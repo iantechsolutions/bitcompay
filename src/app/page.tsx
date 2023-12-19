@@ -1,16 +1,24 @@
-"use client";
 
+import AdminSidenav from "~/components/admin-sidenav";
+import AppLayout from "~/components/applayout";
+import { NavUserData } from "~/components/nav-user-section";
 import { Button } from "~/components/ui/button";
-import { UploadButton } from "~/components/uploadthing";
+import { getServerAuthSession } from "~/server/auth";
+// import { UploadButton } from "~/components/uploadthing";
 
-export default function Home() {
+export default async function Home() {
+  const session = await getServerAuthSession();
+
   return (
-    <main className="p-10">
+    <AppLayout
+      user={session?.user}
+      sidenav={<AdminSidenav />}
+    >
       <div className="flex justify-center mb-10">
         <Button>Test</Button>
       </div>
       <div>
-        <UploadButton
+        {/* <UploadButton
           endpoint="imageUploader"
           onClientUploadComplete={(res) => {
             // Do something with the response
@@ -21,8 +29,8 @@ export default function Home() {
             // Do something with the error.
             alert(`ERROR! ${error.message}`);
           }}
-        />
+        /> */}
       </div>
-    </main>
+    </AppLayout>
   );
 }
