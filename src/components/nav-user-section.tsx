@@ -7,6 +7,7 @@ import {
 } from "~/components/ui/popover"
 import Link from "next/link";
 import { SignOut } from "./sign-in-out-buttons";
+import { Badge } from "./ui/badge";
 
 export type NavUserData = {
     name?: string | null;
@@ -36,10 +37,13 @@ export function UserPopOver(props: { trigger: React.ReactNode, user: NavUserData
             <PopoverContent className="w-80">
                 <ul>
                     <li>
-                        <p className="font-semibold">{props.user.name}</p>
+                        <Link href={'/account'} className="font-semibold">{props.user.name}</Link>
                     </li>
-                    <li className="text-sm font-medium py-2 pb-4">
+                    <li className="text-xs font-medium">
                         <Link href={'/account'}>{props.user.email}</Link>
+                    </li>
+                    <li className="mb-3 mt-1">
+                        <p><Badge variant="secondary">Administrador</Badge></p>
                     </li>
                     <li className="text-sm font-medium">
                         <SignOut />
