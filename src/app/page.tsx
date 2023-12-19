@@ -1,16 +1,28 @@
-import Link from "next/link";
+"use client";
 
 import { Button } from "~/components/ui/button";
-import { getServerAuthSession } from "~/server/auth";
-import { api } from "~/trpc/server";
+import { UploadButton } from "~/components/uploadthing";
 
-export default async function Home() {
-  const hello = await api.post.hello.query({ text: "from tRPC" });
-  const session = await getServerAuthSession();
-
+export default function Home() {
   return (
-    <main className="">
-      <Button>Hola</Button>
+    <main className="p-10">
+      <div className="flex justify-center mb-10">
+        <Button>Test</Button>
+      </div>
+      <div>
+        <UploadButton
+          endpoint="imageUploader"
+          onClientUploadComplete={(res) => {
+            // Do something with the response
+            console.log("Files: ", res);
+            alert("Upload Completed");
+          }}
+          onUploadError={(error: Error) => {
+            // Do something with the error.
+            alert(`ERROR! ${error.message}`);
+          }}
+        />
+      </div>
     </main>
   );
 }
