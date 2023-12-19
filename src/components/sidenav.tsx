@@ -7,7 +7,7 @@ export default function Sidenav(props: { children: React.ReactNode }) {
 }
 
 export function SidenavSeparator(props: { children: React.ReactNode }) {
-    return <li className="px-4 pt-2 text-sm font-medium">
+    return <li className="px-4 pt-3 text-sm font-medium">
         {props.children}
     </li>
 }

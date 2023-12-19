@@ -3,7 +3,9 @@ import { ActivityIcon, ActivitySquareIcon, BanknoteIcon, DollarSignIcon, FileUpI
 
 export default function AdminSidenav() {
     return <Sidenav>
+        <SidenavSeparator>Global</SidenavSeparator>
         <SidenavItem icon={<LayoutDashboardIcon />} href="/dashboard">Dashboard</SidenavItem>
+        <SidenavItem icon={<Settings2Icon />} href="/dashboard">Configuraciones</SidenavItem>
         <SidenavSeparator>Administración</SidenavSeparator>
         <SidenavItem icon={<Settings2Icon />}>Global</SidenavItem>
         <SidenavItem icon={<UsersIcon />}>Usuarios</SidenavItem>
