@@ -11,6 +11,7 @@ export default async function Home() {
 
   return (
     <AppLayout
+      title="BITCOMPAY"
       user={session?.user}
       sidenav={<AdminSidenav />}
     >

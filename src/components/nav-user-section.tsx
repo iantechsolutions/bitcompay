@@ -42,8 +42,9 @@ export function UserPopOver(props: { trigger: React.ReactNode, user: NavUserData
                     <li className="text-xs font-medium">
                         <Link href={'/account'}>{props.user.email}</Link>
                     </li>
-                    <li className="mb-3 mt-1">
-                        <p><Badge variant="secondary">Administrador</Badge></p>
+                    <li className="mb-3 mt-2 grid grid-cols-2 gap-2">
+                        <Badge variant="secondary" className="justify-center">Administrador</Badge>
+                        <Badge variant="secondary" className="justify-center">I AN TECH</Badge>
                     </li>
                     <li className="text-sm font-medium">
                         <SignOut />
