@@ -1,13 +1,14 @@
 import Sidenav, { SidenavItem, SidenavSeparator } from "./sidenav"
-import { ActivityIcon, ActivitySquareIcon, BanknoteIcon, DollarSignIcon, FileUpIcon, LayoutDashboardIcon, MessageCircleQuestionIcon, MessageSquareReplyIcon, Settings2Icon, UsersIcon } from 'lucide-react';
+import { ActivityIcon, ActivitySquareIcon, BanknoteIcon, DollarSignIcon, FileUpIcon, FingerprintIcon, LayoutDashboardIcon, MessageCircleQuestionIcon, MessageSquareReplyIcon, Settings2Icon, UsersIcon } from 'lucide-react';
 
-export default function AdminSidenav() {
+export default function AppSidenav() {
     return <Sidenav>
         <SidenavSeparator>Global</SidenavSeparator>
         <SidenavItem icon={<LayoutDashboardIcon />} href="/dashboard">Dashboard</SidenavItem>
         <SidenavSeparator>Administración</SidenavSeparator>
         <SidenavItem icon={<Settings2Icon />} href="/dashboard/admin/settings">Global</SidenavItem>
         <SidenavItem icon={<UsersIcon />} href="/dashboard/admin/users">Usuarios</SidenavItem>
+        <SidenavItem icon={<FingerprintIcon />} href="/dashboard/admin/roles">Roles</SidenavItem>
         <SidenavItem icon={<DollarSignIcon />} href="/dashboard/admin/costs">Costos</SidenavItem>
         <SidenavItem icon={<BanknoteIcon />} href="/dashboard/admin/cc">Cuenta corriente</SidenavItem>
         <SidenavItem icon={<ActivityIcon />} href="/dashboard/admin/monitoring">Monitoreo dinámico</SidenavItem>

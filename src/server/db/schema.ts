@@ -19,20 +19,53 @@ import { type AdapterAccount } from "next-auth/adapters";
  */
 export const mysqlTable = mysqlTableCreator((name) => `bitcompay_${name}`);
 
-export const posts = mysqlTable(
-  "post",
+export const roles = mysqlTable(
+  "role",
   {
-    id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
-    name: varchar("name", { length: 256 }),
-    createdById: varchar("createdById", { length: 255 }).notNull(),
-    createdAt: timestamp("created_at")
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updatedAt").onUpdateNow(),
+    id: varchar('id', { length: 25 }).primaryKey().notNull().unique(),
+    name: varchar("name", { length: 256 }).notNull().unique(),
+  },
+  (roles) => ({
+    nameIndex: index("name_idx").on(roles.name),
+  })
+);
+
+export const rolesRelations = relations(roles, ({ one, many }) => ({
+  permissions: many(rolePermissions),
+  members: many(roleMemberhips),
+}));
+
+export const rolePermissions = mysqlTable(
+  "role_permission",
+  {
+    roleId: bigint("roleId", { mode: "number" }).notNull(),
+    permission: varchar("permission", { length: 256 }).notNull(),
   },
   (example) => ({
-    createdByIdIdx: index("createdById_idx").on(example.createdById),
-    nameIndex: index("name_idx").on(example.name),
+    compoundKey: primaryKey(example.roleId, example.permission),
+  })
+);
+
+export const rolePermissionsRelations = relations(rolePermissions, ({ one }) => ({
+  role: one(roles, { fields: [rolePermissions.roleId], references: [roles.id] }),
+}));
+
+export const roleMemberhips = mysqlTable(
+  "role_membership",
+  {
+    userId: varchar("userId", { length: 255 }).notNull(),
+    roleId: bigint("roleId", { mode: "number" }).notNull(),
+  },
+  (example) => ({
+    compoundKey: primaryKey(example.userId, example.roleId),
+  })
+);
+
+export const roleMemberhipsRelations = relations(
+  roleMemberhips,
+  ({ one, many }) => ({
+    user: one(users, { fields: [roleMemberhips.userId], references: [users.id] }),
+    role: one(roles, { fields: [roleMemberhips.roleId], references: [roles.id] }),
   })
 );
 
@@ -50,6 +83,7 @@ export const users = mysqlTable("user", {
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
   sessions: many(sessions),
+  roles: many(roleMemberhips),
 }));
 
 export const accounts = mysqlTable(

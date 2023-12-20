@@ -1,5 +1,3 @@
-import { nameInitials } from "~/lib/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import {
     Popover,
     PopoverContent,
@@ -8,6 +6,7 @@ import {
 import Link from "next/link";
 import { SignOut } from "./sign-in-out-buttons";
 import { Badge } from "./ui/badge";
+import { UserAvatarCircle } from "./user-avatar-circle";
 
 export type NavUserData = {
     name?: string | null;
@@ -20,10 +19,7 @@ export default function NavUserSection(props: {
 }) {
     return <UserPopOver
         user={props.user}
-        trigger={<Avatar role="button">
-            {props.user.image && <AvatarImage src={props.user.image} />}
-            <AvatarFallback>{nameInitials(props.user.name ?? '')}</AvatarFallback>
-        </Avatar>}
+        trigger={<UserAvatarCircle user={props.user} />}
     />
 }
 
