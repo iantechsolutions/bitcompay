@@ -1,37 +1,28 @@
-
-import AdminSidenav from "~/components/admin-sidenav";
-import AppLayout from "~/components/applayout";
-import { NavUserData } from "~/components/nav-user-section";
+import Link from "next/link";
 import { Button } from "~/components/ui/button";
-import { getServerAuthSession } from "~/server/auth";
-// import { UploadButton } from "~/components/uploadthing";
+import { Card, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 
 export default async function Home() {
-  const session = await getServerAuthSession();
+  // const session = await getServerAuthSession();
 
-  return (
-    <AppLayout
-      title="BITCOMPAY"
-      user={session?.user}
-      sidenav={<AdminSidenav />}
-    >
-      <div className="flex justify-center mb-10">
-        <Button>Test</Button>
+  return <>
+    <header className="flex items-center justify-center bg-[#204444] fixed top-0 left-0 right-0 bottom-0 pb-[12.5%]">
+      <h1 className="font-bold text-2xl text-[#FFD800]">Bitcompay</h1>
+    </header>
+    <main className="z-10 absolute top-[50%] left-0 right-0 flex justify-center">
+      <div className="w-[700px] max-w-full px-10 pb-10">
+        <Card className="flex">
+          <CardHeader>
+            <CardTitle>Aplicación de Bitcompay</CardTitle>
+            <CardDescription>Sistema de gestion de pagos</CardDescription>
+          </CardHeader>
+          <div className="flex items-center ml-auto mr-8">
+            <Link href="/dashboard">
+              <Button>Abrir APP</Button>
+            </Link>
+          </div>
+        </Card>
       </div>
-      <div>
-        {/* <UploadButton
-          endpoint="imageUploader"
-          onClientUploadComplete={(res) => {
-            // Do something with the response
-            console.log("Files: ", res);
-            alert("Upload Completed");
-          }}
-          onUploadError={(error: Error) => {
-            // Do something with the error.
-            alert(`ERROR! ${error.message}`);
-          }}
-        /> */}
-      </div>
-    </AppLayout>
-  );
+    </main>
+  </>
 }

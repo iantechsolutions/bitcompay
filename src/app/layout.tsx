@@ -1,10 +1,6 @@
 import "~/styles/globals.css";
 
 import { Inter } from "next/font/google";
-import { cookies } from "next/headers";
-
-import { TRPCReactProvider } from "~/trpc/react";
-import AuthProvider from "~/components/auth-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -17,19 +13,11 @@ export const metadata = {
   icons: [{ rel: "icon", url: "/icon.png" }],
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout(props: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="es">
       <body className={`font-sans ${inter.variable}`}>
-        <AuthProvider>
-          <TRPCReactProvider cookies={cookies().toString()}>
-            {children}
-          </TRPCReactProvider>
-        </AuthProvider>
+        {props.children}
       </body>
     </html>
   );
