@@ -1,6 +1,8 @@
 import { relations, sql } from "drizzle-orm";
 import {
   bigint,
+  boolean,
+  datetime,
   index,
   int,
   mysqlTableCreator,
@@ -140,5 +142,63 @@ export const verificationTokens = mysqlTable(
   },
   (vt) => ({
     compoundKey: primaryKey(vt.identifier, vt.token),
+  })
+);
+
+export const documentUploads = mysqlTable(
+  "document_upload",
+  {
+    id: varchar("id", { length: 255 }).notNull().primaryKey(),
+    userId: varchar("userId", { length: 255 }).notNull(),
+    fileUrl: varchar("fileUrl", { length: 255 }).notNull(),
+    fileName: varchar("fileName", { length: 255 }).notNull(),
+    fileSize: int("fileSize").notNull(),
+
+    confirmed: boolean("confirmed").notNull().default(false),
+    confirmedAt: timestamp("confirmedAt", { mode: "date" }),
+
+    documentType: varchar("documentType", { length: 255 }).$type<'rec' | null>(),
+
+    createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow(),
+    updatedAt: timestamp("updatedAt", { mode: "date" }).notNull().defaultNow(),
+  },
+  (documentUploads) => ({
+    userIdIdx: index("userId_idx").on(documentUploads.userId),
+  })
+);
+
+export const payments = mysqlTable(
+  "payment",
+  {
+    id: varchar("id", { length: 255 }).notNull().primaryKey(),
+    userId: varchar("userId", { length: 255 }).notNull(),
+    documentUploadId: varchar("documentUploadId", { length: 255 }).notNull(),
+
+    // Rec fields
+    g_c: bigint("g_c", { mode: 'number' }),
+    name: varchar("name", { length: 255 }),
+    fiscal_id_type: varchar("fiscal_id_type", { length: 255 }),
+    fiscal_id_number: bigint("fiscal_id_number", { mode: 'number' }),
+    du_type: varchar("du_type", { length: 255 }),
+    du_number: bigint("du_number", { mode: 'number' }),
+    channel: varchar("channel", { length: 255 }),
+    invoice_number: bigint("invoice_number", { mode: 'number' }),
+    period: datetime("period"),
+    first_due_amount: bigint("first_due_amount", { mode: 'number' }),
+    first_due_date: datetime("first_due_date"),
+    second_due_amount: bigint("second_due_amount", { mode: 'number' }),
+    second_due_date: datetime("second_due_date"),
+    additional_info: varchar("additional_info", { length: 255 }),
+    payment_channel: varchar("payment_channel", { length: 255 }),
+    payment_date: datetime("payment_date"),
+    collected_amount: bigint("collected_amount", { mode: 'number' }),
+    // end Rec fields
+
+    createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow(),
+    updatedAt: timestamp("updatedAt", { mode: "date" }).onUpdateNow(),
+  },
+  (payments) => ({
+    userIdIdx: index("userId_idx").on(payments.userId),
+    documentUploadIdIdx: index("documentUploadId_idx").on(payments.documentUploadId),
   })
 );

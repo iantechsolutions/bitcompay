@@ -1,33 +1,60 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
- 
+import { createId } from "~/lib/utils";
+import { getServerAuthSession } from "~/server/auth";
+import { db } from "~/server/db";
+import * as schema from "~/server/db/schema";
+
 const f = createUploadthing();
- 
-const auth = async (req: Request) => ({ id: "fakeId" }); // Fake auth function
- 
+
+const auth = async (_: Request) => {
+  const session = await getServerAuthSession()
+  return session?.user
+};
+
 // FileRouter for your app, can contain multiple FileRoutes
 export const ourFileRouter = {
+
   // Define as many FileRoutes as you like, each with a unique routeSlug
-  imageUploader: f({ image: { maxFileSize: "4MB" } })
+  documentUpload: f({
+    "application/vnd.ms-excel": {
+      maxFileCount: 1,
+      maxFileSize: '128MB',
+    },
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+      maxFileCount: 1,
+      maxFileSize: '128MB',
+    }
+  })
     // Set permissions and file types for this FileRoute
     .middleware(async ({ req }) => {
       // This code runs on your server before upload
       const user = await auth(req);
- 
+
       // If you throw, the user will not be able to upload
       if (!user) throw new Error("Unauthorized");
- 
+
       // Whatever is returned here is accessible in onUploadComplete as `metadata`
       return { userId: user.id };
     })
     .onUploadComplete(async ({ metadata, file }) => {
       // This code RUNS ON YOUR SERVER after upload
       console.log("Upload complete for userId:", metadata.userId);
- 
+
       console.log("file url", file.url);
- 
+
+      const uploadId = createId()
+
+      await db.insert(schema.documentUploads).values({
+        id: uploadId,
+        userId: metadata.userId,
+        fileUrl: file.url,
+        fileName: file.name,
+        fileSize: file.size,
+      })
+
       // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback
-      return { uploadedBy: metadata.userId };
+      return { uploadId };
     }),
 } satisfies FileRouter;
- 
+
 export type OurFileRouter = typeof ourFileRouter;

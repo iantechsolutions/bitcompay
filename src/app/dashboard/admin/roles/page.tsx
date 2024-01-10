@@ -22,6 +22,7 @@ export default async function Home() {
             <Title>Roles y permisos</Title>
             <List>
                 {roles.map(role => <ListTile
+                    key={role.id}
                     title={<p>{role.name}</p>}
                     subtitle={<ul>
                         {role.permissions.map(permission => <li key={permission}>{permission}</li>)}
