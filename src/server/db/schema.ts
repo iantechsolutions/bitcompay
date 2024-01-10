@@ -183,14 +183,14 @@ export const payments = mysqlTable(
     du_number: bigint("du_number", { mode: 'number' }),
     channel: varchar("channel", { length: 255 }),
     invoice_number: bigint("invoice_number", { mode: 'number' }),
-    period: datetime("period"),
+    period: timestamp("period", { mode: "date" }),
     first_due_amount: bigint("first_due_amount", { mode: 'number' }),
-    first_due_date: datetime("first_due_date"),
+    first_due_date: timestamp("first_due_date", { mode: "date" }),
     second_due_amount: bigint("second_due_amount", { mode: 'number' }),
-    second_due_date: datetime("second_due_date"),
+    second_due_date: timestamp("second_due_date", { mode: "date" }),
     additional_info: varchar("additional_info", { length: 255 }),
     payment_channel: varchar("payment_channel", { length: 255 }),
-    payment_date: datetime("payment_date"),
+    payment_date: timestamp("payment_date", { mode: "date" }),
     collected_amount: bigint("collected_amount", { mode: 'number' }),
     // end Rec fields
 
@@ -200,5 +200,23 @@ export const payments = mysqlTable(
   (payments) => ({
     userIdIdx: index("userId_idx").on(payments.userId),
     documentUploadIdIdx: index("documentUploadId_idx").on(payments.documentUploadId),
+  })
+);
+
+export const channels = mysqlTable(
+  "channel",
+  {
+    id: varchar("id", { length: 255 }).notNull().primaryKey(),
+    number: int("number").notNull().unique(),
+    name: varchar("name", { length: 255 }).notNull(),
+    description: varchar("description", { length: 255 }).notNull(),
+
+    enabled: boolean("enabled").notNull().default(false),
+    createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow(),
+    updatedAt: timestamp("updatedAt", { mode: "date" }).onUpdateNow(),
+  },
+  (channels) => ({
+    nameIdx: index("name_idx").on(channels.name),
+    numberIdx: index("number_idx").on(channels.number),
   })
 );
