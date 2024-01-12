@@ -5,6 +5,7 @@ import {
   datetime,
   index,
   int,
+  json,
   mysqlTableCreator,
   primaryKey,
   text,
@@ -216,6 +217,8 @@ export const channels = mysqlTable(
     description: varchar("description", { length: 255 }).notNull(),
 
     enabled: boolean("enabled").notNull().default(false),
+
+    requiredColumns: json("required_columns").$type<string[]>().notNull().default([]),
 
     createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow(),
     updatedAt: timestamp("updatedAt", { mode: "date" }).onUpdateNow(),

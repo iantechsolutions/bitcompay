@@ -14,6 +14,7 @@ export const channelsRouter = createTRPCRouter({
     
         return channel
     }),
+
     create: protectedProcedure.input(z.object({
         name: z.string().min(1).max(255),
         description: z.string().min(0).max(1023),
@@ -31,5 +32,20 @@ export const channelsRouter = createTRPCRouter({
         })
 
         return { id }
-    })
+    }),
+
+    change: protectedProcedure.input(z.object({
+        channelId: z.string(),
+        name: z.string().min(1).max(255).optional(),
+        description: z.string().min(0).max(1023).optional(),
+        number: z.number().min(1).max(255).optional(),
+        requiredColumns: z.array(z.string()).optional(),
+    })).mutation(async ({ ctx, input }) => {
+        await db.update(schema.channels).set({
+            name: input.name,
+            description: input.description,
+            number: input.number,
+            requiredColumns: input.requiredColumns,
+        }).where(eq(schema.channels.id, input.channelId))
+    }) 
 })

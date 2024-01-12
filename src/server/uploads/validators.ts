@@ -29,11 +29,24 @@ const stringAsDate = z.string().or(z.number()).transform((value) => {
     }
 
     return dayjs(`${year}-${month}-${day}`).toDate()
+}).refine((value) => {
+    if (value.getFullYear() < 2000) return false
+    if (value.getFullYear() > 3000) return false
+    return true
 })
 
 const stringAsPeriod = z.string().transform((value) => {
     return dayjs(value, "MMYYYY").toDate()
+}).refine((value) => {
+    if (value.getFullYear() < 2000) return false
+    if (value.getFullYear() > 3000) return false
+    return true
 })
+
+
+const cbuSchema = z.string().or(z.number()).transform((value) => {
+    return value.toString().replaceAll('/', '').padStart(22, '0')
+}).refine((value) => value.length === 22)
 
 export const recDocumentValidator = z.object({
     "G.C.": z.number().int().min(0).max(14000).nullable().optional(),
@@ -42,7 +55,11 @@ export const recDocumentValidator = z.object({
     "Nro ID Fiscal": stringToValidIntegerZodTransformer.nullable().optional(),
     "Tipo DU": z.literal("DNI").or(z.literal("LC")).or(z.literal("LE")).nullable().optional(),
     "Nro DU": stringToValidIntegerZodTransformer.nullable().optional(),
-    "Canal": z.string().min(1).max(140).nullable().optional(),
+    "Canal": z.string().min(1).max(140),
+    "Nro CBU": cbuSchema.nullable().optional(),
+    "TC Marca": z.string().min(1).max(140).nullable().optional(),
+    "Alta Nueva": z.string().transform(value => value.toLowerCase() === 'SI').nullable().optional(),
+    "Nro. Tarjeta": z.string().length(16).nullable().optional(),
     // NOT OPTIONAL!!!
     "Nro Factura": stringToValidIntegerZodTransformer,
     //
@@ -55,6 +72,7 @@ export const recDocumentValidator = z.object({
     "Canal de Cobro": z.string().min(0).max(140).catch('').nullable().optional(),
     "Fecha de Pago/Débito": stringAsDate.nullable().optional(),
     "Importe Cobrado": nullableStringToValidIntegerZodTransformer.nullable().optional(),
+    "Obs.": z.string().min(0).max(1023).catch('').nullable().optional(),
 }).transform((value) => {
 
     // Translated to english
@@ -66,6 +84,10 @@ export const recDocumentValidator = z.object({
         'du_type': value['Tipo DU'] ?? null,
         'du_number': value['Nro DU'] ?? null,
         'channel': value['Canal'] ?? null,
+        'cbu': value['Nro CBU'] ?? null,
+        'card_brand': value['TC Marca'] ?? null,
+        'is_new': value['Alta Nueva'] ?? null,
+        'card_number': value['Nro. Tarjeta'] ?? null,
         'invoice_number': value['Nro Factura'] ?? null,
         'period': value['Período'] ?? null,
         'first_due_amount': value['Importe 1er Vto.'] ?? null,
@@ -76,6 +98,7 @@ export const recDocumentValidator = z.object({
         'payment_channel': value['Canal de Cobro'] ?? null,
         'payment_date': value['Fecha de Pago/Débito'] ?? null,
         'collected_amount': value['Importe Cobrado'] ?? null,
+        'comment': value['Obs.'] ?? null,
     }
 
 })
@@ -92,7 +115,11 @@ export const recHeaders: TableHeaders = [
     { key: 'fiscal_id_number', label: 'Nro ID Fiscal', width: 140, },
     { key: 'du_type', label: 'Tipo DU', width: 140, },
     { key: 'du_number', label: 'Nro DU', width: 140, },
-    { key: 'channel', label: 'Canal', width: 140, },
+    { key: 'channel', label: 'Canal', width: 140, alwaysRequired: true },
+    { key: 'cbu', label: 'Nro CBU', width: 140, },
+    { key: 'card_brand', label: 'TC Marca', width: 140, },
+    { key: 'is_new', label: 'Alta Nueva', width: 140, },
+    { key: 'card_number', label: 'Nro. Tarjeta', width: 140, },
     { key: 'invoice_number', label: 'Nro Factura', width: 140, alwaysRequired: true },
     { key: 'period', label: 'Período', width: 140, },
     { key: 'first_due_amount', label: 'Importe 1er Vto.', width: 140, },
@@ -103,4 +130,7 @@ export const recHeaders: TableHeaders = [
     { key: 'payment_channel', label: 'Canal de Cobro', width: 140, },
     { key: 'payment_date', label: 'Fecha de Pago/Débito', width: 140, },
     { key: 'collected_amount', label: 'Importe Cobrado', width: 140, },
+    { key: 'comment', label: 'Obs.', width: 140, },
 ]
+
+export const columnLabelByKey = Object.fromEntries(recHeaders.map(header => [header.key, header.label])) as Record<string, string>
