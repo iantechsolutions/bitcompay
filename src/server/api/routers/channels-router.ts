@@ -2,8 +2,18 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db, schema } from "~/server/db";
 import { createId } from "~/lib/utils";
+import { eq } from "drizzle-orm";
 
 export const channelsRouter = createTRPCRouter({
+    get: protectedProcedure.input(z.object({
+        channelId: z.string(),
+    })).query(async ({ input }) => {
+        const channel = await db.query.channels.findFirst({
+            where: eq(schema.channels.id, input.channelId)
+        })
+    
+        return channel
+    }),
     create: protectedProcedure.input(z.object({
         name: z.string().min(1).max(255),
         description: z.string().min(0).max(1023),
