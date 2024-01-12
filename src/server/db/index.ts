@@ -16,3 +16,4 @@ export const db = drizzle(
 export type TXType = MySqlTransaction<PlanetscaleQueryResultHKT, PlanetScalePreparedQueryHKT, typeof schema, ExtractTablesWithRelations<typeof schema>>
 export type DBType = typeof db // PlanetScaleDatabase<typeof schema>
 export type DBTX = DBType | TXType
+export { schema }

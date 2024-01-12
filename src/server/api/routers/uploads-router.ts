@@ -85,6 +85,10 @@ async function readUploadContents(db: DBTX, id: string, type?: string) {
 
     const rows = xlsx.utils.sheet_to_json(firstSheet) as Record<string, any>[]
 
+    console.log(rows[0])
+
+    // return
+
     if (type === "rec") {
         console.log(rows.map(trimObject)[0])
         return {

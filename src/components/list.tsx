@@ -26,11 +26,11 @@ export function List(props: ListProps) {
 export function ListTile(props: ListTileProps) {
 
     let content = <>
-        {props.leading && <div className="flex items-center justify-center">
+        {props.leading && <div className="flex items-center justify-center shrink-0">
             {props.leading}
         </div>}
 
-        <div>
+        <div className="w-full">
             <div className="font-medium flex">
                 {props.title}
             </div>
@@ -39,7 +39,7 @@ export function ListTile(props: ListTileProps) {
             </div>
         </div>
 
-        {props.trailing && <div className="flex items-center justify-center">
+        {props.trailing && <div className="flex items-center justify-center shrink-0">
             {props.trailing}
         </div>}
     </>

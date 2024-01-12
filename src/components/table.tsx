@@ -1,11 +1,13 @@
 import { createContext, useContext, useId, useLayoutEffect, useMemo } from "react";
 import { FixedSizeList as List } from 'react-window';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
+import dayjs from "dayjs";
 
 export type TableHeaders = {
     key: string,
     label: React.ReactNode,
     width?: number,
+    alwaysRequired?: boolean
 }[]
 
 const tableContext = createContext<{ rows: Record<string, any>[], headers: TableHeaders }>({
@@ -135,7 +137,7 @@ function Row(props: {
             let value: any = row[header.key]
 
             if (value instanceof Date) {
-                value = value.toLocaleDateString()
+                value = dayjs(value).format('YYYY-MM-DD')
             }
 
             const w = header.width ?? 160

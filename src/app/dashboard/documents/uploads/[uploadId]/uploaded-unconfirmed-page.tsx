@@ -123,16 +123,17 @@ export default function UploadedUnconfirmedPage(props: UploadedPageProps) {
                 disabled={!documentType || isLoading}
                 onClick={handleContinue}
             >Leer datos</Button>
-            <Button
-                className="ml-3"
-                variant="destructive"
-            >Cancelar y eliminar</Button>
+            <div className="flex gap-2">
+                <Button
+                    variant="destructive"
+                >Cancelar y eliminar</Button>
 
-            {data && <Button
-                onClick={handlerConfirm}
-            >
-                Confirmar y escribir a la base de datos
-            </Button>}
+                {data && <Button
+                    onClick={handlerConfirm}
+                >
+                    Confirmar y escribir a la base de datos
+                </Button>}
+            </div>
         </LayoutContainer>
         <div className="mt-5">
             {data && <LargeTable

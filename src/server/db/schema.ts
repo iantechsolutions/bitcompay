@@ -9,6 +9,7 @@ import {
   primaryKey,
   text,
   timestamp,
+  unique,
   varchar,
 } from "drizzle-orm/mysql-core";
 import { type AdapterAccount } from "next-auth/adapters";
@@ -182,7 +183,9 @@ export const payments = mysqlTable(
     du_type: varchar("du_type", { length: 255 }),
     du_number: bigint("du_number", { mode: 'number' }),
     channel: varchar("channel", { length: 255 }),
-    invoice_number: bigint("invoice_number", { mode: 'number' }),
+    //! Can be used as id
+    invoice_number: bigint("invoice_number", { mode: 'number' }).notNull().unique(),
+    //
     period: timestamp("period", { mode: "date" }),
     first_due_amount: bigint("first_due_amount", { mode: 'number' }),
     first_due_date: timestamp("first_due_date", { mode: "date" }),
@@ -200,6 +203,7 @@ export const payments = mysqlTable(
   (payments) => ({
     userIdIdx: index("userId_idx").on(payments.userId),
     documentUploadIdIdx: index("documentUploadId_idx").on(payments.documentUploadId),
+    invoiceNumberIdx: index("invoiceNumber_idx").on(payments.invoice_number),
   })
 );
 
@@ -212,6 +216,7 @@ export const channels = mysqlTable(
     description: varchar("description", { length: 255 }).notNull(),
 
     enabled: boolean("enabled").notNull().default(false),
+
     createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow(),
     updatedAt: timestamp("updatedAt", { mode: "date" }).onUpdateNow(),
   },
@@ -220,3 +225,71 @@ export const channels = mysqlTable(
     numberIdx: index("number_idx").on(channels.number),
   })
 );
+
+export const companies = mysqlTable(
+  "company",
+  {
+    id: varchar("id", { length: 255 }).notNull().primaryKey(),
+    name: varchar("name", { length: 255 }).notNull(),
+    description: varchar("description", { length: 255 }).notNull(),
+
+    enabled: boolean("enabled").notNull().default(false),
+
+    createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow(),
+    updatedAt: timestamp("updatedAt", { mode: "date" }).onUpdateNow(),
+  },
+  (companies) => ({
+    nameIdx: index("name_idx").on(companies.name),
+  })
+);
+
+export const companiesRelations = relations(companies, ({ one, many }) => ({
+  brands: many(brands),
+  channels: many(channels),
+}));
+
+export const brands = mysqlTable(
+  "brand",
+  {
+    id: varchar("id", { length: 255 }).notNull().primaryKey(),
+    name: varchar("name", { length: 255 }).notNull(),
+    description: varchar("description", { length: 255 }).notNull(),
+
+    companyId: varchar("companyId", { length: 255 }).notNull(),
+
+    enabled: boolean("enabled").notNull().default(false),
+
+    createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow(),
+    updatedAt: timestamp("updatedAt", { mode: "date" }).onUpdateNow(),
+  },
+  (brands) => ({
+    nameIdx: index("name_idx").on(brands.name),
+    companyIdIdx: index("companyId_idx").on(brands.companyId),
+  })
+);
+
+export const brandsRelations = relations(brands, ({ one, many }) => ({
+  company: one(companies, { fields: [brands.companyId], references: [companies.id] }),
+}));
+
+export const companyChannels = mysqlTable(
+  'company_channel',
+  {
+    companyId: varchar("brandId", { length: 255 }).notNull(),
+    channelId: varchar("channelId", { length: 255 }).notNull(),
+  },
+  (brandChannels) => ({
+    pk: primaryKey({
+      name: 'pk',
+      columns: [brandChannels.companyId, brandChannels.channelId],
+    }),
+    // brandIdIdx: index("brandId_idx").on(brandChannels.brandId),
+    // channelIdIdx: index("channelId_idx").on(brandChannels.channelId),
+    // unique: unique('unique').on(brandChannels.brandId, brandChannels.channelId),
+  })
+);
+
+export const companyChannelsRelations = relations(companyChannels, ({ one, many }) => ({
+  company: one(companies, { fields: [companyChannels.companyId], references: [companies.id] }),
+  channel: one(channels, { fields: [companyChannels.channelId], references: [channels.id] }),
+}));

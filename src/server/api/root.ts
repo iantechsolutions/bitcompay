@@ -1,5 +1,6 @@
 import { createTRPCRouter } from "~/server/api/trpc";
 import { uploadsRouter } from "./routers/uploads-router";
+import { channelsRouter } from "./routers/channels-router";
 
 /**
  * This is the primary router for your server.
@@ -8,6 +9,7 @@ import { uploadsRouter } from "./routers/uploads-router";
  */
 export const appRouter = createTRPCRouter({
   uploads: uploadsRouter,
+  channels: channelsRouter,
 });
 
 // export type definition of API

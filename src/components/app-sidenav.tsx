@@ -6,7 +6,7 @@ export default function AppSidenav() {
         <SidenavSeparator>Global</SidenavSeparator>
         <SidenavItem icon={<LayoutDashboardIcon />} href="/dashboard">Dashboard</SidenavItem>
         <SidenavSeparator>Administración</SidenavSeparator>
-        <SidenavItem icon={<Settings2Icon />} href="/dashboard/admin/settings">Global</SidenavItem>
+        <SidenavItem icon={<Settings2Icon />} href="/dashboard/admin/global">Global</SidenavItem>
         <SidenavItem icon={<UsersIcon />} href="/dashboard/admin/users">Usuarios</SidenavItem>
         <SidenavItem icon={<FingerprintIcon />} href="/dashboard/admin/roles">Roles</SidenavItem>
         <SidenavItem icon={<DollarSignIcon />} href="/dashboard/admin/costs">Costos</SidenavItem>

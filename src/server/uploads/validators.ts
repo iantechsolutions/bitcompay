@@ -16,7 +16,19 @@ const stringAsDate = z.string().or(z.number()).transform((value) => {
         value = value.toString().padStart(8, '0')
     }
 
-    return dayjs(value, "DDMMYYYY").toDate()
+    const last4 = parseInt(value.substring(4, 8))
+
+    let day = value.substring(6, 8)
+    let month = value.substring(4, 6)
+    let year = value.substring(0, 4)
+
+    if (last4 > 2000) {
+        day = value.substring(0, 2)
+        month = value.substring(2, 4)
+        year = value.substring(4, 8)
+    }
+
+    return dayjs(`${year}-${month}-${day}`).toDate()
 })
 
 const stringAsPeriod = z.string().transform((value) => {
@@ -31,7 +43,9 @@ export const recDocumentValidator = z.object({
     "Tipo DU": z.literal("DNI").or(z.literal("LC")).or(z.literal("LE")).nullable().optional(),
     "Nro DU": stringToValidIntegerZodTransformer.nullable().optional(),
     "Canal": z.string().min(1).max(140).nullable().optional(),
-    "Nro Factura": stringToValidIntegerZodTransformer.nullable().optional(),
+    // NOT OPTIONAL!!!
+    "Nro Factura": stringToValidIntegerZodTransformer,
+    //
     "Período": stringAsPeriod.nullable().optional(),
     "Importe 1er Vto.": stringToValidIntegerZodTransformer.nullable().optional(),
     "Fecha 1er Vto.": stringAsDate.nullable().optional(),
@@ -79,7 +93,7 @@ export const recHeaders: TableHeaders = [
     { key: 'du_type', label: 'Tipo DU', width: 140, },
     { key: 'du_number', label: 'Nro DU', width: 140, },
     { key: 'channel', label: 'Canal', width: 140, },
-    { key: 'invoice_number', label: 'Nro Factura', width: 140, },
+    { key: 'invoice_number', label: 'Nro Factura', width: 140, alwaysRequired: true },
     { key: 'period', label: 'Período', width: 140, },
     { key: 'first_due_amount', label: 'Importe 1er Vto.', width: 140, },
     { key: 'first_due_date', label: 'Fecha 1er Vto.', width: 140, },
