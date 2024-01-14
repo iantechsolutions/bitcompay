@@ -9,10 +9,25 @@ export const channelsRouter = createTRPCRouter({
         channelId: z.string(),
     })).query(async ({ input }) => {
         const channel = await db.query.channels.findFirst({
-            where: eq(schema.channels.id, input.channelId)
+            where: eq(schema.channels.id, input.channelId),
+            with: {
+                companies: {
+                    with: {
+                        company: true
+                    }
+                }
+            }
         })
     
         return channel
+    }),
+
+    getAll: protectedProcedure.query(async ({ input }) => {
+        const channels = await db.query.channels.findMany({
+            where: eq(schema.channels.enabled, true)
+        })
+    
+        return channels
     }),
 
     create: protectedProcedure.input(z.object({
@@ -47,5 +62,11 @@ export const channelsRouter = createTRPCRouter({
             number: input.number,
             requiredColumns: input.requiredColumns,
         }).where(eq(schema.channels.id, input.channelId))
-    }) 
+    }),
+    
+    delete: protectedProcedure.input(z.object({
+        channelId: z.string(),
+    })).mutation(async ({ ctx, input }) => {
+        await db.delete(schema.channels).where(eq(schema.channels.id, input.channelId))
+    }),
 })

@@ -38,33 +38,24 @@ import {
 import { useRouter } from "next/navigation"
 import { revalidatePath } from "next/cache"
 
-export default function ChannelPage({ channel, user }: {
-    channel: NonNullable<RouterOutputs['channels']['get']>,
+export default function CompanyPage({ company, user, channels }: {
+    company: NonNullable<RouterOutputs['companies']['get']>,
     user: NavUserData
+    channels: RouterOutputs['channels']['getAll']
 }) {
-    const [requiredColumns, setRequiredColumns] = useState<Set<string>>(new Set(channel.requiredColumns))
-    const [name, setName] = useState(channel.name)
-    const [number, setNumber] = useState(channel.number.toString())
-    const [description, setDescription] = useState(channel.description)
+    const [name, setName] = useState(company.name)
+    const [description, setDescription] = useState(company.description)
 
-    function changeRequiredColumn(key: string, required: boolean) {
-        if (required) {
-            requiredColumns.add(key)
-        } else {
-            requiredColumns.delete(key)
-        }
-        setRequiredColumns(new Set(requiredColumns))
-    }
+    const [companyChannels, setCompanyChannels] = useState<Set<string>>(new Set(company.channels.map(c => c.channelId)))
 
-    const { mutateAsync: changeChannel, isLoading } = api.channels.change.useMutation()
+    const { mutateAsync: changeCompany, isLoading } = api.companies.change.useMutation()
 
     async function handleChange() {
         try {
-            await changeChannel({
-                channelId: channel.id,
-                requiredColumns: Array.from(requiredColumns),
+            await changeCompany({
+                companyId: company.id,
+                channels: Array.from(companyChannels),
                 name,
-                number: parseInt(number),
                 description,
             })
             toast.success('Se han guardado los cambios')
@@ -74,15 +65,24 @@ export default function ChannelPage({ channel, user }: {
         }
     }
 
+    function changeCompanyChannel(channelId: string, enabled: boolean) {
+        if (enabled) {
+            companyChannels.add(channelId)
+        } else {
+            companyChannels.delete(channelId)
+        }
+        setCompanyChannels(new Set(companyChannels))
+    }
+
     return <AppLayout
-        title={<h1>{channel.number} - {channel.name}</h1>}
+        title={<h1>{company.name}</h1>}
         user={user}
         sidenav={<AppSidenav />}
     >
         <LayoutContainer>
             <section className="space-y-2">
                 <div className="flex justify-between">
-                    <Title>Modificar canal</Title>
+                    <Title>Modificar empresa</Title>
                     <Button
                         disabled={isLoading}
                         onClick={handleChange}
@@ -95,19 +95,18 @@ export default function ChannelPage({ channel, user }: {
                 <Accordion type="single" collapsible className="w-full">
                     <AccordionItem value="item-1">
                         <AccordionTrigger>
-                            <h2 className="text-md">Columnas obligatorias</h2>
+                            <h2 className="text-md">Canales habilitados</h2>
                         </AccordionTrigger>
                         <AccordionContent>
                             <List>
-                                {recHeaders.map(header => {
+                                {channels.map(channel => {
                                     return <ListTile
-                                        key={header.key}
-                                        title={header.label}
-                                        subtitle={header.key}
+                                        key={channel.id}
+                                        leading={channel.number}
+                                        title={channel.name}
                                         trailing={<Switch
-                                            disabled={header.alwaysRequired}
-                                            checked={header.alwaysRequired || requiredColumns.has(header.key)}
-                                            onCheckedChange={required => changeRequiredColumn(header.key, required)}
+                                            checked={companyChannels.has(channel.id)}
+                                            onCheckedChange={checked => changeCompanyChannel(channel.id, checked)}
                                         />}
                                     />
                                 })}
@@ -116,7 +115,7 @@ export default function ChannelPage({ channel, user }: {
                     </AccordionItem>
                     <AccordionItem value="item-2">
                         <AccordionTrigger>
-                            <h2 className="text-md">Info. del canal</h2>
+                            <h2 className="text-md">Info. de la empresa</h2>
                         </AccordionTrigger>
                         <AccordionContent>
                             <Card className="p-5">
@@ -124,10 +123,6 @@ export default function ChannelPage({ channel, user }: {
                                     <div>
                                         <Label htmlFor="name">Nombre</Label>
                                         <Input id="name" value={name} onChange={e => setName(e.target.value)} />
-                                    </div>
-                                    <div>
-                                        <Label htmlFor="number">Número</Label>
-                                        <Input id="number" type="number" value={number} onChange={e => setNumber(e.target.value)} />
                                     </div>
                                     <div className="col-span-2">
                                         <Label htmlFor="description">Descripción</Label>
@@ -137,29 +132,29 @@ export default function ChannelPage({ channel, user }: {
                             </Card>
                         </AccordionContent>
                     </AccordionItem>
-                    <AccordionItem value="item-3">
+                    <AccordionItem value="item-4">
                         <AccordionTrigger>
-                            <h2 className="text-md">Empresas con este canal habilitado</h2>
+                            <h2 className="text-md">Marcas</h2>
                         </AccordionTrigger>
                         <AccordionContent>
                             <List>
-                                {channel.companies.map(({ company }) => {
+                                {/* {channels.map(channel => {
                                     return <ListTile
-                                        href={`/dashboard/admin/global/companies/${company.id}`}
-                                        key={company.id}
-                                        title={company.name}
+                                        href={`/dashboard/admin/global/channels/${channel.id}`}
+                                        leading={channel.number}
+                                        title={channel.name}
                                     />
-                                })}
+                                })} */}
                             </List>
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-4" className="border-none">
                         <AccordionTrigger>
-                            <h2 className="text-md">Eliminar canal</h2>
+                            <h2 className="text-md">Eliminar empresa</h2>
                         </AccordionTrigger>
                         <AccordionContent>
                             <div className="flex justify-end">
-                                <DeleteChannel channelId={channel.id} />
+                                <DeleteChannel companyId={company.id} />
                             </div>
                         </AccordionContent>
                     </AccordionItem>
@@ -170,14 +165,14 @@ export default function ChannelPage({ channel, user }: {
 }
 
 
-function DeleteChannel(props: { channelId: string }) {
-    const { mutateAsync: deleteChannel, isLoading } = api.channels.delete.useMutation()
+function DeleteChannel(props: { companyId: string }) {
+    const { mutateAsync: deleteChannel, isLoading } = api.companies.delete.useMutation()
 
     const router = useRouter()
 
     const handleDelete: MouseEventHandler<HTMLButtonElement> = (e) => {
         e.preventDefault()
-        deleteChannel({ channelId: props.channelId }).then(() => {
+        deleteChannel({ companyId: props.companyId }).then(() => {
             toast.success('Se ha eliminado el canal')
             router.push('../')
         }).catch((e) => {
@@ -187,13 +182,13 @@ function DeleteChannel(props: { channelId: string }) {
     }
     return <AlertDialog>
         <AlertDialogTrigger asChild>
-            <Button variant="destructive" className="w-[160px]">Eliminar canal</Button>
+            <Button variant="destructive" className="w-[160px]">Eliminar empresa</Button>
         </AlertDialogTrigger>
         <AlertDialogContent>
             <AlertDialogHeader>
-                <AlertDialogTitle>¿Estás seguro que querés eliminar el canal?</AlertDialogTitle>
+                <AlertDialogTitle>¿Estás seguro que querés eliminar la empresa?</AlertDialogTitle>
                 <AlertDialogDescription>
-                    Eliminar canal permanentemente.
+                    Eliminar empresa permanentemente.
                 </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

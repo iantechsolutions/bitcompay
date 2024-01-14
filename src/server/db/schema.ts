@@ -216,7 +216,7 @@ export const channels = mysqlTable(
     name: varchar("name", { length: 255 }).notNull(),
     description: varchar("description", { length: 255 }).notNull(),
 
-    enabled: boolean("enabled").notNull().default(false),
+    enabled: boolean("enabled").notNull().default(true),
 
     requiredColumns: json("required_columns").$type<string[]>().notNull().default([]),
 
@@ -229,6 +229,10 @@ export const channels = mysqlTable(
   })
 );
 
+export const channelsRelations = relations(channels, ({ one, many }) => ({
+  companies: many(companyChannels),
+}));
+
 export const companies = mysqlTable(
   "company",
   {
@@ -236,7 +240,7 @@ export const companies = mysqlTable(
     name: varchar("name", { length: 255 }).notNull(),
     description: varchar("description", { length: 255 }).notNull(),
 
-    enabled: boolean("enabled").notNull().default(false),
+    enabled: boolean("enabled").notNull().default(true),
 
     createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow(),
     updatedAt: timestamp("updatedAt", { mode: "date" }).onUpdateNow(),
@@ -248,7 +252,7 @@ export const companies = mysqlTable(
 
 export const companiesRelations = relations(companies, ({ one, many }) => ({
   brands: many(brands),
-  channels: many(channels),
+  channels: many(companyChannels),
 }));
 
 export const brands = mysqlTable(
@@ -260,7 +264,7 @@ export const brands = mysqlTable(
 
     companyId: varchar("companyId", { length: 255 }).notNull(),
 
-    enabled: boolean("enabled").notNull().default(false),
+    enabled: boolean("enabled").notNull().default(true),
 
     createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow(),
     updatedAt: timestamp("updatedAt", { mode: "date" }).onUpdateNow(),

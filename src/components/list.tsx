@@ -1,8 +1,9 @@
 import Link from "next/link";
+import React from "react";
 import { cn } from "~/lib/utils";
 
 export type ListProps = {
-    children: React.ReactNode;
+    children?: React.ReactNode;
     className?: string;
 }
 
@@ -18,8 +19,12 @@ export type ListTileProps = {
 }
 
 export function List(props: ListProps) {
+
+    const isEmpty = React.Children.count(props.children) === 0
+    
     return <div className={cn("mb-3", props.className)}>
-        <ul>{props.children}</ul>
+        {!isEmpty && <ul>{props.children}</ul>}
+        {isEmpty && <div className="text-center text-gray-500 border border-dashed rounded-lg py-3">No hay elementos</div>}
     </div>
 }
 
