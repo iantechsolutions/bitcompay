@@ -2,7 +2,6 @@
 
 import LayoutContainer from "~/components/layout-container";
 import { Title } from "~/components/title";
-import { UploadButton } from "~/components/uploadthing";
 import { UploadDropzone } from "@uploadthing/react";
 import type { OurFileRouter } from "~/app/api/uploadthing/core";
 import { useState } from "react";
@@ -34,7 +33,7 @@ export default function UploadPage() {
 
                 if(!file) return
 
-                router.push(`/dashboard/documents/uploads/${file.serverData.uploadId}`)
+                router.push(`./uploads/${file.serverData.uploadId}`)
             }}
             onUploadError={(error: Error) => {
                 setErrorMessage(error.message);
