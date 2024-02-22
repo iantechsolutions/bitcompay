@@ -12,6 +12,7 @@ import {
 import { columnId, createdAt, pgTable, updatedAt } from "./schema/util";
 
 export * from './schema/auth';
+export { pgTable } from './schema/util';
 
 export const documentUploads = pgTable(
   "document_upload",

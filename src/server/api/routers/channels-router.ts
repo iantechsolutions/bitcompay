@@ -63,7 +63,7 @@ export const channelsRouter = createTRPCRouter({
             requiredColumns: input.requiredColumns,
         }).where(eq(schema.channels.id, input.channelId))
     }),
-    
+
     delete: protectedProcedure.input(z.object({
         channelId: z.string(),
     })).mutation(async ({ ctx, input }) => {

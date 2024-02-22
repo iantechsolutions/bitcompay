@@ -56,7 +56,7 @@ export default function ChannelPage({ channel, user }: {
         setRequiredColumns(new Set(requiredColumns))
     }
 
-    const { mutateAsync: changeChannel, isLoading } = api.channels.change.useMutation()
+    const { mutateAsync: changeChannel, isLoading } = api.channels.change.useMutation()    
 
     async function handleChange() {
         try {
