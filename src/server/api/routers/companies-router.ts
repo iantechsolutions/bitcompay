@@ -5,17 +5,21 @@ import { createId } from "~/lib/utils";
 import { and, eq, inArray } from "drizzle-orm";
 
 export const companiesRouter = createTRPCRouter({
+    list: protectedProcedure.query(async ({ ctx }) => {
+        return await db.query.companies.findMany()
+    }),
+
     get: protectedProcedure.input(z.object({
         companyId: z.string(),
     })).query(async ({ input }) => {
-        const channel = await db.query.companies.findFirst({
+        const company = await db.query.companies.findFirst({
             where: eq(schema.companies.id, input.companyId),
             with: {
                 channels: {},
             }
         })
 
-        return channel
+        return company
     }),
 
     create: protectedProcedure.input(z.object({

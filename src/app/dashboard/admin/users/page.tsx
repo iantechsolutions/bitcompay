@@ -1,7 +1,6 @@
 
-import AppSidenav from "~/components/app-sidenav";
-import AppLayout from "~/components/applayout";
 import { List, ListTile } from "~/components/list";
+import { Title } from "~/components/title";
 import { UserAvatarCircle } from "~/components/user-avatar-circle";
 import { getServerAuthSession } from "~/server/auth";
 import { db } from "~/server/db";
@@ -16,26 +15,11 @@ export default async function Home() {
       id: true,
       image: true,
     },
-    with: {
-      roles: {
-        with: {
-          role: {
-            columns: {
-              name: true,
-              id: true,
-            }
-          }
-        }
-      }
-    }
   })
 
   return (
-    <AppLayout
-      title={<h1>Usuarios</h1>}
-      user={session?.user}
-      sidenav={<AppSidenav />}
-    >
+    <>
+      <Title>Usuarios</Title>
       <List>
         {users.map(user => <ListTile
           leading={<UserAvatarCircle user={user} />}
@@ -43,6 +27,6 @@ export default async function Home() {
           subtitle={<p>{user.email}</p>}
         />)}
       </List>
-    </AppLayout>
+    </>
   );
 }

@@ -1,4 +1,4 @@
-import AppSidenav from "~/components/app-sidenav";
+import AppSidenav from "~/components/admin-sidenav";
 import AppLayout from "~/components/applayout";
 import { Title } from "~/components/title";
 import { getServerAuthSession } from "~/server/auth";

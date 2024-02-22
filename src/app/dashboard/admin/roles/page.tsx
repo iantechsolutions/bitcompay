@@ -7,7 +7,7 @@ import { Title } from "~/components/title";
 import { PlusCircleIcon, UserIcon } from "lucide-react";
 import { topRightAbsoluteOnDesktopClassName } from "~/lib/utils";
 import { List, ListTile } from "~/components/list";
-import AppSidenav from "~/components/app-sidenav";
+import AppSidenav from "~/components/admin-sidenav";
 
 export default async function Home() {
     const session = await getServerAuthSession();

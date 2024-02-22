@@ -10,7 +10,6 @@ export type ListProps = {
 export type ListTileProps = {
     leading?: React.ReactNode;
     trailing?: React.ReactNode;
-    children?: React.ReactNode;
     title?: React.ReactNode;
     subtitle?: React.ReactNode;
     className?: string;

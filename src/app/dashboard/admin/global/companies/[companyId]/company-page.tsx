@@ -3,7 +3,7 @@
 import { CheckIcon, Loader2 } from "lucide-react"
 import { MouseEventHandler, useState } from "react"
 import { toast } from "sonner"
-import AppSidenav from "~/components/app-sidenav"
+import AppSidenav from "~/components/admin-sidenav"
 import AppLayout from "~/components/applayout"
 import LayoutContainer from "~/components/layout-container"
 import { List, ListTile } from "~/components/list"
