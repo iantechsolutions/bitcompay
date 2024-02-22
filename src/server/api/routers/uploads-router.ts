@@ -12,7 +12,7 @@ export const uploadsRouter = createTRPCRouter({
     upload: protectedProcedure.input(z.object({
         id: z.string()
     })).query(async ({ ctx, input }) => {
-        const upload = await db.query.documentUploads.findFirst({
+        const upload = await db.query.documentUploads.findFirst({   
             where: eq(schema.documentUploads.id, input.id)
         })
 

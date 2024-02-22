@@ -13,15 +13,16 @@ import { neon } from '@neondatabase/serverless';
 
 import postgres from 'postgres';
 const queryClient = postgres(env.DATABASE_URL);
-import { drizzle } from 'drizzle-orm/postgres-js';
+import { PostgresJsQueryResultHKT, drizzle } from 'drizzle-orm/postgres-js';
+import { PgTransaction } from "drizzle-orm/pg-core";
+import { ExtractTablesWithRelations } from "drizzle-orm";
 
 export const db = drizzle(
   queryClient,
   { schema }
 );
 
-
-export type TXType = null
+export type TXType = PgTransaction<PostgresJsQueryResultHKT, typeof schema, ExtractTablesWithRelations<typeof schema>>
 export type DBType = typeof db // PlanetScaleDatabase<typeof schema>
 export type DBTX = DBType | TXType
 export { schema }

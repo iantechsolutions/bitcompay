@@ -9,7 +9,7 @@ export default async function Channel(props: { params: { companyId: string } }) 
     const session = await getServerAuthSession();
 
     const company = await api.companies.get.query({ companyId: props.params.companyId })
-    const channels = await api.channels.getAll.query()
+    const channels = await api.channels.list.query()
 
     if (!company || !session?.user) {
         return <AppLayout

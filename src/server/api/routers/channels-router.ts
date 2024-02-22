@@ -22,7 +22,7 @@ export const channelsRouter = createTRPCRouter({
         return channel
     }),
 
-    getAll: protectedProcedure.query(async ({ input }) => {
+    list: protectedProcedure.query(async ({ input }) => {
         const channels = await db.query.channels.findMany({
             where: eq(schema.channels.enabled, true)
         })

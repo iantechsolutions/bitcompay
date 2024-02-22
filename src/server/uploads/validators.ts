@@ -84,6 +84,7 @@ export const recDocumentValidator = z.object({
         'du_type': value['Tipo DU'] ?? null,
         'du_number': value['Nro DU'] ?? null,
         'channel': value['Canal'] ?? null,
+        'channel_number': parseInt(value['Canal']) ?? null,
         'cbu': value['Nro CBU'] ?? null,
         'card_brand': value['TC Marca'] ?? null,
         'is_new': value['Alta Nueva'] ?? null,

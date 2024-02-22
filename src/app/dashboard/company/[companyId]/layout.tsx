@@ -3,6 +3,8 @@ import CompanySidenav from "~/components/company-sidenav";
 import { getServerAuthSession } from "~/server/auth";
 import { CompanyProvider } from "./company-provider";
 import { api } from "~/trpc/server";
+import Sidenav, { SidenavItem } from "~/components/sidenav";
+import { ArrowLeftIcon } from "lucide-react";
 
 
 export default async function Layout(props: { children?: React.ReactNode, params: { companyId: string } }) {
@@ -14,7 +16,7 @@ export default async function Layout(props: { children?: React.ReactNode, params
     return <AppLayout
         title={company?.name || '404 NOT FOUND'}
         user={session?.user}
-        sidenav={<CompanySidenav />}
+        sidenav={company ? <CompanySidenav companyId={company.id} /> : <Sidenav><SidenavItem href="/dashboard" icon={<ArrowLeftIcon />}>Volver</SidenavItem></Sidenav>}
     >
         <CompanyProvider company={company}>
             {props.children}

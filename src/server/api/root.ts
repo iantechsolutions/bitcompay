@@ -3,6 +3,7 @@ import { uploadsRouter } from "./routers/uploads-router";
 import { channelsRouter } from "./routers/channels-router";
 import { companiesRouter } from "./routers/companies-router";
 import { transactionsRouter } from "./routers/transactions-router";
+import { iofilesRouter } from "./routers/iofiles-routers";
 
 /**
  * This is the primary router for your server.
@@ -14,6 +15,7 @@ export const appRouter = createTRPCRouter({
   channels: channelsRouter,
   companies: companiesRouter,
   transactions: transactionsRouter,
+  iofiles: iofilesRouter,
 });
 
 // export type definition of API
