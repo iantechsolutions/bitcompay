@@ -12,13 +12,7 @@ export default async function Channel(props: { params: { companyId: string } }) 
     const channels = await api.channels.list.query()
 
     if (!company || !session?.user) {
-        return <AppLayout
-            title={<h1>Error 404</h1>}
-            user={session?.user}
-            sidenav={<AppSidenav />}
-        >
-            <Title>No se encontró la empresa</Title>
-        </AppLayout>
+        return <Title>No se encontró la empresa</Title>
     }
 
     return <CompanyPage company={company} user={session.user} channels={channels} />

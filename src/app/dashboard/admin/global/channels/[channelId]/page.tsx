@@ -11,13 +11,7 @@ export default async function Channel(props: { params: { channelId: string } }) 
     const channel = await api.channels.get.query({ channelId: props.params.channelId })
 
     if (!channel || !session?.user) {
-        return <AppLayout
-            title={<h1>Error 404</h1>}
-            user={session?.user}
-            sidenav={<AppSidenav />}
-        >
-            <Title>No se encontró el canal</Title>
-        </AppLayout>
+        return <Title>No se encontró el canal</Title>
     }
 
     return <ChannelPage channel={channel} user={session.user} />

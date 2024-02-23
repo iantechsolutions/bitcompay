@@ -41,7 +41,7 @@ import { revalidatePath } from "next/cache"
 export default function CompanyPage({ company, user, channels }: {
     company: NonNullable<RouterOutputs['companies']['get']>,
     user: NavUserData
-    channels: RouterOutputs['channels']['getAll']
+    channels: RouterOutputs['channels']['list']
 }) {
     const [name, setName] = useState(company.name)
     const [description, setDescription] = useState(company.description)
@@ -74,94 +74,88 @@ export default function CompanyPage({ company, user, channels }: {
         setCompanyChannels(new Set(companyChannels))
     }
 
-    return <AppLayout
-        title={<h1>{company.name}</h1>}
-        user={user}
-        sidenav={<AppSidenav />}
-    >
-        <LayoutContainer>
-            <section className="space-y-2">
-                <div className="flex justify-between">
-                    <Title>Modificar empresa</Title>
-                    <Button
-                        disabled={isLoading}
-                        onClick={handleChange}
-                    >
-                        {isLoading ? <Loader2 className="mr-2 animate-spin" /> : <CheckIcon className="mr-2" />}
-                        Aplicar
-                    </Button>
-                </div>
+    return <LayoutContainer>
+        <section className="space-y-2">
+            <div className="flex justify-between">
+                <Title>{company.name}</Title>
+                <Button
+                    disabled={isLoading}
+                    onClick={handleChange}
+                >
+                    {isLoading ? <Loader2 className="mr-2 animate-spin" /> : <CheckIcon className="mr-2" />}
+                    Aplicar
+                </Button>
+            </div>
 
-                <Accordion type="single" collapsible className="w-full">
-                    <AccordionItem value="item-1">
-                        <AccordionTrigger>
-                            <h2 className="text-md">Canales habilitados</h2>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                            <List>
-                                {channels.map(channel => {
-                                    return <ListTile
-                                        key={channel.id}
-                                        leading={channel.number}
-                                        title={channel.name}
-                                        trailing={<Switch
-                                            checked={companyChannels.has(channel.id)}
-                                            onCheckedChange={checked => changeCompanyChannel(channel.id, checked)}
-                                        />}
-                                    />
-                                })}
-                            </List>
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="item-2">
-                        <AccordionTrigger>
-                            <h2 className="text-md">Info. de la empresa</h2>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                            <Card className="p-5">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <div>
-                                        <Label htmlFor="name">Nombre</Label>
-                                        <Input id="name" value={name} onChange={e => setName(e.target.value)} />
-                                    </div>
-                                    <div className="col-span-2">
-                                        <Label htmlFor="description">Descripción</Label>
-                                        <Input id="description" value={description} onChange={e => setDescription(e.target.value)} />
-                                    </div>
+            <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="item-1">
+                    <AccordionTrigger>
+                        <h2 className="text-md">Canales habilitados</h2>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                        <List>
+                            {channels.map(channel => {
+                                return <ListTile
+                                    key={channel.id}
+                                    leading={channel.number}
+                                    title={channel.name}
+                                    trailing={<Switch
+                                        checked={companyChannels.has(channel.id)}
+                                        onCheckedChange={checked => changeCompanyChannel(channel.id, checked)}
+                                    />}
+                                />
+                            })}
+                        </List>
+                    </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="item-2">
+                    <AccordionTrigger>
+                        <h2 className="text-md">Info. de la empresa</h2>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                        <Card className="p-5">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <Label htmlFor="name">Nombre</Label>
+                                    <Input id="name" value={name} onChange={e => setName(e.target.value)} />
                                 </div>
-                            </Card>
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="item-4">
-                        <AccordionTrigger>
-                            <h2 className="text-md">Marcas</h2>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                            <List>
-                                {/* {channels.map(channel => {
+                                <div className="col-span-2">
+                                    <Label htmlFor="description">Descripción</Label>
+                                    <Input id="description" value={description} onChange={e => setDescription(e.target.value)} />
+                                </div>
+                            </div>
+                        </Card>
+                    </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="item-4">
+                    <AccordionTrigger>
+                        <h2 className="text-md">Marcas</h2>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                        <List>
+                            {/* {channels.map(channel => {
                                     return <ListTile
                                         href={`/dashboard/admin/global/channels/${channel.id}`}
                                         leading={channel.number}
                                         title={channel.name}
                                     />
                                 })} */}
-                            </List>
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="item-4" className="border-none">
-                        <AccordionTrigger>
-                            <h2 className="text-md">Eliminar empresa</h2>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                            <div className="flex justify-end">
-                                <DeleteChannel companyId={company.id} />
-                            </div>
-                        </AccordionContent>
-                    </AccordionItem>
-                </Accordion>
-            </section>
-        </LayoutContainer>
-    </AppLayout>
+                        </List>
+                    </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="item-4" className="border-none">
+                    <AccordionTrigger>
+                        <h2 className="text-md">Eliminar empresa</h2>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                        <div className="flex justify-end">
+                            <DeleteChannel companyId={company.id} />
+                        </div>
+                    </AccordionContent>
+                </AccordionItem>
+            </Accordion>
+        </section>
+    </LayoutContainer>
 }
 
 
