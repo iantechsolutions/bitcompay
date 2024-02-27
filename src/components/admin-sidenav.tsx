@@ -1,5 +1,5 @@
 import Sidenav, { SidenavItem, SidenavSeparator } from "./sidenav"
-import { ActivityIcon, BanknoteIcon, Building2Icon, DollarSignIcon, FileLineChart, FingerprintIcon, LayoutDashboardIcon, ShoppingBagIcon, UsersIcon } from 'lucide-react';
+import { ActivityIcon, BanknoteIcon, Building2Icon, DollarSignIcon, FileLineChart, FingerprintIcon, LayoutDashboardIcon, PackageIcon, ShoppingBagIcon, UsersIcon } from 'lucide-react';
 
 export default function AdminSidenav() {
     return <Sidenav>
@@ -7,6 +7,7 @@ export default function AdminSidenav() {
         <SidenavItem icon={<LayoutDashboardIcon />} href="/dashboard">Inicio</SidenavItem>
         <SidenavSeparator>Administración</SidenavSeparator>
         <SidenavItem icon={<Building2Icon />} href="/dashboard/admin/global">Empresas</SidenavItem>
+        <SidenavItem icon={<PackageIcon />} href="/dashboard/admin/global">Producto</SidenavItem>
         <SidenavItem icon={<FileLineChart />} href="/dashboard/admin/global">Canales</SidenavItem>
         <SidenavItem icon={<ShoppingBagIcon />} href="/dashboard/admin/products">Productos</SidenavItem>
         <SidenavItem icon={<UsersIcon />} href="/dashboard/admin/users">Usuarios</SidenavItem>
