@@ -11,9 +11,9 @@ export const channelsRouter = createTRPCRouter({
         const channel = await db.query.channels.findFirst({
             where: eq(schema.channels.id, input.channelId),
             with: {
-                companies: {
+                products: {
                     with: {
-                        company: true
+                        product: true
                     }
                 }
             }

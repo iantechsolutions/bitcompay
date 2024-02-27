@@ -36,7 +36,6 @@ import {
     AlertDialogTrigger,
 } from "~/components/ui/alert-dialog"
 import { useRouter } from "next/navigation"
-import { revalidatePath } from "next/cache"
 
 export default function ChannelPage({ channel, user }: {
     channel: NonNullable<RouterOutputs['channels']['get']>,
@@ -134,15 +133,15 @@ export default function ChannelPage({ channel, user }: {
                 </AccordionItem>
                 <AccordionItem value="item-3">
                     <AccordionTrigger>
-                        <h2 className="text-md">Empresas con este canal habilitado</h2>
+                        <h2 className="text-md">Productos con este canal habilitado</h2>
                     </AccordionTrigger>
                     <AccordionContent>
                         <List>
-                            {channel.companies.map(({ company }) => {
+                            {channel.products.map(({ product }) => {
                                 return <ListTile
-                                    href={`/dashboard/admin/global/companies/${company.id}`}
-                                    key={company.id}
-                                    title={company.name}
+                                    href={`/dashboard/admin/products/${product.id}`}
+                                    key={product.id}
+                                    title={product.name}
                                 />
                             })}
                         </List>
