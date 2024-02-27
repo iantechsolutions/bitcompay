@@ -98,7 +98,7 @@ export const channels = pgTable(
 );
 
 export const channelsRelations = relations(channels, ({ one, many }) => ({
-  companies: many(companyChannels),
+  products: many(productChannels),
 }));
 
 export const companies = pgTable(
@@ -120,7 +120,7 @@ export const companies = pgTable(
 
 export const companiesRelations = relations(companies, ({ one, many }) => ({
   brands: many(brands),
-  channels: many(companyChannels),
+  products: many(companyProducts),
 }));
 
 export const brands = pgTable(
@@ -147,26 +147,6 @@ export const brandsRelations = relations(brands, ({ one, many }) => ({
   company: one(companies, { fields: [brands.companyId], references: [companies.id] }),
 }));
 
-export const companyChannels = pgTable(
-  'company_channel',
-  {
-    companyId: varchar("brandId", { length: 255 }).notNull(),
-    channelId: varchar("channelId", { length: 255 }).notNull(),
-  },
-  (brandChannels) => ({
-    pk: primaryKey({
-      name: 'company_channel_pk',
-      columns: [brandChannels.companyId, brandChannels.channelId],
-    }),
-  })
-);
-
-export const companyChannelsRelations = relations(companyChannels, ({ one, many }) => ({
-  company: one(companies, { fields: [companyChannels.companyId], references: [companies.id] }),
-  channel: one(channels, { fields: [companyChannels.channelId], references: [channels.id] }),
-}));
-
-
 export const companyProducts = pgTable(
   'company_product',
   {
@@ -192,6 +172,7 @@ export const products = pgTable(
     id: columnId,
     name: varchar("name", { length: 255 }).notNull(),
     description: varchar("description", { length: 255 }).notNull(),
+    number: integer("number").notNull().unique(),
 
     enabled: boolean("enabled").notNull().default(true),
 
@@ -221,3 +202,8 @@ export const productChannels = pgTable(
     }),
   })
 );
+
+export const productChannelsRelations = relations(productChannels, ({ one }) => ({
+  product: one(products, { fields: [productChannels.productId], references: [products.id] }),
+  channel: one(channels, { fields: [productChannels.channelId], references: [channels.id] }),
+}));

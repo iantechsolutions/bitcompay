@@ -15,7 +15,7 @@ export const companiesRouter = createTRPCRouter({
         const company = await db.query.companies.findFirst({
             where: eq(schema.companies.id, input.companyId),
             with: {
-                channels: {},
+                products: {},
             }
         })
 
@@ -43,42 +43,42 @@ export const companiesRouter = createTRPCRouter({
         companyId: z.string(),
         name: z.string().min(1).max(255).optional(),
         description: z.string().min(0).max(1023).optional(),
-        channels: z.array(z.string()).optional(),
+        products: z.array(z.string()).optional(),
     })).mutation(async ({ ctx, input }) => {
 
-        await db.transaction(async tx => {
-            await tx.update(schema.companies).set({
+        await db.transaction(async db => {
+            await db.update(schema.companies).set({
                 name: input.name,
                 description: input.description,
             }).where(eq(schema.companies.id, input.companyId))
 
-            const companyChannels = await tx.query.companyChannels.findMany({
-                where: eq(schema.companyChannels.companyId, input.companyId)
+            const companyProducts = await db.query.companyProducts.findMany({
+                where: eq(schema.companyProducts.companyId, input.companyId)
             })
 
-            if (input.channels) {
-                const channels = new Set(input.channels)
+            if (input.products) {
+                const products = new Set(input.products)
 
-                const channelsToDelete = companyChannels.filter(companyChannel => {
-                    return !channels.has(companyChannel.channelId)
+                const productsToDelete = companyProducts.filter(companyProduct => {
+                    return !products.has(companyProduct.productId)
                 })
 
-                const channelsToAdd = input.channels.filter(channelId => {
-                    return !companyChannels.find(companyChannel => companyChannel.channelId === channelId)
+                const productsToAdd = input.products.filter(productId => {
+                    return !companyProducts.find(companyProduct => companyProduct.productId === productId)
                 })
 
 
-                if (channelsToDelete.length > 0) {
-                    await tx.delete(schema.companyChannels).where(and(
-                        eq(schema.companyChannels.companyId, input.companyId),
-                        inArray(schema.companyChannels.channelId, channelsToDelete.map(companyChannel => companyChannel.channelId))
+                if (productsToDelete.length > 0) {
+                    await db.delete(schema.companyProducts).where(and(
+                        eq(schema.companyProducts.companyId, input.companyId),
+                        inArray(schema.companyProducts.productId, productsToDelete.map(companyProduct => companyProduct.productId))
                     ))
                 }
 
-                if (channelsToAdd.length > 0) {
-                    await tx.insert(schema.companyChannels).values(channelsToAdd.map(channelId => ({
+                if (productsToAdd.length > 0) {
+                    await db.insert(schema.companyProducts).values(productsToAdd.map(productId => ({
                         companyId: input.companyId,
-                        channelId,
+                        productId,
                     })))
                 }
             }
@@ -90,7 +90,7 @@ export const companiesRouter = createTRPCRouter({
     })).mutation(async ({ ctx, input }) => {
         await db.transaction(async tx => {
             await tx.delete(schema.companies).where(eq(schema.companies.id, input.companyId))
-            await tx.delete(schema.companyChannels).where(eq(schema.companyChannels.companyId, input.companyId))
+            await tx.delete(schema.companyProducts).where(eq(schema.companyProducts.companyId, input.companyId))
         })
     }),
 })

@@ -9,11 +9,11 @@ export default async function Channel(props: { params: { companyId: string } }) 
     const session = await getServerAuthSession();
 
     const company = await api.companies.get.query({ companyId: props.params.companyId })
-    const channels = await api.channels.list.query()
+    const products = await api.products.list.query()
 
     if (!company || !session?.user) {
         return <Title>No se encontró la empresa</Title>
     }
 
-    return <CompanyPage company={company} user={session.user} channels={channels} />
+    return <CompanyPage company={company} user={session.user} products={products} />
 }

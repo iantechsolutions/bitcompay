@@ -4,6 +4,7 @@ import { channelsRouter } from "./routers/channels-router";
 import { companiesRouter } from "./routers/companies-router";
 import { transactionsRouter } from "./routers/transactions-router";
 import { iofilesRouter } from "./routers/iofiles-routers";
+import { productsChannel } from "./routers/products-router";
 
 /**
  * This is the primary router for your server.
@@ -13,6 +14,7 @@ import { iofilesRouter } from "./routers/iofiles-routers";
 export const appRouter = createTRPCRouter({
   uploads: uploadsRouter,
   channels: channelsRouter,
+  products: productsChannel,
   companies: companiesRouter,
   transactions: transactionsRouter,
   iofiles: iofilesRouter,
