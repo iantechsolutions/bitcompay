@@ -11,29 +11,43 @@ import { createId } from "~/lib/utils";
 export const uploadsRouter = createTRPCRouter({
     upload: protectedProcedure.input(z.object({
         id: z.string()
-    })).query(async ({ ctx, input }) => {
+    })).query(async ({ input }) => {
         const upload = await db.query.documentUploads.findFirst({
             where: eq(schema.documentUploads.id, input.id)
         })
 
         return upload
     }),
+    list: protectedProcedure.query(async ({ }) => {
+        return await db.query.documentUploads.findMany()
+    }),
     readUploadContents: protectedProcedure.input(z.object({
         type: z.literal("rec"),
         id: z.string(),
         companyId: z.string(),
-    })).mutation(async ({ ctx, input }) => {
+    })).mutation(async ({ input }) => {
         return await db.transaction(async db => {
             const channels = await getCompanyProducts(db, input.companyId)
 
             const contents = await readUploadContents(db, input.id, input.type, channels)
 
             await db.update(schema.documentUploads).set({
-                documentType: input.type
+                documentType: input.type,
+                rowsCount: contents.rows.length,
             }).where(eq(schema.documentUploads.id, input.id))
+
 
             return contents
         })
+    }),
+    get: protectedProcedure.input(z.object({
+        uploadId: z.string()
+    })).query(async ({ input }) => { 
+        const upload = await db.query.documentUploads.findFirst({
+            where: eq(schema.documentUploads.id, input.uploadId)
+        })
+
+        return upload
     }),
     confirmUpload: protectedProcedure.input(z.object({
         id: z.string(),

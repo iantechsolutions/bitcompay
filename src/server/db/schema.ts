@@ -22,6 +22,7 @@ export const documentUploads = pgTable(
     fileUrl: varchar("fileUrl", { length: 255 }).notNull(),
     fileName: varchar("fileName", { length: 255 }).notNull(),
     fileSize: integer("fileSize").notNull(),
+    rowsCount: integer("rowsCount"),
 
     confirmed: boolean("confirmed").notNull().default(false),
     confirmedAt: timestamp("confirmedAt", { mode: "date" }),

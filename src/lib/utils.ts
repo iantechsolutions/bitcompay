@@ -15,4 +15,8 @@ export function createId() {
   return nanoid()
 }
 
+export function formatKB(bytes: number) {
+  return (bytes / 1000).toFixed(1) + ' KB'
+}
+
 export const topRightAbsoluteOnDesktopClassName = 'md:absolute md:top-0 md:right-0 mr-10 mt-10'
