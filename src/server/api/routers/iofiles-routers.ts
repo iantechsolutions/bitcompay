@@ -9,7 +9,7 @@ export const iofilesRouter = createTRPCRouter({
         channelNumber: z.number()
     })).mutation(async ({ ctx, input }) => {
         const transactions = await db.query.payments.findMany({
-            where: eq(schema.payments.channel_number, input.channelNumber)
+            where: eq(schema.payments.product_number, input.channelNumber)
         })
 
         let text = ''

@@ -19,16 +19,17 @@ export default async function Home() {
       title={<h1>BITCOMPAY</h1>}
       user={session?.user}
       sidenav={<Sidenav>
-        <SidenavItem icon={<Settings2Icon />} href="/dashboard/admin/global">Administración</SidenavItem>
+        <SidenavItem icon={<Settings2Icon />} href="/dashboard/admin">Administración</SidenavItem>
         <SidenavItem icon={<LayoutDashboardIcon />} href="/dashboard/management/transactions">Gestión bitcompay</SidenavItem>
       </Sidenav>}
     >
       <div className="flex justify-between">
         <Title>Ingresar como empresa</Title>
         <Button>Gestionar</Button>
-      </div>        <List>
+      </div>
+      <List>
         {companies.map((company) => {
-          return <ListTile href={`/dashboard/company/${company.id}/uploads`} title={company.name} leading={<Building2Icon />} />
+          return <ListTile key={company.id} href={`/dashboard/company/${company.id}/uploads`} title={company.name} leading={<Building2Icon />} />
         })}
       </List>
     </AppLayout>

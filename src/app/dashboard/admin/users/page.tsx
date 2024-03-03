@@ -22,6 +22,7 @@ export default async function Home() {
       <Title>Usuarios</Title>
       <List>
         {users.map(user => <ListTile
+          key={user.id}
           leading={<UserAvatarCircle user={user} />}
           title={<p>{user.name}</p>}
           subtitle={<p>{user.email}</p>}

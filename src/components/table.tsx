@@ -1,6 +1,5 @@
 import { createContext, useContext, useId, useLayoutEffect, useMemo } from "react";
 import { FixedSizeList as List } from 'react-window';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 import dayjs from "dayjs";
 
 export type TableHeaders = {
@@ -18,7 +17,12 @@ const tableContext = createContext<{ rows: Record<string, any>[], headers: Table
 export function LargeTable(props: {
     rows: Record<string, any>[],
     headers?: TableHeaders,
+    height?: number,
 }) {
+
+    const height = props.height || 600
+
+    const document = typeof global.document !== 'undefined' ? global.document : null
 
     const headers = useTableHeaders(props.headers, props.rows)
 
@@ -26,8 +30,8 @@ export function LargeTable(props: {
 
     const uniqueClassName = useId()
 
-    const header = document.getElementById(headerId)
-    const list = document.getElementsByClassName(uniqueClassName)[0]
+    const header = document?.getElementById(headerId)
+    const list = document?.getElementsByClassName(uniqueClassName)[0]
 
     useLayoutEffect(() => {
         // Set list scroll (uniqueClasName) to scroll headerId
@@ -68,7 +72,7 @@ export function LargeTable(props: {
             </div>
             <List
                 className={uniqueClassName}
-                height={600}
+                height={height}
                 itemCount={props.rows.length}
                 itemSize={35}
                 width={'100%'}
@@ -76,25 +80,6 @@ export function LargeTable(props: {
             />
         </div>
     </tableContext.Provider>
-
-    return <Table>
-        <TableHeader>
-            <TableRow>
-                {headers.map(header => {
-                    return <TableHead key={header.key}>{header.label}</TableHead>
-                })}
-            </TableRow>
-        </TableHeader>
-        <TableBody>
-            <List
-                height={600}
-                itemCount={props.rows.length}
-                itemSize={35}
-                width={'10'}
-                children={Row}
-            />
-        </TableBody>
-    </Table>
 }
 
 function useTableHeaders(headers: TableHeaders | undefined, data: Record<string, any>[]): TableHeaders {

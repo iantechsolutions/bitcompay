@@ -1,23 +1,12 @@
-import { CircleDollarSignIcon } from "lucide-react";
-import { List, ListTile } from "~/components/list";
-import { Title } from "~/components/title";
 import { api } from "~/trpc/server";
+import TransactionsPage from "./transactions-page";
 
-export default async function TransactionsPage() {
+export default async function Page() {
     const transactions = await api.transactions.list.query()
-
-    return <>
-        <Title>Transacciones</Title>
-        <List>
-            {transactions.map((transaction) => {
-                return <ListTile
-                    leading={<CircleDollarSignIcon />}
-                    key={transaction.id}
-                    title={transaction.name}
-                    subtitle={`${transaction.fiscal_id_number} - ${transaction.channel?.split(' ')[3]}`}
-                    trailing={`$${transaction.first_due_amount?.toLocaleString()}`}
-                />
-            })}
-        </List>
-    </>
+    
+    return <div className="absolute left-0 top-0 right-0 bottom-0 h-[calc(100dvh_-_70px)]">
+        <TransactionsPage
+            transactions={transactions}
+        />
+    </div>
 }

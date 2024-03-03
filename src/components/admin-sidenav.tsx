@@ -6,10 +6,9 @@ export default function AdminSidenav() {
         <SidenavSeparator>Global</SidenavSeparator>
         <SidenavItem icon={<LayoutDashboardIcon />} href="/dashboard">Inicio</SidenavItem>
         <SidenavSeparator>Administración</SidenavSeparator>
-        <SidenavItem icon={<Building2Icon />} href="/dashboard/admin/global">Empresas</SidenavItem>
-        <SidenavItem icon={<PackageIcon />} href="/dashboard/admin/global">Producto</SidenavItem>
-        <SidenavItem icon={<FileLineChart />} href="/dashboard/admin/global">Canales</SidenavItem>
-        <SidenavItem icon={<ShoppingBagIcon />} href="/dashboard/admin/products">Productos</SidenavItem>
+        <SidenavItem icon={<PackageIcon />} href="/dashboard/admin/products">Productos</SidenavItem>
+        <SidenavItem icon={<FileLineChart />} href="/dashboard/admin/channels">Canales</SidenavItem>
+        <SidenavItem icon={<Building2Icon />} href="/dashboard/admin/companies">Empresas</SidenavItem>
         <SidenavItem icon={<UsersIcon />} href="/dashboard/admin/users">Usuarios</SidenavItem>
         <SidenavItem icon={<FingerprintIcon />} href="/dashboard/admin/roles">Roles</SidenavItem>
         <SidenavItem icon={<DollarSignIcon />} href="/dashboard/admin/costs">Costos</SidenavItem>

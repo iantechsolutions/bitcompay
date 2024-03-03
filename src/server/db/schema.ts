@@ -50,8 +50,9 @@ export const payments = pgTable(
     fiscal_id_number: bigint("fiscal_id_number", { mode: 'number' }),
     du_type: varchar("du_type", { length: 255 }),
     du_number: bigint("du_number", { mode: 'number' }),
-    channel: varchar("channel", { length: 255 }),
-    channel_number: integer("channel_number").notNull().default(0),
+    product: varchar("product", { length: 255 }),
+    // 
+    product_number: integer("product_number").notNull().default(0),
     //! Can be used as id
     invoice_number: bigint("invoice_number", { mode: 'number' }).notNull().unique(),
     //

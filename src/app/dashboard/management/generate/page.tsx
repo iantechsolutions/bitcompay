@@ -11,6 +11,7 @@ export default async function PageGenerate() {
             {channels.map(channel => {
 
                 return <ListTile
+                    key={channel.id}
                     leading={channel.number}
                     title={channel.name}
                     href={`./generate/${channel.id}`}

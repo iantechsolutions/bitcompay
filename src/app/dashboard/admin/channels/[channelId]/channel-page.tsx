@@ -139,8 +139,8 @@ export default function ChannelPage({ channel, user }: {
                         <List>
                             {channel.products.map(({ product }) => {
                                 return <ListTile
-                                    href={`/dashboard/admin/products/${product.id}`}
                                     key={product.id}
+                                    href={`/dashboard/admin/products/${product.id}`}
                                     title={product.name}
                                 />
                             })}
