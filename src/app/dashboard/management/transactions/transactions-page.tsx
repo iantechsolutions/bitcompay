@@ -3,6 +3,7 @@
 import { useLayoutEffect, useState } from "react"
 import { LargeTable } from "~/components/table"
 import { recHeaders } from "~/server/uploads/validators"
+import { TransactionsFiltersDialog } from "./transactions-filters"
 
 export default function TransactionsPage(props: {
     transactions: Record<string, any>[]
@@ -23,9 +24,19 @@ export default function TransactionsPage(props: {
         }
     }, [])
 
-    return <LargeTable
-        height={height}
-        headers={recHeaders}
-        rows={props.transactions}
-    />
+    return <div>
+        <LargeTable
+            height={height}
+            headers={recHeaders}
+            rows={props.transactions}
+        />
+        <div className="fixed top-4 right-20 z-10">
+            <TransactionsFiltersDialog
+                filters={0}
+                onChange={() => { }}
+            />
+        </div>
+    </div>
+
+
 }

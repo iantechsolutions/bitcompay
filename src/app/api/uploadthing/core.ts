@@ -1,4 +1,5 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
+import { z } from "zod";
 import { createId } from "~/lib/utils";
 import { getServerAuthSession } from "~/server/auth";
 import { db } from "~/server/db";
@@ -25,8 +26,11 @@ export const ourFileRouter = {
       maxFileSize: '128MB',
     }
   })
+    .input(z.object({
+      companyId: z.string(),
+    }))
     // Set permissions and file types for this FileRoute
-    .middleware(async ({ req }) => {
+    .middleware(async ({ req, input }) => {
       // This code runs on your server before upload
       const user = await auth(req);
 
@@ -34,7 +38,7 @@ export const ourFileRouter = {
       if (!user) throw new Error("Unauthorized");
 
       // Whatever is returned here is accessible in onUploadComplete as `metadata`
-      return { userId: user.id };
+      return { userId: user.id, companyId: input.companyId };
     })
     .onUploadComplete(async ({ metadata, file }) => {
       // This code RUNS ON YOUR SERVER after upload
@@ -50,6 +54,7 @@ export const ourFileRouter = {
         fileUrl: file.url,
         fileName: file.name,
         fileSize: file.size,
+        companyId: metadata.companyId,
       })
 
       // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback

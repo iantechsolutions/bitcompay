@@ -22,6 +22,7 @@ import { api } from "~/trpc/react";
 import { LargeTable } from "~/components/table";
 import { toast } from "sonner"
 import { asTRPCError } from "~/lib/errors";
+import { useCompanyData } from "../../company-provider";
 
 export type UploadedPageProps = {
     upload: NonNullable<RouterOutputs['uploads']['upload']>
@@ -32,7 +33,9 @@ export default function UploadedUnconfirmedPage(props: UploadedPageProps) {
 
     const { upload } = props
 
-    const [documentType, setDocumentType] = useState<string | null>(null)
+    const [documentType, setDocumentType] = useState<string | null>('rec')
+
+    const company = useCompanyData()
 
     let fileSizeLabel: React.ReactNode = null
 
@@ -57,7 +60,7 @@ export default function UploadedUnconfirmedPage(props: UploadedPageProps) {
         if (isLoadingConfirm) return
 
         try {
-            await confirmUpload({ id: upload.id })
+            await confirmUpload({ id: upload.id, companyId: company.id })
             toast.success('Documento cargado correctamente')
             router.refresh()
         } catch (e) {
@@ -76,7 +79,7 @@ export default function UploadedUnconfirmedPage(props: UploadedPageProps) {
 
         try {
             setError(null)
-            const data = await readUploadContents({ id: upload.id, type: (documentType as any) })
+            const data = await readUploadContents({ id: upload.id, type: (documentType as any), companyId: company.id })
             if (data) setData(data)
         } catch (e) {
             const error = asTRPCError(e)!
@@ -99,7 +102,7 @@ export default function UploadedUnconfirmedPage(props: UploadedPageProps) {
                     <p className="text-xs font-semibold">{fileSizeLabel} - subido el {dayjs(upload.createdAt).format('DD/MM/YYYY [a las] HH:mm:ss')}</p>
                 </div>
             </Card>
-            <SelectGroup>
+            {/* <SelectGroup>
                 <SelectLabel>Tipo de documento</SelectLabel>
                 <Select
                     onValueChange={setDocumentType}
@@ -110,12 +113,12 @@ export default function UploadedUnconfirmedPage(props: UploadedPageProps) {
                     </SelectTrigger>
                     <SelectContent>
                         <SelectGroup>
-                            {/* <SelectLabel></SelectLabel> */}
+                            <SelectLabel></SelectLabel>
                             <SelectItem value="rec">REC</SelectItem>
                         </SelectGroup>
                     </SelectContent>
                 </Select>
-            </SelectGroup>
+            </SelectGroup> */}
             {error && <p className="text-red-500 font-semibold">{error}</p>}
             <Button
                 className="py-6 w-full"

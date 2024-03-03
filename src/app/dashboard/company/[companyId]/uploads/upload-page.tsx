@@ -2,22 +2,25 @@
 
 import LayoutContainer from "~/components/layout-container";
 import { Title } from "~/components/title";
-import { UploadDropzone } from "@uploadthing/react";
-import type { OurFileRouter } from "~/app/api/uploadthing/core";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { UploadDropzone } from "~/components/uploadthing";
+import { useCompanyData } from "../company-provider";
 
 export default function UploadPage() {
     const [errorMessage, setErrorMessage] = useState<string | null>();
 
     const router = useRouter()
 
+    const company = useCompanyData()
+
     return <LayoutContainer>
         <Title>Cargar documento</Title>
 
         {errorMessage && <p className="text-red-500">{errorMessage}</p>}
 
-        <UploadDropzone<OurFileRouter, any>
+        <UploadDropzone
+            input={{ companyId: company.id }}
             endpoint="documentUpload"
             config={{
                 mode: 'manual',
@@ -31,7 +34,7 @@ export default function UploadPage() {
             onClientUploadComplete={(res) => {
                 const [file] = res
 
-                if(!file) return
+                if (!file) return
 
                 router.push(`./uploads/${file.serverData.uploadId}`)
             }}

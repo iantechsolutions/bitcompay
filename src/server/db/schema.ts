@@ -28,6 +28,8 @@ export const documentUploads = pgTable(
 
     documentType: varchar("documentType", { length: 255 }).$type<'rec' | null>(),
 
+    companyId: varchar("companyId", { length: 255 }).notNull().references(() => companies.id),
+
     createdAt,
     updatedAt,
   },
@@ -36,12 +38,17 @@ export const documentUploads = pgTable(
   })
 );
 
+export const documentUploadsRelations = relations(documentUploads, ({ one, many }) => ({
+  company: one(companies, { fields: [documentUploads.companyId], references: [companies.id] }),
+  payments: many(payments),
+}));
+
 export const payments = pgTable(
   "payment",
   {
     id: columnId,
     userId: varchar("userId", { length: 255 }).notNull(),
-    documentUploadId: varchar("documentUploadId", { length: 255 }).notNull(),
+    documentUploadId: varchar("documentUploadId", { length: 255 }).notNull().references(() => documentUploads.id),
 
     // Rec fields
     g_c: bigint("g_c", { mode: 'number' }),
@@ -52,7 +59,7 @@ export const payments = pgTable(
     du_number: bigint("du_number", { mode: 'number' }),
     product: varchar("product", { length: 255 }),
     // 
-    product_number: integer("product_number").notNull().default(0),
+    product_number: integer("product_number").notNull().default(0).references(() => products.number),
     //! Can be used as id
     invoice_number: bigint("invoice_number", { mode: 'number' }).notNull().unique(),
     //
@@ -67,6 +74,8 @@ export const payments = pgTable(
     collected_amount: bigint("collected_amount", { mode: 'number' }),
     // end Rec fields
 
+    companyId: varchar("companyId", { length: 255 }).notNull().references(() => companies.id),
+
     createdAt,
     updatedAt,
   },
@@ -76,6 +85,12 @@ export const payments = pgTable(
     invoiceNumberIdx: index("invoiceNumber_idx").on(payments.invoice_number),
   })
 );
+
+export const paymentsRelations = relations(payments, ({ one, many }) => ({
+  documentUpload: one(documentUploads, { fields: [payments.documentUploadId], references: [documentUploads.id] }),
+  company: one(companies, { fields: [payments.companyId], references: [companies.id] }),
+  product: one(products, { fields: [payments.product_number], references: [products.number] }),
+}));
 
 export const channels = pgTable(
   "channel",
