@@ -5,6 +5,9 @@ import { useMemo } from "react"
 import { ZodError, z } from "zod"
 import { AppRouter } from "~/server/api/root"
 
+// Disable eslint for this file
+/* eslint-disable */
+
 export function asDatabseError(error: any) {
     if (error.name === 'DatabaseError') {
         return {
@@ -44,6 +47,7 @@ export function newServerInternalError(error: any, cause?: any, message?: string
 export function asTRPCError(error: any) {
     if (isTRPCClientError(error)) {
         return {
+            data: error.data as { zodError?: ZodError },
             cause: ((error.data as any).cause as string) ?? 'UNKNOWN',
             message: error.message as string,
             code: error.data?.code ?? 'UNKNOWN',

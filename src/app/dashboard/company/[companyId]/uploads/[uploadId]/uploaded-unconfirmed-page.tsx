@@ -2,16 +2,7 @@
 
 import LayoutContainer from "~/components/layout-container";
 import { Title } from "~/components/title";
-import { RouterOutputs } from "~/trpc/shared";
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue,
-} from "~/components/ui/select"
+import type { RouterOutputs } from "~/trpc/shared";
 import React, { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
@@ -33,7 +24,7 @@ export default function UploadedUnconfirmedPage(props: UploadedPageProps) {
 
     const { upload } = props
 
-    const [documentType, setDocumentType] = useState<string | null>('rec')
+    const [documentType] = useState<'rec'>('rec')
 
     const company = useCompanyData()
 
@@ -51,7 +42,7 @@ export default function UploadedUnconfirmedPage(props: UploadedPageProps) {
         fileSizeLabel = <span>{(upload.fileSize / 1000 / 1000).toFixed(1)} MB</span>
     }
 
-    const { mutateAsync: readUploadContents, isLoading } = api.uploads.readUploadContents.useMutation()
+    const { mutateAsync: readUploadContents, isLoading, error: dataError } = api.uploads.readUploadContents.useMutation()
     const { mutateAsync: confirmUpload, isLoading: isLoadingConfirm } = api.uploads.confirmUpload.useMutation()
 
     async function handlerConfirm() {
@@ -79,11 +70,10 @@ export default function UploadedUnconfirmedPage(props: UploadedPageProps) {
 
         try {
             setError(null)
-            const data = await readUploadContents({ id: upload.id, type: (documentType as any), companyId: company.id })
+            const data = await readUploadContents({ id: upload.id, type: documentType, companyId: company.id })
             if (data) setData(data)
         } catch (e) {
-            const error = asTRPCError(e)!
-            toast.error(error.message)
+            console.error(e)
             return
         }
     }
@@ -126,6 +116,12 @@ export default function UploadedUnconfirmedPage(props: UploadedPageProps) {
                 disabled={!documentType || isLoading}
                 onClick={handleContinue}
             >Leer datos</Button>
+
+
+            {dataError && <pre className="border border-dashed p-4 rounded-md overflow-auto mt-5">
+                {dataError.data?.cause?.trim() ?? dataError.message}
+            </pre>}
+
             <div className="flex gap-2">
                 <Button
                     variant="destructive"

@@ -13,6 +13,7 @@ import { ZodError } from "zod";
 
 import { getServerAuthSession } from "~/server/auth";
 import { db } from "~/server/db";
+import { fromZodError } from 'zod-validation-error';
 
 /**
  * 1. CONTEXT
@@ -46,13 +47,20 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
 const t = initTRPC.context<typeof createTRPCContext>().create({
   transformer: superjson,
   errorFormatter({ shape, error }) {
+
+    let zodErrorMessage: string | null = null
+
+    if (error.cause instanceof ZodError) {
+      zodErrorMessage = fromZodError(error.cause).toString().replaceAll('; ', '\n').split(':').slice(1).join(':')
+    }
+
     return {
       ...shape,
       data: {
         ...shape.data,
-        cause: error.cause?.message,
+        cause: zodErrorMessage ?? error.cause?.message,
         zodError:
-          error.cause instanceof ZodError ? error.cause.flatten() : null,
+          error.cause instanceof ZodError ? error.cause : null,
       },
     };
   },

@@ -18,6 +18,7 @@ export default async function Home() {
                     {products.map(product => {
                         return <ListTile
                             key={product.id}
+                            leading={product.number}
                             href={`/dashboard/admin/products/${product.id}`}
                             title={product.name}
                         />

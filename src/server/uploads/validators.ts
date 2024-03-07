@@ -1,8 +1,8 @@
 import dayjs from "dayjs"
 import { z } from "zod"
-import { TableHeaders } from "~/components/table"
+import type { TableHeaders } from "~/components/table"
 
-export type DOCRowsValidatorAndTransformer = (rows: Record<string, any>[]) => Record<string, any>[]
+export type DOCRowsValidatorAndTransformer = (rows: Record<string, unknown>[]) => Record<string, unknown>[]
 
 const stringToValidIntegerZodTransformer = z.string().or(z.number()).transform(v => parseInt(v.toString())).refine(Number.isInteger)
 
@@ -55,7 +55,7 @@ export const recDocumentValidator = z.object({
     "Nro ID Fiscal": stringToValidIntegerZodTransformer.nullable().optional(),
     "Tipo DU": z.literal("DNI").or(z.literal("LC")).or(z.literal("LE")).nullable().optional(),
     "Nro DU": stringToValidIntegerZodTransformer.nullable().optional(),
-    "Producto": z.string().min(1).max(140),
+    "Producto": z.string({invalid_type_error: "El Producto no es válido", required_error: 'Falta columna "Producto"' }).min(1).max(140),
     "Nro CBU": cbuSchema.nullable().optional(),
     "TC Marca": z.string().min(1).max(140).nullable().optional(),
     "Alta Nueva": z.string().transform(value => value.toLowerCase() === 'SI').nullable().optional(),
@@ -83,8 +83,8 @@ export const recDocumentValidator = z.object({
         'fiscal_id_number': value['Nro ID Fiscal'] ?? null,
         'du_type': value['Tipo DU'] ?? null,
         'du_number': value['Nro DU'] ?? null,
-        'product': value['Producto'] ?? null,
-        'product_number': parseInt(value['Producto']) ?? null,
+        'product': value.Producto ?? null,
+        'product_number': parseInt(value.Producto) ?? null,
         'cbu': value['Nro CBU'] ?? null,
         'card_brand': value['TC Marca'] ?? null,
         'is_new': value['Alta Nueva'] ?? null,
@@ -105,7 +105,7 @@ export const recDocumentValidator = z.object({
 })
 
 
-export const recRowsTransformer = (rows: Record<string, any>[]) => {
+export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     return z.array(recDocumentValidator).parse(rows)
 }
 

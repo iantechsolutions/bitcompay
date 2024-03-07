@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import * as schema from "~/server/db/schema";
-import { DBTX, db } from "~/server/db";
+import { type DBTX, db } from "~/server/db";
 import { eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import * as xlsx from 'xlsx'
@@ -110,7 +110,7 @@ async function getCompanyProducts(db: DBTX, companyId: string) {
         }
     })
 
-    const p = r?.products.map(p => p.product) || []
+    const p = r?.products.map(p => p.product) ?? []
 
     return p.map(product => ({
         id: product.id,
@@ -131,7 +131,7 @@ async function readUploadContents(db: DBTX, id: string, type: string | undefined
     }
 
     if (!type) {
-        type = upload.documentType || undefined
+        type = upload.documentType ?? undefined
     }
 
     if (!type) {
@@ -145,11 +145,13 @@ async function readUploadContents(db: DBTX, id: string, type: string | undefined
 
     const firstSheet = workbook.Sheets[workbook.SheetNames[0]!]!
 
-    const rows = xlsx.utils.sheet_to_json(firstSheet) as Record<string, any>[]
+    const rows = xlsx.utils.sheet_to_json(firstSheet) as unknown as Record<string, unknown>[]
 
     const transformedRows = recRowsTransformer(rows.map(trimObject))
 
     const productsMap = Object.fromEntries(products.map(product => [product.number, product]))
+
+    const errors: string[] = []
 
     for (let i = 0; i < transformedRows.length; i++) {
         const row = transformedRows[i]!
@@ -159,18 +161,25 @@ async function readUploadContents(db: DBTX, id: string, type: string | undefined
         const product = productsMap[row.product_number]
 
         if (!product) {
-            throw new TRPCError({ code: "BAD_REQUEST", message: `La fila ${rowNum} tiene un producto inválido "${row.product} (factura: ${row.invoice_number})"` })
+            // throw new TRPCError({ code: "BAD_REQUEST", message:  })
+            errors.push(`La fila ${rowNum} tiene un producto inválido "${row.product} (factura: ${row.invoice_number})"`)
+            continue
         }
 
         for (const column of product.requiredColumns) {
             const value = (row as Record<string, unknown>)[column]
 
             if (!value) {
-                const columnName = columnLabelByKey[column] || column
+                const columnName = columnLabelByKey[column] ?? column
 
-                throw new TRPCError({ code: "BAD_REQUEST", message: `En la fila ${rowNum} la columna "${columnName}" está vacia (factura: ${row.invoice_number})` })
+                // throw new TRPCError({ code: "BAD_REQUEST", message:  })
+                errors.push(`En la fila ${rowNum} la columna "${columnName}" está vacia (factura: ${row.invoice_number})`)
             }
         }
+    }
+
+    if(errors.length > 0) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: errors.join("\n") })
     }
 
     if (type === "rec") {
@@ -184,7 +193,7 @@ async function readUploadContents(db: DBTX, id: string, type: string | undefined
     throw new TRPCError({ code: "NOT_FOUND" })
 }
 
-function trimObject(obj: Record<string, any>) {
+function trimObject(obj: Record<string, unknown>) {
     return Object.fromEntries(Object.entries(obj).map(([key, value]) => {
         if (typeof value === "string") {
             const t = value.trim()
