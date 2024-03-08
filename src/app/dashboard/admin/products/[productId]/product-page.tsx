@@ -1,12 +1,12 @@
 "use client"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "~/components/ui/accordion";
 import { Switch } from "~/components/ui/switch";
-import { MouseEventHandler, useState } from "react";
+import { type MouseEventHandler, useState } from "react";
 import LayoutContainer from "~/components/layout-container";
 import { List, ListTile } from "~/components/list";
 import { Title } from "~/components/title";
 import { Button } from "~/components/ui/button";
-import { RouterOutputs } from "~/trpc/shared";
+import type { RouterOutputs } from "~/trpc/shared";
 import { api } from "~/trpc/react";
 import { CheckIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -22,7 +22,7 @@ export default function ProductPage({ product, channels }: {
     channels: RouterOutputs['channels']['list'],
 }) {
 
-    const [productChannels, setProductChannels] = useState<Set<string>>(new Set(product.channels.map(c => c.channelId)))
+    const [productChannels, setProductChannels] = useState<Set<string>>(new Set(product.channelsReferences.map(c => c.channelId)))
 
     const { mutateAsync: changeProduct, isLoading } = api.products.change.useMutation()
 

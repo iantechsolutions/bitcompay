@@ -88,7 +88,7 @@ async function getCompanyProducts(db: DBTX, companyId: string) {
                 with: {
                     product: {
                         with: {
-                            channels: {
+                            channelsReferences: {
                                 with: {
                                     channel: {
                                         columns: {
@@ -115,7 +115,7 @@ async function getCompanyProducts(db: DBTX, companyId: string) {
     return p.map(product => ({
         id: product.id,
         number: product.number,
-        requiredColumns: new Set(product.channels.map(c => c.channel.requiredColumns).reduce((acc, val) => acc.concat(val), [])),
+        requiredColumns: new Set(product.channelsReferences.map(c => c.channel.requiredColumns).reduce((acc, val) => acc.concat(val), [])),
     }))
 }
 

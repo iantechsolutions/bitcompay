@@ -1,22 +1,17 @@
 "use client"
 
 import { CheckIcon, Loader2 } from "lucide-react"
-import { MouseEventHandler, useState } from "react"
+import { type MouseEventHandler, useState } from "react"
 import { toast } from "sonner"
-import AppSidenav from "~/components/admin-sidenav"
-import AppLayout from "~/components/applayout"
 import LayoutContainer from "~/components/layout-container"
 import { List, ListTile } from "~/components/list"
-import { NavUserData } from "~/components/nav-user-section"
 import { Title } from "~/components/title"
 import { Button } from "~/components/ui/button"
 import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
 import { Switch } from "~/components/ui/switch"
 import { asTRPCError } from "~/lib/errors"
-import { recHeaders } from "~/server/uploads/validators"
 import { api } from "~/trpc/react"
-import { RouterOutputs } from "~/trpc/shared"
 import {
     Accordion,
     AccordionContent,
@@ -36,11 +31,10 @@ import {
     AlertDialogTrigger,
 } from "~/components/ui/alert-dialog"
 import { useRouter } from "next/navigation"
-import { revalidatePath } from "next/cache"
+import type { RouterOutputs } from "~/trpc/shared"
 
-export default function CompanyPage({ company, user, products }: {
+export default function CompanyPage({ company, products }: {
     company: NonNullable<RouterOutputs['companies']['get']>,
-    user: NavUserData
     products: RouterOutputs['products']['list']
 }) {
     const [name, setName] = useState(company.name)

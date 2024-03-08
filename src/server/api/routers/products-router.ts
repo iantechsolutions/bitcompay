@@ -12,7 +12,7 @@ export const productsChannel = createTRPCRouter({
         name: z.string().min(1).max(255),
         description: z.string().min(0).max(1023),
         number: z.number().min(1).max(255),
-    })).mutation(async ({ ctx, input }) => {
+    })).mutation(async ({ input }) => {
         const id = createId()
 
         await db.insert(schema.products).values({
@@ -30,7 +30,7 @@ export const productsChannel = createTRPCRouter({
         const product = await db.query.products.findFirst({
             where: eq(schema.products.id, input.productId),
             with: {
-                channels: {
+                channelsReferences: {
                     with: {
                         channel: true
                     }
@@ -46,10 +46,10 @@ export const productsChannel = createTRPCRouter({
         name: z.string().min(1).max(255).optional(),
         description: z.string().min(0).max(1023).optional(),
         channels: z.array(z.string()).optional(),
-    })).mutation(async ({ ctx, input }) => {
+    })).mutation(async ({ input }) => {
 
         await db.transaction(async tx => {
-            if (input.name || input.description) {
+            if (input.name ?? input.description) {
                 await tx.update(schema.products).set({
                     name: input.name,
                     description: input.description,
@@ -91,7 +91,7 @@ export const productsChannel = createTRPCRouter({
     }),
     delete: protectedProcedure.input(z.object({
         productId: z.string(),
-    })).mutation(async ({ ctx, input }) => {
+    })).mutation(async ({ input }) => {
         await db.transaction(async tx => {
             await tx.delete(schema.productChannels).where(eq(schema.productChannels.productId, input.productId))
             await tx.delete(schema.products).where(eq(schema.products.id, input.productId))

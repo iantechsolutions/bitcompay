@@ -7,6 +7,7 @@ import { api } from "~/trpc/server";
 
 export default async function Home() {
     const channels = await api.channels.list.query()
+    
     return (
         <LayoutContainer>
             <section className="space-y-2">

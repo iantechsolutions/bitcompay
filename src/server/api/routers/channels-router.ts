@@ -11,20 +11,19 @@ export const channelsRouter = createTRPCRouter({
         const channel = await db.query.channels.findFirst({
             where: eq(schema.channels.id, input.channelId),
             with: {
-                products: {
+                productsReferences: {
                     with: {
                         product: true
                     }
-                }
+                },
             }
         })
 
         return channel
     }),
 
-    list: protectedProcedure.query(async ({ input }) => {
+    list: protectedProcedure.query(async ({ }) => {
         const channels = await db.query.channels.findMany({
-            where: eq(schema.channels.enabled, true),
             orderBy: [asc(schema.channels.number)],
         })
 
@@ -35,7 +34,7 @@ export const channelsRouter = createTRPCRouter({
         name: z.string().min(1).max(255),
         description: z.string().min(0).max(1023),
         number: z.number().min(1).max(255),
-    })).mutation(async ({ ctx, input }) => {
+    })).mutation(async ({ input }) => {
         // TODO: verificar permisos
 
         const id = createId()
@@ -56,7 +55,7 @@ export const channelsRouter = createTRPCRouter({
         description: z.string().min(0).max(1023).optional(),
         number: z.number().min(1).max(255).optional(),
         requiredColumns: z.array(z.string()).optional(),
-    })).mutation(async ({ ctx, input }) => {
+    })).mutation(async ({ input }) => {
         await db.update(schema.channels).set({
             name: input.name,
             description: input.description,
@@ -67,7 +66,7 @@ export const channelsRouter = createTRPCRouter({
 
     delete: protectedProcedure.input(z.object({
         channelId: z.string(),
-    })).mutation(async ({ ctx, input }) => {
+    })).mutation(async ({ input }) => {
         await db.delete(schema.channels).where(eq(schema.channels.id, input.channelId))
     }),
 })
