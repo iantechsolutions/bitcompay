@@ -161,7 +161,10 @@ export default function BrandPage({
                     <SelectContent>
                       {unrelatedCompanies?.map((company?) => {
                         return (
-                          <SelectItem key={company?.id} value={company?.name ?? ''}>
+                          <SelectItem
+                            key={company?.id}
+                            value={company?.name ?? ""}
+                          >
                             {company?.name}
                           </SelectItem>
                         );

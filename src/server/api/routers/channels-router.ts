@@ -5,69 +5,90 @@ import { createId } from "~/lib/utils";
 import { asc, eq } from "drizzle-orm";
 
 export const channelsRouter = createTRPCRouter({
-    get: protectedProcedure.input(z.object({
+  get: protectedProcedure
+    .input(
+      z.object({
         channelId: z.string(),
-    })).query(async ({ input }) => {
-        const channel = await db.query.channels.findFirst({
-            where: eq(schema.channels.id, input.channelId),
+      }),
+    )
+    .query(async ({ input }) => {
+      const channel = await db.query.channels.findFirst({
+        where: eq(schema.channels.id, input.channelId),
+        with: {
+          products: {
             with: {
-                products: {
-                    with: {
-                        product: true
-                    }
-                }
-            }
-        })
+              product: true,
+            },
+          },
+        },
+      });
 
-        return channel
+      return channel;
     }),
 
-    list: protectedProcedure.query(async ({ input }) => {
-        const channels = await db.query.channels.findMany({
-            where: eq(schema.channels.enabled, true),
-            orderBy: [asc(schema.channels.number)],
-        })
+  list: protectedProcedure.query(async ({ input }) => {
+    const channels = await db.query.channels.findMany({
+      where: eq(schema.channels.enabled, true),
+      orderBy: [asc(schema.channels.number)],
+    });
 
-        return channels
-    }),
+    return channels;
+  }),
 
-    create: protectedProcedure.input(z.object({
+  create: protectedProcedure
+    .input(
+      z.object({
         name: z.string().min(1).max(255),
         description: z.string().min(0).max(1023),
         number: z.number().min(1).max(255),
-    })).mutation(async ({ ctx, input }) => {
-        // TODO: verificar permisos
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      // TODO: verificar permisos
 
-        const id = createId()
+      const id = createId();
 
-        await db.insert(schema.channels).values({
-            id,
-            name: input.name,
-            description: input.description,
-            number: input.number,
-        })
+      await db.insert(schema.channels).values({
+        id,
+        name: input.name,
+        description: input.description,
+        number: input.number,
+      });
 
-        return { id }
+      return { id };
     }),
 
-    change: protectedProcedure.input(z.object({
+  change: protectedProcedure
+    .input(
+      z.object({
         channelId: z.string(),
         name: z.string().min(1).max(255).optional(),
         description: z.string().min(0).max(1023).optional(),
         number: z.number().min(1).max(255).optional(),
         requiredColumns: z.array(z.string()).optional(),
-    })).mutation(async ({ ctx, input }) => {
-        await db.update(schema.channels).set({
-            name: input.name,
-            description: input.description,
-            number: input.number,
-            requiredColumns: input.requiredColumns,
-        }).where(eq(schema.channels.id, input.channelId))
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await db
+        .update(schema.channels)
+        .set({
+          name: input.name,
+          description: input.description,
+          number: input.number,
+          requiredColumns: input.requiredColumns,
+        })
+        .where(eq(schema.channels.id, input.channelId));
     }),
 
-    delete: protectedProcedure.input(z.object({
+  delete: protectedProcedure
+    .input(
+      z.object({
         channelId: z.string(),
-    })).mutation(async ({ ctx, input }) => {
-        await db.delete(schema.channels).where(eq(schema.channels.id, input.channelId))
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await db
+        .delete(schema.channels)
+        .where(eq(schema.channels.id, input.channelId));
     }),
-})
+});

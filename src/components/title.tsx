@@ -1,3 +1,3 @@
 export function Title(props: { children: React.ReactNode }) {
-    return <h2 className="text-2xl font-semibold mb-3">{props.children}</h2>
+  return <h2 className="mb-3 text-2xl font-semibold">{props.children}</h2>;
 }

@@ -11,8 +11,8 @@ import {
 } from "drizzle-orm/pg-core";
 import { columnId, createdAt, pgTable, updatedAt } from "./schema/util";
 
-export * from './schema/auth';
-export { pgTable } from './schema/util';
+export * from "./schema/auth";
+export { pgTable } from "./schema/util";
 
 export const documentUploads = pgTable(
   "document_upload",
@@ -27,24 +27,34 @@ export const documentUploads = pgTable(
     confirmed: boolean("confirmed").notNull().default(false),
     confirmedAt: timestamp("confirmedAt", { mode: "date" }),
 
-    documentType: varchar("documentType", { length: 255 }).$type<'rec' | null>(),
+    documentType: varchar("documentType", { length: 255 }).$type<
+      "rec" | null
+    >(),
 
-    companyId: varchar("companyId", { length: 255 }).notNull().references(() => companies.id),
+    companyId: varchar("companyId", { length: 255 })
+      .notNull()
+      .references(() => companies.id),
 
     createdAt,
     updatedAt,
   },
   (documentUploads) => ({
     userIdIdx: index("docuemnt_upload_userId_idx").on(documentUploads.userId),
-  })
+  }),
 );
 
-export const documentUploadsRelations = relations(documentUploads, ({ one, many }) => ({
-  company: one(companies, { fields: [documentUploads.companyId], references: [companies.id] }),
-  payments: many(payments),
-}));
+export const documentUploadsRelations = relations(
+  documentUploads,
+  ({ one, many }) => ({
+    company: one(companies, {
+      fields: [documentUploads.companyId],
+      references: [companies.id],
+    }),
+    payments: many(payments),
+  }),
+);
 
-export const responseDocumentUploads=pgTable("response_document_uploads",{
+export const responseDocumentUploads = pgTable("response_document_uploads", {
   id: columnId,
   userId: varchar("userId", { length: 255 }).notNull(),
   fileUrl: varchar("fileUrl", { length: 255 }).notNull(),
@@ -55,76 +65,104 @@ export const responseDocumentUploads=pgTable("response_document_uploads",{
   confirmed: boolean("confirmed").notNull().default(false),
   confirmedAt: timestamp("confirmedAt", { mode: "date" }),
 
-  documentType: varchar("documentType", { length: 255 }).$type<'txt' | null>(),
+  documentType: varchar("documentType", { length: 255 }).$type<"txt" | null>(),
 
   createdAt,
   updatedAt,
-})
-export const responseDocumentUploadsRelations = relations(responseDocumentUploads, ({ many }) => ({
-  payments: many(payments),
-}));
+});
+export const responseDocumentUploadsRelations = relations(
+  responseDocumentUploads,
+  ({ many }) => ({
+    payments: many(payments),
+  }),
+);
 
-export const payment_status= pgTable("payment_status",{
-  statusId:varchar("statusId",{length:2}).primaryKey().default("99"),
-  description:varchar("description",{length:255})
-})
+export const payment_status = pgTable("payment_status", {
+  statusId: varchar("statusId", { length: 2 }).primaryKey().default("99"),
+  description: varchar("description", { length: 255 }),
+});
 
-export const payment_status_relations=relations(payment_status,({many})=>({
-  paymentes:many(payments)
-}))
+export const payment_status_relations = relations(
+  payment_status,
+  ({ many }) => ({
+    paymentes: many(payments),
+  }),
+);
 
 export const payments = pgTable(
   "payment",
   {
     id: columnId,
     userId: varchar("userId", { length: 255 }).notNull(),
-    documentUploadId: varchar("document_upload_id", { length: 255 }).notNull().references(() => documentUploads.id),
-    responseDocumentId:varchar("response_document_upload_id", {length:255}),
+    documentUploadId: varchar("document_upload_id", { length: 255 })
+      .notNull()
+      .references(() => documentUploads.id),
+    // responseDocumentId:varchar("response_document_upload_id", {length:255}),
     // Rec fields
-    g_c: bigint("g_c", { mode: 'number' }),
+    g_c: bigint("g_c", { mode: "number" }),
     name: varchar("name", { length: 255 }),
     fiscal_id_type: varchar("fiscal_id_type", { length: 255 }),
-    fiscal_id_number: bigint("fiscal_id_number", { mode: 'number' }),
+    fiscal_id_number: bigint("fiscal_id_number", { mode: "number" }),
     du_type: varchar("du_type", { length: 255 }),
-    du_number: bigint("du_number", { mode: 'number' }),
+    du_number: bigint("du_number", { mode: "number" }),
     product: varchar("product", { length: 255 }),
-    // 
-    product_number: integer("product_number").notNull().default(0).references(() => products.number),
+    //
+    product_number: integer("product_number")
+      .notNull()
+      .default(0)
+      .references(() => products.number),
     //! Can be used as id
-    invoice_number: bigint("invoice_number", { mode: 'number' }).notNull().unique(),
+    invoice_number: bigint("invoice_number", { mode: "number" })
+      .notNull()
+      .unique(),
     //
     period: timestamp("period", { mode: "date" }),
-    first_due_amount: bigint("first_due_amount", { mode: 'number' }),
+    first_due_amount: bigint("first_due_amount", { mode: "number" }),
     first_due_date: timestamp("first_due_date", { mode: "date" }),
-    second_due_amount: bigint("second_due_amount", { mode: 'number' }),
+    second_due_amount: bigint("second_due_amount", { mode: "number" }),
     second_due_date: timestamp("second_due_date", { mode: "date" }),
     additional_info: varchar("additional_info", { length: 255 }),
     payment_channel: varchar("payment_channel", { length: 255 }),
     payment_date: timestamp("payment_date", { mode: "date" }),
-    collected_amount: bigint("collected_amount", { mode: 'number' }),
-    cbu:varchar("cbu", {length:22}).default(" "),
+    collected_amount: bigint("collected_amount", { mode: "number" }),
+    cbu: varchar("cbu", { length: 22 }).default(" "),
     // end Rec fields
 
-    companyId: varchar("companyId", { length: 255 }).notNull().references(() => companies.id),
-    status_code:varchar("status_code", {length:255}),
+    companyId: varchar("companyId", { length: 255 })
+      .notNull()
+      .references(() => companies.id),
+    status_code: varchar("status_code", { length: 255 }),
 
     createdAt,
     updatedAt,
   },
   (payments) => ({
     userIdIdx: index("payment_userId_idx").on(payments.userId),
-    documentUploadIdIdx: index("documentUploadId_idx").on(payments.documentUploadId),
+    documentUploadIdIdx: index("documentUploadId_idx").on(
+      payments.documentUploadId,
+    ),
     invoiceNumberIdx: index("invoiceNumber_idx").on(payments.invoice_number),
-  })
+  }),
 );
 
 export const paymentsRelations = relations(payments, ({ one, many }) => ({
-  documentUpload: one(documentUploads, { fields: [payments.documentUploadId], references: [documentUploads.id] }),
-  responseDocumentUpload:one(responseDocumentUploads,{fields:[payments.responseDocumentId],references:[responseDocumentUploads.id]}),
-  company: one(companies, { fields: [payments.companyId], references: [companies.id] }),
-  product: one(products, { fields: [payments.product_number], references: [products.number] }),
-  status_code: one(payment_status, {fields:[payments.status_code],
-    references:[payment_status.statusId]})
+  documentUpload: one(documentUploads, {
+    fields: [payments.documentUploadId],
+    references: [documentUploads.id],
+  }),
+  // responseDocumentUpload:one(responseDocumentUploads,{fields:[payments.responseDocumentId],references:[responseDocumentUploads.id]}),
+  company: one(companies, {
+    fields: [payments.companyId],
+    references: [companies.id],
+  }),
+  product: one(products, {
+    fields: [payments.product_number],
+    references: [products.number],
+  }),
+  status_code: one(payment_status, {
+    fields: [payments.status_code],
+    references: [payment_status.statusId],
+  }),
 }));
 
 export const channels = pgTable(
@@ -137,7 +175,10 @@ export const channels = pgTable(
 
     enabled: boolean("enabled").notNull().default(true),
 
-    requiredColumns: json("required_columns").$type<string[]>().notNull().default([]),
+    requiredColumns: json("required_columns")
+      .$type<string[]>()
+      .notNull()
+      .default([]),
 
     createdAt,
     updatedAt,
@@ -145,7 +186,7 @@ export const channels = pgTable(
   (channels) => ({
     nameIdx: index("channel_name_idx").on(channels.name),
     numberIdx: index("number_idx").on(channels.number),
-  })
+  }),
 );
 
 export const channelsRelations = relations(channels, ({ one, many }) => ({
@@ -166,7 +207,7 @@ export const companies = pgTable(
   },
   (companies) => ({
     nameIdx: index("company_name_idx").on(companies.name),
-  })
+  }),
 );
 
 export const companiesRelations = relations(companies, ({ one, many }) => ({
@@ -181,7 +222,9 @@ export const brands = pgTable(
     name: varchar("name", { length: 255 }).notNull(),
     description: varchar("description", { length: 255 }).notNull(),
 
-    redescription:varchar("redescription", {length:10}).notNull().default(''),
+    redescription: varchar("redescription", { length: 10 })
+      .notNull()
+      .default(""),
 
     companyId: varchar("companyId", { length: 255 }),
 
@@ -192,51 +235,65 @@ export const brands = pgTable(
   (brands) => ({
     nameIdx: index("brand_name_idx").on(brands.name),
     companyIdIdx: index("companyId_idx").on(brands.companyId),
-  })
+  }),
 );
 
 export const brandsRelations = relations(brands, ({ many }) => ({
   company: many(companiesToBrands),
 }));
 
-export const companiesToBrands = pgTable("companiesToBrands",{
-  companyId: varchar('company_id').notNull(),
-  brandId:varchar('brand_id').notNull(),
-},
-(t) => ({
-  pk: primaryKey(t.companyId, t.brandId),
-}),
-)
-
-export const companiesToBrandsRelations= relations(companiesToBrands,({one})=>({
-  company:one(companies,{
-    fields:[companiesToBrands.companyId],
-    references:[companies.id]
+export const companiesToBrands = pgTable(
+  "companiesToBrands",
+  {
+    companyId: varchar("company_id").notNull(),
+    brandId: varchar("brand_id").notNull(),
+  },
+  (t) => ({
+    pk: primaryKey(t.companyId, t.brandId),
   }),
-  brand: one(brands, {
-    fields:[companiesToBrands.brandId],
-    references: [brands.id]
-  })
-}))
+);
+
+export const companiesToBrandsRelations = relations(
+  companiesToBrands,
+  ({ one }) => ({
+    company: one(companies, {
+      fields: [companiesToBrands.companyId],
+      references: [companies.id],
+    }),
+    brand: one(brands, {
+      fields: [companiesToBrands.brandId],
+      references: [brands.id],
+    }),
+  }),
+);
 
 export const companyProducts = pgTable(
-  'company_product',
+  "company_product",
   {
     companyId: varchar("company_id", { length: 255 }).notNull(),
     productId: varchar("product_id", { length: 255 }).notNull(),
   },
   (companyProducts) => ({
     pk: primaryKey({
-      name: 'company_product_pk',
+      name: "company_product_pk",
       columns: [companyProducts.companyId, companyProducts.productId],
     }),
-  })
+  }),
 );
 
-export const companyProductsRelations = relations(companyProducts, ({ one}) => ({
-  company: one(companies, { fields: [companyProducts.companyId], references: [companies.id] }),
-  product: one(products, { fields: [companyProducts.productId], references: [products.id] }),
-}));
+export const companyProductsRelations = relations(
+  companyProducts,
+  ({ one }) => ({
+    company: one(companies, {
+      fields: [companyProducts.companyId],
+      references: [companies.id],
+    }),
+    product: one(products, {
+      fields: [companyProducts.productId],
+      references: [products.id],
+    }),
+  }),
+);
 
 export const products = pgTable(
   "product",
@@ -253,7 +310,7 @@ export const products = pgTable(
   },
   (products) => ({
     nameIdx: index("product_name_idx").on(products.name),
-  })
+  }),
 );
 
 export const productsRelations = relations(products, ({ one, many }) => ({
@@ -262,22 +319,31 @@ export const productsRelations = relations(products, ({ one, many }) => ({
 }));
 
 export const productChannels = pgTable(
-  'product_channel',
+  "product_channel",
   {
     productId: varchar("product_id", { length: 255 }).notNull(),
     channelId: varchar("channel_id", { length: 255 }).notNull(),
   },
   (productChannels) => ({
     pk: primaryKey({
-      name: 'product_channel_pk',
+      name: "product_channel_pk",
       columns: [productChannels.productId, productChannels.channelId],
     }),
-  })
+  }),
 );
 
-export const productChannelsRelations = relations(productChannels, ({ one }) => ({
-  product: one(products, { fields: [productChannels.productId], references: [products.id] }),
-  channel: one(channels, { fields: [productChannels.channelId], references: [channels.id] }),
-}));
+export const productChannelsRelations = relations(
+  productChannels,
+  ({ one }) => ({
+    product: one(products, {
+      fields: [productChannels.productId],
+      references: [products.id],
+    }),
+    channel: one(channels, {
+      fields: [productChannels.channelId],
+      references: [channels.id],
+    }),
+  }),
+);
 
 // tablas de vendedores, proveedores y clientes

@@ -13,7 +13,6 @@
 2. Lo sube al banco.
 3. Recibe un archivo de salida, se sube al sistema de Bitcompay.
 
-
 ## Organizar secciones
 
 ### Empleado normal de Bitcompay: "Gestión de documentos"

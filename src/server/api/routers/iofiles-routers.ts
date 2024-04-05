@@ -5,76 +5,91 @@ import { eq } from "drizzle-orm";
 import dayjs from "dayjs";
 
 export const iofilesRouter = createTRPCRouter({
-    generate: protectedProcedure.input(z.object({
-        channelNumber: z.number()
-    })).mutation(async ({ ctx, input }) => {
-        const transactions = await db.query.payments.findMany({
-            where: eq(schema.payments.product_number, input.channelNumber)
-        })
+  generate: protectedProcedure
+    .input(
+      z.object({
+        channelNumber: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const transactions = await db.query.payments.findMany({
+        where: eq(schema.payments.product_number, input.channelNumber),
+      });
 
-        const currentDate=dayjs();
-        const dateYYYYMMDD = currentDate.format('YYYYMMDD')
-        let text =`411002513${dateYYYYMMDD}${dateYYYYMMDD} 00170356730103179945MEPLIFE   ARS0Com.Rur.CuotBITCOM SRL                          20                        \r\n`;
-        let total_records=1;
-        let total_operations=0;
-        let total_collected=0;
-        for (const transaction of transactions) {
-            //actulizar estado de pago
-            await db.update(schema.payments).set({
-                status_code:'92',
-            })
-            .where(eq(schema.payments.id,transaction.id))
+      const currentDate = dayjs();
+      const dateYYYYMMDD = currentDate.format("YYYYMMDD");
+      let text = `411002513${dateYYYYMMDD}${dateYYYYMMDD} 00170356730103179945MEPLIFE   ARS0Com.Rur.CuotBITCOM SRL                          20                        \r\n`;
+      let total_records = 1;
+      let total_operations = 0;
+      let total_collected = 0;
+      for (const transaction of transactions) {
+        //actulizar estado de pago
+        await db
+          .update(schema.payments)
+          .set({
+            status_code: "92",
+          })
+          .where(eq(schema.payments.id, transaction.id));
 
-            //deserializacion de archivo
-            const date = dayjs(transaction.first_due_date)
-            const year = date.year()
-            const monthName = date.format('MMMM').toUpperCase()
-            const dateYYYYMMDD = date.format('YYYYMMDD')
-            let CBU='0000000000000000000000'
-            if (transaction.cbu && transaction.cbu!==" "){
-                CBU= transaction.cbu;
-            }
-            let zeros_collected_amount='0000000000000'
-            const collected_amount_digits= transaction.collected_amount?.toString().length ?? 0 
-            if( collected_amount_digits<13){
-                zeros_collected_amount='0'.repeat(13-collected_amount_digits)
-            }
-
-            text += `421002513  ${transaction.fiscal_id_number}           ${CBU }${zeros_collected_amount}${transaction.collected_amount??''}00                              ${monthName} ${year}         ${dateYYYYMMDD}  000000000${transaction.invoice_number}                        \r\n`
-            text += `422002513  ${transaction.fiscal_id_number}           ${transaction.name}                        \r\n`
-            text+=`423002513  ${transaction.fiscal_id_number}                         \r\n`
-            text+=`424002513  ${transaction.fiscal_id_number}           ARANCEL MEPLIFE SALUD SRL                        \r\n`
-
-            total_records+=4;
-            total_operations+=1;
-            total_collected+= transaction.collected_amount ?? 0;
+        //deserializacion de archivo
+        const date = dayjs(transaction.first_due_date);
+        const year = date.year();
+        const monthName = date.format("MMMM").toUpperCase();
+        const dateYYYYMMDD = date.format("YYYYMMDD");
+        let CBU = "0000000000000000000000";
+        if (transaction.cbu && transaction.cbu !== " ") {
+          CBU = transaction.cbu;
+        }
+        let zeros_collected_amount = "0000000000000";
+        const collected_amount_digits =
+          transaction.collected_amount?.toString().length ?? 0;
+        if (collected_amount_digits < 13) {
+          zeros_collected_amount = "0".repeat(13 - collected_amount_digits);
         }
 
-        total_records+=1;
+        text += `421002513  ${
+          transaction.fiscal_id_number
+        }           ${CBU}${zeros_collected_amount}${
+          transaction.collected_amount ?? ""
+        }00                              ${monthName} ${year}         ${dateYYYYMMDD}  000000000${
+          transaction.invoice_number
+        }                        \r\n`;
+        text += `422002513  ${transaction.fiscal_id_number}           ${transaction.name}                        \r\n`;
+        text += `423002513  ${transaction.fiscal_id_number}                         \r\n`;
+        text += `424002513  ${transaction.fiscal_id_number}           ARANCEL MEPLIFE SALUD SRL                        \r\n`;
 
-        const total_records_string= total_records?.toString();
-        const total_operations_string=total_operations?.toString();
-        const total_collected_string= total_collected?.toString();
-        let zeros_total_income=''
-        let zeros_total_operations=''
-        let zeros_total_collected=''
-        if(total_records_string?.length <8){
-            zeros_total_income='0'.repeat(13-total_records_string.length);
-        }
+        total_records += 4;
+        total_operations += 1;
+        total_collected += transaction.collected_amount ?? 0;
+      }
 
-        if(total_operations_string.length<10){
-             zeros_total_operations= '0'.repeat(10-total_operations_string.length)
-        }
+      total_records += 1;
 
-        if(total_collected_string.length < 13){
-             zeros_total_collected='0'.repeat(13-total_collected_string.length)
-        }
+      const total_records_string = total_records?.toString();
+      const total_operations_string = total_operations?.toString();
+      const total_collected_string = total_collected?.toString();
+      let zeros_total_income = "";
+      let zeros_total_operations = "";
+      let zeros_total_collected = "";
+      if (total_records_string?.length < 8) {
+        zeros_total_income = "0".repeat(13 - total_records_string.length);
+      }
 
-        text+=`491002513${zeros_total_collected}${total_collected}${zeros_total_operations}${total_operations}${zeros_total_income}${total_records}\r\n`
-        
-        return text
-    })
-})
+      if (total_operations_string.length < 10) {
+        zeros_total_operations = "0".repeat(
+          10 - total_operations_string.length,
+        );
+      }
+
+      if (total_collected_string.length < 13) {
+        zeros_total_collected = "0".repeat(13 - total_collected_string.length);
+      }
+
+      text += `491002513${zeros_total_collected}${total_collected}${zeros_total_operations}${total_operations}${zeros_total_income}${total_records}\r\n`;
+
+      return text;
+    }),
+});
 
 // 411002513202303292023033000170356730103179945MEPLIFE   ARS0Com.Rur.CuotBITCOM SRL                          20
 // 421002513  20174324736           2850600140001011366187000000000085000      ABRIL 2023            20230403  000000000133400
@@ -137,4 +152,4 @@ export const iofilesRouter = createTRPCRouter({
 // 422002513  20168864273           YUBRIN JOSE RODOLFO
 // 423002513  20168864273
 // 424002513  20168864273           ARANCEL MEPLIFE SALUD SRL
-// 491002513000000001275000000000150000000062 
+// 491002513000000001275000000000150000000062

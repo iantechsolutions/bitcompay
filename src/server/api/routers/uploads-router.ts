@@ -217,7 +217,7 @@ async function getCompanyProducts(db: DBTX, companyId: string) {
   });
 
   const p = r?.products.map((p) => p.product) ?? [];
-  console.log(p)
+  console.log(p);
   return p.map((product) => ({
     id: product.id,
     number: product.number,
@@ -332,11 +332,13 @@ async function readUploadContents(
 
   const transformedRows = recRowsTransformer(rows.map(trimObject));
 
-  const productsMap = Object.fromEntries(products.map(product => [product.number, product]))
+  const productsMap = Object.fromEntries(
+    products.map((product) => [product.number, product]),
+  );
 
   const errors: string[] = [];
-  
-  console.log(products)
+
+  console.log(products);
   for (let i = 0; i < transformedRows.length; i++) {
     const row = transformedRows[i]!;
 
@@ -344,7 +346,7 @@ async function readUploadContents(
 
     let product;
     if (products.length === 1) {
-      product = products[0]
+      product = products[0];
     } else {
       product = productsMap[row.product_number];
     }

@@ -4,14 +4,14 @@ import { AddProviderDialog } from "./add-provider-dialog";
 import { api } from "~/trpc/server";
 
 export default async function Home() {
-    return (
-        <LayoutContainer>
-            <section className="space-y-2">
-                <div className="flex justify-between">
-                    <Title>Proveedores</Title>
-                    <AddProviderDialog />
-                </div>
-            </section>
-        </LayoutContainer>
-    );
+  return (
+    <LayoutContainer>
+      <section className="space-y-2">
+        <div className="flex justify-between">
+          <Title>Proveedores</Title>
+          <AddProviderDialog />
+        </div>
+      </section>
+    </LayoutContainer>
+  );
 }
