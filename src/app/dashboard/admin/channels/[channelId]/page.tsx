@@ -1,4 +1,7 @@
+import AppSidenav from "~/components/admin-sidenav";
+import AppLayout from "~/components/applayout";
 import { Title } from "~/components/title";
+import { getServerAuthSession } from "~/server/auth";
 import ChannelPage from "./channel-page";
 import { api } from "~/trpc/server";
 

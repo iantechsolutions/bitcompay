@@ -189,8 +189,8 @@ export const channels = pgTable(
   }),
 );
 
-export const channelsRelations = relations(channels, ({ many }) => ({
-  productsReferences: many(productChannels),
+export const channelsRelations = relations(channels, ({ one, many }) => ({
+  products: many(productChannels),
 }));
 
 export const companies = pgTable(
@@ -313,9 +313,9 @@ export const products = pgTable(
   }),
 );
 
-export const productsRelations = relations(products, ({ many }) => ({
-  // companiesReferences: many(companyProducts),
-  channelsReferences: many(productChannels),
+export const productsRelations = relations(products, ({ one, many }) => ({
+  company: many(companyProducts),
+  channels: many(productChannels),
 }));
 
 export const productChannels = pgTable(

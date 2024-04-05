@@ -6,12 +6,12 @@ import {
   AccordionTrigger,
 } from "~/components/ui/accordion";
 import { Switch } from "~/components/ui/switch";
-import { type MouseEventHandler, useState } from "react";
+import { MouseEventHandler, useState } from "react";
 import LayoutContainer from "~/components/layout-container";
 import { List, ListTile } from "~/components/list";
 import { Title } from "~/components/title";
 import { Button } from "~/components/ui/button";
-import type { RouterOutputs } from "~/trpc/shared";
+import { RouterOutputs } from "~/trpc/shared";
 import { api } from "~/trpc/react";
 import { CheckIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
