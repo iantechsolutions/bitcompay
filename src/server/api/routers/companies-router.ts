@@ -16,12 +16,67 @@ export const companiesRouter = createTRPCRouter({
             where: eq(schema.companies.id, input.companyId),
             with: {
                 products: {},
+                brands:{
+                    columns:{
+                      companyId:false,
+                      brandId:false,
+                    },
+
+                    with:{
+                        brand:{
+                            columns:{
+                                name:true,
+                                id:true
+                            }
+                        }
+                    }
+                }
             }
         })
-
         return company
     }),
 
+    getUnrelated:protectedProcedure.input(z.object({
+        brandId:z.string(),
+    })).query(async({input})=> {
+
+        interface Company{
+            id:string,
+            name:string
+        }
+
+        const allCompaniesToBrands = await db.query.companiesToBrands.findMany();
+
+        const unrelatedCompanies = allCompaniesToBrands.filter(company => company.brandId !== input.brandId);
+
+        const unrelatedCompaniesId= unrelatedCompanies.map(ucompany=> ucompany.companyId)
+
+        let companies:(Company|undefined)[]=[]
+
+        unrelatedCompaniesId.forEach( async (companyId) =>{
+            let currentCompany= await db.query.companies.findFirst({
+                where:eq(schema.companies.id,companyId),
+                columns:{
+                    id:true,
+                    name:true,
+                }
+            })
+
+            if(currentCompany!==undefined){
+                companies.push(currentCompany)
+            }
+            
+        }
+        )
+
+        if (companies.length === 0){
+           return await db.query.companies.findMany();
+        }
+        else{
+            return companies
+        }
+    }),
+        
     create: protectedProcedure.input(z.object({
         name: z.string().min(1).max(255),
         description: z.string().min(0).max(1023),
@@ -92,5 +147,6 @@ export const companiesRouter = createTRPCRouter({
             await tx.delete(schema.companies).where(eq(schema.companies.id, input.companyId))
             await tx.delete(schema.companyProducts).where(eq(schema.companyProducts.companyId, input.companyId))
         })
+        await db.delete(schema.companiesToBrands).where(eq(schema.companiesToBrands.companyId, input.companyId))
     }),
 })

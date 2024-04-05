@@ -21,9 +21,9 @@ export function List(props: ListProps) {
 
     const isEmpty = React.Children.count(props.children) === 0
     
-    return <div className={cn("mb-3", props.className)}>
+    return <div className={cn(props.className)}>
         {!isEmpty && <ul>{props.children}</ul>}
-        {isEmpty && <div className="text-center text-gray-500 border border-dashed rounded-lg py-3">No hay elementos</div>}
+        {isEmpty && <div className="text-center text-gray-500 border border-dashed rounded-lg">No hay elementos</div>}
     </div>
 }
 
@@ -48,7 +48,7 @@ export function ListTile(props: ListTileProps) {
         </div>}
     </>
 
-    const containerClassName = "flex gap-5 py-2 hover:bg-stone-100 active:bg-stone-200"
+    const containerClassName = "flex gap-3 py-3 hover:bg-stone-100 active:bg-stone-200"
 
     if (props.href) {
         content = <Link href={props.href} className={cn(containerClassName, props.className)} onClick={props.onClick}>

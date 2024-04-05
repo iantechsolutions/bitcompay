@@ -38,10 +38,16 @@ import {
 import { useRouter } from "next/navigation"
 import { revalidatePath } from "next/cache"
 
-export default function CompanyPage({ company, user, products }: {
+interface Brand {
+    name:string;
+    id:string;
+}
+
+export default function CompanyPage({ company, user, products, brands }: {
     company: NonNullable<RouterOutputs['companies']['get']>,
-    user: NavUserData
-    products: RouterOutputs['products']['list']
+    user: NavUserData,
+    products: RouterOutputs['products']['list'],
+    brands: Brand[]|undefined
 }) {
     const [name, setName] = useState(company.name)
     const [description, setDescription] = useState(company.description)
@@ -133,13 +139,13 @@ export default function CompanyPage({ company, user, products }: {
                     </AccordionTrigger>
                     <AccordionContent>
                         <List>
-                            {/* {products.map(channel => {
+                            {brands?.map(brand => {
                                     return <ListTile
-                                        href={`/dashboard/admin/global/products/${channel.id}`}
-                                        leading={channel.number}
-                                        title={channel.name}
+                                        href={`/dashboard/admin/brands/${brand.id}`}
+                                        title={brand.name}
+                                        key={brand.id}
                                     />
-                                })} */}
+                                })}
                         </List>
                     </AccordionContent>
                 </AccordionItem>

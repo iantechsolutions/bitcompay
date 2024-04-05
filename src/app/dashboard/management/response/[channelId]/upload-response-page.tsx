@@ -5,15 +5,12 @@ import { Title } from "~/components/title";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { UploadDropzone } from "~/components/uploadthing";
-import { useCompanyData } from "../company-provider";
+import { RouterOutputs } from "~/trpc/shared";
 
-export default function UploadPage() {
+export default function UploadResponsePage(props: { channel: NonNullable<RouterOutputs['channels']['get']> }) {
     const [errorMessage, setErrorMessage] = useState<string | null>();
 
     const router = useRouter()
-
-    const company = useCompanyData()
-
 
     return <LayoutContainer>
         <Title>Cargar documento</Title>
@@ -21,15 +18,15 @@ export default function UploadPage() {
         {errorMessage && <p className="text-red-500">{errorMessage}</p>}
 
         <UploadDropzone
-            input={{ companyId: company.id }}
-            endpoint="documentUpload"
+            input={{channel:props.channel.name}}
+            endpoint="responseUpload"
             config={{
                 mode: 'manual',
                 appendOnPaste: true,
             }}
             content={{
                 button: 'Continuar',
-                allowedContent: 'Archivos de excel',
+                allowedContent: 'Archivos de txt',
                 label: 'Arrastra y suelta el archivo aquí',
             }}
             onClientUploadComplete={(res) => {
@@ -37,7 +34,7 @@ export default function UploadPage() {
 
                 if (!file) return
 
-                router.push(`./uploads/${file.serverData.uploadId}`)
+                router.push(`./${props.channel.id}/${file.serverData.uploadId}`)
             }}
             onUploadError={(error: Error) => {
                 setErrorMessage(error.message);

@@ -6,7 +6,7 @@ export default async function PageGenerate() {
     const channels = await api.channels.list.query()
 
     return <>
-        <Title>Generar archivos de salida</Title>
+        <Title>Generar archivos de respuesta</Title>
         <List>
             {channels.map(channel => {
 
@@ -14,7 +14,7 @@ export default async function PageGenerate() {
                     key={channel.id}
                     leading={channel.number}
                     title={channel.name}
-                    href={`./generate/${channel.id}`}
+                    href={`./response/${channel.id}`}
                 />
             })}
         </List>

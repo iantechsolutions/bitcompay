@@ -55,7 +55,7 @@ export const recDocumentValidator = z.object({
     "Nro ID Fiscal": stringToValidIntegerZodTransformer.nullable().optional(),
     "Tipo DU": z.literal("DNI").or(z.literal("LC")).or(z.literal("LE")).nullable().optional(),
     "Nro DU": stringToValidIntegerZodTransformer.nullable().optional(),
-    "Producto": z.string({invalid_type_error: "El Producto no es válido", required_error: 'Falta columna "Producto"' }).min(1).max(140),
+    "Producto": z.string({invalid_type_error: "El Producto no es válido", required_error: 'Falta columna "Producto"' }).min(1).max(140).optional(),
     "Nro CBU": cbuSchema.nullable().optional(),
     "TC Marca": z.string().min(1).max(140).nullable().optional(),
     "Alta Nueva": z.string().transform(value => value.toLowerCase() === 'SI').nullable().optional(),
@@ -73,6 +73,7 @@ export const recDocumentValidator = z.object({
     "Fecha de Pago/Débito": stringAsDate.nullable().optional(),
     "Importe Cobrado": nullableStringToValidIntegerZodTransformer.nullable().optional(),
     "Obs.": z.string().min(0).max(1023).catch('').nullable().optional(),
+    "Estado de Pago": z.string().nullable().optional()
 }).transform((value) => {
 
     // Translated to english
@@ -84,7 +85,7 @@ export const recDocumentValidator = z.object({
         'du_type': value['Tipo DU'] ?? null,
         'du_number': value['Nro DU'] ?? null,
         'product': value.Producto ?? null,
-        'product_number': parseInt(value.Producto) ?? null,
+        'product_number': parseInt(value.Producto ?? '') ?? null,
         'cbu': value['Nro CBU'] ?? null,
         'card_brand': value['TC Marca'] ?? null,
         'is_new': value['Alta Nueva'] ?? null,
@@ -100,6 +101,7 @@ export const recDocumentValidator = z.object({
         'payment_date': value['Fecha de Pago/Débito'] ?? null,
         'collected_amount': value['Importe Cobrado'] ?? null,
         'comment': value['Obs.'] ?? null,
+        'payment_status':value['Estado de Pago'] ?? null
     }
 
 })
@@ -132,6 +134,7 @@ export const recHeaders: TableHeaders = [
     { key: 'payment_date', label: 'Fecha de Pago/Débito', width: 140, },
     { key: 'collected_amount', label: 'Importe Cobrado', width: 140, },
     { key: 'comment', label: 'Obs.', width: 140, },
+    {key:'payment_status', label:'Estado de Pago', width:140}
 ]
 
 export const columnLabelByKey = Object.fromEntries(recHeaders.map(header => [header.key, header.label])) as Record<string, string>

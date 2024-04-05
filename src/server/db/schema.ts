@@ -44,13 +44,42 @@ export const documentUploadsRelations = relations(documentUploads, ({ one, many 
   payments: many(payments),
 }));
 
+export const responseDocumentUploads=pgTable("response_document_uploads",{
+  id: columnId,
+  userId: varchar("userId", { length: 255 }).notNull(),
+  fileUrl: varchar("fileUrl", { length: 255 }).notNull(),
+  fileName: varchar("fileName", { length: 255 }).notNull(),
+  fileSize: integer("fileSize").notNull(),
+  rowsCount: integer("rowsCount"),
+
+  confirmed: boolean("confirmed").notNull().default(false),
+  confirmedAt: timestamp("confirmedAt", { mode: "date" }),
+
+  documentType: varchar("documentType", { length: 255 }).$type<'txt' | null>(),
+
+  createdAt,
+  updatedAt,
+})
+export const responseDocumentUploadsRelations = relations(responseDocumentUploads, ({ many }) => ({
+  payments: many(payments),
+}));
+
+export const payment_status= pgTable("payment_status",{
+  statusId:varchar("statusId",{length:2}).primaryKey().default("99"),
+  description:varchar("description",{length:255})
+})
+
+export const payment_status_relations=relations(payment_status,({many})=>({
+  paymentes:many(payments)
+}))
+
 export const payments = pgTable(
   "payment",
   {
     id: columnId,
     userId: varchar("userId", { length: 255 }).notNull(),
     documentUploadId: varchar("documentUploadId", { length: 255 }).notNull().references(() => documentUploads.id),
-
+    responseDocumentId:varchar("responseDocumentUploadId", {length:255}),
     // Rec fields
     g_c: bigint("g_c", { mode: 'number' }),
     name: varchar("name", { length: 255 }),
@@ -73,9 +102,11 @@ export const payments = pgTable(
     payment_channel: varchar("payment_channel", { length: 255 }),
     payment_date: timestamp("payment_date", { mode: "date" }),
     collected_amount: bigint("collected_amount", { mode: 'number' }),
+    cbu:varchar("cbu", {length:22}).default(" "),
     // end Rec fields
 
     companyId: varchar("companyId", { length: 255 }).notNull().references(() => companies.id),
+    status_code:varchar("status_code", {length:255}),
 
     createdAt,
     updatedAt,
@@ -89,8 +120,11 @@ export const payments = pgTable(
 
 export const paymentsRelations = relations(payments, ({ one, many }) => ({
   documentUpload: one(documentUploads, { fields: [payments.documentUploadId], references: [documentUploads.id] }),
+  responseDocumentUpload:one(responseDocumentUploads,{fields:[payments.responseDocumentId],references:[responseDocumentUploads.id]}),
   company: one(companies, { fields: [payments.companyId], references: [companies.id] }),
   product: one(products, { fields: [payments.product_number], references: [products.number] }),
+  status_code: one(payment_status, {fields:[payments.status_code],
+    references:[payment_status.statusId]})
 }));
 
 export const channels = pgTable(
@@ -136,7 +170,7 @@ export const companies = pgTable(
 );
 
 export const companiesRelations = relations(companies, ({ one, many }) => ({
-  brands: many(brands),
+  brands: many(companiesToBrands),
   products: many(companyProducts),
 }));
 
@@ -147,10 +181,11 @@ export const brands = pgTable(
     name: varchar("name", { length: 255 }).notNull(),
     description: varchar("description", { length: 255 }).notNull(),
 
-    companyId: varchar("companyId", { length: 255 }).notNull(),
+    redescription:varchar("redescription", {length:10}).notNull().default(''),
+
+    companyId: varchar("companyId", { length: 255 }),
 
     enabled: boolean("enabled").notNull().default(true),
-
     createdAt,
     updatedAt,
   },
@@ -160,9 +195,29 @@ export const brands = pgTable(
   })
 );
 
-export const brandsRelations = relations(brands, ({ one, many }) => ({
-  company: one(companies, { fields: [brands.companyId], references: [companies.id] }),
+export const brandsRelations = relations(brands, ({ many }) => ({
+  company: many(companiesToBrands),
 }));
+
+export const companiesToBrands = pgTable("companiesToBrands",{
+  companyId: varchar('company_id').notNull(),
+  brandId:varchar('brand_id').notNull(),
+},
+(t) => ({
+  pk: primaryKey(t.companyId, t.brandId),
+}),
+)
+
+export const companiesToBrandsRelations= relations(companiesToBrands,({one})=>({
+  company:one(companies,{
+    fields:[companiesToBrands.companyId],
+    references:[companies.id]
+  }),
+  brand: one(brands, {
+    fields:[companiesToBrands.brandId],
+    references: [brands.id]
+  })
+}))
 
 export const companyProducts = pgTable(
   'company_product',
@@ -178,7 +233,7 @@ export const companyProducts = pgTable(
   })
 );
 
-export const companyProductsRelations = relations(companyProducts, ({ one, many }) => ({
+export const companyProductsRelations = relations(companyProducts, ({ one}) => ({
   company: one(companies, { fields: [companyProducts.companyId], references: [companies.id] }),
   product: one(products, { fields: [companyProducts.productId], references: [products.id] }),
 }));
@@ -224,3 +279,5 @@ export const productChannelsRelations = relations(productChannels, ({ one }) => 
   product: one(products, { fields: [productChannels.productId], references: [products.id] }),
   channel: one(channels, { fields: [productChannels.channelId], references: [channels.id] }),
 }));
+
+// tablas de vendedores, proveedores y clientes
