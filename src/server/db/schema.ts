@@ -78,8 +78,8 @@ export const payments = pgTable(
   {
     id: columnId,
     userId: varchar("userId", { length: 255 }).notNull(),
-    documentUploadId: varchar("documentUploadId", { length: 255 }).notNull().references(() => documentUploads.id),
-    responseDocumentId:varchar("responseDocumentUploadId", {length:255}),
+    documentUploadId: varchar("document_upload_id", { length: 255 }).notNull().references(() => documentUploads.id),
+    responseDocumentId:varchar("response_document_upload_id", {length:255}),
     // Rec fields
     g_c: bigint("g_c", { mode: 'number' }),
     name: varchar("name", { length: 255 }),
