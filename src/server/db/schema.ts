@@ -97,7 +97,7 @@ export const payments = pgTable(
     documentUploadId: varchar("document_upload_id", { length: 255 })
       .notNull()
       .references(() => documentUploads.id),
-    // responseDocumentId:varchar("response_document_upload_id", {length:255}),
+    responseDocumentId: varchar("response_document_upload_id", { length: 255 }),
     // Rec fields
     g_c: bigint("g_c", { mode: "number" }),
     name: varchar("name", { length: 255 }),
@@ -150,7 +150,7 @@ export const paymentsRelations = relations(payments, ({ one, many }) => ({
     fields: [payments.documentUploadId],
     references: [documentUploads.id],
   }),
-  // responseDocumentUpload:one(responseDocumentUploads,{fields:[payments.responseDocumentId],references:[responseDocumentUploads.id]}),
+  responseDocumentUpload: one(responseDocumentUploads, { fields: [payments.responseDocumentId], references: [responseDocumentUploads.id] }),
   company: one(companies, {
     fields: [payments.companyId],
     references: [companies.id],
