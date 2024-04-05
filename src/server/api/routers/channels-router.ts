@@ -22,7 +22,6 @@ export const channelsRouter = createTRPCRouter({
           },
         },
       });
-
       return channel;
     }),
 
@@ -31,7 +30,6 @@ export const channelsRouter = createTRPCRouter({
       where: eq(schema.channels.enabled, true),
       orderBy: [asc(schema.channels.number)],
     });
-
     return channels;
   }),
 

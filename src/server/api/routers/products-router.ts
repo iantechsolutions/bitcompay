@@ -18,7 +18,6 @@ export const productsChannel = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const id = createId();
-
       await db.insert(schema.products).values({
         id,
         name: input.name,
