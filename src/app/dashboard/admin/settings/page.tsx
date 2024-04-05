@@ -1,4 +1,3 @@
-
 import AppSidenav from "~/components/admin-sidenav";
 import AppLayout from "~/components/applayout";
 import { Button } from "~/components/ui/button";
@@ -13,12 +12,10 @@ export default async function Home() {
       user={session?.user}
       sidenav={<AppSidenav />}
     >
-      <div className="flex justify-center mb-10">
+      <div className="mb-10 flex justify-center">
         <Button>Opciones</Button>
       </div>
-      <div>
-  
-      </div>
+      <div></div>
     </AppLayout>
   );
 }

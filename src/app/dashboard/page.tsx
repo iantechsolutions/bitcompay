@@ -1,5 +1,8 @@
-
-import { Building2Icon, LayoutDashboardIcon, Settings2Icon } from "lucide-react";
+import {
+  Building2Icon,
+  LayoutDashboardIcon,
+  Settings2Icon,
+} from "lucide-react";
 import Link from "next/link";
 import AppLayout from "~/components/applayout";
 import { List, ListTile } from "~/components/list";
@@ -18,10 +21,19 @@ export default async function Home() {
     <AppLayout
       title={<h1>BITCOMPAY</h1>}
       user={session?.user}
-      sidenav={<Sidenav>
-        <SidenavItem icon={<Settings2Icon />} href="/dashboard/admin">Administración</SidenavItem>
-        <SidenavItem icon={<LayoutDashboardIcon />} href="/dashboard/management/transactions">Gestión bitcompay</SidenavItem>
-      </Sidenav>}
+      sidenav={
+        <Sidenav>
+          <SidenavItem icon={<Settings2Icon />} href="/dashboard/admin">
+            Administración
+          </SidenavItem>
+          <SidenavItem
+            icon={<LayoutDashboardIcon />}
+            href="/dashboard/management/transactions"
+          >
+            Gestión bitcompay
+          </SidenavItem>
+        </Sidenav>
+      }
     >
       <div className="flex justify-between">
         <Title>Ingresar como empresa</Title>
@@ -29,7 +41,14 @@ export default async function Home() {
       </div>
       <List>
         {companies.map((company) => {
-          return <ListTile key={company.id} href={`/dashboard/company/${company.id}/uploads`} title={company.name} leading={<Building2Icon />} />
+          return (
+            <ListTile
+              key={company.id}
+              href={`/dashboard/company/${company.id}/uploads`}
+              title={company.name}
+              leading={<Building2Icon />}
+            />
+          );
         })}
       </List>
     </AppLayout>

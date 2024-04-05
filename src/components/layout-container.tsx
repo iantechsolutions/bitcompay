@@ -1,5 +1,3 @@
-export default function LayoutContainer(props: {children: React.ReactNode}) {
-    return <div className="space-y-5 max-w-[800px] w-full">
-        {props.children}
-    </div>
+export default function LayoutContainer(props: { children: React.ReactNode }) {
+  return <div className="w-full max-w-[800px] space-y-5">{props.children}</div>;
 }

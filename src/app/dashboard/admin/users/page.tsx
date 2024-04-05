@@ -1,4 +1,3 @@
-
 import { List, ListTile } from "~/components/list";
 import { Title } from "~/components/title";
 import { UserAvatarCircle } from "~/components/user-avatar-circle";
@@ -15,18 +14,20 @@ export default async function Home() {
       id: true,
       image: true,
     },
-  })
+  });
 
   return (
     <>
       <Title>Usuarios</Title>
       <List>
-        {users.map(user => <ListTile
-          key={user.id}
-          leading={<UserAvatarCircle user={user} />}
-          title={<p>{user.name}</p>}
-          subtitle={<p>{user.email}</p>}
-        />)}
+        {users.map((user) => (
+          <ListTile
+            key={user.id}
+            leading={<UserAvatarCircle user={user} />}
+            title={<p>{user.name}</p>}
+            subtitle={<p>{user.email}</p>}
+          />
+        ))}
       </List>
     </>
   );

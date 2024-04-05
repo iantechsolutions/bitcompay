@@ -2,12 +2,18 @@ import { Title } from "~/components/title";
 import ChannelPage from "./channel-page";
 import { api } from "~/trpc/server";
 
-export default async function Channel(props: { params: { channelId: string } }) {
-    const channel = await api.channels.get.query({ channelId: props.params.channelId })
+export default async function Channel(props: {
+  params: { channelId: string };
+}) {
+  const session = await getServerAuthSession();
 
-    if (!channel) {
-        return <Title>No se encontró el canal</Title>
-    }
+  const channel = await api.channels.get.query({
+    channelId: props.params.channelId,
+  });
 
-    return <ChannelPage channel={channel} />
+  if (!channel || !session?.user) {
+    return <Title>No se encontró el canal</Title>;
+  }
+
+  return <ChannelPage channel={channel} user={session.user} />;
 }
