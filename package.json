@@ -9,6 +9,7 @@
     "db:studio": "dotenv drizzle-kit studio",
     "dev": "next dev",
     "lint": "next lint",
+    "format": "prettier . --write",
     "start": "next start"
   },
   "dependencies": {
