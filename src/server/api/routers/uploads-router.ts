@@ -347,6 +347,7 @@ async function readUploadContents(
     let product;
     if (products.length === 1) {
       product = products[0];
+      row.product_number = product?.number ?? 0;
     } else {
       product = productsMap[row.product_number];
     }
