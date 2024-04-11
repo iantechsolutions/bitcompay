@@ -2,7 +2,6 @@
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -11,7 +10,6 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 
-import dayjs from "dayjs";
 import { DownloadIcon, Loader2Icon } from "lucide-react";
 import { Title } from "~/components/title";
 import { Button } from "~/components/ui/button";
@@ -37,13 +35,11 @@ export default function GenerateChannelOutputPage(props: {
     const { company } = props;
     await generateInputFile({
       channelId: props.channel.id,
-      companyName: company.name,
+      companyId: company.id,
       fileName: fileName,
       concept: company.concept,
     });
   }
-
-  const dateYYYYMMDD = dayjs().format("YYYY-MM-DD");
 
   const dataDataURL = data
     ? `data:text/plain;charset=utf-8,${encodeURIComponent(data)}`
@@ -93,7 +89,7 @@ export default function GenerateChannelOutputPage(props: {
         <div className="mt-5">
           <Title>Resultado</Title>
           {dataDataURL && (
-            <a href={dataDataURL} download={`entrada-${dateYYYYMMDD}.txt`}>
+            <a href={dataDataURL} download={`${fileName}.txt`}>
               <Button size="lg">
                 <DownloadIcon className="mr-2" />
                 Descargar archivo

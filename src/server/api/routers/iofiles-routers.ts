@@ -1,41 +1,52 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db, schema } from "~/server/db";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import dayjs from "dayjs";
-import { TRPCError } from "@trpc/server";
-import { error } from "console";
 
 export const iofilesRouter = createTRPCRouter({
   generate: protectedProcedure
     .input(
       z.object({
         channelId: z.string(),
-        companyName: z.string(),
+        companyId: z.string(),
         fileName: z.string(),
         concept: z.string(),
       }),
     )
-    .mutation(async ({input}) => {
+    .mutation(async ({ input }) => {
+      const company = await db.query.companies.findFirst({
+        where: eq(schema.companies.id, input.companyId),
+      });
+
       const productsChannels = await db.query.productChannels.findMany({
         where: eq(schema.productChannels.channelId, input.channelId),
       });
 
       const transactions = [];
       for (const relation of productsChannels) {
-
-        const product= await db.query.products.findFirst({
-          
-          where:eq (schema.products.id, relation.productId)
+        const product = await db.query.products.findFirst({
+          where: eq(schema.products.id, relation.productId),
         });
 
-        if(!product){
-          throw new Error("product or channel does not exist in company")
+        if (!product) {
+          throw new Error("product or channel does not exist in company");
         }
 
-        const t = await db.query.payments.findMany({
-          where: eq(schema.payments.product_number, product.number),
-        });
+        // const t = await db.query.payments.findMany({
+        //   where: eq(schema.payments.product_number, product.number),
+        // });
+
+        const t = await db
+          .select()
+          .from(schema.payments)
+          .where(
+            and(
+              eq(schema.payments.product_number, product.number),
+              eq(schema.payments.companyId, input.companyId),
+            ),
+          );
+
         for (const item of t) {
           transactions.push(item);
         }
@@ -43,7 +54,7 @@ export const iofilesRouter = createTRPCRouter({
 
       const currentDate = dayjs();
       const dateYYYYMMDD = currentDate.format("YYYYMMDD");
-      let text = `411002513${dateYYYYMMDD}${dateYYYYMMDD} 00170356730103179945${input.companyName}   ${input.fileName}BITCOM SRL                          20                        \r\n`;
+      let text = `411002513${dateYYYYMMDD}${dateYYYYMMDD} 00170356730103179945${company?.name}   ${input.fileName}BITCOM SRL                          20                        \r\n`;
       let total_records = 1;
       let total_operations = 0;
       let total_collected = 0;
