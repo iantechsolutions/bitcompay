@@ -6,7 +6,7 @@ import type { RouterOutputs } from "~/trpc/shared";
 import React, { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
-import { FileSpreadsheetIcon } from "lucide-react";
+import { FileSpreadsheetIcon, Rows } from "lucide-react";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 import { api } from "~/trpc/react";
@@ -79,11 +79,13 @@ export default function UploadedUnconfirmedPage(props: UploadedPageProps) {
 
     try {
       setError(null);
-      const data = await readUploadContents({
-        id: upload.id,
-        type: documentType,
-        companyId: company.id,
-      });
+      const data: RouterOutputs["uploads"]["readUploadContents"] | null =
+        await readUploadContents({
+          id: upload.id,
+          type: documentType,
+          companyId: company.id,
+        });
+
       if (data) setData(data);
     } catch (e) {
       console.error(e);

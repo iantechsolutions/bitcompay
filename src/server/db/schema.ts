@@ -150,7 +150,10 @@ export const paymentsRelations = relations(payments, ({ one, many }) => ({
     fields: [payments.documentUploadId],
     references: [documentUploads.id],
   }),
-  responseDocumentUpload: one(responseDocumentUploads, { fields: [payments.responseDocumentId], references: [responseDocumentUploads.id] }),
+  responseDocumentUpload: one(responseDocumentUploads, {
+    fields: [payments.responseDocumentId],
+    references: [responseDocumentUploads.id],
+  }),
   company: one(companies, {
     fields: [payments.companyId],
     references: [companies.id],
@@ -199,7 +202,7 @@ export const companies = pgTable(
     id: columnId,
     name: varchar("name", { length: 255 }).notNull(),
     description: varchar("description", { length: 255 }).notNull(),
-
+    concept: varchar("concept", { length: 255 }).notNull().default("concept"),
     enabled: boolean("enabled").notNull().default(true),
 
     createdAt,
@@ -219,9 +222,9 @@ export const brands = pgTable(
   "brand",
   {
     id: columnId,
+    number: integer("number").notNull().unique(),
     name: varchar("name", { length: 255 }).notNull(),
     description: varchar("description", { length: 255 }).notNull(),
-
     redescription: varchar("redescription", { length: 10 })
       .notNull()
       .default(""),

@@ -5,7 +5,7 @@ import { createId } from "~/lib/utils";
 import { and, eq, inArray } from "drizzle-orm";
 
 export const companiesRouter = createTRPCRouter({
-  list: protectedProcedure.query(async ({ ctx }) => {
+  list: protectedProcedure.query(async ({}) => {
     return await db.query.companies.findMany();
   }),
 
@@ -62,10 +62,10 @@ export const companiesRouter = createTRPCRouter({
         (ucompany) => ucompany.companyId,
       );
 
-      let companies: (Company | undefined)[] = [];
+      const companies: (Company | undefined)[] = [];
 
-      unrelatedCompaniesId.forEach(async (companyId) => {
-        let currentCompany = await db.query.companies.findFirst({
+      for (const companyId of unrelatedCompaniesId) {
+        const currentCompany = await db.query.companies.findFirst({
           where: eq(schema.companies.id, companyId),
           columns: {
             id: true,
@@ -76,7 +76,7 @@ export const companiesRouter = createTRPCRouter({
         if (currentCompany !== undefined) {
           companies.push(currentCompany);
         }
-      });
+      }
 
       if (companies.length === 0) {
         return await db.query.companies.findMany();
@@ -90,9 +90,10 @@ export const companiesRouter = createTRPCRouter({
       z.object({
         name: z.string().min(1).max(255),
         description: z.string().min(0).max(1023),
+        concept: z.string().min(0).max(1023),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       // TODO: verificar permisos
 
       const id = createId();
@@ -101,6 +102,7 @@ export const companiesRouter = createTRPCRouter({
         id,
         name: input.name,
         description: input.description,
+        concept: input.concept,
       });
 
       return { id };
@@ -115,7 +117,7 @@ export const companiesRouter = createTRPCRouter({
         products: z.array(z.string()).optional(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       await db.transaction(async (db) => {
         await db
           .update(schema.companies)
@@ -168,13 +170,31 @@ export const companiesRouter = createTRPCRouter({
       });
     }),
 
+  getByProduct: protectedProcedure
+    .input(z.object({ productId: z.string() }))
+    .query(async ({ input }) => {
+      const relations = await db.query.companyProducts.findMany({
+        where: eq(schema.companyProducts.productId, input.productId),
+      });
+      const companies = [];
+
+      for (const relation of relations) {
+        const company = await db.query.companies.findFirst({
+          where: eq(schema.companies.id, relation.companyId),
+        });
+        companies.push(company);
+      }
+
+      return companies;
+    }),
+
   delete: protectedProcedure
     .input(
       z.object({
         companyId: z.string(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       await db.transaction(async (tx) => {
         await tx
           .delete(schema.companies)

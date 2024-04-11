@@ -104,7 +104,7 @@ export const recDocumentValidator = z
       .optional(),
     "Nro. Tarjeta": z.string().length(16).nullable().optional(),
     // NOT OPTIONAL!!!
-    "Nro Factura": stringToValidIntegerZodTransformer,
+    "Nro Factura": stringToValidIntegerZodTransformer.optional(),
     //
     Período: stringAsPeriod.nullable().optional(),
     "Importe 1er Vto.": stringToValidIntegerZodTransformer

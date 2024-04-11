@@ -8,17 +8,30 @@ export const iofilesRouter = createTRPCRouter({
   generate: protectedProcedure
     .input(
       z.object({
-        channelNumber: z.number(),
+        channelId: z.string(),
+        companyName: z.string(),
+        fileName: z.string(),
+        concept: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const transactions = await db.query.payments.findMany({
-        where: eq(schema.payments.product_number, input.channelNumber),
+      const products = await db.query.productChannels.findMany({
+        where: eq(schema.productChannels.channelId, input.channelId),
       });
+
+      const transactions = [];
+      for (const product of products) {
+        const t = await db.query.payments.findMany({
+          where: eq(schema.payments.product, product.productId),
+        });
+        for (const item of t) {
+          transactions.push(item);
+        }
+      }
 
       const currentDate = dayjs();
       const dateYYYYMMDD = currentDate.format("YYYYMMDD");
-      let text = `411002513${dateYYYYMMDD}${dateYYYYMMDD} 00170356730103179945MEPLIFE   ARS0Com.Rur.CuotBITCOM SRL                          20                        \r\n`;
+      let text = `411002513${dateYYYYMMDD}${dateYYYYMMDD} 00170356730103179945${input.companyName}   ${input.fileName}BITCOM SRL                          20                        \r\n`;
       let total_records = 1;
       let total_operations = 0;
       let total_collected = 0;
@@ -56,7 +69,7 @@ export const iofilesRouter = createTRPCRouter({
         }                        \r\n`;
         text += `422002513  ${transaction.fiscal_id_number}           ${transaction.name}                        \r\n`;
         text += `423002513  ${transaction.fiscal_id_number}                         \r\n`;
-        text += `424002513  ${transaction.fiscal_id_number}           ARANCEL MEPLIFE SALUD SRL                        \r\n`;
+        text += `424002513  ${transaction.fiscal_id_number}           ${input.concept}                        \r\n`;
 
         total_records += 4;
         total_operations += 1;

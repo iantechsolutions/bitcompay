@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { number, z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import * as schema from "~/server/db/schema";
 import { type DBTX, db } from "~/server/db";
@@ -11,6 +11,7 @@ import {
   recRowsTransformer,
 } from "~/server/uploads/validators";
 import { createId } from "~/lib/utils";
+import { api } from "~/trpc/server";
 
 export const uploadsRouter = createTRPCRouter({
   upload: protectedProcedure
@@ -53,11 +54,13 @@ export const uploadsRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       return await db.transaction(async (db) => {
         const channels = await getCompanyProducts(db, input.companyId);
+        const brands= await getCompanyBrands(db, input.companyId)
         const contents = await readUploadContents(
           db,
           input.id,
           input.type,
           channels,
+          brands,
         );
 
         await db
@@ -152,12 +155,13 @@ export const uploadsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       await db.transaction(async (tx) => {
         const channels = await getCompanyProducts(tx, input.companyId);
-
+        const brands= await getCompanyBrands(tx,input.companyId)
         const { rows, upload } = await readUploadContents(
           tx,
           input.id,
           undefined,
           channels,
+          brands,
         );
 
         if (upload.confirmed) {
@@ -172,6 +176,7 @@ export const uploadsRouter = createTRPCRouter({
           })
           .where(eq(schema.documentUploads.id, input.id));
 
+        // arreglar esto, row tiene campos que no van a payments parece o se llaman distinto
         await tx.insert(schema.payments).values(
           rows.map((row) => ({
             id: createId(),
@@ -217,8 +222,8 @@ async function getCompanyProducts(db: DBTX, companyId: string) {
   });
 
   const p = r?.products.map((p) => p.product) ?? [];
-  console.log(p);
-  return p.map((product) => ({
+
+  const values = p.map((product) => ({
     id: product.id,
     number: product.number,
     requiredColumns: new Set(
@@ -227,7 +232,26 @@ async function getCompanyProducts(db: DBTX, companyId: string) {
         .reduce((acc, val) => acc.concat(val), []),
     ),
   }));
+  console.log(values);
+  return values;
 }
+
+async function getCompanyBrands(db: DBTX, companyId: string) {
+  const relations = await db.query.companiesToBrands.findMany({
+    where: eq(schema.companiesToBrands.companyId, companyId)
+  });
+
+  const brands = [];
+  for (const relation of relations) {
+    const brandId = relation.brandId;
+    const brand = await db.query.brands.findMany({
+      where: eq(schema.brands.id, brandId)
+    });
+    brands.push(brand);
+  }
+  return brands;
+}
+
 
 async function readResponseUploadContents(
   db: DBTX,
@@ -266,7 +290,7 @@ async function readResponseUploadContents(
       const status_code = largeNumber?.slice(-2);
       console.log(status_code);
       // extract invoice_number
-      const regex = /\d{15}[PC][A-Za-z]*/;
+      const regex = /\d{15}[PC]/;
       const stringInvoiceNumber = recordValues.filter((recordValue) =>
         regex.test(recordValue),
       );
@@ -295,12 +319,13 @@ async function readResponseUploadContents(
 }
 
 type ProductsOfCompany = Awaited<ReturnType<typeof getCompanyProducts>>;
-
+type BrandsOfCompany = Awaited<ReturnType<typeof getCompanyBrands>>;
 async function readUploadContents(
   db: DBTX,
   id: string,
   type: string | undefined,
   products: ProductsOfCompany,
+  brands:BrandsOfCompany,
 ) {
   const upload = await db.query.documentUploads.findFirst({
     where: eq(schema.documentUploads.id, id),
@@ -330,7 +355,14 @@ async function readUploadContents(
     unknown
   >[];
 
-  const transformedRows = recRowsTransformer(rows.map(trimObject));
+  const trimmedRows = rows.map(trimObject);
+
+  trimmedRows.forEach((row) => {
+    if ("Período" in row) {
+      row.Período = row.Período?.toString();
+    }
+  });
+  const transformedRows = recRowsTransformer(trimmedRows);
 
   const productsMap = Object.fromEntries(
     products.map((product) => [product.number, product]),
@@ -338,7 +370,6 @@ async function readUploadContents(
 
   const errors: string[] = [];
 
-  console.log(products);
   for (let i = 0; i < transformedRows.length; i++) {
     const row = transformedRows[i]!;
 
@@ -348,16 +379,45 @@ async function readUploadContents(
     if (products.length === 1) {
       product = products[0];
       row.product_number = product?.number ?? 0;
+      row.product = product?.id ?? null;
     } else {
       product = productsMap[row.product_number];
+      console.log(typeof product);
+      row.product = product?.id ?? null;
     }
 
+    console.log(brands)
+
+    if (brands.length===1){
+      if(!brands[0]){
+        throw new Error('brands does not exist')}
+
+      const brand=brands[0][0] ?? null
+      
+      if(!brand){
+        throw new Error('brand is undefined')
+      }
+      row.g_c = brand?.number 
+
+    }
+    
     if (!product) {
       // throw new TRPCError({ code: "BAD_REQUEST", message:  })
       errors.push(
         `La fila ${rowNum} tiene un producto inválido "${row.product} (factura: ${row.invoice_number})"`,
       );
       continue;
+    }
+
+    if (!row.invoice_number) {
+      let invoice_number = Math.floor(10000 + Math.random() * 90000);
+      const transactionFound = await db.query.payments.findFirst({
+        where: eq(schema.payments.invoice_number, invoice_number),
+      });
+      while (transactionFound) {
+        invoice_number = Math.floor(10000 + Math.random() * 90000);
+      }
+      row.invoice_number = invoice_number;
     }
 
     for (const column of product.requiredColumns) {

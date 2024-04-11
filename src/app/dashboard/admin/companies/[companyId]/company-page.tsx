@@ -56,6 +56,7 @@ export default function CompanyPage({
 }) {
   const [name, setName] = useState(company.name);
   const [description, setDescription] = useState(company.description);
+  const [concepto, setConcepto]=useState(company.concept);
 
   const [companyProducts, setCompanyProducts] = useState<Set<string>>(
     new Set(company.products.map((c) => c.productId)),
@@ -151,6 +152,14 @@ export default function CompanyPage({
                       id="description"
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <Label htmlFor="description">Concepto</Label>
+                    <Input
+                      id="concepto"
+                      value={concepto}
+                      onChange={(e) => setConcepto(e.target.value)}
                     />
                   </div>
                 </div>

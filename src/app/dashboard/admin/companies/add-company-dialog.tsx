@@ -25,6 +25,7 @@ export function AddCompanyDialog() {
 
   const [description, setDescription] = useState("");
   const [name, setName] = useState("");
+  const [concept, setConcept] = useState("");
 
   const [open, setOpen] = useState(false);
 
@@ -35,6 +36,7 @@ export function AddCompanyDialog() {
       await createCompany({
         description,
         name,
+        concept
       });
 
       toast.success("Empresa creado correctamente");
@@ -78,11 +80,17 @@ export function AddCompanyDialog() {
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
+          <div>
+            <Label htmlFor="concept">Descripción</Label>
+            <Input
+              id="concept"
+              placeholder="..."
+              value={concept}
+              onChange={(e) => setConcept(e.target.value)}
+            />
+          </div>
           <DialogFooter>
             <Button disabled={isLoading} onClick={handleCreate}>
-              {isLoading && (
-                <Loader2Icon className="mr-2 animate-spin" size={20} />
-              )}
               Crear empresa
             </Button>
           </DialogFooter>
