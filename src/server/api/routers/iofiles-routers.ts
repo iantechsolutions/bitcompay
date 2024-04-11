@@ -3,6 +3,8 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db, schema } from "~/server/db";
 import { eq } from "drizzle-orm";
 import dayjs from "dayjs";
+import { TRPCError } from "@trpc/server";
+import { error } from "console";
 
 export const iofilesRouter = createTRPCRouter({
   generate: protectedProcedure
@@ -14,15 +16,25 @@ export const iofilesRouter = createTRPCRouter({
         concept: z.string(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
-      const products = await db.query.productChannels.findMany({
+    .mutation(async ({input}) => {
+      const productsChannels = await db.query.productChannels.findMany({
         where: eq(schema.productChannels.channelId, input.channelId),
       });
 
       const transactions = [];
-      for (const product of products) {
+      for (const relation of productsChannels) {
+
+        const product= await db.query.products.findFirst({
+          
+          where:eq (schema.products.id, relation.productId)
+        });
+
+        if(!product){
+          throw new Error("product or channel does not exist in company")
+        }
+
         const t = await db.query.payments.findMany({
-          where: eq(schema.payments.product, product.productId),
+          where: eq(schema.payments.product_number, product.number),
         });
         for (const item of t) {
           transactions.push(item);
