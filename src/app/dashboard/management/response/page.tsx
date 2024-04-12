@@ -7,7 +7,7 @@ export default async function PageGenerate() {
 
   return (
     <>
-      <Title>Generar archivos de respuesta</Title>
+      <Title>Leer archivos de respuesta</Title>
       <List>
         {channels.map((channel) => {
           return (
