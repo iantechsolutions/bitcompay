@@ -180,17 +180,24 @@ export const uploadsRouter = createTRPCRouter({
             .where(eq(schema.documentUploads.id, input.id));
 
           // arreglar esto, row tiene campos que no van a payments parece o se llaman distinto
+          const rows2 = [
+            {
+              userId: "123",
+              companyId: "456",
+              documentUploadId: "789",
+              invoice_number: 123,
+            } /* Other rows */,
+          ];
 
-          // await tx.insert(schema.payments).values(
-          //   rows.map((row) => ({
-          //     id: createId(),
-          //     userId: ctx.session.user.id,
-          //     documentUploadId: upload.id,
-          //     companyId: input.companyId,
-          //     status_code: "91",
-          //     ...row,
-          //   })),
-          // );
+          await tx.insert(schema.payments).values(
+            rows.map((row) => ({
+              userId: ctx.session.user.id,
+              documentUploadId: upload.id,
+              companyId: input.companyId,
+              status_code: "91",
+              invoice_number: row.invoice_number!,
+            })),
+          );
         }
       });
     }),
