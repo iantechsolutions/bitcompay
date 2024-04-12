@@ -69,7 +69,7 @@ export const uploadsRouter = createTRPCRouter({
           .update(schema.documentUploads)
           .set({
             documentType: input.type,
-            rowsCount: contents.rows.length,
+            rowsCount: contents?.rows.length,
           })
           .where(eq(schema.documentUploads.id, input.id));
 
@@ -158,37 +158,40 @@ export const uploadsRouter = createTRPCRouter({
       await db.transaction(async (tx) => {
         const channels = await getCompanyProducts(tx, input.companyId);
         const brands = await getCompanyBrands(tx, input.companyId);
-        const { rows, upload } = await readUploadContents(
+        const result = await readUploadContents(
           tx,
           input.id,
           undefined,
           channels,
           brands,
         );
+        if (result) {
+          const { rows, upload } = result;
+          if (upload.confirmed) {
+            tx.rollback();
+          }
 
-        if (upload.confirmed) {
-          tx.rollback();
+          await tx
+            .update(schema.documentUploads)
+            .set({
+              confirmed: true,
+              confirmedAt: new Date(),
+            })
+            .where(eq(schema.documentUploads.id, input.id));
+
+          // arreglar esto, row tiene campos que no van a payments parece o se llaman distinto
+
+          // await tx.insert(schema.payments).values(
+          //   rows.map((row) => ({
+          //     id: createId(),
+          //     userId: ctx.session.user.id,
+          //     documentUploadId: upload.id,
+          //     companyId: input.companyId,
+          //     status_code: "91",
+          //     ...row,
+          //   })),
+          // );
         }
-
-        await tx
-          .update(schema.documentUploads)
-          .set({
-            confirmed: true,
-            confirmedAt: new Date(),
-          })
-          .where(eq(schema.documentUploads.id, input.id));
-
-        // arreglar esto, row tiene campos que no van a payments parece o se llaman distinto
-        await tx.insert(schema.payments).values(
-          rows.map((row) => ({
-            id: createId(),
-            userId: ctx.session.user.id,
-            documentUploadId: upload.id,
-            companyId: input.companyId,
-            status_code: "91",
-            ...row,
-          })),
-        );
       });
     }),
 
