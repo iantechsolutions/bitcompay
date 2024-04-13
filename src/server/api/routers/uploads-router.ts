@@ -52,11 +52,9 @@ export const uploadsRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       return await db.transaction(async (db) => {
-        console.log("se llama a la funcion");
-        const channels = await getCompanyProducts(db, input.companyId);
-        console.log("no fallo getbrands");
-        const brands = await getCompanyBrands(db, input.companyId);
-        console.log("no fallo getproducts");
+        const channels = await getCompanyProducts(input.companyId);
+        const brands = await getCompanyBrands(input.companyId);
+        console.log(brands);
         const contents = await readUploadContents(
           db,
           input.id,
@@ -156,8 +154,8 @@ export const uploadsRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       await db.transaction(async (tx) => {
-        const channels = await getCompanyProducts(tx, input.companyId);
-        const brands = await getCompanyBrands(tx, input.companyId);
+        const channels = await getCompanyProducts(input.companyId);
+        const brands = await getCompanyBrands(input.companyId);
         const result = await readUploadContents(
           tx,
           input.id,
@@ -225,7 +223,7 @@ export const uploadsRouter = createTRPCRouter({
     }),
 });
 
-async function getCompanyProducts(db: DBTX, companyId: string) {
+async function getCompanyProducts(companyId: string) {
   console.log("empieza funcion getProducts");
   const r = await db.query.companies.findFirst({
     where: eq(schema.companies.id, companyId),
@@ -274,7 +272,7 @@ async function getCompanyProducts(db: DBTX, companyId: string) {
   return values;
 }
 
-async function getCompanyBrands(db: DBTX, companyId: string) {
+async function getCompanyBrands(companyId: string) {
   const relations = await db.query.companiesToBrands.findMany({
     where: eq(schema.companiesToBrands.companyId, companyId),
   });
@@ -466,18 +464,17 @@ async function readUploadContents(
       }
       row.invoice_number = invoice_number;
     }
-    const exemptedColumns = []
-    
-    if(brands.length===1){
-      exemptedColumns.push("g_c")
+    console.log(brands.length);
+
+    if (brands.length === 1) {
+      product.requiredColumns.delete("g_c");
     }
-    
 
     for (const column of product.requiredColumns) {
       console.log(column);
       const value = (row as Record<string, unknown>)[column];
-      
-      if (!value && !exemptedColumns.includes(column)) {
+
+      if (!value) {
         const columnName = columnLabelByKey[column] ?? column;
 
         // throw new TRPCError({ code: "BAD_REQUEST", message:  })

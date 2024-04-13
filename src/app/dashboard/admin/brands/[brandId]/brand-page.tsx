@@ -66,7 +66,7 @@ export default function BrandPage({
   );
   const { mutateAsync: changebrand, isLoading } =
     api.brands.change.useMutation();
-
+  const { mutateAsync: addBrandRelation } = api.brands.change.useMutation();
   async function handleChange() {
     try {
       await changebrand({
@@ -75,6 +75,7 @@ export default function BrandPage({
         description,
         company,
       });
+
       toast.success("Se han guardado los cambios");
     } catch (e) {
       const error = asTRPCError(e)!;

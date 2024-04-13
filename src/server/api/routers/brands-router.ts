@@ -83,6 +83,11 @@ export const brandsRouter = createTRPCRouter({
           companyId: input.company,
         })
         .where(eq(schema.brands.id, input.brandId));
+
+      await db.insert(schema.companiesToBrands).values({
+        companyId: input.company!,
+        brandId: input.brandId,
+      });
     }),
 
   delete: protectedProcedure
