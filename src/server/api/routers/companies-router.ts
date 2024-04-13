@@ -81,6 +81,8 @@ export const companiesRouter = createTRPCRouter({
       if (companies.length === 0) {
         return await db.query.companies.findMany();
       } else {
+        //CAMBIAR ESTO, PARA QUE DE VERDAD LEVANTE BIEN
+        //return await db.query.companies.findMany();
         return companies;
       }
     }),

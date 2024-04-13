@@ -466,11 +466,18 @@ async function readUploadContents(
       }
       row.invoice_number = invoice_number;
     }
+    const exemptedColumns = []
+    
+    if(brands.length===1){
+      exemptedColumns.push("g_c")
+    }
+    
 
     for (const column of product.requiredColumns) {
+      console.log(column);
       const value = (row as Record<string, unknown>)[column];
-
-      if (!value) {
+      
+      if (!value && !exemptedColumns.includes(column)) {
         const columnName = columnLabelByKey[column] ?? column;
 
         // throw new TRPCError({ code: "BAD_REQUEST", message:  })

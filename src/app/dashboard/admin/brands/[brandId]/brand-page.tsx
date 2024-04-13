@@ -59,6 +59,7 @@ export default function BrandPage({
   unrelatedCompanies: NonNullable<RouterOutputs["companies"]["getUnrelated"]>;
 }) {
   const [name, setName] = useState(brand.name);
+  const [company, setCompany] = useState(brand.companyId);
   const [description, setDescription] = useState(brand.description);
   const [reducedDescription, setReducedDescription] = useState(
     brand.redescription,
@@ -133,7 +134,7 @@ export default function BrandPage({
           </AccordionItem>
           <AccordionItem value="item-3">
             <AccordionTrigger>
-              <h2 className="text-md">Compañias con esta marca</h2>
+              <h2 className="text-md">Empresas con esta marca</h2>
             </AccordionTrigger>
             <AccordionContent>
               <List>
@@ -150,13 +151,13 @@ export default function BrandPage({
             </AccordionContent>
             <AccordionItem value="item-4">
               <AccordionTrigger>
-                <h2 className="text-md">Agregar compañia</h2>
+                <h2 className="text-md">Agregar empresa</h2>
               </AccordionTrigger>
               <AccordionContent>
                 <Card className="pm-5 h-20">
                   <Select>
                     <SelectTrigger className="w-50">
-                      <SelectValue placeholder="compañia" />
+                      <SelectValue placeholder="Empresa" />
                     </SelectTrigger>
                     <SelectContent>
                       {unrelatedCompanies?.map((company?) => {
@@ -164,6 +165,7 @@ export default function BrandPage({
                           <SelectItem
                             key={company?.id}
                             value={company?.name ?? ""}
+                            onSelect={setCompany}
                           >
                             {company?.name}
                           </SelectItem>

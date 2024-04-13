@@ -191,9 +191,9 @@
 
 
 .prehome-4{
-    background-image: url("../../public/landing_images/fondo\ negro.jpg");
-    background-size: 100% 100%;
-    background-position: center;
+    background-image: url("../../public/landing_images/paginas-2\ \(1\).jpg");
+    background-size: 100%;
+    background-position: top center;
     background-repeat: no-repeat;
     display: flex;
     height: 10vh;
@@ -206,6 +206,13 @@
     padding: 50px;
     margin-left: 8rem;
 } 
+
+.prehome-4-tittle span{
+    font-size: 40px;
+    color: white;
+    margin-bottom: 5px;
+    font-family: "Spline Sans", sans-serif;
+}
 
 .prehome-4-tittle h2{
     font-size: 40px;
@@ -321,6 +328,7 @@
 
 .home-5-tittle span{
     color: #1BDFB7;
+    font-family: "Spline Sans", sans-serif;
 }
 
 .home-5-tittle p{
