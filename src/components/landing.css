@@ -2,8 +2,7 @@
 
 .home{
     zoom:86%;
-    /* background-image: url("../../public/landing_images/fondo\ primero.jpg"); */
-    background-image: url("../../public/landing_images/fondo\ primero.jpg");
+    background-image: url("https://utfs.io/f/b0a373d7-9a31-44b6-8e3d-c9281cd3409c-25g1zo.jpg");
 
     /* padding: 100px; */
     height: 900px;
@@ -58,7 +57,7 @@
     cursor: pointer;
  }
  .home-2{
-    background-image: url(../../public/landing_images/fondovioleta.jpg);
+    background-image: url(https://utfs.io/f/0a01fa82-702b-478a-aa50-e5da470939d5-oaakwe.jpg);
     padding-bottom: 10rem;
 }
 
@@ -120,7 +119,7 @@
 
 .home-3 {
     zoom: 90%;
-    background-image: url(../../public/landing_images/fondo\ compu.jpg);
+    background-image: url(https://utfs.io/f/fa7e3c96-2a62-434d-ad52-f9812ee3c431-kyzlca.jpg);
     background-size: 100% 100%;
     background-position: center;
     background-repeat: no-repeat;
@@ -183,7 +182,7 @@
 }
 .items-2 ul {
     list-style-position: inside; 
-    list-style-image: url("../../public/landing_images/tick.png");
+    list-style-image: url("https://utfs.io/f/d8f66b29-cf32-4767-ba5b-abacd1c77858-1j6ot.png");
 }
 
 
@@ -191,7 +190,7 @@
 
 
 .prehome-4{
-    background-image: url("../../public/landing_images/paginas-2\ \(1\).jpg");
+    background-image: url("https://utfs.io/f/99b02f02-4bdb-4bdf-9a1f-d77cc980dc57-ytcnv2.jpg");
     background-size: 100%;
     background-position: top center;
     background-repeat: no-repeat;
@@ -239,7 +238,7 @@
 
 
 .home-4{
-    background-image: url(../../public/landing_images/paginas-2\ \(1\).jpg);
+    background-image: url(https://utfs.io/f/99b02f02-4bdb-4bdf-9a1f-d77cc980dc57-ytcnv2.jpg);
     background-size: 100% 100%;
     background-position: center;
     background-repeat: no-repeat;
@@ -306,7 +305,7 @@
 
 .home-5{
     /* padding: 15rem 10rem 20rem; */
-    background-image: url(../../public/landing_images/paginas\ 6.jpg);
+    background-image: url(https://utfs.io/f/61fb586c-d9e2-458d-a88e-503e226c5b6e-gqc0ar.jpg);
     background-repeat: no-repeat;
     background-size: 100% 100%;
 }
@@ -418,7 +417,7 @@ body{
 }
 
 .header{
-    background-image: url(../../public/landing_images/fondocolor.jpg);
+    background-image: url(https://utfs.io/f/abf87743-0ad6-487b-a2f8-b3f55465c15e-mk6g19.jpg);
     background-repeat: no-repeat;
     background-position: 100% 100%;
     display: flex;
@@ -588,9 +587,9 @@ body{
     width: 30%;
 }
 .nav-links a{
-    font-size: 16px;
+    font-size: 20px;
     position: relative;
-    top:12px;
+    top:4px;
     color: white;
     font-family: "Spline Sans", sans-serif;
     text-decoration: none;
