@@ -16,9 +16,7 @@ export default async function Brand(props: { params: { brandId: string } }) {
     return company.company;
   });
 
-  const unrelatedCompanies = await api.companies.getUnrelated.query({
-    brandId: props.params.brandId,
-  });
+  const unrelatedCompanies = await api.companies.list.query();
 
   if (!brand || !session?.user) {
     return <Title>No se encontró la marca</Title>;

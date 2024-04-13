@@ -156,20 +156,20 @@ export default function BrandPage({
               </AccordionTrigger>
               <AccordionContent>
                 <Card className="pm-5 h-20">
-                  {unrelatedCompanies?.map((company?) => {
-                    return (
-                      <Select key={company!.id!} onValueChange={setCompany}>
-                        <SelectTrigger className="w-50">
-                          <SelectValue placeholder="Empresa" />
-                        </SelectTrigger>
-                        <SelectContent>
+                  <Select onValueChange={setCompany}>
+                    <SelectTrigger className="w-50">
+                      <SelectValue placeholder="Empresa" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {unrelatedCompanies?.map((company?) => {
+                        return (
                           <SelectItem key={company?.id} value={company?.id!}>
                             {company?.name}
                           </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    );
-                  })}
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
                 </Card>
               </AccordionContent>
             </AccordionItem>
