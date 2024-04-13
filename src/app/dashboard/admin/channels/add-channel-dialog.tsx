@@ -78,7 +78,7 @@ export function AddChannelDialog() {
               placeholder="ej: 1"
               value={number}
               onChange={(e) => setNumber(e.target.value)}
-            />
+              />
           </div>
           <div>
             <Label htmlFor="description">Descripción</Label>

@@ -43,6 +43,7 @@ export const brandsRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string().min(1).max(255),
+        number: z.number().min(1).max(255),
         description: z.string().min(0).max(1023),
         redescription: z.string().min(0).max(10),
       }),
@@ -58,6 +59,7 @@ export const brandsRouter = createTRPCRouter({
         description: input.description,
         redescription: input.redescription,
         companyId: null,
+        number: input.number,
       });
 
       return { id };

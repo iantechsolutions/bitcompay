@@ -16,7 +16,7 @@ export type TableHeaders = {
 }[];
 
 const tableContext = createContext<{
-  rows: Record<string, any>[];
+  rows: Record<string, unknown>[];
   headers: TableHeaders;
 }>({
   rows: [],
@@ -24,11 +24,11 @@ const tableContext = createContext<{
 });
 
 export function LargeTable(props: {
-  rows: Record<string, any>[];
+  rows: Record<string, unknown>[];
   headers?: TableHeaders;
   height?: number;
 }) {
-  const height = props.height || 600;
+  const height = props.height ?? 600;
 
   const document =
     typeof global.document !== "undefined" ? global.document : null;

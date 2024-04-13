@@ -11,7 +11,6 @@ import {
   recRowsTransformer,
 } from "~/server/uploads/validators";
 import { createId } from "~/lib/utils";
-import { api } from "~/trpc/server";
 
 export const uploadsRouter = createTRPCRouter({
   upload: protectedProcedure
@@ -53,8 +52,11 @@ export const uploadsRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       return await db.transaction(async (db) => {
+        console.log("se llama a la funcion");
         const channels = await getCompanyProducts(db, input.companyId);
-        const brands= await getCompanyBrands(db, input.companyId)
+        console.log("no fallo getbrands");
+        const brands = await getCompanyBrands(db, input.companyId);
+        console.log("no fallo getproducts");
         const contents = await readUploadContents(
           db,
           input.id,
@@ -62,12 +64,12 @@ export const uploadsRouter = createTRPCRouter({
           channels,
           brands,
         );
-
+        console.log("no fallo readcontents");
         await db
           .update(schema.documentUploads)
           .set({
             documentType: input.type,
-            rowsCount: contents.rows.length,
+            rowsCount: contents?.rows.length,
           })
           .where(eq(schema.documentUploads.id, input.id));
 
@@ -155,43 +157,76 @@ export const uploadsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       await db.transaction(async (tx) => {
         const channels = await getCompanyProducts(tx, input.companyId);
-        const brands= await getCompanyBrands(tx,input.companyId)
-        const { rows, upload } = await readUploadContents(
+        const brands = await getCompanyBrands(tx, input.companyId);
+        const result = await readUploadContents(
           tx,
           input.id,
           undefined,
           channels,
           brands,
         );
+        if (result) {
+          const { rows, upload } = result;
+          if (upload.confirmed) {
+            tx.rollback();
+          }
 
-        if (upload.confirmed) {
-          tx.rollback();
+          await tx
+            .update(schema.documentUploads)
+            .set({
+              confirmed: true,
+              confirmedAt: new Date(),
+            })
+            .where(eq(schema.documentUploads.id, input.id));
+
+          // arreglar esto, row tiene campos que no van a payments parece o se llaman distinto
+          await tx.insert(schema.payments).values(
+            rows.map((row) => ({
+              id: createId(),
+              userId: ctx.session.user.id,
+              documentUploadId: upload.id,
+              companyId: input.companyId,
+              g_c: row.g_c,
+              name: row.name,
+              fiscal_id_type: row.fiscal_id_type,
+              fiscal_id_number: row.fiscal_id_number,
+              du_type: row.du_type,
+              du_number: row.du_number,
+              product: row.product,
+              product_number: row.product_number,
+              invoice_number: row.invoice_number!,
+              period: row.period,
+              first_due_amount: row.first_due_amount,
+              first_due_date: row.first_due_date,
+              second_due_amount: row.second_due_amount ?? null,
+              second_due_date: row.second_due_date ?? null,
+              additional_info: row.additional_info ?? null,
+              payment_channel: row.payment_channel ?? null,
+              payment_date: row.payment_date ?? null,
+              collected_amount: row.collected_amount ?? null,
+              cbu: row.cbu ?? null,
+              status_code: "91",
+            })),
+          );
         }
-
-        await tx
-          .update(schema.documentUploads)
-          .set({
-            confirmed: true,
-            confirmedAt: new Date(),
-          })
-          .where(eq(schema.documentUploads.id, input.id));
-
-        // arreglar esto, row tiene campos que no van a payments parece o se llaman distinto
-        await tx.insert(schema.payments).values(
-          rows.map((row) => ({
-            id: createId(),
-            userId: ctx.session.user.id,
-            documentUploadId: upload.id,
-            companyId: input.companyId,
-            status_code: "91",
-            ...row,
-          })),
-        );
       });
+    }),
+
+  delete: protectedProcedure
+    .input(
+      z.object({
+        uploadId: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      await db
+        .delete(schema.documentUploads)
+        .where(eq(schema.documentUploads.id, input.uploadId));
     }),
 });
 
 async function getCompanyProducts(db: DBTX, companyId: string) {
+  console.log("empieza funcion getProducts");
   const r = await db.query.companies.findFirst({
     where: eq(schema.companies.id, companyId),
     with: {
@@ -220,9 +255,12 @@ async function getCompanyProducts(db: DBTX, companyId: string) {
       },
     },
   });
+  console.log(r);
 
   const p = r?.products.map((p) => p.product) ?? [];
 
+  console.log(p);
+  console.log(p[0]?.channels);
   const values = p.map((product) => ({
     id: product.id,
     number: product.number,
@@ -238,20 +276,19 @@ async function getCompanyProducts(db: DBTX, companyId: string) {
 
 async function getCompanyBrands(db: DBTX, companyId: string) {
   const relations = await db.query.companiesToBrands.findMany({
-    where: eq(schema.companiesToBrands.companyId, companyId)
+    where: eq(schema.companiesToBrands.companyId, companyId),
   });
 
   const brands = [];
   for (const relation of relations) {
     const brandId = relation.brandId;
     const brand = await db.query.brands.findMany({
-      where: eq(schema.brands.id, brandId)
+      where: eq(schema.brands.id, brandId),
     });
     brands.push(brand);
   }
   return brands;
 }
-
 
 async function readResponseUploadContents(
   db: DBTX,
@@ -290,16 +327,17 @@ async function readResponseUploadContents(
       const status_code = largeNumber?.slice(-2);
       console.log(status_code);
       // extract invoice_number
-      const regex = /\d{15}[PC]/;
-      const stringInvoiceNumber = recordValues.filter((recordValue) =>
-        regex.test(recordValue),
-      );
+      const stringInvoiceNumber = recordValues[recordValues.length - 1] ?? null;
       console.log(recordValues);
       console.log(stringInvoiceNumber);
-      const matches = stringInvoiceNumber[0]?.trim().match(/[a-zA-Z]+|[0-9]+/g);
-      console.log(matches);
-      if (matches) {
-        const invoice_number = matches[0].slice(-5);
+
+      if (!stringInvoiceNumber) {
+        throw new Error("there is no invoice number");
+      }
+
+      const invoice_number = stringInvoiceNumber.slice(9, 14) ?? null;
+      console.log(invoice_number);
+      if (invoice_number) {
         const original_transaction = await db.query.payments.findFirst({
           where: eq(schema.payments.invoice_number, parseInt(invoice_number)),
         });
@@ -307,6 +345,8 @@ async function readResponseUploadContents(
           original_transaction.status_code = status_code ?? null;
           records.push(original_transaction);
         }
+      } else {
+        throw Error("cannot read invoice number");
       }
     } else if (recordIndex == 4) {
       recordIndex = 0;
@@ -320,13 +360,15 @@ async function readResponseUploadContents(
 
 type ProductsOfCompany = Awaited<ReturnType<typeof getCompanyProducts>>;
 type BrandsOfCompany = Awaited<ReturnType<typeof getCompanyBrands>>;
+
 async function readUploadContents(
   db: DBTX,
   id: string,
   type: string | undefined,
   products: ProductsOfCompany,
-  brands:BrandsOfCompany,
+  brands: BrandsOfCompany,
 ) {
+  console.log("hola que hace");
   const upload = await db.query.documentUploads.findFirst({
     where: eq(schema.documentUploads.id, id),
   });
@@ -370,6 +412,14 @@ async function readUploadContents(
 
   const errors: string[] = [];
 
+  const productsBatch = Object.fromEntries(
+    Object.keys(productsMap).map((clave) => [
+      clave,
+      { amount_collected: 0, records_number: 0 },
+    ]),
+  );
+  console.log("info de cabeza de lote", productsBatch);
+
   for (let i = 0; i < transformedRows.length; i++) {
     const row = transformedRows[i]!;
 
@@ -382,25 +432,22 @@ async function readUploadContents(
       row.product = product?.id ?? null;
     } else {
       product = productsMap[row.product_number];
-      console.log(typeof product);
       row.product = product?.id ?? null;
     }
 
-    console.log(brands)
-
-    if (brands.length===1){
-      if(!brands[0]){
-        throw new Error('brands does not exist')}
-
-      const brand=brands[0][0] ?? null
-      
-      if(!brand){
-        throw new Error('brand is undefined')
+    if (brands.length === 1) {
+      if (!brands[0]) {
+        throw new Error("brands does not exist");
       }
-      row.g_c = brand?.number 
 
+      const brand = brands[0][0] ?? null;
+
+      if (!brand) {
+        throw new Error("brand is undefined");
+      }
+      row.g_c = brand?.number;
     }
-    
+
     if (!product) {
       // throw new TRPCError({ code: "BAD_REQUEST", message:  })
       errors.push(
@@ -432,35 +479,54 @@ async function readUploadContents(
         );
       }
     }
-  }
+    //agrego fila a info de cabeza de lote
 
-  if (errors.length > 0) {
-    throw new TRPCError({ code: "BAD_REQUEST", message: errors.join("\n") });
+    if (productsBatch[product.number]) {
+      const temp = productsBatch[product.number];
+      if (temp) {
+        temp.records_number += 1;
+        if (row.collected_amount !== null) {
+          temp.amount_collected += row.collected_amount;
+        }
+        productsBatch[product.number] = temp;
+      }
+    }
+
+    if (errors.length > 0) {
+      throw new TRPCError({ code: "BAD_REQUEST", message: errors.join("\n") });
+    }
+
+    //throw new TRPCError({ code: "NOT_FOUND" });
   }
 
   if (type === "rec") {
     return {
       rows: transformedRows,
       headers: recHeaders,
+      batchHead: productsBatch,
       upload,
     };
   }
+  // for (const key in productsBatch) {
+  //   if (productsBatch.hasOwnProperty(key)) {
+  //     const productHead = { ...productsBatch[key], key };
+  //     batchHead.push(productHead);
+  //   }
+  // }
 
-  throw new TRPCError({ code: "NOT_FOUND" });
-}
+  function trimObject(obj: Record<string, unknown>) {
+    return Object.fromEntries(
+      Object.entries(obj).map(([key, value]) => {
+        if (typeof value === "string") {
+          const t = value.trim();
 
-function trimObject(obj: Record<string, unknown>) {
-  return Object.fromEntries(
-    Object.entries(obj).map(([key, value]) => {
-      if (typeof value === "string") {
-        const t = value.trim();
+          if (t === "") return [key, null];
 
-        if (t === "") return [key, null];
+          return [key, t];
+        }
 
-        return [key, t];
-      }
-
-      return [key, value];
-    }),
-  );
+        return [key, value];
+      }),
+    );
+  }
 }

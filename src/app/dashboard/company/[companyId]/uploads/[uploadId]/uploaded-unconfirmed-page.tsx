@@ -52,6 +52,9 @@ export default function UploadedUnconfirmedPage(props: UploadedPageProps) {
   const { mutateAsync: confirmUpload, isLoading: isLoadingConfirm } =
     api.uploads.confirmUpload.useMutation();
 
+    const { mutateAsync: deleteUpload,  } =
+    api.uploads.delete.useMutation();
+
   async function handlerConfirm() {
     if (!data) return;
     if (!documentType) return;
@@ -66,12 +69,29 @@ export default function UploadedUnconfirmedPage(props: UploadedPageProps) {
       toast.error(error.message);
     }
   }
-
+ 
   const [error, setError] = useState<string | null>(null);
 
   const [data, setData] = useState<
     RouterOutputs["uploads"]["readUploadContents"] | null
   >(null);
+
+  const productsBatchArray: Record<string, unknown>[] = Object.entries(
+    data?.batchHead ?? {},
+  ).map(([key, value]) => ({
+    product: key,
+    ...value,
+  }));
+
+  async function handleDelete (){
+    try {
+      await deleteUpload({uploadId: props.upload.id})
+      router.back();
+    } catch (error) {
+      console.log(error)
+    }
+
+  }
 
   async function handleContinue() {
     if (!documentType) return;
@@ -142,9 +162,15 @@ export default function UploadedUnconfirmedPage(props: UploadedPageProps) {
             {dataError.data?.cause?.trim() ?? dataError.message}
           </pre>
         )}
-
+        {data && (
+          <LargeTable rows={productsBatchArray} 
+          headers={[{ key: "product", label: "producto", width: 140 },
+          { key: "records_number", label: "Cant. transacciones", width: 180 },
+          {key:"amount_collected", label:"recaudado por producto", width:200}]} 
+          height={200}/>
+        )}
         <div className="flex gap-2">
-          <Button variant="destructive">Cancelar y eliminar</Button>
+          <Button variant="destructive" onClick={handleDelete}>Cancelar y eliminar</Button>
 
           {data && (
             <Button onClick={handlerConfirm}>
