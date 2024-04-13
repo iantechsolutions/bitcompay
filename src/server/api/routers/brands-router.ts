@@ -71,6 +71,7 @@ export const brandsRouter = createTRPCRouter({
         brandId: z.string(),
         name: z.string().min(1).max(255),
         description: z.string().min(0).max(1023).optional(),
+        company: z.string().min(0).max(1023).nullable(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -79,6 +80,7 @@ export const brandsRouter = createTRPCRouter({
         .set({
           name: input.name,
           description: input.description,
+          companyId: input.company,
         })
         .where(eq(schema.brands.id, input.brandId));
     }),

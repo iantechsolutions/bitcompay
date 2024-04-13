@@ -73,6 +73,7 @@ export default function BrandPage({
         brandId: brand.id,
         name,
         description,
+        company,
       });
       toast.success("Se han guardado los cambios");
     } catch (e) {
@@ -155,24 +156,20 @@ export default function BrandPage({
               </AccordionTrigger>
               <AccordionContent>
                 <Card className="pm-5 h-20">
-                  <Select>
-                    <SelectTrigger className="w-50">
-                      <SelectValue placeholder="Empresa" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {unrelatedCompanies?.map((company?) => {
-                        return (
-                          <SelectItem
-                            key={company?.id}
-                            value={company?.name ?? ""}
-                            onSelect={setCompany}
-                          >
+                  {unrelatedCompanies?.map((company?) => {
+                    return (
+                      <Select key={company!.id!} onValueChange={setCompany}>
+                        <SelectTrigger className="w-50">
+                          <SelectValue placeholder="Empresa" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem key={company?.id} value={company?.id!}>
                             {company?.name}
                           </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
+                        </SelectContent>
+                      </Select>
+                    );
+                  })}
                 </Card>
               </AccordionContent>
             </AccordionItem>
