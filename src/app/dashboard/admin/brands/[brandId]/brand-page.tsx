@@ -1,21 +1,17 @@
 "use client";
 import { CheckIcon, Loader2 } from "lucide-react";
-import { MouseEventHandler, useState } from "react";
+import { type MouseEventHandler, useState } from "react";
 import { toast } from "sonner";
-import AppSidenav from "~/components/admin-sidenav";
-import AppLayout from "~/components/applayout";
 import LayoutContainer from "~/components/layout-container";
 import { List, ListTile } from "~/components/list";
-import { NavUserData } from "~/components/nav-user-section";
 import { Title } from "~/components/title";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
 import { asTRPCError } from "~/lib/errors";
-import { recHeaders } from "~/server/uploads/validators";
 import { api } from "~/trpc/react";
-import { RouterOutputs } from "~/trpc/shared";
+import { type RouterOutputs } from "~/trpc/shared";
 import {
   Accordion,
   AccordionContent,
@@ -34,46 +30,57 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../../../../components/ui/select";
 
 import { useRouter } from "next/navigation";
-
-interface Company {
-  name: string;
-  id: string;
-}
 
 export default function BrandPage({
   brand,
   companies,
-  unrelatedCompanies,
+  relatedCompanies,
 }: {
   brand: NonNullable<RouterOutputs["brands"]["get"]>;
-  companies: Company[] | undefined | null;
-  unrelatedCompanies: NonNullable<RouterOutputs["companies"]["getUnrelated"]>;
+  companies: NonNullable<RouterOutputs["companies"]["list"]>;
+  relatedCompanies: NonNullable<RouterOutputs["companies"]["getRelated"]>;
 }) {
+  type CompaniesResponse = NonNullable<RouterOutputs["companies"]["list"]>;
+  type Company = CompaniesResponse extends (infer T)[] ? T : never;
+
   const [name, setName] = useState(brand.name);
-  const [company, setCompany] = useState(brand.companyId);
   const [description, setDescription] = useState(brand.description);
   const [reducedDescription, setReducedDescription] = useState(
     brand.redescription,
   );
-  const { mutateAsync: changebrand, isLoading } =
+  const [relCompanies, setRelCompanies] = useState(new Set(relatedCompanies));
+
+  const { mutateAsync: changeBrand, isLoading } =
     api.brands.change.useMutation();
-  const { mutateAsync: addBrandRelation } = api.brands.change.useMutation();
+
+  function changeCompany(company: Company, required: boolean) {
+    if (required) {
+      relCompanies.add(company);
+    } else {
+      relCompanies.delete(company);
+    }
+    setRelCompanies(new Set(relCompanies));
+  }
+
   async function handleChange() {
     try {
-      await changebrand({
-        brandId: brand.id,
+      const companiesIdArray = Array.from(relCompanies)
+        .map((company) => company?.id)
+        .filter((companyId): companyId is string => companyId !== undefined);
+
+      const nonNullRelatedCompanies = companiesIdArray.filter(
+        (company) => company !== undefined,
+      );
+      const companiesId = new Set(nonNullRelatedCompanies);
+
+      await changeBrand({
         name,
         description,
-        company,
+        reducedDescription,
+        companiesId,
+        brandId: brand.id,
       });
 
       toast.success("Se han guardado los cambios");
@@ -140,40 +147,49 @@ export default function BrandPage({
             </AccordionTrigger>
             <AccordionContent>
               <List>
-                {companies?.map((company?) => {
+                {relatedCompanies
+                  ?.filter(
+                    (company): company is Company => company !== undefined,
+                  )
+                  .map((company: Company) => {
+                    return (
+                      <ListTile
+                        key={company?.id}
+                        href={`/dashboard/admin/companies/${company?.id}`}
+                        title={company?.name}
+                      />
+                    );
+                  })}
+              </List>
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="item-4">
+            <AccordionTrigger>
+              <h2 className="text-md">Agregar empresa</h2>
+            </AccordionTrigger>
+            <AccordionContent>
+              <List>
+                {companies?.map((company) => {
+                  const isChecked = Array.from(relCompanies).some(
+                    (c) => c?.id === company?.id,
+                  );
                   return (
                     <ListTile
                       key={company?.id}
-                      href={`/dashboard/admin/companies/${company?.id}`}
                       title={company?.name}
+                      trailing={
+                        <Switch
+                          checked={isChecked}
+                          onCheckedChange={(required) =>
+                            changeCompany(company, required)
+                          }
+                        />
+                      }
                     />
                   );
                 })}
               </List>
             </AccordionContent>
-            <AccordionItem value="item-4">
-              <AccordionTrigger>
-                <h2 className="text-md">Agregar empresa</h2>
-              </AccordionTrigger>
-              <AccordionContent>
-                <Card className="pm-5 h-20">
-                  <Select onValueChange={setCompany}>
-                    <SelectTrigger className="w-50">
-                      <SelectValue placeholder="Empresa" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {unrelatedCompanies?.map((company?) => {
-                        return (
-                          <SelectItem key={company?.id} value={company?.id!}>
-                            {company?.name}
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-                </Card>
-              </AccordionContent>
-            </AccordionItem>
           </AccordionItem>
           <AccordionItem value="item-5" className="border-none">
             <AccordionTrigger>

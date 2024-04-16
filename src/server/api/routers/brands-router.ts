@@ -2,7 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db, schema } from "~/server/db";
 import { createId } from "~/lib/utils";
-import { asc, eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 export const brandsRouter = createTRPCRouter({
   get: protectedProcedure
@@ -48,7 +48,7 @@ export const brandsRouter = createTRPCRouter({
         redescription: z.string().min(0).max(10),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       // TODO: verificar permisos
 
       const id = createId();
@@ -71,23 +71,28 @@ export const brandsRouter = createTRPCRouter({
         brandId: z.string(),
         name: z.string().min(1).max(255),
         description: z.string().min(0).max(1023).optional(),
-        company: z.string().min(0).max(1023).nullable(),
+        reducedDescription: z.string().min(0).max(10).optional(),
+        companiesId: z.set(z.string()),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       await db
         .update(schema.brands)
         .set({
           name: input.name,
           description: input.description,
-          companyId: input.company,
+          redescription: input.reducedDescription,
         })
         .where(eq(schema.brands.id, input.brandId));
 
-      await db.insert(schema.companiesToBrands).values({
-        companyId: input.company!,
-        brandId: input.brandId,
-      });
+      await db
+        .delete(schema.companiesToBrands)
+        .where(eq(schema.companiesToBrands.brandId, input.brandId));
+      for (const companyId of input.companiesId) {
+        await db
+          .insert(schema.companiesToBrands)
+          .values({ brandId: input.brandId, companyId: companyId });
+      }
     }),
 
   delete: protectedProcedure
@@ -96,10 +101,31 @@ export const brandsRouter = createTRPCRouter({
         brandId: z.string(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       await db.delete(schema.brands).where(eq(schema.brands.id, input.brandId));
       await db
         .delete(schema.companiesToBrands)
         .where(eq(schema.companiesToBrands.brandId, input.brandId));
+    }),
+
+  addRelation: protectedProcedure
+    .input(z.object({ companyId: z.string(), brandId: z.string() }))
+    .mutation(async ({ input }) => {
+      await db
+        .insert(schema.companiesToBrands)
+        .values({ brandId: input.brandId, companyId: input.companyId });
+    }),
+
+  deleteRelation: protectedProcedure
+    .input(z.object({ companyId: z.string(), brandId: z.string() }))
+    .mutation(async ({ input }) => {
+      await db
+        .delete(schema.companiesToBrands)
+        .where(
+          and(
+            eq(schema.companiesToBrands.companyId, input.companyId),
+            eq(schema.companiesToBrands.brandId, input.brandId),
+          ),
+        );
     }),
 });

@@ -68,7 +68,7 @@ export const channelsRouter = createTRPCRouter({
         requiredColumns: z.array(z.string()).optional(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       await db
         .update(schema.channels)
         .set({

@@ -40,7 +40,7 @@ export const companiesRouter = createTRPCRouter({
       return company;
     }),
 
-  getUnrelated: protectedProcedure
+  getRelated: protectedProcedure
     .input(
       z.object({
         brandId: z.string(),
@@ -54,17 +54,17 @@ export const companiesRouter = createTRPCRouter({
 
       const allCompaniesToBrands = await db.query.companiesToBrands.findMany();
 
-      const unrelatedCompanies = allCompaniesToBrands.filter(
-        (company) => company.brandId !== input.brandId,
+      const relatedCompanies = allCompaniesToBrands.filter(
+        (company) => company.brandId == input.brandId,
       );
 
-      const unrelatedCompaniesId = unrelatedCompanies.map(
-        (ucompany) => ucompany.companyId,
+      const relatedCompaniesId = relatedCompanies.map(
+        (company) => company.companyId,
       );
 
       const companies: (Company | undefined)[] = [];
 
-      for (const companyId of unrelatedCompaniesId) {
+      for (const companyId of relatedCompaniesId) {
         const currentCompany = await db.query.companies.findFirst({
           where: eq(schema.companies.id, companyId),
           columns: {
@@ -78,13 +78,7 @@ export const companiesRouter = createTRPCRouter({
         }
       }
 
-      if (companies.length === 0) {
-        return await db.query.companies.findMany();
-      } else {
-        //CAMBIAR ESTO, PARA QUE DE VERDAD LEVANTE BIEN
-        //return await db.query.companies.findMany();
-        return companies;
-      }
+      return companies;
     }),
 
   create: protectedProcedure
