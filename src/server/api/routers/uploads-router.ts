@@ -245,6 +245,7 @@ async function getCompanyProducts(companyId: string) {
             },
             columns: {
               id: true,
+              name: true,
               number: true,
               enabled: true,
             },
@@ -262,6 +263,7 @@ async function getCompanyProducts(companyId: string) {
   const values = p.map((product) => ({
     id: product.id,
     number: product.number,
+    name: product.name,
     requiredColumns: new Set(
       product.channels
         .map((c) => c.channel.requiredColumns)
@@ -413,7 +415,11 @@ async function readUploadContents(
   const productsBatch = Object.fromEntries(
     Object.keys(productsMap).map((clave) => [
       clave,
-      { amount_collected: 0, records_number: 0 },
+      {
+        amount_collected: 0,
+        records_number: 0,
+        productName: productsMap[clave]?.name,
+      },
     ]),
   );
   console.log("info de cabeza de lote", productsBatch);

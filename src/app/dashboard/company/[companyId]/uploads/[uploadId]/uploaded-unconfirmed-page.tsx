@@ -6,7 +6,7 @@ import type { RouterOutputs } from "~/trpc/shared";
 import React, { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
-import { FileSpreadsheetIcon, Rows } from "lucide-react";
+import { FileSpreadsheetIcon } from "lucide-react";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 import { api } from "~/trpc/react";
@@ -200,15 +200,21 @@ export default function UploadedUnconfirmedPage(props: UploadedPageProps) {
                   <TableRow key={row.product as React.Key}>
                     <TableCell className="font-medium">
                       {" "}
-                      {typeof row.product === "string" ? row.product : ""}
+                      {typeof row.productName === "string"
+                        ? row.productName
+                        : ""}
                     </TableCell>
                     <TableCell>
                       {" "}
-                      {typeof row.product === "string" ? row.product : ""}
+                      {typeof row.records_number === "number"
+                        ? row.records_number
+                        : ""}
                     </TableCell>
                     <TableCell>
                       {" "}
-                      {typeof row.product === "string" ? row.product : ""}
+                      {typeof row.amount_collected === "number"
+                        ? row.amount_collected
+                        : ""}
                     </TableCell>
                   </TableRow>
                 );
