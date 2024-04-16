@@ -14,6 +14,14 @@ import { LargeTable } from "~/components/table";
 import { toast } from "sonner";
 import { asTRPCError } from "~/lib/errors";
 import { useCompanyData } from "../../company-provider";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/components/ui/table";
 
 export type UploadedPageProps = {
   upload: NonNullable<RouterOutputs["uploads"]["upload"]>;
@@ -52,8 +60,7 @@ export default function UploadedUnconfirmedPage(props: UploadedPageProps) {
   const { mutateAsync: confirmUpload, isLoading: isLoadingConfirm } =
     api.uploads.confirmUpload.useMutation();
 
-    const { mutateAsync: deleteUpload,  } =
-    api.uploads.delete.useMutation();
+  const { mutateAsync: deleteUpload } = api.uploads.delete.useMutation();
 
   async function handlerConfirm() {
     if (!data) return;
@@ -69,7 +76,7 @@ export default function UploadedUnconfirmedPage(props: UploadedPageProps) {
       toast.error(error.message);
     }
   }
- 
+
   const [error, setError] = useState<string | null>(null);
 
   const [data, setData] = useState<
@@ -83,14 +90,13 @@ export default function UploadedUnconfirmedPage(props: UploadedPageProps) {
     ...value,
   }));
 
-  async function handleDelete (){
+  async function handleDelete() {
     try {
-      await deleteUpload({uploadId: props.upload.id})
+      await deleteUpload({ uploadId: props.upload.id });
       router.back();
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-
   }
 
   async function handleContinue() {
@@ -163,14 +169,57 @@ export default function UploadedUnconfirmedPage(props: UploadedPageProps) {
           </pre>
         )}
         {data && (
-          <LargeTable rows={productsBatchArray} 
-          headers={[{ key: "product", label: "producto", width: 140 },
-          { key: "records_number", label: "Cant. transacciones", width: 180 },
-          {key:"amount_collected", label:"recaudado por producto", width:200}]} 
-          height={200}/>
+          // <LargeTable
+          //   rows={productsBatchArray}
+          //   headers={[
+          //     { key: "product", label: "producto", width: 140 },
+          //     {
+          //       key: "records_number",
+          //       label: "Cant. transacciones",
+          //       width: 180,
+          //     },
+          //     {
+          //       key: "amount_collected",
+          //       label: "recaudado por producto",
+          //       width: 200,
+          //     },
+          //   ]}
+          //   height={100}
+          // />
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Producto</TableHead>
+                <TableHead>Cant. Transacciones</TableHead>
+                <TableHead>Recaudado por producto</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {productsBatchArray.map((row) => {
+                return (
+                  <TableRow key={row.product as React.Key}>
+                    <TableCell className="font-medium">
+                      {" "}
+                      {typeof row.product === "string" ? row.product : ""}
+                    </TableCell>
+                    <TableCell>
+                      {" "}
+                      {typeof row.product === "string" ? row.product : ""}
+                    </TableCell>
+                    <TableCell>
+                      {" "}
+                      {typeof row.product === "string" ? row.product : ""}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
         )}
         <div className="flex gap-2">
-          <Button variant="destructive" onClick={handleDelete}>Cancelar y eliminar</Button>
+          <Button variant="destructive" onClick={handleDelete}>
+            Cancelar y eliminar
+          </Button>
 
           {data && (
             <Button onClick={handlerConfirm}>
