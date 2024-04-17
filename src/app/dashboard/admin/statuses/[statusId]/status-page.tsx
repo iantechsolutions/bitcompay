@@ -1,24 +1,23 @@
 "use client";
+
 import {
   Accordion,
-  AccordionContent,
   AccordionItem,
   AccordionTrigger,
+  AccordionContent,
 } from "~/components/ui/accordion";
-import { Switch } from "~/components/ui/switch";
-import { type MouseEventHandler, useState } from "react";
-import LayoutContainer from "~/components/layout-container";
-import { List, ListTile } from "~/components/list";
-import { Title } from "~/components/title";
-import { Button } from "~/components/ui/button";
-import { RouterOutputs } from "~/trpc/shared";
 import { api } from "~/trpc/react";
-import { CheckIcon, Loader2 } from "lucide-react";
-import { toast } from "sonner";
-import { asTRPCError } from "~/lib/errors";
+import { type MouseEventHandler, useState } from "react";
+import { Title } from "~/components/title";
+import { Label } from "~/components/ui/label";
+import { Loader2, CheckIcon } from "lucide-react";
+import LayoutContainer from "~/components/layout-container";
+import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
+import { type RouterOutputs } from "~/trpc/shared";
+import { toast } from "sonner";
+import { asTRPCError } from "~/lib/errors";
 import { useRouter } from "next/navigation";
 import {
   AlertDialog,
@@ -32,52 +31,35 @@ import {
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
 
-export default function ProductPage({
-  product,
-  channels,
+export default function StatusPage({
+  status,
 }: {
-  product: NonNullable<RouterOutputs["products"]["get"]>;
-  channels: RouterOutputs["channels"]["list"];
+  status: NonNullable<RouterOutputs["status"]["get"]>;
 }) {
-  const [productChannels, setProductChannels] = useState<Set<string>>(
-    new Set(product.channels.map((c) => c.channelId)),
-  );
-
-  const { mutateAsync: changeProduct, isLoading } =
-    api.products.change.useMutation();
-
-  const [name, setName] = useState(product.name);
-  const [description, setDescription] = useState(product.description);
-
+  const { mutateAsync: change, isLoading } = api.status.change.useMutation();
+  const [description, setDescription] = useState<string>(status.description!);
+  const [code, setCode] = useState<string>(status.code!);
+  const router = useRouter();
   async function handleChange() {
     try {
-      await changeProduct({
-        productId: product.id,
-        channels: Array.from(productChannels),
-        name,
+      await change({
+        statusId: status.id,
+        code,
         description,
       });
       toast.success("Se han guardado los cambios");
+      router.refresh();
     } catch (e) {
       const error = asTRPCError(e)!;
       toast.error(error.message);
     }
   }
 
-  function changeProductChannel(channelId: string, enabled: boolean) {
-    if (enabled) {
-      productChannels.add(channelId);
-    } else {
-      productChannels.delete(channelId);
-    }
-    setProductChannels(new Set(productChannels));
-  }
-
   return (
     <LayoutContainer>
       <section className="space-y-2">
         <div className="flex justify-between">
-          <Title>{product.name}</Title>
+          <Title>{status.description}</Title>
           <Button disabled={isLoading} onClick={handleChange}>
             {isLoading ? (
               <Loader2 className="mr-2 animate-spin" />
@@ -90,46 +72,20 @@ export default function ProductPage({
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="item-1">
             <AccordionTrigger>
-              <h2 className="text-md">Canales habilitados</h2>
-            </AccordionTrigger>
-            <AccordionContent>
-              <List>
-                {channels.map((channel) => {
-                  return (
-                    <ListTile
-                      key={channel.id}
-                      leading={channel.number}
-                      title={channel.name}
-                      trailing={
-                        <Switch
-                          checked={productChannels.has(channel.id)}
-                          onCheckedChange={(checked) =>
-                            changeProductChannel(channel.id, checked)
-                          }
-                        />
-                      }
-                    />
-                  );
-                })}
-              </List>
-            </AccordionContent>
-          </AccordionItem>
-          <AccordionItem value="item-2">
-            <AccordionTrigger>
-              <h2 className="text-md">Info. de la producto</h2>
+              <h2 className="text-md">Info. del estado</h2>
             </AccordionTrigger>
             <AccordionContent>
               <Card className="p-5">
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <div>
-                    <Label htmlFor="name">Nombre</Label>
-                    <Input
-                      id="name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                    />
-                  </div>
                   <div className="col-span-2">
+                    <div className="col-span-2">
+                      <Label htmlFor="code">Codigo</Label>
+                      <Input
+                        id="code"
+                        value={code}
+                        onChange={(e) => setCode(e.target.value)}
+                      />
+                    </div>
                     <Label htmlFor="description">Descripción</Label>
                     <Input
                       id="description"
@@ -141,13 +97,13 @@ export default function ProductPage({
               </Card>
             </AccordionContent>
           </AccordionItem>
-          <AccordionItem value="item-4" className="border-none">
+          <AccordionItem value="item-2" className="border-none">
             <AccordionTrigger>
-              <h2 className="text-md">Eliminar producto</h2>
+              <h2 className="text-md">Eliminar Estado de transaccion</h2>
             </AccordionTrigger>
             <AccordionContent>
               <div className="flex justify-end">
-                <DeleteProduct productId={product.id} />
+                <DeleteStatus statusId={status.id} />
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -157,18 +113,19 @@ export default function ProductPage({
   );
 }
 
-function DeleteProduct(props: { productId: string }) {
-  const { mutateAsync: deleteProduct, isLoading } =
-    api.products.delete.useMutation();
+function DeleteStatus(props: { statusId: string }) {
+  const { mutateAsync: DeleteStatus, isLoading } =
+    api.status.delete.useMutation();
 
   const router = useRouter();
 
   const handleDelete: MouseEventHandler<HTMLButtonElement> = (e) => {
     e.preventDefault();
-    deleteProduct({ productId: props.productId })
+    DeleteStatus({ statusId: props.statusId })
       .then(() => {
-        toast.success("Se ha eliminado el producto");
-        router.push("../products");
+        toast.success("Se ha eliminado el estado");
+        router.push("../statuses");
+        router.refresh();
       })
       .catch((e) => {
         const error = asTRPCError(e)!;
@@ -179,16 +136,16 @@ function DeleteProduct(props: { productId: string }) {
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <Button variant="destructive" className="w-[160px]">
-          Eliminar producto
+          Eliminar estado
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            ¿Estás seguro que querés eliminar el producto?
+            ¿Estás seguro que querés eliminar el estado?
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Eliminar producto permanentemente.
+            Eliminar estado permanentemente.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

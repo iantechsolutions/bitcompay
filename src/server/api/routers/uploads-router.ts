@@ -190,7 +190,6 @@ export const uploadsRouter = createTRPCRouter({
               fiscal_id_number: row.fiscal_id_number,
               du_type: row.du_type,
               du_number: row.du_number,
-              product: row.product,
               product_number: row.product_number,
               invoice_number: row.invoice_number!,
               period: row.period,
@@ -403,6 +402,9 @@ async function readUploadContents(
     if ("Período" in row) {
       row.Período = row.Período?.toString();
     }
+    if ("Producto" in row) {
+      row.Producto = row.Producto?.toString();
+    }
   });
   const transformedRows = recRowsTransformer(trimmedRows);
 
@@ -423,20 +425,55 @@ async function readUploadContents(
     ]),
   );
   console.log("info de cabeza de lote", productsBatch);
+  /// verificacion si hay columna producto
+
+  let productColumnExist = false;
+  for (const row of transformedRows) {
+    console.log(row.product_number);
+    if (row.product_number) {
+      productColumnExist = true;
+    }
+  }
+
+  if (!productColumnExist && products.length > 1) {
+    errors.push("no existe la columna producto");
+    throw new TRPCError({ code: "BAD_REQUEST", message: errors[0] });
+  }
 
   for (let i = 0; i < transformedRows.length; i++) {
     const row = transformedRows[i]!;
 
     const rowNum = i + 2;
 
+    if (!row.invoice_number) {
+      let invoice_number = Math.floor(10000 + Math.random() * 90000);
+      const transactionFound = await db.query.payments.findFirst({
+        where: eq(schema.payments.invoice_number, invoice_number),
+      });
+      while (transactionFound) {
+        invoice_number = Math.floor(10000 + Math.random() * 90000);
+      }
+      row.invoice_number = invoice_number;
+    }
+
     let product;
-    if (products.length === 1) {
-      product = products[0];
-      row.product_number = product?.number ?? 0;
-      row.product = product?.id ?? null;
+    if (row.product_number) {
+      if (row.product_number in productsMap) {
+        product = productsMap[row.product_number];
+      } else {
+        errors.push(
+          `Este producto: ${row.product_number} es invalido o  no se encuentra habilitado (fila:${rowNum})`,
+        );
+      }
     } else {
-      product = productsMap[row.product_number];
-      row.product = product?.id ?? null;
+      if (products.length === 1) {
+        product = products[0];
+        row.product_number = product?.number ?? 0;
+      } else if (products.length > 1) {
+        errors.push(`falta columna producto en fila:${rowNum}`);
+      } else {
+        throw new Error("no hay productos habilitados para esta empresa");
+      }
     }
 
     if (brands.length === 1) {
@@ -452,53 +489,39 @@ async function readUploadContents(
       row.g_c = brand?.number;
     }
 
-    if (!product) {
-      // throw new TRPCError({ code: "BAD_REQUEST", message:  })
-      errors.push(
-        `La fila ${rowNum} tiene un producto inválido "${row.product} (factura: ${row.invoice_number})"`,
-      );
-      continue;
-    }
-
-    if (!row.invoice_number) {
-      let invoice_number = Math.floor(10000 + Math.random() * 90000);
-      const transactionFound = await db.query.payments.findFirst({
-        where: eq(schema.payments.invoice_number, invoice_number),
-      });
-      while (transactionFound) {
-        invoice_number = Math.floor(10000 + Math.random() * 90000);
+    if (product) {
+      if (brands.length === 1) {
+        product.requiredColumns.delete("g_c");
       }
-      row.invoice_number = invoice_number;
-    }
-    console.log(brands.length);
 
-    if (brands.length === 1) {
-      product.requiredColumns.delete("g_c");
-    }
+      for (const column of product.requiredColumns) {
+        console.log(column);
+        const value = (row as Record<string, unknown>)[column];
 
-    for (const column of product.requiredColumns) {
-      console.log(column);
-      const value = (row as Record<string, unknown>)[column];
+        if (!value) {
+          const columnName = columnLabelByKey[column] ?? column;
 
-      if (!value) {
-        const columnName = columnLabelByKey[column] ?? column;
-
-        // throw new TRPCError({ code: "BAD_REQUEST", message:  })
-        errors.push(
-          `En la fila ${rowNum} la columna "${columnName}" está vacia (factura: ${row.invoice_number})`,
-        );
+          // throw new TRPCError({ code: "BAD_REQUEST", message:  })
+          errors.push(
+            `En la fila ${rowNum} la columna "${columnName}" está vacia (factura: ${row.invoice_number})`,
+          );
+        }
       }
     }
     //agrego fila a info de cabeza de lote
 
-    if (productsBatch[product.number]) {
-      const temp = productsBatch[product.number];
-      if (temp) {
-        temp.records_number += 1;
-        if (row.collected_amount !== null) {
-          temp.amount_collected += row.collected_amount;
+    if (product) {
+      if (productsBatch[product.number]) {
+        const temp = productsBatch[product.number];
+        if (temp) {
+          temp.records_number += 1;
+          if (row.collected_amount !== null) {
+            temp.amount_collected += row.collected_amount;
+          } else if (!row.collected_amount && row.first_due_amount !== null) {
+            temp.amount_collected += row.first_due_amount;
+          }
+          productsBatch[product.number] = temp;
         }
-        productsBatch[product.number] = temp;
       }
     }
 
@@ -517,12 +540,6 @@ async function readUploadContents(
       upload,
     };
   }
-  // for (const key in productsBatch) {
-  //   if (productsBatch.hasOwnProperty(key)) {
-  //     const productHead = { ...productsBatch[key], key };
-  //     batchHead.push(productHead);
-  //   }
-  // }
 
   function trimObject(obj: Record<string, unknown>) {
     return Object.fromEntries(

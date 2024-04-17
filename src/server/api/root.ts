@@ -6,6 +6,7 @@ import { transactionsRouter } from "./routers/transactions-router";
 import { iofilesRouter } from "./routers/iofiles-routers";
 import { productsChannel } from "./routers/products-router";
 import { brandsRouter } from "./routers/brands-router";
+import { statusRouter } from "./routers/status-router";
 
 /**
  * This is the primary router for your server.
@@ -20,6 +21,7 @@ export const appRouter = createTRPCRouter({
   transactions: transactionsRouter,
   iofiles: iofilesRouter,
   brands: brandsRouter,
+  status: statusRouter,
 });
 
 // export type definition of API

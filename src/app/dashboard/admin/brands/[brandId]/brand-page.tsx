@@ -45,6 +45,7 @@ export default function BrandPage({
   type CompaniesResponse = NonNullable<RouterOutputs["companies"]["list"]>;
   type Company = CompaniesResponse extends (infer T)[] ? T : never;
 
+  const router = useRouter();
   const [name, setName] = useState(brand.name);
   const [description, setDescription] = useState(brand.description);
   const [reducedDescription, setReducedDescription] = useState(
@@ -54,14 +55,25 @@ export default function BrandPage({
 
   const { mutateAsync: changeBrand, isLoading } =
     api.brands.change.useMutation();
-
   function changeCompany(company: Company, required: boolean) {
+    const newRelCompanies = new Set(relCompanies); // Crear una copia del conjunto actual
+
+    console.log(newRelCompanies);
+    console.log(required);
+
     if (required) {
-      relCompanies.add(company);
+      newRelCompanies.add(company); // Agregar la empresa al conjunto copiado
     } else {
-      relCompanies.delete(company);
+      for (const relCompany of newRelCompanies) {
+        if (relCompany && relCompany.id === company.id) {
+          newRelCompanies.delete(relCompany); // Eliminar la empresa del conjunto copiado
+          break; // No es necesario continuar después de eliminar el objeto
+        }
+      }
     }
-    setRelCompanies(new Set(relCompanies));
+
+    console.log(newRelCompanies);
+    setRelCompanies(newRelCompanies); // Establecer la copia actualizada como el nuevo estado
   }
 
   async function handleChange() {
@@ -82,8 +94,8 @@ export default function BrandPage({
         companiesId,
         brandId: brand.id,
       });
-
       toast.success("Se han guardado los cambios");
+      router.refresh();
     } catch (e) {
       const error = asTRPCError(e)!;
       toast.error(error.message);
@@ -173,6 +185,7 @@ export default function BrandPage({
                   const isChecked = Array.from(relCompanies).some(
                     (c) => c?.id === company?.id,
                   );
+                  console.log("isChecked: ", isChecked);
                   return (
                     <ListTile
                       key={company?.id}

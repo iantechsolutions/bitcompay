@@ -78,7 +78,8 @@ export const responseDocumentUploadsRelations = relations(
 );
 
 export const payment_status = pgTable("payment_status", {
-  statusId: varchar("statusId", { length: 2 }).primaryKey().default("99"),
+  id: columnId,
+  code: varchar("statusId", { length: 2 }),
   description: varchar("description", { length: 255 }),
 });
 
@@ -145,7 +146,7 @@ export const payments = pgTable(
   }),
 );
 
-export const paymentsRelations = relations(payments, ({ one, many }) => ({
+export const paymentsRelations = relations(payments, ({ one }) => ({
   documentUpload: one(documentUploads, {
     fields: [payments.documentUploadId],
     references: [documentUploads.id],
@@ -164,7 +165,7 @@ export const paymentsRelations = relations(payments, ({ one, many }) => ({
   }),
   status_code: one(payment_status, {
     fields: [payments.status_code],
-    references: [payment_status.statusId],
+    references: [payment_status.id],
   }),
 }));
 

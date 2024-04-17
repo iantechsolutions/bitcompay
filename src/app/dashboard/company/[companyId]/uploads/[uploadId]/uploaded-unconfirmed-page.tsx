@@ -169,23 +169,6 @@ export default function UploadedUnconfirmedPage(props: UploadedPageProps) {
           </pre>
         )}
         {data && (
-          // <LargeTable
-          //   rows={productsBatchArray}
-          //   headers={[
-          //     { key: "product", label: "producto", width: 140 },
-          //     {
-          //       key: "records_number",
-          //       label: "Cant. transacciones",
-          //       width: 180,
-          //     },
-          //     {
-          //       key: "amount_collected",
-          //       label: "recaudado por producto",
-          //       width: 200,
-          //     },
-          //   ]}
-          //   height={100}
-          // />
           <Table>
             <TableHeader>
               <TableRow>
@@ -195,30 +178,27 @@ export default function UploadedUnconfirmedPage(props: UploadedPageProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {productsBatchArray.map((row) => {
-                return (
+              {productsBatchArray
+                .filter((row) => row.records_number !== 0)
+                .map((row) => (
                   <TableRow key={row.product as React.Key}>
                     <TableCell className="font-medium">
-                      {" "}
                       {typeof row.productName === "string"
                         ? row.productName
                         : ""}
                     </TableCell>
                     <TableCell>
-                      {" "}
                       {typeof row.records_number === "number"
                         ? row.records_number
                         : ""}
                     </TableCell>
                     <TableCell>
-                      {" "}
                       {typeof row.amount_collected === "number"
                         ? row.amount_collected
                         : ""}
                     </TableCell>
                   </TableRow>
-                );
-              })}
+                ))}
             </TableBody>
           </Table>
         )}

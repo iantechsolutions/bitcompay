@@ -145,7 +145,6 @@ export const recDocumentValidator = z
       fiscal_id_number: value["Nro ID Fiscal"] ?? null,
       du_type: value["Tipo DU"] ?? null,
       du_number: value["Nro DU"] ?? null,
-      product: value.Producto ?? null,
       product_number: parseInt(value.Producto ?? "") ?? null,
       cbu: value["Nro CBU"] ?? null,
       card_brand: value["TC Marca"] ?? null,

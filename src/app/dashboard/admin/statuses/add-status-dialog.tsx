@@ -17,13 +17,11 @@ import { Label } from "~/components/ui/label";
 import { asTRPCError } from "~/lib/errors";
 import { api } from "~/trpc/react";
 
-export function AddProductDialog() {
-  const { mutateAsync: createProduct, isLoading } =
-    api.products.create.useMutation();
+export function AddStatusDialog() {
+  const { mutateAsync: create, isLoading } = api.status.create.useMutation();
 
+  const [code, setCode] = useState("");
   const [description, setDescription] = useState("");
-  const [name, setName] = useState("");
-  const [number, setNumber] = useState("");
 
   const [open, setOpen] = useState(false);
 
@@ -31,13 +29,12 @@ export function AddProductDialog() {
 
   async function handleCreate() {
     try {
-      await createProduct({
+      await create({
         description,
-        name,
-        number: parseInt(number),
+        code,
       });
 
-      toast.success("Producto creado correctamente");
+      toast.success("Estado creado correctamente");
       router.refresh();
       setOpen(false);
     } catch (e) {
@@ -50,49 +47,42 @@ export function AddProductDialog() {
     <>
       <Button onClick={() => setOpen(true)}>
         <PlusCircleIcon className="mr-2" size={20} />
-        Crear producto
+        Agregar Estado de transaccion
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Crear nuevo producto</DialogTitle>
+            <DialogTitle>Crear nuevo Estado</DialogTitle>
             {/* <DialogDescription>
                     
                 </DialogDescription> */}
           </DialogHeader>
+
           <div>
-            <Label htmlFor="name">Nombre del producto</Label>
+            <Label htmlFor="code">Codigo de Estado</Label>
             <Input
-              id="name"
-              placeholder="ej: premiun pack xz"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-          <div>
-            <Label htmlFor="number">Número de producto</Label>
-            <Input
-              id="number"
-              placeholder="ej: 1"
-              value={number}
-              onChange={(e) => setNumber(e.target.value)}
-            />
-          </div>
-          <div>
-            <Label htmlFor="description">Descripción</Label>
-            <Input
-              id="description"
+              id="code"
               placeholder="..."
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+            />
+          </div>
+          <div>
+            <Label htmlFor="name">Descripcion del Estado</Label>
+            <Input
+              id="status_description"
+              placeholder="ej: RECHAZADO POR BANCO"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
+
           <DialogFooter>
             <Button disabled={isLoading} onClick={handleCreate}>
               {isLoading && (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}
-              Crear producto
+              Crear Estado
             </Button>
           </DialogFooter>
         </DialogContent>

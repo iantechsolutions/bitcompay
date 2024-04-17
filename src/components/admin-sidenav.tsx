@@ -8,6 +8,7 @@ import {
   FingerprintIcon,
   LayoutDashboardIcon,
   PackageIcon,
+  Landmark,
   ShoppingBagIcon,
   UsersIcon,
   Stamp,
@@ -32,6 +33,9 @@ export default function AdminSidenav() {
       </SidenavItem>
       <SidenavItem icon={<Stamp />} href="/dashboard/admin/brands">
         Marcas
+      </SidenavItem>
+      <SidenavItem icon={<Landmark />} href="/dashboard/admin/statuses">
+        Estados
       </SidenavItem>
       <SidenavItem icon={<UsersIcon />} href="/dashboard/admin/users">
         Usuarios
