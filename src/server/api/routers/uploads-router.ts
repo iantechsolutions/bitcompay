@@ -395,7 +395,7 @@ async function readUploadContents(
     string,
     unknown
   >[];
-
+  console.log(11111);
   const trimmedRows = rows.map(trimObject);
 
   trimmedRows.forEach((row) => {
@@ -406,14 +406,16 @@ async function readUploadContents(
       row.Producto = row.Producto?.toString();
     }
   });
-  const transformedRows = recRowsTransformer(trimmedRows);
-
+  console.log("antes de recrows")
+  const temp = recRowsTransformer(trimmedRows);
+  const transformedRows = temp.transformedRows;
+  const cellsToEdit = temp.cellsToEdit;
   const productsMap = Object.fromEntries(
     products.map((product) => [product.number, product]),
   );
 
   const errors: string[] = [];
-
+  console.log(333333);
   const productsBatch = Object.fromEntries(
     Object.keys(productsMap).map((clave) => [
       clave,
@@ -434,9 +436,10 @@ async function readUploadContents(
       productColumnExist = true;
     }
   }
-
+  console.log("aca no hay error");
+  
   if (!productColumnExist && products.length > 1) {
-    errors.push("no existe la columna producto");
+    errors.push("Error: La columna producto no existe en el documento");
     throw new TRPCError({ code: "BAD_REQUEST", message: errors[0] });
   }
 
@@ -495,16 +498,18 @@ async function readUploadContents(
       }
 
       for (const column of product.requiredColumns) {
-        console.log(column);
         const value = (row as Record<string, unknown>)[column];
 
         if (!value) {
           const columnName = columnLabelByKey[column] ?? column;
+          cellsToEdit.push({row: row, column: columnName, reason: "Empty cell"} )
+          //remove row from list of transformedRows
+          transformedRows.splice(i, 1);
 
           // throw new TRPCError({ code: "BAD_REQUEST", message:  })
-          errors.push(
-            `En la fila ${rowNum} la columna "${columnName}" está vacia (factura: ${row.invoice_number})`,
-          );
+          // errors.push(
+          //   `En la fila ${rowNum} la columna "${columnName}" está vacia (factura: ${row.invoice_number})`,
+          // );
         }
       }
     }
@@ -538,6 +543,7 @@ async function readUploadContents(
       headers: recHeaders,
       batchHead: productsBatch,
       upload,
+      rowToEdit: cellsToEdit,
     };
   }
 

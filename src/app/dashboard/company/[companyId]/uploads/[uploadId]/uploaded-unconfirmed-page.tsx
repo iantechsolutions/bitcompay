@@ -25,6 +25,7 @@ import {
 
 export type UploadedPageProps = {
   upload: NonNullable<RouterOutputs["uploads"]["upload"]>;
+  sendData: (data: any) => void;
 };
 
 export default function UploadedUnconfirmedPage(props: UploadedPageProps) {
@@ -90,6 +91,15 @@ export default function UploadedUnconfirmedPage(props: UploadedPageProps) {
     ...value,
   }));
 
+  props.sendData(productsBatchArray);
+
+  const editBatchArray: Record<string, unknown>[] = Object.entries(
+    data?.rowToEdit ?? {},
+  ).map(([key, value]) => ({
+    product: key,
+    ...value,
+  }));
+
   async function handleDelete() {
     try {
       await deleteUpload({ uploadId: props.upload.id });
@@ -112,13 +122,18 @@ export default function UploadedUnconfirmedPage(props: UploadedPageProps) {
           companyId: company.id,
         });
 
-      if (data) setData(data);
+      if (data) {
+        setData(data);
+      }
     } catch (e) {
       console.error(e);
       return;
     }
   }
-
+  console.log("rows que llegan");
+  console.log(data?.rows);
+  console.log("rowsEdit que llegan");
+  console.log(data?.rowToEdit);
   return (
     <>
       <LayoutContainer>
@@ -202,6 +217,19 @@ export default function UploadedUnconfirmedPage(props: UploadedPageProps) {
             </TableBody>
           </Table>
         )}
+
+        <div className="mt-5">
+          <h3>Filas con errores a arreglar</h3>
+
+          {data && (
+            <LargeTable
+              rows={data.rowToEdit}
+              headers={data.headers}
+              height={100}
+            />
+          )}
+        </div>
+
         <div className="flex gap-2">
           <Button variant="destructive" onClick={handleDelete}>
             Cancelar y eliminar
@@ -214,6 +242,7 @@ export default function UploadedUnconfirmedPage(props: UploadedPageProps) {
           )}
         </div>
       </LayoutContainer>
+
       <div className="mt-5">
         {data && <LargeTable rows={data.rows} headers={data.headers} />}
       </div>

@@ -9,10 +9,18 @@ export default async function Home(props: { params: { uploadId: string } }) {
   if (!upload) {
     return <Title>El documento no existe.</Title>;
   }
+  const receiveData = (data: any) => {
+    // const cantidad = data.length;
+    console.log(data);
+  };
+
+  const numeroId = 0;
 
   return (
     <>
-      {!upload.confirmed && <UploadedUnconfirmedPage upload={upload} />}
+      {!upload.confirmed && (
+        <UploadedUnconfirmedPage upload={upload} sendData={receiveData} />
+      )}
       {upload.confirmed && <UploadedConfirmedPage upload={upload} />}
     </>
   );

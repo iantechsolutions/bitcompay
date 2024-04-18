@@ -165,9 +165,63 @@ export const recDocumentValidator = z
     };
   });
 
+// export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
+//   return z.array(recDocumentValidator).parse(rows);
+// };
+
+
 export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
-  return z.array(recDocumentValidator).parse(rows);
+  const cellsToEdit: { row: { g_c: number | null; name: string | null; fiscal_id_type: "CUIT" | "CUIL" | null; fiscal_id_number: number | null; du_type: "DNI" | "LC" | "LE" | null; du_number: number | null; product_number: number | null; cbu: string | null; card_brand: string | null; is_new: boolean | null; card_number: string | null; invoice_number: number | null; period: Date | null; first_due_amount: number | null; first_due_date: Date | null; second_due_amount: number | null; second_due_date: Date | null; additional_info: string | null; payment_channel: string | null; payment_date: Date | null; collected_amount: number | null; comment: string | null; payment_status: string | null; }; column: string | number | undefined; reason: string }[] = [];
+  const transformedRows: ({ g_c: number | null; name: string | null; fiscal_id_type: "CUIT" | "CUIL" | null; fiscal_id_number: number | null; du_type: "DNI" | "LC" | "LE" | null; du_number: number | null; product_number: number; cbu: string | null; card_brand: string | null; is_new: boolean | null; card_number: string | null; invoice_number: number | null; period: Date | null; first_due_amount: number | null; first_due_date: Date | null; second_due_amount: number | null; second_due_date: Date | null; additional_info: string | null; payment_channel: string | null; payment_date: Date | null; collected_amount: number | null; comment: string | null; payment_status: string | null; })[] = [];
+  const defaultRow = {g_c: null,name: null,fiscal_id_type: null,fiscal_id_number: null,du_type: null,du_number: null,product_number: 0,cbu: null,card_brand: null,is_new: null,card_number: null,invoice_number: null,period: null,first_due_amount: null,first_due_date: null,second_due_amount: null,second_due_date: null,additional_info: null,payment_channel: null,payment_date: null,collected_amount: null,comment: null,payment_status: null,  };
+  rows.forEach((row, rowIndex) => {
+    try {
+      const parsedRow = z.array(recDocumentValidator).parse([row]);
+      console.log("aca");
+      console.log(parsedRow);
+      transformedRows.push(parsedRow.at(0) ?? defaultRow);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        error.errors.forEach((zodError) => {
+          const column = zodError.path[zodError.path.length - 1];
+          cellsToEdit.push({
+            row: {
+              g_c:row.g_c as number | null,
+              name: row.name as string | null,
+              fiscal_id_type: row.fiscal_id_type as "CUIT" | "CUIL" | null,
+              fiscal_id_number: row.fiscal_id_number as number | null,
+              du_type: row.du_type as "DNI" | "LC" | "LE" | null,
+              du_number: row.du_number as number | null,
+              product_number: row.product_number as number | null,
+              cbu: row.cbu as string | null,
+              card_brand: row.card_brand as string | null,
+              is_new: row.is_new as boolean | null,
+              card_number: row.card_number as string | null,
+              invoice_number: row.invoice_number as number | null,
+              period: row.period as Date | null,
+              first_due_amount: row.first_due_amount as number | null,
+              first_due_date: row.first_due_date as Date | null,
+              second_due_amount: row.second_due_amount as number | null,
+              second_due_date: row.second_due_date as Date | null,
+              additional_info: row.additional_info as string | null,
+              payment_channel: row.payment_channel as string | null,
+              payment_date: row.payment_date as Date | null,
+              collected_amount: row.collected_amount as number | null,
+              comment: row.comment as string | null,
+              payment_status: row.payment_status as string | null,
+            },
+            column,
+            reason: zodError.message,
+          });
+        });
+      }
+    }
+  });
+
+  return { transformedRows, cellsToEdit };
 };
+
+
 
 export const recHeaders: TableHeaders = [
   { key: "g_c", label: "G.C.", width: 50 },
