@@ -8,11 +8,9 @@ import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -78,7 +76,7 @@ export function AddChannelDialog() {
               placeholder="ej: 1"
               value={number}
               onChange={(e) => setNumber(e.target.value)}
-              />
+            />
           </div>
           <div>
             <Label htmlFor="description">Descripción</Label>

@@ -7,11 +7,9 @@ import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -25,7 +23,7 @@ export function AddBrandDialog() {
   const [reducedDescription, setReducedDescription] = useState("");
   const [description, setDescription] = useState("");
   const [name, setName] = useState("");
-  const [number, setNumber] = useState(0);
+  const [number, setNumber] = useState("");
   const [open, setOpen] = useState(false);
 
   const router = useRouter();
@@ -36,7 +34,7 @@ export function AddBrandDialog() {
         description,
         name,
         redescription: reducedDescription,
-        number
+        number: parseInt(number),
       });
 
       toast.success("marca creada correctamente");
@@ -79,15 +77,15 @@ export function AddBrandDialog() {
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
-          
+
           <div>
-            <Label htmlFor="number">Número de canal</Label>
+            <Label htmlFor="number">Número de la marca</Label>
             <Input
               id="number"
               placeholder="ej: 1"
               value={number}
-              onChange={(e) => setNumber(parseInt(e.target.value))}
-              />
+              onChange={(e) => setNumber(e.target.value)}
+            />
           </div>
 
           <div>

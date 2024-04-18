@@ -206,7 +206,7 @@ export default function BrandPage({
           </AccordionItem>
           <AccordionItem value="item-5" className="border-none">
             <AccordionTrigger>
-              <h2 className="text-md">Eliminar marca</h2>
+              <h2 className="text-md">Eliminar Marca</h2>
             </AccordionTrigger>
             <AccordionContent>
               <div className="flex justify-end">
@@ -231,7 +231,7 @@ function Deletebrand(props: { brandId: string }) {
     deletebrand({ brandId: props.brandId })
       .then(() => {
         toast.success("Se ha eliminado la marca");
-        router.push("../");
+        router.push("./");
       })
       .catch((e) => {
         const error = asTRPCError(e)!;
@@ -242,7 +242,7 @@ function Deletebrand(props: { brandId: string }) {
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <Button variant="destructive" className="w-[160px]">
-          Eliminar canal
+          Eliminar Marca
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>

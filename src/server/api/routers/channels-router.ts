@@ -26,7 +26,7 @@ export const channelsRouter = createTRPCRouter({
       return channel;
     }),
 
-  list: protectedProcedure.query(async ({ input }) => {
+  list: protectedProcedure.query(async ({}) => {
     const channels = await db.query.channels.findMany({
       where: eq(schema.channels.enabled, true),
       orderBy: [asc(schema.channels.number)],
@@ -43,7 +43,7 @@ export const channelsRouter = createTRPCRouter({
         number: z.number().min(1).max(255),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       // TODO: verificar permisos
 
       const id = createId();
@@ -86,9 +86,12 @@ export const channelsRouter = createTRPCRouter({
         channelId: z.string(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       await db
         .delete(schema.channels)
         .where(eq(schema.channels.id, input.channelId));
+      await db
+        .delete(schema.productChannels)
+        .where(eq(schema.productChannels.channelId, input.channelId));
     }),
 });
