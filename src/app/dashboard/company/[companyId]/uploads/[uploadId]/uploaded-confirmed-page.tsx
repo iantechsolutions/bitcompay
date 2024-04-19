@@ -67,26 +67,31 @@ export default function UploadedConfirmedPage(props: UploadedPageProps) {
       <Button size="lg" className="w-full" onClick={downloadPDF}>
         Descargar Comprobante de salida
       </Button>
-      <div ref={pdfRef} className="p-16">
-        <h2>Comprobante de subida</h2>
-        <div className="flex flex-row justify-between">
-          <div className="flex flex-row">
-            <img
-              src="https://utfs.io/f/761a1f9b-564b-4690-8868-e18d666b80f3-mtnazc.png"
-              className="p-r-4"
-              alt="logo"
-            />
-            <p className="relative top-2 text-4xl font-bold ">Bitcom</p>
-            <p className="relative top-2 text-4xl">Pay</p>
-          </div>
-          <div className="flex flex-col">
-            <p className="text-ml font-semibold">{fileName}</p>
-            <p className="text-ml font-semibold">
-              cargado el{" "}
-              {dayjs(confirmedAt).format("DD/MM/YYYY [a las] HH:mm:ss")}
-            </p>
-          </div>
+      <div ref={pdfRef} className="items-center justify-center p-16">
+        <div className="flex flex-row">
+          <img
+            src="https://utfs.io/f/761a1f9b-564b-4690-8868-e18d666b80f3-mtnazc.png"
+            className="p-r-4"
+            alt="logo"
+          />
+          <p className="relative top-2 text-4xl font-bold ">Bitcom</p>
+          <p className="relative top-2 text-4xl">Pay</p>
         </div>
+        <hr className="p-4" />
+        <h2>Comprobante de subida</h2>
+        <hr className="p-4" />
+        <div className="flex flex-row justify-between">
+          <h4>Fecha de subida:</h4>
+          <h4 className="font-bold">
+            {dayjs(confirmedAt).format("DD/MM/YYYY [a las] HH:mm:ss")}
+          </h4>
+        </div>
+        <hr className="p-4" />
+        <div className="flex flex-row justify-between ">
+          <h4>Nombre del archivo:</h4>
+          <h4 className="font-bold">{fileName}</h4>
+        </div>
+        <hr className="p-4" />
         <Table>
           <TableHeader>
             <TableRow>
@@ -117,6 +122,7 @@ export default function UploadedConfirmedPage(props: UploadedPageProps) {
               ))}
           </TableBody>
         </Table>
+        <hr className="p-4" />
       </div>
     </LayoutContainer>
   );
