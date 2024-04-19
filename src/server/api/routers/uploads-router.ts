@@ -54,7 +54,7 @@ export const uploadsRouter = createTRPCRouter({
       return await db.transaction(async (db) => {
         const channels = await getCompanyProducts(input.companyId);
         const brands = await getCompanyBrands(input.companyId);
-        console.log(brands);
+        
         const contents = await readUploadContents(
           db,
           input.id,
@@ -62,7 +62,7 @@ export const uploadsRouter = createTRPCRouter({
           channels,
           brands,
         );
-        console.log("no fallo readcontents");
+        
         await db
           .update(schema.documentUploads)
           .set({
@@ -406,7 +406,10 @@ async function readUploadContents(
     }
   });
 
-  const transformedRows = recRowsTransformer(trimmedRows);
+  // const transformedRows = recRowsTransformer(trimmedRows);
+  const temp = recRowsTransformer(trimmedRows);
+  const transformedRows = temp.transformedRows;
+  const cellsToEdit = temp.cellsToEdit;
   const productsMap = Object.fromEntries(
     products.map((product) => [product.number, product]),
   );
@@ -423,20 +426,19 @@ async function readUploadContents(
       },
     ]),
   );
-  console.log("info de cabeza de lote", productsBatch);
+  
   /// verificacion si hay columna producto
 
   let productColumnExist = false;
   for (const row of transformedRows) {
-    console.log(row.product_number);
     if (row.product_number) {
       productColumnExist = true;
     }
   }
-  console.log("aca no hay error");
 
   if (!productColumnExist && products.length > 1) {
     errors.push("Error: La columna producto no existe en el documento");
+
     throw new TRPCError({ code: "BAD_REQUEST", message: errors[0] });
   }
 
@@ -498,9 +500,8 @@ async function readUploadContents(
         const value = (row as Record<string, unknown>)[column];
         if (!value) {
           const columnName = columnLabelByKey[column] ?? column;
-          errors.push(
-            `En la fila ${rowNum} la columna "${columnName}" está vacia (factura: ${row.invoice_number})`,
-          );
+          cellsToEdit.push({row: row, column: columnName, reason: "Empty cell"} )
+          transformedRows.splice(i, 1);
         }
       }
     }
@@ -534,6 +535,7 @@ async function readUploadContents(
       headers: recHeaders,
       batchHead: productsBatch,
       upload,
+      rowToEdit: cellsToEdit,
     };
   }
 }

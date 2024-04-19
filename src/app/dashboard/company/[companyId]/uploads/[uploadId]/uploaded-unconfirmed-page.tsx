@@ -11,6 +11,7 @@ import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 import { api } from "~/trpc/react";
 import { LargeTable } from "~/components/table";
+import { LargeEditableTable } from "~/components/editable-table";
 import { toast } from "sonner";
 import { asTRPCError } from "~/lib/errors";
 import { useCompanyData } from "../../company-provider";
@@ -86,7 +87,6 @@ export default function UploadContainer(props: UploadedPageProps) {
   >(null);
   // uso la funcion de contexto
   // const { updateProductsBatch } = useReceiveData();
-
   const productsBatchArray: Record<string, unknown>[] = Object.entries(
     data?.batchHead ?? {},
   ).map(([key, value]) => ({
@@ -95,6 +95,24 @@ export default function UploadContainer(props: UploadedPageProps) {
   }));
 
   props.sendData(productsBatchArray);
+
+  const rowsOnly = data?.rowToEdit.map((item) => item.row);
+  const colsOnly = data?.rowToEdit.map((item) => item.column);
+  const reasonsOnly = data?.rowToEdit.map((item) => item.reason);
+  const editRowsBatchArray: Record<string, unknown>[] = Object.entries(
+    rowsOnly ?? {},
+  ).map(([key, value]) => ({
+    product: key,
+    ...value,
+  }));
+
+  const [editableTableRows, setEditableTableRows] =
+    useState<Record<string, unknown>[]>(editRowsBatchArray);
+  const handleRowChange = (row: Record<string, unknown>, index: number) => {
+    const newRows = [...editableTableRows];
+    newRows[index] = row;
+    setEditableTableRows(newRows);
+  };
 
   async function handleDelete() {
     try {
@@ -125,6 +143,7 @@ export default function UploadContainer(props: UploadedPageProps) {
       console.error(e);
       return;
     }
+    console.log(data?.rowToEdit);
   }
 
   return (
@@ -194,7 +213,18 @@ export default function UploadContainer(props: UploadedPageProps) {
             </TableBody>
           </Table>
         )}
+        <div className="mt-5">
+          <h3>Filas con errores a arreglar</h3>
 
+          {data && (
+            <LargeEditableTable
+              rows={editRowsBatchArray}
+              headers={data.headers}
+              height={100}
+              columns={colsOnly}
+            />
+          )}
+        </div>
         <div className="flex gap-2">
           <Button variant="destructive" onClick={handleDelete}>
             Cancelar y eliminar

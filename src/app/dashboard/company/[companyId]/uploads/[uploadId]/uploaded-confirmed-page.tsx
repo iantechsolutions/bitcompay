@@ -13,7 +13,6 @@ export default function UploadedConfirmedPage(props: UploadedPageProps) {
   const { confirmedAt, fileName } = props.upload;
   const { dataBatch } = props;
 
-  console.log(confirmedAt, fileName, dataBatch);
   return (
     <LayoutContainer>
       <Title>Carga de archivo finalizada</Title>

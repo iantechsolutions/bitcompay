@@ -1,4 +1,4 @@
-"use server";
+"use client";
 
 import { Title } from "~/components/title";
 import { api } from "~/trpc/server";
