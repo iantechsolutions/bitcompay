@@ -39,6 +39,8 @@
     "cmdk": "^0.2.0",
     "dayjs": "^1.11.10",
     "drizzle-orm": "^0.29.3",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.1",
     "lucide-react": "^0.298.0",
     "nanoid": "^5.0.4",
     "next": "^14.1.3",
