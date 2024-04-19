@@ -1,6 +1,5 @@
 "use client";
 
-import UploadedConfirmedPage from "./uploaded-confirmed-page";
 import LayoutContainer from "~/components/layout-container";
 import { Title } from "~/components/title";
 import type { RouterOutputs } from "~/trpc/shared";
@@ -27,11 +26,10 @@ import {
 
 export type UploadedPageProps = {
   upload: NonNullable<RouterOutputs["uploads"]["upload"]>;
+  sendData: (data: any) => void;
 };
 
-export default function UploadedUnconfirmedPage(props: UploadedPageProps) {
-  const [confirmed, setConfirmed] = useState(props.upload.confirmed);
-
+export default function UploadContainer(props: UploadedPageProps) {
   const router = useRouter();
 
   const { upload } = props;
@@ -73,8 +71,8 @@ export default function UploadedUnconfirmedPage(props: UploadedPageProps) {
 
     try {
       await confirmUpload({ id: upload.id, companyId: company.id });
-      setConfirmed(true);
       toast.success("Documento cargado correctamente");
+      router.refresh();
     } catch (e) {
       const error = asTRPCError(e)!;
       toast.error(error.message);
@@ -96,7 +94,7 @@ export default function UploadedUnconfirmedPage(props: UploadedPageProps) {
     ...value,
   }));
 
-  // updateProductsBatch(productsBatchArray)
+  props.sendData(productsBatchArray);
 
   async function handleDelete() {
     try {
@@ -131,99 +129,88 @@ export default function UploadedUnconfirmedPage(props: UploadedPageProps) {
 
   return (
     <>
-      {confirmed ? (
-        <UploadedConfirmedPage
-          upload={props.upload}
-          dataBatch={productsBatchArray}
-        />
-      ) : (
-        <>
-          <LayoutContainer>
-            <></>
-            <Title>Proceso de carga</Title>
+      <LayoutContainer>
+        <></>
+        <Title>Proceso de carga</Title>
 
-            <Card className="flex items-center gap-3 p-3">
-              <div className="flex h-[50px] w-[50px] items-center justify-center rounded-full bg-stone-100">
-                <FileSpreadsheetIcon />
-              </div>
-              <div className="">
-                <p className="text-md font-medium">{upload.fileName}</p>
-                <p className="text-xs font-semibold">
-                  {fileSizeLabel} - subido el{" "}
-                  {dayjs(upload.createdAt).format(
-                    "DD/MM/YYYY [a las] HH:mm:ss",
-                  )}
-                </p>
-              </div>
-            </Card>
-            {error && <p className="font-semibold text-red-500">{error}</p>}
-            <Button
-              className="w-full py-6"
-              variant="outline"
-              disabled={!documentType || isLoading}
-              onClick={handleContinue}
-            >
-              Leer datos
-            </Button>
-
-            {dataError && (
-              <pre className="mt-5 overflow-auto rounded-md border border-dashed p-4">
-                {dataError.data?.cause?.trim() ?? dataError.message}
-              </pre>
-            )}
-            {data && (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Producto</TableHead>
-                    <TableHead>Cant. Transacciones</TableHead>
-                    <TableHead>Recaudado por producto</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {productsBatchArray
-                    .filter((row) => row.records_number !== 0)
-                    .map((row) => (
-                      <TableRow key={row.product as React.Key}>
-                        <TableCell className="font-medium">
-                          {typeof row.productName === "string"
-                            ? row.productName
-                            : ""}
-                        </TableCell>
-                        <TableCell>
-                          {typeof row.records_number === "number"
-                            ? row.records_number
-                            : ""}
-                        </TableCell>
-                        <TableCell>
-                          {typeof row.amount_collected === "number"
-                            ? row.amount_collected
-                            : ""}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
-            )}
-
-            <div className="flex gap-2">
-              <Button variant="destructive" onClick={handleDelete}>
-                Cancelar y eliminar
-              </Button>
-
-              {data && (
-                <Button onClick={handlerConfirm}>
-                  Confirmar y escribir a la base de datos
-                </Button>
-              )}
-            </div>
-          </LayoutContainer>
-
-          <div className="mt-5">
-            {data && <LargeTable rows={data.rows} headers={data.headers} />}
+        <Card className="flex items-center gap-3 p-3">
+          <div className="flex h-[50px] w-[50px] items-center justify-center rounded-full bg-stone-100">
+            <FileSpreadsheetIcon />
           </div>
-        </>
-      )}
+          <div className="">
+            <p className="text-md font-medium">{upload.fileName}</p>
+            <p className="text-xs font-semibold">
+              {fileSizeLabel} - subido el{" "}
+              {dayjs(upload.createdAt).format("DD/MM/YYYY [a las] HH:mm:ss")}
+            </p>
+          </div>
+        </Card>
+        {error && <p className="font-semibold text-red-500">{error}</p>}
+        <Button
+          className="w-full py-6"
+          variant="outline"
+          disabled={!documentType || isLoading}
+          onClick={handleContinue}
+        >
+          Leer datos
+        </Button>
+
+        {dataError && (
+          <pre className="mt-5 overflow-auto rounded-md border border-dashed p-4">
+            {dataError.data?.cause?.trim() ?? dataError.message}
+          </pre>
+        )}
+        {data && (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Producto</TableHead>
+                <TableHead>Cant. Transacciones</TableHead>
+                <TableHead>Recaudado por producto</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {productsBatchArray
+                .filter((row) => row.records_number !== 0)
+                .map((row) => (
+                  <TableRow key={row.product as React.Key}>
+                    <TableCell className="font-medium">
+                      {typeof row.productName === "string"
+                        ? row.productName
+                        : ""}
+                    </TableCell>
+                    <TableCell>
+                      {typeof row.records_number === "number"
+                        ? row.records_number
+                        : ""}
+                    </TableCell>
+                    <TableCell>
+                      {typeof row.amount_collected === "number"
+                        ? row.amount_collected
+                        : ""}
+                    </TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+        )}
+
+        <div className="flex gap-2">
+          <Button variant="destructive" onClick={handleDelete}>
+            Cancelar y eliminar
+          </Button>
+
+          {data && (
+            <Button onClick={handlerConfirm}>
+              Confirmar y escribir a la base de datos
+            </Button>
+          )}
+        </div>
+      </LayoutContainer>
+
+      <div className="mt-5">
+        {data && <LargeTable rows={data.rows} headers={data.headers} />}
+      </div>
     </>
   );
 }
