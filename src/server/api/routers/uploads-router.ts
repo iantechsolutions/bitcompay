@@ -1,4 +1,4 @@
-import { number, z } from "zod";
+import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import * as schema from "~/server/db/schema";
 import { type DBTX, db } from "~/server/db";
@@ -367,7 +367,6 @@ async function readUploadContents(
   products: ProductsOfCompany,
   brands: BrandsOfCompany,
 ) {
-  console.log("hola que hace");
   const upload = await db.query.documentUploads.findFirst({
     where: eq(schema.documentUploads.id, id),
   });
@@ -395,7 +394,7 @@ async function readUploadContents(
     string,
     unknown
   >[];
-  console.log(11111);
+
   const trimmedRows = rows.map(trimObject);
 
   trimmedRows.forEach((row) => {
@@ -406,16 +405,14 @@ async function readUploadContents(
       row.Producto = row.Producto?.toString();
     }
   });
-  console.log("antes de recrows")
-  const temp = recRowsTransformer(trimmedRows);
-  const transformedRows = temp.transformedRows;
-  const cellsToEdit = temp.cellsToEdit;
+
+  const transformedRows = recRowsTransformer(trimmedRows);
   const productsMap = Object.fromEntries(
     products.map((product) => [product.number, product]),
   );
 
   const errors: string[] = [];
-  console.log(333333);
+
   const productsBatch = Object.fromEntries(
     Object.keys(productsMap).map((clave) => [
       clave,
@@ -437,7 +434,7 @@ async function readUploadContents(
     }
   }
   console.log("aca no hay error");
-  
+
   if (!productColumnExist && products.length > 1) {
     errors.push("Error: La columna producto no existe en el documento");
     throw new TRPCError({ code: "BAD_REQUEST", message: errors[0] });
@@ -499,21 +496,14 @@ async function readUploadContents(
 
       for (const column of product.requiredColumns) {
         const value = (row as Record<string, unknown>)[column];
-
         if (!value) {
           const columnName = columnLabelByKey[column] ?? column;
-          cellsToEdit.push({row: row, column: columnName, reason: "Empty cell"} )
-          //remove row from list of transformedRows
-          transformedRows.splice(i, 1);
-
-          // throw new TRPCError({ code: "BAD_REQUEST", message:  })
-          // errors.push(
-          //   `En la fila ${rowNum} la columna "${columnName}" está vacia (factura: ${row.invoice_number})`,
-          // );
+          errors.push(
+            `En la fila ${rowNum} la columna "${columnName}" está vacia (factura: ${row.invoice_number})`,
+          );
         }
       }
     }
-    //agrego fila a info de cabeza de lote
 
     if (product) {
       if (productsBatch[product.number]) {
@@ -529,13 +519,14 @@ async function readUploadContents(
         }
       }
     }
-
-    if (errors.length > 0) {
-      throw new TRPCError({ code: "BAD_REQUEST", message: errors.join("\n") });
-    }
-
-    //throw new TRPCError({ code: "NOT_FOUND" });
   }
+  //agrego fila a info de cabeza de lote
+
+  if (errors.length > 0) {
+    throw new TRPCError({ code: "BAD_REQUEST", message: errors.join("\n") });
+  }
+
+  //throw new TRPCError({ code: "NOT_FOUND" });
 
   if (type === "rec") {
     return {
@@ -543,23 +534,22 @@ async function readUploadContents(
       headers: recHeaders,
       batchHead: productsBatch,
       upload,
-      rowToEdit: cellsToEdit,
     };
   }
+}
 
-  function trimObject(obj: Record<string, unknown>) {
-    return Object.fromEntries(
-      Object.entries(obj).map(([key, value]) => {
-        if (typeof value === "string") {
-          const t = value.trim();
+function trimObject(obj: Record<string, unknown>) {
+  return Object.fromEntries(
+    Object.entries(obj).map(([key, value]) => {
+      if (typeof value === "string") {
+        const t = value.trim();
 
-          if (t === "") return [key, null];
+        if (t === "") return [key, null];
 
-          return [key, t];
-        }
+        return [key, t];
+      }
 
-        return [key, value];
-      }),
-    );
-  }
+      return [key, value];
+    }),
+  );
 }
