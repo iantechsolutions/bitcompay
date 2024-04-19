@@ -12,10 +12,11 @@ export type UploadContainerProps = {
   upload: NonNullable<RouterOutputs["uploads"]["upload"]>;
 };
 
-export default async function Home(props: UploadContainerProps) {
-  let batch: any;
-  const receiveData = (data: any) => {
-    const batch = data;
+export default function Home(props: UploadContainerProps) {
+  let batch: Record<string, unknown>[];
+  const receiveData = (data: Record<string, unknown>[]) => {
+    batch = data;
+    console.log("send data ejecutado", batch);
   };
 
   return (

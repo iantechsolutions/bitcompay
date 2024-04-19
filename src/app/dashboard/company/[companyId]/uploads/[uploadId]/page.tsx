@@ -1,7 +1,6 @@
 import { Title } from "~/components/title";
 import { api } from "~/trpc/server";
-import UploadedUnconfirmedPage from "./uploaded-unconfirmed-page";
-import UploadContainer from "./upload-container-page";
+import UploadUnconfirmedPage from "./uploaded-unconfirmed-page";
 // import UploadedConfirmedPage from "./uploaded-confirmed-page";
 // import { ReceiveDataProvider } from "./upload-provider";
 export default async function Home(props: { params: { uploadId: string } }) {
@@ -11,5 +10,5 @@ export default async function Home(props: { params: { uploadId: string } }) {
     return <Title>El documento no existe.</Title>;
   }
 
-  return <UploadContainer upload={upload} />;
+  return <UploadUnconfirmedPage upload={upload} />;
 }

@@ -166,21 +166,13 @@ export const recDocumentValidator = z
     };
   });
 
-
-
-  export const recDocumentValidatorWithoutProduct = z
+export const recDocumentValidatorWithoutProduct = z
   .object({
     "G.C.": z.any().nullable().optional(),
     "Apellido y Nombre": z.any().nullable().optional(),
-    "Tipo ID Fiscal": z
-    .any()
-      .nullable()
-      .optional(),
+    "Tipo ID Fiscal": z.any().nullable().optional(),
     "Nro ID Fiscal": z.any().nullable().optional(),
-    "Tipo DU": z
-      .any()
-      .nullable()
-      .optional(),
+    "Tipo DU": z.any().nullable().optional(),
     "Nro DU": z.any().nullable().optional(),
     Producto: z
       .any({
@@ -190,37 +182,20 @@ export const recDocumentValidator = z
       .optional(),
     "Nro CBU": z.any().nullable().optional(),
     "TC Marca": z.any().nullable().optional(),
-    "Alta Nueva": z
-      .any()
-      .nullable()
-      .optional(),
+    "Alta Nueva": z.any().nullable().optional(),
     "Nro. Tarjeta": z.any().nullable().optional(),
     // NOT OPTIONAL!!!
     "Nro Factura": z.any().optional(),
     //
     Período: z.any().nullable().optional(),
-    "Importe 1er Vto.": z.any()
-      .nullable()
-      .optional(),
+    "Importe 1er Vto.": z.any().nullable().optional(),
     "Fecha 1er Vto.": z.any().nullable().optional(),
-    "Importe 2do Vto.": z.any()
-      .nullable()
-      .optional(),
+    "Importe 2do Vto.": z.any().nullable().optional(),
     "Fecha 2do. Vto.": z.any().nullable().optional(),
-    "Info. Adicional": z
-      .any()
-      .catch("")
-      .nullable()
-      .optional(),
-    "Canal de Cobro": z
-      .any()
-      .catch("")
-      .nullable()
-      .optional(),
+    "Info. Adicional": z.any().catch("").nullable().optional(),
+    "Canal de Cobro": z.any().catch("").nullable().optional(),
     "Fecha de Pago/Débito": z.any().nullable().optional(),
-    "Importe Cobrado": z.any()
-      .nullable()
-      .optional(),
+    "Importe Cobrado": z.any().nullable().optional(),
     "Obs.": z.any().catch("").nullable().optional(),
     "Estado de Pago": z.any().nullable().optional(),
   })
@@ -257,61 +232,135 @@ export const recDocumentValidator = z
 // };
 
 export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
-  const cellsToEdit: { row: { g_c: number | null; name: string | null; fiscal_id_type: "CUIT" | "CUIL" | null; fiscal_id_number: number | null; du_type: "DNI" | "LC" | "LE" | null; du_number: number | null; product_number: number | null; cbu: string | null; card_brand: string | null; is_new: boolean | null; card_number: string | null; invoice_number: number | null; period: Date | null; first_due_amount: number | null; first_due_date: Date | null; second_due_amount: number | null; second_due_date: Date | null; additional_info: string | null; payment_channel: string | null; payment_date: Date | null; collected_amount: number | null; comment: string | null; payment_status: string | null; }; column: string | number | undefined; reason: string }[] = [];
-  const transformedRows: ({ g_c: number | null; name: string | null; fiscal_id_type: "CUIT" | "CUIL" | null; fiscal_id_number: number | null; du_type: "DNI" | "LC" | "LE" | null; du_number: number | null; product_number: number; cbu: string | null; card_brand: string | null; is_new: boolean | null; card_number: string | null; invoice_number: number | null; period: Date | null; first_due_amount: number | null; first_due_date: Date | null; second_due_amount: number | null; second_due_date: Date | null; additional_info: string | null; payment_channel: string | null; payment_date: Date | null; collected_amount: number | null; comment: string | null; payment_status: string | null; })[] = [];
-  const defaultRow = {g_c: null,name: null,fiscal_id_type: null,fiscal_id_number: null,du_type: null,du_number: null,product_number: 0,cbu: null,card_brand: null,is_new: null,card_number: null,invoice_number: null,period: null,first_due_amount: null,first_due_date: null,second_due_amount: null,second_due_date: null,additional_info: null,payment_channel: null,payment_date: null,collected_amount: null,comment: null,payment_status: null,  };
+  const cellsToEdit: {
+    row: {
+      g_c: number | null;
+      name: string | null;
+      fiscal_id_type: "CUIT" | "CUIL" | null;
+      fiscal_id_number: number | null;
+      du_type: "DNI" | "LC" | "LE" | null;
+      du_number: number | null;
+      product_number: number | null;
+      cbu: string | null;
+      card_brand: string | null;
+      is_new: boolean | null;
+      card_number: string | null;
+      invoice_number: number | null;
+      period: Date | null;
+      first_due_amount: number | null;
+      first_due_date: Date | null;
+      second_due_amount: number | null;
+      second_due_date: Date | null;
+      additional_info: string | null;
+      payment_channel: string | null;
+      payment_date: Date | null;
+      collected_amount: number | null;
+      comment: string | null;
+      payment_status: string | null;
+    };
+    column: string | number | undefined;
+    reason: string;
+  }[] = [];
+  const transformedRows: {
+    g_c: number | null;
+    name: string | null;
+    fiscal_id_type: "CUIT" | "CUIL" | null;
+    fiscal_id_number: number | null;
+    du_type: "DNI" | "LC" | "LE" | null;
+    du_number: number | null;
+    product_number: number;
+    cbu: string | null;
+    card_brand: string | null;
+    is_new: boolean | null;
+    card_number: string | null;
+    invoice_number: number | null;
+    period: Date | null;
+    first_due_amount: number | null;
+    first_due_date: Date | null;
+    second_due_amount: number | null;
+    second_due_date: Date | null;
+    additional_info: string | null;
+    payment_channel: string | null;
+    payment_date: Date | null;
+    collected_amount: number | null;
+    comment: string | null;
+    payment_status: string | null;
+  }[] = [];
+  const defaultRow = {
+    g_c: null,
+    name: null,
+    fiscal_id_type: null,
+    fiscal_id_number: null,
+    du_type: null,
+    du_number: null,
+    product_number: 0,
+    cbu: null,
+    card_brand: null,
+    is_new: null,
+    card_number: null,
+    invoice_number: null,
+    period: null,
+    first_due_amount: null,
+    first_due_date: null,
+    second_due_amount: null,
+    second_due_date: null,
+    additional_info: null,
+    payment_channel: null,
+    payment_date: null,
+    collected_amount: null,
+    comment: null,
+    payment_status: null,
+  };
   rows.forEach((row, rowIndex) => {
-    
     try {
       const parsedRow = z.array(recDocumentValidator).parse([row]);
-      
-      
+
       transformedRows.push(parsedRow.at(0) ?? defaultRow);
     } catch (error) {
-      
       if (error instanceof z.ZodError) {
         error.errors.forEach((zodError) => {
           const column = zodError.path[zodError.path.length - 1];
-          const parsedRow = z.array(recDocumentValidatorWithoutProduct).parse([row]);
+          const parsedRow = z
+            .array(recDocumentValidatorWithoutProduct)
+            .parse([row]);
           cellsToEdit.push({
             row: {
-              g_c:parsedRow.at(0)?.g_c,
-              name: parsedRow.at(0)?.name ,
-              fiscal_id_type: parsedRow.at(0)?.fiscal_id_type ,
-              fiscal_id_number: parsedRow.at(0)?.fiscal_id_number ,
-              du_type: parsedRow.at(0)?.du_type ,
+              g_c: parsedRow.at(0)?.g_c,
+              name: parsedRow.at(0)?.name,
+              fiscal_id_type: parsedRow.at(0)?.fiscal_id_type,
+              fiscal_id_number: parsedRow.at(0)?.fiscal_id_number,
+              du_type: parsedRow.at(0)?.du_type,
               du_number: parsedRow.at(0)?.du_number,
               product_number: parsedRow.at(0)?.product_number,
               cbu: parsedRow.at(0)?.cbu,
               card_brand: parsedRow.at(0)?.card_brand,
-              is_new: parsedRow.at(0)?.is_new ,
+              is_new: parsedRow.at(0)?.is_new,
               card_number: parsedRow.at(0)?.card_number,
-              invoice_number: parsedRow.at(0)?.invoice_number ,
-              period: parsedRow.at(0)?.period ,
-              first_due_amount: parsedRow.at(0)?.first_due_amount ,
+              invoice_number: parsedRow.at(0)?.invoice_number,
+              period: parsedRow.at(0)?.period,
+              first_due_amount: parsedRow.at(0)?.first_due_amount,
               first_due_date: parsedRow.at(0)?.first_due_date,
-              second_due_amount: parsedRow.at(0)?.second_due_amount ,
-              second_due_date: parsedRow.at(0)?.second_due_date ,
-              additional_info: parsedRow.at(0)?.additional_info ,
-              payment_channel: parsedRow.at(0)?.payment_channel ,
-              payment_date: parsedRow.at(0)?.payment_date ,
-              collected_amount: parsedRow.at(0)?.collected_amount ,
-              comment: parsedRow.at(0)?.comment ,
+              second_due_amount: parsedRow.at(0)?.second_due_amount,
+              second_due_date: parsedRow.at(0)?.second_due_date,
+              additional_info: parsedRow.at(0)?.additional_info,
+              payment_channel: parsedRow.at(0)?.payment_channel,
+              payment_date: parsedRow.at(0)?.payment_date,
+              collected_amount: parsedRow.at(0)?.collected_amount,
+              comment: parsedRow.at(0)?.comment,
               payment_status: parsedRow.at(0)?.payment_status,
             },
             column,
-            reason: zodError.message, 
+            reason: zodError.message,
           });
-          
         });
       }
     }
   });
-  
+
   return { transformedRows, cellsToEdit };
 };
 export const recHeaders: TableHeaders = [
-  { key: "g_c", label: "G.C.", width: 50 },
+  { key: "g_c", label: "Marca", width: 50 },
   { key: "name", label: "Apellido y Nombre", width: 200 },
   { key: "fiscal_id_type", label: "Tipo ID Fiscal", width: 140 },
   { key: "fiscal_id_number", label: "Nro ID Fiscal", width: 140 },
