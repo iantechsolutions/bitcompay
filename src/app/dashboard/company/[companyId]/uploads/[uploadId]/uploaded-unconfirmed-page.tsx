@@ -187,6 +187,7 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
                 {dataError.data?.cause?.trim() ?? dataError.message}
               </pre>
             )}
+
             {data && (
               <Table>
                 <TableHeader>

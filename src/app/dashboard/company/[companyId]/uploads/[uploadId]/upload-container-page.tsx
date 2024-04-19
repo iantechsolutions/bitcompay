@@ -22,10 +22,10 @@ export default function Home(props: UploadContainerProps) {
   return (
     <>
       {!props.upload.confirmed && (
-        <UploadedUnconfirmedPage upload={props.upload} sendData={receiveData} />
+        <UploadedUnconfirmedPage upload={props.upload} />
       )}
       {props.upload.confirmed && (
-        <UploadedConfirmedPage upload={props.upload} dataBatch={batch} />
+        <UploadedConfirmedPage upload={props.upload} dataBatch={batch!} />
       )}
     </>
   );
