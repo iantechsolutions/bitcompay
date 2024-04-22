@@ -107,7 +107,8 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
 
   const [editableTableRows, setEditableTableRows] =
     useState<Record<string, unknown>[]>(editRowsBatchArray);
-  const handleRowChange = (row: Record<string, unknown>, index: number) => {
+  const handleRowChange = (index: number, row: Record<string, unknown>) => {
+    console.log("test");
     const newRows = [...editableTableRows];
     newRows[index] = row;
     setEditableTableRows(newRows);
@@ -220,7 +221,7 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
                 </TableBody>
               </Table>
             )}
-            {/* <div className="mt-5">
+            <div className="mt-5">
               <h3>Filas con errores a arreglar</h3>
 
               {data && (
@@ -229,9 +230,10 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
                   headers={data.headers}
                   height={100}
                   columns={colsOnly}
+                  onRowChange={handleRowChange}
                 />
               )}
-            </div> */}
+            </div>
             <div className="flex gap-2">
               <Button variant="destructive" onClick={handleDelete}>
                 Cancelar y eliminar
