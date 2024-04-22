@@ -153,29 +153,8 @@ export default function BrandPage({
               </Card>
             </AccordionContent>
           </AccordionItem>
+
           <AccordionItem value="item-3">
-            <AccordionTrigger>
-              <h2 className="text-md">Empresas con esta marca</h2>
-            </AccordionTrigger>
-            <AccordionContent>
-              <List>
-                {relatedCompanies
-                  ?.filter(
-                    (company): company is Company => company !== undefined,
-                  )
-                  .map((company: Company) => {
-                    return (
-                      <ListTile
-                        key={company?.id}
-                        href={`/dashboard/admin/companies/${company?.id}`}
-                        title={company?.name}
-                      />
-                    );
-                  })}
-              </List>
-            </AccordionContent>
-          </AccordionItem>
-          <AccordionItem value="item-4">
             <AccordionTrigger>
               <h2 className="text-md">Agregar empresa</h2>
             </AccordionTrigger>

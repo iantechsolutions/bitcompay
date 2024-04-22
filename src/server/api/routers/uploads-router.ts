@@ -54,7 +54,7 @@ export const uploadsRouter = createTRPCRouter({
       return await db.transaction(async (db) => {
         const channels = await getCompanyProducts(input.companyId);
         const brands = await getCompanyBrands(input.companyId);
-        
+
         const contents = await readUploadContents(
           db,
           input.id,
@@ -62,7 +62,7 @@ export const uploadsRouter = createTRPCRouter({
           channels,
           brands,
         );
-        
+
         await db
           .update(schema.documentUploads)
           .set({
@@ -284,7 +284,7 @@ async function getCompanyBrands(companyId: string) {
     const brand = await db.query.brands.findMany({
       where: eq(schema.brands.id, brandId),
     });
-    brands.push(brand);
+    brands.push(brand[0]);
   }
   return brands;
 }
@@ -426,27 +426,51 @@ async function readUploadContents(
       },
     ]),
   );
-  
-  /// verificacion si hay columna producto
+  // verificar si empresa tiene productos y marcas
+  if (products.length === 0) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "esta empresa no tiene ningun producto habilitado",
+    });
+  }
+  if (brands.length === 0) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "esta empresa no tiene ninguna marca asociada",
+    });
+  }
+  /// verificacion si hay columna producto o marca en excel
 
   let productColumnExist = false;
+  let brandColumnExist = false;
   for (const row of transformedRows) {
+    if (row.g_c) {
+      brandColumnExist = true;
+    }
     if (row.product_number) {
       productColumnExist = true;
     }
   }
 
   if (!productColumnExist && products.length > 1) {
-    errors.push("Error: La columna producto no existe en el documento");
-
-    throw new TRPCError({ code: "BAD_REQUEST", message: errors[0] });
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Error: La columna producto no existe en el documento",
+    });
+  } else if (!brandColumnExist && brands.length > 1) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Error: la columna Marca no existe en el documento",
+    });
   }
+
+  // verificacion fila a fila
 
   for (let i = 0; i < transformedRows.length; i++) {
     const row = transformedRows[i]!;
 
     const rowNum = i + 2;
-
+    // asignar numero de factura si no tiene
     if (!row.invoice_number) {
       let invoice_number = Math.floor(10000 + Math.random() * 90000);
       const transactionFound = await db.query.payments.findFirst({
@@ -457,7 +481,7 @@ async function readUploadContents(
       }
       row.invoice_number = invoice_number;
     }
-
+    // verificar producto
     let product;
     if (row.product_number) {
       if (row.product_number in productsMap) {
@@ -470,27 +494,39 @@ async function readUploadContents(
     } else {
       if (products.length === 1) {
         product = products[0];
+        console.log("el producto en esta fila es:", product?.number);
         row.product_number = product?.number ?? 0;
+        console.log(
+          "el nuevo valor de row.product_number es: ",
+          row.product_number,
+        );
       } else if (products.length > 1) {
         errors.push(`falta columna producto en fila:${rowNum}`);
+      }
+    }
+    // verificar marca
+    if (row.g_c) {
+      let isInBrands = false;
+      for (const brand of brands) {
+        if (row.g_c === brand?.number) {
+          isInBrands = true;
+          break;
+        }
+      }
+      if (!isInBrands) {
+        errors.push(
+          `Esta Marca: ${row.g_c} es invalido o  no se encuentra habilitado (fila:${rowNum})`,
+        );
+      }
+    } else {
+      if (brands.length === 1) {
+        console.log("la marca en esta fila es ", brands[0]?.number);
+        row.g_c = brands[0]?.number ?? null;
       } else {
-        throw new Error("no hay productos habilitados para esta empresa");
+        errors.push(`No existe columna marca en (fila:${rowNum})`);
       }
     }
-
-    if (brands.length === 1) {
-      if (!brands[0]) {
-        throw new Error("brands does not exist");
-      }
-
-      const brand = brands[0][0] ?? null;
-
-      if (!brand) {
-        throw new Error("brand is undefined");
-      }
-      row.g_c = brand?.number;
-    }
-
+    // verificar columnas requeridas
     if (product) {
       if (brands.length === 1) {
         product.requiredColumns.delete("g_c");
@@ -500,12 +536,16 @@ async function readUploadContents(
         const value = (row as Record<string, unknown>)[column];
         if (!value) {
           const columnName = columnLabelByKey[column] ?? column;
-          cellsToEdit.push({row: row, column: columnName, reason: "Empty cell"} )
+          cellsToEdit.push({
+            row: row,
+            column: columnName,
+            reason: "Empty cell",
+          });
           transformedRows.splice(i, 1);
         }
       }
     }
-
+    // recolectar info. cabeza de lote
     if (product) {
       if (productsBatch[product.number]) {
         const temp = productsBatch[product.number];
@@ -521,14 +561,13 @@ async function readUploadContents(
       }
     }
   }
-  //agrego fila a info de cabeza de lote
 
   if (errors.length > 0) {
     throw new TRPCError({ code: "BAD_REQUEST", message: errors.join("\n") });
   }
-
-  //throw new TRPCError({ code: "NOT_FOUND" });
-
+  console.log(brands);
+  console.log(products);
+  console.log(transformedRows);
   if (type === "rec") {
     return {
       rows: transformedRows,
