@@ -87,8 +87,7 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
   const [data, setData] = useState<
     RouterOutputs["uploads"]["readUploadContents"] | null
   >(null);
-  // uso la funcion de contexto
-  // const { updateProductsBatch } = useReceiveData();
+
   const productsBatchArray: Record<string, unknown>[] = Object.entries(
     data?.batchHead ?? {},
   ).map(([key, value]) => ({

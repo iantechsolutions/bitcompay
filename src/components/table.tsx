@@ -141,7 +141,7 @@ function Row(props: { style?: React.CSSProperties; index: number }) {
         let value: any = row[header.key];
 
         if (value instanceof Date) {
-          value = dayjs(value).format("YYYY-MM-DD");
+          value = dayjs(value).format("DD-MM-YYYY");
         }
 
         const w = header.width ?? 160;

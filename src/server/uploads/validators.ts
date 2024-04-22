@@ -52,16 +52,9 @@ const stringAsDate = z
     return true;
   });
 
-const stringAsPeriod = z
-  .string()
-  .transform((value) => {
-    return dayjs(value, "MMYYYY").toDate();
-  })
-  .refine((value) => {
-    if (value.getFullYear() < 2000) return false;
-    if (value.getFullYear() > 3000) return false;
-    return true;
-  });
+const stringAsPeriod = z.string().transform((value) => {
+  return dayjs(value, "MMYYYY").format("MM-YYYY");
+});
 
 const cbuSchema = z
   .string()
@@ -227,7 +220,8 @@ export const recDocumentValidatorWithoutProduct = z
       payment_status: value["Estado de Pago"] ?? null,
     };
   });
-// export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
+
+// export const recRowsFormat = (rows: Record<string, unknown>[]) => {
 //   return z.array(recDocumentValidator).parse(rows);
 // };
 
@@ -311,10 +305,9 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     comment: null,
     payment_status: null,
   };
-  rows.forEach((row, rowIndex) => {
+  rows.forEach((row) => {
     try {
       const parsedRow = z.array(recDocumentValidator).parse([row]);
-
       transformedRows.push(parsedRow.at(0) ?? defaultRow);
     } catch (error) {
       if (error instanceof z.ZodError) {

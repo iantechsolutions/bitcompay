@@ -16,6 +16,7 @@ import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 import type { RouterOutputs } from "~/trpc/shared";
 import { useState } from "react";
+import { DialogClose } from "@radix-ui/react-dialog";
 
 export default function GenerateChannelOutputPage(props: {
   channel: NonNullable<RouterOutputs["channels"]["get"]>;
@@ -76,12 +77,11 @@ export default function GenerateChannelOutputPage(props: {
             </div>
           </div>
           <DialogFooter>
-            <Button disabled={isLoading} onClick={handleGenerate}>
-              {isLoading && (
-                <Loader2Icon className="mr-2 animate-spin" size={20} />
-              )}
-              generar archivo
-            </Button>
+            <DialogClose>
+              <Button type="button" onClick={handleGenerate}>
+                generar archivo
+              </Button>
+            </DialogClose>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -2,7 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import * as schema from "~/server/db/schema";
 import { type DBTX, db } from "~/server/db";
-import { eq } from "drizzle-orm";
+import { Table, eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import * as xlsx from "xlsx";
 import {
@@ -453,18 +453,8 @@ async function readUploadContents(
     });
   }
 
-  // verificacion fila a fila
-  // console.log(
-  //   transformedRows.map((x) => {
-  //     console.log(x.name);
-  //   }),
-  // );
-  // transformedRows.forEach((x) => {
-  //   console.log(x.name);
-  // });
   for (let i = 0; i < transformedRows.length; i++) {
     const row = transformedRows[i]!;
-
     const rowNum = i + 2;
     // asignar numero de factura si no tiene
     if (!row.invoice_number) {
@@ -551,13 +541,36 @@ async function readUploadContents(
     }
   }
 
+  //descartar encabezados no requeridos
+  const companyReqColumns = new Set();
+  // Iterar sobre cada objeto en el array products
+  products.forEach((product) => {
+    // Iterar sobre cada elemento del set requiredColumns del objeto actual
+    product.requiredColumns.forEach((column) => {
+      // Añadir cada columna al conjunto companyReqColumns
+      companyReqColumns.add(column);
+    });
+  });
+
+  let TableHeaders = recHeaders.filter((header) =>
+    companyReqColumns.has(header.key),
+  );
+
+  TableHeaders.unshift({ key: "g_c", label: "Marca", width: 50 });
+  TableHeaders.splice(5, 0, {
+    key: "product_number",
+    label: "Producto",
+    width: 80,
+    alwaysRequired: true,
+  });
+
   if (errors.length > 0) {
     throw new TRPCError({ code: "BAD_REQUEST", message: errors.join("\n") });
   }
   if (type === "rec") {
     return {
       rows: transformedRows,
-      headers: recHeaders,
+      headers: TableHeaders,
       batchHead: productsBatch,
       upload,
       rowToEdit: cellsToEdit,
