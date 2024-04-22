@@ -143,7 +143,6 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
       console.error(e);
       return;
     }
-    console.log(data?.rowToEdit);
   }
 
   return (

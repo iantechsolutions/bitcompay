@@ -133,9 +133,7 @@ export const uploadsRouter = createTRPCRouter({
         await Promise.all(
           records.map(async (record) => {
             const invoiceNumber = record.invoice_number || 0;
-            console.log(invoiceNumber, typeof invoiceNumber);
-            console.log(record.status_code, typeof record.status_code);
-            console.log(eq(schema.payments.invoice_number, invoiceNumber));
+
             await tx
               .update(schema.payments)
               .set({ status_code: record.status_code })
@@ -223,7 +221,6 @@ export const uploadsRouter = createTRPCRouter({
 });
 
 async function getCompanyProducts(companyId: string) {
-  console.log("empieza funcion getProducts");
   const r = await db.query.companies.findFirst({
     where: eq(schema.companies.id, companyId),
     with: {
@@ -253,12 +250,9 @@ async function getCompanyProducts(companyId: string) {
       },
     },
   });
-  console.log(r);
 
   const p = r?.products.map((p) => p.product) ?? [];
 
-  console.log(p);
-  console.log(p[0]?.channels);
   const values = p.map((product) => ({
     id: product.id,
     number: product.number,
@@ -269,7 +263,6 @@ async function getCompanyProducts(companyId: string) {
         .reduce((acc, val) => acc.concat(val), []),
     ),
   }));
-  console.log(values);
   return values;
 }
 
@@ -324,18 +317,14 @@ async function readResponseUploadContents(
       //trato el ultimo elemento que esta junto nro de factura y estado de pago
       const largeNumber = recordValues[2];
       const status_code = largeNumber?.slice(-2);
-      console.log(status_code);
       // extract invoice_number
       const stringInvoiceNumber = recordValues[recordValues.length - 1] ?? null;
-      console.log(recordValues);
-      console.log(stringInvoiceNumber);
 
       if (!stringInvoiceNumber) {
         throw new Error("there is no invoice number");
       }
 
       const invoice_number = stringInvoiceNumber.slice(9, 14) ?? null;
-      console.log(invoice_number);
       if (invoice_number) {
         const original_transaction = await db.query.payments.findFirst({
           where: eq(schema.payments.invoice_number, parseInt(invoice_number)),
@@ -465,7 +454,14 @@ async function readUploadContents(
   }
 
   // verificacion fila a fila
-
+  // console.log(
+  //   transformedRows.map((x) => {
+  //     console.log(x.name);
+  //   }),
+  // );
+  // transformedRows.forEach((x) => {
+  //   console.log(x.name);
+  // });
   for (let i = 0; i < transformedRows.length; i++) {
     const row = transformedRows[i]!;
 
@@ -494,12 +490,7 @@ async function readUploadContents(
     } else {
       if (products.length === 1) {
         product = products[0];
-        console.log("el producto en esta fila es:", product?.number);
         row.product_number = product?.number ?? 0;
-        console.log(
-          "el nuevo valor de row.product_number es: ",
-          row.product_number,
-        );
       } else if (products.length > 1) {
         errors.push(`falta columna producto en fila:${rowNum}`);
       }
@@ -520,7 +511,6 @@ async function readUploadContents(
       }
     } else {
       if (brands.length === 1) {
-        console.log("la marca en esta fila es ", brands[0]?.number);
         row.g_c = brands[0]?.number ?? null;
       } else {
         errors.push(`No existe columna marca en (fila:${rowNum})`);
@@ -541,7 +531,6 @@ async function readUploadContents(
             column: columnName,
             reason: "Empty cell",
           });
-          transformedRows.splice(i, 1);
         }
       }
     }
@@ -565,9 +554,6 @@ async function readUploadContents(
   if (errors.length > 0) {
     throw new TRPCError({ code: "BAD_REQUEST", message: errors.join("\n") });
   }
-  console.log(brands);
-  console.log(products);
-  console.log(transformedRows);
   if (type === "rec") {
     return {
       rows: transformedRows,

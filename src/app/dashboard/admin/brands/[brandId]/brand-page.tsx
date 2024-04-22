@@ -58,9 +58,6 @@ export default function BrandPage({
   function changeCompany(company: Company, required: boolean) {
     const newRelCompanies = new Set(relCompanies); // Crear una copia del conjunto actual
 
-    console.log(newRelCompanies);
-    console.log(required);
-
     if (required) {
       newRelCompanies.add(company); // Agregar la empresa al conjunto copiado
     } else {
@@ -72,7 +69,6 @@ export default function BrandPage({
       }
     }
 
-    console.log(newRelCompanies);
     setRelCompanies(newRelCompanies); // Establecer la copia actualizada como el nuevo estado
   }
 
@@ -164,7 +160,6 @@ export default function BrandPage({
                   const isChecked = Array.from(relCompanies).some(
                     (c) => c?.id === company?.id,
                   );
-                  console.log("isChecked: ", isChecked);
                   return (
                     <ListTile
                       key={company?.id}

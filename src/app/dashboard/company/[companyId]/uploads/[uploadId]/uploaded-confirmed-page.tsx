@@ -25,7 +25,6 @@ export default function UploadedConfirmedPage(props: UploadedPageProps) {
   const { confirmedAt, fileName } = props.upload;
   const { dataBatch } = props;
   const pdfRef = useRef<HTMLDivElement>(null);
-  console.log(confirmedAt, fileName, dataBatch);
 
   async function downloadPDF() {
     try {
