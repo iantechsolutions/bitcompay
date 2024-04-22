@@ -48,7 +48,11 @@ export function LargeEditableTable(props: {
     key: string,
     newValue: string,
   ) => {
+    console.log("test1");
+    props.rows;
     if (props.onRowChange) {
+      console.log("test2");
+
       const updatedRow = { ...props.rows[rowIndex], [key]: newValue };
       props.onRowChange(rowIndex, updatedRow);
     }
@@ -165,6 +169,8 @@ function Row(props: { style?: React.CSSProperties; index: number }) {
     >
       {ctx.headers.map((header) => {
         let value: any = row[header.key];
+        const [variable, setVariable] = useState(value);
+
         if (value instanceof Date) {
           value = dayjs(value).format("YYYY-MM-DD");
         }
@@ -172,12 +178,12 @@ function Row(props: { style?: React.CSSProperties; index: number }) {
         const w = header.width ?? 160;
 
         if (header.label?.toString() === specialCellKey) {
-          const [variable, setVariable] = useState(value);
-          const handleVariableChange = (newValue: string) => {
+          const handleVariableChange = (newValue: any) => {
+            console.log(props.index);
+            console.log(header.key);
+            console.log(header.label?.toString());
             setVariable(newValue);
-            if (ctx.onInputChange) {
-              ctx.onInputChange(props.index, header.key, newValue);
-            }
+            ctx.onInputChange!(props.index, header.key, newValue);
           };
           return (
             <div
@@ -192,9 +198,10 @@ function Row(props: { style?: React.CSSProperties; index: number }) {
             >
               <Input
                 value={variable}
-                onChange={(newValue) => handleVariableChange}
+                onChange={(e) => {
+                  handleVariableChange(e.target.value);
+                }}
               />
-              {/* input */}
             </div>
           );
         } else {

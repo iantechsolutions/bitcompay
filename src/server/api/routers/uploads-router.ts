@@ -482,7 +482,11 @@ async function readUploadContents(
         product = products[0];
         row.product_number = product?.number ?? 0;
       } else if (products.length > 1) {
-        errors.push(`falta columna producto en fila:${rowNum}`);
+        cellsToEdit.push({
+          row,
+          column: "Producto",
+          reason: "Producto inválido",
+        });
       }
     }
     // verificar marca

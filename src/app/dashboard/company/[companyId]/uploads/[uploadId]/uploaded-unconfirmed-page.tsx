@@ -61,6 +61,7 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
     isLoading,
     error: dataError,
   } = api.uploads.readUploadContents.useMutation();
+
   const { mutateAsync: confirmUpload, isLoading: isLoadingConfirm } =
     api.uploads.confirmUpload.useMutation();
 
@@ -108,10 +109,15 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
   const [editableTableRows, setEditableTableRows] =
     useState<Record<string, unknown>[]>(editRowsBatchArray);
   const handleRowChange = (index: number, row: Record<string, unknown>) => {
-    console.log("test");
     const newRows = [...editableTableRows];
+    console.log();
     newRows[index] = row;
-    setEditableTableRows(newRows);
+    if (data !== null) {
+      setData({
+        ...data,
+        rows: newRows!,
+      });
+    }
   };
 
   async function handleDelete() {
@@ -119,7 +125,7 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
       await deleteUpload({ uploadId: props.upload.id });
       router.back();
     } catch (error) {
-      console.log(error);
+      console.log("error");
     }
   }
 
