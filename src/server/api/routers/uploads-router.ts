@@ -487,6 +487,7 @@ async function readUploadContents(
           column: "Producto",
           reason: "Producto inválido",
         });
+        errors.push(`Producto invalido en fila: ${rowNum}`)
       }
     }
     // verificar marca
@@ -520,11 +521,12 @@ async function readUploadContents(
         const value = (row as Record<string, unknown>)[column];
         if (!value) {
           const columnName = columnLabelByKey[column] ?? column;
-          cellsToEdit.push({
-            row: row,
-            column: columnName,
-            reason: "Empty cell",
-          });
+          // cellsToEdit.push({
+          //   row: row,
+          //   column: columnName,
+          //   reason: "Empty cell",
+          // });
+          errors.push(`Este producto: ${row.product_number} es invalido o  no se encuentra habilitado (fila:${rowNum})`)
         }
       }
     }
