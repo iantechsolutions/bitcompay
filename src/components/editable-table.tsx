@@ -48,11 +48,8 @@ export function LargeEditableTable(props: {
     key: string,
     newValue: string,
   ) => {
-    console.log("test1");
-    props.rows;
+    const row = props.rows[rowIndex];
     if (props.onRowChange) {
-      console.log("test2");
-
       const updatedRow = { ...props.rows[rowIndex], [key]: newValue };
       props.onRowChange(rowIndex, updatedRow);
     }

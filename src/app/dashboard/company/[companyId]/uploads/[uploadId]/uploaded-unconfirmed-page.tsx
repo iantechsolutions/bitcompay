@@ -106,18 +106,13 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
     ...value,
   }));
 
-  const [editableTableRows, setEditableTableRows] =
-    useState<Record<string, unknown>[]>(editRowsBatchArray);
+  const [editableTableRows, setEditableTableRows] = useState<
+    Record<string, unknown>[]
+  >([]);
   const handleRowChange = (index: number, row: Record<string, unknown>) => {
     const newRows = [...editableTableRows];
-    console.log();
     newRows[index] = row;
-    if (data !== null) {
-      setData({
-        ...data,
-        rows: newRows!,
-      });
-    }
+    setEditableTableRows(newRows);
   };
 
   async function handleDelete() {
@@ -144,6 +139,9 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
 
       if (data) {
         setData(data);
+      }
+      if (editRowsBatchArray) {
+        setEditableTableRows(editRowsBatchArray);
       }
     } catch (e) {
       console.error(e);
@@ -227,19 +225,19 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
                 </TableBody>
               </Table>
             )}
-            <div className="mt-5">
+            {/* <div className="mt-5">
               <h3>Filas con errores a arreglar</h3>
 
               {data && (
                 <LargeEditableTable
-                  rows={editRowsBatchArray}
+                  rows={editableTableRows}
                   headers={data.headers}
                   height={100}
                   columns={colsOnly}
                   onRowChange={handleRowChange}
                 />
               )}
-            </div>
+            </div> */}
             <div className="flex gap-2">
               <Button variant="destructive" onClick={handleDelete}>
                 Cancelar y eliminar
