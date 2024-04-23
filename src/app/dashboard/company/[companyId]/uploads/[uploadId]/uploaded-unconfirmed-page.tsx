@@ -61,6 +61,7 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
     isLoading,
     error: dataError,
   } = api.uploads.readUploadContents.useMutation();
+
   const { mutateAsync: confirmUpload, isLoading: isLoadingConfirm } =
     api.uploads.confirmUpload.useMutation();
 
@@ -105,9 +106,10 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
     ...value,
   }));
 
-  const [editableTableRows, setEditableTableRows] =
-    useState<Record<string, unknown>[]>(editRowsBatchArray);
-  const handleRowChange = (row: Record<string, unknown>, index: number) => {
+  const [editableTableRows, setEditableTableRows] = useState<
+    Record<string, unknown>[]
+  >([]);
+  const handleRowChange = (index: number, row: Record<string, unknown>) => {
     const newRows = [...editableTableRows];
     newRows[index] = row;
     setEditableTableRows(newRows);
@@ -118,7 +120,7 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
       await deleteUpload({ uploadId: props.upload.id });
       router.back();
     } catch (error) {
-      console.log(error);
+      console.log("error");
     }
   }
 
@@ -137,6 +139,9 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
 
       if (data) {
         setData(data);
+      }
+      if (editRowsBatchArray) {
+        setEditableTableRows(editRowsBatchArray);
       }
     } catch (e) {
       console.error(e);
@@ -225,10 +230,11 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
 
               {data && (
                 <LargeEditableTable
-                  rows={editRowsBatchArray}
+                  rows={editableTableRows}
                   headers={data.headers}
                   height={100}
                   columns={colsOnly}
+                  onRowChange={handleRowChange}
                 />
               )}
             </div> */}
