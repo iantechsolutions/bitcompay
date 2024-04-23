@@ -52,8 +52,14 @@ export const iofilesRouter = createTRPCRouter({
         }
       }
 
-      const currentDate = dayjs();
+      let currentDate = dayjs();
+      const currentHour = currentDate.hour();
+      const currentMinutes = currentDate.minute();
+      if (currentHour > 16 || (currentHour == 16 && currentMinutes > 0)) {
+        currentDate = currentDate.add(1, "day");
+      }
       const dateYYYYMMDD = currentDate.format("YYYYMMDD");
+
       let text = `411002513${dateYYYYMMDD}${dateYYYYMMDD} 00170356730103179945${company?.name}   ${input.fileName}BITCOM SRL                          20                        \r\n`;
       let total_records = 1;
       let total_operations = 0;
