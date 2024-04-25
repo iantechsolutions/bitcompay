@@ -66,7 +66,7 @@ const cbuSchema = z
 
 export const recDocumentValidator = z
   .object({
-    "G.C.": z.number().int().min(0).max(14000).nullable().optional(),
+    Marca: z.number().int().min(0).max(14000).nullable().optional(),
     "Apellido y Nombre": z.string().min(1).max(140).nullable().optional(),
     "Tipo ID Fiscal": z
       .literal("CUIT")
@@ -133,7 +133,7 @@ export const recDocumentValidator = z
   .transform((value) => {
     // Translated to english
     return {
-      g_c: value["G.C."] ?? null,
+      g_c: value["Marca"] ?? null,
       name: value["Apellido y Nombre"] ?? null,
       fiscal_id_type: value["Tipo ID Fiscal"] ?? null,
       fiscal_id_number: value["Nro ID Fiscal"] ?? null,
@@ -161,7 +161,7 @@ export const recDocumentValidator = z
 
 export const recDocumentValidatorWithoutProduct = z
   .object({
-    "G.C.": z.any().nullable().optional(),
+    Marca: z.any().nullable().optional(),
     "Apellido y Nombre": z.any().nullable().optional(),
     "Tipo ID Fiscal": z.any().nullable().optional(),
     "Nro ID Fiscal": z.any().nullable().optional(),
@@ -195,7 +195,7 @@ export const recDocumentValidatorWithoutProduct = z
   .transform((value) => {
     // Translated to english
     return {
-      g_c: value["G.C."] ?? null,
+      g_c: value["Marca"] ?? null,
       name: value["Apellido y Nombre"] ?? null,
       fiscal_id_type: value["Tipo ID Fiscal"] ?? null,
       fiscal_id_number: value["Nro ID Fiscal"] ?? null,
