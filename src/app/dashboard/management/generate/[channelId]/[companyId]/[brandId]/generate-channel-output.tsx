@@ -1,4 +1,5 @@
 "use client";
+import { z } from "zod";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +22,7 @@ import { DialogClose } from "@radix-ui/react-dialog";
 export default function GenerateChannelOutputPage(props: {
   channel: NonNullable<RouterOutputs["channels"]["get"]>;
   company: NonNullable<RouterOutputs["companies"]["get"]>;
+  brand: NonNullable<RouterOutputs["brands"]["get"]>;
 }) {
   const {
     mutateAsync: generateInputFile,
@@ -30,16 +32,44 @@ export default function GenerateChannelOutputPage(props: {
     data,
   } = api.iofiles.generate.useMutation();
 
-  const [fileName, setFileName] = useState("Com.Rur.Cuot");
+  const schema = z.object({
+    texto: z.string().max(12),
+  });
 
+  const [fileName, setFileName] = useState("");
+  const [error, setError] = useState<string | null>(null);
   async function handleGenerate() {
-    const { company } = props;
-    await generateInputFile({
-      channelId: props.channel.id,
-      companyId: company.id,
-      fileName: fileName,
-      concept: company.concept,
-    });
+    try {
+      // Validar el valor del input con Zod
+      console.log(fileName);
+      schema.parse({ texto: fileName });
+
+      const { company } = props;
+      await generateInputFile({
+        channelId: props.channel.id,
+        companyId: company.id,
+        fileName: fileName,
+        concept: company.concept,
+        redescription: props.brand.redescription,
+      });
+
+      // Limpiar los errores
+      setError(null);
+    } catch (error) {
+      // Si hay errores de validación, mostrarlos al usuario
+      setError("no se puede asignar un nombre mayor a 10 caracteres");
+    }
+  }
+
+  function handleName(event: React.ChangeEvent<HTMLInputElement>) {
+    const value = event.target.value;
+    setFileName(value);
+    try {
+      schema.parse({ texto: value });
+      setError(null);
+    } catch (err) {
+      setError("ingresar un nombre menor a 10 caracteres");
+    }
   }
 
   const dataDataURL = data
@@ -71,9 +101,12 @@ export default function GenerateChannelOutputPage(props: {
               <Input
                 id="fileName"
                 value={fileName}
-                onChange={(e) => setFileName(e.target.value)}
+                onChange={handleName}
                 className="col-span-3"
               />
+              {error && (
+                <span className="w-full text-xs text-red-600">{error}</span>
+              )}
             </div>
           </div>
           <DialogFooter>

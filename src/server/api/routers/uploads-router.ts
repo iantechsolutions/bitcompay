@@ -487,7 +487,7 @@ async function readUploadContents(
           column: "Producto",
           reason: "Producto inválido",
         });
-        errors.push(`Producto invalido en fila: ${rowNum}`)
+        errors.push(`Producto invalido en fila: ${rowNum}`);
       }
     }
     // verificar marca
@@ -526,7 +526,9 @@ async function readUploadContents(
           //   column: columnName,
           //   reason: "Empty cell",
           // });
-          errors.push(`Este producto: ${row.product_number} es invalido o  no se encuentra habilitado (fila:${rowNum})`)
+          errors.push(
+            `Este producto: ${row.product_number} es invalido o  no se encuentra habilitado (fila:${rowNum})`,
+          );
         }
       }
     }
@@ -558,17 +560,12 @@ async function readUploadContents(
     });
   });
 
-  let TableHeaders = recHeaders.filter((header) =>
-    companyReqColumns.has(header.key),
+  const TableHeaders = recHeaders.filter(
+    (header) =>
+      companyReqColumns.has(header.key) ||
+      header.key === "g_c" ||
+      header.key === "product_number",
   );
-
-  TableHeaders.unshift({ key: "g_c", label: "Marca", width: 50 });
-  TableHeaders.splice(5, 0, {
-    key: "product_number",
-    label: "Producto",
-    width: 80,
-    alwaysRequired: true,
-  });
 
   if (errors.length > 0) {
     throw new TRPCError({ code: "BAD_REQUEST", message: errors.join("\n") });

@@ -3,6 +3,7 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db, schema } from "~/server/db";
 import { eq, and } from "drizzle-orm";
 import dayjs from "dayjs";
+import { TRPCError } from "@trpc/server";
 
 export const iofilesRouter = createTRPCRouter({
   generate: protectedProcedure
@@ -10,8 +11,9 @@ export const iofilesRouter = createTRPCRouter({
       z.object({
         channelId: z.string(),
         companyId: z.string(),
-        fileName: z.string(),
+        fileName: z.string().max(12),
         concept: z.string(),
+        redescription: z.string().max(10),
       }),
     )
     .mutation(async ({ input }) => {
@@ -51,7 +53,18 @@ export const iofilesRouter = createTRPCRouter({
           transactions.push(item);
         }
       }
-
+      function formatString(
+        char: string,
+        string: string,
+        limit: number,
+        final: boolean,
+      ) {
+        if (final) {
+          return string.concat(char.repeat(limit - string.length));
+        } else {
+          return char.repeat(limit - string.length).concat(string);
+        }
+      }
       let currentDate = dayjs();
       const currentHour = currentDate.hour();
       const currentMinutes = currentDate.minute();
@@ -59,8 +72,11 @@ export const iofilesRouter = createTRPCRouter({
         currentDate = currentDate.add(1, "day");
       }
       const dateYYYYMMDD = currentDate.format("YYYYMMDD");
-
-      let text = `411002513${dateYYYYMMDD}${dateYYYYMMDD} 00170356730103179945${company?.name}   ${input.fileName}BITCOM SRL                          20                        \r\n`;
+      const fileName = formatString(" ", input.fileName, 12, true);
+      const redDescription = formatString(" ", input.redescription, 10, true);
+      let text = `411002513${dateYYYYMMDD}${dateYYYYMMDD}00170356730103179945${redDescription}ARS0${fileName}BITCOM SRL${" ".repeat(
+        26,
+      )}20${" ".repeat(141)}\r\n`;
       let total_records = 1;
       let total_operations = 0;
       let total_collected = 0;
@@ -77,57 +93,81 @@ export const iofilesRouter = createTRPCRouter({
         const date = dayjs(transaction.first_due_date);
         const year = date.year();
         const monthName = date.format("MMMM").toUpperCase();
+        const period = formatString(" ", monthName + " " + year, 22, true);
         const dateYYYYMMDD = date.format("YYYYMMDD");
-        let CBU = "0000000000000000000000";
-        if (transaction.cbu && transaction.cbu !== " ") {
-          CBU = transaction.cbu;
+        let collected_amount;
+        if (transaction.collected_amount) {
+          collected_amount = transaction.collected_amount?.toString();
+        } else if (transaction.first_due_amount) {
+          collected_amount = transaction.first_due_amount?.toString();
+        } else {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: ` no hay informacion sobre importe a cobrar (invoice number:${transaction.invoice_number}`,
+          });
         }
-        let zeros_collected_amount = "0000000000000";
-        const collected_amount_digits =
-          transaction.collected_amount?.toString().length ?? 0;
-        if (collected_amount_digits < 13) {
-          zeros_collected_amount = "0".repeat(13 - collected_amount_digits);
+        const collectedAmount = formatString("0", collected_amount, 13, false);
+        const fiscalNumber = formatString(
+          " ",
+          transaction.fiscal_id_number!.toString(),
+          22,
+          true,
+        );
+        if (!transaction.cbu) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: ` no hay informacion sobre CBU (invoice number:${transaction.invoice_number}`,
+          });
         }
-
-        text += `421002513  ${
-          transaction.fiscal_id_number
-        }           ${CBU}${zeros_collected_amount}${
-          transaction.collected_amount ?? ""
-        }00                              ${monthName} ${year}         ${dateYYYYMMDD}  000000000${
-          transaction.invoice_number
-        }                        \r\n`;
-        text += `422002513  ${transaction.fiscal_id_number}           ${transaction.name}                        \r\n`;
-        text += `423002513  ${transaction.fiscal_id_number}                         \r\n`;
-        text += `424002513  ${transaction.fiscal_id_number}           ${input.concept}                        \r\n`;
+        const invoice_number = formatString(
+          "0",
+          transaction.invoice_number!.toString(),
+          15,
+          false,
+        );
+        const CBU = transaction.cbu;
+        text += `421002513  ${fiscalNumber}${CBU}${collectedAmount}00      ${period}${dateYYYYMMDD}  ${invoice_number}${" ".repeat(
+          127,
+        )}\r\n`;
+        let name;
+        if (transaction.name!.length > 36) {
+          name = transaction.name!.slice(0, 36);
+        } else {
+          name = formatString(" ", transaction.name!, 36, true);
+        }
+        text += `422002513  ${fiscalNumber}${name}${" ".repeat(181)}\r\n`;
+        text += `423002513  ${fiscalNumber}${" ".repeat(217)}\r\n`;
+        const concept = formatString(" ", input.concept, 40, true);
+        text += `424002513  ${fiscalNumber}${concept}${" ".repeat(177)}\r\n`;
 
         total_records += 4;
         total_operations += 1;
-        total_collected += transaction.collected_amount ?? 0;
+        total_collected +=
+          transaction.collected_amount ?? transaction.first_due_amount ?? 0;
       }
 
       total_records += 1;
 
-      const total_records_string = total_records?.toString();
-      const total_operations_string = total_operations?.toString();
-      const total_collected_string = total_collected?.toString();
-      let zeros_total_income = "";
-      let zeros_total_operations = "";
-      let zeros_total_collected = "";
-      if (total_records_string?.length < 8) {
-        zeros_total_income = "0".repeat(13 - total_records_string.length);
-      }
+      const total_collected_string = formatString(
+        "0",
+        total_collected?.toString(),
+        13,
+        false,
+      );
+      const total_operations_string = formatString(
+        "0",
+        total_operations?.toString(),
+        8,
+        false,
+      );
+      const total_records_string = formatString(
+        "0",
+        total_records?.toString(),
+        10,
+        false,
+      );
 
-      if (total_operations_string.length < 10) {
-        zeros_total_operations = "0".repeat(
-          10 - total_operations_string.length,
-        );
-      }
-
-      if (total_collected_string.length < 13) {
-        zeros_total_collected = "0".repeat(13 - total_collected_string.length);
-      }
-
-      text += `491002513${zeros_total_collected}${total_collected}${zeros_total_operations}${total_operations}${zeros_total_income}${total_records}\r\n`;
+      text += `491002513${total_collected_string}${total_operations_string}${total_records_string}\r\n`;
 
       return text;
     }),

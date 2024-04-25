@@ -1,29 +1,31 @@
-import { api } from "~/trpc/server";
 import { Title } from "~/components/title";
-import GenerateChannelOutputPage from "./generate-channel-output";
-export default async function page({
-  params,
-}: {
-  params: { channelId: string; companyId: string };
-}) {
-  const company = await api.companies.get.query({
-    companyId: params.companyId,
-  });
-  const channel = await api.channels.get.query({
-    channelId: params.channelId,
-  });
+import { api } from "~/trpc/server";
+import { Building2Icon } from "lucide-react";
+import { List, ListTile } from "~/components/list";
+import { type RouterOutputs } from "~/trpc/shared";
 
-  if (!company) {
-    return <Title>company not found</Title>;
-  }
+export default async function Page(props: {
+  params: { companyId: string; channelId: string };
+}) {
+  const brands: RouterOutputs["brands"]["getbyCompany"] =
+    await api.brands.getbyCompany.query({
+      companyId: props.params.companyId,
+    });
 
   return (
     <>
-      {channel ? (
-        <GenerateChannelOutputPage channel={channel} company={company} />
-      ) : (
-        <Title>Channel not found</Title>
-      )}
+      <List>
+        {brands.map((brand) => {
+          return (
+            <ListTile
+              key={brand?.id}
+              href={`/dashboard/management/generate/${props.params.channelId}/${props.params.companyId}/${brand?.id}`}
+              title={brand?.name}
+              leading={<Building2Icon />}
+            />
+          );
+        })}
+      </List>
     </>
   );
 }

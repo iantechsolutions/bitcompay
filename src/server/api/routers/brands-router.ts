@@ -38,7 +38,25 @@ export const brandsRouter = createTRPCRouter({
   list: protectedProcedure.query(async () => {
     return await db.query.brands.findMany();
   }),
-
+  getbyCompany: protectedProcedure
+    .input(
+      z.object({
+        companyId: z.string(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const relations = await db.query.companiesToBrands.findMany({
+        where: eq(schema.companiesToBrands.companyId, input.companyId),
+      });
+      const brands = [];
+      for (const relation of relations) {
+        const brand = await db.query.brands.findFirst({
+          where: eq(schema.brands.id, relation.brandId),
+        });
+        brands.push(brand);
+      }
+      return brands;
+    }),
   create: protectedProcedure
     .input(
       z.object({

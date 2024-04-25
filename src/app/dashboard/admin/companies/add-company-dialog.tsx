@@ -18,7 +18,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { asTRPCError } from "~/lib/errors";
 import { api } from "~/trpc/react";
-
+import { z } from "zod";
 export function AddCompanyDialog() {
   const { mutateAsync: createCompany, isLoading } =
     api.companies.create.useMutation();
@@ -26,23 +26,27 @@ export function AddCompanyDialog() {
   const [description, setDescription] = useState("");
   const [name, setName] = useState("");
   const [concept, setConcept] = useState("");
-
+  const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
 
   const router = useRouter();
-
+  const schema = z.object({
+    texto: z.string().max(40),
+  });
   async function handleCreate() {
     try {
+      schema.parse({ texto: concept });
       await createCompany({
         description,
         name,
-        concept
+        concept,
       });
 
       toast.success("Empresa creado correctamente");
       router.refresh();
       setOpen(false);
     } catch (e) {
+      setError("por favor inserte un concept de 40 caracteres o menos");
       const error = asTRPCError(e)!;
       toast.error(error.message);
     }
@@ -86,8 +90,18 @@ export function AddCompanyDialog() {
               id="concept"
               placeholder="..."
               value={concept}
-              onChange={(e) => setConcept(e.target.value)}
+              onChange={(e) => {
+                setConcept(e.target.value);
+                try {
+                  schema.parse({ texto: concept });
+                } catch {
+                  setError(
+                    "el campo concepto no puede superar los 40 caracteres",
+                  );
+                }
+              }}
             />
+            <span className="text-xs text-red-600">{error}</span>
           </div>
           <DialogFooter>
             <Button disabled={isLoading} onClick={handleCreate}>

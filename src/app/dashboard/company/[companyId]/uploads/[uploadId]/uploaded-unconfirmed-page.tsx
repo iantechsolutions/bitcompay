@@ -29,7 +29,32 @@ import {
 export type UploadedPageProps = {
   upload: NonNullable<RouterOutputs["uploads"]["upload"]>;
 };
-
+interface TableRow {
+  period: string | undefined;
+  g_c: number | null;
+  name: string | null;
+  fiscal_id_type: "CUIT" | "CUIL" | null;
+  fiscal_id_number: number | null;
+  du_type: "DNI" | "LC" | "LE" | null;
+  // Agrega las otras propiedades aquí
+  du_number: number | null;
+  product_number: number | null;
+  cbu: string | null;
+  card_brand: string | null;
+  is_new: boolean | null;
+  card_number: string | null;
+  invoice_number: number | null;
+  first_due_amount: number | null;
+  first_due_date: Date | null;
+  second_due_amount: number | null;
+  second_due_date: Date | null;
+  additional_info: string | null;
+  payment_channel: string | null;
+  payment_date: Date | null;
+  collected_amount: number | null;
+  comment: string | null;
+  payment_status: string | null;
+}
 export default function UploadUnconfirmedPage(props: UploadedPageProps) {
   const [confirmed, setConfirmed] = useState<boolean>(props.upload.confirmed);
   const router = useRouter();
@@ -89,6 +114,8 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
     RouterOutputs["uploads"]["readUploadContents"] | null
   >(null);
 
+  const [tableRows, setTableRows] = useState<Record<string, unknown>[]>([]);
+
   const productsBatchArray: Record<string, unknown>[] = Object.entries(
     data?.batchHead ?? {},
   ).map(([key, value]) => ({
@@ -142,6 +169,20 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
       }
       if (editRowsBatchArray) {
         setEditableTableRows(editRowsBatchArray);
+      }
+      // para mostrar en la tabla
+      const tableRows = data?.rows.map((row) => {
+        let formattedPeriod: string | undefined;
+
+        if (row.period && row.period instanceof Date) {
+          formattedPeriod = dayjs(row.period).format("MM-YYYY");
+        }
+
+        return { ...row, period: formattedPeriod };
+      });
+
+      if (tableRows) {
+        setTableRows(tableRows);
       }
     } catch (e) {
       console.error(e);
@@ -250,9 +291,8 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
               )}
             </div>
           </LayoutContainer>
-
           <div className="mt-5">
-            {data && <LargeTable rows={data.rows} headers={data.headers} />}
+            {data && <LargeTable rows={tableRows} headers={data.headers} />}
           </div>
         </>
       )}

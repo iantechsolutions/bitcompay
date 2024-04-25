@@ -53,7 +53,7 @@ const stringAsDate = z
   });
 
 const stringAsPeriod = z.string().transform((value) => {
-  return dayjs(value, "MMYYYY").format("MM-YYYY");
+  return dayjs(value, "MMYYYY").toDate();
 });
 
 const cbuSchema = z

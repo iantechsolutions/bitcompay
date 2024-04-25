@@ -1,4 +1,5 @@
 "use client";
+import { z } from "zod";
 import { Loader2Icon, PlusCircleIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -19,17 +20,22 @@ import { api } from "~/trpc/react";
 export function AddBrandDialog() {
   const { mutateAsync: createBrand, isLoading } =
     api.brands.create.useMutation();
-
   const [reducedDescription, setReducedDescription] = useState("");
   const [description, setDescription] = useState("");
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
   const [open, setOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const router = useRouter();
 
+  const schema = z.object({
+    texto: z.string().max(10),
+  });
+
   async function handleCreate() {
     try {
+      schema.parse({ texto: reducedDescription });
       await createBrand({
         description,
         name,
@@ -41,6 +47,9 @@ export function AddBrandDialog() {
       router.refresh();
       setOpen(false);
     } catch (e) {
+      setError(
+        "no se puede asignar una descripcion reducidad de mas de 10 caracteres",
+      );
       const error = asTRPCError(e)!;
       toast.error(error.message);
     }
@@ -94,8 +103,18 @@ export function AddBrandDialog() {
               id="description_reducida"
               placeholder="..."
               value={reducedDescription}
-              onChange={(e) => setReducedDescription(e.target.value)}
+              onChange={(e) => {
+                setReducedDescription(e.target.value);
+                try {
+                  schema.parse({ texto: reducedDescription });
+                } catch {
+                  setError(
+                    "por favor inserte una descripcion reducida de 10 caracteres o menos",
+                  );
+                }
+              }}
             />
+            {error && <span className="text-xs text-red-600">{error}</span>}
           </div>
 
           <DialogFooter>
