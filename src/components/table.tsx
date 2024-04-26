@@ -36,26 +36,28 @@ export function LargeTable(props: {
   const headers = useTableHeaders(props.headers, props.rows);
 
   const headerId = useId();
-
   const uniqueClassName = useId();
 
-  const header = document?.getElementById(headerId);
-  const list = document?.getElementsByClassName(uniqueClassName)[0];
-
   useLayoutEffect(() => {
-    // Set list scroll (uniqueClasName) to scroll headerId
+    const header = document?.getElementById(headerId);
+    const list = document?.getElementsByClassName(uniqueClassName)[0];
 
-    if (!header || !list) return;
-    list.addEventListener("scroll", () => {
-      header.scrollLeft = list.scrollLeft;
-    });
+    const syncScroll = () => {
+      if (header && list) {
+        header.scrollLeft = list.scrollLeft;
+      }
+    };
+
+    if (list) {
+      list.addEventListener("scroll", syncScroll);
+    }
 
     return () => {
-      list.removeEventListener("scroll", () => {
-        header.scrollLeft = list.scrollLeft;
-      });
+      if (list) {
+        list.removeEventListener("scroll", syncScroll);
+      }
     };
-  }, [header, list]);
+  }, [headerId, uniqueClassName]);
 
   return (
     <tableContext.Provider

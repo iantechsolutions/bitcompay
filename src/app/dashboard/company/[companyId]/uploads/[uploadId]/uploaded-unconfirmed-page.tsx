@@ -116,6 +116,7 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
 
   const [tableRows, setTableRows] = useState<Record<string, unknown>[]>([]);
 
+  if(data!= null && data.batchHead != null){}
   const productsBatchArray: Record<string, unknown>[] = Object.entries(
     data?.batchHead ?? {},
   ).map(([key, value]) => ({

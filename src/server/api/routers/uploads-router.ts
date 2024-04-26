@@ -579,7 +579,7 @@ async function readUploadContents(
       rowToEdit: cellsToEdit,
     };
   } else {
-    return new TRPCError({
+    throw new TRPCError({
       code: "BAD_REQUEST",
       message: "suba un archivo en formato xlsx",
     });
