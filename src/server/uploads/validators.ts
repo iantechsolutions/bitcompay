@@ -375,7 +375,7 @@ export const recHeaders: TableHeaders = [
   { key: "first_due_date", label: "Fecha 1er Vto.", width: 140 },
   { key: "second_due_amount", label: "Importe 2do Vto.", width: 140 },
   { key: "second_due_date", label: "Fecha 2do. Vto.", width: 140 },
-  { key: "additional_info", label: "Info. Adicional", width: 140 },
+  { key: "additional_info", label: "Info. Adicional", width: 250 },
   { key: "payment_channel", label: "Canal de Cobro", width: 140 },
   { key: "payment_date", label: "Fecha de Pago/Débito", width: 140 },
   { key: "collected_amount", label: "Importe Cobrado", width: 140 },

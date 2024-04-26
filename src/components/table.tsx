@@ -28,7 +28,8 @@ export function LargeTable(props: {
   headers?: TableHeaders;
   height?: number;
 }) {
-  const height = props.height ?? 600;
+  const listHeight =
+    props.rows.length * 35 > 600 ? 600 : props.rows.length * 35 + 10;
 
   const document =
     typeof global.document !== "undefined" ? global.document : null;
@@ -91,7 +92,7 @@ export function LargeTable(props: {
         </div>
         <List
           className={uniqueClassName}
-          height={height}
+          height={listHeight}
           itemCount={props.rows.length}
           itemSize={35}
           width={"100%"}
