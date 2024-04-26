@@ -452,7 +452,6 @@ async function readUploadContents(
       message: "Error: la columna Marca no existe en el documento",
     });
   }
-
   for (let i = 0; i < transformedRows.length; i++) {
     const row = transformedRows[i]!;
     const rowNum = i + 2;
@@ -470,6 +469,7 @@ async function readUploadContents(
     // verificar producto
     let product;
     if (row.product_number) {
+      console.log("existe row product_number");
       if (row.product_number in productsMap) {
         product = productsMap[row.product_number];
       } else {
@@ -527,7 +527,7 @@ async function readUploadContents(
           //   reason: "Empty cell",
           // });
           errors.push(
-            `Este producto: ${row.product_number} es invalido o  no se encuentra habilitado (fila:${rowNum})`,
+            `La columna ${columnName} es obligatoria y no esta en el archivo(fila:${rowNum})`,
           );
         }
       }
