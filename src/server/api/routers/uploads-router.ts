@@ -161,7 +161,7 @@ export const uploadsRouter = createTRPCRouter({
           channels,
           brands,
         );
-        if (result) {
+        if (result.rows) {
           const { rows, upload } = result;
           if (upload.confirmed) {
             tx.rollback();
@@ -578,6 +578,11 @@ async function readUploadContents(
       upload,
       rowToEdit: cellsToEdit,
     };
+  } else {
+    return new TRPCError({
+      code: "BAD_REQUEST",
+      message: "suba un archivo en formato xlsx",
+    });
   }
 }
 

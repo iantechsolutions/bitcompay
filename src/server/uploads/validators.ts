@@ -74,7 +74,7 @@ export const recDocumentValidator = z
       .nullable()
       .optional(),
     "Nro ID Fiscal": stringToValidIntegerZodTransformer.nullable().optional(),
-    "Tipo DU": z
+    "Tipo DNI": z
       .literal("DNI")
       .or(z.literal("LC"))
       .or(z.literal("LE"))
@@ -137,7 +137,7 @@ export const recDocumentValidator = z
       name: value["Apellido y Nombre"] ?? null,
       fiscal_id_type: value["Tipo ID Fiscal"] ?? null,
       fiscal_id_number: value["Nro ID Fiscal"] ?? null,
-      du_type: value["Tipo DU"] ?? null,
+      du_type: value["Tipo DNI"] ?? null,
       du_number: value["Nro DU"] ?? null,
       product_number: parseInt(value.Producto ?? "") ?? null,
       cbu: value["Nro CBU"] ?? null,
@@ -165,7 +165,7 @@ export const recDocumentValidatorWithoutProduct = z
     "Apellido y Nombre": z.any().nullable().optional(),
     "Tipo ID Fiscal": z.any().nullable().optional(),
     "Nro ID Fiscal": z.any().nullable().optional(),
-    "Tipo DU": z.any().nullable().optional(),
+    "Tipo DNI": z.any().nullable().optional(),
     "Nro DU": z.any().nullable().optional(),
     Producto: z
       .any({
@@ -199,7 +199,7 @@ export const recDocumentValidatorWithoutProduct = z
       name: value["Apellido y Nombre"] ?? null,
       fiscal_id_type: value["Tipo ID Fiscal"] ?? null,
       fiscal_id_number: value["Nro ID Fiscal"] ?? null,
-      du_type: value["Tipo DU"] ?? null,
+      du_type: value["Tipo DNI"] ?? null,
       du_number: value["Nro DU"] ?? null,
       product_number: value.Producto ?? null,
       cbu: value["Nro CBU"] ?? null,
@@ -357,7 +357,7 @@ export const recHeaders: TableHeaders = [
   { key: "name", label: "Apellido y Nombre", width: 200 },
   { key: "fiscal_id_type", label: "Tipo ID Fiscal", width: 140 },
   { key: "fiscal_id_number", label: "Nro ID Fiscal", width: 140 },
-  { key: "du_type", label: "Tipo DU", width: 140 },
+  { key: "du_type", label: "Tipo DNI", width: 140 },
   { key: "du_number", label: "Nro DU", width: 140 },
   { key: "product_number", label: "Producto", width: 80, alwaysRequired: true },
   { key: "cbu", label: "Nro CBU", width: 140 },
