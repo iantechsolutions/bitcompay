@@ -40,10 +40,6 @@ export default async function page({
       throw new Error("product or channel does not exist in company");
     }
 
-    // const t = await db.query.payments.findMany({
-    //   where: eq(schema.payments.product_number, product.number),
-    // });
-
     const t = await db
       .select()
       .from(schema.payments)
