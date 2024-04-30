@@ -4,8 +4,12 @@ import { db, schema } from "~/server/db";
 import { eq, and } from "drizzle-orm";
 import dayjs from "dayjs";
 import { TRPCError } from "@trpc/server";
-import 'dayjs/locale/es';
-dayjs.locale('es');
+import "dayjs/locale/es";
+dayjs.locale("es");
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 export const iofilesRouter = createTRPCRouter({
   generate: protectedProcedure
@@ -68,7 +72,7 @@ export const iofilesRouter = createTRPCRouter({
           return char.repeat(limit - string.length).concat(string);
         }
       }
-      let currentDate = dayjs();
+      let currentDate = dayjs().utc().tz("America/Argentina/Buenos_Aires");
       const currentHour = currentDate.hour();
       const currentMinutes = currentDate.minute();
       if (currentHour > 16 || (currentHour == 16 && currentMinutes > 0)) {
@@ -170,7 +174,9 @@ export const iofilesRouter = createTRPCRouter({
         false,
       );
 
-      text += `491002513${total_collected_string}${total_operations_string}${total_records_string}${" ".repeat(208)}\r\n`;
+      text += `491002513${total_collected_string}${total_operations_string}${total_records_string}${" ".repeat(
+        208,
+      )}\r\n`;
 
       return text;
     }),
