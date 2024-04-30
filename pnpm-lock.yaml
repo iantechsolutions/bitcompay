@@ -65,9 +65,6 @@ dependencies:
   '@trpc/server':
     specifier: ^10.43.6
     version: 10.44.1
-  '@types/react-virtualized-auto-sizer':
-    specifier: ^1.0.4
-    version: 1.0.4
   '@types/react-window':
     specifier: ^1.8.8
     version: 1.8.8
@@ -1957,12 +1954,6 @@ packages:
     resolution: {integrity: sha512-TJxDm6OfAX2KJWJdMEVTwWke5Sc/E/RlnPGvGfS0W7+6ocy2xhDVQVh/KvC2Uf7kACs+gDytdusDSdWfWkaNzw==}
     dependencies:
       '@types/react': 18.2.45
-
-  /@types/react-virtualized-auto-sizer@1.0.4:
-    resolution: {integrity: sha512-nhYwlFiYa8M3S+O2T9QO/e1FQUYMr/wJENUdf/O0dhRi1RS/93rjrYQFYdbUqtdFySuhrtnEDX29P6eKOttY+A==}
-    dependencies:
-      '@types/react': 18.2.45
-    dev: false
 
   /@types/react-window@1.8.8:
     resolution: {integrity: sha512-8Ls660bHR1AUA2kuRvVG9D/4XpRC6wjAaPT9dil7Ckc76eP9TKWZwwmgfq8Q1LANX3QNDnoU4Zp48A3w+zK69Q==}
