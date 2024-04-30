@@ -18,11 +18,20 @@ import { api } from "~/trpc/react";
 import type { RouterOutputs } from "~/trpc/shared";
 import { useState } from "react";
 import { DialogClose } from "@radix-ui/react-dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/components/ui/table";
 
 export default function GenerateChannelOutputPage(props: {
   channel: NonNullable<RouterOutputs["channels"]["get"]>;
   company: NonNullable<RouterOutputs["companies"]["get"]>;
   brand: NonNullable<RouterOutputs["brands"]["get"]>;
+  status_batch: Record<string, string | number>[];
 }) {
   const {
     mutateAsync: generateInputFile,
@@ -81,6 +90,34 @@ export default function GenerateChannelOutputPage(props: {
       <Title>
         {props.company.name} {props.channel?.name}: Generar entrada
       </Title>
+      <Table className="mb-5 w-full">
+        <TableHeader>
+          <TableRow>
+            <TableHead>Estado transaccion</TableHead>
+            <TableHead>Cant. Transacciones</TableHead>
+            <TableHead>Recaudacion </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {props.status_batch
+            .filter((row) => row.records !== 0)
+            .map((row) => (
+              <TableRow key={row.product as React.Key}>
+                <TableCell className="font-medium">
+                  {typeof row.status === "string" ? row.status : ""}
+                </TableCell>
+                <TableCell>
+                  {typeof row.records === "number" ? row.records : ""}
+                </TableCell>
+                <TableCell>
+                  {typeof row.amount_collected === "number"
+                    ? "$".concat(row.amount_collected.toString())
+                    : ""}
+                </TableCell>
+              </TableRow>
+            ))}
+        </TableBody>
+      </Table>
 
       <Dialog>
         <DialogTrigger asChild>

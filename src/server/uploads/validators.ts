@@ -53,6 +53,11 @@ const stringAsDate = z
   });
 
 const stringAsPeriod = z.string().transform((value) => {
+  const first2 = value.substring(0, 2);
+  if (parseInt(first2) < 12) {
+    const year = value.substring(2, 8);
+    return dayjs(`${year}${first2}`, "MMYYYY").toDate();
+  }
   return dayjs(value, "MMYYYY").toDate();
 });
 
@@ -380,7 +385,7 @@ export const recHeaders: TableHeaders = [
   { key: "payment_date", label: "Fecha de Pago/Débito", width: 140 },
   { key: "collected_amount", label: "Importe Cobrado", width: 140 },
   { key: "comment", label: "Obs.", width: 140 },
-  { key: "payment_status", label: "Estado de Pago", width: 140 },
+  { key: "status_code", label: "Estado de Pago", width: 140 },
 ];
 
 export const columnLabelByKey = Object.fromEntries(

@@ -3,10 +3,10 @@
 import { useLayoutEffect, useState } from "react";
 import { LargeTable } from "~/components/table";
 import { recHeaders } from "~/server/uploads/validators";
-import { TransactionsFiltersDialog } from "./transactions-filters";
+// import { TransactionsFiltersDialog } from "./transactions-filters";
 
 export default function TransactionsPage(props: {
-  transactions: Record<string, any>[];
+  transactions: Record<string, unknown>[];
 }) {
   const [height, setHeight] = useState(600);
 
@@ -32,7 +32,7 @@ export default function TransactionsPage(props: {
         rows={props.transactions}
       />
       <div className="fixed right-20 top-4 z-10">
-        <TransactionsFiltersDialog filters={0} onChange={() => {}} />
+        {/* <TransactionsFiltersDialog filters={0} onChange={() => {}} /> */}
       </div>
     </div>
   );
