@@ -47,6 +47,7 @@ export default async function page({
         and(
           eq(schema.payments.product_number, product.number),
           eq(schema.payments.companyId, params.companyId),
+          eq(schema.payments.status_code, "91"),
         ),
       );
 
@@ -57,16 +58,11 @@ export default async function page({
   //despues cambiar esto por un dict<status<record,amount>>
   const status_batch = [
     { status: "Pendiente", records: 0, amount_collected: 0 },
-    { status: "Enviado a banco", records: 0, amount_collected: 0 },
   ];
   for (const transaction of transactions) {
     if (transaction.status_code === "91") {
       status_batch[0]!.records += 1;
       status_batch[0]!.amount_collected +=
-        transaction?.collected_amount ?? transaction?.first_due_amount ?? 0;
-    } else if (transaction.status_code == "92") {
-      status_batch[1]!.records += 1;
-      status_batch[1]!.amount_collected +=
         transaction?.collected_amount ?? transaction?.first_due_amount ?? 0;
     }
   }

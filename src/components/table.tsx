@@ -7,7 +7,8 @@ import {
 } from "react";
 import { FixedSizeList as List } from "react-window";
 import dayjs from "dayjs";
-
+import utc from "dayjs/plugin/utc";
+dayjs.extend(utc);
 export type TableHeaders = {
   key: string;
   label: React.ReactNode;
@@ -144,7 +145,7 @@ function Row(props: { style?: React.CSSProperties; index: number }) {
         let value: any = row[header.key];
 
         if (value instanceof Date) {
-          value = dayjs(value).format("DD-MM-YYYY");
+          value = dayjs.utc(value).format("DD-MM-YYYY");
         }
 
         const w = header.width ?? 160;

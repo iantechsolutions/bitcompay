@@ -47,12 +47,12 @@ export default function GenerateChannelOutputPage(props: {
 
   const [fileName, setFileName] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [disabled, setDisabled] = useState(false);
   async function handleGenerate() {
     try {
       // Validar el valor del input con Zod
       console.log(fileName);
       schema.parse({ texto: fileName });
-
       const { company } = props;
       await generateInputFile({
         channelId: props.channel.id,
@@ -64,6 +64,8 @@ export default function GenerateChannelOutputPage(props: {
 
       // Limpiar los errores
       setError(null);
+      // desabilitar el boton
+      setDisabled(true);
     } catch (error) {
       // Si hay errores de validación, mostrarlos al usuario
       setError("no se puede asignar un nombre mayor a 10 caracteres");
@@ -90,38 +92,46 @@ export default function GenerateChannelOutputPage(props: {
       <Title>
         {props.company.name} {props.channel?.name}: Generar entrada
       </Title>
-      <Table className="mb-5 w-full">
-        <TableHeader>
-          <TableRow>
-            <TableHead>Estado transaccion</TableHead>
-            <TableHead>Cant. Transacciones</TableHead>
-            <TableHead>Recaudacion </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {props.status_batch
-            .filter((row) => row.records !== 0)
-            .map((row) => (
-              <TableRow key={row.product as React.Key}>
-                <TableCell className="font-medium">
-                  {typeof row.status === "string" ? row.status : ""}
-                </TableCell>
-                <TableCell>
-                  {typeof row.records === "number" ? row.records : ""}
-                </TableCell>
-                <TableCell>
-                  {typeof row.amount_collected === "number"
-                    ? "$".concat(row.amount_collected.toString())
-                    : ""}
-                </TableCell>
-              </TableRow>
-            ))}
-        </TableBody>
-      </Table>
+      {props.status_batch[0]!.records !== 0 && (
+        <Table className="mb-5 w-full">
+          <TableHeader>
+            <TableRow>
+              <TableHead>Estado transaccion</TableHead>
+              <TableHead>Cant. Transacciones</TableHead>
+              <TableHead>Recaudacion </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {props.status_batch
+              .filter((row) => row.records !== 0)
+              .map((row) => (
+                <TableRow key={row.product as React.Key}>
+                  <TableCell className="font-medium">
+                    {typeof row.status === "string" ? row.status : ""}
+                  </TableCell>
+                  <TableCell>
+                    {typeof row.records === "number" ? row.records : ""}
+                  </TableCell>
+                  <TableCell>
+                    {typeof row.amount_collected === "number"
+                      ? "$".concat(row.amount_collected.toString())
+                      : ""}
+                  </TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+      )}
 
       <Dialog>
         <DialogTrigger asChild>
-          <Button disabled={isLoading} size="lg" className="w-full">
+          <Button
+            disabled={
+              isLoading || props.status_batch[0]!.records === 0 || disabled
+            }
+            size="lg"
+            className="w-full"
+          >
             {isLoading && <Loader2Icon className="mr-2 animate-spin" />}
             Generar Archivo
           </Button>
