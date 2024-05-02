@@ -1,21 +1,8 @@
-import dayjs from "dayjs";
-import {
-  AlertCircleIcon,
-  CheckIcon,
-  FileOutput,
-  MessageSquareReply,
-  File,
-} from "lucide-react";
+import { FileOutput, MessageSquareReply, File } from "lucide-react";
 import { List, ListTile } from "~/components/list";
 import { Title } from "~/components/title";
-import { formatKB } from "~/lib/utils";
-import { api } from "~/trpc/server";
 
 export default async function UploadedDocumentsPage() {
-  const uploadedDocuments = await api.uploads.list.query();
-  //   c2LQxo7Z294z7XXwZpMpj
-  // rzRGJTyxSnB9UVPAxbljo
-  // KNPqhFLCGiXktr3SmuwNI
   const documentsTypes = [
     {
       id: "c2LQxo7Z294z7XXwZpMpj",
@@ -39,24 +26,6 @@ export default async function UploadedDocumentsPage() {
             title={type.name}
             leading={type.leading}
             href={`/dashboard/management/documents/${type.id}`}
-          />
-        ))}
-      </List>
-      <List>
-        {uploadedDocuments.map((upload) => (
-          <ListTile
-            key={upload.id}
-            href={`/dashboard/management/documents/${upload.id}`}
-            leading={upload.confirmed ? <CheckIcon /> : <AlertCircleIcon />}
-            title={upload.fileName}
-            subtitle={
-              <>
-                {formatKB(upload.fileSize)}
-                {" - "}
-                {dayjs(upload.createdAt).format("DD/MM/YYYY")}
-              </>
-            }
-            trailing={<>{upload.rowsCount}</>}
           />
         ))}
       </List>

@@ -42,6 +42,10 @@ export const uploadsRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({}) => {
     return await db.query.documentUploads.findMany();
   }),
+
+  listResponse: protectedProcedure.query(async ({}) => {
+    return await db.query.responseDocumentUploads.findMany();
+  }),
   readUploadContents: protectedProcedure
     .input(
       z.object({
