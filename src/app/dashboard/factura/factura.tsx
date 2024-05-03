@@ -4,7 +4,7 @@ import { set } from "zod";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 import path from "path";
-
+import { FacturaDialog } from "./generarFactura";
 export async function ingresarAfip() {
   //CUIT QUE QUEREMOS QUE COBRE
   const taxId = 23439214619;

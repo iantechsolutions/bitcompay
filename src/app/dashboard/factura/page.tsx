@@ -5,6 +5,8 @@ import fs from "fs";
 import Sidenav, { SidenavItem } from "~/components/sidenav";
 import { LayoutDashboardIcon, Settings2Icon } from "lucide-react";
 import { getServerAuthSession } from "~/server/auth";
+import { Title } from "~/components/title";
+import { FacturaDialog } from "./generarFactura";
 
 export default async function Home() {
   const session = await getServerAuthSession();
@@ -27,7 +29,9 @@ export default async function Home() {
         </Sidenav>
       }
     >
-      <Factura receivedHtml={html}></Factura>
+      <Title>Facturas</Title>
+      <FacturaDialog></FacturaDialog>
+      {/* <Factura receivedHtml={html}></Factura> */}
     </AppLayout>
   );
 }
