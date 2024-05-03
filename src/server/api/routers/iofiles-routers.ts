@@ -91,6 +91,20 @@ export const iofilesRouter = createTRPCRouter({
         return text
       })
     }),
+  list: protectedProcedure.input(z.object({
+    channelId: z.string(),
+    companyId: z.string(),
+    brandId: z.string(),
+  })).query(async ({ input }) => {
+    return await db.query.uploadedOutputFiles.findMany({
+      where: and(
+        eq(schema.uploadedOutputFiles.channelId, input.channelId),
+        eq(schema.uploadedOutputFiles.companyId, input.companyId),
+        eq(schema.uploadedOutputFiles.brandId, input.brandId),
+      ),
+    })
+
+  }),
 });
 
 function generateDebitoDirecto(

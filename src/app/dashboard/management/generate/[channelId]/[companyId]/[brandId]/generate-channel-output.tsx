@@ -32,6 +32,7 @@ export default function GenerateChannelOutputPage(props: {
   company: NonNullable<RouterOutputs["companies"]["get"]>;
   brand: { id: string };
   status_batch: Record<string, string | number>[];
+  outputFiles: RouterOutputs["iofiles"]["list"];
 }) {
   const {
     mutateAsync: generateInputFile,
@@ -165,6 +166,14 @@ export default function GenerateChannelOutputPage(props: {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {props.outputFiles.length > 0 && (
+        <div>
+          <Title>Archivos generados</Title>
+          {props.outputFiles.map((file) => (<a href={file.fileUrl}>{file.fileName}</a>))}
+        </div>
+      )}
+
       {data != undefined && (
         <div className="mt-5">
           <Title>Resultado</Title>
