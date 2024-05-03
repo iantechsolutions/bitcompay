@@ -8,10 +8,11 @@ import "dayjs/locale/es";
 dayjs.locale("es");
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+import dayOfYear from "dayjs/plugin/dayOfYear";
 import { type RouterOutputs } from "~/trpc/shared";
 dayjs.extend(utc);
 dayjs.extend(timezone);
-
+dayjs.extend(dayOfYear);
 export const iofilesRouter = createTRPCRouter({
   generate: protectedProcedure
     .input(
@@ -60,6 +61,8 @@ export const iofilesRouter = createTRPCRouter({
         text = await generateDebitoDirecto(input, transactions);
       } else if (channel?.name.includes("PAGOMISCUENTAS")) {
         text = await generatePagomiscuentas(input, transactions);
+      } else if (channel?.name.includes("PAGO FACIL")) {
+        text = await generatePagoFacil(input, transactions);
       }
       return text;
     }),
@@ -192,10 +195,10 @@ async function generatePagomiscuentas(
   },
   transactions: RouterOutputs["transactions"]["list"],
 ): Promise<string> {
-  const dateAAAAMMDD = dayjs().format("AAAAMMDD");
+  const dateAAAAMMDD = dayjs().format("YYYYMMDD");
   const companyCode = "1234";
   //header
-  let text = `0400${companyCode}${dateAAAAMMDD}${"0".repeat(264)}`;
+  let text = `0400${companyCode}${dateAAAAMMDD}${"0".repeat(84)}\n`;
   let total_records = 0;
   let total_collected = 0;
   for (const transaction of transactions) {
@@ -212,7 +215,7 @@ async function generatePagomiscuentas(
       20,
       true,
     );
-    const first_due_date = dayjs(transaction.first_due_date).format("AAAAMMDD");
+    const first_due_date = dayjs(transaction.first_due_date).format("YYYYMMDD");
     const first_due_amount = formatString(
       "0",
       transaction.first_due_amount
@@ -221,29 +224,11 @@ async function generatePagomiscuentas(
       9,
       false,
     );
-    const second_due_date = dayjs(transaction.second_due_date).format(
-      "AAAAMMDD",
-    );
-    const second_due_amount = formatString(
-      "0",
-      transaction.second_due_amount
-        ? transaction.second_due_amount.toString()
-        : "",
-      9,
-      false,
-    );
-    const concept = formatString(" ", input.concept, 40, true);
-    const displayMessage = formatString(" ", input.concept, 15, true);
-    text += `5${fiscal_id_number}${invoice_number}0${first_due_date}${first_due_amount}00`;
-    text += `${second_due_date}${second_due_amount}00${" ".repeat(
-      11,
-    )}${" ".repeat(8)}`;
-    text += `${"0".repeat(
-      19,
-    )}${fiscal_id_number}${concept}${displayMessage}${" ".repeat(
-      60,
-    )}${" ".repeat(29)}\n`;
-
+    const controlNumber = "1292";
+    // const concept = formatString(" ", input.concept, 40, true);
+    // const displayMessage = formatString(" ", input.concept, 15, true);
+    text += `5${fiscal_id_number}${invoice_number}${first_due_date}0${first_due_date}${first_due_amount}00`;
+    text += `2${dateAAAAMMDD}PC${controlNumber}   ${"0".repeat(14)}\n`;
     total_records++;
     total_collected += transaction.first_due_amount!;
   }
@@ -251,7 +236,7 @@ async function generatePagomiscuentas(
   const total_collected_string = formatString(
     "0",
     total_collected.toString(),
-    16,
+    9,
     false,
   );
   const total_records_string = formatString(
@@ -262,8 +247,103 @@ async function generatePagomiscuentas(
   );
   text += `9400${companyCode}${dateAAAAMMDD}${total_records_string}${"0".repeat(
     7,
-  )}${total_collected_string}00${"0".repeat(234)}\n`;
+  )}${total_collected_string}00${"0".repeat(11)}${"0".repeat(48)}\n`;
 
+  return text;
+}
+
+async function generatePagoFacil(
+  input: {
+    channelId: string;
+    companyId: string;
+    fileName: string;
+    concept: string;
+    redescription: string;
+  },
+  transactions: RouterOutputs["transactions"]["list"],
+): Promise<string> {
+  let text = "";
+  //header
+  const date = dayjs().format("DDMMYYYY");
+  const hours = dayjs().format("HHmmss");
+  const companyName = formatString(" ", "BITCOM SRL", 40, true);
+  const originName = formatString(" ", "PAGO FACIL", 10, true);
+  text += `1${date}90063509${companyName}${originName}${"0".repeat(123)}\r\n`;
+  let total_records = 0;
+  let total_collected = 0;
+  for (const transaction of transactions) {
+    const fiscal_id_number = formatString(
+      " ",
+      transaction.fiscal_id_number!.toString(),
+      11,
+      true,
+    );
+    const invoice_number = formatString(
+      "0",
+      transaction.invoice_number.toString(),
+      6,
+      false,
+    );
+    const first_due_date = dayjs(transaction.first_due_date).format("DDMMYYYY");
+    const first_due_amount = formatString(
+      "0",
+      transaction.first_due_amount
+        ? transaction.first_due_amount?.toString()
+        : "",
+      10,
+      false,
+    );
+    const CBU = transaction.cbu;
+    const terminal_id = "123456";
+    const seq_terminal = "1234";
+    // codigo de barras
+    const service_company = "3509";
+    const dayOfYear = dayjs(transaction.first_due_date).dayOfYear();
+    const first_due_amount_bar_code = formatString(
+      "0",
+      transaction.first_due_amount!.toString(),
+      6,
+      false,
+    );
+    const first_due_date_bar_code = first_due_date.slice(-2) + dayOfYear;
+    const second_due_amount_charge = "000330";
+    const bar_code = `${service_company}${first_due_amount_bar_code}00${first_due_date_bar_code}${fiscal_id_number}0${second_due_amount_charge}${first_due_date.slice(
+      2,
+    )}00`;
+    //fin codigo de barras
+    text += `3${date}${"0".repeat(6)}${invoice_number}10${formatString(
+      " ",
+      bar_code,
+      60,
+      true,
+    )}${fiscal_id_number}PES${first_due_amount}00${terminal_id}${date}${hours}${seq_terminal} PESE${" ".repeat(
+      29,
+    )}${formatString(
+      "0",
+      transaction.first_due_amount
+        ? transaction.first_due_amount?.toString()
+        : "",
+      13,
+      false,
+    )}00\r\n`;
+    total_records++;
+    total_collected += transaction.first_due_amount!;
+  }
+  const total_records_string = formatString(
+    "0",
+    total_records.toString(),
+    7,
+    false,
+  );
+  const total_collected_string = formatString(
+    "0",
+    total_collected.toString(),
+    12,
+    false,
+  );
+  text += `9${"0".repeat(8)}${"0".repeat(12)}${"0".repeat(
+    7,
+  )}${total_records_string}${total_collected_string}${"0".repeat(143)}`;
   return text;
 }
 
@@ -279,3 +359,5 @@ function formatString(
     return char.repeat(limit - string.length).concat(string);
   }
 }
+
+function verificationNumber(string: string) {}
