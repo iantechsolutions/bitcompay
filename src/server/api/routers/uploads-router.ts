@@ -39,11 +39,11 @@ export const uploadsRouter = createTRPCRouter({
       return responseUpload;
     }),
 
-  list: protectedProcedure.query(async ({ }) => {
+  list: protectedProcedure.query(async ({}) => {
     return await db.query.documentUploads.findMany();
   }),
 
-  listResponse: protectedProcedure.query(async ({ }) => {
+  listResponse: protectedProcedure.query(async ({}) => {
     return await db.query.responseDocumentUploads.findMany();
   }),
   readUploadContents: protectedProcedure
@@ -140,7 +140,7 @@ export const uploadsRouter = createTRPCRouter({
 
             await tx
               .update(schema.payments)
-              .set({ statusId: record.status_code })
+              .set({ statusId: record.statusId })
               .where(eq(schema.payments.invoice_number, invoiceNumber));
           }),
         );
@@ -204,7 +204,7 @@ export const uploadsRouter = createTRPCRouter({
               payment_date: row.payment_date ?? null,
               collected_amount: row.collected_amount ?? null,
               cbu: row.cbu ?? null,
-              status_code: "91",
+              statusId: "91",
             })),
           );
         }

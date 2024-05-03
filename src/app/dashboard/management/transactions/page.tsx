@@ -6,9 +6,9 @@ export default async function Page() {
   const transactionsTable = await Promise.all(
     transactions.map(async (transaction) => {
       const payment_status = await api.status.get.query({
-        statusId: transaction.status_code!,
+        statusId: transaction.statusId!,
       });
-      transaction.status_code = payment_status!.description;
+      transaction.statusId = payment_status!.description;
       return transaction;
     }),
   );
