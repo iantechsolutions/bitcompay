@@ -28,9 +28,9 @@ import {
 } from "~/components/ui/table";
 
 export default function GenerateChannelOutputPage(props: {
-  channel: NonNullable<RouterOutputs["channels"]["get"]>;
+  channel: { id: string, name: string };
   company: NonNullable<RouterOutputs["companies"]["get"]>;
-  brand: NonNullable<RouterOutputs["brands"]["get"]>;
+  brand: { id: string };
   status_batch: Record<string, string | number>[];
 }) {
   const {
@@ -57,9 +57,9 @@ export default function GenerateChannelOutputPage(props: {
       await generateInputFile({
         channelId: props.channel.id,
         companyId: company.id,
+        brandId: props.brand.id,
         fileName: fileName,
         concept: company.concept,
-        redescription: props.brand.redescription,
       });
 
       // Limpiar los errores
@@ -90,7 +90,7 @@ export default function GenerateChannelOutputPage(props: {
   return (
     <>
       <Title>
-        {props.company.name} {props.channel?.name}: Generar entrada
+        {props.company.name} {props.channel.name}: Generar entrada
       </Title>
       {props.status_batch[0]!.records !== 0 && (
         <Table className="mb-5 w-full">
