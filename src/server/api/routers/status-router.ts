@@ -5,14 +5,14 @@ import { eq } from "drizzle-orm";
 // a partir de ahora
 export const statusRouter = createTRPCRouter({
   list: protectedProcedure.query(async () => {
-    const status = await db.query.payment_status.findMany();
+    const status = await db.query.paymentStatus.findMany();
     return status;
   }),
   get: protectedProcedure
     .input(z.object({ statusId: z.string() }))
     .query(async ({ input }) => {
-      const status_found = await db.query.payment_status.findFirst({
-        where: eq(schema.payment_status.code, input.statusId),
+      const status_found = await db.query.paymentStatus.findFirst({
+        where: eq(schema.paymentStatus.code, input.statusId),
       });
       return status_found;
     }),
@@ -20,7 +20,7 @@ export const statusRouter = createTRPCRouter({
     .input(z.object({ description: z.string(), code: z.string() }))
     .mutation(async ({ input }) => {
       const new_status = await db
-        .insert(schema.payment_status)
+        .insert(schema.paymentStatus)
         .values({ code: input.code, description: input.description });
       return new_status;
     }),
@@ -34,17 +34,17 @@ export const statusRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       const modified_status = await db
-        .update(schema.payment_status)
+        .update(schema.paymentStatus)
         .set({ description: input.description, code: input.code })
-        .where(eq(schema.payment_status.id, input.statusId));
+        .where(eq(schema.paymentStatus.id, input.statusId));
       return modified_status;
     }),
   delete: protectedProcedure
     .input(z.object({ statusId: z.string() }))
     .mutation(async ({ input }) => {
       const deleted_status = await db
-        .delete(schema.payment_status)
-        .where(eq(schema.payment_status.id, input.statusId));
+        .delete(schema.paymentStatus)
+        .where(eq(schema.paymentStatus.id, input.statusId));
       return deleted_status;
     }),
 });

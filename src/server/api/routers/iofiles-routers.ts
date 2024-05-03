@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { db, schema } from "~/server/db";
-import { eq, and } from "drizzle-orm";
+import { db, DBTX, schema } from "~/server/db";
+import { eq, and, isNull, inArray } from "drizzle-orm";
 import dayjs from "dayjs";
 import { TRPCError } from "@trpc/server";
 import "dayjs/locale/es";
@@ -10,6 +10,8 @@ import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import dayOfYear from "dayjs/plugin/dayOfYear";
 import { type RouterOutputs } from "~/trpc/shared";
+import { utapi } from "~/server/uploadthing";
+import { createId } from "~/lib/utils";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(dayOfYear);
@@ -19,56 +21,99 @@ export const iofilesRouter = createTRPCRouter({
       z.object({
         channelId: z.string(),
         companyId: z.string(),
+        brandId: z.string(),
         fileName: z.string().max(12),
         concept: z.string(),
-        redescription: z.string().max(10),
       }),
     )
-    .mutation(async ({ input }) => {
-      const channel = await db.query.channels.findFirst({
-        where: eq(schema.channels.id, input.channelId),
-      });
-      let text = " ";
-      const productsChannels = await db.query.productChannels.findMany({
-        where: eq(schema.productChannels.channelId, input.channelId),
-      });
-      const transactions = [];
-      for (const relation of productsChannels) {
-        const product = await db.query.products.findFirst({
-          where: eq(schema.products.id, relation.productId),
+    .mutation(async ({ input, ctx }) => {
+      return await db.transaction(async (db) => {
+        // Obtenemos la marca y el canal
+        const { brand, channel } = await getBrandAndChannel(db, input);
+
+        // Productos del canal
+        const productsNumbers = channel.products.map((p) => p.product.number);
+
+        // Pagos que no tienen archivo de salida que corresponden a la marca y los productos del canal
+        const payments = await db.query.payments.findMany({
+          where: and(
+            eq(schema.payments.companyId, input.companyId),
+            eq(schema.payments.g_c, brand.number),
+            inArray(schema.payments.product_number, productsNumbers), // Solo los productos de la marca y producto -> (los productos salen del canal)
+            isNull(schema.payments.outputFileId), // Si no tiene archivo de salida, es que no le generaron el archivo
+          ),
         });
 
-        if (!product) {
-          throw new Error("product or channel does not exist in company");
+        // Salida generada
+        let text: string;
+
+        const generateInput = {
+          channelId: channel.id,
+          companyId: input.companyId,
+          fileName: input.fileName,
+          concept: input.concept,
+          redescription: brand.redescription,
+        };
+
+        // Generamos el archivo de salida segun el canal
+        if (channel.name.includes("DEBITO DIRECTO")) {
+          text = generateDebitoDirecto(generateInput, payments);
+        } else if (channel.name.includes("PAGOMISCUENTAS")) {
+          text = generatePagomiscuentas(generateInput, payments);
+        } else {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: `channel ${channel?.name} is not supported`,
+          });
         }
 
-        const t = await db
-          .select()
-          .from(schema.payments)
-          .where(
-            and(
-              eq(schema.payments.product_number, product.number),
-              eq(schema.payments.companyId, input.companyId),
-              eq(schema.payments.status_code, "91"),
-            ),
-          );
+        // Subimos el archivo a Uploadthing
+        const uploaded = await utapi.uploadFiles(
+          new File([text], input.fileName, { type: "text/plain" }),
+        );
 
-        for (const item of t) {
-          transactions.push(item);
-        }
-      }
-      if (channel?.name.includes("DEBITO DIRECTO")) {
-        text = await generateDebitoDirecto(input, transactions);
-      } else if (channel?.name.includes("PAGOMISCUENTAS")) {
-        text = await generatePagomiscuentas(input, transactions);
-      } else if (channel?.name.includes("PAGO FACIL")) {
-        text = await generatePagoFacil(input, transactions);
-      }
-      return text;
+        // Guardamos el archivo en la base de datos
+        const id = createId();
+
+        await db.insert(schema.uploadedOutputFiles).values({
+          id,
+          brandId: brand.id,
+          channelId: channel.id,
+          companyId: input.companyId,
+          fileName: input.fileName,
+          fileSize: text.length,
+          fileUrl: uploaded.data!.url,
+          userId: ctx.session.user.id,
+        });
+
+        // Actualizamos los pagos con el archivo generado
+        await db.update(schema.payments).set({
+          outputFileId: id,
+        });
+
+        return text;
+      });
+    }),
+  list: protectedProcedure
+    .input(
+      z.object({
+        channelId: z.string(),
+        companyId: z.string(),
+        brandId: z.string(),
+      }),
+    )
+    .query(async ({ input }) => {
+      return await db.query.uploadedOutputFiles.findMany({
+        where: and(
+          eq(schema.uploadedOutputFiles.channelId, input.channelId),
+          eq(schema.uploadedOutputFiles.companyId, input.companyId),
+          eq(schema.uploadedOutputFiles.brandId, input.brandId),
+        ),
+      });
     }),
 });
 
-async function generateDebitoDirecto(
+function generateDebitoDirecto(
   input: {
     channelId: string;
     companyId: string;
@@ -77,7 +122,7 @@ async function generateDebitoDirecto(
     redescription: string;
   },
   transactions: RouterOutputs["transactions"]["list"],
-): Promise<string> {
+) {
   let currentDate = dayjs().utc().tz("America/Argentina/Buenos_Aires");
   const currentHour = currentDate.hour();
   const currentMinutes = currentDate.minute();
@@ -94,13 +139,6 @@ async function generateDebitoDirecto(
   let total_operations = 0;
   let total_collected = 0;
   for (const transaction of transactions) {
-    await db
-      .update(schema.payments)
-      .set({
-        status_code: "92",
-      })
-      .where(eq(schema.payments.id, transaction.id));
-
     const date = dayjs(transaction.first_due_date);
     const year = date.year();
     const monthName = date.format("MMMM").toUpperCase();
@@ -185,7 +223,7 @@ async function generateDebitoDirecto(
   return text;
 }
 
-async function generatePagomiscuentas(
+function generatePagomiscuentas(
   input: {
     channelId: string;
     companyId: string;
@@ -194,8 +232,8 @@ async function generatePagomiscuentas(
     redescription: string;
   },
   transactions: RouterOutputs["transactions"]["list"],
-): Promise<string> {
-  const dateAAAAMMDD = dayjs().format("YYYYMMDD");
+) {
+  const dateAAAAMMDD = dayjs().format("AAAAMMDD");
   const companyCode = "1234";
   //header
   let text = `0400${companyCode}${dateAAAAMMDD}${"0".repeat(84)}\n`;
@@ -360,4 +398,44 @@ function formatString(
   }
 }
 
-function verificationNumber(string: string) {}
+export async function getBrandAndChannel(
+  db: DBTX,
+  input: { channelId: string; companyId: string; brandId: string },
+) {
+  const brand = await db.query.brands.findFirst({
+    where: eq(schema.brands.id, input.brandId),
+  });
+
+  // Si la marca no existe, no podemos continuar
+  if (!brand) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: `brand ${input.brandId} does not exist in company ${input.companyId}`,
+    });
+  }
+
+  const channel = await db.query.channels.findFirst({
+    where: eq(schema.channels.id, input.channelId),
+    with: {
+      products: {
+        with: {
+          product: {
+            columns: {
+              number: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  // Si el canal no existe, no podemos continuar
+  if (!channel) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: `channel ${input.channelId} does not exist in company ${input.companyId}`,
+    });
+  }
+
+  return { brand, channel };
+}

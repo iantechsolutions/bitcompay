@@ -77,16 +77,16 @@ export const responseDocumentUploadsRelations = relations(
   }),
 );
 
-export const payment_status = pgTable("payment_status", {
+export const paymentStatus = pgTable("payment_status", {
   id: columnId,
-  code: varchar("statusId", { length: 2 }),
+  code: varchar("code", { length: 2 }),
   description: varchar("description", { length: 255 }),
 });
 
 export const payment_status_relations = relations(
-  payment_status,
+  paymentStatus,
   ({ many }) => ({
-    paymentes: many(payments),
+    payments: many(payments),
   }),
 );
 
@@ -132,7 +132,9 @@ export const payments = pgTable(
     companyId: varchar("companyId", { length: 255 })
       .notNull()
       .references(() => companies.id),
-    status_code: varchar("status_code", { length: 255 }),
+
+    statusId: varchar("status_id", { length: 255 }),
+    outputFileId: varchar("output_file_id", { length: 255 }),
 
     createdAt,
     updatedAt,
@@ -163,9 +165,13 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
     fields: [payments.product_number],
     references: [products.number],
   }),
-  status_code: one(payment_status, {
-    fields: [payments.status_code],
-    references: [payment_status.id],
+  statusCode: one(paymentStatus, {
+    fields: [payments.statusId],
+    references: [paymentStatus.id],
+  }),
+  outputFile: one(uploadedOutputFiles, {
+    fields: [payments.outputFileId],
+    references: [uploadedOutputFiles.id],
   }),
 }));
 
@@ -351,3 +357,21 @@ export const productChannelsRelations = relations(
 );
 
 // tablas de vendedores, proveedores y clientes
+
+
+export const uploadedOutputFiles = pgTable(
+  "uploaded_output_files",
+  {
+    id: columnId,
+    userId: varchar("userId", { length: 255 }).notNull(),
+    fileUrl: varchar("fileUrl", { length: 255 }).notNull(),
+    fileName: varchar("fileName", { length: 255 }).notNull(),
+    fileSize: integer("fileSize").notNull(),
+
+    channelId: varchar("channelId", { length: 255 }).notNull(),
+    companyId: varchar("companyId", { length: 255 }).notNull(),
+    brandId: varchar("brandId", { length: 255 }).notNull(),
+
+    createdAt,
+  }
+);
