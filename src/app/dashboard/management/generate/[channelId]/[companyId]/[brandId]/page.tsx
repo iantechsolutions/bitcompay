@@ -1,7 +1,8 @@
 import { api } from "~/trpc/server";
 import { Title } from "~/components/title";
 import { db, schema } from "~/server/db";
-import { eq, and } from "drizzle-orm";
+import { getBrandAndChannel } from "~/server/api/routers/iofiles-routers";
+import { eq, and, inArray, isNull } from "drizzle-orm";
 import GenerateChannelOutputPage from "./generate-channel-output";
 export default async function page({
   params,
@@ -11,60 +12,49 @@ export default async function page({
   const company = await api.companies.get.query({
     companyId: params.companyId,
   });
-  const channel = await api.channels.get.query({
-    channelId: params.channelId,
-  });
 
-  const brand = await api.brands.get.query({
-    brandId: params.brandId,
-  });
 
   if (!company) {
     return <Title>company not found</Title>;
   }
 
-  if (!brand) {
-    return <Title>brand nout found</Title>;
-  }
-  const productsChannels = await db.query.productChannels.findMany({
-    where: eq(schema.productChannels.channelId, params.channelId),
+
+  const { brand, channel } = await getBrandAndChannel(db, {
+    companyId: company.id,
+    channelId: params.channelId,
+    brandId: params.brandId,
+  })
+
+  // Productos del canal
+  const productsNumbers = channel.products.map(p => p.product.number)
+
+  // Pagos que no tienen archivo de salida que corresponden a la marca y los productos del canal
+  const payments = await db.query.payments.findMany({
+    where: and(
+      eq(schema.payments.companyId, company.id),
+      eq(schema.payments.g_c, brand.number),
+      inArray(schema.payments.product_number, productsNumbers), // Solo los productos de la marca y producto -> (los productos salen del canal)
+      isNull(schema.payments.outputFileId), // Si no tiene archivo de salida, es que no le generaron el archivo
+    ),
   });
 
-  const transactions = [];
-  for (const relation of productsChannels) {
-    const product = await db.query.products.findFirst({
-      where: eq(schema.products.id, relation.productId),
-    });
 
-    if (!product) {
-      throw new Error("product or channel does not exist in company");
-    }
+  const outputFiles = await api.iofiles.list.query({
+    channelId: params.channelId,
+    companyId: params.companyId,
+    brandId: params.brandId,
+  })
 
-    const t = await db
-      .select()
-      .from(schema.payments)
-      .where(
-        and(
-          eq(schema.payments.product_number, product.number),
-          eq(schema.payments.companyId, params.companyId),
-          eq(schema.payments.status_code, "91"),
-        ),
-      );
 
-    for (const item of t) {
-      transactions.push(item);
-    }
-  }
-  //despues cambiar esto por un dict<status<record,amount>>
+  // TODO: cambiar esto por un dict<status<record,amount>>
   const status_batch = [
     { status: "Pendiente", records: 0, amount_collected: 0 },
   ];
-  for (const transaction of transactions) {
-    if (transaction.status_code === "91") {
-      status_batch[0]!.records += 1;
-      status_batch[0]!.amount_collected +=
-        transaction?.collected_amount ?? transaction?.first_due_amount ?? 0;
-    }
+  for (const transaction of payments) {
+    status_batch[0]!.records += 1;
+    status_batch[0]!.amount_collected +=
+      transaction?.collected_amount ?? transaction?.first_due_amount ?? 0;
+
   }
   return (
     <>
@@ -74,6 +64,7 @@ export default async function page({
           company={company}
           brand={brand}
           status_batch={status_batch}
+          outputFiles={outputFiles}
         />
       ) : (
         <Title>Channel not found</Title>

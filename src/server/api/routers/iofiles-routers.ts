@@ -1,71 +1,123 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { db, schema } from "~/server/db";
-import { eq, and } from "drizzle-orm";
+import { db, DBTX, schema } from "~/server/db";
+import { eq, and, isNull, inArray } from "drizzle-orm";
 import dayjs from "dayjs";
 import { TRPCError } from "@trpc/server";
 import "dayjs/locale/es";
 dayjs.locale("es");
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+import dayOfYear from "dayjs/plugin/dayOfYear";
 import { type RouterOutputs } from "~/trpc/shared";
+import { utapi } from "~/server/uploadthing";
+import { createId } from "~/lib/utils";
 dayjs.extend(utc);
 dayjs.extend(timezone);
-
+dayjs.extend(dayOfYear);
 export const iofilesRouter = createTRPCRouter({
   generate: protectedProcedure
     .input(
       z.object({
         channelId: z.string(),
         companyId: z.string(),
+        brandId: z.string(),
         fileName: z.string().max(12),
         concept: z.string(),
-        redescription: z.string().max(10),
       }),
     )
-    .mutation(async ({ input }) => {
-      const channel = await db.query.channels.findFirst({
-        where: eq(schema.channels.id, input.channelId),
-      });
-      let text = " ";
-      const productsChannels = await db.query.productChannels.findMany({
-        where: eq(schema.productChannels.channelId, input.channelId),
-      });
-      const transactions = [];
-      for (const relation of productsChannels) {
-        const product = await db.query.products.findFirst({
-          where: eq(schema.products.id, relation.productId),
+    .mutation(async ({ input, ctx }) => {
+      return await db.transaction(async (db) => {
+        // Obtenemos la marca y el canal
+        const { brand, channel } = await getBrandAndChannel(db, input);
+
+        // Productos del canal
+        const productsNumbers = channel.products.map((p) => p.product.number);
+
+        // Pagos que no tienen archivo de salida que corresponden a la marca y los productos del canal
+        const payments = await db.query.payments.findMany({
+          where: and(
+            eq(schema.payments.companyId, input.companyId),
+            eq(schema.payments.g_c, brand.number),
+            inArray(schema.payments.product_number, productsNumbers), // Solo los productos de la marca y producto -> (los productos salen del canal)
+            isNull(schema.payments.outputFileId), // Si no tiene archivo de salida, es que no le generaron el archivo
+          ),
         });
 
-        if (!product) {
-          throw new Error("product or channel does not exist in company");
+        // Salida generada
+        let text: string;
+
+        const generateInput = {
+          channelId: channel.id,
+          companyId: input.companyId,
+          fileName: input.fileName,
+          concept: input.concept,
+          redescription: brand.redescription,
+        };
+
+        // Generamos el archivo de salida segun el canal
+        if (channel.name.includes("DEBITO DIRECTO")) {
+          text = generateDebitoDirecto(generateInput, payments);
+        } else if (channel.name.includes("PAGOMISCUENTAS")) {
+          text = generatePagomiscuentas(generateInput, payments);
+        } else if (channel.name.includes("PAGO FACIL")) {
+          text = await generatePagoFacil(generateInput, payments);
+        } else if (channel.name.includes("RAPIPAGO")) {
+          text = generateRapiPago(generateInput, payments);
+        } else {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: `channel ${channel?.name} is not supported`,
+          });
         }
 
-        const t = await db
-          .select()
-          .from(schema.payments)
-          .where(
-            and(
-              eq(schema.payments.product_number, product.number),
-              eq(schema.payments.companyId, input.companyId),
-              eq(schema.payments.status_code, "91"),
-            ),
-          );
+        // Subimos el archivo a Uploadthing
+        const uploaded = await utapi.uploadFiles(
+          new File([text], input.fileName, { type: "text/plain" }),
+        );
 
-        for (const item of t) {
-          transactions.push(item);
-        }
-      }
-      if (channel?.name.includes("DEBITO DIRECTO")) {
-        text = await generateDebitoDirecto(input, transactions);
-      } else if (channel?.name.includes("PAGOMISCUENTAS")) {
-        text = await generatePagomiscuentas(input, transactions);
-      }
-      return text;
+        // Guardamos el archivo en la base de datos
+        const id = createId();
+
+        await db.insert(schema.uploadedOutputFiles).values({
+          id,
+          brandId: brand.id,
+          channelId: channel.id,
+          companyId: input.companyId,
+          fileName: input.fileName,
+          fileSize: text.length,
+          fileUrl: uploaded.data!.url,
+          userId: ctx.session.user.id,
+        });
+
+        // Actualizamos los pagos con el archivo generado
+        await db.update(schema.payments).set({
+          outputFileId: id,
+        });
+
+        return text;
+      });
+    }),
+  list: protectedProcedure
+    .input(
+      z.object({
+        channelId: z.string(),
+        companyId: z.string(),
+        brandId: z.string(),
+      }),
+    )
+    .query(async ({ input }) => {
+      return await db.query.uploadedOutputFiles.findMany({
+        where: and(
+          eq(schema.uploadedOutputFiles.channelId, input.channelId),
+          eq(schema.uploadedOutputFiles.companyId, input.companyId),
+          eq(schema.uploadedOutputFiles.brandId, input.brandId),
+        ),
+      });
     }),
 });
 
-async function generateDebitoDirecto(
+function generateDebitoDirecto(
   input: {
     channelId: string;
     companyId: string;
@@ -74,7 +126,7 @@ async function generateDebitoDirecto(
     redescription: string;
   },
   transactions: RouterOutputs["transactions"]["list"],
-): Promise<string> {
+) {
   let currentDate = dayjs().utc().tz("America/Argentina/Buenos_Aires");
   const currentHour = currentDate.hour();
   const currentMinutes = currentDate.minute();
@@ -91,13 +143,6 @@ async function generateDebitoDirecto(
   let total_operations = 0;
   let total_collected = 0;
   for (const transaction of transactions) {
-    await db
-      .update(schema.payments)
-      .set({
-        status_code: "92",
-      })
-      .where(eq(schema.payments.id, transaction.id));
-
     const date = dayjs(transaction.first_due_date);
     const year = date.year();
     const monthName = date.format("MMMM").toUpperCase();
@@ -182,7 +227,7 @@ async function generateDebitoDirecto(
   return text;
 }
 
-async function generatePagomiscuentas(
+function generatePagomiscuentas(
   input: {
     channelId: string;
     companyId: string;
@@ -191,11 +236,11 @@ async function generatePagomiscuentas(
     redescription: string;
   },
   transactions: RouterOutputs["transactions"]["list"],
-): Promise<string> {
+) {
   const dateAAAAMMDD = dayjs().format("AAAAMMDD");
   const companyCode = "1234";
   //header
-  let text = `0400${companyCode}${dateAAAAMMDD}${"0".repeat(264)}`;
+  let text = `0400${companyCode}${dateAAAAMMDD}${"0".repeat(84)}\n`;
   let total_records = 0;
   let total_collected = 0;
   for (const transaction of transactions) {
@@ -212,7 +257,7 @@ async function generatePagomiscuentas(
       20,
       true,
     );
-    const first_due_date = dayjs(transaction.first_due_date).format("AAAAMMDD");
+    const first_due_date = dayjs(transaction.first_due_date).format("YYYYMMDD");
     const first_due_amount = formatString(
       "0",
       transaction.first_due_amount
@@ -221,29 +266,11 @@ async function generatePagomiscuentas(
       9,
       false,
     );
-    const second_due_date = dayjs(transaction.second_due_date).format(
-      "AAAAMMDD",
-    );
-    const second_due_amount = formatString(
-      "0",
-      transaction.second_due_amount
-        ? transaction.second_due_amount.toString()
-        : "",
-      9,
-      false,
-    );
-    const concept = formatString(" ", input.concept, 40, true);
-    const displayMessage = formatString(" ", input.concept, 15, true);
-    text += `5${fiscal_id_number}${invoice_number}0${first_due_date}${first_due_amount}00`;
-    text += `${second_due_date}${second_due_amount}00${" ".repeat(
-      11,
-    )}${" ".repeat(8)}`;
-    text += `${"0".repeat(
-      19,
-    )}${fiscal_id_number}${concept}${displayMessage}${" ".repeat(
-      60,
-    )}${" ".repeat(29)}\n`;
-
+    const controlNumber = "1292";
+    // const concept = formatString(" ", input.concept, 40, true);
+    // const displayMessage = formatString(" ", input.concept, 15, true);
+    text += `5${fiscal_id_number}${invoice_number}${first_due_date}0${first_due_date}${first_due_amount}00`;
+    text += `2${dateAAAAMMDD}PC${controlNumber}   ${"0".repeat(14)}\n`;
     total_records++;
     total_collected += transaction.first_due_amount!;
   }
@@ -251,7 +278,7 @@ async function generatePagomiscuentas(
   const total_collected_string = formatString(
     "0",
     total_collected.toString(),
-    16,
+    9,
     false,
   );
   const total_records_string = formatString(
@@ -262,8 +289,175 @@ async function generatePagomiscuentas(
   );
   text += `9400${companyCode}${dateAAAAMMDD}${total_records_string}${"0".repeat(
     7,
-  )}${total_collected_string}00${"0".repeat(234)}\n`;
+  )}${total_collected_string}00${"0".repeat(11)}${"0".repeat(48)}\n`;
 
+  return text;
+}
+
+async function generatePagoFacil(
+  input: {
+    channelId: string;
+    companyId: string;
+    fileName: string;
+    concept: string;
+    redescription: string;
+  },
+  transactions: RouterOutputs["transactions"]["list"],
+): Promise<string> {
+  let text = "";
+  //header
+  const date = dayjs().format("DDMMYYYY");
+  const hours = dayjs().format("HHmmss");
+  const companyName = formatString(" ", "BITCOM SRL", 40, true);
+  const originName = formatString(" ", "PAGO FACIL", 10, true);
+  text += `1${date}90063509${companyName}${originName}${"0".repeat(123)}\r\n`;
+  let total_records = 0;
+  let total_collected = 0;
+  for (const transaction of transactions) {
+    const fiscal_id_number = formatString(
+      " ",
+      transaction.fiscal_id_number!.toString(),
+      11,
+      true,
+    );
+    const invoice_number = formatString(
+      "0",
+      transaction.invoice_number.toString(),
+      6,
+      false,
+    );
+    const first_due_date = dayjs(transaction.first_due_date).format("DDMMYYYY");
+    const first_due_amount = formatString(
+      "0",
+      transaction.first_due_amount
+        ? transaction.first_due_amount?.toString()
+        : "",
+      10,
+      false,
+    );
+    const CBU = transaction.cbu;
+    const terminal_id = "123456";
+    const seq_terminal = "1234";
+    // codigo de barras
+    const service_company = "3509";
+    const dayOfYear = dayjs(transaction.first_due_date).dayOfYear();
+    const first_due_amount_bar_code = formatString(
+      "0",
+      transaction.first_due_amount!.toString(),
+      6,
+      false,
+    );
+    const first_due_date_bar_code = first_due_date.slice(-2) + dayOfYear;
+    const second_due_amount_charge = "000330";
+    const bar_code = `${service_company}${first_due_amount_bar_code}00${first_due_date_bar_code}${fiscal_id_number}0${second_due_amount_charge}${first_due_date.slice(
+      2,
+    )}00`;
+    //fin codigo de barras
+    text += `3${date}${"0".repeat(6)}${invoice_number}10${formatString(
+      " ",
+      bar_code,
+      60,
+      true,
+    )}${fiscal_id_number}PES${first_due_amount}00${terminal_id}${date}${hours}${seq_terminal} PESE${" ".repeat(
+      29,
+    )}${formatString(
+      "0",
+      transaction.first_due_amount
+        ? transaction.first_due_amount?.toString()
+        : "",
+      13,
+      false,
+    )}00\r\n`;
+    total_records++;
+    total_collected += transaction.first_due_amount!;
+  }
+  const total_records_string = formatString(
+    "0",
+    total_records.toString(),
+    7,
+    false,
+  );
+  const total_collected_string = formatString(
+    "0",
+    total_collected.toString(),
+    12,
+    false,
+  );
+  text += `9${"0".repeat(8)}${"0".repeat(12)}${"0".repeat(
+    7,
+  )}${total_records_string}${total_collected_string}${"0".repeat(143)}`;
+  return text;
+}
+function generateRapiPago(
+  input: {
+    channelId: string;
+    companyId: string;
+    fileName: string;
+    concept: string;
+    redescription: string;
+  },
+  transactions: RouterOutputs["transactions"]["list"],
+) {
+  const currentDate = dayjs().format("YYYYMMDD");
+  let text = `081400${currentDate}${"0".repeat(76)}\n`;
+  let total_records = 0;
+  let total_collected = 0;
+  for (const transaction of transactions) {
+    const fiscal_id_number = formatString(
+      " ",
+      transaction.fiscal_id_number!.toString(),
+      19,
+      true,
+    );
+    const invoice_number = formatString(
+      " ",
+      transaction.invoice_number.toString(),
+      20,
+      true,
+    );
+    const first_due_date = dayjs(transaction.first_due_date).format("YYYYMMDD");
+    const first_due_amount = formatString(
+      "0",
+      transaction.first_due_amount
+        ? transaction.first_due_amount?.toString()
+        : "",
+      9,
+      false,
+    );
+    const second_due_date = dayjs(
+      transaction.second_due_date
+        ? transaction.second_due_date
+        : transaction.first_due_date,
+    ).format("YYYYMMDD");
+    const second_due_amount = formatString(
+      "0",
+      transaction.second_due_amount
+        ? transaction.second_due_amount?.toString()
+        : "",
+      9,
+      false,
+    );
+    text += `5${fiscal_id_number}${invoice_number}0${first_due_date}0${first_due_amount}00${second_due_date}${second_due_amount}00${"0".repeat(
+      11,
+    )}\n`;
+    total_records++;
+    total_collected += transaction.first_due_amount ?? 0;
+  }
+  const total_records_string = formatString(
+    "0",
+    total_records.toString(),
+    7,
+    false,
+  );
+  const total_collected_string = formatString(
+    "0",
+    total_collected.toString(),
+    9,
+    false,
+  );
+  text += `981400${currentDate}${total_records_string}${"0".repeat(
+    7,
+  )}${total_collected_string}00${"0".repeat(11)}${"0".repeat(40)}`;
   return text;
 }
 
@@ -278,4 +472,46 @@ function formatString(
   } else {
     return char.repeat(limit - string.length).concat(string);
   }
+}
+
+export async function getBrandAndChannel(
+  db: DBTX,
+  input: { channelId: string; companyId: string; brandId: string },
+) {
+  const brand = await db.query.brands.findFirst({
+    where: eq(schema.brands.id, input.brandId),
+  });
+
+  // Si la marca no existe, no podemos continuar
+  if (!brand) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: `brand ${input.brandId} does not exist in company ${input.companyId}`,
+    });
+  }
+
+  const channel = await db.query.channels.findFirst({
+    where: eq(schema.channels.id, input.channelId),
+    with: {
+      products: {
+        with: {
+          product: {
+            columns: {
+              number: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  // Si el canal no existe, no podemos continuar
+  if (!channel) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: `channel ${input.channelId} does not exist in company ${input.companyId}`,
+    });
+  }
+
+  return { brand, channel };
 }

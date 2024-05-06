@@ -28,10 +28,11 @@ import {
 } from "~/components/ui/table";
 
 export default function GenerateChannelOutputPage(props: {
-  channel: NonNullable<RouterOutputs["channels"]["get"]>;
+  channel: { id: string; name: string };
   company: NonNullable<RouterOutputs["companies"]["get"]>;
-  brand: NonNullable<RouterOutputs["brands"]["get"]>;
+  brand: { id: string; name: string };
   status_batch: Record<string, string | number>[];
+  outputFiles: RouterOutputs["iofiles"]["list"];
 }) {
   const {
     mutateAsync: generateInputFile,
@@ -57,9 +58,9 @@ export default function GenerateChannelOutputPage(props: {
       await generateInputFile({
         channelId: props.channel.id,
         companyId: company.id,
+        brandId: props.brand.id,
         fileName: fileName,
         concept: company.concept,
-        redescription: props.brand.redescription,
       });
 
       // Limpiar los errores
@@ -90,8 +91,9 @@ export default function GenerateChannelOutputPage(props: {
   return (
     <>
       <Title>
-        {props.company.name} {props.channel?.name}: Generar entrada
+        {props.company.name} {props.channel.name}: Generar entrada
       </Title>
+      <h2 className="mb-3 text-xl font-semibold">{props.brand.name}</h2>
       {props.status_batch[0]!.records !== 0 && (
         <Table className="mb-5 w-full">
           <TableHeader>
@@ -165,6 +167,16 @@ export default function GenerateChannelOutputPage(props: {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {props.outputFiles.length > 0 && (
+        <div>
+          <Title>Archivos generados</Title>
+          {props.outputFiles.map((file) => (
+            <a href={file.fileUrl}>{file.fileName}</a>
+          ))}
+        </div>
+      )}
+
       {data != undefined && (
         <div className="mt-5">
           <Title>Resultado</Title>

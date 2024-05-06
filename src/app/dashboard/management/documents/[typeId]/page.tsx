@@ -8,10 +8,7 @@ import { formatKB } from "~/lib/utils";
 const Page = async (props: { params: { typeId: string } }) => {
   const uploadedDocuments = await api.uploads.list.query();
   const responseUploadedDocuments = await api.uploads.listResponse.query();
-
-  // else if(props.params.typeId==="rzRGJTyxSnB9UVPAxbljo"){
-  //     //archivos generados
-  // }
+  const uploadedOutputFiles = await api.uploads.listOutput.query();
   return (
     <>
       <Title>Documentos subidos</Title>
@@ -51,6 +48,24 @@ const Page = async (props: { params: { typeId: string } }) => {
                 </>
               }
               trailing={<>{upload.rowsCount}</>}
+            />
+          ))}
+        </List>
+      )}
+      {props.params.typeId === "rzRGJTyxSnB9UVPAxbljo" && (
+        <List>
+          {uploadedOutputFiles.map((upload) => (
+            <ListTile
+              key={upload.id}
+              href={`/dashboard/management/documents/${props.params.typeId}/${upload.id}`}
+              title={upload.fileName}
+              subtitle={
+                <>
+                  {formatKB(upload.fileSize)}
+                  {" - "}
+                  {dayjs(upload.createdAt).format("DD/MM/YYYY")}
+                </>
+              }
             />
           ))}
         </List>

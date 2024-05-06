@@ -385,7 +385,7 @@ export const recHeaders: TableHeaders = [
   { key: "payment_date", label: "Fecha de Pago/Débito", width: 140 },
   { key: "collected_amount", label: "Importe Cobrado", width: 140 },
   { key: "comment", label: "Obs.", width: 140 },
-  { key: "status_code", label: "Estado de Pago", width: 140 },
+  { key: "statusId", label: "Estado de Pago", width: 140 },
 ];
 
 export const columnLabelByKey = Object.fromEntries(

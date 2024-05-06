@@ -11,6 +11,7 @@ import {
   recRowsTransformer,
 } from "~/server/uploads/validators";
 import { createId } from "~/lib/utils";
+import { List } from "~/components/list";
 
 export const uploadsRouter = createTRPCRouter({
   upload: protectedProcedure
@@ -38,13 +39,27 @@ export const uploadsRouter = createTRPCRouter({
       });
       return responseUpload;
     }),
-
+  outputUpload: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const outputUpload = await db.query.uploadedOutputFiles.findFirst({
+        where: eq(schema.uploadedOutputFiles.id, input.id),
+      });
+      return outputUpload;
+    }),
   list: protectedProcedure.query(async ({}) => {
     return await db.query.documentUploads.findMany();
   }),
 
   listResponse: protectedProcedure.query(async ({}) => {
     return await db.query.responseDocumentUploads.findMany();
+  }),
+  listOutput: protectedProcedure.query(async ({}) => {
+    return await db.query.uploadedOutputFiles.findMany();
   }),
   readUploadContents: protectedProcedure
     .input(
@@ -140,7 +155,7 @@ export const uploadsRouter = createTRPCRouter({
 
             await tx
               .update(schema.payments)
-              .set({ status_code: record.status_code })
+              .set({ statusId: record.statusId })
               .where(eq(schema.payments.invoice_number, invoiceNumber));
           }),
         );
@@ -204,7 +219,7 @@ export const uploadsRouter = createTRPCRouter({
               payment_date: row.payment_date ?? null,
               collected_amount: row.collected_amount ?? null,
               cbu: row.cbu ?? null,
-              status_code: "91",
+              statusId: "91",
             })),
           );
         }
@@ -469,6 +484,12 @@ async function readUploadContents(
         invoice_number = Math.floor(10000 + Math.random() * 90000);
       }
       row.invoice_number = invoice_number;
+      // const transactionsDB = await db.query.payments.findMany();
+      // const invoice_number_array = transactionsDB
+      //   .filter((row) => row.invoice_number !== null)
+      //   .map((row) => {
+      //     row.invoice_number;
+      //   });
     }
     // verificar producto
     let product;
