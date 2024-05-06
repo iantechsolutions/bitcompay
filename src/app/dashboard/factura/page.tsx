@@ -11,6 +11,8 @@ import { FacturaDialog } from "./generarFactura";
 export default async function Home() {
   const session = await getServerAuthSession();
   const html = fs.readFileSync("src/app/dashboard/factura/bill.html", "utf8");
+  console.log("html");
+  console.log(html);
   return (
     <AppLayout
       title={<h1>BITCOMPAY</h1>}
@@ -30,7 +32,7 @@ export default async function Home() {
       }
     >
       <Title>Facturas</Title>
-      <FacturaDialog></FacturaDialog>
+      <FacturaDialog receivedHtml={html}></FacturaDialog>
       {/* <Factura receivedHtml={html}></Factura> */}
     </AppLayout>
   );

@@ -1,7 +1,9 @@
+"use client";
 import Afip from "@afipsdk/afip.js";
 import { Loader2Icon, PlusCircleIcon } from "lucide-react";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
+import { ComboboxDemo } from "~/components/ui/combobox";
 import {
   Dialog,
   DialogContent,
@@ -11,6 +13,9 @@ import {
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { Factura } from "./facturaGenerada";
+import { ToastAction } from "~/components/ui/toast";
+import { useToast } from "~/components/ui/use-toast";
 
 export async function ingresarAfip() {
   //CUIT QUE QUEREMOS QUE COBRE
@@ -45,7 +50,11 @@ export async function ingresarAfip() {
   return afip;
 }
 
-export function FacturaDialog() {
+interface FacturaDialog {
+  receivedHtml: string;
+}
+
+export function FacturaDialog({ receivedHtml }: FacturaDialog) {
   async function generateFactura() {
     (async () => {
       const afip = await ingresarAfip();
@@ -81,7 +90,8 @@ export function FacturaDialog() {
          **/
         const fecha_vencimiento_pago = 20191213;
       }
-
+      console.log("html viejo");
+      console.log(receivedHtml);
       const data = {
         CantReg: 1, // Cantidad de facturas a registrar
         PtoVta: puntoVenta,
@@ -97,12 +107,17 @@ export function FacturaDialog() {
         FchVtoPago: fecha_vencimiento_pago,
         ImpTotal: importe,
         ImpTotConc: 0, // Importe neto no gravado
-        ImpNeto: importe,
+        ImpNeto: (Number(importe) * 1).toString(),
         ImpOpEx: 0,
         ImpIVA: 0,
-        ImpTrib: 0, //Importe total de tributos
-        MonId: "PES", //Tipo de moneda usada en la factura ('PES' = pesos argentinos)
-        MonCotiz: 1, // Cotización de la moneda usada (1 para pesos argentinos)
+        ImpTrib: 0,
+        MonId: "PES",
+        MonCotiz: 1,
+        // Iva: {
+        //   Id: 5,
+        //   BaseImp: importe,
+        //   Importe: (Number(importe) * 0, 21).toString(),
+        // },
       };
 
       /**
@@ -117,8 +132,49 @@ export function FacturaDialog() {
         cae: res.CAE, //CAE asignado a la Factura
         vencimiento: res.CAEFchVto, //Fecha de vencimiento del CAE
       });
+      const html = Factura({
+        puntoDeVenta: puntoVenta,
+        tipoFactura: tipoFactura,
+        concepto: concepto,
+        documentoComprador: tipoDocumento,
+        nroDocumento: nroDocumento,
+        total: Number(importe),
+        facturadoDesde: fechaServicioDesde,
+        facturadoHasta: fechaServicioHasta,
+        vtoPago: fechaVencimientoPago,
+        cantidad: 1,
+        nroComprobante: numero_de_factura,
+        nroCae: res.CAE,
+        vtoCae: res.CAEFchVto,
+        nombreServicio: "Servicio de prueba",
+        domicilioComprador: "Calle falsa 123",
+        nombreComprador: "Homero Simpson",
+      });
+      const name = "PDF de prueba";
+      const options = {
+        width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
+        marginLeft: 0.4, // Margen izquierdo en pulgadas. Usar 0.1 para ticket
+        marginRight: 0.4, // Margen derecho en pulgadas. Usar 0.1 para ticket
+        marginTop: 0.4, // Margen superior en pulgadas. Usar 0.1 para ticket
+        marginBottom: 0.4, // Margen inferior en pulgadas. Usar 0.1 para ticket
+      };
+      const resHtml = await afip.ElectronicBilling.createPDF({
+        html: html,
+        file_name: name,
+        options: options,
+      });
+      console.log(html);
+      console.log(resHtml.file);
+      toast({
+        onClick: () => window.open(resHtml.file, "_blank"),
+        title: "Factura generada",
+        description:
+          "La factura ha sido generada correctamente, clickee aqui para abrirla ",
+      });
     })();
   }
+  const { toast } = useToast();
+  async function showFactura() {}
   const [puntoVenta, setPuntoVenta] = useState("");
   const [tipoFactura, setTipoFactura] = useState("");
   const [concepto, setConcepto] = useState("");
@@ -141,132 +197,127 @@ export function FacturaDialog() {
     <>
       <Button onClick={() => setOpen(true)}>
         <PlusCircleIcon className="mr-2" size={20} />
-        Crear marca
+        Generar nueva factura
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[650px]">
           <DialogHeader>
             <DialogTitle>Crear nueva factura</DialogTitle>
           </DialogHeader>
-          <div>
-            <Label htmlFor="name">Punto de venta a utilizar</Label>
-            <Input
-              id="puntoVenta"
-              placeholder="..."
-              value={puntoVenta}
-              onChange={(e) => setPuntoVenta(e.target.value)}
-              required
-            />
+          <div className="flexx-row flex justify-between">
+            <div>
+              <Label htmlFor="name">Punto de venta a utilizar</Label>
+              <Input
+                id="puntoVenta"
+                placeholder="..."
+                value={puntoVenta}
+                onChange={(e) => setPuntoVenta(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="factura">Tipo de factura</Label>
+              <br />
+              <ComboboxDemo
+                title="Seleccionar factura..."
+                placeholder="Factura X"
+                options={[
+                  { value: "3", label: "FACTURA A" },
+                  { value: "6", label: "FACTURA B" },
+                  { value: "11", label: "FACTURA C" },
+                  { value: "51", label: "FACTURA M" },
+                  { value: "19", label: "FACTURA E" },
+                  { value: "8", label: "NOTA DE DEBITO A" },
+                  { value: "13", label: "NOTA DE DEBITO B" },
+                  { value: "15", label: "NOTA DE DEBITO C" },
+                  { value: "52", label: "NOTA DE DEBITO M" },
+                  { value: "20", label: "NOTA DE DEBITO E" },
+                  { value: "2", label: "NOTA DE CREDITO A" },
+                  { value: "12", label: "NOTA DE CREDITO B" },
+                  { value: "14", label: "NOTA DE CREDITO C" },
+                  { value: "53", label: "NOTA DE CREDITO M" },
+                  { value: "21", label: "NOTA DE CREDITO E" },
+                ]}
+                onSelectionChange={(e) => setTipoFactura(e)}
+              />
+            </div>
           </div>
-          {/* CODIGO  : TIPO DE FACTURA
-          FACTURAS
-          3       : FACTURA A
-          6       : FACTURA B
-          11      : FACTURA C
-          51      : FACTURA M
-          19      : FACTURA E
-
-          NOTAS DE DEBITO
-          8       : FACTURA A
-          13      : FACTURA B
-          15      : FACTURA C
-          52      : FACTURA M
-          20      : FACTURA E
-
-          NOTAS DE CREDITO
-          2       : FACTURA A
-          12      : FACTURA B
-          14      : FACTURA C
-          53      : FACTURA M
-          21      : FACTURA E */}
-
-          <div>
-            <Label htmlFor="factura">Codigo de tipo de factura a generar</Label>
-            <Input
-              id="factura"
-              placeholder="..."
-              value={tipoFactura}
-              onChange={(e) => setTipoFactura(e.target.value)}
-            />
+          <div className="flexx-row flex justify-between">
+            <div>
+              <Label htmlFor="concepto">Concepto de la factura</Label>
+              <br />
+              <ComboboxDemo
+                title="Seleccionar concepto..."
+                placeholder="Concepto"
+                options={[
+                  { value: "1", label: "Productos" },
+                  { value: "2", label: "Servicios" },
+                  { value: "3", label: "Productos y Servicios" },
+                ]}
+                onSelectionChange={(e) => setConcepto(e)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="tipoDocumento">Tipo de documento</Label>
+              <br />
+              <ComboboxDemo
+                title="Seleccionar una opcion"
+                placeholder="Tipo de documento"
+                options={[
+                  { value: "80", label: "CUIT" },
+                  { value: "86", label: "CUIL" },
+                  { value: "96", label: "DNI" },
+                  { value: "99", label: "Consumidor Final" },
+                ]}
+                onSelectionChange={(e) => setTipoDocumento(e)}
+              />
+            </div>
           </div>
-          {/* Opciones:
-            
-            1 = Productos 
-            2 = Servicios 
-            3 = Productos y Servicios */}
-          <div>
-            <Label htmlFor="concepto">Concepto de la factura</Label>
-            <Input
-              id="concepto"
-              placeholder="..."
-              value={concepto}
-              onChange={(e) => setConcepto(e.target.value)}
-            />
+          <div className="flexx-row flex justify-between">
+            <div>
+              <Label htmlFor="nroDocumento">Numero de documento</Label>
+              <Input
+                id="nroDocumento"
+                placeholder="..."
+                value={tipoDocumento !== "99" ? nroDocumento : "0"}
+                onChange={(e) => setNroDocumento(e.target.value)}
+              />
+            </div>
+
+            {/* Importe de la Factura */}
+            <div>
+              <Label htmlFor="importe">Importe total de la factura</Label>
+              <Input
+                id="importe"
+                placeholder="..."
+                value={importe}
+                onChange={(e) => setImporte(e.target.value)}
+              />
+            </div>
           </div>
+          <div className="flexx-row flex justify-between">
+            {/* Los siguientes campos solo son obligatorios para los conceptos 2 y 3 */}
 
-          {/* Tipo de documento del comprador
-	 
-            Opciones:
-            
-            80 = CUIT 
-            86 = CUIL 
-            96 = DNI
-            99 = Consumidor Final  */}
+            <div>
+              <Label htmlFor="fechaDesde">Fecha de inicio del servicio</Label>
+              <Input
+                id="fechaDesde"
+                placeholder="..."
+                value={concepto !== "1" ? fechaServicioDesde : "No valido"}
+                onChange={(e) => setFechaServicioDesde(e.target.value)}
+              />
+            </div>
 
-          <div>
-            <Label htmlFor="tipoDocumento">Tipo de documento</Label>
-            <Input
-              id="tipoDocumento"
-              placeholder="..."
-              value={tipoDocumento}
-              onChange={(e) => setTipoDocumento(e.target.value)}
-            />
+            <div>
+              <Label htmlFor="fechaHasta">Fecha de fin del servicio</Label>
+              <Input
+                id="fechaHasta"
+                placeholder="..."
+                value={concepto !== "1" ? fechaServicioHasta : "No valido"}
+                onChange={(e) => setFechaServicioHasta(e.target.value)}
+              />
+            </div>
           </div>
-
-          {/* Numero de documento del comprador (0 para consumidor final) */}
-
-          <div>
-            <Label htmlFor="nroDocumento">Numero de documento</Label>
-            <Input
-              id="nroDocumento"
-              placeholder="..."
-              value={nroDocumento}
-              onChange={(e) => setNroDocumento(e.target.value)}
-            />
-          </div>
-
-          {/* Importe de la Factura */}
-          <div>
-            <Label htmlFor="importe">Importe total de la factura</Label>
-            <Input
-              id="importe"
-              placeholder="..."
-              value={importe}
-              onChange={(e) => setImporte(e.target.value)}
-            />
-          </div>
-          {/* Los siguientes campos solo son obligatorios para los conceptos 2 y 3 */}
-
-          <div>
-            <Label htmlFor="fechaDesde">Fecha de inicio del servicio</Label>
-            <Input
-              id="fechaDesde"
-              placeholder="..."
-              value={fechaServicioDesde}
-              onChange={(e) => setFechaServicioDesde(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="fechaHasta">Fecha de fin del servicio</Label>
-            <Input
-              id="fechaHasta"
-              placeholder="..."
-              value={fechaServicioHasta}
-              onChange={(e) => setFechaServicioHasta(e.target.value)}
-            />
-          </div>
-
           <div>
             <Label htmlFor="fechaVencimiento">
               Fecha de vencimiento del pago
@@ -274,7 +325,7 @@ export function FacturaDialog() {
             <Input
               id="fechaVencimiento"
               placeholder="..."
-              value={fechaVencimientoPago}
+              value={concepto !== "1" ? fechaVencimientoPago : "No valido"}
               onChange={(e) => setFechaVencimientoPago(e.target.value)}
             />
           </div>
@@ -284,7 +335,7 @@ export function FacturaDialog() {
               {isLoading && (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}
-              Crear marca
+              Generar nueva Factura
             </Button>
           </DialogFooter>
         </DialogContent>
