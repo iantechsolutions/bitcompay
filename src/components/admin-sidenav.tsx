@@ -9,7 +9,6 @@ import {
   LayoutDashboardIcon,
   PackageIcon,
   Landmark,
-  ShoppingBagIcon,
   UsersIcon,
   Stamp,
 } from "lucide-react";

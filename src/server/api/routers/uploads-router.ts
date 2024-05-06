@@ -2,7 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import * as schema from "~/server/db/schema";
 import { type DBTX, db } from "~/server/db";
-import { Table, eq } from "drizzle-orm";
+import { Table, eq, and } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import * as xlsx from "xlsx";
 import {
@@ -78,6 +78,7 @@ export const uploadsRouter = createTRPCRouter({
           db,
           input.id,
           input.type,
+          input.companyId,
           channels,
           brands,
         );
@@ -176,7 +177,8 @@ export const uploadsRouter = createTRPCRouter({
         const result = await readUploadContents(
           tx,
           input.id,
-          undefined,
+          "rec",
+          input.companyId,
           channels,
           brands,
         );
@@ -372,6 +374,7 @@ async function readUploadContents(
   db: DBTX,
   id: string,
   type: string | undefined,
+  companyId: string,
   products: ProductsOfCompany,
   brands: BrandsOfCompany,
 ) {
@@ -471,27 +474,19 @@ async function readUploadContents(
       message: "Error: la columna Marca no existe en el documento",
     });
   }
+  const transactionsDB = await db.query.payments.findMany({
+    where: eq(schema.payments.companyId, companyId),
+  });
+  const invoice_number_array = transactionsDB
+    .filter((row) => row.invoice_number !== null)
+    .map((row) => {
+      return row.invoice_number;
+    });
+  let auxiliarInvoiceNumber =
+    invoice_number_array.length > 0 ? Math.max(...invoice_number_array) : 0;
   for (let i = 0; i < transformedRows.length; i++) {
     const row = transformedRows[i]!;
     const rowNum = i + 2;
-    // asignar numero de factura si no tiene
-    if (!row.invoice_number) {
-      // let invoice_number = Math.floor(10000 + Math.random() * 90000);
-      // const transactionFound = await db.query.payments.findFirst({
-      //   where: eq(schema.payments.invoice_number, invoice_number),
-      // });
-      // while (transactionFound) {
-      //   invoice_number = Math.floor(10000 + Math.random() * 90000);
-      // }
-      // row.invoice_number = invoice_number;
-      const transactionsDB = await db.query.payments.findMany();
-      const invoice_number_array = transactionsDB
-        .filter((row) => row.invoice_number !== null)
-        .map((row) => {
-          return row.invoice_number;
-        });
-      row.invoice_number = Math.max(...invoice_number_array) + 1;
-    }
     // verificar producto
     let product;
     if (row.product_number) {
@@ -536,6 +531,11 @@ async function readUploadContents(
       } else {
         errors.push(`No existe columna marca en (fila:${rowNum})`);
       }
+    }
+    // asignar numero de factura si no tiene
+    if (!row.invoice_number) {
+      auxiliarInvoiceNumber++;
+      row.invoice_number = auxiliarInvoiceNumber;
     }
     // verificar columnas requeridas
     if (product) {

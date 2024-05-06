@@ -56,7 +56,6 @@ export default function CompanyPage({
 }) {
   const [name, setName] = useState(company.name);
   const [description, setDescription] = useState(company.description);
-  const [concepto, setConcepto] = useState(company.concept);
 
   const [companyProducts, setCompanyProducts] = useState<Set<string>>(
     new Set(company.products.map((c) => c.productId)),
@@ -162,20 +161,6 @@ export default function CompanyPage({
             <AccordionTrigger>
               <h2 className="text-md">Info de facturacion</h2>
             </AccordionTrigger>
-            <AccordionContent>
-              <Card className="p-5">
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <div className="col-span-2">
-                    <Label htmlFor="description">Concepto</Label>
-                    <Input
-                      id="concepto"
-                      value={concepto}
-                      onChange={(e) => setConcepto(e.target.value)}
-                    />
-                  </div>
-                </div>
-              </Card>
-            </AccordionContent>
           </AccordionItem>
           <AccordionItem value="item-4">
             <AccordionTrigger>

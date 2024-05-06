@@ -1,5 +1,6 @@
+"use client";
 import Link from "next/link";
-
+import { usePathname } from "next/navigation";
 export default function Sidenav(props: { children: React.ReactNode }) {
   return <ul>{props.children}</ul>;
 }
@@ -14,14 +15,16 @@ export function SidenavItem(props: {
   href?: string;
   onClick?: () => void;
 }) {
+  const pathname = usePathname();
+  const isActive =
+    props.href !== "/dashboard" ? pathname.includes(props.href!) : false;
   const className = `w-full flex gap-2 px-3 py-2 items-center
-    hover:bg-stone-100 dark:hover:bg-stone-900
     active:bg-stone-200 dark:active:bg-stone-800`;
-
+  // hover:bg-stone-100 dark:hover:bg-stone-900
   const content = (
     <>
       <div className="items-center justify-center p-1">{props.icon}</div>
-      <p className="text block w-full text-left font-medium">
+      <p className="text block w-full text-left font-medium ">
         {props.children}
       </p>
     </>
@@ -29,7 +32,7 @@ export function SidenavItem(props: {
 
   if (props.href) {
     return (
-      <li>
+      <li className={`${isActive ? "bg-zinc-300 " : ""}`}>
         <Link href={props.href} className={className}>
           {content}
         </Link>

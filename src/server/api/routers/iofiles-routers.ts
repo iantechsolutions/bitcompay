@@ -190,7 +190,12 @@ function generateDebitoDirecto(
     }
     text += `422002513  ${fiscalNumber}${name}${" ".repeat(181)}\r\n`;
     text += `423002513  ${fiscalNumber}${" ".repeat(217)}\r\n`;
-    const concept = formatString(" ", input.concept, 40, true);
+    const concept = formatString(
+      " ",
+      transaction.additional_info ?? "",
+      40,
+      true,
+    );
     text += `424002513  ${fiscalNumber}${concept}${" ".repeat(177)}\r\n`;
 
     total_records += 4;

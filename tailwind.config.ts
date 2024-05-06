@@ -1,3 +1,4 @@
+import { boxShadow } from "html2canvas/dist/types/css/property-descriptors/box-shadow";
 import { fontFamily } from "tailwindcss/defaultTheme";
 import { withUt } from "uploadthing/tw";
 
@@ -19,6 +20,9 @@ export default withUt({
     },
     extend: {
       colors: {
+        boxShadow: {
+          simple: "0px 1px black",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
