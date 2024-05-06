@@ -113,9 +113,7 @@ export const payments = pgTable(
       .default(0)
       .references(() => products.number),
     //! Can be used as id
-    invoice_number: bigint("invoice_number", { mode: "number" })
-      .notNull()
-      .unique(),
+    invoice_number: bigint("invoice_number", { mode: "number" }).notNull(),
     //
     period: timestamp("period", { mode: "date" }),
     first_due_amount: bigint("first_due_amount", { mode: "number" }),
@@ -358,20 +356,16 @@ export const productChannelsRelations = relations(
 
 // tablas de vendedores, proveedores y clientes
 
+export const uploadedOutputFiles = pgTable("uploaded_output_files", {
+  id: columnId,
+  userId: varchar("userId", { length: 255 }).notNull(),
+  fileUrl: varchar("fileUrl", { length: 255 }).notNull(),
+  fileName: varchar("fileName", { length: 255 }).notNull(),
+  fileSize: integer("fileSize").notNull(),
 
-export const uploadedOutputFiles = pgTable(
-  "uploaded_output_files",
-  {
-    id: columnId,
-    userId: varchar("userId", { length: 255 }).notNull(),
-    fileUrl: varchar("fileUrl", { length: 255 }).notNull(),
-    fileName: varchar("fileName", { length: 255 }).notNull(),
-    fileSize: integer("fileSize").notNull(),
+  channelId: varchar("channelId", { length: 255 }).notNull(),
+  companyId: varchar("companyId", { length: 255 }).notNull(),
+  brandId: varchar("brandId", { length: 255 }).notNull(),
 
-    channelId: varchar("channelId", { length: 255 }).notNull(),
-    companyId: varchar("companyId", { length: 255 }).notNull(),
-    brandId: varchar("brandId", { length: 255 }).notNull(),
-
-    createdAt,
-  }
-);
+  createdAt,
+});

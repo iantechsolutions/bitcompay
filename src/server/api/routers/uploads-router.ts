@@ -349,7 +349,7 @@ async function readResponseUploadContents(
           where: eq(schema.payments.invoice_number, parseInt(invoice_number)),
         });
         if (original_transaction) {
-          original_transaction.status_code = status_code ?? null;
+          original_transaction.statusId = status_code ?? null;
           records.push(original_transaction);
         }
       } else {
@@ -476,20 +476,21 @@ async function readUploadContents(
     const rowNum = i + 2;
     // asignar numero de factura si no tiene
     if (!row.invoice_number) {
-      let invoice_number = Math.floor(10000 + Math.random() * 90000);
-      const transactionFound = await db.query.payments.findFirst({
-        where: eq(schema.payments.invoice_number, invoice_number),
-      });
-      while (transactionFound) {
-        invoice_number = Math.floor(10000 + Math.random() * 90000);
-      }
-      row.invoice_number = invoice_number;
-      // const transactionsDB = await db.query.payments.findMany();
-      // const invoice_number_array = transactionsDB
-      //   .filter((row) => row.invoice_number !== null)
-      //   .map((row) => {
-      //     row.invoice_number;
-      //   });
+      // let invoice_number = Math.floor(10000 + Math.random() * 90000);
+      // const transactionFound = await db.query.payments.findFirst({
+      //   where: eq(schema.payments.invoice_number, invoice_number),
+      // });
+      // while (transactionFound) {
+      //   invoice_number = Math.floor(10000 + Math.random() * 90000);
+      // }
+      // row.invoice_number = invoice_number;
+      const transactionsDB = await db.query.payments.findMany();
+      const invoice_number_array = transactionsDB
+        .filter((row) => row.invoice_number !== null)
+        .map((row) => {
+          return row.invoice_number;
+        });
+      row.invoice_number = Math.max(...invoice_number_array) + 1;
     }
     // verificar producto
     let product;
