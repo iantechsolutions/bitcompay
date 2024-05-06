@@ -28,9 +28,9 @@ import {
 } from "~/components/ui/table";
 
 export default function GenerateChannelOutputPage(props: {
-  channel: { id: string, name: string };
+  channel: { id: string; name: string };
   company: NonNullable<RouterOutputs["companies"]["get"]>;
-  brand: { id: string };
+  brand: { id: string; name: string };
   status_batch: Record<string, string | number>[];
   outputFiles: RouterOutputs["iofiles"]["list"];
 }) {
@@ -93,6 +93,7 @@ export default function GenerateChannelOutputPage(props: {
       <Title>
         {props.company.name} {props.channel.name}: Generar entrada
       </Title>
+      <h2 className="mb-3 text-xl font-semibold">{props.brand.name}</h2>
       {props.status_batch[0]!.records !== 0 && (
         <Table className="mb-5 w-full">
           <TableHeader>
@@ -170,7 +171,9 @@ export default function GenerateChannelOutputPage(props: {
       {props.outputFiles.length > 0 && (
         <div>
           <Title>Archivos generados</Title>
-          {props.outputFiles.map((file) => (<a href={file.fileUrl}>{file.fileName}</a>))}
+          {props.outputFiles.map((file) => (
+            <a href={file.fileUrl}>{file.fileName}</a>
+          ))}
         </div>
       )}
 

@@ -60,6 +60,10 @@ export const iofilesRouter = createTRPCRouter({
           text = generateDebitoDirecto(generateInput, payments);
         } else if (channel.name.includes("PAGOMISCUENTAS")) {
           text = generatePagomiscuentas(generateInput, payments);
+        } else if (channel.name.includes("PAGO FACIL")) {
+          text = await generatePagoFacil(generateInput, payments);
+        } else if (channel.name.includes("RAPIPAGO")) {
+          text = generateRapiPago(generateInput, payments);
         } else {
           throw new TRPCError({
             code: "BAD_REQUEST",
@@ -382,6 +386,78 @@ async function generatePagoFacil(
   text += `9${"0".repeat(8)}${"0".repeat(12)}${"0".repeat(
     7,
   )}${total_records_string}${total_collected_string}${"0".repeat(143)}`;
+  return text;
+}
+function generateRapiPago(
+  input: {
+    channelId: string;
+    companyId: string;
+    fileName: string;
+    concept: string;
+    redescription: string;
+  },
+  transactions: RouterOutputs["transactions"]["list"],
+) {
+  const currentDate = dayjs().format("YYYYMMDD");
+  let text = `081400${currentDate}${"0".repeat(76)}\n`;
+  let total_records = 0;
+  let total_collected = 0;
+  for (const transaction of transactions) {
+    const fiscal_id_number = formatString(
+      " ",
+      transaction.fiscal_id_number!.toString(),
+      19,
+      true,
+    );
+    const invoice_number = formatString(
+      " ",
+      transaction.invoice_number.toString(),
+      20,
+      true,
+    );
+    const first_due_date = dayjs(transaction.first_due_date).format("YYYYMMDD");
+    const first_due_amount = formatString(
+      "0",
+      transaction.first_due_amount
+        ? transaction.first_due_amount?.toString()
+        : "",
+      9,
+      false,
+    );
+    const second_due_date = dayjs(
+      transaction.second_due_date
+        ? transaction.second_due_date
+        : transaction.first_due_date,
+    ).format("YYYYMMDD");
+    const second_due_amount = formatString(
+      "0",
+      transaction.second_due_amount
+        ? transaction.second_due_amount?.toString()
+        : "",
+      9,
+      false,
+    );
+    text += `5${fiscal_id_number}${invoice_number}0${first_due_date}0${first_due_amount}00${second_due_date}${second_due_amount}00${"0".repeat(
+      11,
+    )}\n`;
+    total_records++;
+    total_collected += transaction.first_due_amount ?? 0;
+  }
+  const total_records_string = formatString(
+    "0",
+    total_records.toString(),
+    7,
+    false,
+  );
+  const total_collected_string = formatString(
+    "0",
+    total_collected.toString(),
+    9,
+    false,
+  );
+  text += `981400${currentDate}${total_records_string}${"0".repeat(
+    7,
+  )}${total_collected_string}00${"0".repeat(11)}${"0".repeat(40)}`;
   return text;
 }
 
