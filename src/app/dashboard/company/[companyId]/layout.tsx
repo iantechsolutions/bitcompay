@@ -19,7 +19,7 @@ export default async function Layout(props: {
 
   return (
     <AppLayout
-      title={company?.name || "404 NOT FOUND"}
+      title={company?.name ?? "404 NOT FOUND"}
       user={session?.user}
       sidenav={
         company ? (

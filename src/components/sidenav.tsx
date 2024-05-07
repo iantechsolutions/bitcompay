@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { cn } from "~/lib/utils";
 export default function Sidenav(props: { children: React.ReactNode }) {
   return <ul>{props.children}</ul>;
 }
