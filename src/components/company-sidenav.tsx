@@ -7,8 +7,13 @@ import {
   Contact,
   Users,
   LayoutPanelLeft,
+  Boxes,
+  HeartPulse,
+  Option,
+  Gem,
+  NotebookPen,
 } from "lucide-react";
-import { VscNotebook } from "react-icons/vsc";
+import { Notebook } from "lucide-react";
 import {
   Accordion,
   AccordionItem,
@@ -19,31 +24,46 @@ import {
 export default function CompanySidenav(props: { companyId: string }) {
   return (
     <Sidenav>
-      <SidenavSeparator>General</SidenavSeparator>
-      <SidenavItem icon={<LayoutDashboardIcon />} href="/dashboard">
-        Inicio
-      </SidenavItem>
-      <SidenavSeparator>Gestión de documentos</SidenavSeparator>
-      <SidenavItem
-        icon={<FileUpIcon />}
-        href={`/dashboard/company/${props.companyId}/uploads`}
-      >
-        Subida
-      </SidenavItem>
-      <SidenavItem
-        icon={<ActivitySquareIcon />}
-        href={`/dashboard/company/${props.companyId}/monitoring`}
-      >
-        Monitoreo
-      </SidenavItem>
-      <SidenavItem
-        icon={<Users />}
-        href={`/dashboard/company/${props.companyId}/support`}
-      >
-        Soporte
-      </SidenavItem>
       <Accordion type="single" collapsible>
         <AccordionItem value="item-1">
+          <AccordionTrigger>
+            <SidenavSeparator>General</SidenavSeparator>
+          </AccordionTrigger>
+          <AccordionContent>
+            <SidenavItem
+              icon={<LayoutDashboardIcon />}
+              href={`/dashboard/company/${props.companyId}/company-dashboard`}
+            >
+              Dashboard
+            </SidenavItem>
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="item-2">
+          <AccordionTrigger>
+            <SidenavSeparator>Gestión de documentos</SidenavSeparator>
+          </AccordionTrigger>
+          <AccordionContent>
+            <SidenavItem
+              icon={<FileUpIcon />}
+              href={`/dashboard/company/${props.companyId}/uploads`}
+            >
+              Subida
+            </SidenavItem>
+            <SidenavItem
+              icon={<ActivitySquareIcon />}
+              href={`/dashboard/company/${props.companyId}/monitoring`}
+            >
+              Monitoreo
+            </SidenavItem>
+            <SidenavItem
+              icon={<Users />}
+              href={`/dashboard/company/${props.companyId}/support`}
+            >
+              Soporte
+            </SidenavItem>
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="item-3">
           <AccordionTrigger>
             <SidenavSeparator>Administracion</SidenavSeparator>
           </AccordionTrigger>
@@ -62,74 +82,90 @@ export default function CompanySidenav(props: { companyId: string }) {
             </SidenavItem>
             <SidenavItem
               href={`/dashboard/company/${props.companyId}/administration/planes`}
-              icon={<Users />}
+              icon={<Notebook />}
             >
               Planes
             </SidenavItem>
             <SidenavItem
               href={`/dashboard/company/${props.companyId}/administration/units`}
-              icon={<Users />}
+              icon={<Boxes />}
             >
               Unidades de negocio
             </SidenavItem>
             <SidenavItem
               href={`/dashboard/company/${props.companyId}/administration/health-insurance`}
-              icon={<Users />}
+              icon={<HeartPulse />}
             >
               Obras sociales
             </SidenavItem>
             <SidenavItem
               href={`/dashboard/company/${props.companyId}/administration/differentials`}
-              icon={<Users />}
+              icon={<Option />}
             >
               Diferenciales
             </SidenavItem>
             <SidenavItem
               href={`/dashboard/company/${props.companyId}/administration/bonuses`}
-              icon={<Users />}
+              icon={<Gem />}
             >
               Bonificaciones
             </SidenavItem>
             <SidenavItem
               href={`/dashboard/company/${props.companyId}/administration/statuses`}
-              icon={<Users />}
+              icon={<NotebookPen />}
             >
               Estados
             </SidenavItem>
           </AccordionContent>
         </AccordionItem>
+        <AccordionItem value="item-4">
+          <AccordionTrigger>
+            <SidenavSeparator>Ventas</SidenavSeparator>
+          </AccordionTrigger>
+          <AccordionContent>
+            <SidenavItem
+              href={`/dashboard/company/${props.companyId}/sales`}
+              icon={<BadgeDollarSign />}
+            >
+              Inicio
+            </SidenavItem>
+            <SidenavItem
+              href={`/dashboard/company/${props.companyId}/sales/prospects`}
+              icon={<Users />}
+            >
+              Prospectos
+            </SidenavItem>
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="item-5">
+          <AccordionTrigger>
+            <SidenavSeparator>Clientes</SidenavSeparator>
+          </AccordionTrigger>
+          <AccordionContent>
+            <SidenavItem
+              href={`/dashboard/company/${props.companyId}/clients`}
+              icon={<Users />}
+            >
+              Inicio
+            </SidenavItem>
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="item-6">
+          <AccordionTrigger>
+            <SidenavSeparator>Proovedores</SidenavSeparator>
+          </AccordionTrigger>
+          <AccordionContent>
+            <SidenavItem
+              icon={<Contact />}
+              href={`/dashboard/company/${props.companyId}/providers`}
+            >
+              Inicio
+            </SidenavItem>
+          </AccordionContent>
+        </AccordionItem>
       </Accordion>
-
-      <SidenavSeparator>Ventas</SidenavSeparator>
-      <SidenavItem
-        href={`/dashboard/company/${props.companyId}/sales`}
-        icon={<BadgeDollarSign />}
-      >
-        Inicio
-      </SidenavItem>
-      <SidenavItem
-        href={`/dashboard/company/${props.companyId}/sales/prospects`}
-        icon={<Users />}
-      >
-        Prospectos
-      </SidenavItem>
-
-      <SidenavSeparator>Clientes</SidenavSeparator>
-      <SidenavItem
-        href={`/dashboard/company/${props.companyId}/clients`}
-        icon={<Users />}
-      >
-        Inicio
-      </SidenavItem>
-
-      <SidenavSeparator>Proovedores</SidenavSeparator>
-
-      <SidenavItem
-        icon={<Contact />}
-        href={`/dashboard/company/${props.companyId}/providers`}
-      >
-        Inicio
-      </SidenavItem>
     </Sidenav>
   );
 }

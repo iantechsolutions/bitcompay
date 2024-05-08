@@ -3,6 +3,7 @@ import { api } from "~/trpc/server";
 import { Building2Icon } from "lucide-react";
 import { List, ListTile } from "~/components/list";
 import { type RouterOutputs } from "~/trpc/shared";
+import { ChevronRight } from "lucide-react";
 export default async function Page(props: { params: { channelId: string } }) {
   const channel: RouterOutputs["channels"]["get"] =
     await api.channels.get.query({
@@ -48,6 +49,10 @@ export default async function Page(props: { params: { channelId: string } }) {
 
   return (
     <>
+      <div className="flex items-center text-sm font-semibold opacity-80">
+        {channel.name} <ChevronRight />{" "}
+      </div>
+      <Title>Elegir Empresa:</Title>
       {companiesArray.length > 0 ? (
         <List>
           {companiesArray.map((company) => {

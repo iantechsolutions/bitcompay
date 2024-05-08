@@ -8,8 +8,10 @@ import {
   primaryKey,
   timestamp,
   varchar,
+  pgEnum,
 } from "drizzle-orm/pg-core";
 import { columnId, createdAt, pgTable, updatedAt } from "./schema/util";
+import { number } from "zod";
 
 export * from "./schema/auth";
 export { pgTable } from "./schema/util";
@@ -354,8 +356,6 @@ export const productChannelsRelations = relations(
   }),
 );
 
-// tablas de vendedores, proveedores y clientes
-
 export const uploadedOutputFiles = pgTable("uploaded_output_files", {
   id: columnId,
   userId: varchar("userId", { length: 255 }).notNull(),
@@ -368,4 +368,91 @@ export const uploadedOutputFiles = pgTable("uploaded_output_files", {
   brandId: varchar("brandId", { length: 255 }).notNull(),
 
   createdAt,
+});
+
+export const genderEnum = pgEnum("gender", ["male", "female", "other"]);
+export const civilStatus = pgEnum("civil_status", [
+  "single",
+  "married",
+  "divorced",
+  "widowed",
+]);
+
+export const providers = pgTable(
+  "providers",
+  {
+    id: columnId,
+    user: varchar("user", { length: 255 }).notNull(),
+    createdAt,
+    provider_type: varchar("provider_type", { length: 255 }),
+    supervisor: varchar("supervisor", { length: 255 }),
+    manager: varchar("manager", { length: 255 }),
+    provider_code: varchar("provider_code", { length: 255 }),
+    id_type: varchar("id_type", { length: 255 }),
+    id_number: varchar("id_number", { length: 255 }),
+    name: varchar("name", { length: 255 }),
+    afip_status: varchar("afip_status", { length: 255 }),
+    fiscal_id_type: varchar("fiscal_id_type", { length: 255 }),
+    fiscal_id_number: varchar("fiscal_id_number", { length: 255 }),
+    gender: genderEnum("gender"), // shoud be enum
+    born_date: timestamp("born_date", { mode: "date" }),
+    civil_status: civilStatus("civil_status"), // should be enum
+    nationality: varchar("nationality", { length: 255 }),
+    address: varchar("address", { length: 255 }),
+    phone_number: varchar("phone_number", { length: 255 }),
+    cellphone_number: varchar("cellphone_number", { length: 255 }),
+    email: varchar("email", { length: 255 }),
+    financial_entity: varchar("financial_entity", { length: 255 }),
+    cbu: varchar("cbu", { length: 255 }),
+    status: varchar("status", { length: 255 }),
+    unsubscription_motive: varchar("unsubscription_motive", { length: 255 }),
+  },
+  (users) => ({
+    userIdx: index("user_idx").on(users.user),
+    emailIdx: index("email_idx").on(users.email),
+  }),
+);
+
+export const plans = pgTable("plans", {
+  id: columnId,
+  user: varchar("user", { length: 255 }).notNull(),
+  createdAt,
+  expiration_date: timestamp("expiration_date").notNull(),
+  plan_code: varchar("plan_code", { length: 255 }).notNull(),
+  description: varchar("description", { length: 255 }).notNull(),
+  age: integer("age").notNull(),
+  price: bigint("price", { mode: "number" }).notNull(),
+});
+
+export const bussinessUnits = pgTable(
+  "bussiness_units",
+  {
+    id: columnId,
+    description: varchar("description", { length: 255 }).notNull(),
+    createdAt,
+    companyId: varchar("companyId", { length: 255 })
+      .notNull()
+      .references(() => companies.id),
+  },
+  (bussinessUnits) => ({
+    companyIdIdx: index("companyId_idx").on(bussinessUnits.companyId),
+  }),
+);
+
+export const bussinessUnitsRelations = relations(bussinessUnits, ({ one }) => ({
+  company: one(companies, {
+    fields: [bussinessUnits.companyId],
+    references: [companies.id],
+  }),
+}));
+
+export const healthInsurances = pgTable("health_insurances", {
+  id: columnId,
+  name: varchar("name", { length: 255 }).notNull(),
+});
+
+export const clientStatuses = pgTable("client_statuses", {
+  id: columnId,
+  description: varchar("description", { length: 255 }).notNull(),
+  type: varchar("type", { length: 255 }).notNull(),
 });
