@@ -6,11 +6,21 @@ import {
   CardContent,
   CardDescription,
 } from "~/components/ui/card";
-
+import Link from "next/link";
 import { getServerAuthSession } from "~/server/auth";
 import { Button } from "~/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { HandCoins, LogOut, ArrowLeftRight, Import } from "lucide-react";
-import LayoutContainer from "~/components/layout-container";
+import { EyeOff } from "lucide-react";
+import { Clock9 } from "lucide-react";
+import { Overview } from "~/components/dashboard/overview";
+import { RecentSales } from "~/components/dashboard/recent-sales";
 export default async function page() {
   const session = await getServerAuthSession();
   const user = session?.user;
@@ -18,81 +28,127 @@ export default async function page() {
     return <Title>No se encontró el usuario</Title>;
   }
   return (
-    <main className="ml-18 max-w-[1100px]">
+    <main className="ml-18 ">
       <Title>
         Hola, <span className="text-[#8fefdc]"> {user.name!}!</span>
       </Title>
 
       <section>
-        <Card>
-          <CardContent className="mt-5 flex w-full flex-wrap items-center gap-7">
-            <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                className=" w-20 rounded-full bg-[#1bdfb7] p-3"
-              >
-                <HandCoins className="h-8 w-8" />
-              </Button>
-              <p className="text-md word-wrap overflow-wrap break-words font-semibold">
-                Generación de Recaudación
-              </p>
-            </div>
+        <Card className="max-w-[1000px]">
+          <CardContent className="mt-5 flex w-full flex-wrap items-center justify-around gap-5">
+            <Link href={"sdfksdf"} className=" h-auto w-auto">
+              <Button className=" bg-white text-black shadow-none hover:bg-white">
+                <div className="mr-4 box-border rounded-full bg-[#1bdfb7] p-2">
+                  <HandCoins className="h-6 w-6" />
+                </div>
 
-            <div className="flex  items-center gap-3">
-              <Button
-                variant="outline"
-                className=" rounded-full bg-[#1bdfb7] p-3"
-              >
-                <ArrowLeftRight className="h-10 w-10" />
+                <p className="text-wrap text-basis w-[100px] overflow-hidden whitespace-normal text-left">
+                  Generacion de Recaudacion
+                </p>
               </Button>
-              <p className="text-md flex  flex-col font-semibold">
-                Transacciones de la fecha
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                className=" rounded-full bg-[#1bdfb7] p-3"
-              >
-                <LogOut className="h-10 w-10" />
+            </Link>
+            <Link href={"sdfksdf"} className=" h-auto w-auto">
+              <Button className="  bg-white text-black shadow-none hover:bg-white">
+                <div className="mr-4 box-border rounded-full bg-[#1bdfb7] p-2 ">
+                  <ArrowLeftRight className="h-6 w-6" />
+                </div>
+
+                <p className="text-wrap   text-basis w-[100px] overflow-hidden whitespace-pre-line text-left">
+                  Transacciones de la fecha
+                </p>
               </Button>
-              <p className="text-md font-semibold">
-                Información de facturación
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                className=" rounded-full bg-[#1bdfb7] p-3"
-              >
-                <Import className="h-10 w-10" />
+            </Link>
+            <Link href={"sdfksdf"} className=" h-auto w-auto">
+              <Button className=" bg-white text-black shadow-none hover:bg-white">
+                <div className="mr-4 box-border rounded-full border-none bg-[#1bdfb7] p-2 ">
+                  <LogOut className="h-6 w-6" />
+                </div>
+
+                <p className="text-wrap  text-basis w-[100px] overflow-hidden whitespace-normal text-left">
+                  Informacion de facturacion
+                </p>
               </Button>
-              <p className="text-md font-semibold">Solicitar transferencia</p>
-            </div>
+            </Link>
+
+            <Link href={"sdfksdf"} className=" h-auto w-auto">
+              <Button className=" bg-white text-black shadow-none hover:bg-white ">
+                <div className="mr-4 box-border rounded-full bg-[#1bdfb7] p-2 ">
+                  <Import className="h-6 w-6" />
+                </div>
+
+                <p className="text-wrap text-basis w-[100px] overflow-hidden whitespace-normal text-left">
+                  Solicitar transferencia
+                </p>
+              </Button>
+            </Link>
           </CardContent>
         </Card>
       </section>
       <section className="mt-4">
         <h2 className="mb-3 text-xl font-semibold  ">
           Saldo en <span className="text-[#8fefdc]">cuenta</span>
-        </h2>
-        <Card className="mt-3"> carta de saldo pendiente</Card>
+        </h2>{" "}
+        <Card className="mt-3 max-w-[500px] rounded-[12px]">
+          <div className="font-spline-sans flex items-center justify-between px-7 pt-7">
+            <p className="text-4xl font-semibold">
+              {" "}
+              $<span className="text-3xl"> ****</span>
+            </p>
+            <div className="box-sizing rounded-full bg-[#1bdfb7] p-2">
+              <EyeOff className="h-5 w-5" />
+            </div>
+          </div>
+          <div className="mt-3 overflow-hidden  bg-[#8fefdc] px-4 py-2">
+            <p className="flex items-center gap-1 text-sm font-bold">
+              <Clock9 className="h-3 w-3 " /> Actualizado{" "}
+              <span className="text-sm font-light opacity-70"> 13/05/2024</span>
+            </p>
+          </div>
+        </Card>
       </section>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
           <CardHeader>
-            <CardTitle className="font-">Resumen de cuenta</CardTitle>
+            <div className="flex justify-between">
+              <CardTitle className="text-xl">Resumen de cuenta</CardTitle>
+              <Select>
+                <SelectTrigger className="w-[180px] bg-[#1bdfb7] font-bold">
+                  <SelectValue placeholder="Saldo en cuenta" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    value="Pendiente"
+                    className="rounded-none border-b border-gray-600"
+                  >
+                    Pendiente
+                  </SelectItem>
+
+                  <SelectItem
+                    value="Recaudado"
+                    className="rounded-none border-b border-gray-600"
+                  >
+                    Recaudado
+                  </SelectItem>
+
+                  <SelectItem value="Liquidado">Liquidado</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </CardHeader>
-          <CardContent className="pl-2"></CardContent>
+          <CardContent className="pl-2">
+            <Overview />
+          </CardContent>
         </Card>
         <Card className="col-span-3">
           <CardHeader>
-            <CardTitle>Transacciones del dia</CardTitle>
+            <CardTitle className="text-xl">Transacciones del dia</CardTitle>
             <CardDescription>
               Se han realizado 256 cobros este mes.
             </CardDescription>
           </CardHeader>
-          <CardContent></CardContent>
+          <CardContent>
+            <RecentSales />
+          </CardContent>
         </Card>
       </div>
     </main>

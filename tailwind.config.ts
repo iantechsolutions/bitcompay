@@ -78,6 +78,7 @@ export default withUt({
       },
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],
+        "spline-sans": ['"Spline Sans"', "sans-serif"],
       },
     },
   },

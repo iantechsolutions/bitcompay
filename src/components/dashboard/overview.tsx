@@ -84,7 +84,7 @@ const data = [
 
 export function Overview() {
   return (
-    <ResponsiveContainer width="100%" height="100%">
+    <ResponsiveContainer width={"99%"} height={300}>
       <AreaChart
         width={500}
         height={400}
@@ -96,11 +96,23 @@ export function Overview() {
           bottom: 0,
         }}
       >
-        <CartesianGrid strokeDasharray="3 3" />
+        <defs>
+          <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#1bdfb7" stopOpacity={1.0} />
+            <stop offset="90%" stopColor="#1bdfb7" stopOpacity={0} />
+          </linearGradient>
+        </defs>
         <XAxis dataKey="name" />
         <YAxis />
+        <CartesianGrid strokeDasharray="3 3" />
         <Tooltip />
-        <Area type="monotone" dataKey="total" stroke="#8884d8" fill="#8884d8" />
+        <Area
+          type="monotone"
+          dataKey="total"
+          stroke="#1bdfb7"
+          fillOpacity={1}
+          fill="url(#colorUv)"
+        />
       </AreaChart>
     </ResponsiveContainer>
   );
