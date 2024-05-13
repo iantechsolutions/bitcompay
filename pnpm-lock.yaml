@@ -38,6 +38,9 @@ dependencies:
   '@radix-ui/react-popover':
     specifier: ^1.0.7
     version: 1.0.7(@types/react-dom@18.2.18)(@types/react@18.2.45)(react-dom@18.2.0)(react@18.3.1)
+  '@radix-ui/react-scroll-area':
+    specifier: ^1.0.5
+    version: 1.0.5(@types/react-dom@18.2.18)(@types/react@18.2.45)(react-dom@18.2.0)(react@18.3.1)
   '@radix-ui/react-select':
     specifier: ^2.0.0
     version: 2.0.0(@types/react-dom@18.2.18)(@types/react@18.2.45)(react-dom@18.2.0)(react@18.3.1)
@@ -83,12 +86,18 @@ dependencies:
   cmdk:
     specifier: ^0.2.0
     version: 0.2.0(@types/react@18.2.45)(react-dom@18.2.0)(react@18.3.1)
+  date-fns:
+    specifier: ^3.6.0
+    version: 3.6.0
   dayjs:
     specifier: ^1.11.10
     version: 1.11.10
   drizzle-orm:
     specifier: ^0.29.3
     version: 0.29.3(@neondatabase/serverless@0.8.1)(@types/react@18.2.45)(pg@8.11.3)(postgres@3.4.3)(react@18.3.1)
+  drizzle-zod:
+    specifier: ^0.5.1
+    version: 0.5.1(drizzle-orm@0.29.3)(zod@3.22.4)
   fs:
     specifier: 0.0.1-security
     version: 0.0.1-security
@@ -116,6 +125,9 @@ dependencies:
   react:
     specifier: 18.3.1
     version: 18.3.1
+  react-day-picker:
+    specifier: ^8.10.1
+    version: 8.10.1(date-fns@3.6.0)(react@18.3.1)
   react-dom:
     specifier: 18.2.0
     version: 18.2.0(react@18.3.1)
@@ -152,6 +164,9 @@ dependencies:
   uploadthing:
     specifier: ^6.1.0
     version: 6.1.0
+  validator:
+    specifier: ^13.12.0
+    version: 13.12.0
   xlsx:
     specifier: ^0.18.5
     version: 0.18.5
@@ -175,9 +190,15 @@ devDependencies:
   '@types/react':
     specifier: ^18.2.37
     version: 18.2.45
+  '@types/react-day-picker':
+    specifier: ^5.3.0
+    version: 5.3.0(date-fns@3.6.0)(react@18.3.1)
   '@types/react-dom':
     specifier: ^18.2.15
     version: 18.2.18
+  '@types/validator':
+    specifier: ^13.11.9
+    version: 13.11.9
   '@typescript-eslint/eslint-plugin':
     specifier: ^6.11.0
     version: 6.15.0(@typescript-eslint/parser@6.15.0)(eslint@8.56.0)(typescript@5.3.3)
@@ -1553,6 +1574,35 @@ packages:
       react-dom: 18.2.0(react@18.3.1)
     dev: false
 
+  /@radix-ui/react-scroll-area@1.0.5(@types/react-dom@18.2.18)(@types/react@18.2.45)(react-dom@18.2.0)(react@18.3.1):
+    resolution: {integrity: sha512-b6PAgH4GQf9QEn8zbT2XUHpW5z8BzqEc7Kl11TwDrvuTrxlkcjTD5qa/bxgKr+nmuXKu4L/W5UZ4mlP/VG/5Gw==}
+    peerDependencies:
+      '@types/react': '*'
+      '@types/react-dom': '*'
+      react: ^16.8 || ^17.0 || ^18.0
+      react-dom: ^16.8 || ^17.0 || ^18.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
+    dependencies:
+      '@babel/runtime': 7.23.6
+      '@radix-ui/number': 1.0.1
+      '@radix-ui/primitive': 1.0.1
+      '@radix-ui/react-compose-refs': 1.0.1(@types/react@18.2.45)(react@18.3.1)
+      '@radix-ui/react-context': 1.0.1(@types/react@18.2.45)(react@18.3.1)
+      '@radix-ui/react-direction': 1.0.1(@types/react@18.2.45)(react@18.3.1)
+      '@radix-ui/react-presence': 1.0.1(@types/react-dom@18.2.18)(@types/react@18.2.45)(react-dom@18.2.0)(react@18.3.1)
+      '@radix-ui/react-primitive': 1.0.3(@types/react-dom@18.2.18)(@types/react@18.2.45)(react-dom@18.2.0)(react@18.3.1)
+      '@radix-ui/react-use-callback-ref': 1.0.1(@types/react@18.2.45)(react@18.3.1)
+      '@radix-ui/react-use-layout-effect': 1.0.1(@types/react@18.2.45)(react@18.3.1)
+      '@types/react': 18.2.45
+      '@types/react-dom': 18.2.18
+      react: 18.3.1
+      react-dom: 18.2.0(react@18.3.1)
+    dev: false
+
   /@radix-ui/react-select@2.0.0(@types/react-dom@18.2.18)(@types/react@18.2.45)(react-dom@18.2.0)(react@18.3.1):
     resolution: {integrity: sha512-RH5b7af4oHtkcHS7pG6Sgv5rk5Wxa7XI8W5gvB1N/yiuDGZxko1ynvOiVhFM7Cis2A8zxF9bTOUVbRDzPepe6w==}
     peerDependencies:
@@ -2033,6 +2083,16 @@ packages:
     dev: false
     optional: true
 
+  /@types/react-day-picker@5.3.0(date-fns@3.6.0)(react@18.3.1):
+    resolution: {integrity: sha512-iMMXQjwTH8uxPTW3WYP6ZufZBSMFFEScGIztENtKfvukefrojmX/WCUNPrimC9ys1ll5nnM0VGaHolYLAbcEtw==}
+    deprecated: This is a stub types definition for react-day-picker (https://github.com/gpbl/react-day-picker). react-day-picker provides its own type definitions, so you don't need @types/react-day-picker installed!
+    dependencies:
+      react-day-picker: 8.10.1(date-fns@3.6.0)(react@18.3.1)
+    transitivePeerDependencies:
+      - date-fns
+      - react
+    dev: true
+
   /@types/react-dom@18.2.18:
     resolution: {integrity: sha512-TJxDm6OfAX2KJWJdMEVTwWke5Sc/E/RlnPGvGfS0W7+6ocy2xhDVQVh/KvC2Uf7kACs+gDytdusDSdWfWkaNzw==}
     dependencies:
@@ -2056,6 +2116,10 @@ packages:
 
   /@types/semver@7.5.6:
     resolution: {integrity: sha512-dn1l8LaMea/IjDoHNd9J52uBbInB796CDffS6VdIxvqYCPSG0V0DzHp76GpaWnlhg88uYyPbXCDIowa86ybd5A==}
+    dev: true
+
+  /@types/validator@13.11.9:
+    resolution: {integrity: sha512-FCTsikRozryfayPuiI46QzH3fnrOoctTjvOYZkho9BTFLCOZ2rgZJHMOVgCOfttjPJcgOx52EpkY0CMfy87MIw==}
     dev: true
 
   /@typescript-eslint/eslint-plugin@6.15.0(@typescript-eslint/parser@6.15.0)(eslint@8.56.0)(typescript@5.3.3):
@@ -2682,6 +2746,9 @@ packages:
       type: 1.2.0
     dev: true
 
+  /date-fns@3.6.0:
+    resolution: {integrity: sha512-fRHTG8g/Gif+kSh50gaGEdToemgfj74aRX3swtiouboip5JDLAyDE9F11nHMIcvOaXeOC6D7SpNhi7uFyB7Uww==}
+
   /dayjs@1.11.10:
     resolution: {integrity: sha512-vjAczensTgRcqDERK0SR2XMwsF/tSvnvlv6VcF2GIhg6Sx4yOIt/irsr1RDJsKiIyBzJDpCoXiWWq28MqH2cnQ==}
     dev: false
@@ -2882,6 +2949,16 @@ packages:
       pg: 8.11.3
       postgres: 3.4.3
       react: 18.3.1
+    dev: false
+
+  /drizzle-zod@0.5.1(drizzle-orm@0.29.3)(zod@3.22.4):
+    resolution: {integrity: sha512-C/8bvzUH/zSnVfwdSibOgFjLhtDtbKYmkbPbUCq46QZyZCH6kODIMSOgZ8R7rVjoI+tCj3k06MRJMDqsIeoS4A==}
+    peerDependencies:
+      drizzle-orm: '>=0.23.13'
+      zod: '*'
+    dependencies:
+      drizzle-orm: 0.29.3(@neondatabase/serverless@0.8.1)(@types/react@18.2.45)(pg@8.11.3)(postgres@3.4.3)(react@18.3.1)
+      zod: 3.22.4
     dev: false
 
   /electron-to-chromium@1.4.615:
@@ -3463,7 +3540,6 @@ packages:
 
   /js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
-    dev: false
 
   /js-yaml@4.1.0:
     resolution: {integrity: sha512-wpxZs9NoxZaJESJGIZTyDEaYpl0FKSA+FB9aJiyemKhMwkxQg63h4T1KJgUGHpTqPDNRcmmYLugrRjJlBtWvRA==}
@@ -3556,7 +3632,6 @@ packages:
     hasBin: true
     dependencies:
       js-tokens: 4.0.0
-    dev: false
 
   /lru-cache@6.0.0:
     resolution: {integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==}
@@ -4150,6 +4225,15 @@ packages:
     dev: false
     optional: true
 
+  /react-day-picker@8.10.1(date-fns@3.6.0)(react@18.3.1):
+    resolution: {integrity: sha512-TMx7fNbhLk15eqcMt+7Z7S2KF7mfTId/XJDjKE8f+IUcFn0l08/kI4FiYTL/0yuOLmEcbR4Fwe3GJf/NiiMnPA==}
+    peerDependencies:
+      date-fns: ^2.28.0 || ^3.0.0
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      date-fns: 3.6.0
+      react: 18.3.1
+
   /react-dom@18.2.0(react@18.3.1):
     resolution: {integrity: sha512-6IMTriUmvsjHUjNtEDudZfuDQUoWXVxKHhlEGSk81n4YFS+r/Kl99wXiwlVXtPBtJenozv2P+hxDsw9eA7Xo6g==}
     peerDependencies:
@@ -4315,7 +4399,6 @@ packages:
     engines: {node: '>=0.10.0'}
     dependencies:
       loose-envify: 1.4.0
-    dev: false
 
   /read-cache@1.0.0:
     resolution: {integrity: sha512-Owdv/Ft7IjOgm/i0xvNDZ1LrRANRfew4b2prF3OWMQLxLfu3bS8FVhCsrSCMK4lR56Y9ya+AThoTpDCTxCmpRA==}
@@ -4763,6 +4846,11 @@ packages:
   /uuid@8.3.2:
     resolution: {integrity: sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==}
     hasBin: true
+    dev: false
+
+  /validator@13.12.0:
+    resolution: {integrity: sha512-c1Q0mCiPlgdTVVVIJIrBuxNicYE+t/7oKeI9MWLj3fh/uq2Pxh/3eeWbVZ4OcGW1TUf53At0njHw5SMdA3tmMg==}
+    engines: {node: '>= 0.10'}
     dev: false
 
   /victory-vendor@36.9.2:

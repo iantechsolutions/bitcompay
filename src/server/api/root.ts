@@ -8,6 +8,11 @@ import { productsChannel } from "./routers/products-router";
 import { brandsRouter } from "./routers/brands-router";
 import { statusRouter } from "./routers/status-router";
 import { afipRouter } from "./routers/afip-router";
+import { providersRouter } from "./routers/providers-router";
+import { plansRouter } from "./routers/plans-router";
+import { bussinessUnitsRouter } from "./routers/bussiness-units-router";
+import { healthInsurancesRouter } from "./routers/health-insurances-router";
+import { clientStatusesRouter } from "./routers/client-statuses-router";
 /**
  * This is the primary router for your server.
  *
@@ -23,6 +28,11 @@ export const appRouter = createTRPCRouter({
   iofiles: iofilesRouter,
   brands: brandsRouter,
   status: statusRouter,
+  providers: providersRouter,
+  plans: plansRouter,
+  bussinessUnits: bussinessUnitsRouter,
+  healthInsurances: healthInsurancesRouter,
+  clientStatuses: clientStatusesRouter,
 });
 
 // export type definition of API

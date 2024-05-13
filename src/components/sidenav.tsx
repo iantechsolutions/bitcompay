@@ -33,7 +33,7 @@ export function SidenavItem(props: {
 
   if (props.href) {
     return (
-      <li className={`${isActive ? "bg-zinc-300 " : ""}`}>
+      <li className={`${isActive ? "bg-[#8FEFDC] " : ""}`}>
         <Link href={props.href} className={className}>
           {content}
         </Link>

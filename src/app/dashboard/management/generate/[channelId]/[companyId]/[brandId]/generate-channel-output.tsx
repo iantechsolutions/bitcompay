@@ -26,7 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-
+import { ChevronRight } from "lucide-react";
 export default function GenerateChannelOutputPage(props: {
   channel: { id: string; name: string };
   company: NonNullable<RouterOutputs["companies"]["get"]>;
@@ -90,10 +90,14 @@ export default function GenerateChannelOutputPage(props: {
 
   return (
     <>
-      <Title>
-        {props.company.name} {props.channel.name}: Generar entrada
-      </Title>
-      <h2 className="mb-3 text-xl font-semibold">{props.brand.name}</h2>
+      <div className="flex text-sm font-semibold opacity-80">
+        {props.channel.name}
+        <ChevronRight />
+        {props.company.name}
+        <ChevronRight />
+        {props.brand.name}
+      </div>
+      <Title>Generar entrada</Title>
       {props.status_batch[0]!.records !== 0 && (
         <Table className="mb-5 w-full">
           <TableHeader>

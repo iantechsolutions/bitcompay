@@ -8,11 +8,10 @@ import {
   primaryKey,
   timestamp,
   varchar,
-  pgEnum,
 } from "drizzle-orm/pg-core";
 import { columnId, createdAt, pgTable, updatedAt } from "./schema/util";
-import { number } from "zod";
-
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { type z } from "zod";
 export * from "./schema/auth";
 export { pgTable } from "./schema/util";
 
@@ -199,7 +198,7 @@ export const channels = pgTable(
   }),
 );
 
-export const channelsRelations = relations(channels, ({ one, many }) => ({
+export const channelsRelations = relations(channels, ({ many }) => ({
   products: many(productChannels),
 }));
 
@@ -220,9 +219,10 @@ export const companies = pgTable(
   }),
 );
 
-export const companiesRelations = relations(companies, ({ one, many }) => ({
+export const companiesRelations = relations(companies, ({ many }) => ({
   brands: many(companiesToBrands),
   products: many(companyProducts),
+  bussinessUnits: many(bussinessUnits),
 }));
 
 export const brands = pgTable(
@@ -323,7 +323,7 @@ export const products = pgTable(
   }),
 );
 
-export const productsRelations = relations(products, ({ one, many }) => ({
+export const productsRelations = relations(products, ({ many }) => ({
   company: many(companyProducts),
   channels: many(productChannels),
 }));
@@ -370,14 +370,6 @@ export const uploadedOutputFiles = pgTable("uploaded_output_files", {
   createdAt,
 });
 
-export const genderEnum = pgEnum("gender", ["male", "female", "other"]);
-export const civilStatus = pgEnum("civil_status", [
-  "single",
-  "married",
-  "divorced",
-  "widowed",
-]);
-
 export const providers = pgTable(
   "providers",
   {
@@ -394,9 +386,11 @@ export const providers = pgTable(
     afip_status: varchar("afip_status", { length: 255 }),
     fiscal_id_type: varchar("fiscal_id_type", { length: 255 }),
     fiscal_id_number: varchar("fiscal_id_number", { length: 255 }),
-    gender: genderEnum("gender"), // shoud be enum
-    born_date: timestamp("born_date", { mode: "date" }),
-    civil_status: civilStatus("civil_status"), // should be enum
+    gender: varchar("gender", { enum: ["female", "male", "other"] }),
+    birth_date: timestamp("birth_date", { mode: "date" }),
+    civil_status: varchar("civil_status", {
+      enum: ["single", "married", "divorced", "widowed"],
+    }),
     nationality: varchar("nationality", { length: 255 }),
     address: varchar("address", { length: 255 }),
     phone_number: varchar("phone_number", { length: 255 }),
@@ -413,6 +407,34 @@ export const providers = pgTable(
   }),
 );
 
+export const insertProvidersSchema = createInsertSchema(providers);
+export const selectProvidersSchema = createSelectSchema(providers);
+export const ProviderSchemaDB = insertProvidersSchema.pick({
+  provider_type: true,
+  supervisor: true,
+  manager: true,
+  provider_code: true,
+  id_type: true,
+  id_number: true,
+  name: true,
+  afip_status: true,
+  fiscal_id_type: true,
+  fiscal_id_number: true,
+  gender: true,
+  birth_date: true,
+  civil_status: true,
+  nationality: true,
+  address: true,
+  phone_number: true,
+  cellphone_number: true,
+  email: true,
+  financial_entity: true,
+  cbu: true,
+  status: true,
+  unsubscription_motive: true,
+});
+export type Providers = z.infer<typeof selectProvidersSchema>;
+
 export const plans = pgTable("plans", {
   id: columnId,
   user: varchar("user", { length: 255 }).notNull(),
@@ -424,20 +446,14 @@ export const plans = pgTable("plans", {
   price: bigint("price", { mode: "number" }).notNull(),
 });
 
-export const bussinessUnits = pgTable(
-  "bussiness_units",
-  {
-    id: columnId,
-    description: varchar("description", { length: 255 }).notNull(),
-    createdAt,
-    companyId: varchar("companyId", { length: 255 })
-      .notNull()
-      .references(() => companies.id),
-  },
-  (bussinessUnits) => ({
-    companyIdIdx: index("companyId_idx").on(bussinessUnits.companyId),
-  }),
-);
+export const bussinessUnits = pgTable("bussiness_units", {
+  id: columnId,
+  description: varchar("description", { length: 255 }).notNull(),
+  createdAt,
+  companyId: varchar("companyId", { length: 255 })
+    .notNull()
+    .references(() => companies.id),
+});
 
 export const bussinessUnitsRelations = relations(bussinessUnits, ({ one }) => ({
   company: one(companies, {

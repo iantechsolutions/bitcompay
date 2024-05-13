@@ -74,3 +74,11 @@
     @apply bg-background text-foreground;
   }
 }
+
+.rdp [aria-hidden="true"] {
+  @apply hidden;
+}
+
+.rdp-vhidden {
+  @apply hidden;
+}

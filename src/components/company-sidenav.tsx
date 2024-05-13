@@ -26,7 +26,7 @@ export default function CompanySidenav(props: { companyId: string }) {
     <Sidenav>
       <Accordion type="single" collapsible>
         <AccordionItem value="item-1">
-          <AccordionTrigger>
+          <AccordionTrigger className=" px-1 py-1.5 hover:no-underline">
             <SidenavSeparator>General</SidenavSeparator>
           </AccordionTrigger>
           <AccordionContent>
@@ -39,7 +39,7 @@ export default function CompanySidenav(props: { companyId: string }) {
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="item-2">
-          <AccordionTrigger>
+          <AccordionTrigger className=" px-1 py-1.5 hover:no-underline">
             <SidenavSeparator>Gestión de documentos</SidenavSeparator>
           </AccordionTrigger>
           <AccordionContent>
@@ -64,12 +64,12 @@ export default function CompanySidenav(props: { companyId: string }) {
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="item-3">
-          <AccordionTrigger>
+          <AccordionTrigger className=" px-1 py-2 hover:no-underline">
             <SidenavSeparator>Administracion</SidenavSeparator>
           </AccordionTrigger>
           <AccordionContent>
             <SidenavItem
-              href={`/dashboard/company/${props.companyId}/administration`}
+              href={`/dashboard/company/${props.companyId}/administration/start`}
               icon={<LayoutPanelLeft />}
             >
               Inicio
@@ -81,13 +81,13 @@ export default function CompanySidenav(props: { companyId: string }) {
               Proveedores
             </SidenavItem>
             <SidenavItem
-              href={`/dashboard/company/${props.companyId}/administration/planes`}
+              href={`/dashboard/company/${props.companyId}/administration/plans`}
               icon={<Notebook />}
             >
               Planes
             </SidenavItem>
             <SidenavItem
-              href={`/dashboard/company/${props.companyId}/administration/units`}
+              href={`/dashboard/company/${props.companyId}/administration/bussiness_units`}
               icon={<Boxes />}
             >
               Unidades de negocio
@@ -119,7 +119,7 @@ export default function CompanySidenav(props: { companyId: string }) {
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="item-4">
-          <AccordionTrigger>
+          <AccordionTrigger className=" px-1 py-1.5 hover:no-underline">
             <SidenavSeparator>Ventas</SidenavSeparator>
           </AccordionTrigger>
           <AccordionContent>
@@ -139,7 +139,7 @@ export default function CompanySidenav(props: { companyId: string }) {
         </AccordionItem>
 
         <AccordionItem value="item-5">
-          <AccordionTrigger>
+          <AccordionTrigger className=" px-1 py-1.5 hover:no-underline">
             <SidenavSeparator>Clientes</SidenavSeparator>
           </AccordionTrigger>
           <AccordionContent>
@@ -153,13 +153,13 @@ export default function CompanySidenav(props: { companyId: string }) {
         </AccordionItem>
 
         <AccordionItem value="item-6">
-          <AccordionTrigger>
+          <AccordionTrigger className=" px-1 py-1.5 hover:no-underline">
             <SidenavSeparator>Proovedores</SidenavSeparator>
           </AccordionTrigger>
           <AccordionContent>
             <SidenavItem
               icon={<Contact />}
-              href={`/dashboard/company/${props.companyId}/providers`}
+              href={`/dashboard/company/${props.companyId}/providers/start`}
             >
               Inicio
             </SidenavItem>
