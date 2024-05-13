@@ -179,6 +179,7 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
         nombreComprador: "Homero Simpson",
       });
       console.log("aca7");
+      console.log(html);
       const name = "PDF de prueba";
       const options = {
         width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
