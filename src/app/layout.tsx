@@ -1,10 +1,10 @@
 import "~/styles/globals.css";
 
-import { Inter } from "next/font/google";
+import { Roboto } from "next/font/google";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans",
+const roboto = Roboto({
+  subsets: ["latin-ext"],
+  weight: ["400", "500", "700"],
 });
 
 export const metadata = {
@@ -16,7 +16,7 @@ export const metadata = {
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="es">
-      <body className={`font-sans ${inter.variable}`}>{props.children}</body>
+      <body className={`font-sans ${roboto.className}`}>{props.children}</body>
     </html>
   );
 }

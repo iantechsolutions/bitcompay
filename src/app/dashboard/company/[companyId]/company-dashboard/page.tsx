@@ -18,7 +18,10 @@ export default async function page() {
   }
   return (
     <div>
-      <Title>Hola, {user.name!}!</Title>
+      <Title>
+        Hola, <span className="text-[#8fefdc]"> {user.name!}!</span>
+      </Title>
+
       <div>
         <Card>
           <CardContent className="flex w-full flex-wrap items-center gap-7">
@@ -26,7 +29,7 @@ export default async function page() {
               <Button
                 variant="outline"
                 size="icon"
-                className="h-10 w-10 rounded-full bg-emerald-500"
+                className="h-10 w-10 rounded-full bg-[#1bdfb7]"
               >
                 <HandCoins className="h-6 w-6" />
               </Button>
@@ -39,7 +42,7 @@ export default async function page() {
               <Button
                 variant="outline"
                 size="icon"
-                className=" h-9 w-9 rounded-full bg-emerald-500"
+                className=" h-9 w-9 rounded-full bg-[#1bdfb7]"
               >
                 <ArrowLeftRight className="h-6 w-6" />
               </Button>
@@ -51,7 +54,7 @@ export default async function page() {
               <Button
                 variant="outline"
                 size="icon"
-                className=" h-10 w-10 rounded-full bg-emerald-500"
+                className=" h-10 w-10 rounded-full bg-[#1bdfb7]"
               >
                 <LogOut className="h-6 w-6" />
               </Button>
@@ -63,7 +66,7 @@ export default async function page() {
               <Button
                 variant="outline"
                 size="icon"
-                className=" h-10 w-10 rounded-full bg-emerald-500"
+                className=" h-10 w-10 rounded-full bg-[#1bdfb7]"
               >
                 <Import className="h-6 w-6" />
               </Button>
@@ -74,16 +77,21 @@ export default async function page() {
           </CardContent>
         </Card>
       </div>
+      <section>
+        <h2 className="mb-3 text-xl font-semibold  ">
+          Saldo en <span className="text-[#8fefdc]">cuenta</span>
+        </h2>
+      </section>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
           <CardHeader>
-            <CardTitle>Overview</CardTitle>
+            <CardTitle className="font-">Resumen de cuenta</CardTitle>
           </CardHeader>
           <CardContent className="pl-2"></CardContent>
         </Card>
         <Card className="col-span-3">
           <CardHeader>
-            <CardTitle>Cobros recientes</CardTitle>
+            <CardTitle>Transacciones del dia</CardTitle>
             <CardDescription>
               Se han realizado 256 cobros este mes.
             </CardDescription>
