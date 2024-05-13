@@ -16,7 +16,9 @@ export const metadata = {
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="es">
-      <body className={`font-sans ${roboto.className}`}>{props.children}</body>
+      <body className={`font-family ${roboto.className}`}>
+        {props.children}
+      </body>
     </html>
   );
 }

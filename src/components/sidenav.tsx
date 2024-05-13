@@ -19,7 +19,7 @@ export function SidenavItem(props: {
   const pathname = usePathname();
   const isActive =
     props.href !== "/dashboard" ? pathname.includes(props.href!) : false;
-  const className = `w-full flex gap-2 px-3 py-2 items-center
+  const className = `w-full flex gap-2 px-3 py-3 items-center
     active:bg-stone-200 dark:active:bg-stone-800`;
   // hover:bg-stone-100 dark:hover:bg-stone-900
   const content = (
@@ -33,9 +33,10 @@ export function SidenavItem(props: {
 
   if (props.href) {
     return (
-      <li className={`${isActive ? "bg-[#8FEFDC] " : ""}`}>
+      <li className={`${isActive ? "bg-[#8FEFDC] " : ""} flex items-center`}>
         <Link href={props.href} className={className}>
           {content}
+          {isActive && <div className="h-2 w-2 rounded-full bg-gray-500"></div>}
         </Link>
       </li>
     );

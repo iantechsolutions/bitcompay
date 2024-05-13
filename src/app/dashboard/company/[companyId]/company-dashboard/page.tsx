@@ -10,6 +10,7 @@ import {
 import { getServerAuthSession } from "~/server/auth";
 import { Button } from "~/components/ui/button";
 import { HandCoins, LogOut, ArrowLeftRight, Import } from "lucide-react";
+import LayoutContainer from "~/components/layout-container";
 export default async function page() {
   const session = await getServerAuthSession();
   const user = session?.user;
@@ -17,70 +18,65 @@ export default async function page() {
     return <Title>No se encontró el usuario</Title>;
   }
   return (
-    <div>
+    <main className="ml-18 max-w-[1100px]">
       <Title>
         Hola, <span className="text-[#8fefdc]"> {user.name!}!</span>
       </Title>
 
-      <div>
+      <section>
         <Card>
-          <CardContent className="flex w-full flex-wrap items-center gap-7">
+          <CardContent className="mt-5 flex w-full flex-wrap items-center gap-7">
             <div className="flex items-center gap-3">
               <Button
                 variant="outline"
-                size="icon"
-                className="h-10 w-10 rounded-full bg-[#1bdfb7]"
+                className=" w-20 rounded-full bg-[#1bdfb7] p-3"
               >
-                <HandCoins className="h-6 w-6" />
+                <HandCoins className="h-8 w-8" />
               </Button>
-              <div className="text-sm font-semibold">
+              <p className="text-md word-wrap overflow-wrap break-words font-semibold">
                 Generación de Recaudación
-              </div>
+              </p>
             </div>
 
             <div className="flex  items-center gap-3">
               <Button
                 variant="outline"
-                size="icon"
-                className=" h-9 w-9 rounded-full bg-[#1bdfb7]"
+                className=" rounded-full bg-[#1bdfb7] p-3"
               >
-                <ArrowLeftRight className="h-6 w-6" />
+                <ArrowLeftRight className="h-10 w-10" />
               </Button>
-              <div className="flex flex-col  text-sm font-semibold">
-                <span> Transacciones de la fecha</span>
-              </div>
+              <p className="text-md flex  flex-col font-semibold">
+                Transacciones de la fecha
+              </p>
             </div>
             <div className="flex items-center gap-3">
               <Button
                 variant="outline"
-                size="icon"
-                className=" h-10 w-10 rounded-full bg-[#1bdfb7]"
+                className=" rounded-full bg-[#1bdfb7] p-3"
               >
-                <LogOut className="h-6 w-6" />
+                <LogOut className="h-10 w-10" />
               </Button>
-              <div className="text-sm font-semibold">
+              <p className="text-md font-semibold">
                 Información de facturación
-              </div>
+              </p>
             </div>
             <div className="flex items-center gap-3">
               <Button
                 variant="outline"
-                size="icon"
-                className=" h-10 w-10 rounded-full bg-[#1bdfb7]"
+                className=" rounded-full bg-[#1bdfb7] p-3"
               >
-                <Import className="h-6 w-6" />
+                <Import className="h-10 w-10" />
               </Button>
-              <div className="text-sm font-semibold">
-                Solicitar transferencia
-              </div>
+              <p className="text-md font-semibold">Solicitar transferencia</p>
             </div>
           </CardContent>
         </Card>
-      </div>
-      <section>
+      </section>
+      <section className="mt-4">
         <h2 className="mb-3 text-xl font-semibold  ">
           Saldo en <span className="text-[#8fefdc]">cuenta</span>
         </h2>
+        <Card className="mt-3"> carta de saldo pendiente</Card>
       </section>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
@@ -99,6 +95,6 @@ export default async function page() {
           <CardContent></CardContent>
         </Card>
       </div>
-    </div>
+    </main>
   );
 }
