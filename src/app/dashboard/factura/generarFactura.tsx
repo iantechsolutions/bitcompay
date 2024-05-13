@@ -4,6 +4,17 @@ import { Loader2Icon, PlusCircleIcon } from "lucide-react";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { ComboboxDemo } from "~/components/ui/combobox";
+import * as React from "react";
+import { format } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
+
+import { cn } from "~/lib/utils";
+import { Calendar } from "~/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
 import {
   Dialog,
   DialogContent,
@@ -29,23 +40,37 @@ export async function ingresarAfip() {
 
   //ALIAS PARA EL CERTIFICADO
   const alias = "afipsdk";
+  const afipCuit = new Afip({
+    CUIT: taxId,
+    access_token:
+      "T11zSjRqweUhefsFkp0rn1jlvY2KyX1zRo4aRVpmfLR5fowH0kov709vL6Zn9i1F",
+    production: true,
+  });
+  // const res = await afipCuit.CreateCert(username, password, alias);
+  // console.log("Certificado creado");
+  // console.log(res);
+  const wsid = "wsfe";
 
-  const afipCuit = new Afip({ CUIT: taxId });
-  //   const res = await afipCuit.CreateCert(username, password, alias);
-  //   console.log("Certificado creado");
-  //   console.log(res);
-  //   //ESTO CREA LA AUTORIZACION
-  //   const wsid = "BitComPay";
-  //   const res = await afipCuit.CreateWSAuth(username, password, alias, wsid);
+  // //ESTO CREA LA AUTORIZACION
+  // const cert = res.cert;
+  // const key = res.key;
   const cert =
-    "-----BEGIN CERTIFICATE-----\nMIIDRzCCAi+gAwIBAgIISwHLbkA6EKcwDQYJKoZIhvcNAQENBQAwODEaMBgGA1UEAwwRQ29tcHV0\nYWRvcmVzIFRlc3QxDTALBgNVBAoMBEFGSVAxCzAJBgNVBAYTAkFSMB4XDTI0MDQyNjExNDgzMFoX\nDTI2MDQyNjExNDgzMFowLTEQMA4GA1UEAwwHYWZpcHNkazEZMBcGA1UEBRMQQ1VJVCAyMzQzOTIx\nNDYxOTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOGTq95yObyfTwgS3eeyI/Xz4aJe\nTJGFmeGlwMxeRz7xZJ68gQWdvKwnfuzTSH82v1UpRM6docK4H5G17U+/togSpYk4Pw9U9OUXSsLq\nACSTktOLEVsEIhmRYvcbXJ3nFdczX0u7VORpb1g0iiAz6d6FI/8PdoEsM5UQlkCCq/2va36NyA9C\nrZZ3utTVhHb6+hR2cdRj46aF8BDUT6eljrO2+RlbySo2OBTFhSLowhHmjBkAiQ+FAgyPUnWEy/a2\n7ss48CTJCWRnjNU1T6BzZEpx6nkOPfaWPhjjsW2NxDObguqOBw3gZk8DlJFvvmeht2FI50K3ohSD\nOh1YgRoRtUcCAwEAAaNgMF4wDAYDVR0TAQH/BAIwADAfBgNVHSMEGDAWgBSzstP//em63t6NrxEh\nnNYgffJPbzAdBgNVHQ4EFgQUvGUUMMUluUSYBp/lJ3Nhw20vbFwwDgYDVR0PAQH/BAQDAgXgMA0G\nCSqGSIb3DQEBDQUAA4IBAQAxQF7wDwSNM9I3LixoPUrbW/5PIUHNf/bXMCWE9fGLZ8Gldo0lMPzw\n4jo0Vwcpx3DVtyRkF/ry+p3WkbuYliDeOFzSFkWkfv+bdp0oUbYMY/qysJwqbN8YQLN2K9D4fQfr\nmqMcxdByE7N7+rJxrKzUZTRAsKHT/uTW2qXCGdm4LT8SmwU/n73LULNPNOKlrPDYzkd6kRcePiGq\nJ+gdeo6OOVI+Ivk2XCzb8pRkeMCGsTnsIiTLFsaqAogEpacsndnGVMMlhvUMHM6EPKk0s54mRKsj\nELQqHoAY0lnx7yJmUOpAQ4dtcGFm7UXv0imlmIYyDKkM/23X/2Cwqk9fNMjN\n-----END CERTIFICATE-----";
+    "-----BEGIN CERTIFICATE-----\nMIIDQjCCAiqgAwIBAgIIdCXx+jXkmS0wDQYJKoZIhvcNAQENBQAwMzEVMBMGA1UEAwwMQ29tcHV0\nYWRvcmVzMQ0wCwYDVQQKDARBRklQMQswCQYDVQQGEwJBUjAeFw0yNDA1MTAxNTU3MjBaFw0yNjA1\nMTAxNTU3MjBaMC0xEDAOBgNVBAMMB2FmaXBzZGsxGTAXBgNVBAUTEENVSVQgMjM0MzkyMTQ2MTkw\nggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDABvAAKxop0QQa6OTEdl+Eci5skbTUi7F/\nCTpM4OZVo84b0PJ+Gb/Hc3IZIBAAPtnFBEJLaJgXXGJWXVYCOUUzUv+LKAEgXy73iq1sA3yobNZa\nP4OvDcRgrDmj/rawInxf7gIM5bhUZFx2EnJQ9bUa/pGvYeq0UF4rLbmpgM/o6MMv9W65AE1Kpl4h\nc9e7qb1PdB35yCUauNmE/2Zyf2j5ow0pzg99cKI1xtYmtfci7XVDmxU8/A9LvcVWIwNmcQ8QisZ3\n+9bAwZ0GzGcTAyEuvms5HJWUU1Crpk8C46O8l6f2yQX0ehvK+/nmUGu8KWFXPBoaK8mSuGsOLFo8\nzqdDAgMBAAGjYDBeMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUKw0vyN9h/QjJThHQNZMEbY5b\n0G4wHQYDVR0OBBYEFI4OMvXVnB2CCdOgCw/ifvAzIea+MA4GA1UdDwEB/wQEAwIF4DANBgkqhkiG\n9w0BAQ0FAAOCAQEAvjP+YP2HWfTSFtYpV9Z9PyKr5OS6gvNmFiUCk/5EctIkceynMlvuL0XgcTSB\nwlr9joA44Vjh3PPbiPWdf4woc32sSimBS0NtuJcxPKpsm0eFy2okqFI+zgRNMDIKMCVL9iNEpvEf\nehi1wlxQI3NKWZHkeJpOKU97lzQQw2mvTNsSeKfqxk/Lpu4XT5u36TYYLspYjiLYXplBYoJo6yVP\nqXgtEmcChZFFk3aSVrU+twMgAXsGbUGokphfN4Cx2S9K97Vaa6XVRm0hEX2JxGi6WCO48R+ctfhr\n3js3d2quH3zRVTCZ682wMpOoZdY9tWJzRl/mrxPg+Ic5Qsg8+f7qEg==\n-----END CERTIFICATE-----";
   const key =
-    "-----BEGIN RSA PRIVATE KEY-----\r\nMIIEpAIBAAKCAQEA4ZOr3nI5vJ9PCBLd57Ij9fPhol5MkYWZ4aXAzF5HPvFknryB\r\nBZ28rCd+7NNIfza/VSlEzp2hwrgfkbXtT7+2iBKliTg/D1T05RdKwuoAJJOS04sR\r\nWwQiGZFi9xtcnecV1zNfS7tU5GlvWDSKIDPp3oUj/w92gSwzlRCWQIKr/a9rfo3I\r\nD0Ktlne61NWEdvr6FHZx1GPjpoXwENRPp6WOs7b5GVvJKjY4FMWFIujCEeaMGQCJ\r\nD4UCDI9SdYTL9rbuyzjwJMkJZGeM1TVPoHNkSnHqeQ499pY+GOOxbY3EM5uC6o4H\r\nDeBmTwOUkW++Z6G3YUjnQreiFIM6HViBGhG1RwIDAQABAoIBAQDLOmPJkVd7HHvz\r\nZiwOJmxHlmVeB18sbBVrOg4tEXNWvdxNNr9289mbsCml6+SQ2B4g94FKNLIb4A5x\r\nFFqtUqd8iHAi5E3L3lqUWxu7514hleLeO5hzS5H9PwLOZhRXHm6K53mfnTKqZmMu\r\nMIeQ47R8Ca+Yh7HYRp5iWgNEM3YIomSPTjxRW1JmCZvJXqS2i/R8Qz8xfliflukk\r\nxsqWRV3EzrXgCjQ3xdx23qWualdWLz8HXFyNlMnY1cnKYZx3+z6AUn9lbCyhOZIs\r\nqbR6gHpZYhNumVHhJXFSso2BL5BBC/8OyGBAtb5uqGReTzXVfg4bPUeROpQUwnla\r\neukv2KFBAoGBAP7vDUy8ptzCVey8oieHgSblpQ2Aq8euy0ZnrHIbo9pc/SakqYsb\r\n7eqB8Xv9pgu/RlC7IL5k2WAhclkA+FYNZ8ADuJ/ST2hncb8mmCjj2/UHK+g1qKav\r\nVzcvihj4VZe3sBy+bvKNwMstALC5ESWQITej4Wx4vra7W7S7RErzg27fAoGBAOKF\r\nMCIcsNqWPB+yoScLrDXl9g6vIKBWoc6aSwW+TTLG80kAKxZZXly+2UDqgJ59vyqj\r\nAYqgvpLSrbC8P0oLRKUPeGgVGaBgA4qtKFddlRtiTFpT/ab6+YFr/s3XPMff6w1C\r\nlUJrh1aTAYqfAC5evj3mdS+PvhqBudWxxNWFU86ZAoGAKeP8KnzhamsglWsVtisl\r\nBNA9g+99yq0lR+dnRcTW8t3O11e9aFdpi9xYYwh2DX4bvs5Q/hgyRAKa+JcZN4Ky\r\nZrH114VGeSBuZ3ufCzEOBsBr7ZdLpEAxs6bDKYE9B1YuwTplnsO+R2SYtXFjqOl7\r\nG9p5A0sAA6Tb1+HhwfMryL8CgYALoleUiPC0aV7xKdWJEdpockUu/+OnGIv69oW/\r\n58RDRWCdcTrFTRXBobO619B/U2oMII8ltZfUJqnxF9oQTX/bEm5Wui60w/mql7Yo\r\nto+/9k6BnSq79sv1z7woilN+2ItUBQVxgeBTm/1KR1xVBVy0BTAjnzheWCdZSGYZ\r\nqV1ikQKBgQCIUdAvEJF8y1Ka28CMVCpk9DP3WQxMa+85qccP9KWb+SyJN6zqbcgh\r\nyO1q44vJXs30KAbZnYW8WfmizbrhrYVAU/6EuoRxdwDSFILl6r83j6/9nTspED2q\r\nkkYpwB0+geqzXmanwkVAvdrId1gEz5YnK1L+riR2VzLsM1rhCUan+Q==\r\n-----END RSA PRIVATE KEY-----\r\n";
+    "-----BEGIN RSA PRIVATE KEY-----\r\nMIIEpAIBAAKCAQEAwAbwACsaKdEEGujkxHZfhHIubJG01Iuxfwk6TODmVaPOG9Dy\r\nfhm/x3NyGSAQAD7ZxQRCS2iYF1xiVl1WAjlFM1L/iygBIF8u94qtbAN8qGzWWj+D\r\nrw3EYKw5o/62sCJ8X+4CDOW4VGRcdhJyUPW1Gv6Rr2HqtFBeKy25qYDP6OjDL/Vu\r\nuQBNSqZeIXPXu6m9T3Qd+cglGrjZhP9mcn9o+aMNKc4PfXCiNcbWJrX3Iu11Q5sV\r\nPPwPS73FViMDZnEPEIrGd/vWwMGdBsxnEwMhLr5rORyVlFNQq6ZPAuOjvJen9skF\r\n9Hobyvv55lBrvClhVzwaGivJkrhrDixaPM6nQwIDAQABAoIBADcYxnwF4ffllPvz\r\nntAP9tAVwuQ72lqxyjfc+fFdBjnESjsI9MrhsHkV0sMKxAyN/AXfdvYUCK+LPlvx\r\nY+A3dneHdPMEg246YUt9asz3IylgMRCr8Killpb2U4OObfSTsIQF0mjI8N6l/TGT\r\nkWFRXqlkKYDc427hMGPLNt4/q2f0Ab7viqw5mIU3kWuRkS64CWRIzcmYKKZx1usl\r\ne5j6Q9uBKh7YgOT/fa3o5CTZmXu5WsKP9kHIa4pTeLIQ63P5AiaXK9UXBS6o5QpS\r\nvgzBhPLdNYQrsX9cRY6tfxau5MIl1I3wAvioxTHcX4WNelb36Lm9u7+PsoQiKk8A\r\nLriRdUECgYEA6mZOB37wlZLZ9RyB+DsZzB4ellh1CwS+lW700vCiiN8uqaDzz4jU\r\ndnMVyF/OQVoM1xZ+KUVHe2EhDIK3x8oaeRlF9mdpJZDaTrgg4noG6Cm8vFV0UKKL\r\nkP5dKVHCgYWoV6Bght8zD0toDM/UzwvryO0Qz2q9Vl7l71w/VkhLsCkCgYEA0bkG\r\n89YvPOFY+yNKdqtnJxmrivlMwR95PW3R2YE9CMIcvwV3vdanWj9Ou1xPXQ6Y+Uh3\r\nsIgkW+XVXrvfJmo7YhMGC77ZdGQLaiUtVlD/5w6rov+9igIX130ax9xlNj2LE7sJ\r\nPVhRJwmMnDGWraw8EyMf1em1GzP57k9hT6OyGYsCgYEAyHfqsDp+pE3OHvXcqmJR\r\nc+MmocrRfzT1knQs6uNm/sxx6h1/p7UMkKlordBSZE4RwTq5d66Krhip3TtG1pYh\r\nAgT9cvmKUdiK/Nw5M7jNg21+v0wOiJAb8Uu6fYYxZfjbuuWs6GyoDKKfQKXXCaTW\r\naSdnQx21BNNwr8AjYzW9ldECgYAxi+/7jV9tl6OI+WZvMMFW+HaRh6I9ge0HuTk5\r\nlJHRzuIxst3+KIczB//WvdE2H+u+AQPd3dwRJfRJxELM9Y3/9pSYE8eV+sjDk/Lp\r\nEIvUj5+3C4pA34u4aiL4krYKoXGJAMgHCSVq/pOMlx6M+0LaFpM/203hFl92kKRh\r\nxz+dTwKBgQCK1yPFGDeCBnDxwHHf+zK+6+mKmsKvDiOInFpMR/j2sETIfDnclq4i\r\ny1UvicJYL0/WW1T0A9rHyhSu2BMH8zkrmEC4Sa7MEGD3B3HfT50yke1QL+hdWZx0\r\nCGtbc2r1DqhJg0mXROOltX0RQlUri5m8P/s0wLI+L2NwFF78WpR3vQ==\r\n-----END RSA PRIVATE KEY-----\r\n";
   const afip = new Afip({
+    access_token:
+      "T11zSjRqweUhefsFkp0rn1jlvY2KyX1zRo4aRVpmfLR5fowH0kov709vL6Zn9i1F",
     CUIT: taxId,
     cert: cert,
     key: key,
+    production: true,
   });
+  const serSer = await afip.CreateWSAuth(username, password, alias, wsid);
+  console.log(serSer);
+  const salesPoints = await afip.ElectronicBilling.getSalesPoints();
+  console.log(salesPoints);
+  // const serSer = await afip.CreateWSAuth(username, password, alias, wsid);
 
   return afip;
 }
@@ -54,57 +79,59 @@ interface FacturaDialog {
   receivedHtml: string;
 }
 
+function formatDate(date: Date | undefined) {
+  if (date) {
+    let year = date.getFullYear();
+    let month = (1 + date.getMonth()).toString().padStart(2, "0");
+    let day = date.getDate().toString().padStart(2, "0");
+
+    return year + month + day;
+  } else {
+    return null;
+  }
+}
+
 export function FacturaDialog({ receivedHtml }: FacturaDialog) {
   async function generateFactura() {
     (async () => {
+      setLoading(true);
       const afip = await ingresarAfip();
-      const last_voucher = await afip.ElectronicBilling.getLastVoucher(
-        puntoVenta,
-        tipoFactura,
-      );
-      const numero_de_factura = last_voucher + 1;
+      const serverStatus = await afip.ElectronicBilling.getServerStatus();
+      console.log("status");
+      console.log(serverStatus);
 
+      let last_voucher;
+      try {
+        last_voucher = await afip.ElectronicBilling.getLastVoucher(
+          puntoVenta,
+          tipoFactura,
+        );
+      } catch {
+        last_voucher = 0;
+      }
+
+      const numero_de_factura = last_voucher + 1;
+      console.log("aca1");
       const fecha = new Date(
         Date.now() - new Date().getTimezoneOffset() * 60000,
       )
         .toISOString()
         .split("T")[0];
 
-      let fecha_servicio_desde = null,
-        fecha_servicio_hasta = null,
-        fecha_vencimiento_pago = null;
-
-      if (concepto === "2" || concepto === "3") {
-        /**
-         * Fecha de inicio de servicio en formato aaaammdd
-         **/
-        const fecha_servicio_desde = 20191213;
-
-        /**
-         * Fecha de fin de servicio en formato aaaammdd
-         **/
-        const fecha_servicio_hasta = 20191213;
-
-        /**
-         * Fecha de vencimiento del pago en formato aaaammdd
-         **/
-        const fecha_vencimiento_pago = 20191213;
-      }
-      console.log("html viejo");
-      console.log(receivedHtml);
+      console.log("aca2");
       const data = {
         CantReg: 1, // Cantidad de facturas a registrar
         PtoVta: puntoVenta,
         CbteTipo: tipoFactura,
-        Concepto: concepto,
+        Concepto: Number(concepto),
         DocTipo: tipoDocumento,
-        DocNro: nroDocumento,
+        DocNro: tipoDocumento !== "99" ? nroDocumento : 0,
         CbteDesde: numero_de_factura,
         CbteHasta: numero_de_factura,
         CbteFch: parseInt(fecha?.replace(/-/g, "") ?? ""),
-        FchServDesde: fecha_servicio_desde,
-        FchServHasta: fecha_servicio_hasta,
-        FchVtoPago: fecha_vencimiento_pago,
+        FchServDesde: formatDate(dateDesde),
+        FchServHasta: formatDate(dateHasta),
+        FchVtoPago: formatDate(dateVencimiento),
         ImpTotal: importe,
         ImpTotConc: 0, // Importe neto no gravado
         ImpNeto: (Number(importe) * 1).toString(),
@@ -119,12 +146,12 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
         //   Importe: (Number(importe) * 0, 21).toString(),
         // },
       };
-
+      console.log("aca4");
       /**
        * Creamos la Factura
        **/
       const res = await afip.ElectronicBilling.createVoucher(data);
-
+      console.log("aca5");
       /**
        * Mostramos por pantalla los datos de la nueva Factura
        **/
@@ -132,6 +159,7 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
         cae: res.CAE, //CAE asignado a la Factura
         vencimiento: res.CAEFchVto, //Fecha de vencimiento del CAE
       });
+      console.log("aca6");
       const html = Factura({
         puntoDeVenta: puntoVenta,
         tipoFactura: tipoFactura,
@@ -139,9 +167,9 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
         documentoComprador: tipoDocumento,
         nroDocumento: nroDocumento,
         total: Number(importe),
-        facturadoDesde: fechaServicioDesde,
-        facturadoHasta: fechaServicioHasta,
-        vtoPago: fechaVencimientoPago,
+        facturadoDesde: formatDate(dateDesde),
+        facturadoHasta: formatDate(dateHasta),
+        vtoPago: formatDate(dateVencimiento),
         cantidad: 1,
         nroComprobante: numero_de_factura,
         nroCae: res.CAE,
@@ -150,6 +178,7 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
         domicilioComprador: "Calle falsa 123",
         nombreComprador: "Homero Simpson",
       });
+      console.log("aca7");
       const name = "PDF de prueba";
       const options = {
         width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
@@ -171,6 +200,7 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
         description:
           "La factura ha sido generada correctamente, clickee aqui para abrirla ",
       });
+      setLoading(false);
     })();
   }
   const { toast } = useToast();
@@ -181,18 +211,16 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
   const [tipoDocumento, setTipoDocumento] = useState("");
   const [nroDocumento, setNroDocumento] = useState("");
   const [importe, setImporte] = useState("");
-  const [fechaServicioDesde, setFechaServicioDesde] = useState("");
-  const [fechaServicioHasta, setFechaServicioHasta] = useState("");
-  const [fechaVencimientoPago, setFechaVencimientoPago] = useState("");
-
-  const [isLoading, setLoading] = useState(false);
-  const [reducedDescription, setReducedDescription] = useState("");
-  const [description, setDescription] = useState("");
-  const [name, setName] = useState("");
-  const [number, setNumber] = useState("");
+  // const [fechaServicioDesde, setFechaServicioDesde] = useState("");
+  // const [fechaServicioHasta, setFechaServicioHasta] = useState("");
+  // const [fechaVencimientoPago, setFechaVencimientoPago] = useState("");
+  const [dateDesde, setDateDesde] = React.useState<Date>();
+  const [dateHasta, setDateHasta] = React.useState<Date>();
+  const [dateVencimiento, setDateVencimiento] = React.useState<Date>();
+  const [isLoading, setIsLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+  const [loading, setLoading] = useState(false);
   return (
     <>
       <Button onClick={() => setOpen(true)}>
@@ -204,18 +232,33 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
           <DialogHeader>
             <DialogTitle>Crear nueva factura</DialogTitle>
           </DialogHeader>
-          <div className="flexx-row flex justify-between">
+          <div className="flex flex-row justify-between">
             <div>
               <Label htmlFor="name">Punto de venta a utilizar</Label>
-              <Input
+              <br />
+              {/* <Input
+                className="w-[220px]"
                 id="puntoVenta"
                 placeholder="..."
                 value={puntoVenta}
                 onChange={(e) => setPuntoVenta(e.target.value)}
                 required
+              /> */}
+
+              <ComboboxDemo
+                title="Seleccionar PV..."
+                placeholder="_"
+                options={[
+                  { value: "1", label: "1" },
+                  { value: "2", label: "2" },
+                ]}
+                onSelectionChange={(e) => {
+                  setPuntoVenta(e);
+                  console.log(e);
+                }}
               />
             </div>
-            <div>
+            <div className="relative right-20">
               <Label htmlFor="factura">Tipo de factura</Label>
               <br />
               <ComboboxDemo
@@ -238,11 +281,14 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
                   { value: "53", label: "NOTA DE CREDITO M" },
                   { value: "21", label: "NOTA DE CREDITO E" },
                 ]}
-                onSelectionChange={(e) => setTipoFactura(e)}
+                onSelectionChange={(e) => {
+                  setTipoFactura(e);
+                  console.log(e);
+                }}
               />
             </div>
           </div>
-          <div className="flexx-row flex justify-between">
+          <div className="flex flex-row justify-between">
             <div>
               <Label htmlFor="concepto">Concepto de la factura</Label>
               <br />
@@ -257,7 +303,7 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
                 onSelectionChange={(e) => setConcepto(e)}
               />
             </div>
-            <div>
+            <div className="relative right-20">
               <Label htmlFor="tipoDocumento">Tipo de documento</Label>
               <br />
               <ComboboxDemo
@@ -273,7 +319,7 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
               />
             </div>
           </div>
-          <div className="flexx-row flex justify-between">
+          <div className="flex flex-row justify-between">
             <div>
               <Label htmlFor="nroDocumento">Numero de documento</Label>
               <Input
@@ -285,7 +331,7 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
             </div>
 
             {/* Importe de la Factura */}
-            <div>
+            <div className="relative right-14">
               <Label htmlFor="importe">Importe total de la factura</Label>
               <Input
                 id="importe"
@@ -295,44 +341,110 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
               />
             </div>
           </div>
-          <div className="flexx-row flex justify-between">
-            {/* Los siguientes campos solo son obligatorios para los conceptos 2 y 3 */}
-
+          {(concepto === "2" || concepto === "3") && (
             <div>
-              <Label htmlFor="fechaDesde">Fecha de inicio del servicio</Label>
-              <Input
-                id="fechaDesde"
-                placeholder="..."
-                value={concepto !== "1" ? fechaServicioDesde : "No valido"}
-                onChange={(e) => setFechaServicioDesde(e.target.value)}
-              />
-            </div>
+              <div className="flex flex-row justify-between">
+                {/* Los siguientes campos solo son obligatorios para los conceptos 2 y 3 */}
 
-            <div>
-              <Label htmlFor="fechaHasta">Fecha de fin del servicio</Label>
-              <Input
-                id="fechaHasta"
-                placeholder="..."
-                value={concepto !== "1" ? fechaServicioHasta : "No valido"}
-                onChange={(e) => setFechaServicioHasta(e.target.value)}
-              />
+                <div>
+                  <Label htmlFor="importe">Fecha de inicio de servicio</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-[220px] justify-start text-left font-normal",
+                          !dateDesde && "text-muted-foreground",
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dateDesde ? (
+                          format(dateDesde, "PPP")
+                        ) : (
+                          <span>Selecciona una fecha</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={dateDesde}
+                        onSelect={setDateDesde}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                <div className="relative left-2">
+                  <Label htmlFor="importe">Fecha de fin de servicio</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-[220px] justify-start text-left font-normal",
+                          !dateHasta && "text-muted-foreground",
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dateHasta ? (
+                          format(dateHasta, "PPP")
+                        ) : (
+                          <span>Selecciona una fecha</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={dateHasta}
+                        onSelect={setDateHasta}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+              <div className="flex flex-row justify-between">
+                <div>
+                  <Label htmlFor="importe">Fecha de vencimiento</Label>
+                  <br />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-[220px] justify-start text-left font-normal",
+                          !dateVencimiento && "text-muted-foreground",
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dateVencimiento ? (
+                          format(dateVencimiento, "PPP")
+                        ) : (
+                          <span>Selecciona una fecha</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={dateVencimiento}
+                        onSelect={setDateVencimiento}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
             </div>
-          </div>
-          <div>
-            <Label htmlFor="fechaVencimiento">
-              Fecha de vencimiento del pago
-            </Label>
-            <Input
-              id="fechaVencimiento"
-              placeholder="..."
-              value={concepto !== "1" ? fechaVencimientoPago : "No valido"}
-              onChange={(e) => setFechaVencimientoPago(e.target.value)}
-            />
-          </div>
+          )}
+          {tipoFactura != "11" && tipoFactura != "14" && tipoFactura != "15"}
 
           <DialogFooter>
-            <Button disabled={isLoading} onClick={generateFactura}>
-              {isLoading && (
+            <Button disabled={loading} onClick={generateFactura}>
+              {loading && (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}
               Generar nueva Factura

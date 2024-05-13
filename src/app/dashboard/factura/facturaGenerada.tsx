@@ -5,9 +5,9 @@ interface FacturaProps {
   concepto: string;
   tipoFactura: string;
   nroComprobante: string;
-  facturadoDesde: string;
-  facturadoHasta: string;
-  vtoPago: string;
+  facturadoDesde: string | null;
+  facturadoHasta: string | null;
+  vtoPago: string | null;
   documentoComprador: string;
   nroDocumento: string;
   nombreComprador: string;
