@@ -56,10 +56,14 @@ export function ComboboxDemo({
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
-  const handleSelectionChange = (currentValue: any) => {
-    const newValue = currentValue === value ? "" : currentValue;
+  const [label, setLabel] = React.useState("");
+  const handleSelectionChange = (currentLabel: string) => {
+    const newLabel = currentLabel === label.toLowerCase() ? "" : currentLabel;
     if (onSelectionChange) {
-      onSelectionChange(currentValue);
+      onSelectionChange(
+        options.find((option) => option.label.toLowerCase() === newLabel)
+          ?.value ?? "",
+      );
     }
   };
 
@@ -72,9 +76,7 @@ export function ComboboxDemo({
           aria-expanded={open}
           className="w-[200px] justify-between"
         >
-          {value
-            ? options?.find((option) => option.value === value)?.label
-            : title}
+          {label || title}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -86,17 +88,17 @@ export function ComboboxDemo({
             {options?.map((option) => (
               <CommandItem
                 key={option.value}
-                value={option.value}
-                onSelect={(currentValue) => {
-                  handleSelectionChange(currentValue);
-                  setValue(currentValue === value ? "" : currentValue);
+                value={option.label}
+                onSelect={(currentLabel) => {
+                  handleSelectionChange(currentLabel);
+                  setLabel(currentLabel === label ? "" : currentLabel);
                   setOpen(false);
                 }}
               >
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",
-                    value === option.value ? "opacity-100" : "opacity-0",
+                    label === option.label ? "opacity-100" : "opacity-0",
                   )}
                 />
                 {option.label}
