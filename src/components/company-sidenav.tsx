@@ -52,7 +52,7 @@ export default function CompanySidenav(props: { companyId: string }) {
   return (
     <Sidenav className="h-full bg-[#e9fcf8]">
       <img
-        className="bg-[#e9fcf8] pb-5 pl-5 pr-5 pt-10"
+        className="bg-[#e9fcf8] pb-5 pl-5 pr-5 pt-7"
         src="https://utfs.io/f/2241aac5-d6d9-4310-bc31-db91cf5565cb-j8i4q3.png"
         alt="logo"
       ></img>
