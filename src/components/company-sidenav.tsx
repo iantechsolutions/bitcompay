@@ -51,6 +51,11 @@ export default function CompanySidenav(props: { companyId: string }) {
   };
   return (
     <Sidenav>
+      <img
+        className="pb-5 pl-5 pr-5 pt-5"
+        src="https://utfs.io/f/2241aac5-d6d9-4310-bc31-db91cf5565cb-j8i4q3.png"
+        alt="logo"
+      ></img>
       <Accordion type="single" className="pl-5 pr-5" collapsible>
         <AccordionItem value="item-1" className="border-none">
           <AccordionTrigger
@@ -61,9 +66,6 @@ export default function CompanySidenav(props: { companyId: string }) {
             }
           >
             <SidenavSeparator>General </SidenavSeparator>
-            <SidenavSeparator>
-              {isActive("General" ? "Casa" : "Nop")}
-            </SidenavSeparator>
           </AccordionTrigger>
           <AccordionContent>
             <SidenavItem
