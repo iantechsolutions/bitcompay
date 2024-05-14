@@ -51,7 +51,7 @@ export default function CompanySidenav(props: { companyId: string }) {
   };
   return (
     <Sidenav>
-      <Accordion type="single" className="pl-5 pr-5" collapsible>
+      <Accordion type="single" className="bg-[#e9fcf8] pl-5 pr-5" collapsible>
         <AccordionItem value="item-1" className="border-none">
           <AccordionTrigger
             className={
