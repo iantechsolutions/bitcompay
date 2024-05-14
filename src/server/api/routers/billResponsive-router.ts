@@ -46,7 +46,21 @@ export const billResponsibleRouter = createTRPCRouter({
     }))
     .mutation(async ({ input }) => {
       
-        await db.insert(billResponsible).values(input);
+        await db.insert(billResponsible).values({
+          adress: input.adress,
+          afip_status: input.afip_status,
+          cuit: input.cuit,
+          fiscal_id_number: input.fiscal_id_number,
+          fiscal_id_type: input.fiscal_id_type,
+          id_number: input.id_number,
+          id_type: input.id_type,
+          integrant_id: input.integrant_id,
+          iva: input.iva,
+          name: input.name,
+          payment_holder: input.payment_holder,
+          payment_responsive: input.payment_responsive,
+
+        });
       
     }),     
   change: protectedProcedure
@@ -72,7 +86,21 @@ export const billResponsibleRouter = createTRPCRouter({
 
       const updatedbillResponsible = await db
         .update(schema.billResponsible)
-        .set(input)
+        .set({
+          adress: input.adress,
+          afip_status: input.afip_status,
+          cuit: input.cuit,
+          fiscal_id_number: input.fiscal_id_number,
+          fiscal_id_type: input.fiscal_id_type,
+          id_number: input.id_number,
+          id_type: input.id_type,
+          integrant_id: input.integrant_id,
+          iva: input.iva,
+          name: input.name,
+          payment_holder: input.payment_holder,
+          payment_responsive: input.payment_responsive,
+        
+        })
         .where(eq(schema.billResponsible.id, id));
       console.log(updatedbillResponsible);
       return updatedbillResponsible;

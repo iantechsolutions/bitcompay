@@ -207,7 +207,7 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
       iva: iva,
       nroDocumento: Number(nroDocumento),
       ptoVenta: Number(puntoVenta),
-      tipoDocumento: tipoDocumento,
+      tipoDocumento: Number(tipoDocumento),
       tipoFactura: tipoFactura,
       fromPeriod: dateDesde,
       toPeriod: dateHasta,

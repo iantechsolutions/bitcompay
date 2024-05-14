@@ -60,7 +60,10 @@ export default function CompanySidenav(props: { companyId: string }) {
                 : "px-1 py-1.5 hover:no-underline"
             }
           >
-            <SidenavSeparator>General</SidenavSeparator>
+            <SidenavSeparator>General </SidenavSeparator>
+            <SidenavSeparator>
+              {isActive("General" ? "Casa" : "Nop")}
+            </SidenavSeparator>
           </AccordionTrigger>
           <AccordionContent>
             <SidenavItem
