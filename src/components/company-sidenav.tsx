@@ -51,13 +51,13 @@ export default function CompanySidenav(props: { companyId: string }) {
   };
   return (
     <Sidenav>
-      <Accordion type="single" className="rounded-lg pl-5" collapsible>
+      <Accordion type="single" className="pl-5 pr-5" collapsible>
         <AccordionItem value="item-1" className="border-none">
           <AccordionTrigger
             className={
               isActive("General")
-                ? "bg-[#1bdfb7] px-1 py-1.5 hover:no-underline"
-                : "px-1 py-1.5 hover:no-underline"
+                ? "rounded-lg bg-[#1bdfb7] px-1 py-1.5 hover:no-underline"
+                : "rounded-lg px-1 py-1.5 hover:no-underline"
             }
           >
             <SidenavSeparator>General </SidenavSeparator>
@@ -78,8 +78,8 @@ export default function CompanySidenav(props: { companyId: string }) {
           <AccordionTrigger
             className={
               isActive("Gestión de documentos")
-                ? "bg-[#1bdfb7] px-1 py-1.5 hover:no-underline"
-                : "px-1 py-1.5 hover:no-underline"
+                ? "rounded-lg bg-[#1bdfb7] px-1 py-1.5 hover:no-underline"
+                : "rounded-lg px-1 py-1.5 hover:no-underline"
             }
           >
             <SidenavSeparator>Gestión de documentos</SidenavSeparator>
@@ -109,8 +109,8 @@ export default function CompanySidenav(props: { companyId: string }) {
           <AccordionTrigger
             className={
               isActive("Administracion")
-                ? "bg-[#1bdfb7] px-1 py-1.5 hover:no-underline"
-                : "px-1 py-1.5 hover:no-underline"
+                ? "rounded-lg bg-[#1bdfb7] px-1 py-1.5 hover:no-underline"
+                : "rounded-lg px-1 py-1.5 hover:no-underline"
             }
           >
             <SidenavSeparator>Administracion</SidenavSeparator>
@@ -170,8 +170,8 @@ export default function CompanySidenav(props: { companyId: string }) {
           <AccordionTrigger
             className={
               isActive("Ventas")
-                ? "bg-[#1bdfb7] px-1 py-1.5 hover:no-underline"
-                : "px-1 py-1.5 hover:no-underline"
+                ? "rounded-lg bg-[#1bdfb7] px-1 py-1.5 hover:no-underline"
+                : "rounded-lg px-1 py-1.5 hover:no-underline"
             }
           >
             <SidenavSeparator>Ventas</SidenavSeparator>
@@ -196,8 +196,8 @@ export default function CompanySidenav(props: { companyId: string }) {
           <AccordionTrigger
             className={
               isActive("Clientes")
-                ? "bg-[#1bdfb7] px-1 py-1.5 hover:no-underline"
-                : "px-1 py-1.5 hover:no-underline"
+                ? "rounded-lg bg-[#1bdfb7] px-1 py-1.5 hover:no-underline"
+                : "rounded-lg px-1 py-1.5 hover:no-underline"
             }
           >
             <SidenavSeparator>Clientes</SidenavSeparator>
@@ -216,8 +216,8 @@ export default function CompanySidenav(props: { companyId: string }) {
           <AccordionTrigger
             className={
               isActive("Proveedores")
-                ? "bg-[#1bdfb7] px-1 py-1.5 hover:no-underline"
-                : "px-1 py-1.5 hover:no-underline"
+                ? "rounded-lg bg-[#1bdfb7] px-1 py-1.5 hover:no-underline"
+                : "rounded-lg px-1 py-1.5 hover:no-underline"
             }
           >
             <SidenavSeparator>Proveedores</SidenavSeparator>
