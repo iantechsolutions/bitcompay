@@ -3,6 +3,8 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db, schema } from "~/server/db";
 import { eq } from "drizzle-orm";
 import { getServerAuthSession } from "~/server/auth";
+
+
 export const plansRouter = createTRPCRouter({
   get: protectedProcedure
     .input(z.object({ planId: z.string() }))

@@ -6,7 +6,7 @@ import z from "zod";
 
 export const afipRouter = createTRPCRouter({
     createPDF: protectedProcedure.query(async () => {
-      const html = fs.readFileSync("http:/localhost:3000/dashboard/factura/bill.html", "utf8");
+      const html = fs.readFileSync("http:/localhost:3000/dashboard/admin/factura/bill.html", "utf8");
       return html;
     }),
   });
