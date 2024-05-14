@@ -3,69 +3,72 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db, schema } from "~/server/db";
 import { eq } from "drizzle-orm";
 import { getServerAuthSession } from "~/server/auth";
-import { ProviderSchemaDB } from "~/server/db/schema";
+import { integrant } from "~/server/db/schema";
 
-export const providersRouter = createTRPCRouter({
+
+
+
+export const integrantRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({}) => {
-    const providers = await db.query.providers.findMany();
-    return providers;
+    const integrants = await db.query.integrants.findMany();
+    return integrants;
   }),
   get: protectedProcedure
     .input(
       z.object({
-        providerId: z.string(),
+        integrantId: z.string(),
       }),
     )
     .query(async ({ input }) => {
-      const provider = await db.query.providers.findFirst({
-        where: eq(schema.providers.id, input.providerId),
+      const integrant = await db.query.integrants.findFirst({
+        where: eq(schema.integrant.id, input.integrantId),
       });
 
-      return provider;
+      return integrant;
     }),
 
   create: protectedProcedure
-    .input(ProviderSchemaDB)
+    .input(integrant)
     .mutation(async ({ input }) => {
       const session = await getServerAuthSession();
       if (!session || !session.user) {
         throw new Error("User not found");
       }
       const user = session?.user.id;
-      const newProvider = await db
-        .insert(schema.providers)
+      const newintegrant = await db
+        .insert(schema.integrant)
         .values({ ...input, user });
 
-      return newProvider;
+      return newintegrant;
     }),
 
   change: protectedProcedure
     .input(
       z.object({
         id: z.string(),
-        ...ProviderSchemaDB.shape,
+        ...integrant.shape,
       }),
     )
     .mutation(async ({ input: { id, ...input } }) => {
       console.log("Function called");
 
-      const updatedProvider = await db
-        .update(schema.providers)
+      const updatedintegrant = await db
+        .update(schema.integrant)
         .set(input)
-        .where(eq(schema.providers.id, id));
-      console.log(updatedProvider);
-      return updatedProvider;
+        .where(eq(schema.integrant.id, id));
+      console.log(updatedintegrant);
+      return updatedintegrant;
     }),
 
   delete: protectedProcedure
     .input(
       z.object({
-        providerId: z.string(),
+        integrantId: z.string(),
       }),
     )
     .mutation(async ({ input }) => {
       await db
-        .delete(schema.providers)
-        .where(eq(schema.providers.id, input.providerId));
+        .delete(schema.integrant)
+        .where(eq(schema.integrant.id, input.integrantId));
     }),
 });

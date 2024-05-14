@@ -3,69 +3,72 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db, schema } from "~/server/db";
 import { eq } from "drizzle-orm";
 import { getServerAuthSession } from "~/server/auth";
-import { ProviderSchemaDB } from "~/server/db/schema";
+import { paymentHolders } from "~/server/db/schema";
 
-export const providersRouter = createTRPCRouter({
+
+
+
+export const paymentHoldersRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({}) => {
-    const providers = await db.query.providers.findMany();
-    return providers;
+    const paymentHolderss = await db.query.paymentHolderss.findMany();
+    return paymentHolderss;
   }),
   get: protectedProcedure
     .input(
       z.object({
-        providerId: z.string(),
+        paymentHoldersId: z.string(),
       }),
     )
     .query(async ({ input }) => {
-      const provider = await db.query.providers.findFirst({
-        where: eq(schema.providers.id, input.providerId),
+      const paymentHolders = await db.query.paymentHolderss.findFirst({
+        where: eq(schema.paymentHolders.id, input.paymentHoldersId),
       });
 
-      return provider;
+      return paymentHolders;
     }),
 
   create: protectedProcedure
-    .input(ProviderSchemaDB)
+    .input(paymentHolders)
     .mutation(async ({ input }) => {
       const session = await getServerAuthSession();
       if (!session || !session.user) {
         throw new Error("User not found");
       }
       const user = session?.user.id;
-      const newProvider = await db
-        .insert(schema.providers)
+      const newpaymentHolders = await db
+        .insert(schema.paymentHolders)
         .values({ ...input, user });
 
-      return newProvider;
+      return newpaymentHolders;
     }),
 
   change: protectedProcedure
     .input(
       z.object({
         id: z.string(),
-        ...ProviderSchemaDB.shape,
+        ...paymentHolders.shape,
       }),
     )
     .mutation(async ({ input: { id, ...input } }) => {
       console.log("Function called");
 
-      const updatedProvider = await db
-        .update(schema.providers)
+      const updatedpaymentHolders = await db
+        .update(schema.paymentHolders)
         .set(input)
-        .where(eq(schema.providers.id, id));
-      console.log(updatedProvider);
-      return updatedProvider;
+        .where(eq(schema.paymentHolders.id, id));
+      console.log(updatedpaymentHolders);
+      return updatedpaymentHolders;
     }),
 
   delete: protectedProcedure
     .input(
       z.object({
-        providerId: z.string(),
+        paymentHoldersId: z.string(),
       }),
     )
     .mutation(async ({ input }) => {
       await db
-        .delete(schema.providers)
-        .where(eq(schema.providers.id, input.providerId));
+        .delete(schema.paymentHolders)
+        .where(eq(schema.paymentHolders.id, input.paymentHoldersId));
     }),
 });

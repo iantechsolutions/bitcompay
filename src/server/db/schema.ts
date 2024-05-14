@@ -472,3 +472,52 @@ export const clientStatuses = pgTable("client_statuses", {
   description: varchar("description", { length: 255 }).notNull(),
   type: varchar("type", { length: 255 }).notNull(),
 });
+
+export const modos = pgTable("modos", {
+  id: columnId,
+  description: varchar("description", { length: 255 }).notNull(),
+});
+
+export const integrant = pgTable("modos", {
+  id: columnId,
+  affiliate_type: varchar("affiliate_type", { length: 255 }),
+  relationship: varchar("relationship", { length: 255 }),
+  adress: varchar("adress", { length: 255 }),
+  name: varchar("name", { length: 255 }),
+  id_type: varchar("id_type", { length: 255 }),
+  id_number: varchar("id_number", { length: 255 }),
+  birth_date: timestamp("birth_date", { mode: "date" }),
+  gender: varchar("gender", { enum: ["female", "male", "other"] }),
+  civil_status: varchar("civil_status", {
+    enum: ["single", "married", "divorced", "widowed"],
+  }),
+  nationality: varchar("nationality", { length: 255 }),
+  afip_status: varchar("afip_status", { length: 255 }),
+  fiscal_id_type: varchar("fiscal_id_type", { length: 255 }),
+  fiscal_id_number: varchar("fiscal_id_number", { length: 255 }),
+  address: varchar("address", { length: 255 }),
+  phone_number: varchar("phone_number", { length: 255 }),
+  cellphone_number: varchar("cellphone_number", { length: 255 }),
+  email: varchar("email", { length: 255 }),
+  floor: varchar("floor", { length: 255 }),
+  department: varchar("department", { length: 255 }),
+  localidad: varchar("localidad", { length: 255 }),
+  partido: varchar("partido", { length: 255 }),
+  provincia: varchar("provincia", { length: 255 }),
+  cp: varchar("cp", { length: 255 }),
+  zona: varchar("cp", { length: 255 }),
+  isHolder:  boolean("isHolder").notNull().default(false),
+  isPaymentHolder:  boolean("isPaymentHolder").notNull().default(false),
+  isAffiliate:  boolean("isAffiliate").notNull().default(false),
+  
+});
+
+export const paymentHolders = pgTable("modos", {
+  id: columnId,
+  cuit: varchar("description", { length: 255 }).notNull(),
+  name: varchar("description", { length: 255 }).notNull(),
+  adress: varchar("description", { length: 255 }).notNull(),
+  iva: varchar("iva", {
+    enum: ["10.5", "21"],
+  }),
+});
