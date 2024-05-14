@@ -50,13 +50,13 @@ export default function CompanySidenav(props: { companyId: string }) {
     }
   };
   return (
-    <Sidenav>
+    <Sidenav className="h-full bg-[#e9fcf8]">
       <img
-        className="pb-5 pl-5 pr-5 pt-5"
+        className="bg-[#e9fcf8] pb-5 pl-5 pr-5 pt-10"
         src="https://utfs.io/f/2241aac5-d6d9-4310-bc31-db91cf5565cb-j8i4q3.png"
         alt="logo"
       ></img>
-      <Accordion type="single" className="bg-[#e9fcf8] pl-5 pr-5" collapsible>
+      <Accordion type="single" className="pl-5 pr-5 pt-5" collapsible>
         <AccordionItem value="item-1" className="border-none">
           <AccordionTrigger
             className={
@@ -80,7 +80,7 @@ export default function CompanySidenav(props: { companyId: string }) {
           <AccordionTrigger
             className={
               isActive("Gestión de documentos")
-                ? "rounded-lg bg-[#1bdfb7] px-1 py-1.5 hover:no-underline"
+                ? "rounded-lg bg-[#1bdfb7] px-1 py-1.5 hover:no-underline "
                 : "rounded-lg px-1 py-1.5 hover:no-underline"
             }
           >
@@ -180,7 +180,7 @@ export default function CompanySidenav(props: { companyId: string }) {
           </AccordionTrigger>
           <AccordionContent>
             <SidenavItem
-              href={`/dashboard/company/${props.companyId}/sales`}
+              href={`/dashboard/company/${props.companyId}/sales/sales`}
               icon={<BadgeDollarSign />}
             >
               Inicio

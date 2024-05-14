@@ -19,7 +19,14 @@ export default async function Layout(props: {
 
   return (
     <AppLayout
-      title={company?.name ?? "404 NOT FOUND"}
+      // title={
+      //   <img
+      //     className=" pb-5 pt-5"
+      //     src="https://utfs.io/f/2241aac5-d6d9-4310-bc31-db91cf5565cb-j8i4q3.png"
+      //     alt="logo"
+      //   ></img>
+      // }
+      headerClass="bg-[#e9fcf8]"
       user={session?.user}
       sidenav={
         company ? (

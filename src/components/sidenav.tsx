@@ -1,8 +1,14 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-export default function Sidenav(props: { children: React.ReactNode }) {
-  return <ul>{props.children}</ul>;
+
+interface SidenavProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+export default function Sidenav({ children, className }: SidenavProps) {
+  return <ul className={className}>{children}</ul>;
 }
 
 export function SidenavSeparator(props: { children: React.ReactNode }) {
