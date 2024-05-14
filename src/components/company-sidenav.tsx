@@ -53,11 +53,16 @@ export default function CompanySidenav(props: { companyId: string }) {
       <Accordion type="single" collapsible>
         <AccordionItem value="item-1">
           <AccordionTrigger
-            className={`${
-              isActive("General") ? "bg-[#1bdfb7]" : ""
-            }px-1 py-1.5 hover:no-underline`}
+            className={
+              isActive("General")
+                ? "bg-[#1bdfb7] px-1 py-1.5 hover:no-underline"
+                : " px-1 py-1.5 hover:no-underline"
+            }
           >
-            <SidenavSeparator>General</SidenavSeparator>
+            <SidenavSeparator>General </SidenavSeparator>
+            <SidenavSeparator>
+              {isActive("General" ? "Casa" : "Nop")}
+            </SidenavSeparator>
           </AccordionTrigger>
           <AccordionContent>
             <SidenavItem

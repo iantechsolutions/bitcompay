@@ -154,7 +154,11 @@ export default function PlanPage(props: {
                             >
                               <Calendar
                                 mode="single"
-                                selected={field.value}
+                                selected={
+                                  field.value
+                                    ? new Date(field.value)
+                                    : undefined
+                                }
                                 onSelect={field.onChange}
                                 disabled={(date: Date) => date < new Date()}
                                 initialFocus
