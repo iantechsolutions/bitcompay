@@ -1,33 +1,13 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "~/lib/utils";
 export default function Sidenav(props: { children: React.ReactNode }) {
   return <ul>{props.children}</ul>;
 }
 
 export function SidenavSeparator(props: { children: React.ReactNode }) {
-  const menu = {
-    Administracion: "administration",
-    "Gestión de documentos": "management",
-    General: "General",
-    Clientes: "clients",
-    Proveedores: "providers",
-  };
-  const pathname = usePathname();
-  let isActive = false;
-  if (typeof props.children === "string") {
-    isActive = pathname.includes(props.children.toLowerCase());
-  }
-
-  console.log(typeof props.children === "string");
-  console.log("isActive is ", isActive);
   return (
-    <li
-      className={`${
-        isActive ? "bg-[#1bdfb7] " : ""
-      } flex items-center px-4 pt-3 text-sm font-medium`}
-    >
+    <li className={` flex items-center px-4 pt-3 text-sm font-medium`}>
       {props.children}
     </li>
   );
