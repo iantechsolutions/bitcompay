@@ -16,7 +16,7 @@ import { clientStatusesRouter } from "./routers/client-statuses-router";
 import { integrant } from "../db/schema";
 import { integrantRouter } from "./routers/integrant-router";
 import { paymentHoldersRouter } from "./routers/paymentHolders.router";
-import { modosRouter } from "./routers/modos.router";
+import { billResponsiveRouter } from "./routers/billResponsive.router";
 /**
  * This is the primary router for your server.
  *
@@ -38,8 +38,8 @@ export const appRouter = createTRPCRouter({
   healthInsurances: healthInsurancesRouter,
   clientStatuses: clientStatusesRouter,
   integrant: integrantRouter,
-  modos: modosRouter,
   paymentHolders: paymentHoldersRouter,
+  billResponsive: billResponsiveRouter,
 
 });
 

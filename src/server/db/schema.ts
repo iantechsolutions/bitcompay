@@ -473,16 +473,10 @@ export const clientStatuses = pgTable("client_statuses", {
   type: varchar("type", { length: 255 }).notNull(),
 });
 
-export const modos = pgTable("modos", {
-  id: columnId,
-  description: varchar("description", { length: 255 }).notNull(),
-});
-
-export const integrant = pgTable("modos", {
+export const integrant = pgTable("integrant", {
   id: columnId,
   affiliate_type: varchar("affiliate_type", { length: 255 }),
   relationship: varchar("relationship", { length: 255 }),
-  adress: varchar("adress", { length: 255 }),
   name: varchar("name", { length: 255 }),
   id_type: varchar("id_type", { length: 255 }),
   id_number: varchar("id_number", { length: 255 }),
@@ -505,7 +499,7 @@ export const integrant = pgTable("modos", {
   partido: varchar("partido", { length: 255 }),
   provincia: varchar("provincia", { length: 255 }),
   cp: varchar("cp", { length: 255 }),
-  zona: varchar("cp", { length: 255 }),
+  zona: varchar("zona", { length: 255 }),
   isHolder:  boolean("isHolder").notNull().default(false),
   isPaymentHolder:  boolean("isPaymentHolder").notNull().default(false),
   isAffiliate:  boolean("isAffiliate").notNull().default(false),
@@ -514,10 +508,24 @@ export const integrant = pgTable("modos", {
 
 export const paymentHolders = pgTable("modos", {
   id: columnId,
-  cuit: varchar("description", { length: 255 }).notNull(),
-  name: varchar("description", { length: 255 }).notNull(),
-  adress: varchar("description", { length: 255 }).notNull(),
-  iva: varchar("iva", {
-    enum: ["10.5", "21"],
-  }),
+  cuit: varchar("cuit", { length: 255 }).notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  address: varchar("address", { length: 255 }).notNull(),
+  iva: varchar("iva", { length: 255 })
 });
+export const billResponsive = pgTable("billResponsive", {
+  id: columnId,
+  name: varchar("name", { length: 255 }),
+  id_type: varchar("id_type", { length: 255 }),
+  id_number: varchar("id_number", { length: 255 }),
+  afip_status: varchar("afip_status", { length: 255 }),
+  fiscal_id_type: varchar("fiscal_id_type", { length: 255 }),
+  fiscal_id_number: varchar("fiscal_id_number", { length: 255 }),
+  cuit: varchar("cuit", { length: 255 }),
+  address: varchar("address", { length: 255 }),
+  iva: varchar("iva", { length: 255 }),
+  payment_holder: varchar("is_payment_holder")
+})
+
+
+
