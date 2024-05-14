@@ -57,6 +57,10 @@ export default withUt({
           foreground: "hsl(var(--card-foreground))",
         },
       },
+      boxShadow: {
+        "custom-dark":
+          "0 2px 7px -2px rgba(0, 0, 0, 0.4), 0 1px 2px -1px rgba(0, 0, 0, 0.03)",
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",

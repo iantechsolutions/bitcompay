@@ -42,7 +42,7 @@ export function UserPopOver(props: {
           </li>
           <li className="mb-3 mt-2 grid grid-cols-2 gap-2">
             <Badge variant="secondary" className="justify-center">
-              Administrador
+              Administrador x
             </Badge>
             <Badge variant="secondary" className="justify-center">
               I AN TECH
