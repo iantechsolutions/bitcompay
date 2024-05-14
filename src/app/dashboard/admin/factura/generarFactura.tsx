@@ -25,8 +25,6 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Factura } from "./facturaGenerada";
-import { ToastAction } from "~/components/ui/toast";
-import { useToast } from "~/components/ui/use-toast";
 
 export async function ingresarAfip() {
   //CUIT QUE QUEREMOS QUE COBRE
@@ -96,6 +94,10 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
     (async () => {
       setLoading(true);
       const afip = await ingresarAfip();
+      const ivas = await afip.ElectronicBilling.getAliquotTypes();
+      console.log("ivas");
+      console.log(ivas);
+
       const serverStatus = await afip.ElectronicBilling.getServerStatus();
       console.log("status");
       console.log(serverStatus);
@@ -157,7 +159,6 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
         cae: res.CAE, //CAE asignado a la Factura
         vencimiento: res.CAEFchVto, //Fecha de vencimiento del CAE
       });
-      console.log("aca6");
       const html = Factura({
         puntoDeVenta: puntoVenta,
         tipoFactura: tipoFactura,
@@ -193,16 +194,9 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
       });
       console.log(html);
       console.log(resHtml.file);
-      toast({
-        onClick: () => window.open(resHtml.file, "_blank"),
-        title: "Factura generada",
-        description:
-          "La factura ha sido generada correctamente, clickee aqui para abrirla ",
-      });
       setLoading(false);
     })();
   }
-  const { toast } = useToast();
   async function showFactura() {}
   const [puntoVenta, setPuntoVenta] = useState("");
   const [tipoFactura, setTipoFactura] = useState("");
@@ -216,7 +210,8 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
   const [dateDesde, setDateDesde] = React.useState<Date>();
   const [dateHasta, setDateHasta] = React.useState<Date>();
   const [dateVencimiento, setDateVencimiento] = React.useState<Date>();
-  const [isLoading, setIsLoading] = useState(false);
+  const [servicioprod, setservicioprod] = useState("");
+  const [iva, setIva] = useState("");
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -439,8 +434,45 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
               </div>
             </div>
           )}
-          {tipoFactura != "11" && tipoFactura != "14" && tipoFactura != "15"}
-
+          {tipoFactura != "11" &&
+            tipoFactura != "14" &&
+            tipoFactura != "15" &&
+            tipoFactura != "" && (
+              <div className="flex flex-row justify-between">
+                <div>
+                  <Label htmlFor="iva">IVA</Label>
+                  <br />
+                  <ComboboxDemo
+                    title="Seleccionar una opcion"
+                    placeholder="IVA"
+                    options={[
+                      { value: "3", label: "0%" },
+                      { value: "4", label: "10.5%" },
+                      { value: "5", label: "21%" },
+                      { value: "6", label: "27%" },
+                      { value: "8", label: "5%" },
+                      { value: "9", label: "2.5%" },
+                    ]}
+                    onSelectionChange={(e) => setIva(e)}
+                  />
+                </div>
+              </div>
+            )}
+          <div className="flex flex-row justify-between">
+            <div>
+              <Label htmlFor="nombreprod">
+                {concepto == "1"
+                  ? "Nombre del producto"
+                  : "Nombre del servicio"}{" "}
+              </Label>
+              <Input
+                id="nombrepro"
+                placeholder="..."
+                value={servicioprod}
+                onChange={(e) => setservicioprod(e.target.value)}
+              />
+            </div>
+          </div>
           <DialogFooter>
             <Button disabled={loading} onClick={generateFactura}>
               {loading && (
