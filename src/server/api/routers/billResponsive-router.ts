@@ -58,7 +58,7 @@ export const billResponsibleRouter = createTRPCRouter({
           iva: input.iva,
           name: input.name,
           payment_holder: input.payment_holder,
-          payment_responsive: input.payment_responsive,
+          payment_responsible: input.payment_responsible,
 
         });
       
@@ -68,7 +68,7 @@ export const billResponsibleRouter = createTRPCRouter({
       z.object({
         id: z.string(),
         integrant_id:  z.string(),
-        payment_responsive: z.string(),
+        payment_responsible: z.string(),
         name:  z.string(),
         id_type:  z.string(),
         id_number:  z.string(),
@@ -98,7 +98,7 @@ export const billResponsibleRouter = createTRPCRouter({
           iva: input.iva,
           name: input.name,
           payment_holder: input.payment_holder,
-          payment_responsive: input.payment_responsive,
+          payment_responsible: input.payment_responsible,
         
         })
         .where(eq(schema.billResponsible.id, id));
@@ -112,7 +112,9 @@ export const billResponsibleRouter = createTRPCRouter({
         billResponsibleId: z.string(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({
+      input
+     }) => {
       await db
         .delete(schema.billResponsible)
         .where(eq(schema.billResponsible.id, input.billResponsibleId));

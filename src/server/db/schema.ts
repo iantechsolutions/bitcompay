@@ -632,7 +632,7 @@ export const insertBillResponsibleSchema = createInsertSchema(billResponsible);
 export const selectBillResponsibleSchema = createSelectSchema(billResponsible);
 export const billResponsibleSchemaDB = insertBillResponsibleSchema.pick({
   integrant_id: true,
-  payment_responsive:true,
+  payment_responsible:true,
   name:true,
   id_type: true,
   id_number: true,
@@ -655,7 +655,7 @@ export type BillResponsible = z.infer<typeof selectBillResponsibleSchema>;
 //     }),
 // ({
 //   paymentHolders: one(paymentHolders, {
-    //       fields: [billResponsible.payment_responsive],
+    //       fields: [billResponsible.payment_responsible],
     //       references: [paymentHolders.id],
 //   }),
 //   }),

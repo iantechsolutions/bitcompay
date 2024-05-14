@@ -52,7 +52,7 @@ export default function CompanySidenav(props: { companyId: string }) {
   return (
     <Sidenav>
       <Accordion type="single" className="rounded-lg pl-5" collapsible>
-        <AccordionItem value="item-1">
+        <AccordionItem value="item-1" className="border-none">
           <AccordionTrigger
             className={
               isActive("General")
@@ -74,7 +74,7 @@ export default function CompanySidenav(props: { companyId: string }) {
             </SidenavItem>
           </AccordionContent>
         </AccordionItem>
-        <AccordionItem value="item-2">
+        <AccordionItem value="item-2" className="border-none">
           <AccordionTrigger
             className={
               isActive("Gestión de documentos")
@@ -105,7 +105,7 @@ export default function CompanySidenav(props: { companyId: string }) {
             </SidenavItem>
           </AccordionContent>
         </AccordionItem>
-        <AccordionItem value="item-3">
+        <AccordionItem value="item-3" className="border-none">
           <AccordionTrigger
             className={
               isActive("Administracion")
@@ -166,7 +166,7 @@ export default function CompanySidenav(props: { companyId: string }) {
             </SidenavItem>
           </AccordionContent>
         </AccordionItem>
-        <AccordionItem value="item-4">
+        <AccordionItem value="item-4" className="border-none">
           <AccordionTrigger
             className={
               isActive("Ventas")
@@ -192,7 +192,7 @@ export default function CompanySidenav(props: { companyId: string }) {
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value="item-5">
+        <AccordionItem value="item-5" className="border-none">
           <AccordionTrigger
             className={
               isActive("Clientes")
@@ -212,7 +212,7 @@ export default function CompanySidenav(props: { companyId: string }) {
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value="item-6">
+        <AccordionItem value="item-6" className="border-none">
           <AccordionTrigger
             className={
               isActive("Proveedores")

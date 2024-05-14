@@ -225,9 +225,6 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
   const [tipoDocumento, setTipoDocumento] = useState("");
   const [nroDocumento, setNroDocumento] = useState("");
   const [importe, setImporte] = useState("");
-  // const [fechaServicioDesde, setFechaServicioDesde] = useState("");
-  // const [fechaServicioHasta, setFechaServicioHasta] = useState("");
-  // const [fechaVencimientoPago, setFechaVencimientoPago] = useState("");
   const [dateDesde, setDateDesde] = React.useState<Date>();
   const [dateHasta, setDateHasta] = React.useState<Date>();
   const [dateVencimiento, setDateVencimiento] = React.useState<Date>();
@@ -251,15 +248,6 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
             <div>
               <Label htmlFor="name">Punto de venta a utilizar</Label>
               <br />
-              {/* <Input
-                className="w-[220px]"
-                id="puntoVenta"
-                placeholder="..."
-                value={puntoVenta}
-                onChange={(e) => setPuntoVenta(e.target.value)}
-                required
-              /> */}
-
               <ComboboxDemo
                 title="Seleccionar PV..."
                 placeholder="_"
@@ -491,6 +479,15 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
                 placeholder="..."
                 value={servicioprod}
                 onChange={(e) => setservicioprod(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="afiliado">Afiliado</Label>
+              <ComboboxDemo
+                title="Afiliado"
+                placeholder="Afiliado"
+                options={[]}
+                onSelectionChange={(e) => setIva(e)}
               />
             </div>
           </div>
