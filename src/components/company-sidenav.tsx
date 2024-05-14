@@ -30,6 +30,7 @@ export default function CompanySidenav(props: { companyId: string }) {
     General: "general",
     Clientes: "clients",
     Proveedores: "providers",
+    Ventas: "sales",
   };
   const pathname = usePathname();
   const isActive = (href: keyof typeof menu) => {
@@ -56,7 +57,7 @@ export default function CompanySidenav(props: { companyId: string }) {
             className={
               isActive("General")
                 ? "bg-[#1bdfb7] px-1 py-1.5 hover:no-underline"
-                : " px-1 py-1.5 hover:no-underline"
+                : "px-1 py-1.5 hover:no-underline"
             }
           >
             <SidenavSeparator>General </SidenavSeparator>
@@ -74,13 +75,19 @@ export default function CompanySidenav(props: { companyId: string }) {
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="item-2">
-          <AccordionTrigger className=" px-1 py-1.5 hover:no-underline">
+          <AccordionTrigger
+            className={
+              isActive("Gestión de documentos")
+                ? "bg-[#1bdfb7] px-1 py-1.5 hover:no-underline"
+                : "px-1 py-1.5 hover:no-underline"
+            }
+          >
             <SidenavSeparator>Gestión de documentos</SidenavSeparator>
           </AccordionTrigger>
           <AccordionContent>
             <SidenavItem
               icon={<FileUpIcon />}
-              href={`/dashboard/company/${props.companyId}/uploads`}
+              href={`/dashboard/company/${props.companyId}/management/uploads`}
             >
               Subida
             </SidenavItem>
@@ -99,7 +106,13 @@ export default function CompanySidenav(props: { companyId: string }) {
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="item-3">
-          <AccordionTrigger className=" px-1 py-2 hover:no-underline">
+          <AccordionTrigger
+            className={
+              isActive("Administracion")
+                ? "bg-[#1bdfb7] px-1 py-1.5 hover:no-underline"
+                : "px-1 py-1.5 hover:no-underline"
+            }
+          >
             <SidenavSeparator>Administracion</SidenavSeparator>
           </AccordionTrigger>
           <AccordionContent>
@@ -154,7 +167,13 @@ export default function CompanySidenav(props: { companyId: string }) {
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="item-4">
-          <AccordionTrigger className=" px-1 py-1.5 hover:no-underline">
+          <AccordionTrigger
+            className={
+              isActive("Ventas")
+                ? "bg-[#1bdfb7] px-1 py-1.5 hover:no-underline"
+                : "px-1 py-1.5 hover:no-underline"
+            }
+          >
             <SidenavSeparator>Ventas</SidenavSeparator>
           </AccordionTrigger>
           <AccordionContent>
@@ -174,7 +193,13 @@ export default function CompanySidenav(props: { companyId: string }) {
         </AccordionItem>
 
         <AccordionItem value="item-5">
-          <AccordionTrigger className=" px-1 py-1.5 hover:no-underline">
+          <AccordionTrigger
+            className={
+              isActive("Clientes")
+                ? "bg-[#1bdfb7] px-1 py-1.5 hover:no-underline"
+                : "px-1 py-1.5 hover:no-underline"
+            }
+          >
             <SidenavSeparator>Clientes</SidenavSeparator>
           </AccordionTrigger>
           <AccordionContent>
@@ -188,8 +213,14 @@ export default function CompanySidenav(props: { companyId: string }) {
         </AccordionItem>
 
         <AccordionItem value="item-6">
-          <AccordionTrigger className=" px-1 py-1.5 hover:no-underline">
-            <SidenavSeparator>Proovedores</SidenavSeparator>
+          <AccordionTrigger
+            className={
+              isActive("Proveedores")
+                ? "bg-[#1bdfb7] px-1 py-1.5 hover:no-underline"
+                : "px-1 py-1.5 hover:no-underline"
+            }
+          >
+            <SidenavSeparator>Proveedores</SidenavSeparator>
           </AccordionTrigger>
           <AccordionContent>
             <SidenavItem

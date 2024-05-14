@@ -35,7 +35,7 @@ export function SidenavItem(props: {
 
   if (props.href) {
     return (
-      <li className={`${isActive ? "bg-[#8FEFDC] " : ""} flex items-center`}>
+      <li className={`${isActive ? "bg-[#c6ece4] " : ""} flex items-center`}>
         <Link href={props.href} className={className}>
           {content}
           {isActive && <div className="h-2 w-3 rounded-full bg-gray-500"></div>}
