@@ -56,7 +56,7 @@ export default function CompanySidenav(props: { companyId: string }) {
         src="https://utfs.io/f/2241aac5-d6d9-4310-bc31-db91cf5565cb-j8i4q3.png"
         alt="logo"
       ></img>
-      <Accordion type="single" className="pl-5 pr-5" collapsible>
+      <Accordion type="single" className="bg-[#e9fcf8] pl-5 pr-5" collapsible>
         <AccordionItem value="item-1" className="border-none">
           <AccordionTrigger
             className={
