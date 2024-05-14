@@ -39,7 +39,7 @@ export async function ingresarAfip() {
   const password = "TBzQ.,i5JhZbAg2";
 
   //ALIAS PARA EL CERTIFICADO
-  const alias = "afipsdk";
+  const alias = "afipsdk2";
   const afipCuit = new Afip({
     CUIT: taxId,
     access_token:
@@ -47,17 +47,17 @@ export async function ingresarAfip() {
     production: true,
   });
   // const res = await afipCuit.CreateCert(username, password, alias);
-  // console.log("Certificado creado");
+  // // console.log("Certificado creado");
   // console.log(res);
-  const wsid = "wsfe";
+  // const wsid = "wsfe";
 
-  // //ESTO CREA LA AUTORIZACION
+  // // //ESTO CREA LA AUTORIZACION
   // const cert = res.cert;
   // const key = res.key;
   const cert =
-    "-----BEGIN CERTIFICATE-----\nMIIDQjCCAiqgAwIBAgIIdCXx+jXkmS0wDQYJKoZIhvcNAQENBQAwMzEVMBMGA1UEAwwMQ29tcHV0\nYWRvcmVzMQ0wCwYDVQQKDARBRklQMQswCQYDVQQGEwJBUjAeFw0yNDA1MTAxNTU3MjBaFw0yNjA1\nMTAxNTU3MjBaMC0xEDAOBgNVBAMMB2FmaXBzZGsxGTAXBgNVBAUTEENVSVQgMjM0MzkyMTQ2MTkw\nggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDABvAAKxop0QQa6OTEdl+Eci5skbTUi7F/\nCTpM4OZVo84b0PJ+Gb/Hc3IZIBAAPtnFBEJLaJgXXGJWXVYCOUUzUv+LKAEgXy73iq1sA3yobNZa\nP4OvDcRgrDmj/rawInxf7gIM5bhUZFx2EnJQ9bUa/pGvYeq0UF4rLbmpgM/o6MMv9W65AE1Kpl4h\nc9e7qb1PdB35yCUauNmE/2Zyf2j5ow0pzg99cKI1xtYmtfci7XVDmxU8/A9LvcVWIwNmcQ8QisZ3\n+9bAwZ0GzGcTAyEuvms5HJWUU1Crpk8C46O8l6f2yQX0ehvK+/nmUGu8KWFXPBoaK8mSuGsOLFo8\nzqdDAgMBAAGjYDBeMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUKw0vyN9h/QjJThHQNZMEbY5b\n0G4wHQYDVR0OBBYEFI4OMvXVnB2CCdOgCw/ifvAzIea+MA4GA1UdDwEB/wQEAwIF4DANBgkqhkiG\n9w0BAQ0FAAOCAQEAvjP+YP2HWfTSFtYpV9Z9PyKr5OS6gvNmFiUCk/5EctIkceynMlvuL0XgcTSB\nwlr9joA44Vjh3PPbiPWdf4woc32sSimBS0NtuJcxPKpsm0eFy2okqFI+zgRNMDIKMCVL9iNEpvEf\nehi1wlxQI3NKWZHkeJpOKU97lzQQw2mvTNsSeKfqxk/Lpu4XT5u36TYYLspYjiLYXplBYoJo6yVP\nqXgtEmcChZFFk3aSVrU+twMgAXsGbUGokphfN4Cx2S9K97Vaa6XVRm0hEX2JxGi6WCO48R+ctfhr\n3js3d2quH3zRVTCZ682wMpOoZdY9tWJzRl/mrxPg+Ic5Qsg8+f7qEg==\n-----END CERTIFICATE-----";
+    "-----BEGIN CERTIFICATE-----\nMIIDQzCCAiugAwIBAgIIBDcBTy1RV9IwDQYJKoZIhvcNAQENBQAwMzEVMBMGA1UEAwwMQ29tcHV0\nYWRvcmVzMQ0wCwYDVQQKDARBRklQMQswCQYDVQQGEwJBUjAeFw0yNDA1MTQxMjQ1NTZaFw0yNjA1\nMTQxMjQ1NTZaMC4xETAPBgNVBAMMCGFmaXBzZGsyMRkwFwYDVQQFExBDVUlUIDIzNDM5MjE0NjE5\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAv2gtWDrfV7m9Lz1dYFimDivBff/UCrBB\nQHUuREfIcwL3cs0TDQ075Nk6GyPIIclvVBAUrIXHNDAEgLM3uxY/eSNO/kL9OpjTbleSNUxPyfZz\nwbFsS93ZZb37iA72J2ffgS8TRT9q0tiDnx5dUBv+lVIBliwbxGR6qgEGvgLwZHy7oSKfiYXV8vuc\n+Dt5kNbBVEZTyYyhSMYrM80TcStVrMYuFAz4GJiJRR3g258tJAVARB2KU6tNdaeZ/dmkFzQF/kL8\n9SsIVXEj/8HuLK1qNPoY/qIyD35xqlBW5VYeQMlqRC87V/eKWXUCQM/O+wett6QzB4OGYwBwZYsE\nMNFqWQIDAQABo2AwXjAMBgNVHRMBAf8EAjAAMB8GA1UdIwQYMBaAFCsNL8jfYf0IyU4R0DWTBG2O\nW9BuMB0GA1UdDgQWBBSqnCsGiIw8kqJgF80pSpuLASPB/zAOBgNVHQ8BAf8EBAMCBeAwDQYJKoZI\nhvcNAQENBQADggEBAJQMwlkuNIan9Em48HBUG03glquZsyF74uWLwBAXJ5KAoWHJDU8k1nsRLmw4\n4qw0jWpDPBX1kTvdYVq2412lndnXCdoBiOCjBibwApylqV3pZGyHDTfhWEYBBF+0TOLB/w2FVhSk\n7mbtmWTZ8twqJtORuBbolkM1QTWVuFCWRHX2wSINnjP23NxnLIf6CTJKdMUsAZ7YxAubuWIw3IYd\nGASuLrUCpAlyrA1jpGa3k1vBgTawt/9vWMrbX9uumefFRTM38xB+JPlIY5pN1vEOTreVfAyK7MGR\n1IH2RXkvV3n+YJkj+pcQZG5xOuYuLdeuki4jPy7Q/i3DlAhRYDONgDI=\n-----END CERTIFICATE-----";
   const key =
-    "-----BEGIN RSA PRIVATE KEY-----\r\nMIIEpAIBAAKCAQEAwAbwACsaKdEEGujkxHZfhHIubJG01Iuxfwk6TODmVaPOG9Dy\r\nfhm/x3NyGSAQAD7ZxQRCS2iYF1xiVl1WAjlFM1L/iygBIF8u94qtbAN8qGzWWj+D\r\nrw3EYKw5o/62sCJ8X+4CDOW4VGRcdhJyUPW1Gv6Rr2HqtFBeKy25qYDP6OjDL/Vu\r\nuQBNSqZeIXPXu6m9T3Qd+cglGrjZhP9mcn9o+aMNKc4PfXCiNcbWJrX3Iu11Q5sV\r\nPPwPS73FViMDZnEPEIrGd/vWwMGdBsxnEwMhLr5rORyVlFNQq6ZPAuOjvJen9skF\r\n9Hobyvv55lBrvClhVzwaGivJkrhrDixaPM6nQwIDAQABAoIBADcYxnwF4ffllPvz\r\nntAP9tAVwuQ72lqxyjfc+fFdBjnESjsI9MrhsHkV0sMKxAyN/AXfdvYUCK+LPlvx\r\nY+A3dneHdPMEg246YUt9asz3IylgMRCr8Killpb2U4OObfSTsIQF0mjI8N6l/TGT\r\nkWFRXqlkKYDc427hMGPLNt4/q2f0Ab7viqw5mIU3kWuRkS64CWRIzcmYKKZx1usl\r\ne5j6Q9uBKh7YgOT/fa3o5CTZmXu5WsKP9kHIa4pTeLIQ63P5AiaXK9UXBS6o5QpS\r\nvgzBhPLdNYQrsX9cRY6tfxau5MIl1I3wAvioxTHcX4WNelb36Lm9u7+PsoQiKk8A\r\nLriRdUECgYEA6mZOB37wlZLZ9RyB+DsZzB4ellh1CwS+lW700vCiiN8uqaDzz4jU\r\ndnMVyF/OQVoM1xZ+KUVHe2EhDIK3x8oaeRlF9mdpJZDaTrgg4noG6Cm8vFV0UKKL\r\nkP5dKVHCgYWoV6Bght8zD0toDM/UzwvryO0Qz2q9Vl7l71w/VkhLsCkCgYEA0bkG\r\n89YvPOFY+yNKdqtnJxmrivlMwR95PW3R2YE9CMIcvwV3vdanWj9Ou1xPXQ6Y+Uh3\r\nsIgkW+XVXrvfJmo7YhMGC77ZdGQLaiUtVlD/5w6rov+9igIX130ax9xlNj2LE7sJ\r\nPVhRJwmMnDGWraw8EyMf1em1GzP57k9hT6OyGYsCgYEAyHfqsDp+pE3OHvXcqmJR\r\nc+MmocrRfzT1knQs6uNm/sxx6h1/p7UMkKlordBSZE4RwTq5d66Krhip3TtG1pYh\r\nAgT9cvmKUdiK/Nw5M7jNg21+v0wOiJAb8Uu6fYYxZfjbuuWs6GyoDKKfQKXXCaTW\r\naSdnQx21BNNwr8AjYzW9ldECgYAxi+/7jV9tl6OI+WZvMMFW+HaRh6I9ge0HuTk5\r\nlJHRzuIxst3+KIczB//WvdE2H+u+AQPd3dwRJfRJxELM9Y3/9pSYE8eV+sjDk/Lp\r\nEIvUj5+3C4pA34u4aiL4krYKoXGJAMgHCSVq/pOMlx6M+0LaFpM/203hFl92kKRh\r\nxz+dTwKBgQCK1yPFGDeCBnDxwHHf+zK+6+mKmsKvDiOInFpMR/j2sETIfDnclq4i\r\ny1UvicJYL0/WW1T0A9rHyhSu2BMH8zkrmEC4Sa7MEGD3B3HfT50yke1QL+hdWZx0\r\nCGtbc2r1DqhJg0mXROOltX0RQlUri5m8P/s0wLI+L2NwFF78WpR3vQ==\r\n-----END RSA PRIVATE KEY-----\r\n";
+    "-----BEGIN RSA PRIVATE KEY-----\r\nMIIEpQIBAAKCAQEAv2gtWDrfV7m9Lz1dYFimDivBff/UCrBBQHUuREfIcwL3cs0T\r\nDQ075Nk6GyPIIclvVBAUrIXHNDAEgLM3uxY/eSNO/kL9OpjTbleSNUxPyfZzwbFs\r\nS93ZZb37iA72J2ffgS8TRT9q0tiDnx5dUBv+lVIBliwbxGR6qgEGvgLwZHy7oSKf\r\niYXV8vuc+Dt5kNbBVEZTyYyhSMYrM80TcStVrMYuFAz4GJiJRR3g258tJAVARB2K\r\nU6tNdaeZ/dmkFzQF/kL89SsIVXEj/8HuLK1qNPoY/qIyD35xqlBW5VYeQMlqRC87\r\nV/eKWXUCQM/O+wett6QzB4OGYwBwZYsEMNFqWQIDAQABAoIBAQCQFCct5wL/0fyq\r\ndpK3V4OH30ADTHOcqBg2IP72vuIQUQdbDytsA642EZ4/l6uqYyq+KGyngPv2OL7q\r\n8fzdg128Hev0URC07x0YTirsm8jjyfRQtPFEGnbusxeHz1tTRkljwL/MvHP4yqop\r\nOH4dMzVryRMQq5srNkdveN5OYX/64uxGM2uM+ZVXtMb7ve4KX5GZKCt2fyEC5ZTJ\r\n/B2i/by7NJtm3+VtiVrifi3U2oxjQ0Es1j9COBEWY8JtpIZw9PoP93Hb/zliipJW\r\nXRC6UGd7aF4KOi2vIt619dTD/jsRSweidNGluGdVfHkwQ2BIuLzepA4IU1Z6UKX2\r\nmu2NPXCRAoGBAN7zoRJmNeLf/i0xWHSkyhC3kKgV0wvICbXYVAFBCBEnM2p7Kx7v\r\nyIzQCg+qFtdqSh8Xv1hgo5hFP5QbiavCRbJa+Jb8ZPsqrmEhrE5HYoPamjRuSRi+\r\nzcH43O21fAX/eMhFl5g60i0svMP4hqhcVqli26Lt8iwvyKb83squ6c6XAoGBANvH\r\nhD2dVrRRcBC5+JOrJ2JKgGIqcX8TD9JKQqsHX6bytVUL4aOebgJqXHIBZPU8cRCx\r\nB+1dX5O8fjqkUNIWzq1IqAZtwZopjp1AGoctSzj9J3zYyjoK7AWaeDuyu2ZIzCef\r\nVat8k9Q1RdCovfhfQHZlV84+zJ7l8WWx0SFdpZyPAoGBAI5Mh2C79ebBOnTTyvZf\r\n+0xiLSTrERGy8merFCrcu+5ey9VJmcMcHi+p1NIcqImDIJ3pxUn+HExi3mqEjQEg\r\ndOWaZJHRtA4PNs9t85DexQUNMGEIhwUROzhzw2bA79DQNuH0cQZLfLwykqSt6hxp\r\nGzLvkunR30DOms3iFbzdmQMvAoGBAL/wP9JbnYQ+9yL0d13nhK63p+WTcalr6U5b\r\nIlwhRW0U3D5Y8Qcm7qZXY0MBar0tuwS7xtOKz1TDsm3eYOMJnhgBsxRiOEk9b9pv\r\nSHuzl9U+aYUEA6CrNzMxkz13u2f5vaoA4h2w353dpIo1RCssbKy5lvR9LdC7upV4\r\ntM5x7ZeLAoGAYs2nPABoUPrqKTOZmZg2ob0LKFnSxzFYNrxnIxyJN4CPbg5WJNFK\r\nUwOzB1oOezdIKBJ2eO7tidTa3DJ4HuMqvyChlnmQfL/98jCnnkwnVXldEfWwrKs/\r\npPiKvjFCOZROnwm3PhTfZtEi3Lpn6GNIy7rjl7eFOxgGGNCMkx34ehY=\r\n-----END RSA PRIVATE KEY-----\r\n";
   const afip = new Afip({
     access_token:
       "T11zSjRqweUhefsFkp0rn1jlvY2KyX1zRo4aRVpmfLR5fowH0kov709vL6Zn9i1F",
@@ -66,10 +66,10 @@ export async function ingresarAfip() {
     key: key,
     production: true,
   });
-  const serSer = await afip.CreateWSAuth(username, password, alias, wsid);
-  console.log(serSer);
-  const salesPoints = await afip.ElectronicBilling.getSalesPoints();
-  console.log(salesPoints);
+  // const serSer = await afip.CreateWSAuth(username, password, alias, wsid);
+  // console.log(serSer);
+  // const salesPoints = await afip.ElectronicBilling.getSalesPoints();
+  // console.log(salesPoints);
   // const serSer = await afip.CreateWSAuth(username, password, alias, wsid);
 
   return afip;
@@ -111,14 +111,13 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
       }
 
       const numero_de_factura = last_voucher + 1;
-      console.log("aca1");
+
       const fecha = new Date(
         Date.now() - new Date().getTimezoneOffset() * 60000,
       )
         .toISOString()
         .split("T")[0];
 
-      console.log("aca2");
       const data = {
         CantReg: 1, // Cantidad de facturas a registrar
         PtoVta: puntoVenta,
@@ -146,12 +145,11 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
         //   Importe: (Number(importe) * 0, 21).toString(),
         // },
       };
-      console.log("aca4");
       /**
        * Creamos la Factura
        **/
       const res = await afip.ElectronicBilling.createVoucher(data);
-      console.log("aca5");
+
       /**
        * Mostramos por pantalla los datos de la nueva Factura
        **/
@@ -332,7 +330,7 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
             </div>
 
             {/* Importe de la Factura */}
-            <div className="relative right-14">
+            <div className="relative right-20">
               <Label htmlFor="importe">Importe total de la factura</Label>
               <Input
                 id="importe"
