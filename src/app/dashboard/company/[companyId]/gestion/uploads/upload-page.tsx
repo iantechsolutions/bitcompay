@@ -5,7 +5,7 @@ import { Title } from "~/components/title";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { UploadDropzone } from "~/components/uploadthing";
-import { useCompanyData } from "../company-provider";
+import { useCompanyData } from "../../company-provider";
 
 export default function UploadPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>();

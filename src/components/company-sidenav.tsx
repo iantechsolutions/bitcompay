@@ -25,12 +25,12 @@ import { usePathname } from "next/navigation";
 
 export default function CompanySidenav(props: { companyId: string }) {
   const menu: Record<string, string> = {
-    Administracion: "administration",
-    "Gestión de documentos": "management",
-    General: "general",
-    Clientes: "clients",
-    Proveedores: "providers",
-    Ventas: "sales",
+    Administracion: "administration/",
+    "Gestión de documentos": "gestion/",
+    General: "general/",
+    Clientes: "clients/",
+    Proveedores: "providers/",
+    Ventas: "sales/",
   };
   const pathname = usePathname();
   const isActive = (href: keyof typeof menu) => {
@@ -87,7 +87,7 @@ export default function CompanySidenav(props: { companyId: string }) {
           <AccordionContent>
             <SidenavItem
               icon={<FileUpIcon />}
-              href={`/dashboard/company/${props.companyId}/management/uploads`}
+              href={`/dashboard/company/${props.companyId}/gestion/uploads`}
             >
               Subida
             </SidenavItem>
@@ -141,7 +141,7 @@ export default function CompanySidenav(props: { companyId: string }) {
               Unidades de negocio
             </SidenavItem>
             <SidenavItem
-              href={`/dashboard/company/${props.companyId}/administration/health-insurance`}
+              href={`/dashboard/company/${props.companyId}/administration/health_insurances`}
               icon={<HeartPulse />}
             >
               Obras sociales
@@ -159,7 +159,7 @@ export default function CompanySidenav(props: { companyId: string }) {
               Bonificaciones
             </SidenavItem>
             <SidenavItem
-              href={`/dashboard/company/${props.companyId}/administration/statuses`}
+              href={`/dashboard/company/${props.companyId}/administration/client_statuses`}
               icon={<NotebookPen />}
             >
               Estados
@@ -204,7 +204,7 @@ export default function CompanySidenav(props: { companyId: string }) {
           </AccordionTrigger>
           <AccordionContent>
             <SidenavItem
-              href={`/dashboard/company/${props.companyId}/clients`}
+              href={`/dashboard/company/${props.companyId}/clients/clients`}
               icon={<Users />}
             >
               Inicio
