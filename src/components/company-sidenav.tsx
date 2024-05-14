@@ -1,3 +1,4 @@
+"use client";
 import Sidenav, { SidenavItem, SidenavSeparator } from "./sidenav";
 import {
   ActivitySquareIcon,
@@ -20,13 +21,42 @@ import {
   AccordionContent,
   AccordionTrigger,
 } from "./ui/accordion";
+import { usePathname } from "next/navigation";
 
 export default function CompanySidenav(props: { companyId: string }) {
+  const menu: Record<string, string> = {
+    Administracion: "administration",
+    "Gestión de documentos": "management",
+    General: "general",
+    Clientes: "clients",
+    Proveedores: "providers",
+  };
+  const pathname = usePathname();
+  const isActive = (href: keyof typeof menu) => {
+    console.log("ejecutado");
+    if (href !== undefined) {
+      if (href in menu) {
+        const menuValue = menu[href];
+        if (menuValue !== undefined) {
+          console.log(
+            "el menu.href es ",
+            menu[href],
+            pathname.includes(menuValue),
+          );
+          return pathname.includes(menuValue);
+        }
+      }
+    }
+  };
   return (
     <Sidenav>
       <Accordion type="single" collapsible>
         <AccordionItem value="item-1">
-          <AccordionTrigger className=" px-1 py-1.5 hover:no-underline">
+          <AccordionTrigger
+            className={`${
+              isActive("General") ? "bg-[#1bdfb7]" : ""
+            }px-1 py-1.5 hover:no-underline`}
+          >
             <SidenavSeparator>General</SidenavSeparator>
           </AccordionTrigger>
           <AccordionContent>
