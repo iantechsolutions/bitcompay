@@ -16,7 +16,7 @@ import { clientStatusesRouter } from "./routers/client-statuses-router";
 import { integrant } from "../db/schema";
 import { integrantRouter } from "./routers/integrant-router";
 import { paymentHoldersRouter } from "./routers/paymentHolders.router";
-import { billResponsiveRouter } from "./routers/billResponsive.router";
+import { billResponsibleRouter } from "./routers/billResponsive.router";
 import { facturasRouter } from "./routers/factura-router";
 import { modosRouter } from "./routers/modo.router";
 /**

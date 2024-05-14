@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { Table, relations } from "drizzle-orm";
 import {
   bigint,
   boolean,
@@ -11,8 +11,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { columnId, createdAt, pgTable, updatedAt } from "./schema/util";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { type z } from "zod";
-import { int } from "drizzle-orm/mysql-core";
+import { number, type z } from "zod";
 export * from "./schema/auth";
 export { pgTable } from "./schema/util";
 
@@ -480,6 +479,7 @@ export const modos = pgTable("modos", {
   description: varchar("description", { length: 255 }).notNull(),
 });
 
+
 export const integrant = pgTable("integrant", {
   id: columnId,
   affiliate_type: varchar("affiliate_type", { length: 255 }),
@@ -510,10 +510,10 @@ export const integrant = pgTable("integrant", {
   isAffiliate:  boolean("isAffiliate").notNull().default(false),
   isBillResponsible: boolean("isBillResponsible").notNull().default(false),
 
-  paymentHolders_id: varchar("paymentHoldersId")
-  .references(() => paymentHolders.id),
-  billResponsible_id: varchar("billResponsibleId")
-  .references(() => billResponsible.id),
+  // paymentHolders_id: varchar("paymentHoldersId", { length: 255 })
+  // .references(() => paymentHolders.id).notNull().default(""),
+  // billResponsible_id: varchar("billResponsibleId", { length: 255 })
+  // .references(() => billResponsible.id).notNull().default(""),
 });
 
 export const insertintegrantSchema = createInsertSchema(integrant);
@@ -552,21 +552,21 @@ export const integrantSchemaDB = insertintegrantSchema.pick({
 export type Integrant = z.infer<typeof selectintegrantSchema>;
 
 
-export const integrantRelations = relations(integrant, ({ one }) => ({
-  paymentHolders: one(paymentHolders, {
-    fields: [integrant.paymentHolders_id],
-    references: [paymentHolders.id],
-  }),
-  billResponsible: one(billResponsible, {
-    fields: [integrant.billResponsible_id],
-    references: [billResponsible.id],
-  }),
-}));
+// export const integrantRelations = relations(integrant, ({ one }) => ({
+//   paymentHolders: one(paymentHolders, {
+//     fields: [integrant.paymentHolders_id],
+//     references: [paymentHolders.id],
+//   }),
+//   billResponsible: one(billResponsible, {
+//     fields: [integrant.billResponsible_id],
+//     references: [billResponsible.id],
+//   }),
+// }));
+
 
 export const paymentHolders = pgTable("paymentHolders", {
   id: columnId,
   name: varchar("description", { length: 255 }).notNull(),
-  integrant_id:  integer("integrant_id").references(() => integrant.id).notNull(),
   id_type: varchar("id_type", { length: 255 }),
   id_number: varchar("id_number", { length: 255 }),
   cuit: varchar("description", { length: 255 }).notNull(),
@@ -575,6 +575,7 @@ export const paymentHolders = pgTable("paymentHolders", {
   fiscal_id_number: varchar("fiscal_id_number", { length: 255 }),
   address: varchar("description", { length: 255 }).notNull(),
   iva: varchar("iva", { length: 255 }).notNull(),
+  integrant_id: varchar("integrant_id", { length: 255 }).references(() => integrant.id).default(""),
 });
 
 export const insertpaymentHoldersSchema = createInsertSchema(paymentHolders);
@@ -613,7 +614,6 @@ export const paymentHoldersRelations = relations(
 
 export const billResponsible = pgTable("billResponsible", {
   id: columnId,
-  integrant_id:  integer("integrant_id").references(() => integrant.id).notNull(),
   payment_responsive: integer("payment_responsive").references(() => paymentHolders.id).notNull(),
   name: varchar("description", { length: 255 }).notNull(),
   id_type: varchar("id_type", { length: 255 }),
@@ -625,6 +625,7 @@ export const billResponsible = pgTable("billResponsible", {
   payment_holder: varchar("payment_holder", { length: 255 }),
   adress: varchar("description", { length: 255 }).notNull(),
   iva: varchar("iva", { length: 255 }).notNull(),
+  integrant_id:  varchar("integrant_id", { length: 255 }).references(() => integrant.id).notNull().default("1"),
 });
 
 export const insertBillResponsibleSchema = createInsertSchema(billResponsible);
@@ -668,7 +669,7 @@ export const facturas = pgTable("facturas", {
   nroFactura: integer("nroFactura").notNull(),
   tipoFactura: varchar("tipoFactura", { length: 255 }).notNull(),
   concepto: integer("concept").notNull(),
-  tipoDocumento: varchar("tipoDocumento", { length: 255 }).notNull(),
+  tipoDocumento: integer("tipoDocumento").notNull(),
   nroDocumento: integer("nroDocumento").notNull(),
   importe: integer("importe").notNull(),
   fromPeriod: timestamp("fromperiod", { mode: "date" }),

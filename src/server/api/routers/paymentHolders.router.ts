@@ -39,6 +39,8 @@ export const paymentHoldersRouter = createTRPCRouter({
       fiscal_id_number: z.string(),
       address: z.string(),
       iva: z.string(),
+      integrant_id: z.string()
+
 }))
 .mutation(async ({ input }) => {
       
