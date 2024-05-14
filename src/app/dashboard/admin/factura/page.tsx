@@ -7,6 +7,8 @@ import { getServerAuthSession } from "~/server/auth";
 import { Title } from "~/components/title";
 import { FacturaDialog } from "./generarFactura";
 import LayoutContainer from "~/components/layout-container";
+import { api } from "~/trpc/server";
+import { List, ListTile } from "~/components/list";
 
 export default async function Home() {
   const session = await getServerAuthSession();
@@ -14,6 +16,7 @@ export default async function Home() {
     "src/app/dashboard/admin/factura/bill.html",
     "utf8",
   );
+  const products = await api.facturas.list.query();
   return (
     <LayoutContainer>
       <section className="space-y-2">
@@ -21,6 +24,16 @@ export default async function Home() {
           <Title>Facturas</Title>
           <FacturaDialog receivedHtml={html}></FacturaDialog>
         </div>
+        <List>
+          {products.map((product) => {
+            return (
+              <ListTile
+                key={product.id}
+                leading={product.generated ? "🟢" : "🔴"}
+              />
+            );
+          })}
+        </List>
       </section>
     </LayoutContainer>
   );

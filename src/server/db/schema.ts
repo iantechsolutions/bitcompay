@@ -521,3 +521,48 @@ export const paymentHolders = pgTable("modos", {
     enum: ["10.5", "21"],
   }),
 });
+
+
+export const facturas = pgTable("facturas", {
+  id: columnId,
+  generated: timestamp("generated", { mode: "date" }),
+  ptoVenta: integer("ptoVenta").notNull(),
+  nroFactura: integer("nroFactura").notNull(),
+  tipoFactura: varchar("tipoFactura", { length: 255 }).notNull(),
+  concepto: integer("concept").notNull(),
+  tipoDocumento: integer("tipoDocumento").notNull(),
+  nroDocumento: integer("nroDocumento").notNull(),
+  importe: integer("importe").notNull(),
+  fromPeriod: timestamp("fromperiod", { mode: "date" }),
+  toPeriod: timestamp("toperiod", { mode: "date" }),
+  due_date: timestamp("due_date", { mode: "date" }),
+  payedDate: timestamp("payedDate", { mode: "date" }),
+  prodName: varchar("prodName", { length: 255 }).notNull(),
+  iva: varchar("iva", { length: 255 }).notNull(),
+  billLink: varchar("billLink", { length: 255 }).notNull(),
+});
+
+
+export const insertFacturasSchema = createInsertSchema(facturas);
+export const selectFacturasSchema = createSelectSchema(facturas);
+export const FacturasSchemaDB = insertFacturasSchema.pick({
+  generated: true,
+  payment_date: true,
+  link: true,
+  billLink: true,
+  concepto: true,
+  tipoFactura: true,
+  tipoDocumento: true,
+  nroDocumento: true,
+  importe: true,
+  fromPeriod: true,
+  toPeriod: true,
+  due_date: true,
+  payedDate: true,
+  prodName: true,
+  iva: true,
+  ptoVenta: true,
+  nroFactura: true,
+});
+export type Facturas = z.infer<typeof selectFacturasSchema>;
+
