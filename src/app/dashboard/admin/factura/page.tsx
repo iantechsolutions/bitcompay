@@ -10,6 +10,14 @@ import LayoutContainer from "~/components/layout-container";
 import { api } from "~/trpc/server";
 import { List, ListTile } from "~/components/list";
 
+function formatDate(date: Date | null) {
+  if (date) {
+    return date.getFullYear() + "/" + date.getMonth() + "/" + date.getDay();
+  } else {
+    return "";
+  }
+}
+
 export default async function Home() {
   const session = await getServerAuthSession();
   const html = fs.readFileSync(
@@ -29,7 +37,8 @@ export default async function Home() {
             return (
               <ListTile
                 key={product.id}
-                leading={product.generated ? "🟢" : "🔴"}
+                leading={"Nro: " + product.nroFactura + ","}
+                title={" Emitida el: " + formatDate(product.generated)}
               />
             );
           })}

@@ -530,7 +530,7 @@ export const facturas = pgTable("facturas", {
   nroFactura: integer("nroFactura").notNull(),
   tipoFactura: varchar("tipoFactura", { length: 255 }).notNull(),
   concepto: integer("concept").notNull(),
-  tipoDocumento: integer("tipoDocumento").notNull(),
+  tipoDocumento: varchar("tipoDocumento", { length: 255 }).notNull(),
   nroDocumento: integer("nroDocumento").notNull(),
   importe: integer("importe").notNull(),
   fromPeriod: timestamp("fromperiod", { mode: "date" }),
