@@ -4,6 +4,7 @@ import { db, schema } from "~/server/db";
 import { eq } from "drizzle-orm";
 import { getServerAuthSession } from "~/server/auth";
 import { modos } from "~/server/db/schema";
+import { Description } from "@radix-ui/react-toast";
 
 
 
@@ -27,19 +28,15 @@ export const modosRouter = createTRPCRouter({
       return modos;
     }),
 
-  create: protectedProcedure
-    .input(modos)
-    .mutation(async ({ input }) => {
-      const session = await getServerAuthSession();
-      if (!session || !session.user) {
-        throw new Error("User not found");
-      }
-      const user = session?.user.id;
-      const newmodos = await db
-        .insert(schema.modos)
-        .values({ ...input, user });
+    create: protectedProcedure
+    .input(z.object({
+        Description: z.string(),
+        type: z.string(),
 
-      return newmodos;
+}))
+.mutation(async ({ input }) => { 
+    await db.insert(modos).values({ input });
+
     }),
 
   change: protectedProcedure

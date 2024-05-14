@@ -27,19 +27,19 @@ export const paymentHoldersRouter = createTRPCRouter({
       return paymentHolders;
     }),
 
-  create: protectedProcedure
-    .input(paymentHolders)
-    .mutation(async ({ input }) => {
-      const session = await getServerAuthSession();
-      if (!session || !session.user) {
-        throw new Error("User not found");
-      }
-      const user = session?.user.id;
-      const newpaymentHolders = await db
-        .insert(schema.paymentHolders)
-        .values({ ...input, user });
+    create: protectedProcedure
+    .input(z.object({
+        id: z.string(),
+  cuit: z.string(),
+  name: z.string(),
+  adress: z.string(),
+  iva: z.string()
+}))
+.mutation(async ({ input }) => {
+      
+    await db.insert(paymentHolders).values({ input });
+  
 
-      return newpaymentHolders;
     }),
 
   change: protectedProcedure

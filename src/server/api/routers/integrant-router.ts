@@ -27,21 +27,43 @@ export const integrantRouter = createTRPCRouter({
       return integrant;
     }),
 
-  create: protectedProcedure
-    .input(integrant)
+    create: protectedProcedure
+    .input(z.object({ 
+  affiliate_type: z.string(),
+  relationship: z.string(),
+  adress: z.string(),
+  name: z.string(),
+  id_type: z.string(),
+  id_number: z.string(),
+  birth_date: z.string(),
+  gender: z.string(),
+  civil_status: z.string(),
+  nationality: z.string(),
+  afip_status: z.string(),
+  fiscal_id_type: z.string(),
+  fiscal_id_number: z.string(),
+  address:z.string(),
+  phone_number:z.string(),
+  cellphone_number: z.string(),
+  email: z.string(),
+  floor:z.string(),
+  department: z.string(),
+  localidad: z.string(),
+  partido: z.string(),
+  provincia: z.string(),
+  cp: z.string(),
+  zona: z.string(),
+  isHolder:  z.string(),
+  isPaymentHolder:  z.string(),
+  isAffiliate:  z.string(),
+    
+    
+    }))
     .mutation(async ({ input }) => {
-      const session = await getServerAuthSession();
-      if (!session || !session.user) {
-        throw new Error("User not found");
-      }
-      const user = session?.user.id;
-      const newintegrant = await db
-        .insert(schema.integrant)
-        .values({ ...input, user });
-
-      return newintegrant;
-    }),
-
+      
+        await db.insert(integrant).values({ input });
+      
+    }),     
   change: protectedProcedure
     .input(
       z.object({
