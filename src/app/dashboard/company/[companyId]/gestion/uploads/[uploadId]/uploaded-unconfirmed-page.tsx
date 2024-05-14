@@ -15,7 +15,7 @@ import { LargeTable } from "~/components/table";
 import { LargeEditableTable } from "~/components/editable-table";
 import { toast } from "sonner";
 import { asTRPCError } from "~/lib/errors";
-import { useCompanyData } from "../../company-provider";
+import { useCompanyData } from "../../../company-provider";
 import {
   Table,
   TableBody,
