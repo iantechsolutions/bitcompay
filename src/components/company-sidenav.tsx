@@ -32,7 +32,7 @@ export default function CompanySidenav(props: { companyId: string }) {
           <AccordionContent>
             <SidenavItem
               icon={<LayoutDashboardIcon />}
-              href={`/dashboard/company/${props.companyId}/company-dashboard`}
+              href={`/dashboard/company/${props.companyId}/general/dashboard`}
             >
               Dashboard
             </SidenavItem>

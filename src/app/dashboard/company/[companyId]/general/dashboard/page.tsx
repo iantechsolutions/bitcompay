@@ -21,6 +21,7 @@ import { EyeOff } from "lucide-react";
 import { Clock9 } from "lucide-react";
 import { Overview } from "~/components/dashboard/overview";
 import { RecentSales } from "~/components/dashboard/recent-sales";
+import Image from "next/image";
 export default async function page() {
   const session = await getServerAuthSession();
   const user = session?.user;
@@ -34,15 +35,15 @@ export default async function page() {
       </Title>
 
       <section>
-        <Card className="max-w-[1000px]">
-          <CardContent className="mt-5 flex w-full flex-wrap items-center justify-around gap-5">
+        <Card className="cardDashboard max-w-[1000px]">
+          <CardContent className="mt-5 flex w-full flex-wrap items-center justify-between gap-2">
             <Link href={"sdfksdf"} className=" h-auto w-auto">
               <Button className=" bg-white text-black shadow-none hover:bg-white">
                 <div className="mr-4 box-border rounded-full bg-[#1bdfb7] p-2">
                   <HandCoins className="h-6 w-6" />
                 </div>
 
-                <p className="text-wrap text-basis w-[100px] overflow-hidden whitespace-normal text-left">
+                <p className="text-wrap text-basis w-[120px] overflow-hidden   whitespace-normal text-left text-[16px]">
                   Generacion de Recaudacion
                 </p>
               </Button>
@@ -53,7 +54,7 @@ export default async function page() {
                   <ArrowLeftRight className="h-6 w-6" />
                 </div>
 
-                <p className="text-wrap   text-basis w-[100px] overflow-hidden whitespace-pre-line text-left">
+                <p className="text-wrap text-basis   w-[120px] overflow-hidden  whitespace-normal text-left text-[16px]">
                   Transacciones de la fecha
                 </p>
               </Button>
@@ -64,7 +65,7 @@ export default async function page() {
                   <LogOut className="h-6 w-6" />
                 </div>
 
-                <p className="text-wrap  text-basis w-[100px] overflow-hidden whitespace-normal text-left">
+                <p className="text-wrap text-basis  w-[120px] overflow-hidden whitespace-normal text-left text-[16px]">
                   Informacion de facturacion
                 </p>
               </Button>
@@ -76,7 +77,7 @@ export default async function page() {
                   <Import className="h-6 w-6" />
                 </div>
 
-                <p className="text-wrap text-basis w-[100px] overflow-hidden whitespace-normal text-left">
+                <p className="text-wrap text-basis w-[120px] overflow-hidden whitespace-normal text-left text-[16px]">
                   Solicitar transferencia
                 </p>
               </Button>
@@ -84,30 +85,43 @@ export default async function page() {
           </CardContent>
         </Card>
       </section>
-      <section className="mt-4">
+      <section className="mt-8">
         <h2 className="mb-3 text-xl font-semibold  ">
           Saldo en <span className="text-[#8fefdc]">cuenta</span>
         </h2>{" "}
-        <Card className="mt-3 max-w-[500px] rounded-[12px]">
-          <div className="font-spline-sans flex items-center justify-between px-7 pt-7">
-            <p className="text-4xl font-semibold">
-              {" "}
-              $<span className="text-3xl"> ****</span>
-            </p>
-            <div className="box-sizing rounded-full bg-[#1bdfb7] p-2">
-              <EyeOff className="h-5 w-5" />
+        <div className="relative inline-flex">
+          <Image
+            src={"/bitcom_icon.png"}
+            alt="icono_bitcom"
+            width={50}
+            height={50}
+            className="absolute right-[-20px] top-[-20px] z-20"
+          />
+
+          <Card className="cardDashboard z-0  mt-3 w-[400px] overflow-hidden rounded-[12px]">
+            <div className="flex items-center justify-between px-7 pt-7 font-spline-sans">
+              <p className="text-4xl font-semibold">
+                {" "}
+                $<span className="text-3xl"> ****</span>
+              </p>
+              <div className="box-sizing rounded-full bg-[#1bdfb7] p-2">
+                <EyeOff className="h-5 w-5" />
+              </div>
             </div>
-          </div>
-          <div className="mt-3 overflow-hidden  bg-[#8fefdc] px-4 py-2">
-            <p className="flex items-center gap-1 text-sm font-bold">
-              <Clock9 className="h-3 w-3 " /> Actualizado{" "}
-              <span className="text-sm font-light opacity-70"> 13/05/2024</span>
-            </p>
-          </div>
-        </Card>
+            <div className="mt-3 overflow-hidden  bg-[#8fefdc] px-4 py-2">
+              <p className="flex items-center gap-1 text-sm font-bold">
+                <Clock9 className="h-3 w-3 " /> Actualizado{" "}
+                <span className="text-sm font-light opacity-70">
+                  {" "}
+                  13/05/2024
+                </span>
+              </p>
+            </div>
+          </Card>
+        </div>
       </section>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
+      <div className="mt-7 grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        <Card className="cardDashboard col-span-4">
           <CardHeader>
             <div className="flex justify-between">
               <CardTitle className="text-xl">Resumen de cuenta</CardTitle>
@@ -139,12 +153,9 @@ export default async function page() {
             <Overview />
           </CardContent>
         </Card>
-        <Card className="col-span-3">
+        <Card className="cardDashboard col-span-3">
           <CardHeader>
             <CardTitle className="text-xl">Transacciones del dia</CardTitle>
-            <CardDescription>
-              Se han realizado 256 cobros este mes.
-            </CardDescription>
           </CardHeader>
           <CardContent>
             <RecentSales />

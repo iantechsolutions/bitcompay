@@ -7,7 +7,6 @@ import { ComboboxDemo } from "~/components/ui/combobox";
 import * as React from "react";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
-
 import { cn } from "~/lib/utils";
 import { Calendar } from "~/components/ui/calendar";
 import {
@@ -25,6 +24,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Factura } from "./facturaGenerada";
+import { api } from "~/trpc/react";
 
 export async function ingresarAfip() {
   //CUIT QUE QUEREMOS QUE COBRE
@@ -90,6 +90,8 @@ function formatDate(date: Date | undefined) {
 }
 
 export function FacturaDialog({ receivedHtml }: FacturaDialog) {
+  const { mutateAsync: createFactura } = api.facturas.create.useMutation();
+
   async function generateFactura() {
     (async () => {
       setLoading(true);
@@ -177,8 +179,6 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
         domicilioComprador: "Calle falsa 123",
         nombreComprador: "Homero Simpson",
       });
-      console.log("aca7");
-      console.log(html);
       const name = "PDF de prueba";
       const options = {
         width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
@@ -192,11 +192,32 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
         file_name: name,
         options: options,
       });
-      console.log(html);
       console.log(resHtml.file);
       setLoading(false);
+
+      saveFactura(numero_de_factura);
+      setOpen(false);
     })();
   }
+  async function saveFactura(numero_de_factura: number) {
+    await createFactura({
+      billLink: "",
+      concepto: Number(concepto),
+      importe: Number(importe),
+      iva: iva,
+      nroDocumento: Number(nroDocumento),
+      ptoVenta: Number(puntoVenta),
+      tipoDocumento: tipoDocumento,
+      tipoFactura: tipoFactura,
+      fromPeriod: dateDesde,
+      toPeriod: dateHasta,
+      due_date: dateVencimiento,
+      generated: new Date(),
+      prodName: servicioprod,
+      nroFactura: numero_de_factura,
+    });
+  }
+
   async function showFactura() {}
   const [puntoVenta, setPuntoVenta] = useState("");
   const [tipoFactura, setTipoFactura] = useState("");

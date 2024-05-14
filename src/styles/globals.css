@@ -92,3 +92,7 @@
     font-family: "Spline Sans", sans-serif;
   }
 }
+
+.cardDashboard {
+  @apply shadow-custom-dark rounded-lg border-b border-l-0 border-r-0 border-t-0 border-border bg-card text-card-foreground;
+}
