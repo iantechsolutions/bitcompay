@@ -12,6 +12,7 @@ import {
   UsersIcon,
   Stamp,
   Banknote,
+  Blend
 } from "lucide-react";
 
 export default function AdminSidenav() {
@@ -33,6 +34,9 @@ export default function AdminSidenav() {
       </SidenavItem>
       <SidenavItem icon={<Stamp />} href="/dashboard/admin/brands">
         Marcas
+      </SidenavItem>
+      <SidenavItem icon={<Blend />} href="/dashboard/admin/modos">
+        Modos
       </SidenavItem>
       <SidenavItem icon={<Landmark />} href="/dashboard/admin/statuses">
         Estados
