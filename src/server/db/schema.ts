@@ -614,7 +614,6 @@ export const paymentHoldersRelations = relations(
 
 export const billResponsible = pgTable("billResponsible", {
   id: columnId,
-  payment_responsive: integer("payment_responsive").references(() => paymentHolders.id).notNull(),
   name: varchar("description", { length: 255 }).notNull(),
   id_type: varchar("id_type", { length: 255 }),
   id_number: varchar("id_number", { length: 255 }),
@@ -625,7 +624,8 @@ export const billResponsible = pgTable("billResponsible", {
   payment_holder: varchar("payment_holder", { length: 255 }),
   adress: varchar("description", { length: 255 }).notNull(),
   iva: varchar("iva", { length: 255 }).notNull(),
-  integrant_id:  varchar("integrant_id", { length: 255 }).references(() => integrant.id).notNull().default("1"),
+  payment_responsible: varchar("payment_responsible").references(() => paymentHolders.id).notNull(),
+  integrant_id:  varchar("integrant_id", { length: 255 }).references(() => integrant.id).notNull().default(""),
 });
 
 export const insertBillResponsibleSchema = createInsertSchema(billResponsible);
@@ -648,12 +648,18 @@ export type BillResponsible = z.infer<typeof selectBillResponsibleSchema>;
 
 // export const billResponsibleRelations = relations(
 //   billResponsible,
-//   ({ one }) => ({
+//   ({ one, many }) => ({
 //     integrant: one(integrant, {
 //       fields: [billResponsible.integrant_id],
 //       references: [integrant.id],
 //     }),
+// ({
+//   paymentHolders: one(paymentHolders, {
+    //       fields: [billResponsible.payment_responsive],
+    //       references: [paymentHolders.id],
 //   }),
+//   }),
+
 // );
 export const billResponsibleRelations = relations(
   billResponsible,

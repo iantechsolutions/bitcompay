@@ -30,7 +30,7 @@ export const billResponsibleRouter = createTRPCRouter({
     create: protectedProcedure
     .input(z.object({ 
       integrant_id:  z.string(),
-      payment_responsive: z.number(),
+      payment_responsible: z.string(),
       name:  z.string(),
       id_type:  z.string(),
       id_number:  z.string(),
@@ -68,7 +68,7 @@ export const billResponsibleRouter = createTRPCRouter({
       z.object({
         id: z.string(),
         integrant_id:  z.string(),
-        payment_responsive: z.number(),
+        payment_responsive: z.string(),
         name:  z.string(),
         id_type:  z.string(),
         id_number:  z.string(),
