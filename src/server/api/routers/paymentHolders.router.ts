@@ -10,7 +10,7 @@ import { paymentHolders } from "~/server/db/schema";
 
 export const paymentHoldersRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({}) => {
-    const paymentHolderss = await db.query.paymentHolderss.findMany();
+    const paymentHolderss = await db.query.paymentHolders.findMany();
     return paymentHolderss;
   }),
   get: protectedProcedure
@@ -20,7 +20,7 @@ export const paymentHoldersRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      const paymentHolders = await db.query.paymentHolderss.findFirst({
+      const paymentHolders = await db.query.paymentHolders.findFirst({
         where: eq(schema.paymentHolders.id, input.paymentHoldersId),
       });
 
@@ -29,15 +29,20 @@ export const paymentHoldersRouter = createTRPCRouter({
 
     create: protectedProcedure
     .input(z.object({
-        id: z.string(),
-  cuit: z.string(),
-  name: z.string(),
-  adress: z.string(),
-  iva: z.string()
+      name: z.string(),
+      integrant_id:  z.number(),
+      id_type: z.string(),
+      id_number: z.string(),
+      cuit: z.string(),
+      afip_status: z.string(),
+      fiscal_id_type: z.string(),
+      fiscal_id_number: z.string(),
+      address: z.string(),
+      iva: z.string(),
 }))
 .mutation(async ({ input }) => {
       
-    await db.insert(paymentHolders).values({ input });
+    await db.insert(paymentHolders).values(input);
   
 
     }),
@@ -46,7 +51,15 @@ export const paymentHoldersRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string(),
-        ...paymentHolders.shape,
+        name: z.string(),
+        id_type: z.string(),
+        id_number: z.string(),
+        cuit: z.string(),
+        afip_status: z.string(),
+        fiscal_id_type: z.string(),
+        fiscal_id_number: z.string(),
+        address: z.string(),
+        iva: z.string(),
       }),
     )
     .mutation(async ({ input: { id, ...input } }) => {

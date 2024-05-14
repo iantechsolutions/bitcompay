@@ -18,6 +18,7 @@ import { integrantRouter } from "./routers/integrant-router";
 import { paymentHoldersRouter } from "./routers/paymentHolders.router";
 import { billResponsiveRouter } from "./routers/billResponsive.router";
 import { facturasRouter } from "./routers/factura-router";
+import { modosRouter } from "./routers/modo.router";
 /**
  * This is the primary router for your server.
  *
@@ -40,7 +41,9 @@ export const appRouter = createTRPCRouter({
   clientStatuses: clientStatusesRouter,
   integrant: integrantRouter,
   paymentHolders: paymentHoldersRouter,
-
+  billResponsible: billResponsibleRouter,
+  factura: facturasRouter,
+  modo: modosRouter,
 });
 
 // export type definition of API

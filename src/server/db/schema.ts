@@ -12,6 +12,7 @@ import {
 import { columnId, createdAt, pgTable, updatedAt } from "./schema/util";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { type z } from "zod";
+import { int } from "drizzle-orm/mysql-core";
 export * from "./schema/auth";
 export { pgTable } from "./schema/util";
 
@@ -71,6 +72,7 @@ export const responseDocumentUploads = pgTable("response_document_uploads", {
   createdAt,
   updatedAt,
 });
+
 export const responseDocumentUploadsRelations = relations(
   responseDocumentUploads,
   ({ many }) => ({
@@ -473,6 +475,11 @@ export const clientStatuses = pgTable("client_statuses", {
   type: varchar("type", { length: 255 }).notNull(),
 });
 
+export const modos = pgTable("modos", {
+  id: columnId,
+  description: varchar("description", { length: 255 }).notNull(),
+});
+
 export const integrant = pgTable("integrant", {
   id: columnId,
   affiliate_type: varchar("affiliate_type", { length: 255 }),
@@ -482,9 +489,7 @@ export const integrant = pgTable("integrant", {
   id_number: varchar("id_number", { length: 255 }),
   birth_date: timestamp("birth_date", { mode: "date" }),
   gender: varchar("gender", { enum: ["female", "male", "other"] }),
-  civil_status: varchar("civil_status", {
-    enum: ["single", "married", "divorced", "widowed"],
-  }),
+  civil_status: varchar("civil_status", {enum: ["single", "married", "divorced", "widowed"],}),
   nationality: varchar("nationality", { length: 255 }),
   afip_status: varchar("afip_status", { length: 255 }),
   fiscal_id_type: varchar("fiscal_id_type", { length: 255 }),
@@ -503,19 +508,158 @@ export const integrant = pgTable("integrant", {
   isHolder:  boolean("isHolder").notNull().default(false),
   isPaymentHolder:  boolean("isPaymentHolder").notNull().default(false),
   isAffiliate:  boolean("isAffiliate").notNull().default(false),
-  
+  isBillResponsible: boolean("isBillResponsible").notNull().default(false),
+
+  paymentHolders_id: varchar("paymentHoldersId")
+  .references(() => paymentHolders.id),
+  billResponsible_id: varchar("billResponsibleId")
+  .references(() => billResponsible.id),
 });
 
-export const paymentHolders = pgTable("modos", {
-  id: columnId,
-  cuit: varchar("description", { length: 255 }).notNull(),
-  name: varchar("description", { length: 255 }).notNull(),
-  adress: varchar("description", { length: 255 }).notNull(),
-  iva: varchar("iva", {
-    enum: ["10.5", "21"],
+export const insertintegrantSchema = createInsertSchema(integrant);
+export const selectintegrantSchema = createSelectSchema(integrant);
+export const integrantSchemaDB = insertintegrantSchema.pick({
+  affiliate_type: true,
+  relationship: true,
+  name: true,
+  id_type: true,
+  id_number: true,
+  birth_date: true,
+  gender: true,
+  civil_status: true,
+  nationality: true,
+  afip_status: true,
+  fiscal_id_type: true,
+  fiscal_id_number: true,
+  address: true,
+  phone_number: true,
+  cellphone_number: true,
+  email: true,
+  floor: true,
+  department: true,
+  localidad: true,
+  partido: true,
+  provincia: true,
+  cp:true,
+  zona: true,
+  isHolder:  true,
+  isPaymentHolder:  true,
+  isAffiliate:  true,
+  isBillResponsible: true,
+  paymentHolders_id: true, 
+  billResponsible_id: true,
+});
+export type Integrant = z.infer<typeof selectintegrantSchema>;
+
+
+export const integrantRelations = relations(integrant, ({ one }) => ({
+  paymentHolders: one(paymentHolders, {
+    fields: [integrant.paymentHolders_id],
+    references: [paymentHolders.id],
   }),
+  billResponsible: one(billResponsible, {
+    fields: [integrant.billResponsible_id],
+    references: [billResponsible.id],
+  }),
+}));
+
+export const paymentHolders = pgTable("paymentHolders", {
+  id: columnId,
+  name: varchar("description", { length: 255 }).notNull(),
+  integrant_id:  integer("integrant_id").references(() => integrant.id).notNull(),
+  id_type: varchar("id_type", { length: 255 }),
+  id_number: varchar("id_number", { length: 255 }),
+  cuit: varchar("description", { length: 255 }).notNull(),
+  afip_status: varchar("afip_status", { length: 255 }),
+  fiscal_id_type: varchar("fiscal_id_type", { length: 255 }),
+  fiscal_id_number: varchar("fiscal_id_number", { length: 255 }),
+  address: varchar("description", { length: 255 }).notNull(),
+  iva: varchar("iva", { length: 255 }).notNull(),
 });
 
+export const insertpaymentHoldersSchema = createInsertSchema(paymentHolders);
+export const selectpaymentHoldersSchema = createSelectSchema(paymentHolders);
+export const paymentHoldersSchemaDB = insertpaymentHoldersSchema.pick({
+  name: true,
+  integrant_id: true,
+  id_type: true,
+  id_number: true,
+  cuit: true,
+  afip_status: true,
+  fiscal_id_type: true,
+  fiscal_id_number: true,
+  address: true,
+  iva: true,
+});
+
+export type PaymentHolders = z.infer<typeof selectpaymentHoldersSchema>;
+
+
+// export const paymentHoldersRelationss = relations(
+//   paymentHolders,
+//   ({ one }) => ({
+//     integrant: one(integrant, {
+//       fields: [paymentHolders.integrant_id],
+//       references: [integrant.id],
+//     }),
+//   }),
+// );
+export const paymentHoldersRelations = relations(
+  paymentHolders,
+  ({ many }) => ({
+    integrant: many(integrant),
+  }),
+);
+
+export const billResponsible = pgTable("billResponsible", {
+  id: columnId,
+  integrant_id:  integer("integrant_id").references(() => integrant.id).notNull(),
+  payment_responsive: integer("payment_responsive").references(() => paymentHolders.id).notNull(),
+  name: varchar("description", { length: 255 }).notNull(),
+  id_type: varchar("id_type", { length: 255 }),
+  id_number: varchar("id_number", { length: 255 }),
+  afip_status: varchar("afip_status", { length: 255 }),
+  fiscal_id_type: varchar("fiscal_id_type", { length: 255 }),
+  fiscal_id_number: varchar("fiscal_id_number", { length: 255 }),
+  cuit: varchar("cuit").notNull(),
+  payment_holder: varchar("payment_holder", { length: 255 }),
+  adress: varchar("description", { length: 255 }).notNull(),
+  iva: varchar("iva", { length: 255 }).notNull(),
+});
+
+export const insertBillResponsibleSchema = createInsertSchema(billResponsible);
+export const selectBillResponsibleSchema = createSelectSchema(billResponsible);
+export const billResponsibleSchemaDB = insertBillResponsibleSchema.pick({
+  integrant_id: true,
+  payment_responsive:true,
+  name:true,
+  id_type: true,
+  id_number: true,
+  afip_status: true,
+  fiscal_id_type: true,
+  fiscal_id_number: true,
+  cuit: true,
+  payment_holder:true,
+  adress:true,
+  iva: true,
+});
+export type BillResponsible = z.infer<typeof selectBillResponsibleSchema>;
+
+// export const billResponsibleRelations = relations(
+//   billResponsible,
+//   ({ one }) => ({
+//     integrant: one(integrant, {
+//       fields: [billResponsible.integrant_id],
+//       references: [integrant.id],
+//     }),
+//   }),
+// );
+export const billResponsibleRelations = relations(
+  billResponsible,
+  ({ many }) => ({
+    integrant: many(integrant),
+  }),
+);
 
 export const facturas = pgTable("facturas", {
   id: columnId,
