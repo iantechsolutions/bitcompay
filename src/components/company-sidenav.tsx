@@ -76,37 +76,6 @@ export default function CompanySidenav(props: { companyId: string }) {
             </SidenavItem>
           </AccordionContent>
         </AccordionItem>
-        <AccordionItem value="item-2" className="border-none">
-          <AccordionTrigger
-            className={
-              isActive("Gestión de documentos")
-                ? "rounded-lg bg-[#1bdfb7] px-1 py-1.5 hover:no-underline "
-                : "rounded-lg px-1 py-1.5 hover:no-underline"
-            }
-          >
-            <SidenavSeparator>Gestión de documentos</SidenavSeparator>
-          </AccordionTrigger>
-          <AccordionContent>
-            <SidenavItem
-              icon={<FileUpIcon />}
-              href={`/dashboard/company/${props.companyId}/gestion/uploads`}
-            >
-              Subida
-            </SidenavItem>
-            <SidenavItem
-              icon={<ActivitySquareIcon />}
-              href={`/dashboard/company/${props.companyId}/monitoring`}
-            >
-              Monitoreo
-            </SidenavItem>
-            <SidenavItem
-              icon={<Users />}
-              href={`/dashboard/company/${props.companyId}/support`}
-            >
-              Soporte
-            </SidenavItem>
-          </AccordionContent>
-        </AccordionItem>
         <AccordionItem value="item-3" className="border-none">
           <AccordionTrigger
             className={
@@ -165,6 +134,37 @@ export default function CompanySidenav(props: { companyId: string }) {
               icon={<NotebookPen />}
             >
               Estados
+            </SidenavItem>
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="item-2" className="border-none">
+          <AccordionTrigger
+            className={
+              isActive("Gestión de documentos")
+                ? "rounded-lg bg-[#1bdfb7] px-1 py-1.5 hover:no-underline "
+                : "rounded-lg px-1 py-1.5 hover:no-underline"
+            }
+          >
+            <SidenavSeparator>Gestión de documentos</SidenavSeparator>
+          </AccordionTrigger>
+          <AccordionContent>
+            <SidenavItem
+              icon={<FileUpIcon />}
+              href={`/dashboard/company/${props.companyId}/gestion/uploads`}
+            >
+              Subida
+            </SidenavItem>
+            <SidenavItem
+              icon={<ActivitySquareIcon />}
+              href={`/dashboard/company/${props.companyId}/monitoring`}
+            >
+              Monitoreo
+            </SidenavItem>
+            <SidenavItem
+              icon={<Users />}
+              href={`/dashboard/company/${props.companyId}/support`}
+            >
+              Soporte
             </SidenavItem>
           </AccordionContent>
         </AccordionItem>

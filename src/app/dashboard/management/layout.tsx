@@ -13,6 +13,7 @@ export default async function Layout(props: {
   return (
     <AppLayout
       title="Gestión"
+      sidenavClass="top-[70px]"
       user={session?.user}
       sidenav={<ManagementSidenav />}
     >

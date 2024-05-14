@@ -9,6 +9,7 @@ export type AppLayoutProps = {
   sidenav?: React.ReactNode;
   user?: NavUserData;
   headerClass?: string;
+  sidenavClass?: string;
 };
 
 export default function AppLayout(props: AppLayoutProps) {
@@ -31,7 +32,12 @@ export default function AppLayout(props: AppLayoutProps) {
         <div className="w-full">{props.title}</div>
         {props.user && <NavUserSection user={props.user} />}
       </header>
-      <aside className="fixed bottom-0 left-0 top-0 z-20 hidden max-h-full w-[250px] overflow-y-auto border-r md:block">
+      <aside
+        className={
+          "fixed bottom-0 left-0 z-20 hidden max-h-full w-[250px] overflow-y-auto border-r md:block " +
+          props.sidenavClass
+        }
+      >
         {props.sidenav}
       </aside>
       <main className="relative mt-[70px] p-3 md:ml-[250px] md:p-10">

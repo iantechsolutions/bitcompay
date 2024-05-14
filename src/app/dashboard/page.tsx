@@ -21,6 +21,7 @@ export default async function Home() {
     <AppLayout
       title={<h1>BITCOMPAY</h1>}
       user={session?.user}
+      sidenavClass="top-[70px]"
       sidenav={
         <Sidenav>
           <SidenavItem icon={<Settings2Icon />} href="/dashboard/admin">
@@ -44,7 +45,7 @@ export default async function Home() {
           return (
             <ListTile
               key={company.id}
-              href={`/dashboard/company/${company.id}/uploads`}
+              href={`/dashboard/company/${company.id}/gestion/uploads`}
               title={company.name}
               leading={<Building2Icon />}
             />

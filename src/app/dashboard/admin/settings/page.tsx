@@ -8,6 +8,7 @@ export default async function Home() {
 
   return (
     <AppLayout
+      sidenavClass="top-[70px]"
       title={<h1>Configuraciones del sistema</h1>}
       user={session?.user}
       sidenav={<AppSidenav />}

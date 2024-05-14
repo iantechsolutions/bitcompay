@@ -27,6 +27,7 @@ export default async function Layout(props: {
       //   ></img>
       // }
       headerClass="bg-[#e9fcf8]"
+      sidenavClass="top-0"
       user={session?.user}
       sidenav={
         company ? (

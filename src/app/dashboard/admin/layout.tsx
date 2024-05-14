@@ -7,6 +7,7 @@ export default async function Layout(props: { children?: React.ReactNode }) {
 
   return (
     <AppLayout
+      sidenavClass="top-[70px]"
       title={<h1>Administración</h1>}
       user={session?.user}
       sidenav={<AdminSidenav />}
