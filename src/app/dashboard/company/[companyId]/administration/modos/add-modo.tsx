@@ -21,7 +21,7 @@ import { api } from "~/trpc/react";
 
 export function AddModo() {
   const { mutateAsync: createProduct, isLoading } =
-    api.modo.create.useMutation();
+    api.modos.create.useMutation();
 
   const [description, setDescription] = useState("");
 

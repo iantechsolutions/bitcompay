@@ -44,7 +44,7 @@ export const appRouter = createTRPCRouter({
   paymentHolders: paymentHoldersRouter,
   billResponsible: billResponsibleRouter,
   facturas: facturasRouter,
-  modo: modosRouter,
+  modos: modosRouter,
   prospects: prospectsRouter,
   procedure: procedureRouter
 });
