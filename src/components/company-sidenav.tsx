@@ -13,6 +13,7 @@ import {
   Option,
   Gem,
   NotebookPen,
+  Blend,
 } from "lucide-react";
 import { Notebook } from "lucide-react";
 import {
@@ -104,6 +105,12 @@ export default function CompanySidenav(props: { companyId: string }) {
               icon={<Notebook />}
             >
               Planes
+            </SidenavItem>
+            <SidenavItem
+              href={`/dashboard/company/${props.companyId}/administration/modos`}
+              icon={<Blend />}
+            >
+              Modos
             </SidenavItem>
             <SidenavItem
               href={`/dashboard/company/${props.companyId}/administration/bussiness_units`}

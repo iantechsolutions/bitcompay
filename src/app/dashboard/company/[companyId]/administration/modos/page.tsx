@@ -6,22 +6,22 @@ import { AddModo } from "./add-modo";
 import { modos } from "~/server/db/schema";
 
 export default async function Home() {
-  const modos = await api.modo.list.query();
+  const modo = await api.modos.list.query();
   return (
     <LayoutContainer>
       <section className="space-y-2">
         <div className="flex justify-between">
-          <Title>Modos</Title>
+          <Title>modos</Title>
             <AddModo/>
         </div>
         <List>
-          {modos.map((modos) => {
+          {modo.map((modo) => {
             return (
               <ListTile
-                key={modos.id}
-                  leading={modos.description}
-                href={`/dashboard/admin/modos/${modos.id}`}
-                title={modos.description}
+                key={modo.id}
+                  leading={modo.description}
+                href={`/dashboard/admin/modos/${modo.id}`}
+                title={modo.id}
               />
             );
           })}
