@@ -509,16 +509,16 @@ export const integrants = pgTable("integrant", {
   isAffiliate:  boolean("isAffiliate").notNull().default(false), 
   isBillResponsible: boolean("isBillResponsible").notNull().default(false),
   
-  procedure_id: varchar("procedure_id", { length: 255 })
-  .notNull()
-  .references(() => procedure.id),
-  paymentHolder_id: varchar("paymentHolder_id", { length: 255 })
-      .notNull()
-      .references(() => paymentHolders.id),
+  procedure_id: varchar("procedure_id", { length: 255 }),
+  // .notNull()
+  // .references(() => procedure.id),
+  paymentHolder_id: varchar("paymentHolder_id", { length: 255 }),
+      // .notNull()
+      // .references(() => paymentHolders.id),
 
-  billResponsible_id: varchar("billResponsible_id", { length: 255 })
-  .notNull()
-  .references(() => billResponsible.id),
+  billResponsible_id: varchar("billResponsible_id", { length: 255 }),
+  // .notNull()
+  // .references(() => billResponsible.id),
   
 });
 
@@ -609,7 +609,8 @@ export const billResponsible = pgTable("billResponsible", {
   payment_holder: varchar("payment_holder", { length: 255 }),
   adress: varchar("adress", { length: 255 }).notNull(),
   iva: varchar("iva", { length: 255 }).notNull(),
-  payment_responsible: varchar("payment_responsible").references(() => paymentHolders.id).notNull(),
+  payment_responsible: varchar("payment_responsible")
+  // .references(() => paymentHolders.id).notNull(),
   // integrant_id: varchar("integrant_id", { length: 255 })
   // .references(() => integrants.id).notNull().default(""),
 });
@@ -685,7 +686,8 @@ export const procedure = pgTable("procedure", {
   code: varchar("code", { length: 255 }).notNull(),
   procedureNumber: varchar("procedureNumber", { length: 255 }).notNull(),
   estado: varchar("estado", { length: 255 }).notNull(),
-  prospect: varchar("prospect").references(() => prospects.id).notNull(),
+  prospect: varchar("prospect")
+  // .references(() => prospects.id).notNull(),
 });
 
 export const insertProcedureSchema = createInsertSchema(procedure);
@@ -702,13 +704,16 @@ export const prospects = pgTable("prospects", {
   id: columnId,
   businessUnit: varchar("businessUnit", { length: 255 }).notNull(),
   validity: timestamp("validity", { mode: "date" }),
-  plan: varchar("plan").references(() => plans.id).notNull(),
-  modo: varchar("modo").references(() => modos.id).notNull(),
+  plan: varchar("plan"),
+  // .references(() => plans.id).notNull(),
+  modo: varchar("modo"),
+  // .references(() => modos.id).notNull(),
   cuit: varchar("cuit", { length: 255 }).notNull(),
-  healthInsurances: varchar("healthInsurances").references(() => healthInsurances.id).notNull(),
   employerContribution: varchar("employerContribution", { length: 255 }).notNull(),
   receipt:varchar("receipt", { length: 255 }).notNull(),
   bonus: varchar("bonus", { length: 255 }).notNull(),
+  healthInsurances: varchar("healthInsurances")
+  // .references(() => healthInsurances.id).notNull(),
 });
 
 export const insertProspectsSchema = createInsertSchema(prospects);
