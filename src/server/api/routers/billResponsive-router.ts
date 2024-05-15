@@ -29,8 +29,6 @@ export const billResponsibleRouter = createTRPCRouter({
 
     create: protectedProcedure
     .input(z.object({ 
-      integrant_id:  z.string(),
-      payment_responsible: z.string(),
       name:  z.string(),
       id_type:  z.string(),
       id_number:  z.string(),
@@ -41,6 +39,8 @@ export const billResponsibleRouter = createTRPCRouter({
       payment_holder:  z.string(),
       adress:  z.string(),
       iva:  z.string(),
+      payment_responsible: z.string(),
+      // integrant_id:  z.string(),
     
     
     }))
@@ -54,11 +54,11 @@ export const billResponsibleRouter = createTRPCRouter({
           fiscal_id_type: input.fiscal_id_type,
           id_number: input.id_number,
           id_type: input.id_type,
-          integrant_id: input.integrant_id,
           iva: input.iva,
           name: input.name,
-          payment_holder: input.payment_holder,
           payment_responsible: input.payment_responsible,
+          payment_holder: input.payment_holder,
+          // integrant_id: input.integrant_id,
 
         });
       
@@ -94,11 +94,11 @@ export const billResponsibleRouter = createTRPCRouter({
           fiscal_id_type: input.fiscal_id_type,
           id_number: input.id_number,
           id_type: input.id_type,
-          integrant_id: input.integrant_id,
           iva: input.iva,
           name: input.name,
           payment_holder: input.payment_holder,
           payment_responsible: input.payment_responsible,
+          // integrant_id: input.integrant_id,
         
         })
         .where(eq(schema.billResponsible.id, id));

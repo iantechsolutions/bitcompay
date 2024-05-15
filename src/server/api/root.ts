@@ -13,12 +13,13 @@ import { plansRouter } from "./routers/plans-router";
 import { bussinessUnitsRouter } from "./routers/bussiness-units-router";
 import { healthInsurancesRouter } from "./routers/health-insurances-router";
 import { clientStatusesRouter } from "./routers/client-statuses-router";
-import { integrant } from "../db/schema";
-import { integrantRouter } from "./routers/integrant-router";
+import { integrantsRouter } from "./routers/integrant-router";
 import { paymentHoldersRouter } from "./routers/paymentHolders.router";
 import { billResponsibleRouter } from "./routers/billResponsive-router";
 import { facturasRouter } from "./routers/factura-router";
 import { modosRouter } from "./routers/modo.router";
+import { prospectsRouter } from "./routers/prospects.router";
+import { procedureRouter } from "./routers/procedure.router";
 /**
  * This is the primary router for your server.
  *
@@ -39,11 +40,13 @@ export const appRouter = createTRPCRouter({
   bussinessUnits: bussinessUnitsRouter,
   healthInsurances: healthInsurancesRouter,
   clientStatuses: clientStatusesRouter,
-  integrant: integrantRouter,
+  integrants: integrantsRouter,
   paymentHolders: paymentHoldersRouter,
   billResponsible: billResponsibleRouter,
   facturas: facturasRouter,
   modo: modosRouter,
+  prospects: prospectsRouter,
+  procedure: procedureRouter
 });
 
 // export type definition of API

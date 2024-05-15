@@ -1,5 +1,7 @@
 "use client";
 
+import { datetime } from "drizzle-orm/mysql-core";
+import { date } from "drizzle-orm/pg-core";
 import { Loader2Icon, PlusCircleIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -22,7 +24,7 @@ export function AddModo() {
     api.modo.create.useMutation();
 
   const [description, setDescription] = useState("");
-  const [name, setName] = useState("");
+
 
   const [open, setOpen] = useState(false);
 
@@ -31,7 +33,8 @@ export function AddModo() {
   async function handleCreate() {
     try {
       await createProduct({
-        description,
+        description: description
+
       });
 
       toast.success("Producto creado correctamente");
@@ -58,7 +61,7 @@ export function AddModo() {
                 </DialogDescription> */}
           </DialogHeader>
           <div>
-            <Label htmlFor="description">Descripción</Label>
+            <Label htmlFor="description">name</Label>
             <Input
               id="description"
               placeholder="..."
@@ -71,7 +74,7 @@ export function AddModo() {
               {isLoading && (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}
-              Crear producto
+              Crear modo
             </Button>
           </DialogFooter>
         </DialogContent>

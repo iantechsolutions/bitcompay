@@ -30,7 +30,6 @@ export const paymentHoldersRouter = createTRPCRouter({
     create: protectedProcedure
     .input(z.object({
       name: z.string(),
-      integrant_id:  z.string(),
       id_type: z.string(),
       id_number: z.string(),
       cuit: z.string(),
@@ -39,6 +38,7 @@ export const paymentHoldersRouter = createTRPCRouter({
       fiscal_id_number: z.string(),
       address: z.string(),
       iva: z.string(),
+      // integrant_id:  z.string(),
 
 }))
 .mutation(async ({ input }) => {
@@ -61,7 +61,7 @@ export const paymentHoldersRouter = createTRPCRouter({
         fiscal_id_number: z.string(),
         address: z.string(),
         iva: z.string(),
-        integrant_id:  z.string(),
+        // integrant_id:  z.string(),
       }),
     )
     .mutation(async ({ input: { id, ...input } }) => {

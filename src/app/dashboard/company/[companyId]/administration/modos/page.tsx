@@ -3,29 +3,29 @@ import { List, ListTile } from "~/components/list";
 import LayoutContainer from "~/components/layout-container";
 import { api } from "~/trpc/server";
 import { AddModo } from "./add-modo";
-import { modos } from "~/server/db/schema";
+import { procedure } from "~/server/db/schema";
 
 export default async function Home() {
-  const modos = await api.modo.list.query();
+  // const procedure = await api.procedure.list.query();
   return (
     <LayoutContainer>
       <section className="space-y-2">
         <div className="flex justify-between">
-          <Title>Modos</Title>
+          <Title>procedures</Title>
             <AddModo/>
         </div>
-        <List>
-          {modos.map((modos) => {
+        {/* <List>
+          {procedure.map((procedure) => {
             return (
               <ListTile
-                key={modos.id}
-                  leading={modos.description}
-                href={`/dashboard/admin/modos/${modos.id}`}
-                title={modos.description}
+                key={procedure.id}
+                  leading={procedure.estado}
+                href={`/dashboard/admin/procedures/${procedure.id}`}
+                title={procedure.code}
               />
             );
           })}
-        </List>
+        </List> */}
       </section>
     </LayoutContainer>
   );
