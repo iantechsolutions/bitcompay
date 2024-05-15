@@ -186,10 +186,10 @@ export default function CompanySidenav(props: { companyId: string }) {
               Inicio
             </SidenavItem>
             <SidenavItem
-              href={`/dashboard/company/${props.companyId}/sales/prospects`}
+              href={`/dashboard/company/${props.companyId}/sales/procedures`}
               icon={<Users />}
             >
-              Prospectos
+              Tramites
             </SidenavItem>
           </AccordionContent>
         </AccordionItem>
