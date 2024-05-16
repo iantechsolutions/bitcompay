@@ -145,7 +145,6 @@ export const payments = pgTable(
   }),
 );
 
-
 export const paymentsRelations = relations(payments, ({ one }) => ({
   documentUpload: one(documentUploads, {
     fields: [payments.documentUploadId],
@@ -477,8 +476,6 @@ export const modos = pgTable("modos", {
   description: varchar("description", { length: 255 }).notNull(),
 });
 
-
-
 export const integrants = pgTable("integrant", {
   id: columnId,
   affiliate_type: varchar("affiliate_type", { length: 255 }),
@@ -488,7 +485,9 @@ export const integrants = pgTable("integrant", {
   id_number: varchar("id_number", { length: 255 }),
   birth_date: timestamp("birth_date", { mode: "date" }),
   gender: varchar("gender", { enum: ["female", "male", "other"] }),
-  civil_status: varchar("civil_status", {enum: ["single", "married", "divorced", "widowed"]}),
+  civil_status: varchar("civil_status", {
+    enum: ["single", "married", "divorced", "widowed"],
+  }),
   nationality: varchar("nationality", { length: 255 }),
   afip_status: varchar("afip_status", { length: 255 }),
   fiscal_id_type: varchar("fiscal_id_type", { length: 255 }),
@@ -504,22 +503,21 @@ export const integrants = pgTable("integrant", {
   state: varchar("state", { length: 255 }),
   cp: varchar("cp", { length: 255 }),
   zone: varchar("zone", { length: 255 }),
-  isHolder:  boolean("isHolder").notNull().default(false),
-  isPaymentHolder:  boolean("isPaymentHolder").notNull().default(false),
-  isAffiliate:  boolean("isAffiliate").notNull().default(false), 
+  isHolder: boolean("isHolder").notNull().default(false),
+  isPaymentHolder: boolean("isPaymentHolder").notNull().default(false),
+  isAffiliate: boolean("isAffiliate").notNull().default(false),
   isBillResponsible: boolean("isBillResponsible").notNull().default(false),
-  
+
   procedure_id: varchar("procedure_id", { length: 255 })
-  .notNull()
-  .references(() => procedure.id),
+    .notNull()
+    .references(() => procedure.id),
   paymentHolder_id: varchar("paymentHolder_id", { length: 255 })
-      .notNull()
-      .references(() => paymentHolders.id),
+    .notNull()
+    .references(() => paymentHolders.id),
 
   billResponsible_id: varchar("billResponsible_id", { length: 255 })
-  .notNull()
-  .references(() => billResponsible.id),
-  
+    .notNull()
+    .references(() => billResponsible.id),
 });
 
 export const insertintegrantSchema = createInsertSchema(integrants);
@@ -548,19 +546,15 @@ export const integrantSchemaDB = insertintegrantSchema.pick({
   state: true,
   cp: true,
   zone: true,
-  isHolder:  true,
-  isPaymentHolder:  true,
-  isAffiliate:  true,
+  isHolder: true,
+  isPaymentHolder: true,
+  isAffiliate: true,
   isBillResponsible: true,
   procedure_id: true,
-  paymentHolder_id: true, 
+  paymentHolder_id: true,
   billResponsible_id: true,
 });
 export type Integrant = z.infer<typeof selectintegrantSchema>;
-
-
-
-
 
 export const paymentHolders = pgTable("paymentHolders", {
   id: columnId,
@@ -595,8 +589,6 @@ export const paymentHoldersSchemaDB = insertpaymentHoldersSchema.pick({
 
 export type PaymentHolders = z.infer<typeof selectpaymentHoldersSchema>;
 
-
-
 export const billResponsible = pgTable("billResponsible", {
   id: columnId,
   name: varchar("name", { length: 255 }).notNull(),
@@ -609,7 +601,9 @@ export const billResponsible = pgTable("billResponsible", {
   payment_holder: varchar("payment_holder", { length: 255 }),
   adress: varchar("adress", { length: 255 }).notNull(),
   iva: varchar("iva", { length: 255 }).notNull(),
-  payment_responsible: varchar("payment_responsible").references(() => paymentHolders.id).notNull(),
+  payment_responsible: varchar("payment_responsible")
+    .references(() => paymentHolders.id)
+    .notNull(),
   // integrant_id: varchar("integrant_id", { length: 255 })
   // .references(() => integrants.id).notNull().default(""),
 });
@@ -617,22 +611,21 @@ export const billResponsible = pgTable("billResponsible", {
 export const insertBillResponsibleSchema = createInsertSchema(billResponsible);
 export const selectBillResponsibleSchema = createSelectSchema(billResponsible);
 export const billResponsibleSchemaDB = insertBillResponsibleSchema.pick({
-  name:true,
+  name: true,
   id_type: true,
   id_number: true,
   afip_status: true,
   fiscal_id_type: true,
   fiscal_id_number: true,
   cuit: true,
-  payment_holder:true,
-  adress:true,
+  payment_holder: true,
+  adress: true,
   iva: true,
-  payment_responsible:true,
+  payment_responsible: true,
   // integrant_id: true,
 });
 
 export type BillResponsible = z.infer<typeof selectBillResponsibleSchema>;
-
 
 export const facturas = pgTable("facturas", {
   id: columnId,
@@ -652,7 +645,6 @@ export const facturas = pgTable("facturas", {
   iva: varchar("iva", { length: 255 }).notNull(),
   billLink: varchar("billLink", { length: 255 }).notNull(),
 });
-
 
 export const insertFacturasSchema = createInsertSchema(facturas);
 export const selectFacturasSchema = createSelectSchema(facturas);
@@ -677,24 +669,23 @@ export const FacturasSchemaDB = insertFacturasSchema.pick({
 });
 export type Facturas = z.infer<typeof selectFacturasSchema>;
 
-
-
-
 export const procedure = pgTable("procedure", {
   id: columnId,
   code: varchar("code", { length: 255 }).notNull(),
   procedureNumber: varchar("procedureNumber", { length: 255 }).notNull(),
   estado: varchar("estado", { length: 255 }).notNull(),
-  prospect: varchar("prospect").references(() => prospects.id).notNull(),
+  prospect: varchar("prospect")
+    .references(() => prospects.id)
+    .notNull(),
 });
 
 export const insertProcedureSchema = createInsertSchema(procedure);
 export const selectProcedureSchema = createSelectSchema(procedure);
 export const ProcedureSchemaDB = insertProcedureSchema.pick({
-  code:  true,
-  procedureNumber:  true,
-  estado:  true,
-  prospect:  true,
+  code: true,
+  procedureNumber: true,
+  estado: true,
+  prospect: true,
 });
 export type Procedure = z.infer<typeof selectProcedureSchema>;
 
@@ -702,26 +693,34 @@ export const prospects = pgTable("prospects", {
   id: columnId,
   businessUnit: varchar("businessUnit", { length: 255 }).notNull(),
   validity: timestamp("validity", { mode: "date" }),
-  plan: varchar("plan").references(() => plans.id).notNull(),
-  modo: varchar("modo").references(() => modos.id).notNull(),
+  plan: varchar("plan")
+    .references(() => plans.id)
+    .notNull(),
+  modo: varchar("modo")
+    .references(() => modos.id)
+    .notNull(),
   cuit: varchar("cuit", { length: 255 }).notNull(),
-  healthInsurances: varchar("healthInsurances").references(() => healthInsurances.id).notNull(),
-  employerContribution: varchar("employerContribution", { length: 255 }).notNull(),
-  receipt:varchar("receipt", { length: 255 }).notNull(),
+  healthInsurances: varchar("healthInsurances")
+    .references(() => healthInsurances.id)
+    .notNull(),
+  employerContribution: varchar("employerContribution", {
+    length: 255,
+  }).notNull(),
+  receipt: varchar("receipt", { length: 255 }).notNull(),
   bonus: varchar("bonus", { length: 255 }).notNull(),
 });
 
 export const insertProspectsSchema = createInsertSchema(prospects);
 export const selectProspectsSchema = createSelectSchema(prospects);
 export const prospectsSchemaDB = insertProspectsSchema.pick({
-  businessUnit:  true,
-  validity:  true,
-  plan:  true,
-  modo:  true,
-  cuit:  true,
-  healthInsurances:  true,
-  employerContribution:  true,
+  businessUnit: true,
+  validity: true,
+  plan: true,
+  modo: true,
+  cuit: true,
+  healthInsurances: true,
+  employerContribution: true,
   receipt: true,
-  bonus:  true,
+  bonus: true,
 });
 export type Prospects = z.infer<typeof selectProspectsSchema>;
