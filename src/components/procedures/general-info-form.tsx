@@ -29,6 +29,7 @@ import {
 } from "../ui/select";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { cn } from "~/lib/utils";
+import { api } from "~/trpc/react";
 dayjs.extend(utc);
 dayjs.locale("es");
 type Inputs = {
@@ -41,6 +42,11 @@ type Inputs = {
 };
 
 export default function GeneralInfoForm() {
+  const { data: bussinessUnits } = api.bussinessUnits.list.useQuery(undefined);
+
+  const { data: plans } = api.plans.list.useQuery(undefined);
+  const { data: modos } = api.modos.list.useQuery(undefined);
+
   const form = useForm<Inputs>();
   const [mode, setMode] = useState("");
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
@@ -63,8 +69,11 @@ export default function GeneralInfoForm() {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  /// aca van las unidaddes de negocio opciones con SelectItem
-                  //attr value
+                  {bussinessUnits?.map((bussinessUnit) => (
+                    <SelectItem key={bussinessUnit.id} value={bussinessUnit.id}>
+                      {bussinessUnit.description}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </FormItem>
@@ -83,7 +92,11 @@ export default function GeneralInfoForm() {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  /// aca van los planes opciones con SelectItem // attr value
+                  {plans?.map((plan) => (
+                    <SelectItem key={plan.id} value={plan.id}>
+                      {plan.description}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </FormItem>
@@ -151,8 +164,11 @@ export default function GeneralInfoForm() {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="Admin">Administrador</SelectItem>
-                  <SelectItem value="Member">Integrante</SelectItem>
+                  {modos?.map((modo) => (
+                    <SelectItem key={modo.id} value={modo.id}>
+                      {modo.description}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </FormItem>
