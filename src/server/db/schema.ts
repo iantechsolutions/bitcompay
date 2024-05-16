@@ -509,18 +509,37 @@ export const integrants = pgTable("integrant", {
   isAffiliate:  boolean("isAffiliate").notNull().default(false), 
   isBillResponsible: boolean("isBillResponsible").notNull().default(false),
   
-  procedure_id: varchar("procedure_id", { length: 255 }),
-  // .notNull()
-  // .references(() => procedure.id),
-  paymentHolder_id: varchar("paymentHolder_id", { length: 255 }),
-      // .notNull()
-      // .references(() => paymentHolders.id),
+  procedure_id: varchar("procedure_id", { length: 255 })
+  .notNull()
+  .references(() => procedure.id),
+  paymentHolder_id: varchar("paymentHolder_id", { length: 255 })
+      .notNull()
+      .references(() => paymentHolders.id),
 
-  billResponsible_id: varchar("billResponsible_id", { length: 255 }),
-  // .notNull()
-  // .references(() => billResponsible.id),
+  billResponsible_id: varchar("billResponsible_id", { length: 255 })
+  .notNull()
+  .references(() => billResponsible.id),
   
 });
+
+export const integrantsRelations = relations(
+  integrants,
+  ({ one, many }) => ({
+    billResponsible: one(billResponsible, {
+      fields: [integrants.billResponsible_id],
+      references: [billResponsible.id],
+    }),
+    paymentHolder: one(paymentHolders, {
+      fields: [integrants.paymentHolder_id],
+      references: [paymentHolders.id],
+    }),
+    procedure: one(procedure, {
+      fields: [integrants.procedure_id],
+      references: [procedure.id],
+    }),
+  }),
+);
+
 
 export const insertintegrantSchema = createInsertSchema(integrants);
 export const selectintegrantSchema = createSelectSchema(integrants);
@@ -573,9 +592,6 @@ export const paymentHolders = pgTable("paymentHolders", {
   fiscal_id_number: varchar("fiscal_id_number", { length: 255 }),
   address: varchar("address", { length: 255 }).notNull(),
   iva: varchar("iva", { length: 255 }).notNull(),
-
-  // integrant_id: varchar("integrant_id", { length: 255 })
-  // .references(() => integrants.id).notNull().default(""),
 });
 
 export const insertpaymentHoldersSchema = createInsertSchema(paymentHolders);
@@ -590,7 +606,6 @@ export const paymentHoldersSchemaDB = insertpaymentHoldersSchema.pick({
   fiscal_id_number: true,
   address: true,
   iva: true,
-  // integrant_id: true,
 });
 
 export type PaymentHolders = z.infer<typeof selectpaymentHoldersSchema>;
@@ -610,9 +625,6 @@ export const billResponsible = pgTable("billResponsible", {
   adress: varchar("adress", { length: 255 }).notNull(),
   iva: varchar("iva", { length: 255 }).notNull(),
   payment_responsible: varchar("payment_responsible")
-  // .references(() => paymentHolders.id).notNull(),
-  // integrant_id: varchar("integrant_id", { length: 255 })
-  // .references(() => integrants.id).notNull().default(""),
 });
 
 export const insertBillResponsibleSchema = createInsertSchema(billResponsible);
@@ -639,7 +651,7 @@ export const facturas = pgTable("facturas", {
   id: columnId,
   generated: timestamp("generated", { mode: "date" }),
   ptoVenta: integer("ptoVenta").notNull(),
-  nroFactura: integer("nroFactura").notNull(),
+  nroFactura: integer("nroFactura").notNull().default(0),
   tipoFactura: varchar("tipoFactura", { length: 255 }).notNull(),
   concepto: integer("concept").notNull(),
   tipoDocumento: integer("tipoDocumento").notNull(),
@@ -704,17 +716,36 @@ export const prospects = pgTable("prospects", {
   id: columnId,
   businessUnit: varchar("businessUnit", { length: 255 }).notNull(),
   validity: timestamp("validity", { mode: "date" }),
-  plan: varchar("plan"),
-  // .references(() => plans.id).notNull(),
-  modo: varchar("modo"),
-  // .references(() => modos.id).notNull(),
+  plan: varchar("plan")
+  .references(() => plans.id).notNull(),
+  modo: varchar("modo")
+  .references(() => modos.id).notNull(),
   cuit: varchar("cuit", { length: 255 }).notNull(),
   employerContribution: varchar("employerContribution", { length: 255 }).notNull(),
   receipt:varchar("receipt", { length: 255 }).notNull(),
   bonus: varchar("bonus", { length: 255 }).notNull(),
   healthInsurances: varchar("healthInsurances")
-  // .references(() => healthInsurances.id).notNull(),
+  .references(() => healthInsurances.id).notNull(),
 });
+
+export const prospectsRelations = relations(
+  prospects,
+  ({ one, many }) => ({
+    plan: one(plans, {
+      fields: [prospects.plan],
+      references: [plans.id],
+    }),
+    modo: one(modos, {
+      fields: [prospects.modo],
+      references: [modos.id],
+    }),
+    healthInsurances: one(healthInsurances, {
+      fields: [prospects.healthInsurances],
+      references: [healthInsurances.id],
+    }),
+  }),
+);
+
 
 export const insertProspectsSchema = createInsertSchema(prospects);
 export const selectProspectsSchema = createSelectSchema(prospects);

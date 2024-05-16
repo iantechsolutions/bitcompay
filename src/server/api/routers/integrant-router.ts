@@ -10,7 +10,14 @@ import { integrants } from "~/server/db/schema";
 
 export const integrantsRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({}) => {
-    const integrants = await db.query.integrants.findMany();
+    const integrants = await db.query.integrants.findMany(
+    //   {
+    //   with:{
+    //   billResponsible:true,
+    //   paymentHolder:true,
+    //   procedure: true,
+    // }}
+  );
     return integrants;
   }),
   get: protectedProcedure
@@ -22,6 +29,11 @@ export const integrantsRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const integrants = await db.query.integrants.findFirst({
         where: eq(schema.integrants.id, input.integrantsId),
+        with:{
+          billResponsible:true,
+          paymentHolder:true,
+          procedure: true,
+        }
       });
 
       return integrants;
