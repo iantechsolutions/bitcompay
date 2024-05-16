@@ -20,6 +20,9 @@ import { facturasRouter } from "./routers/factura-router";
 import { modosRouter } from "./routers/modo.router";
 import { prospectsRouter } from "./routers/prospects.router";
 import { procedureRouter } from "./routers/procedure.router";
+import { bonusesRouter } from "./routers/bonuses.router";
+import { administrative_auditRouter } from "./routers/administrative_audit-router";
+import { medical_auditRouter } from "./routers/medical_audit-router";
 /**
  * This is the primary router for your server.
  *
@@ -46,7 +49,11 @@ export const appRouter = createTRPCRouter({
   facturas: facturasRouter,
   modos: modosRouter,
   prospects: prospectsRouter,
-  procedure: procedureRouter
+  procedure: procedureRouter,
+  bonuses: bonusesRouter,
+  administrative_audit: administrative_auditRouter,
+  medical_audit: medical_auditRouter
+
 });
 
 // export type definition of API

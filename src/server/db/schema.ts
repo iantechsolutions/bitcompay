@@ -12,6 +12,7 @@ import {
 import { columnId, createdAt, pgTable, updatedAt } from "./schema/util";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { number, type z } from "zod";
+import { duration } from "html2canvas/dist/types/css/property-descriptors/duration";
 export * from "./schema/auth";
 export { pgTable } from "./schema/util";
 
@@ -669,26 +670,6 @@ export const FacturasSchemaDB = insertFacturasSchema.pick({
 });
 export type Facturas = z.infer<typeof selectFacturasSchema>;
 
-export const procedure = pgTable("procedure", {
-  id: columnId,
-  code: varchar("code", { length: 255 }).notNull(),
-  procedureNumber: varchar("procedureNumber", { length: 255 }).notNull(),
-  estado: varchar("estado", { length: 255 }).notNull(),
-  prospect: varchar("prospect")
-    .references(() => prospects.id)
-    .notNull(),
-});
-
-export const insertProcedureSchema = createInsertSchema(procedure);
-export const selectProcedureSchema = createSelectSchema(procedure);
-export const ProcedureSchemaDB = insertProcedureSchema.pick({
-  code: true,
-  procedureNumber: true,
-  estado: true,
-  prospect: true,
-});
-export type Procedure = z.infer<typeof selectProcedureSchema>;
-
 export const prospects = pgTable("prospects", {
   id: columnId,
   businessUnit: varchar("businessUnit", { length: 255 }).notNull(),
@@ -724,3 +705,91 @@ export const prospectsSchemaDB = insertProspectsSchema.pick({
   bonus: true,
 });
 export type Prospects = z.infer<typeof selectProspectsSchema>;
+
+
+
+export const bonuses = pgTable("bonuses", {
+  id: columnId,
+  appliedUser: varchar("appliedUser", { length: 255 }).notNull(),
+  approverUser: varchar("approverUser", { length: 255 }).notNull(),
+  validationDate: timestamp("validationDate", { mode: "date" }),
+  duration: varchar("duration", { length: 255 }).notNull(),
+  amount: varchar("mount", { length: 255 }).notNull(),
+  reason: varchar("reason", { length: 255 }).notNull(),
+});
+
+export const insertBonusesSchema = createInsertSchema(bonuses);
+export const selectBonusesSchema = createSelectSchema(bonuses);
+export const bonusesSchemaDB = insertBonusesSchema.pick({
+  appliedUser: true,
+  approverUser:true,
+  validationDate: true,
+  duration: true,
+  amount: true,
+  reason:true,
+});
+export type Bonuses = z.infer<typeof selectBonusesSchema>;
+
+
+export const procedure = pgTable("procedure", {
+  id: columnId,
+  code: varchar("code", { length: 255 }).notNull(),
+  procedureNumber: varchar("procedureNumber", { length: 255 }).notNull(),
+  estado: varchar("estado", { length: 255 }).notNull(),
+  prospect: varchar("prospect")
+    .references(() => prospects.id)
+    .notNull(),
+    medicalAudit: varchar("medicalAudit", { length: 255 }).references(() => medical_audit.id).notNull(),
+    adminAudit: varchar("adminAudit", { length: 255 }).references(() => administrative_audit.id).notNull(),
+});
+
+
+export const ProcedureRelations = relations(procedure, ({ one }) => ({
+  medical_audit: one(medical_audit, {
+    fields: [procedure.medicalAudit],
+    references: [medical_audit.id],
+  }),
+  administrative_audit: one(administrative_audit, {
+    fields: [procedure.adminAudit],
+    references: [administrative_audit.id],
+  }),
+}));
+
+export const insertProcedureSchema = createInsertSchema(procedure);
+export const selectProcedureSchema = createSelectSchema(procedure);
+export const ProcedureSchemaDB = insertProcedureSchema.pick({
+  code: true,
+  procedureNumber: true,
+  estado: true,
+  prospect: true,
+});
+export type Procedure = z.infer<typeof selectProcedureSchema>;
+
+export const medical_audit = pgTable("medical_audit", {
+  id: columnId,
+  description: varchar("description", { length: 255 }).notNull(),
+  state: varchar("state", { length: 255 }).notNull(),
+});
+
+export const insertmedical_auditSchema = createInsertSchema(medical_audit);
+export const selectmedical_auditSchema = createSelectSchema(medical_audit);
+export const medical_auditSchemaDB = insertmedical_auditSchema.pick({
+  description: true,
+  state: true,
+});
+export type Medical_audit = z.infer<typeof selectmedical_auditSchema>;
+
+export const administrative_audit = pgTable("administrative_audit", {
+  id: columnId,
+  description: varchar("description", { length: 255 }).notNull(),
+  state: varchar("state", { length: 255 }).notNull(),
+});
+
+export const insertadministrative_auditSchema = createInsertSchema(administrative_audit);
+export const selectadministrative_auditSchema = createSelectSchema(administrative_audit);
+export const administrative_auditSchemaDB = insertadministrative_auditSchema.pick({
+  description: true,
+  state: true,
+
+});
+export type Administrative_audit = z.infer<typeof selectadministrative_auditSchema>;
