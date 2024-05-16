@@ -11,7 +11,7 @@ import {
 import { api } from "~/trpc/react";
 import { Input } from "../ui/input";
 import { type Inputs } from "../procedures/members-info";
-
+import { useEffect } from "react";
 type InputsBilling = {
   product_name: string;
   name: string;
@@ -30,23 +30,91 @@ export default function BillingInfo({ data }: propsBillingInfo) {
     data.filter((value) => value.isBillResponsible ?? value.birth_date).length >
       0;
 
+  const eighteenYearsAgo = new Date();
+  eighteenYearsAgo.setFullYear(eighteenYearsAgo.getFullYear() - 18);
+  const isAdult =
+    data.filter((value) => new Date(value.birth_date) <= eighteenYearsAgo)
+      .length > 0;
+  const adult = data.filter(
+    (value) => new Date(value.birth_date) <= eighteenYearsAgo,
+  )[0];
+
   const billingResponsible = data.filter((value) => value.isBillResponsible)[0];
 
   const initialValues: InputsBilling = {
     product_name: "",
-    name: isBillingResponsible ? billingResponsible!.name : "",
-    id_type: isBillingResponsible ? billingResponsible!.id_type : "",
-    id_number: isBillingResponsible ? billingResponsible!.id_number : "",
+    name: isBillingResponsible
+      ? billingResponsible!.name
+      : isAdult
+        ? adult!.name
+        : "",
+    id_type: isBillingResponsible
+      ? billingResponsible!.id_type
+      : isAdult
+        ? adult!.id_type
+        : "",
+    id_number: isBillingResponsible
+      ? billingResponsible!.id_number
+      : isAdult
+        ? adult!.id_number
+        : "",
     fiscal_id_type: isBillingResponsible
       ? billingResponsible!.fiscal_id_type
-      : "",
+      : isAdult
+        ? adult!.fiscal_id_type
+        : "",
     fiscal_id_number: isBillingResponsible
       ? billingResponsible!.fiscal_id_number
-      : "",
+      : isAdult
+        ? adult!.fiscal_id_type
+        : "",
   };
-
+  const { control, setValue } = useForm<InputsBilling>({
+    defaultValues: initialValues,
+  });
+  useEffect(() => {
+    setValue(
+      "name",
+      isBillingResponsible
+        ? billingResponsible!.name
+        : isAdult
+          ? adult!.name
+          : "",
+    );
+    setValue(
+      "id_type",
+      isBillingResponsible
+        ? billingResponsible!.id_type
+        : isAdult
+          ? adult!.id_type
+          : "",
+    );
+    setValue(
+      "id_number",
+      isBillingResponsible
+        ? billingResponsible!.id_number
+        : isAdult
+          ? adult!.id_number
+          : "",
+    );
+    setValue(
+      "fiscal_id_type",
+      isBillingResponsible
+        ? billingResponsible!.fiscal_id_type
+        : isAdult
+          ? adult!.fiscal_id_type
+          : "",
+    );
+    setValue(
+      "fiscal_id_number",
+      isBillingResponsible
+        ? billingResponsible!.fiscal_id_number
+        : isAdult
+          ? adult!.fiscal_id_number
+          : "",
+    );
+  }, [isBillingResponsible, billingResponsible, adult, setValue]);
   const form = useForm({ defaultValues: initialValues });
-
   //   const products = api.products.list.useQuery();
 
   //   const productsOptions = products.map((product) => (
