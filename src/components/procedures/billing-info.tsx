@@ -33,8 +33,10 @@ export default function BillingInfo({ data }: propsBillingInfo) {
   const eighteenYearsAgo = new Date();
   eighteenYearsAgo.setFullYear(eighteenYearsAgo.getFullYear() - 18);
   const isAdult =
-    data.filter((value) => new Date(value.birth_date) <= eighteenYearsAgo)
-      .length > 0;
+    data.filter(
+      (value) =>
+        new Date(value.birth_date) <= eighteenYearsAgo && value.isHolder,
+    ).length > 0;
   const adult = data.filter(
     (value) => new Date(value.birth_date) <= eighteenYearsAgo,
   )[0];
@@ -69,7 +71,7 @@ export default function BillingInfo({ data }: propsBillingInfo) {
         ? adult!.fiscal_id_type
         : "",
   };
-  const { control, setValue } = useForm<InputsBilling>({
+  const { setValue } = useForm<InputsBilling>({
     defaultValues: initialValues,
   });
   useEffect(() => {
