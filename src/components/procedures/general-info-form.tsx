@@ -69,8 +69,11 @@ export default function GeneralInfoForm() {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  /// aca van las unidaddes de negocio opciones con SelectItem
-                  //attr value
+                  {bussinessUnits?.map((bussinessUnit) => (
+                    <SelectItem key={bussinessUnit.id} value={bussinessUnit.id}>
+                      {bussinessUnit.description}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </FormItem>
@@ -89,7 +92,11 @@ export default function GeneralInfoForm() {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  /// aca van los planes opciones con SelectItem // attr value
+                  {plans?.map((plan) => (
+                    <SelectItem key={plan.id} value={plan.id}>
+                      {plan.description}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </FormItem>
@@ -157,8 +164,11 @@ export default function GeneralInfoForm() {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="Admin">Administrador</SelectItem>
-                  <SelectItem value="Member">Integrante</SelectItem>
+                  {modos?.map((modo) => (
+                    <SelectItem key={modo.id} value={modo.id}>
+                      {modo.description}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </FormItem>
