@@ -95,6 +95,7 @@ export default function GeneralInfoForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel htmlFor="birth_date">Fecha de vigencia</FormLabel>
+              <br />
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -130,6 +131,7 @@ export default function GeneralInfoForm() {
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="mode"
