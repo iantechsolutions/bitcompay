@@ -29,6 +29,7 @@ import {
 } from "../ui/select";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { cn } from "~/lib/utils";
+import { api } from "~/trpc/react";
 dayjs.extend(utc);
 dayjs.locale("es");
 type Inputs = {
@@ -41,6 +42,11 @@ type Inputs = {
 };
 
 export default function GeneralInfoForm() {
+  const { data: bussinessUnits } = api.bussinessUnits.list.useQuery(undefined);
+
+  const { data: plans } = api.plans.list.useQuery(undefined);
+  const { data: modos } = api.modos.list.useQuery(undefined);
+
   const form = useForm<Inputs>();
   const [mode, setMode] = useState("");
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
