@@ -12,7 +12,6 @@ import { api } from "~/trpc/react";
 import { Input } from "../ui/input";
 import { type Inputs } from "../procedures/members-info";
 import { useEffect } from "react";
-import { Title } from "../title";
 type InputsBilling = {
   product_name: string;
   name: string;
@@ -116,11 +115,10 @@ export default function BillingInfo({ data }: propsBillingInfo) {
     );
   }, [isBillingResponsible, billingResponsible, adult, setValue]);
   const form = useForm({ defaultValues: initialValues });
-  //   const products = api.products.list.useQuery();
-
-  //   const productsOptions = products.map((product) => (
-  //     <SelectItem value={product.id}>{product.name}</SelectItem>
-  //   ));
+  const { data: products } = api.products.list.useQuery(undefined);
+  const productsOptions = products?.map((product) => (
+    <SelectItem value={product.id}>{product.name}</SelectItem>
+  ));
   const onSubmit: SubmitHandler<InputsBilling> = (data) => {
     console.log(data);
   };
@@ -144,7 +142,7 @@ export default function BillingInfo({ data }: propsBillingInfo) {
                       <SelectValue placeholder="eliga un producto" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent></SelectContent>
+                  <SelectContent>{productsOptions}</SelectContent>
                 </Select>
               </FormItem>
             )}

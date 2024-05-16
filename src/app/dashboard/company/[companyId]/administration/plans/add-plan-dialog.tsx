@@ -83,7 +83,7 @@ export default function AddPlanDialog() {
     if (setOpen) {
       setOpen(false);
     }
-    router.push(`/dashboard/company/${company.id}/administration/units`);
+    router.push(`/dashboard/company/${company.id}/administration/plans`);
     router.refresh();
   };
 
