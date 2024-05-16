@@ -82,16 +82,17 @@ interface AddMembersProps {
 }
 
 export default function AddMembers(props: AddMembersProps) {
+  const [open, setOpen] = useState(false);
   const form = useForm<Inputs>();
-
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     const { addMember, membersData } = props;
     addMember([...membersData, data]);
     console.log(data);
+    setOpen(false);
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" className="border-2">
           Agregar miembro

@@ -30,32 +30,57 @@ import {
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
+import { RouterOutputs } from "~/trpc/shared";
 dayjs.extend(utc);
 dayjs.locale("es");
 type Inputs = {
   bussinessUnit: string;
   plan: string;
-  birth_date: string;
+  validity: string;
   mode: string;
   name: string;
-  billing_number: string;
+  cuit: string;
+  healthInsurances: string;
+  employerContribution: string;
+  receipt: string;
+  bonus: string;
 };
 
-export default function GeneralInfoForm() {
-  const { data: bussinessUnits } = api.bussinessUnits.list.useQuery(undefined);
+type GeneralInfoProps = {
+  changeTab: (tab: string) => void;
+};
 
+export default function GeneralInfoForm(props: GeneralInfoProps) {
+  const { changeTab } = props;
+  const { data: bussinessUnits } = api.bussinessUnits.list.useQuery(undefined);
   const { data: plans } = api.plans.list.useQuery(undefined);
   const { data: modos } = api.modos.list.useQuery(undefined);
-
+  const { mutateAsync: createProcedure } = api.procedure.create.useMutation();
+  const { mutateAsync: createProspect } = api.prospects.create.useMutation();
   const form = useForm<Inputs>();
   const [mode, setMode] = useState("");
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    const newProspect: RouterOutputs["prospects"]["create"] =
+      await createProspect({
+        businessUnit: data.bussinessUnit,
+        validity: new Date(data.validity),
+        plan: data.plan,
+        modo: data.mode,
+      });
+
+    await createProcedure({
+      code: "dkflksdf",
+      procedureNumber: "2334",
+      estado: "pendiente",
+      prospect: newProspect.id,
+    });
     console.log(data);
+    changeTab("members");
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form className="space-y-8" onSubmit={form.handleSubmit(onSubmit)}>
         <FormField
           control={form.control}
           name="bussinessUnit"
@@ -104,7 +129,7 @@ export default function GeneralInfoForm() {
         />
         <FormField
           control={form.control}
-          name="birth_date"
+          name="validity"
           render={({ field }) => (
             <FormItem>
               <FormLabel htmlFor="birth_date">Fecha de vigencia</FormLabel>
@@ -174,31 +199,7 @@ export default function GeneralInfoForm() {
             </FormItem>
           )}
         />
-        {mode === "Admin" && (
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nombre</FormLabel>
-                <Input {...field} />
-              </FormItem>
-            )}
-          />
-        )}
-
-        {mode === "Member" && (
-          <FormField
-            control={form.control}
-            name="billing_number"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nro de Facturación</FormLabel>
-                <Input {...field} />
-              </FormItem>
-            )}
-          />
-        )}
+        <Button type="submit">Continuar</Button>
       </form>
     </Form>
   );

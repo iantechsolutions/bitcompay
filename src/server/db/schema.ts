@@ -706,8 +706,6 @@ export const prospectsSchemaDB = insertProspectsSchema.pick({
 });
 export type Prospects = z.infer<typeof selectProspectsSchema>;
 
-
-
 export const bonuses = pgTable("bonuses", {
   id: columnId,
   appliedUser: varchar("appliedUser", { length: 255 }).notNull(),
@@ -722,14 +720,13 @@ export const insertBonusesSchema = createInsertSchema(bonuses);
 export const selectBonusesSchema = createSelectSchema(bonuses);
 export const bonusesSchemaDB = insertBonusesSchema.pick({
   appliedUser: true,
-  approverUser:true,
+  approverUser: true,
   validationDate: true,
   duration: true,
   amount: true,
-  reason:true,
+  reason: true,
 });
 export type Bonuses = z.infer<typeof selectBonusesSchema>;
-
 
 export const procedure = pgTable("procedure", {
   id: columnId,
@@ -739,10 +736,13 @@ export const procedure = pgTable("procedure", {
   prospect: varchar("prospect")
     .references(() => prospects.id)
     .notNull(),
-    medicalAudit: varchar("medicalAudit", { length: 255 }).references(() => medical_audit.id).notNull(),
-    adminAudit: varchar("adminAudit", { length: 255 }).references(() => administrative_audit.id).notNull(),
+  medicalAudit: varchar("medicalAudit", { length: 255 })
+    .references(() => medical_audit.id)
+    .notNull(),
+  adminAudit: varchar("adminAudit", { length: 255 })
+    .references(() => administrative_audit.id)
+    .notNull(),
 });
-
 
 export const ProcedureRelations = relations(procedure, ({ one }) => ({
   medical_audit: one(medical_audit, {
@@ -785,11 +785,15 @@ export const administrative_audit = pgTable("administrative_audit", {
   state: varchar("state", { length: 255 }).notNull(),
 });
 
-export const insertadministrative_auditSchema = createInsertSchema(administrative_audit);
-export const selectadministrative_auditSchema = createSelectSchema(administrative_audit);
-export const administrative_auditSchemaDB = insertadministrative_auditSchema.pick({
-  description: true,
-  state: true,
-
-});
-export type Administrative_audit = z.infer<typeof selectadministrative_auditSchema>;
+export const insertadministrative_auditSchema =
+  createInsertSchema(administrative_audit);
+export const selectadministrative_auditSchema =
+  createSelectSchema(administrative_audit);
+export const administrative_auditSchemaDB =
+  insertadministrative_auditSchema.pick({
+    description: true,
+    state: true,
+  });
+export type Administrative_audit = z.infer<
+  typeof selectadministrative_auditSchema
+>;

@@ -18,6 +18,17 @@ import { type Inputs } from "~/components/procedures/members-info";
 import BillingInfo from "~/components/procedures/billing-info";
 export default function AddProcedure() {
   const [membersData, setMembersData] = useState<Inputs[]>([]);
+  const [currentTab, setCurrentTab] = useState("general_info");
+  function handleTabChange(tab: string) {
+    console.log("handleTabChange");
+    console.log(currentTab);
+    setCurrentTab(tab);
+    console.log(currentTab);
+  }
+  function handleSumbitMembers() {
+    console.log(membersData);
+  }
+
   return (
     <>
       <Dialog>
@@ -30,7 +41,13 @@ export default function AddProcedure() {
           <DialogHeader>
             <DialogTitle>Agregar tramite</DialogTitle>
           </DialogHeader>
-          <Tabs defaultValue="account">
+          <Tabs
+            defaultValue="account"
+            // onValueChange={(value) => {
+            //   setCurrentTab(value);
+            // }}
+            value={currentTab}
+          >
             <TabsList>
               <TabsTrigger value="general_info">
                 Informacion General
@@ -41,7 +58,7 @@ export default function AddProcedure() {
               </TabsTrigger>
             </TabsList>
             <TabsContent value="general_info">
-              <GeneralInfoForm />
+              <GeneralInfoForm changeTab={handleTabChange} />
             </TabsContent>
             <TabsContent value="members">
               <div className="flex w-full flex-col gap-2">
@@ -53,6 +70,14 @@ export default function AddProcedure() {
                 </div>
 
                 <MembersTable data={membersData} />
+                <Button
+                  onClick={() => {
+                    handleSumbitMembers;
+                    handleTabChange("billing");
+                  }}
+                >
+                  Continuar
+                </Button>
               </div>
             </TabsContent>
             <TabsContent value="billing">

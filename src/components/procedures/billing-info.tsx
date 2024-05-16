@@ -12,6 +12,7 @@ import { api } from "~/trpc/react";
 import { Input } from "../ui/input";
 import { type Inputs } from "../procedures/members-info";
 import { useEffect } from "react";
+import { Button } from "../ui/button";
 type InputsBilling = {
   product_name: string;
   name: string;
@@ -226,6 +227,7 @@ export default function BillingInfo({ data }: propsBillingInfo) {
               </FormItem>
             )}
           />
+          <Button type="submit">Confirmar tramite</Button>
         </form>
       </Form>
     </>
