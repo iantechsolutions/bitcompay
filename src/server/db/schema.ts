@@ -477,7 +477,12 @@ export const modos = pgTable("modos", {
   description: varchar("description", { length: 255 }).notNull(),
 });
 
-
+export const insertModosSchema = createInsertSchema(modos);
+export const selectModosSchema = createSelectSchema(modos);
+export const ModosSchemaDB = insertModosSchema.pick({
+  description: true,
+});
+export type Modos = z.infer<typeof selectModosSchema>;
 
 export const integrants = pgTable("integrant", {
   id: columnId,

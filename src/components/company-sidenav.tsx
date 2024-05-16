@@ -163,18 +163,19 @@ export default function CompanySidenav(props: { companyId: string }) {
             </SidenavItem>
             <SidenavItem
               icon={<ActivitySquareIcon />}
-              href={`/dashboard/company/${props.companyId}/monitoring`}
+              href={`/dashboard/company/${props.companyId}/gestion/monitoring`}
             >
               Monitoreo
             </SidenavItem>
             <SidenavItem
               icon={<Users />}
-              href={`/dashboard/company/${props.companyId}/support`}
+              href={`/dashboard/company/${props.companyId}/gestion/support`}
             >
               Soporte
             </SidenavItem>
           </AccordionContent>
         </AccordionItem>
+
         <AccordionItem value="item-4" className="border-none">
           <AccordionTrigger
             className={
@@ -187,7 +188,7 @@ export default function CompanySidenav(props: { companyId: string }) {
           </AccordionTrigger>
           <AccordionContent>
             <SidenavItem
-              href={`/dashboard/company/${props.companyId}/sales/sales`}
+              href={`/dashboard/company/${props.companyId}/sales/start`}
               icon={<BadgeDollarSign />}
             >
               Inicio
@@ -234,7 +235,7 @@ export default function CompanySidenav(props: { companyId: string }) {
           <AccordionContent>
             <SidenavItem
               icon={<Contact />}
-              href={`/dashboard/company/${props.companyId}/providers/start`}
+              href={`/dashboard/company/${props.companyId}/providers`}
             >
               Inicio
             </SidenavItem>
