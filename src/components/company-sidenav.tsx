@@ -214,32 +214,32 @@ export default function CompanySidenav(props: { companyId: string }) {
           </AccordionTrigger>
           <AccordionContent>
             <SidenavItem
-              href={`/dashboard/company/${props.companyId}/clients/clients`}
+              href={`/dashboard/company/${props.companyId}/audit/administrative`}
               icon={<Users />}
             >
               Administrativo
             </SidenavItem>
             <SidenavItem
-              href={`/dashboard/company/${props.companyId}/clients/clients`}
+              href={`/dashboard/company/${props.companyId}/audit/medical`}
               icon={<Users />}
             >
               Medico
             </SidenavItem>
 
             <SidenavItem
-              href={`/dashboard/company/${props.companyId}/clients/clients`}
+              href={`/dashboard/company/${props.companyId}/audit/benefits`}
               icon={<Users />}
             >
               Beneficios
             </SidenavItem>
             <SidenavItem
-              href={`/dashboard/company/${props.companyId}/clients/clients`}
+              href={`/dashboard/company/${props.companyId}/audit/fixed_eventual`}
               icon={<Users />}
             >
               Eventuales/Fijos
             </SidenavItem>
             <SidenavItem
-              href={`/dashboard/company/${props.companyId}/clients/clients`}
+              href={`/dashboard/company/${props.companyId}/audit/operations`}
               icon={<Users />}
             >
               Operaciones
