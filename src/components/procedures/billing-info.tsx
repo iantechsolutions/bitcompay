@@ -70,9 +70,7 @@ export default function BillingInfo({ data }: propsBillingInfo) {
                     <SelectValue placeholder="eliga un producto" />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent>
-                  {/* ingresa aca opciones de productos */}
-                </SelectContent>
+                <SelectContent></SelectContent>
               </Select>
             </FormItem>
           )}
@@ -88,11 +86,11 @@ export default function BillingInfo({ data }: propsBillingInfo) {
                   <SelectTrigger>
                     <SelectValue placeholder="eliga un tipo de id fiscal " />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="cuit">CUIT</SelectItem>
-                    <SelectItem value="cuil">CUIL</SelectItem>
-                  </SelectContent>
                 </FormControl>
+                <SelectContent>
+                  <SelectItem value="cuit">CUIT</SelectItem>
+                  <SelectItem value="cuil">CUIL</SelectItem>
+                </SelectContent>
               </Select>
             </FormItem>
           )}
@@ -118,11 +116,11 @@ export default function BillingInfo({ data }: propsBillingInfo) {
                   <SelectTrigger>
                     <SelectValue placeholder="eliga un tipo de id " />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="dni">DNI</SelectItem>
-                    <SelectItem value="pasaport">Pasaporte</SelectItem>
-                  </SelectContent>
                 </FormControl>
+                <SelectContent>
+                  <SelectItem value="dni">DNI</SelectItem>
+                  <SelectItem value="pasaport">Pasaporte</SelectItem>
+                </SelectContent>
               </Select>
             </FormItem>
           )}
