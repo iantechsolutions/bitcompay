@@ -214,32 +214,32 @@ export default function CompanySidenav(props: { companyId: string }) {
           </AccordionTrigger>
           <AccordionContent>
             <SidenavItem
-              href={`/dashboard/company/${props.companyId}/clients/clients`}
+              href={`/dashboard/company/${props.companyId}/audit/administrative`}
               icon={<Users />}
             >
               Administrativo
             </SidenavItem>
             <SidenavItem
-              href={`/dashboard/company/${props.companyId}/clients/clients`}
+              href={`/dashboard/company/${props.companyId}/audit/medical`}
               icon={<Users />}
             >
               Medico
             </SidenavItem>
 
             <SidenavItem
-              href={`/dashboard/company/${props.companyId}/clients/clients`}
+              href={`/dashboard/company/${props.companyId}/audit/benefits`}
               icon={<Users />}
             >
               Beneficios
             </SidenavItem>
             <SidenavItem
-              href={`/dashboard/company/${props.companyId}/clients/clients`}
+              href={`/dashboard/company/${props.companyId}/audit/fixed_eventual`}
               icon={<Users />}
             >
               Eventuales/Fijos
             </SidenavItem>
             <SidenavItem
-              href={`/dashboard/company/${props.companyId}/clients/clients`}
+              href={`/dashboard/company/${props.companyId}/audit/operations`}
               icon={<Users />}
             >
               Operaciones
@@ -260,19 +260,19 @@ export default function CompanySidenav(props: { companyId: string }) {
           <AccordionContent>
             <SidenavItem
               icon={<Contact />}
-              href={`/dashboard/company/${props.companyId}/providers/start`}
+              href={`/dashboard/company/${props.companyId}/billing/manual_issuance`}
             >
               Generar manual
             </SidenavItem>
             <SidenavItem
               icon={<Contact />}
-              href={`/dashboard/company/${props.companyId}/providers/start`}
+              href={`/dashboard/company/${props.companyId}/billing/liquidation`}
             >
               Pre-Liquidacion
             </SidenavItem>
             <SidenavItem
               icon={<Contact />}
-              href={`/dashboard/company/${props.companyId}/providers/start`}
+              href={`/dashboard/company/${props.companyId}/billing/consults`}
             >
               Consultas
             </SidenavItem>
@@ -291,19 +291,19 @@ export default function CompanySidenav(props: { companyId: string }) {
           <AccordionContent>
             <SidenavItem
               icon={<Contact />}
-              href={`/dashboard/company/${props.companyId}/providers/start`}
+              href={`/dashboard/company/${props.companyId}/treasury/current_count`}
             >
               Cuenta actual
             </SidenavItem>
             <SidenavItem
               icon={<Contact />}
-              href={`/dashboard/company/${props.companyId}/providers/start`}
+              href={`/dashboard/company/${props.companyId}/treasury/collection`}
             >
               Recoleccion
             </SidenavItem>
             <SidenavItem
               icon={<Contact />}
-              href={`/dashboard/company/${props.companyId}/providers/start`}
+              href={`/dashboard/company/${props.companyId}/treasury/payments`}
             >
               Pagos
             </SidenavItem>
