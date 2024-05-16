@@ -26,9 +26,7 @@ type propsBillingInfo = {
 export default function BillingInfo({ data }: propsBillingInfo) {
   const isData = data.length > 0;
   const isBillingResponsible =
-    isData &&
-    data.filter((value) => value.isBillResponsible ?? value.birth_date).length >
-      0;
+    isData && data.filter((value) => value.isBillResponsible).length > 0;
 
   const eighteenYearsAgo = new Date();
   eighteenYearsAgo.setFullYear(eighteenYearsAgo.getFullYear() - 18);
@@ -188,7 +186,7 @@ export default function BillingInfo({ data }: propsBillingInfo) {
         />
         <FormField
           control={form.control}
-          name="fiscal_id_type"
+          name="id_type"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Tipo de Id </FormLabel>
@@ -208,7 +206,7 @@ export default function BillingInfo({ data }: propsBillingInfo) {
         />
         <FormField
           control={form.control}
-          name="fiscal_id_number"
+          name="id_number"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Numero de Id</FormLabel>
