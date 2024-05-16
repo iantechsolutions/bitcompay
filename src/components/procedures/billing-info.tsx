@@ -12,6 +12,7 @@ import { api } from "~/trpc/react";
 import { Input } from "../ui/input";
 import { type Inputs } from "../procedures/members-info";
 import { useEffect } from "react";
+import { Title } from "../title";
 type InputsBilling = {
   product_name: string;
   name: string;
@@ -26,9 +27,7 @@ type propsBillingInfo = {
 export default function BillingInfo({ data }: propsBillingInfo) {
   const isData = data.length > 0;
   const isBillingResponsible =
-    isData &&
-    data.filter((value) => value.isBillResponsible ?? value.birth_date).length >
-      0;
+    isData && data.filter((value) => value.isBillResponsible).length > 0;
 
   const eighteenYearsAgo = new Date();
   eighteenYearsAgo.setFullYear(eighteenYearsAgo.getFullYear() - 18);
@@ -42,7 +41,7 @@ export default function BillingInfo({ data }: propsBillingInfo) {
   )[0];
 
   const billingResponsible = data.filter((value) => value.isBillResponsible)[0];
-
+  console.log(billingResponsible);
   const initialValues: InputsBilling = {
     product_name: "",
     name: isBillingResponsible
@@ -68,7 +67,7 @@ export default function BillingInfo({ data }: propsBillingInfo) {
     fiscal_id_number: isBillingResponsible
       ? billingResponsible!.fiscal_id_number
       : isAdult
-        ? adult!.fiscal_id_type
+        ? adult!.fiscal_id_number
         : "",
   };
   const { setValue } = useForm<InputsBilling>({
@@ -126,97 +125,111 @@ export default function BillingInfo({ data }: propsBillingInfo) {
     console.log(data);
   };
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        <FormField
-          control={form.control}
-          name="product_name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Producto</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="eliga un producto" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent></SelectContent>
-              </Select>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nombre</FormLabel>
-              <Input {...field} placeholder="ingrese su nombre" />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="fiscal_id_type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tipo de Id fiscal</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="eliga un tipo de id fiscal " />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="cuit">CUIT</SelectItem>
-                  <SelectItem value="cuil">CUIL</SelectItem>
-                </SelectContent>
-              </Select>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="fiscal_id_number"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Numero de Id fiscal</FormLabel>
-              <Input {...field} placeholder="ingrese su numero de id fiscal" />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="fiscal_id_type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tipo de Id </FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="eliga un tipo de id " />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="dni">DNI</SelectItem>
-                  <SelectItem value="pasaport">Pasaporte</SelectItem>
-                </SelectContent>
-              </Select>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="fiscal_id_number"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Numero de Id</FormLabel>
-              <Input {...field} placeholder="ingrese su numero de id " />
-            </FormItem>
-          )}
-        />
-      </form>
-    </Form>
+    <>
+      <h2 className="text-lg font-semibold">Responsable de facturacion</h2>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <FormField
+            control={form.control}
+            name="product_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Producto</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="eliga un producto" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent></SelectContent>
+                </Select>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nombre</FormLabel>
+                <Input {...field} placeholder="ingrese su nombre" />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="fiscal_id_type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tipo de Id fiscal</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="eliga un tipo de id fiscal " />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="cuit">CUIT</SelectItem>
+                    <SelectItem value="cuil">CUIL</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="fiscal_id_number"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Numero de Id fiscal</FormLabel>
+                <Input
+                  {...field}
+                  placeholder="ingrese su numero de id fiscal"
+                />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="id_type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tipo de Id </FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="eliga un tipo de id " />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="dni">DNI</SelectItem>
+                    <SelectItem value="pasaport">Pasaporte</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="id_number"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Numero de Id</FormLabel>
+                <Input {...field} placeholder="ingrese su numero de id " />
+              </FormItem>
+            )}
+          />
+        </form>
+      </Form>
+    </>
   );
 }
