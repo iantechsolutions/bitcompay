@@ -154,9 +154,32 @@ export default function AddMembers(props: AddMembersProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Tipo Documento</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccione un tipo de documento" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="dni">DNI</SelectItem>
+                        <SelectItem value="passport">Pasaporte</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="id_number"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nro. de Documento</FormLabel>
                     <Input
                       {...field}
-                      placeholder="Ingrese el tipo y número de documento"
+                      placeholder="Ingrese el número de documento"
                     />
                   </FormItem>
                 )}
@@ -317,6 +340,19 @@ export default function AddMembers(props: AddMembersProps) {
                         <SelectItem value="cuil">CUIL</SelectItem>
                       </SelectContent>
                     </Select>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="fiscal_id_number"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nro. de Id fiscal</FormLabel>
+                    <Input
+                      {...field}
+                      placeholder="Ingrese el número de id fiscal"
+                    />
                   </FormItem>
                 )}
               />

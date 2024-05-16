@@ -145,6 +145,17 @@ export default function BillingInfo({ data }: propsBillingInfo) {
         />
         <FormField
           control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nombre</FormLabel>
+              <Input {...field} placeholder="ingrese su nombre" />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
           name="fiscal_id_type"
           render={({ field }) => (
             <FormItem>
