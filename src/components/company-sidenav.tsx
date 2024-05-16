@@ -120,7 +120,7 @@ export default function CompanySidenav(props: { companyId: string }) {
               Obras sociales
             </SidenavItem>
             <SidenavItem
-              href={`/dashboard/company/${props.companyId}/administration/differentials`}
+              href={`/dashboard/company/${props.companyId}/administration/services`}
               icon={<Option />}
             >
               Servicios
@@ -152,7 +152,7 @@ export default function CompanySidenav(props: { companyId: string }) {
             </SidenavItem>
             <SidenavItem
               icon={<ActivitySquareIcon />}
-              href={`/dashboard/company/${props.companyId}/monitoring`}
+              href={`/dashboard/company/${props.companyId}/roles`}
             >
               Roles
             </SidenavItem>
