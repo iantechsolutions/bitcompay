@@ -48,6 +48,7 @@ export type InputsGeneralInfo = {
 
 type GeneralInfoProps = {
   changeTab: (tab: string) => void;
+  setGeneralInfo: (data: InputsGeneralInfo) => void;
 };
 
 export default function GeneralInfoForm(props: GeneralInfoProps) {
@@ -62,6 +63,7 @@ export default function GeneralInfoForm(props: GeneralInfoProps) {
   const [mode, setMode] = useState("");
 
   const onSubmit: SubmitHandler<InputsGeneralInfo> = async (data) => {
+    const { setGeneralInfo } = props;
     await createProspect({
       businessUnit: data.bussinessUnit,
       validity: new Date(data.validity),
@@ -73,6 +75,7 @@ export default function GeneralInfoForm(props: GeneralInfoProps) {
         estado: "pending",
         prospect: response[0]!.id,
       });
+      setGeneralInfo(data);
     });
   };
 

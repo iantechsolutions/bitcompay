@@ -598,15 +598,8 @@ export const billResponsible = pgTable("billResponsible", {
   afip_status: varchar("afip_status", { length: 255 }),
   fiscal_id_type: varchar("fiscal_id_type", { length: 255 }),
   fiscal_id_number: varchar("fiscal_id_number", { length: 255 }),
-  cuit: varchar("cuit").notNull(),
-  payment_holder: varchar("payment_holder", { length: 255 }),
-  adress: varchar("adress", { length: 255 }).notNull(),
+  address: varchar("address", { length: 255 }).notNull(),
   iva: varchar("iva", { length: 255 }).notNull(),
-  payment_responsible: varchar("payment_responsible")
-    .references(() => paymentHolders.id)
-    .notNull(),
-  // integrant_id: varchar("integrant_id", { length: 255 })
-  // .references(() => integrants.id).notNull().default(""),
 });
 
 export const insertBillResponsibleSchema = createInsertSchema(billResponsible);

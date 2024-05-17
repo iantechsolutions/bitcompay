@@ -23,10 +23,9 @@ import { SubmitHandler } from "react-hook-form";
 export default function AddProcedure() {
   const { mutateAsync: createIntegrant } = api.integrants.create.useMutation();
   const [membersData, setMembersData] = useState<Inputs[]>([]);
-  const [billingData, setBillingData] = useState<InputsBilling[]>([]);
-  const [generalInfoData, setGeneralInfoData] = useState<InputsGeneralInfo[]>(
-    [],
-  );
+  const [billingData, setBillingData] = useState<InputsBilling | null>(null);
+  const [generalInfoData, setGeneralInfoData] =
+    useState<InputsGeneralInfo | null>(null);
   const [currentTab, setCurrentTab] = useState("general_info");
   function handleTabChange(tab: string) {
     console.log("handleTabChange");
@@ -70,7 +69,10 @@ export default function AddProcedure() {
               </TabsTrigger>
             </TabsList>
             <TabsContent value="general_info">
-              <GeneralInfoForm changeTab={handleTabChange} />
+              <GeneralInfoForm
+                setGeneralInfo={setGeneralInfoData}
+                changeTab={handleTabChange}
+              />
             </TabsContent>
             <TabsContent value="members">
               <div className="flex w-full flex-col gap-2">
@@ -94,7 +96,10 @@ export default function AddProcedure() {
             </TabsContent>
             <TabsContent value="billing">
               <div>
-                <BillingInfo data={membersData} />
+                <BillingInfo
+                  setBillingData={setBillingData}
+                  data={membersData}
+                />
               </div>
             </TabsContent>
           </Tabs>

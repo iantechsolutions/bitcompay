@@ -20,11 +20,18 @@ export type InputsBilling = {
   id_number: string;
   fiscal_id_type: string;
   fiscal_id_number: string;
+  address: string;
+  iva: string;
+  afip_status: string;
 };
 type propsBillingInfo = {
   data: Inputs[];
+  setBillingData: (data: InputsBilling) => void;
 };
-export default function BillingInfo({ data }: propsBillingInfo) {
+export default function BillingInfo({
+  data,
+  setBillingData,
+}: propsBillingInfo) {
   const isData = data.length > 0;
   const isBillingResponsible =
     isData && data.filter((value) => value.isBillResponsible).length > 0;
@@ -68,6 +75,25 @@ export default function BillingInfo({ data }: propsBillingInfo) {
       ? billingResponsible!.fiscal_id_number
       : isAdult
         ? adult!.fiscal_id_number
+        : "",
+    address: isBillingResponsible
+      ? ` ${billingResponsible!.address} ${
+          billingResponsible!.address_number
+        } ${billingResponsible!.depto} ${billingResponsible!.floor} ${
+          billingResponsible!.county
+        } ${billingResponsible!.state} ${billingResponsible!.cp} ${
+          billingResponsible!.zone
+        }`
+      : isAdult
+        ? ` ${adult!.address} ${adult!.address_number} ${adult!.depto} ${
+            adult!.floor
+          } ${adult!.county} ${adult!.state} ${adult!.cp} ${adult!.zone}`
+        : "",
+    iva: "",
+    afip_status: isBillingResponsible
+      ? billingResponsible!.afip_status
+      : isAdult
+        ? adult!.afip_status
         : "",
   };
   const { setValue } = useForm<InputsBilling>({
@@ -114,14 +140,25 @@ export default function BillingInfo({ data }: propsBillingInfo) {
           ? adult!.fiscal_id_number
           : "",
     );
+    setValue(
+      "afip_status",
+      isBillingResponsible
+        ? billingResponsible!.afip_status
+        : isAdult
+          ? adult!.afip_status
+          : "",
+    );
   }, [isBillingResponsible, billingResponsible, adult, setValue]);
   const form = useForm({ defaultValues: initialValues });
   const { data: products } = api.products.list.useQuery(undefined);
+  const { mutateAsync: createBillingResponsible } =
+    api.billResponsible.create.useMutation();
   const productsOptions = products?.map((product) => (
     <SelectItem value={product.id}>{product.name}</SelectItem>
   ));
-  const onSubmit: SubmitHandler<InputsBilling> = (data) => {
-    console.log(data);
+  const onSubmit: SubmitHandler<InputsBilling> = async (data) => {
+    await createBillingResponsible(data);
+    setBillingData(data);
   };
   return (
     <>
@@ -219,6 +256,34 @@ export default function BillingInfo({ data }: propsBillingInfo) {
           />
           <FormField
             control={form.control}
+            name="afip_status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Estado de AFIP</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                ></Select>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccione un estado de AFIP" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="monotributista">Monotributista</SelectItem>
+                  <SelectItem value="responsable_inscripto">
+                    Responsable Inscripto
+                  </SelectItem>
+                  <SelectItem value="exento">Exento</SelectItem>
+                  <SelectItem value="consumidor_final">
+                    Consumidor Final
+                  </SelectItem>
+                </SelectContent>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
             name="id_number"
             render={({ field }) => (
               <FormItem>
@@ -227,7 +292,17 @@ export default function BillingInfo({ data }: propsBillingInfo) {
               </FormItem>
             )}
           />
-          <Button type="submit">Confirmar tramite</Button>
+          <FormField
+            control={form.control}
+            name="iva"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>IVA</FormLabel>
+                <Input {...field} placeholder="ingrese su iva" />
+              </FormItem>
+            )}
+          />
+          <Button type="submit">Precarga</Button>
         </form>
       </Form>
     </>
