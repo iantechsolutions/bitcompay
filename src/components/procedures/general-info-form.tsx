@@ -33,7 +33,7 @@ import { api } from "~/trpc/react";
 import { RouterOutputs } from "~/trpc/shared";
 dayjs.extend(utc);
 dayjs.locale("es");
-type Inputs = {
+export type InputsGeneralInfo = {
   bussinessUnit: string;
   plan: string;
   validity: string;
@@ -58,23 +58,23 @@ export default function GeneralInfoForm(props: GeneralInfoProps) {
   const { mutateAsync: createProcedure } = api.procedure.create.useMutation();
   const { mutateAsync: createProspect } = api.prospects.create.useMutation();
   const [prospectId, setProspectId] = useState("");
-  const form = useForm<Inputs>();
+  const form = useForm<InputsGeneralInfo>();
   const [mode, setMode] = useState("");
-  async function onSubmit(data: any) {
-    const prospect = await createProspect({
+
+  const onSubmit: SubmitHandler<InputsGeneralInfo> = async (data) => {
+    await createProspect({
       businessUnit: data.bussinessUnit,
       validity: new Date(data.validity),
       plan: data.plan,
       modo: data.mode,
+    }).then(async (response) => {
+      await createProcedure({
+        type: "prospect",
+        estado: "pending",
+        prospect: response[0]!.id,
+      });
     });
-    await createProcedure({
-      code: "dkflksdf",
-      procedureNumber: "2334",
-      estado: "pendiente",
-      prospect: prospect[0]?.id ?? "",
-    });
-    changeTab("members");
-  }
+  };
 
   return (
     <Form {...form}>

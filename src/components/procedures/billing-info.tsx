@@ -13,7 +13,7 @@ import { Input } from "../ui/input";
 import { type Inputs } from "../procedures/members-info";
 import { useEffect } from "react";
 import { Button } from "../ui/button";
-type InputsBilling = {
+export type InputsBilling = {
   product_name: string;
   name: string;
   id_type: string;

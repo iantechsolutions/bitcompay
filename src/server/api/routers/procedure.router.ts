@@ -26,8 +26,7 @@ export const procedureRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
-        code: z.string(),
-        procedureNumber: z.string(),
+        type: z.string(),
         estado: z.string(),
         prospect: z.string(),
       }),
@@ -35,8 +34,6 @@ export const procedureRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       const new_procedure = await db.insert(schema.procedure).values({
         ...input,
-        medicalAudit: " ",
-        adminAudit: " ",
       });
       return new_procedure;
     }),
@@ -45,8 +42,7 @@ export const procedureRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string(),
-        code: z.string(),
-        procedureNumber: z.string(),
+        type: z.string(),
         estado: z.string(),
         prospect: z.string(),
       }),
@@ -58,7 +54,6 @@ export const procedureRouter = createTRPCRouter({
         .update(schema.procedure)
         .set(input)
         .where(eq(schema.procedure.id, id));
-      console.log(updatedprocedure);
       return updatedprocedure;
     }),
 

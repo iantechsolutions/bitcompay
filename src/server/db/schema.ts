@@ -702,7 +702,6 @@ const prospectsRelations = relations(prospects, ({ one }) => ({
   }),
 }));
 
-
 export const insertProspectsSchema = createInsertSchema(prospects);
 export const selectProspectsSchema = createSelectSchema(prospects);
 export const prospectsSchemaDB = insertProspectsSchema.pick({
@@ -742,12 +741,9 @@ export type Bonuses = z.infer<typeof selectBonusesSchema>;
 
 export const procedure = pgTable("procedure", {
   id: columnId,
-  code: varchar("code", { length: 255 }).notNull(),
-  procedureNumber: varchar("procedureNumber", { length: 255 }).notNull(),
+  type: varchar("type", { length: 255 }),
   estado: varchar("estado", { length: 255 }).notNull(),
-  prospect: varchar("prospect")
-    .references(() => prospects.id)
-    .notNull(),
+  prospect: varchar("prospect").references(() => prospects.id),
   // medicalAudit: varchar("medicalAudit", { length: 255 })
   //   .references(() => medical_audit.id)
   //   .notNull(),

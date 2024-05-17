@@ -17,9 +17,16 @@ import { useState } from "react";
 import { api } from "~/trpc/react";
 import { type Inputs } from "~/components/procedures/members-info";
 import BillingInfo from "~/components/procedures/billing-info";
+import { type InputsBilling } from "~/components/procedures/billing-info";
+import { type InputsGeneralInfo } from "~/components/procedures/general-info-form";
+import { SubmitHandler } from "react-hook-form";
 export default function AddProcedure() {
   const { mutateAsync: createIntegrant } = api.integrants.create.useMutation();
   const [membersData, setMembersData] = useState<Inputs[]>([]);
+  const [billingData, setBillingData] = useState<InputsBilling[]>([]);
+  const [generalInfoData, setGeneralInfoData] = useState<InputsGeneralInfo[]>(
+    [],
+  );
   const [currentTab, setCurrentTab] = useState("general_info");
   function handleTabChange(tab: string) {
     console.log("handleTabChange");
@@ -27,29 +34,12 @@ export default function AddProcedure() {
     setCurrentTab(tab);
     console.log(currentTab);
   }
-  function handleSumbitMembers() {
-    membersData.map((member) => {
-      createIntegrant({
-        affiliate_type: member.affiliate_type,
-        birth_date: member.birth_date,
-        id_number: member.id_number,
-        name: member.name,
-        relationship: member.relationship,
-        address: member.address,
-        cellphone_number: member.cellphone_number,
-        phone_number: member.phone_number,
-        email: member.mail,
-        isAffiliate: member.isAffiliate,
-        isHolder: member.isHolder,
-        afip_status: member.afip_status,
-      });
-    });
+  const handleSumbitMembers = async () => {
+    const promises = membersData.map((member) => createIntegrant(member));
+    await Promise.all(promises);
     console.log("membersData");
     console.log(membersData);
-    // const integrant = createIntegrant({
-    //   affiliate_type: membersData[]
-    // })
-  }
+  };
 
   return (
     <>
