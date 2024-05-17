@@ -508,18 +508,16 @@ export const integrants = pgTable("integrant", {
   isPaymentHolder: boolean("isPaymentHolder").notNull().default(false),
   isAffiliate: boolean("isAffiliate").notNull().default(false),
   isBillResponsible: boolean("isBillResponsible").notNull().default(false),
-
-  procedure_id: varchar("procedure_id", { length: 255 })
-    .notNull()
+  prospect_id: varchar("prospect_id", { length: 255 })
     .references(() => procedure.id),
-  paymentHolder_id: varchar("paymentHolder_id", { length: 255 })
-    .notNull()
-    .references(() => paymentHolders.id),
-
-  billResponsible_id: varchar("billResponsible_id", { length: 255 })
-    .notNull()
-    .references(() => billResponsible.id),
 });
+
+const integrantsRelations = relations(integrants, ({ one }) => ({
+  prospect: one(prospects, {
+    fields: [integrants.prospect_id],
+    references: [prospects.id],
+  }),
+}));
 
 export const insertintegrantSchema = createInsertSchema(integrants);
 export const selectintegrantSchema = createSelectSchema(integrants);
@@ -556,70 +554,6 @@ export const integrantSchemaDB = insertintegrantSchema.pick({
   billResponsible_id: true,
 });
 export type Integrant = z.infer<typeof selectintegrantSchema>;
-
-export const paymentHolders = pgTable("paymentHolders", {
-  id: columnId,
-  name: varchar("name", { length: 255 }).notNull(),
-  id_type: varchar("id_type", { length: 255 }),
-  id_number: varchar("id_number", { length: 255 }),
-  cuit: varchar("cuit", { length: 255 }).notNull(),
-  afip_status: varchar("afip_status", { length: 255 }),
-  fiscal_id_type: varchar("fiscal_id_type", { length: 255 }),
-  fiscal_id_number: varchar("fiscal_id_number", { length: 255 }),
-  address: varchar("address", { length: 255 }).notNull(),
-  iva: varchar("iva", { length: 255 }).notNull(),
-
-  // integrant_id: varchar("integrant_id", { length: 255 })
-  // .references(() => integrants.id).notNull().default(""),
-});
-
-export const insertpaymentHoldersSchema = createInsertSchema(paymentHolders);
-export const selectpaymentHoldersSchema = createSelectSchema(paymentHolders);
-export const paymentHoldersSchemaDB = insertpaymentHoldersSchema.pick({
-  name: true,
-  id_type: true,
-  id_number: true,
-  cuit: true,
-  afip_status: true,
-  fiscal_id_type: true,
-  fiscal_id_number: true,
-  address: true,
-  iva: true,
-  // integrant_id: true,
-});
-
-export type PaymentHolders = z.infer<typeof selectpaymentHoldersSchema>;
-
-export const billResponsible = pgTable("billResponsible", {
-  id: columnId,
-  name: varchar("name", { length: 255 }).notNull(),
-  id_type: varchar("id_type", { length: 255 }),
-  id_number: varchar("id_number", { length: 255 }),
-  afip_status: varchar("afip_status", { length: 255 }),
-  fiscal_id_type: varchar("fiscal_id_type", { length: 255 }),
-  fiscal_id_number: varchar("fiscal_id_number", { length: 255 }),
-  address: varchar("address", { length: 255 }).notNull(),
-  iva: varchar("iva", { length: 255 }).notNull(),
-});
-
-export const insertBillResponsibleSchema = createInsertSchema(billResponsible);
-export const selectBillResponsibleSchema = createSelectSchema(billResponsible);
-export const billResponsibleSchemaDB = insertBillResponsibleSchema.pick({
-  name: true,
-  id_type: true,
-  id_number: true,
-  afip_status: true,
-  fiscal_id_type: true,
-  fiscal_id_number: true,
-  cuit: true,
-  payment_holder: true,
-  adress: true,
-  iva: true,
-  payment_responsible: true,
-  // integrant_id: true,
-});
-
-export type BillResponsible = z.infer<typeof selectBillResponsibleSchema>;
 
 export const facturas = pgTable("facturas", {
   id: columnId,
@@ -684,7 +618,7 @@ export const prospects = pgTable("prospects", {
   bonus: varchar("bonus", { length: 255 }).notNull(),
 });
 
-const prospectsRelations = relations(prospects, ({ one }) => ({
+const prospectsRelations = relations(prospects, ({ one,many }) => ({
   plan: one(plans, {
     fields: [prospects.plan],
     references: [plans.id],
@@ -693,6 +627,7 @@ const prospectsRelations = relations(prospects, ({ one }) => ({
     fields: [prospects.modo],
     references: [modos.id],
   }),
+  integrants:many(integrants)
 }));
 
 export const insertProspectsSchema = createInsertSchema(prospects);

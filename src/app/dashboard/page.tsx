@@ -45,7 +45,7 @@ export default async function Home() {
           return (
             <ListTile
               key={company.id}
-              href={`/dashboard/company/${company.id}/general/dashboard`}
+              href={`/dashboard/${company.id}/general`}
               title={company.name}
               leading={<Building2Icon />}
             />
