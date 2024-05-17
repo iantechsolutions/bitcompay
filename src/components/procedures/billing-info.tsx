@@ -157,13 +157,10 @@ export default function BillingInfo({
   }, [isBillingResponsible, billingResponsible, adult, setValue]);
   const form = useForm({ defaultValues: initialValues });
   const { data: products } = api.products.list.useQuery(undefined);
-  const { mutateAsync: createBillingResponsible } =
-    api.billResponsible.create.useMutation();
   const productsOptions = products?.map((product) => (
     <SelectItem value={product.id}>{product.name}</SelectItem>
   ));
   const onSubmit: SubmitHandler<InputsBilling> = async (data) => {
-    await createBillingResponsible(data);
     setBillingData(data);
   };
   return (
