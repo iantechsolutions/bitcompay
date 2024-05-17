@@ -46,6 +46,7 @@ dayjs.extend(utc);
 dayjs.locale("es");
 
 export type Inputs = {
+  iva: string;
   affiliate_type: string;
   relationship: string;
   name: string;
@@ -484,6 +485,41 @@ export default function AddMembers(props: AddMembersProps) {
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="mail"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <Input {...field} placeholder="Ingrese el email" />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="iva"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Seleccione el iva a utilizar</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccione un tipo de iva" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="cuit">CUIT</SelectItem>
+                        <SelectItem value="cuil">CUIL</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+
               <FormField
                 control={form.control}
                 name="isHolder"
