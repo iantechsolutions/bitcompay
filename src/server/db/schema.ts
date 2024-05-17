@@ -695,9 +695,7 @@ export const medical_audit = pgTable("medical_audit", {
   id: columnId,
   description: varchar("description", { length: 255 }).notNull(),
   state: varchar("state", { length: 255 }).notNull(),
-  procedure_id: varchar("procedure", { length: 255 }).references(
-    () => procedure.id,
-  ),
+  procedure_id: varchar("procedure", { length: 255 })
 });
 
 export const medical_auditRelations = relations(medical_audit, ({ one }) => ({
@@ -720,9 +718,7 @@ export const administrative_audit = pgTable("administrative_audit", {
   id: columnId,
   description: varchar("description", { length: 255 }).notNull(),
   state: varchar("state", { length: 255 }).notNull(),
-  procedure_id: varchar("procedure", { length: 255 }).references(
-    () => procedure.id,
-  ),
+  procedure_id: varchar("procedure", { length: 255 })
 });
 
 export const administrative_auditRelations = relations(administrative_audit, ({ one }) => ({

@@ -17,14 +17,11 @@ import { Label } from "~/components/ui/label";
 import { asTRPCError } from "~/lib/errors";
 import { api } from "~/trpc/react";
 
-
 interface auditDialog {
   procedure_id: string;
 }
 
-export function AddAuditDialog(props: auditDialog ) {
-
-
+export function AddAuditDialog(props: auditDialog) {
   const { mutateAsync: createAudit, isLoading } =
     api.administrative_audit.create.useMutation();
 
@@ -38,8 +35,8 @@ export function AddAuditDialog(props: auditDialog ) {
   async function handleCreate() {
     try {
       await createAudit({
-        description,
-        state,
+        description: description,
+        state: state,
         procedure_id: props.procedure_id,
       });
 

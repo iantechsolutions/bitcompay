@@ -51,8 +51,6 @@ export const procedureRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input: { id, ...input } }) => {
-      console.log("Function called");
-
       const updatedprocedure = await db
         .update(schema.procedure)
         .set(input)

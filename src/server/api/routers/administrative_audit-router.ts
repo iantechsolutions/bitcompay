@@ -35,10 +35,10 @@ export const administrative_auditRouter = createTRPCRouter({
         throw new Error("User not found");
       }
       const user = session?.user.id;
+      console.log(input);
       const newadministrative_audit = await db
         .insert(schema.administrative_audit)
         .values({ ...input});
-
       return administrative_audit;
     }),
 
