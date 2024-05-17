@@ -29,7 +29,7 @@ export const integrantsRouter = createTRPCRouter({
 
     create: protectedProcedure
     .input(z.object({ 
-    
+      iva:z.string(),
       affiliate_type:z.string(),
       relationship: z.string(),
       name: z.string(),
@@ -57,9 +57,7 @@ export const integrantsRouter = createTRPCRouter({
       isPaymentHolder: z.boolean(),
       isAffiliate: z.boolean(),
       isBillResponsiblee: z.boolean(),
-      procedure_id: z.string().optional(),
-      paymentHolder_id: z.string().optional(),
-      billResponsible_id: z.string().optional()
+      prospect_id: z.string().optional(),
     }))
     .mutation(async ({ input }) => {
       
@@ -71,6 +69,7 @@ export const integrantsRouter = createTRPCRouter({
   change: protectedProcedure
     .input(
       z.object({
+        iva: z.string(),
         id: z.string(),
         affiliate_type: z.string(),
         relationship: z.string(),
@@ -99,10 +98,8 @@ export const integrantsRouter = createTRPCRouter({
         isPaymentHolder: z.boolean(),
         isAffiliate: z.boolean(),
         isBillResponsible: z.boolean(),
-        procedure_id: z.string(),
-        paymentHolder_id: z.string(),
-        billResponsible_id: z.string()
-      }),
+        prospect_id: z.string(),
+        }),
     )
     .mutation(async ({ input: { id, ...input } }) => {
       console.log("Function called");

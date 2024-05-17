@@ -86,7 +86,7 @@ export default function AddProcedure() {
         isPaymentHolder: member.isPaymentResponsible,
         isAffiliate: member.isAffiliate,
         isBillResponsiblee: member.isBillResponsible,
-        billResponsible_id: "",
+        iva: member.iva,
       });
     });
     await Promise.all(promises);
