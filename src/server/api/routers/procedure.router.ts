@@ -6,7 +6,10 @@ import { procedure } from "~/server/db/schema";
 
 export const procedureRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({}) => {
-    const procedures = await db.query.procedure.findMany();
+    const procedures = await db.query.procedure.findMany({with:{
+      administrative_audits:true,
+      medical_audits:true,
+    }});
     return procedures;
   }),
   get: protectedProcedure

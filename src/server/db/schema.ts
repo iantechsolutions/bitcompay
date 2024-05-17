@@ -700,18 +700,19 @@ export const medical_audit = pgTable("medical_audit", {
   ),
 });
 
-// export const medical_auditRelations = relations(procedure, ({ one }) => ({
-//   documentUpload: one(documentUploads, {
-//     fields: [medical_audit.procedure_id],
-//     references: [procedure.id],
-//   })}
-// ));
+export const medical_auditRelations = relations(medical_audit, ({ one }) => ({
+  procedure: one(procedure, {
+    fields: [medical_audit.procedure_id],
+    references: [procedure.id],
+  })}
+));
 
 export const insertmedical_auditSchema = createInsertSchema(medical_audit);
 export const selectmedical_auditSchema = createSelectSchema(medical_audit);
 export const medical_auditSchemaDB = insertmedical_auditSchema.pick({
   description: true,
   state: true,
+  procedure_id: true,
 });
 export type Medical_audit = z.infer<typeof selectmedical_auditSchema>;
 
@@ -724,12 +725,12 @@ export const administrative_audit = pgTable("administrative_audit", {
   ),
 });
 
-// export const admin_auditRelations = relations(procedure, ({ one }) => ({
-//   documentUpload: one(documentUploads, {
-//     fields: [administrative_audit.procedure_id],
-//     references: [procedure.id],
-//   })}
-// ));
+export const administrative_auditRelations = relations(administrative_audit, ({ one }) => ({
+  procedure: one(procedure, {
+    fields: [administrative_audit.procedure_id],
+    references: [procedure.id],
+  })}
+));
 
 export const insertadministrative_auditSchema =
   createInsertSchema(administrative_audit);
@@ -739,6 +740,7 @@ export const administrative_auditSchemaDB =
   insertadministrative_auditSchema.pick({
     description: true,
     state: true,
+    procedure_id:true,
   });
 export type Administrative_audit = z.infer<
   typeof selectadministrative_auditSchema

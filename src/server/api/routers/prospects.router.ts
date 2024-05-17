@@ -2,7 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db, schema } from "~/server/db";
 import { eq } from "drizzle-orm";
-import { prospects } from "~/server/db/schema";
+import { administrative_audit, medical_audit, prospects } from "~/server/db/schema";
 
 export const prospectsRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({}) => {
