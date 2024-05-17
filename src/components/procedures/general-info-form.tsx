@@ -34,6 +34,7 @@ import { RouterOutputs } from "~/trpc/shared";
 dayjs.extend(utc);
 dayjs.locale("es");
 export type InputsGeneralInfo = {
+  id: string;
   bussinessUnit: string;
   plan: string;
   validity: string;
@@ -70,6 +71,7 @@ export default function GeneralInfoForm(props: GeneralInfoProps) {
       plan: data.plan,
       modo: data.mode,
     }).then(async (response) => {
+      setProspectId(response[0]!.id);
       await createProcedure({
         type: "prospect",
         estado: "pending",
