@@ -6,7 +6,9 @@ import { and, eq, inArray } from "drizzle-orm";
 
 export const productsChannel = createTRPCRouter({
   list: protectedProcedure.query(async () => {
-    return await db.query.products.findMany();
+    return await db.query.products.findMany({
+      with: { channels: { with: { channel: true } } },
+    });
   }),
   create: protectedProcedure
     .input(

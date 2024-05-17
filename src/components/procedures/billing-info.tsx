@@ -23,6 +23,9 @@ export type InputsBilling = {
   address: string;
   iva: string;
   afip_status: string;
+  card_number: string;
+  card_expiration_date: string;
+  card_security_code: string;
 };
 type propsBillingInfo = {
   data: Inputs[];
@@ -90,6 +93,9 @@ export default function BillingInfo({
           } ${adult!.county} ${adult!.state} ${adult!.cp} ${adult!.zone}`
         : "",
     iva: "",
+    card_number: "",
+    card_expiration_date: "",
+    card_security_code: "",
     afip_status: isBillingResponsible
       ? billingResponsible!.afip_status
       : isAdult
@@ -182,6 +188,11 @@ export default function BillingInfo({
                   </FormControl>
                   <SelectContent>{productsOptions}</SelectContent>
                 </Select>
+                {products?.map((product) =>
+                  product.channels.map((channel) => (
+                    <FormLabel>{channel.channel.name}</FormLabel>
+                  )),
+                )}
               </FormItem>
             )}
           />
@@ -191,7 +202,11 @@ export default function BillingInfo({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Nombre</FormLabel>
-                <Input {...field} placeholder="ingrese su nombre" />
+                <Input
+                  {...field}
+                  placeholder="ingrese su nombre"
+                  disabled={isBillingResponsible}
+                />
               </FormItem>
             )}
           />
@@ -204,6 +219,7 @@ export default function BillingInfo({
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
+                  disabled={isBillingResponsible}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -227,6 +243,7 @@ export default function BillingInfo({
                 <Input
                   {...field}
                   placeholder="ingrese su numero de id fiscal"
+                  disabled={isBillingResponsible}
                 />
               </FormItem>
             )}
@@ -240,6 +257,7 @@ export default function BillingInfo({
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
+                  disabled={isBillingResponsible}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -263,6 +281,7 @@ export default function BillingInfo({
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
+                  disabled={isBillingResponsible}
                 ></Select>
                 <FormControl>
                   <SelectTrigger>
@@ -288,7 +307,11 @@ export default function BillingInfo({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Numero de Id</FormLabel>
-                <Input {...field} placeholder="ingrese su numero de id " />
+                <Input
+                  {...field}
+                  placeholder="ingrese su numero de id "
+                  disabled={isBillingResponsible}
+                />
               </FormItem>
             )}
           />
@@ -302,6 +325,9 @@ export default function BillingInfo({
               </FormItem>
             )}
           />
+
+          <FormLabel>Campos para DebitoDirecto</FormLabel>
+
           <Button type="submit">Precarga</Button>
         </form>
       </Form>
