@@ -2,6 +2,7 @@
 import { Loader2Icon, PlusCircleIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Interface } from "readline";
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 import {
@@ -16,7 +17,14 @@ import { Label } from "~/components/ui/label";
 import { asTRPCError } from "~/lib/errors";
 import { api } from "~/trpc/react";
 
-export function AddAuditDialog() {
+
+interface auditDialog {
+  procedure_id: string;
+}
+
+export function AddAuditDialog(props: auditDialog ) {
+
+
   const { mutateAsync: createAudit, isLoading } =
     api.administrative_audit.create.useMutation();
 
@@ -32,7 +40,7 @@ export function AddAuditDialog() {
       await createAudit({
         description,
         state,
-        procedureId: router.query.procedureId as string,
+        procedure_id: props.procedure_id,
       });
 
       toast.success("Auditoria creada correctamente");
