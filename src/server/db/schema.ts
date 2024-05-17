@@ -13,6 +13,7 @@ import { columnId, createdAt, pgTable, updatedAt } from "./schema/util";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { number, type z } from "zod";
 import { duration } from "html2canvas/dist/types/css/property-descriptors/duration";
+import { id } from "date-fns/locale";
 export * from "./schema/auth";
 export { pgTable } from "./schema/util";
 
@@ -508,8 +509,9 @@ export const integrants = pgTable("integrant", {
   isPaymentHolder: boolean("isPaymentHolder").notNull().default(false),
   isAffiliate: boolean("isAffiliate").notNull().default(false),
   isBillResponsible: boolean("isBillResponsible").notNull().default(false),
-  prospect_id: varchar("prospect_id", { length: 255 })
-    .references(() => procedure.id),
+  prospect_id: varchar("prospect_id", { length: 255 }).references(
+    () => procedure.id,
+  ),
 });
 
 const integrantsRelations = relations(integrants, ({ one }) => ({
@@ -618,7 +620,7 @@ export const prospects = pgTable("prospects", {
   bonus: varchar("bonus", { length: 255 }).notNull(),
 });
 
-const prospectsRelations = relations(prospects, ({ one,many }) => ({
+const prospectsRelations = relations(prospects, ({ one, many }) => ({
   plan: one(plans, {
     fields: [prospects.plan],
     references: [plans.id],
@@ -627,7 +629,7 @@ const prospectsRelations = relations(prospects, ({ one,many }) => ({
     fields: [prospects.modo],
     references: [modos.id],
   }),
-  integrants:many(integrants)
+  integrants: many(integrants),
 }));
 
 export const insertProspectsSchema = createInsertSchema(prospects);
@@ -693,7 +695,9 @@ export const medical_audit = pgTable("medical_audit", {
   id: columnId,
   description: varchar("description", { length: 255 }).notNull(),
   state: varchar("state", { length: 255 }).notNull(),
-  procedure_id: varchar("procedure", { length: 255 }).references(() => procedure.id)
+  procedure_id: varchar("procedure", { length: 255 }).references(
+    () => procedure.id,
+  ),
 });
 
 // export const medical_auditRelations = relations(procedure, ({ one }) => ({
@@ -715,7 +719,9 @@ export const administrative_audit = pgTable("administrative_audit", {
   id: columnId,
   description: varchar("description", { length: 255 }).notNull(),
   state: varchar("state", { length: 255 }).notNull(),
-  procedure_id: varchar("procedure", { length: 255 }).references(() => procedure.id),
+  procedure_id: varchar("procedure", { length: 255 }).references(
+    () => procedure.id,
+  ),
 });
 
 // export const admin_auditRelations = relations(procedure, ({ one }) => ({
@@ -724,7 +730,6 @@ export const administrative_audit = pgTable("administrative_audit", {
 //     references: [procedure.id],
 //   })}
 // ));
-
 
 export const insertadministrative_auditSchema =
   createInsertSchema(administrative_audit);
@@ -739,3 +744,10 @@ export type Administrative_audit = z.infer<
   typeof selectadministrative_auditSchema
 >;
 
+export const payment_info = pgTable("payment_info", {
+  id: columnId,
+  card_number: varchar("card_number", { length: 255 }).notNull(),
+  expire_date: timestamp("expire_date", { mode: "date" }).notNull(),
+  CCV: varchar("CCV", { length: 255 }).notNull(),
+  CBU: varchar("CBU", { length: 255 }),
+});
