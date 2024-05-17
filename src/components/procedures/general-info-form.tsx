@@ -46,10 +46,14 @@ export type InputsGeneralInfo = {
   receipt: string;
   bonus: string;
 };
+export type InputsProcedure = {
+  id: string;
+};
 
 type GeneralInfoProps = {
   changeTab: (tab: string) => void;
-  setGeneralInfo: (data: InputsGeneralInfo) => void;
+  setProspect: (data: InputsGeneralInfo) => void;
+  setProcedureId: (data: InputsProcedure) => void;
 };
 
 export default function GeneralInfoForm(props: GeneralInfoProps) {
@@ -64,7 +68,7 @@ export default function GeneralInfoForm(props: GeneralInfoProps) {
   const [mode, setMode] = useState("");
 
   const onSubmit: SubmitHandler<InputsGeneralInfo> = async (data) => {
-    const { setGeneralInfo } = props;
+    const { setProspect, setProcedureId } = props;
     await createProspect({
       businessUnit: data.bussinessUnit,
       validity: new Date(data.validity),
@@ -72,12 +76,13 @@ export default function GeneralInfoForm(props: GeneralInfoProps) {
       modo: data.mode,
     }).then(async (response) => {
       setProspectId(response[0]!.id);
-      await createProcedure({
+      setProspect(data);
+      const procedure = await createProcedure({
         type: "prospect",
         estado: "pending",
         prospect: response[0]!.id,
       });
-      setGeneralInfo(data);
+      setProcedureId({ id: procedure[0]!.id });
     });
   };
 

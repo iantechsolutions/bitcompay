@@ -9,7 +9,9 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import GeneralInfoForm from "~/components/procedures/general-info-form";
+import GeneralInfoForm, {
+  InputsProcedure,
+} from "~/components/procedures/general-info-form";
 
 import AddMembers from "~/components/procedures/members-info";
 import MembersTable from "~/components/procedures/member-tab";
@@ -22,10 +24,16 @@ import { type InputsGeneralInfo } from "~/components/procedures/general-info-for
 import { SubmitHandler } from "react-hook-form";
 export default function AddProcedure() {
   const { mutateAsync: createIntegrant } = api.integrants.create.useMutation();
+  const { mutateAsync: updateProcedure } = api.procedure.change.useMutation();
   const [membersData, setMembersData] = useState<Inputs[]>([]);
   const [billingData, setBillingData] = useState<InputsBilling | null>(null);
-  const [generalInfoData, setGeneralInfoData] =
-    useState<InputsGeneralInfo | null>(null);
+  const [procedureData, setProcedureData] = useState<InputsProcedure | null>(
+    null,
+  );
+  const [prospectData, setProspectData] = useState<InputsGeneralInfo | null>(
+    null,
+  );
+
   const [currentTab, setCurrentTab] = useState("general_info");
   function handleTabChange(tab: string) {
     console.log("handleTabChange");
@@ -33,6 +41,14 @@ export default function AddProcedure() {
     setCurrentTab(tab);
     console.log(currentTab);
   }
+  function handlePreLoad() {}
+  function handleFinish() {
+    updateProcedure({
+      id: procedureData!.id,
+      estado: "Completado",
+    });
+  }
+
   const handleSumbitMembers = async () => {
     const promises = membersData.map((member) => {
       let status: "single" | "married" | "divorced" | "widowed";
@@ -87,7 +103,7 @@ export default function AddProcedure() {
         isAffiliate: member.isAffiliate,
         isBillResponsiblee: member.isBillResponsible,
         iva: member.iva,
-        prospect_id: generalInfoData?.id,
+        prospect_id: prospectData?.id,
       });
     });
     await Promise.all(promises);
@@ -125,7 +141,8 @@ export default function AddProcedure() {
             </TabsList>
             <TabsContent value="general_info">
               <GeneralInfoForm
-                setGeneralInfo={setGeneralInfoData}
+                setProspect={setProspectData}
+                setProcedureId={setProcedureData}
                 changeTab={handleTabChange}
               />
             </TabsContent>
@@ -152,6 +169,8 @@ export default function AddProcedure() {
             <TabsContent value="billing">
               <div>
                 <BillingInfo
+                  handleFinish={handleFinish}
+                  handlePreLoad={handlePreLoad}
                   setBillingData={setBillingData}
                   data={membersData}
                 />

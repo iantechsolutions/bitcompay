@@ -34,7 +34,7 @@ export const procedureRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       const new_procedure = await db.insert(schema.procedure).values({
         ...input,
-      });
+      }).returning();
       return new_procedure;
     }),
 
@@ -42,9 +42,9 @@ export const procedureRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string(),
-        type: z.string(),
+        type: z.string().optional(),
         estado: z.string(),
-        prospect: z.string(),
+        prospect: z.string().optional(),
       }),
     )
     .mutation(async ({ input: { id, ...input } }) => {

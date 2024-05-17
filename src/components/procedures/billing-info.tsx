@@ -30,10 +30,14 @@ export type InputsBilling = {
 type propsBillingInfo = {
   data: Inputs[];
   setBillingData: (data: InputsBilling) => void;
+  handlePreLoad: () => void;
+  handleFinish: () => void;
 };
 export default function BillingInfo({
   data,
   setBillingData,
+  handlePreLoad,
+  handleFinish,
 }: propsBillingInfo) {
   const isData = data.length > 0;
   const isBillingResponsible =
@@ -279,22 +283,25 @@ export default function BillingInfo({
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                   disabled={isBillingResponsible}
-                ></Select>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione un estado de AFIP" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="monotributista">Monotributista</SelectItem>
-                  <SelectItem value="responsable_inscripto">
-                    Responsable Inscripto
-                  </SelectItem>
-                  <SelectItem value="exento">Exento</SelectItem>
-                  <SelectItem value="consumidor_final">
-                    Consumidor Final
-                  </SelectItem>
-                </SelectContent>
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccione un estado de AFIP" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="monotributista">
+                      Monotributista
+                    </SelectItem>
+                    <SelectItem value="responsable_inscripto">
+                      Responsable Inscripto
+                    </SelectItem>
+                    <SelectItem value="exento">Exento</SelectItem>
+                    <SelectItem value="consumidor_final">
+                      Consumidor Final
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </FormItem>
             )}
           />
@@ -325,7 +332,12 @@ export default function BillingInfo({
 
           <FormLabel>Campos para DebitoDirecto</FormLabel>
 
-          <Button type="submit">Precarga</Button>
+          <Button onClick={() => handlePreLoad} type="submit">
+            Precarga
+          </Button>
+          <Button onClick={() => handleFinish} type="submit">
+            Finalizar
+          </Button>
         </form>
       </Form>
     </>
