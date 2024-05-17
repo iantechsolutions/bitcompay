@@ -15,7 +15,7 @@ export default async function Page(props: { params: { companyId: string } }) {
     <LayoutContainer>
       <section className="space-y-2">
         <div className="flex justify-between">
-          <Title>Beneficios</Title>
+          <Title>Eventuales/fijos</Title>
         </div>
         <List>
           {procedureComplete.map((procedureComplete) => {
