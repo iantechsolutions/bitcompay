@@ -57,26 +57,24 @@ export default function GeneralInfoForm(props: GeneralInfoProps) {
   const { data: modos } = api.modos.list.useQuery(undefined);
   const { mutateAsync: createProcedure } = api.procedure.create.useMutation();
   const { mutateAsync: createProspect } = api.prospects.create.useMutation();
+  const [prospectId, setProspectId] = useState("");
   const form = useForm<Inputs>();
   const [mode, setMode] = useState("");
-  const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    const newProspect: RouterOutputs["prospects"]["create"] =
-      await createProspect({
-        businessUnit: data.bussinessUnit,
-        validity: new Date(data.validity),
-        plan: data.plan,
-        modo: data.mode,
-      });
-
+  async function onSubmit(data: any) {
+    const prospect = await createProspect({
+      businessUnit: data.bussinessUnit,
+      validity: new Date(data.validity),
+      plan: data.plan,
+      modo: data.mode,
+    });
     await createProcedure({
       code: "dkflksdf",
       procedureNumber: "2334",
       estado: "pendiente",
-      prospect: newProspect.id,
+      prospect: prospect[0]?.id ?? "",
     });
-    console.log(data);
     changeTab("members");
-  };
+  }
 
   return (
     <Form {...form}>

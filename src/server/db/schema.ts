@@ -681,15 +681,27 @@ export const prospects = pgTable("prospects", {
     .references(() => modos.id)
     .notNull(),
   cuit: varchar("cuit", { length: 255 }).notNull(),
-  healthInsurances: varchar("healthInsurances")
-    .references(() => healthInsurances.id)
-    .notNull(),
+  // healthInsurances: varchar("healthInsurances")
+  //   .references(() => healthInsurances.id)
+  //   .notNull(),
   employerContribution: varchar("employerContribution", {
     length: 255,
   }).notNull(),
   receipt: varchar("receipt", { length: 255 }).notNull(),
   bonus: varchar("bonus", { length: 255 }).notNull(),
 });
+
+const prospectsRelations = relations(prospects, ({ one }) => ({
+  plan: one(plans, {
+    fields: [prospects.plan],
+    references: [plans.id],
+  }),
+  modo: one(modos, {
+    fields: [prospects.modo],
+    references: [modos.id],
+  }),
+}));
+
 
 export const insertProspectsSchema = createInsertSchema(prospects);
 export const selectProspectsSchema = createSelectSchema(prospects);
@@ -736,23 +748,23 @@ export const procedure = pgTable("procedure", {
   prospect: varchar("prospect")
     .references(() => prospects.id)
     .notNull(),
-  medicalAudit: varchar("medicalAudit", { length: 255 })
-    .references(() => medical_audit.id)
-    .notNull(),
-  adminAudit: varchar("adminAudit", { length: 255 })
-    .references(() => administrative_audit.id)
-    .notNull(),
+  // medicalAudit: varchar("medicalAudit", { length: 255 })
+  //   .references(() => medical_audit.id)
+  //   .notNull(),
+  // adminAudit: varchar("adminAudit", { length: 255 })
+  //   .references(() => administrative_audit.id)
+  //   .notNull(),
 });
 
 export const ProcedureRelations = relations(procedure, ({ one }) => ({
-  medical_audit: one(medical_audit, {
-    fields: [procedure.medicalAudit],
-    references: [medical_audit.id],
-  }),
-  administrative_audit: one(administrative_audit, {
-    fields: [procedure.adminAudit],
-    references: [administrative_audit.id],
-  }),
+  // medical_audit: one(medical_audit, {
+  //   fields: [procedure.medicalAudit],
+  //   references: [medical_audit.id],
+  // }),
+  // administrative_audit: one(administrative_audit, {
+  //   fields: [procedure.adminAudit],
+  //   references: [administrative_audit.id],
+  // }),
 }));
 
 export const insertProcedureSchema = createInsertSchema(procedure);

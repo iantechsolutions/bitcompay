@@ -87,6 +87,7 @@ export default function AddMembers(props: AddMembersProps) {
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     const { addMember, membersData } = props;
     addMember([...membersData, data]);
+    console.log("dataMembersForm");
     console.log(data);
     setOpen(false);
   };

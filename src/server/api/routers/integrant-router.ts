@@ -56,15 +56,16 @@ export const integrantsRouter = createTRPCRouter({
       isHolder:  z.boolean(),
       isPaymentHolder: z.boolean(),
       isAffiliate: z.boolean(),
-      isBillResponsive: z.boolean(),
+      isBillResponsiblee: z.boolean(),
       procedure_id: z.string(),
       paymentHolder_id: z.string(),
       billResponsible_id: z.string()
     }))
     .mutation(async ({ input }) => {
       
-      await db.insert(integrants).values(input);
-    
+      const integrant = await db.insert(integrants).values(input).returning();
+      
+      return integrant;
   
       }), 
   change: protectedProcedure
@@ -97,7 +98,7 @@ export const integrantsRouter = createTRPCRouter({
         isHolder:  z.boolean(),
         isPaymentHolder: z.boolean(),
         isAffiliate: z.boolean(),
-        isBillResponsive: z.boolean(),
+        isBillResponsible: z.boolean(),
         procedure_id: z.string(),
         paymentHolder_id: z.string(),
         billResponsible_id: z.string()

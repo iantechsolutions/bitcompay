@@ -41,12 +41,11 @@ export const prospectsRouter = createTRPCRouter({
       const new_prospect = await db.insert(prospects).values({
         ...input,
         cuit: " ",
-        healthInsurances: " ",
+        // healthInsurances: " ",
         employerContribution: " ",
         receipt: " ",
         bonus: " ",
-      });
-
+      }).returning();
       return new_prospect;
     }),
 
