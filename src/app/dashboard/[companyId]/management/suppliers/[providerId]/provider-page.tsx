@@ -32,7 +32,7 @@ import {
   AccordionTrigger,
 } from "~/components/ui/accordion";
 // import { useCompanyData } from "../../../company-provider";
-import { useCompanyData } from "~/app/dashboard/company/[companyId]/company-provider";
+import { useCompanyData } from "../../../company-provider";
 import { asTRPCError } from "~/lib/errors";
 
 export default function ProviderPage(props: {

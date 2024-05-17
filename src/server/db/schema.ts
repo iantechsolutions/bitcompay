@@ -674,23 +674,11 @@ export const procedure = pgTable("procedure", {
   type: varchar("type", { length: 255 }),
   estado: varchar("estado", { length: 255 }).notNull(),
   prospect: varchar("prospect").references(() => prospects.id),
-  // medicalAudit: varchar("medicalAudit", { length: 255 })
-  //   .references(() => medical_audit.id)
-  //   .notNull(),
-  // adminAudit: varchar("adminAudit", { length: 255 })
-  //   .references(() => administrative_audit.id)
-  //   .notNull(),
 });
 
-export const ProcedureRelations = relations(procedure, ({ one }) => ({
-  // medical_audit: one(medical_audit, {
-  //   fields: [procedure.medicalAudit],
-  //   references: [medical_audit.id],
-  // }),
-  // administrative_audit: one(administrative_audit, {
-  //   fields: [procedure.adminAudit],
-  //   references: [administrative_audit.id],
-  // }),
+export const ProcedureRelations = relations(procedure, ({ many }) => ({
+  medical_audits: many(medical_audit),
+  administrative_audits: many(administrative_audit),
 }));
 
 export const insertProcedureSchema = createInsertSchema(procedure);
@@ -707,7 +695,17 @@ export const medical_audit = pgTable("medical_audit", {
   id: columnId,
   description: varchar("description", { length: 255 }).notNull(),
   state: varchar("state", { length: 255 }).notNull(),
+  procedure_id: varchar("procedure", { length: 255 }).references(
+    () => procedure.id,
+  ),
 });
+
+// export const medical_auditRelations = relations(procedure, ({ one }) => ({
+//   documentUpload: one(documentUploads, {
+//     fields: [medical_audit.procedure_id],
+//     references: [procedure.id],
+//   })}
+// ));
 
 export const insertmedical_auditSchema = createInsertSchema(medical_audit);
 export const selectmedical_auditSchema = createSelectSchema(medical_audit);
@@ -721,7 +719,17 @@ export const administrative_audit = pgTable("administrative_audit", {
   id: columnId,
   description: varchar("description", { length: 255 }).notNull(),
   state: varchar("state", { length: 255 }).notNull(),
+  procedure_id: varchar("procedure", { length: 255 }).references(
+    () => procedure.id,
+  ),
 });
+
+// export const admin_auditRelations = relations(procedure, ({ one }) => ({
+//   documentUpload: one(documentUploads, {
+//     fields: [administrative_audit.procedure_id],
+//     references: [procedure.id],
+//   })}
+// ));
 
 export const insertadministrative_auditSchema =
   createInsertSchema(administrative_audit);
@@ -735,11 +743,6 @@ export const administrative_auditSchemaDB =
 export type Administrative_audit = z.infer<
   typeof selectadministrative_auditSchema
 >;
-
-//Card_number
-//Expire_date
-//CCV
-//CBU
 
 export const payment_info = pgTable("payment_info", {
   id: columnId,

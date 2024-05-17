@@ -87,6 +87,7 @@ export default function AddProcedure() {
         isAffiliate: member.isAffiliate,
         isBillResponsiblee: member.isBillResponsible,
         iva: member.iva,
+        prospect_id: generalInfoData?.id,
       });
     });
     await Promise.all(promises);
