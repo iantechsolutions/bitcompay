@@ -12,15 +12,15 @@ export default async function Home() {
       <section className="space-y-2">
         <div className="flex justify-between">
           <Title>modos</Title>
-            <AddModo/>
+          <AddModo />
         </div>
         <List>
           {modo.map((modo) => {
             return (
               <ListTile
                 key={modo.id}
-                  leading={modo.description}
-                href={`/dashboard/admin/modos/${modo.id}`}
+                leading={modo.description}
+                href={`/dashboard/faIKDivwt7Z8Gp-B5yFrv/administration/modos/${modo.id}`}
                 title={modo.id}
               />
             );

@@ -62,7 +62,8 @@ export default function GeneralInfoForm(props: GeneralInfoProps) {
   const { data: plans } = api.plans.list.useQuery(undefined);
   const { data: modos } = api.modos.list.useQuery(undefined);
   const { mutateAsync: createProcedure } = api.procedure.create.useMutation();
-  const { mutateAsync: createProspect } = api.prospects.create.useMutation();
+  const { mutateAsync: createProspect, isLoading } =
+    api.prospects.create.useMutation();
   const [prospectId, setProspectId] = useState("");
   const form = useForm<InputsGeneralInfo>();
   const [mode, setMode] = useState("");
@@ -83,6 +84,7 @@ export default function GeneralInfoForm(props: GeneralInfoProps) {
         prospect: response[0]!.id,
       });
       setProcedureId({ id: procedure[0]!.id });
+      changeTab("members");
     });
   };
 
@@ -207,7 +209,9 @@ export default function GeneralInfoForm(props: GeneralInfoProps) {
             </FormItem>
           )}
         />
-        <Button type="submit">Continuar</Button>
+        <Button type="submit" disabled={isLoading}>
+          Continuar
+        </Button>
       </form>
     </Form>
   );

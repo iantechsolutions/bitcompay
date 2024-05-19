@@ -10,6 +10,14 @@ export default async function Page(props: { params: { companyId: string } }) {
       <section className="space-y-2">
         <div className="flex justify-between">
           <Title>Tablas</Title>
+          <List>
+            <ListTile
+              key={1}
+              leading={"Modos"}
+              href={`/dashboard/faIKDivwt7Z8Gp-B5yFrv/administration/modos`}
+              title={"Modos"}
+            />
+          </List>
         </div>
       </section>
     </LayoutContainer>
