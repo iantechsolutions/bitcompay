@@ -4,7 +4,7 @@ import { AddBrandDialog } from "./add-brand-dialog";
 import LayoutContainer from "~/components/layout-container";
 import { api } from "~/trpc/server";
 
-export default async function Home() {
+export default async function Home(props: { params: { companyId: string } }) {
   const brands = await api.brands.list.query();
   return (
     <LayoutContainer>
@@ -18,7 +18,7 @@ export default async function Home() {
             return (
               <ListTile
                 key={brand.id}
-                href={`/dashboard/admin/brands/${brand.id}`}
+                href={`/dashboard/${props.params.companyId}/administration/brands/${brand.id}`}
                 title={brand.name}
               />
             );

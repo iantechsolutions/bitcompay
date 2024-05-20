@@ -4,7 +4,7 @@ import { AddChannelDialog } from "./add-channel-dialog";
 import LayoutContainer from "~/components/layout-container";
 import { api } from "~/trpc/server";
 
-export default async function Home() {
+export default async function Home(props: { params: { companyId: string } }) {
   const channels = await api.channels.list.query();
   return (
     <LayoutContainer>
@@ -18,7 +18,7 @@ export default async function Home() {
             return (
               <ListTile
                 key={channel.id}
-                href={`/dashboard/admin/channels/${channel.id}`}
+                href={`/dashboard/${props.params.companyId}/administration/channels/${channel.id}`}
                 leading={channel.number}
                 title={channel.name}
               />

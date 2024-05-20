@@ -4,7 +4,7 @@ import LayoutContainer from "~/components/layout-container";
 import { AddProductDialog } from "./add-product-dialog";
 import { api } from "~/trpc/server";
 
-export default async function Home() {
+export default async function Home(props: { params: { companyId: string } }) {
   const products = await api.products.list.query();
   return (
     <LayoutContainer>
@@ -19,7 +19,7 @@ export default async function Home() {
               <ListTile
                 key={product.id}
                 leading={product.number}
-                href={`/dashboard/admin/products/${product.id}`}
+                href={`/dashboard/${props.params.companyId}/administration/products/${product.id}`}
                 title={product.name}
               />
             );

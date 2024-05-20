@@ -14,6 +14,24 @@ import {
   Gem,
   NotebookPen,
   Blend,
+  Briefcase,
+  BriefcaseBusiness,
+  Package,
+  Sliders,
+  Tag,
+  Wrench,
+  FileText,
+  User,
+  Shield,
+  Grid,
+  ShoppingCart,
+  Truck,
+  File,
+  Activity,
+  Clipboard,
+  Gift,
+  Calendar,
+  Settings,
 } from "lucide-react";
 import { Notebook } from "lucide-react";
 import {
@@ -85,37 +103,37 @@ export default function CompanySidenav(props: { companyId: string }) {
           <AccordionContent>
             <SidenavItem
               href={`/dashboard/${props.companyId}/administration/companies`}
-              icon={<Users />}
+              icon={<BriefcaseBusiness />}
             >
               Compañias
             </SidenavItem>
             <SidenavItem
               href={`/dashboard/${props.companyId}/administration/products`}
-              icon={<Notebook />}
+              icon={<Package />}
             >
               Productos
             </SidenavItem>
             <SidenavItem
               href={`/dashboard/${props.companyId}/administration/channels`}
-              icon={<Blend />}
+              icon={<Sliders />}
             >
               Canales
             </SidenavItem>
             <SidenavItem
               href={`/dashboard/${props.companyId}/administration/brands`}
-              icon={<Boxes />}
+              icon={<Tag />}
             >
               Marcas
             </SidenavItem>
             <SidenavItem
               href={`/dashboard/${props.companyId}/administration/services`}
-              icon={<Option />}
+              icon={<Wrench />}
             >
               Servicios
             </SidenavItem>
             <SidenavItem
               href={`/dashboard/${props.companyId}/administration/quotes`}
-              icon={<Gem />}
+              icon={<FileText />}
             >
               Cotizaciones
             </SidenavItem>
@@ -133,19 +151,19 @@ export default function CompanySidenav(props: { companyId: string }) {
           </AccordionTrigger>
           <AccordionContent>
             <SidenavItem
-              icon={<FileUpIcon />}
+              icon={<User />}
               href={`/dashboard/${props.companyId}/maintenance/user`}
             >
               Usuarios
             </SidenavItem>
             <SidenavItem
-              icon={<ActivitySquareIcon />}
+              icon={<Shield />}
               href={`/dashboard/${props.companyId}/maintenance/roles`}
             >
               Roles
             </SidenavItem>
             <SidenavItem
-              icon={<Users />}
+              icon={<Grid />}
               href={`/dashboard/${props.companyId}/maintenance/tables`}
             >
               Tablas
@@ -165,7 +183,7 @@ export default function CompanySidenav(props: { companyId: string }) {
           <AccordionContent>
             <SidenavItem
               href={`/dashboard/${props.companyId}/management/sales`}
-              icon={<BadgeDollarSign />}
+              icon={<ShoppingCart />}
             >
               Ventas
             </SidenavItem>
@@ -177,13 +195,13 @@ export default function CompanySidenav(props: { companyId: string }) {
             </SidenavItem>
             <SidenavItem
               href={`/dashboard/${props.companyId}/management/suppliers`}
-              icon={<Users />}
+              icon={<Truck />}
             >
               Proveedores
             </SidenavItem>
             <SidenavItem
               href={`/dashboard/${props.companyId}/management/documents`}
-              icon={<Users />}
+              icon={<File />}
             >
               Documentos
             </SidenavItem>
@@ -203,32 +221,32 @@ export default function CompanySidenav(props: { companyId: string }) {
           <AccordionContent>
             <SidenavItem
               href={`/dashboard/${props.companyId}/audit/administrative`}
-              icon={<Users />}
+              icon={<Clipboard />}
             >
               Administrativo
             </SidenavItem>
             <SidenavItem
               href={`/dashboard/${props.companyId}/audit/medical`}
-              icon={<Users />}
+              icon={<Activity />}
             >
               Medico
             </SidenavItem>
 
             <SidenavItem
               href={`/dashboard/${props.companyId}/audit/benefits`}
-              icon={<Users />}
+              icon={<Gift />}
             >
               Beneficios
             </SidenavItem>
             <SidenavItem
               href={`/dashboard/${props.companyId}/audit/fixed_eventual`}
-              icon={<Users />}
+              icon={<Calendar />}
             >
               Eventuales/Fijos
             </SidenavItem>
             <SidenavItem
               href={`/dashboard/${props.companyId}/audit/operations`}
-              icon={<Users />}
+              icon={<Settings />}
             >
               Operaciones
             </SidenavItem>

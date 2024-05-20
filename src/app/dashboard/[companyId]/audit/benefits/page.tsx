@@ -4,13 +4,12 @@ import { List, ListTile } from "~/components/list";
 import LayoutContainer from "~/components/layout-container";
 import { CircleUserRound } from "lucide-react";
 
-
 export default async function Page(props: { params: { companyId: string } }) {
-
   const procedure = await api.procedure.list.query();
-  const procedureComplete = procedure.filter(procedure => procedure.estado === "completado");
+  const procedureComplete = procedure.filter(
+    (procedure) => procedure.estado === "completado",
+  );
 
-  
   return (
     <LayoutContainer>
       <section className="space-y-2">
@@ -22,7 +21,7 @@ export default async function Page(props: { params: { companyId: string } }) {
             return (
               <ListTile
                 key={procedureComplete.id}
-                href={`/dashboard/audit/administrative/${procedureComplete.id}`}
+                // href={`/dashboard/audit/benefits/${procedureComplete.id}`}
                 leading={procedureComplete.estado}
                 title={procedureComplete.id}
               />

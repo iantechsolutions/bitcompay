@@ -19,7 +19,7 @@ export default async function Page(props: { params: { companyId: string } }) {
             return (
               <ListTile
                 key={provider.id}
-                href={`/dashboard/${props.params.companyId}/administration/providers/${provider.id}`}
+                href={`/dashboard/${props.params.companyId}/administration/suppliers/${provider.id}`}
                 title={provider.name}
                 leading={<CircleUserRound />}
               />

@@ -36,9 +36,11 @@ import { useRouter } from "next/navigation";
 
 export default function ChannelPage({
   channel,
+  companyId,
 }: {
   channel: NonNullable<RouterOutputs["channels"]["get"]>;
   user: NavUserData;
+  companyId: string;
 }) {
   const [requiredColumns, setRequiredColumns] = useState<Set<string>>(
     new Set(channel.requiredColumns),
@@ -169,7 +171,7 @@ export default function ChannelPage({
                   return (
                     <ListTile
                       key={product.id}
-                      href={`/dashboard/admin/products/${product.id}`}
+                      href={`/dashboard/${companyId}/administration/products/${product.id}`}
                       title={product.name}
                     />
                   );
