@@ -27,7 +27,11 @@ import {
   SelectValue,
   SelectContent,
 } from "../ui/select";
-import { useForm, type SubmitHandler } from "react-hook-form";
+import {
+  useForm,
+  type SubmitHandler,
+  type UseFormReturn,
+} from "react-hook-form";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { RouterOutputs } from "~/trpc/shared";
@@ -51,13 +55,13 @@ export type InputsProcedure = {
 };
 
 type GeneralInfoProps = {
-  changeTab: (tab: string) => void;
   setProspect: (data: InputsGeneralInfo) => void;
   setProcedureId: (data: InputsProcedure) => void;
+  form: UseFormReturn<InputsGeneralInfo>;
 };
 
 export default function GeneralInfoForm(props: GeneralInfoProps) {
-  const { changeTab } = props;
+  const [procedureStatus, setProcedureStatus] = useState<string | null>(null);
   const { data: bussinessUnits } = api.bussinessUnits.list.useQuery(undefined);
   const { data: plans } = api.plans.list.useQuery(undefined);
   const { data: modos } = api.modos.list.useQuery(undefined);
@@ -65,8 +69,6 @@ export default function GeneralInfoForm(props: GeneralInfoProps) {
   const { mutateAsync: createProspect, isLoading } =
     api.prospects.create.useMutation();
   const [prospectId, setProspectId] = useState("");
-  const form = useForm<InputsGeneralInfo>();
-  const [mode, setMode] = useState("");
 
   const onSubmit: SubmitHandler<InputsGeneralInfo> = async (data) => {
     const { setProspect, setProcedureId } = props;
@@ -78,21 +80,22 @@ export default function GeneralInfoForm(props: GeneralInfoProps) {
     }).then(async (response) => {
       setProspectId(response[0]!.id);
       setProspect(data);
-      const procedure = await createProcedure({
-        type: "prospect",
-        estado: "pending",
-        prospect: response[0]!.id,
-      });
-      setProcedureId({ id: procedure[0]!.id });
-      changeTab("members");
+      if (procedureStatus) {
+        const procedure = await createProcedure({
+          type: "prospect",
+          estado: procedureStatus,
+          prospect: response[0]!.id,
+        });
+        setProcedureId({ id: procedure[0]!.id });
+      }
     });
   };
 
   return (
-    <Form {...form}>
-      <form className="space-y-8" onSubmit={form.handleSubmit(onSubmit)}>
+    <Form {...props.form}>
+      <form className="space-y-8" onSubmit={props.form.handleSubmit(onSubmit)}>
         <FormField
-          control={form.control}
+          control={props.form.control}
           name="bussinessUnit"
           render={({ field }) => (
             <FormItem>
@@ -115,7 +118,7 @@ export default function GeneralInfoForm(props: GeneralInfoProps) {
           )}
         />
         <FormField
-          control={form.control}
+          control={props.form.control}
           name="plan"
           render={({ field }) => (
             <FormItem>
@@ -138,7 +141,7 @@ export default function GeneralInfoForm(props: GeneralInfoProps) {
           )}
         />
         <FormField
-          control={form.control}
+          control={props.form.control}
           name="validity"
           render={({ field }) => (
             <FormItem>
@@ -181,7 +184,7 @@ export default function GeneralInfoForm(props: GeneralInfoProps) {
         />
 
         <FormField
-          control={form.control}
+          control={props.form.control}
           name="mode"
           render={({ field }) => (
             <FormItem>
@@ -189,7 +192,6 @@ export default function GeneralInfoForm(props: GeneralInfoProps) {
               <Select
                 onValueChange={(value) => {
                   field.onChange(value);
-                  setMode(value);
                 }}
                 defaultValue={field.value}
               >
@@ -209,9 +211,6 @@ export default function GeneralInfoForm(props: GeneralInfoProps) {
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={isLoading}>
-          Continuar
-        </Button>
       </form>
     </Form>
   );

@@ -618,9 +618,12 @@ export const prospects = pgTable("prospects", {
   }).notNull(),
   receipt: varchar("receipt", { length: 255 }).notNull(),
   bonus: varchar("bonus", { length: 255 }).notNull(),
+  procedureId: varchar("procedureId", { length: 255 }).references(
+    () => procedure.id,
+  ),
 });
 
-const prospectsRelations = relations(prospects, ({ one, many }) => ({
+export const prospectsRelations = relations(prospects, ({ one, many }) => ({
   plan: one(plans, {
     fields: [prospects.plan],
     references: [plans.id],
@@ -673,7 +676,7 @@ export const procedure = pgTable("procedure", {
   id: columnId,
   type: varchar("type", { length: 255 }),
   estado: varchar("estado", { length: 255 }).notNull(),
-  prospect: varchar("prospect").references(() => prospects.id),
+  prospect: varchar("prospect"),
 });
 
 export const ProcedureRelations = relations(procedure, ({ many }) => ({
@@ -695,15 +698,15 @@ export const medical_audit = pgTable("medical_audit", {
   id: columnId,
   description: varchar("description", { length: 255 }).notNull(),
   state: varchar("state", { length: 255 }).notNull(),
-  procedure_id: varchar("procedure", { length: 255 })
+  procedure_id: varchar("procedure", { length: 255 }),
 });
 
 export const medical_auditRelations = relations(medical_audit, ({ one }) => ({
   procedure: one(procedure, {
     fields: [medical_audit.procedure_id],
     references: [procedure.id],
-  })}
-));
+  }),
+}));
 
 export const insertmedical_auditSchema = createInsertSchema(medical_audit);
 export const selectmedical_auditSchema = createSelectSchema(medical_audit);
@@ -718,15 +721,18 @@ export const administrative_audit = pgTable("administrative_audit", {
   id: columnId,
   description: varchar("description", { length: 255 }).notNull(),
   state: varchar("state", { length: 255 }).notNull(),
-  procedure_id: varchar("procedure", { length: 255 })
+  procedure_id: varchar("procedure", { length: 255 }),
 });
 
-export const administrative_auditRelations = relations(administrative_audit, ({ one }) => ({
-  procedure: one(procedure, {
-    fields: [administrative_audit.procedure_id],
-    references: [procedure.id],
-  })}
-));
+export const administrative_auditRelations = relations(
+  administrative_audit,
+  ({ one }) => ({
+    procedure: one(procedure, {
+      fields: [administrative_audit.procedure_id],
+      references: [procedure.id],
+    }),
+  }),
+);
 
 export const insertadministrative_auditSchema =
   createInsertSchema(administrative_audit);
@@ -736,7 +742,7 @@ export const administrative_auditSchemaDB =
   insertadministrative_auditSchema.pick({
     description: true,
     state: true,
-    procedure_id:true,
+    procedure_id: true,
   });
 export type Administrative_audit = z.infer<
   typeof selectadministrative_auditSchema

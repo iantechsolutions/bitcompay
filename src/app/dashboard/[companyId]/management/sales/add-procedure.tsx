@@ -17,16 +17,19 @@ import AddMembers from "~/components/procedures/members-info";
 import MembersTable from "~/components/procedures/member-tab";
 import { useState } from "react";
 import { api } from "~/trpc/react";
-import { type Inputs } from "~/components/procedures/members-info";
+import { type InputsMembers } from "~/components/procedures/members-info";
 import BillingInfo from "~/components/procedures/billing-info";
 import { type InputsBilling } from "~/components/procedures/billing-info";
 import { type InputsGeneralInfo } from "~/components/procedures/general-info-form";
-import { SubmitHandler } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { init } from "next/dist/compiled/webpack/webpack";
 export default function AddProcedure() {
   const { mutateAsync: createIntegrant, isLoading } =
     api.integrants.create.useMutation();
   const { mutateAsync: updateProcedure } = api.procedure.change.useMutation();
-  const [membersData, setMembersData] = useState<Inputs[]>([]);
+  const { mutateAsync: createProcedure } = api.procedure.create.useMutation();
+  const { mutateAsync: createProspect } = api.prospects.create.useMutation();
+  const [membersData, setMembersData] = useState<InputsMembers[]>([]);
   const [billingData, setBillingData] = useState<InputsBilling | null>(null);
   const [procedureData, setProcedureData] = useState<InputsProcedure | null>(
     null,
@@ -35,24 +38,15 @@ export default function AddProcedure() {
     null,
   );
 
-  const [currentTab, setCurrentTab] = useState("general_info");
-  function handleTabChange(tab: string) {
-    setCurrentTab(tab);
-  }
-  function handlePreLoad() {
-    updateProcedure({
-      id: procedureData!.id,
-      estado: "pendiente",
-    });
-  }
-  function handleFinish() {
-    updateProcedure({
-      id: procedureData!.id,
-      estado: "Completado",
-    });
-  }
+  const [memberProcedureStatus, setMemberProcedureStatus] = useState<
+    string | null
+  >(null);
 
-  const handleSumbitMembers = async () => {
+  const generalInfoForm = useForm<InputsGeneralInfo>();
+  const membersForm = useForm<InputsMembers>();
+  const billingForm = useForm<InputsBilling>();
+
+  const handleSumbitMembers: SubmitHandler<InputsMembers> = async (data) => {
     const promises = membersData.map((member) => {
       let status: "single" | "married" | "divorced" | "widowed";
       switch (member.civil_status) {
@@ -72,7 +66,8 @@ export default function AddProcedure() {
           status = "single";
           break;
       }
-      createIntegrant({
+
+      return createIntegrant({
         affiliate_type: member.affiliate_type,
         relationship: member.relationship,
         name: member.name,
@@ -109,9 +104,19 @@ export default function AddProcedure() {
         prospect_id: prospectData?.id,
       });
     });
-    await Promise.all(promises);
+
+    await Promise.all(promises).catch((error) =>
+      console.log("An error has occurred", error),
+    );
   };
 
+  const handleSumbitGeneralInfo: SubmitHandler<InputsGeneralInfo> = async (
+    data,
+  ) => {
+    console.log(data);
+  };
+
+  const handleSumbitBilling: SubmitHandler<InputsBilling> = async (data) => {};
   return (
     <>
       <Dialog>
@@ -124,13 +129,7 @@ export default function AddProcedure() {
           <DialogHeader>
             <DialogTitle>Agregar tramite</DialogTitle>
           </DialogHeader>
-          <Tabs
-            defaultValue="account"
-            onValueChange={(value) => {
-              setCurrentTab(value);
-            }}
-            value={currentTab}
-          >
+          <Tabs>
             <TabsList>
               <TabsTrigger value="general_info">
                 Informacion General
@@ -144,7 +143,7 @@ export default function AddProcedure() {
               <GeneralInfoForm
                 setProspect={setProspectData}
                 setProcedureId={setProcedureData}
-                changeTab={handleTabChange}
+                form={generalInfoForm}
               />
             </TabsContent>
             <TabsContent value="members">
@@ -153,26 +152,22 @@ export default function AddProcedure() {
                   <AddMembers
                     addMember={setMembersData}
                     membersData={membersData}
+                    form={membersForm}
                   />
                 </div>
-
                 <MembersTable data={membersData} />
-                <Button
-                  onClick={() => {
-                    handleSumbitMembers;
-                    handleTabChange("billing");
-                  }}
-                  disabled={isLoading}
-                >
-                  Continuar
+                <Button onClick={() => setMemberProcedureStatus("pending")}>
+                  Precarga
+                </Button>
+                <Button onClick={() => setMemberProcedureStatus("completed")}>
+                  Finalizar
                 </Button>
               </div>
             </TabsContent>
             <TabsContent value="billing">
               <div>
                 <BillingInfo
-                  handleFinish={handleFinish}
-                  handlePreLoad={handlePreLoad}
+                  form={billingForm}
                   setBillingData={setBillingData}
                   data={membersData}
                 />
@@ -184,11 +179,3 @@ export default function AddProcedure() {
     </>
   );
 }
-
-// plan de accion:
-// poner todo dentro de las tabs
-// crear componentes para los forms de cada uno:
-// form Datos basicos: de acuerdo al modo se renderizan otras cosas
-// tab int: form integrantes dentro de un popup, crear tabla interactiva
-// tab facturacion: form facturacion: select productos,
-// logica: si dentro de integrantes hay billResponsible o paymanetResponsible, autocompletar y poder editar

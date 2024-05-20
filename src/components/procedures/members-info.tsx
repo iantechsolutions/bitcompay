@@ -39,13 +39,17 @@ import {
   DialogDescription,
 } from "../ui/dialog";
 import MembersTable from "./member-tab";
-import { useForm, type SubmitHandler } from "react-hook-form";
+import {
+  useForm,
+  type SubmitHandler,
+  type UseFormReturn,
+} from "react-hook-form";
 import { cn } from "~/lib/utils";
 import { add } from "date-fns";
 dayjs.extend(utc);
 dayjs.locale("es");
 
-export type Inputs = {
+export type InputsMembers = {
   iva: string;
   affiliate_type: string;
   relationship: string;
@@ -78,14 +82,14 @@ export type Inputs = {
 };
 
 interface AddMembersProps {
-  membersData: Inputs[];
-  addMember: (data: Inputs[]) => void;
+  membersData: InputsMembers[];
+  form: UseFormReturn<InputsMembers>;
+  addMember: (data: InputsMembers[]) => void;
 }
 
 export default function AddMembers(props: AddMembersProps) {
   const [open, setOpen] = useState(false);
-  const form = useForm<Inputs>();
-  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+  const onSubmit: SubmitHandler<InputsMembers> = async (data) => {
     const { addMember, membersData } = props;
     addMember([...membersData, data]);
     console.log("dataMembersForm");
@@ -108,14 +112,14 @@ export default function AddMembers(props: AddMembersProps) {
             pago, responsable de facturación o afiliado.
           </DialogDescription>
         </DialogHeader>
-        <Form {...form}>
+        <Form {...props.form}>
           <form
-            onSubmit={form.handleSubmit(onSubmit)}
+            onSubmit={props.form.handleSubmit(onSubmit)}
             className="mt-4 flex flex-col gap-2"
           >
             <div className="grid grid-cols-4 gap-x-16 gap-y-6">
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="relationship"
                 render={({ field }) => (
                   <FormItem>
@@ -139,7 +143,7 @@ export default function AddMembers(props: AddMembersProps) {
                 )}
               />
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
@@ -152,7 +156,7 @@ export default function AddMembers(props: AddMembersProps) {
                 )}
               />
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="id_type"
                 render={({ field }) => (
                   <FormItem>
@@ -175,7 +179,7 @@ export default function AddMembers(props: AddMembersProps) {
                 )}
               />
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="id_number"
                 render={({ field }) => (
                   <FormItem>
@@ -188,7 +192,7 @@ export default function AddMembers(props: AddMembersProps) {
                 )}
               />
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="birth_date"
                 render={({ field }) => (
                   <FormItem>
@@ -234,7 +238,7 @@ export default function AddMembers(props: AddMembersProps) {
                 )}
               />
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="gender"
                 render={({ field }) => (
                   <FormItem>
@@ -258,7 +262,7 @@ export default function AddMembers(props: AddMembersProps) {
                 )}
               />
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="civil_status"
                 render={({ field }) => (
                   <FormItem>
@@ -283,7 +287,7 @@ export default function AddMembers(props: AddMembersProps) {
                 )}
               />
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="nationality"
                 render={({ field }) => (
                   <FormItem>
@@ -293,7 +297,7 @@ export default function AddMembers(props: AddMembersProps) {
                 )}
               />
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="afip_status"
                 render={({ field }) => (
                   <FormItem>
@@ -324,7 +328,7 @@ export default function AddMembers(props: AddMembersProps) {
                 )}
               />
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="fiscal_id_type"
                 render={({ field }) => (
                   <FormItem>
@@ -347,7 +351,7 @@ export default function AddMembers(props: AddMembersProps) {
                 )}
               />
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="fiscal_id_number"
                 render={({ field }) => (
                   <FormItem>
@@ -360,7 +364,7 @@ export default function AddMembers(props: AddMembersProps) {
                 )}
               />
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="address"
                 render={({ field }) => (
                   <FormItem>
@@ -370,7 +374,7 @@ export default function AddMembers(props: AddMembersProps) {
                 )}
               />
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="address_number"
                 render={({ field }) => (
                   <FormItem>
@@ -383,7 +387,7 @@ export default function AddMembers(props: AddMembersProps) {
                 )}
               />
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="floor"
                 render={({ field }) => (
                   <FormItem>
@@ -393,7 +397,7 @@ export default function AddMembers(props: AddMembersProps) {
                 )}
               />
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="depto"
                 render={({ field }) => (
                   <FormItem>
@@ -403,7 +407,7 @@ export default function AddMembers(props: AddMembersProps) {
                 )}
               />
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="localidad"
                 render={({ field }) => (
                   <FormItem>
@@ -413,7 +417,7 @@ export default function AddMembers(props: AddMembersProps) {
                 )}
               />
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="county"
                 render={({ field }) => (
                   <FormItem>
@@ -423,7 +427,7 @@ export default function AddMembers(props: AddMembersProps) {
                 )}
               />
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="state"
                 render={({ field }) => (
                   <FormItem>
@@ -433,7 +437,7 @@ export default function AddMembers(props: AddMembersProps) {
                 )}
               />
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="cp"
                 render={({ field }) => (
                   <FormItem>
@@ -443,7 +447,7 @@ export default function AddMembers(props: AddMembersProps) {
                 )}
               />
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="zone"
                 render={({ field }) => (
                   <FormItem>
@@ -453,7 +457,7 @@ export default function AddMembers(props: AddMembersProps) {
                 )}
               />
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="phone_number"
                 render={({ field }) => (
                   <FormItem>
@@ -466,7 +470,7 @@ export default function AddMembers(props: AddMembersProps) {
                 )}
               />
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="cellphone_number"
                 render={({ field }) => (
                   <FormItem>
@@ -476,7 +480,7 @@ export default function AddMembers(props: AddMembersProps) {
                 )}
               />
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="mail"
                 render={({ field }) => (
                   <FormItem>
@@ -486,7 +490,7 @@ export default function AddMembers(props: AddMembersProps) {
                 )}
               />
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="mail"
                 render={({ field }) => (
                   <FormItem>
@@ -497,7 +501,7 @@ export default function AddMembers(props: AddMembersProps) {
               />
 
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="iva"
                 render={({ field }) => (
                   <FormItem>
@@ -521,7 +525,7 @@ export default function AddMembers(props: AddMembersProps) {
               />
 
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="isHolder"
                 render={({ field }) => (
                   <FormItem>
@@ -538,7 +542,7 @@ export default function AddMembers(props: AddMembersProps) {
                 )}
               />
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="isBillResponsible"
                 render={({ field }) => (
                   <FormItem>
@@ -555,7 +559,7 @@ export default function AddMembers(props: AddMembersProps) {
                 )}
               />
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="isPaymentResponsible"
                 render={({ field }) => (
                   <FormItem>
@@ -572,7 +576,7 @@ export default function AddMembers(props: AddMembersProps) {
                 )}
               />
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="isAffiliate"
                 render={({ field }) => (
                   <FormItem>

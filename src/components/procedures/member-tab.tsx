@@ -8,10 +8,10 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { type Inputs } from "./members-info";
+import { type InputsMembers } from "./members-info";
 
 type MembersTableProps = {
-  data: Inputs[];
+  data: InputsMembers[];
 };
 export default function MembersTable({ data }: MembersTableProps) {
   return (
