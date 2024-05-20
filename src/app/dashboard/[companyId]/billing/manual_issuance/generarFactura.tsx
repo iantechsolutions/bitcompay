@@ -73,10 +73,6 @@ export async function ingresarAfip() {
   return afip;
 }
 
-interface FacturaDialog {
-  receivedHtml: string;
-}
-
 function formatDate(date: Date | undefined) {
   if (date) {
     let year = date.getFullYear();
@@ -89,7 +85,7 @@ function formatDate(date: Date | undefined) {
   }
 }
 
-export function FacturaDialog({ receivedHtml }: FacturaDialog) {
+export function FacturaDialog() {
   const { mutateAsync: createFactura } = api.facturas.create.useMutation();
 
   async function generateFactura() {
