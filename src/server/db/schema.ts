@@ -514,7 +514,7 @@ export const integrants = pgTable("integrant", {
   ),
 });
 
-const integrantsRelations = relations(integrants, ({ one }) => ({
+export const integrantsRelations = relations(integrants, ({ one }) => ({
   prospect: one(prospects, {
     fields: [integrants.prospect_id],
     references: [prospects.id],
@@ -601,14 +601,10 @@ export type Facturas = z.infer<typeof selectFacturasSchema>;
 
 export const prospects = pgTable("prospects", {
   id: columnId,
-  businessUnit: varchar("businessUnit", { length: 255 }).notNull(),
+  businessUnit: varchar("businessUnit", { length: 255 }),
   validity: timestamp("validity", { mode: "date" }),
-  plan: varchar("plan")
-    .references(() => plans.id)
-    .notNull(),
-  modo: varchar("modo")
-    .references(() => modos.id)
-    .notNull(),
+  plan: varchar("plan").references(() => plans.id),
+  modo: varchar("modo").references(() => modos.id),
   cuit: varchar("cuit", { length: 255 }).notNull(),
   // healthInsurances: varchar("healthInsurances")
   //   .references(() => healthInsurances.id)
@@ -750,8 +746,8 @@ export type Administrative_audit = z.infer<
 
 export const payment_info = pgTable("payment_info", {
   id: columnId,
-  card_number: varchar("card_number", { length: 255 }).notNull(),
-  expire_date: timestamp("expire_date", { mode: "date" }).notNull(),
-  CCV: varchar("CCV", { length: 255 }).notNull(),
+  card_number: varchar("card_number", { length: 255 }),
+  expire_date: timestamp("expire_date", { mode: "date" }),
+  CCV: varchar("CCV", { length: 255 }),
   CBU: varchar("CBU", { length: 255 }),
 });

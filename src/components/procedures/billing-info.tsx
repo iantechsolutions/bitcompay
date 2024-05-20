@@ -30,6 +30,7 @@ export type InputsBilling = {
   card_number: string;
   card_expiration_date: string;
   card_security_code: string;
+  cbu: string;
 };
 type propsBillingInfo = {
   data: InputsMembers[];
@@ -175,7 +176,10 @@ export default function BillingInfo({
     <>
       <h2 className="text-lg font-semibold">Responsable de facturacion</h2>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          onChange={() => setBillingData(form.getValues())}
+        >
           <FormField
             control={form.control}
             name="product_name"
@@ -336,6 +340,55 @@ export default function BillingInfo({
 
           <FormLabel>Campos para DebitoDirecto</FormLabel>
 
+          <FormField
+            control={form.control}
+            name="card_number"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Numero de tarjeta</FormLabel>
+                <Input {...field} placeholder="ingrese su numero de tarjeta" />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="card_expiration_date"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Fecha de vencimiento</FormLabel>
+                <Input
+                  {...field}
+                  placeholder="ingrese su fecha de vencimiento"
+                />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="card_security_code"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Codigo de seguridad</FormLabel>
+                <Input
+                  {...field}
+                  placeholder="ingrese su codigo de seguridad"
+                />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="cbu"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>CBU</FormLabel>
+                <Input {...field} placeholder="ingrese su cbu" />
+              </FormItem>
+            )}
+          />
           <Button onClick={() => handlePreLoad} type="submit">
             Precarga
           </Button>

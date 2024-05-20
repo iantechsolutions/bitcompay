@@ -93,7 +93,11 @@ export default function GeneralInfoForm(props: GeneralInfoProps) {
 
   return (
     <Form {...props.form}>
-      <form className="space-y-8" onSubmit={props.form.handleSubmit(onSubmit)}>
+      <form
+        className="space-y-8"
+        onSubmit={props.form.handleSubmit(onSubmit)}
+        onChange={() => props.setProspect(props.form.getValues())}
+      >
         <FormField
           control={props.form.control}
           name="bussinessUnit"
