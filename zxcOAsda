@@ -1,0 +1,431 @@
+[1mdiff --git a/package.json b/package.json[m
+[1mindex 87c36c1..3ca37e1 100644[m
+[1m--- a/package.json[m
+[1m+++ b/package.json[m
+[36m@@ -20,6 +20,7 @@[m
+     "@radix-ui/react-accordion": "^1.1.2",[m
+     "@radix-ui/react-alert-dialog": "^1.0.5",[m
+     "@radix-ui/react-avatar": "^1.0.4",[m
+[32m+[m[32m    "@radix-ui/react-checkbox": "^1.0.4",[m
+     "@radix-ui/react-dialog": "^1.0.5",[m
+     "@radix-ui/react-icons": "^1.3.0",[m
+     "@radix-ui/react-label": "^2.0.2",[m
+[1mdiff --git a/pnpm-lock.yaml b/pnpm-lock.yaml[m
+[1mindex 9a7982a..555ac4a 100644[m
+[1m--- a/pnpm-lock.yaml[m
+[1m+++ b/pnpm-lock.yaml[m
+[36m@@ -26,6 +26,9 @@[m [mdependencies:[m
+   '@radix-ui/react-avatar':[m
+     specifier: ^1.0.4[m
+     version: 1.0.4(@types/react-dom@18.2.18)(@types/react@18.2.45)(react-dom@18.2.0)(react@18.3.1)[m
+[32m+[m[32m  '@radix-ui/react-checkbox':[m
+[32m+[m[32m    specifier: ^1.0.4[m
+[32m+[m[32m    version: 1.0.4(@types/react-dom@18.2.18)(@types/react@18.2.45)(react-dom@18.2.0)(react@18.3.1)[m
+   '@radix-ui/react-dialog':[m
+     specifier: ^1.0.5[m
+     version: 1.0.5(@types/react-dom@18.2.18)(@types/react@18.2.45)(react-dom@18.2.0)(react@18.3.1)[m
+[36m@@ -1083,6 +1086,34 @@[m [mpackages:[m
+       react-dom: 18.2.0(react@18.3.1)[m
+     dev: false[m
+ [m
+[32m+[m[32m  /@radix-ui/react-checkbox@1.0.4(@types/react-dom@18.2.18)(@types/react@18.2.45)(react-dom@18.2.0)(react@18.3.1):[m
+[32m+[m[32m    resolution: {integrity: sha512-CBuGQa52aAYnADZVt/KBQzXrwx6TqnlwtcIPGtVt5JkkzQwMOLJjPukimhfKEr4GQNd43C+djUh5Ikopj8pSLg==}[m
+[32m+[m[32m    peerDependencies:[m
+[32m+[m[32m      '@types/react': '*'[m
+[32m+[m[32m      '@types/react-dom': '*'[m
+[32m+[m[32m      react: ^16.8 || ^17.0 || ^18.0[m
+[32m+[m[32m      react-dom: ^16.8 || ^17.0 || ^18.0[m
+[32m+[m[32m    peerDependenciesMeta:[m
+[32m+[m[32m      '@types/react':[m
+[32m+[m[32m        optional: true[m
+[32m+[m[32m      '@types/react-dom':[m
+[32m+[m[32m        optional: true[m
+[32m+[m[32m    dependencies:[m
+[32m+[m[32m      '@babel/runtime': 7.23.6[m
+[32m+[m[32m      '@radix-ui/primitive': 1.0.1[m
+[32m+[m[32m      '@radix-ui/react-compose-refs': 1.0.1(@types/react@18.2.45)(react@18.3.1)[m
+[32m+[m[32m      '@radix-ui/react-context': 1.0.1(@types/react@18.2.45)(react@18.3.1)[m
+[32m+[m[32m      '@radix-ui/react-presence': 1.0.1(@types/react-dom@18.2.18)(@types/react@18.2.45)(react-dom@18.2.0)(react@18.3.1)[m
+[32m+[m[32m      '@radix-ui/react-primitive': 1.0.3(@types/react-dom@18.2.18)(@types/react@18.2.45)(react-dom@18.2.0)(react@18.3.1)[m
+[32m+[m[32m      '@radix-ui/react-use-controllable-state': 1.0.1(@types/react@18.2.45)(react@18.3.1)[m
+[32m+[m[32m      '@radix-ui/react-use-previous': 1.0.1(@types/react@18.2.45)(react@18.3.1)[m
+[32m+[m[32m      '@radix-ui/react-use-size': 1.0.1(@types/react@18.2.45)(react@18.3.1)[m
+[32m+[m[32m      '@types/react': 18.2.45[m
+[32m+[m[32m      '@types/react-dom': 18.2.18[m
+[32m+[m[32m      react: 18.3.1[m
+[32m+[m[32m      react-dom: 18.2.0(react@18.3.1)[m
+[32m+[m[32m    dev: false[m
+[32m+[m
+   /@radix-ui/react-collapsible@1.0.3(@types/react-dom@18.2.18)(@types/react@18.2.45)(react-dom@18.2.0)(react@18.3.1):[m
+     resolution: {integrity: sha512-UBmVDkmR6IvDsloHVN+3rtx4Mi5TFvylYXpluuv0f37dtaz3H99bp8No0LGXRigVpl3UAT4l9j6bIchh42S/Gg==}[m
+     peerDependencies:[m
+[1mdiff --git a/src/app/dashboard/company/[companyId]/sales/procedures/add-procedure.tsx b/src/app/dashboard/company/[companyId]/sales/procedures/add-procedure.tsx[m
+[1mindex 59201e9..4fb3563 100644[m
+[1m--- a/src/app/dashboard/company/[companyId]/sales/procedures/add-procedure.tsx[m
+[1m+++ b/src/app/dashboard/company/[companyId]/sales/procedures/add-procedure.tsx[m
+[36m@@ -10,11 +10,14 @@[m [mimport {[m
+ } from "~/components/ui/dialog";[m
+ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";[m
+ import GeneralInfoForm from "~/components/procedures/general-info-form";[m
+[31m-import { useCompanyData } from "../../company-provider";[m
+ [m
+[32m+[m[32mimport AddMembers from "~/components/procedures/members-info";[m
+[32m+[m[32mimport MembersTable from "~/components/procedures/member-tab";[m
+[32m+[m[32mimport { useState } from "react";[m
+[32m+[m[32mimport { type Inputs } from "~/components/procedures/members-info";[m
+[32m+[m[32mimport BillingInfo from "~/components/procedures/billing-info";[m
+ export default function AddProcedure() {[m
+[31m-  const company = useCompanyData();[m
+[31m-  const companyId = company?.id;[m
+[32m+[m[32m  const [membersData, setMembersData] = useState<Inputs[]>([]);[m
+   return ([m
+     <>[m
+       <Dialog>[m
+[36m@@ -27,7 +30,7 @@[m [mexport default function AddProcedure() {[m
+           <DialogHeader>[m
+             <DialogTitle>Agregar tramite</DialogTitle>[m
+           </DialogHeader>[m
+[31m-          <Tabs defaultValue="account" className="w-[400px]">[m
+[32m+[m[32m          <Tabs defaultValue="account">[m
+             <TabsList>[m
+               <TabsTrigger value="general_info">[m
+                 Informacion General[m
+[36m@@ -41,10 +44,21 @@[m [mexport default function AddProcedure() {[m
+               <GeneralInfoForm />[m
+             </TabsContent>[m
+             <TabsContent value="members">[m
+[31m-              // aca va el form de members[m
+[32m+[m[32m              <div className="flex w-full flex-col gap-2">[m
+[32m+[m[32m                <div className="w-full self-end">[m
+[32m+[m[32m                  <AddMembers[m
+[32m+[m[32m                    addMember={setMembersData}[m
+[32m+[m[32m                    membersData={membersData}[m
+[32m+[m[32m                  />[m
+[32m+[m[32m                </div>[m
+[32m+[m
+[32m+[m[32m                <MembersTable data={membersData} />[m
+[32m+[m[32m              </div>[m
+             </TabsContent>[m
+             <TabsContent value="billing">[m
+[31m-              // aca va el form de facturacion[m
+[32m+[m[32m              <div>[m
+[32m+[m[32m                <BillingInfo data={membersData} />[m
+[32m+[m[32m              </div>[m
+             </TabsContent>[m
+           </Tabs>[m
+         </DialogContent>[m
+[1mdiff --git a/src/components/procedures/billing-info.tsx b/src/components/procedures/billing-info.tsx[m
+[1mnew file mode 100644[m
+[1mindex 0000000..e876847[m
+[1m--- /dev/null[m
+[1m+++ b/src/components/procedures/billing-info.tsx[m
+[36m@@ -0,0 +1,143 @@[m
+[32m+[m[32m"use client";[m
+[32m+[m[32mimport { type SubmitHandler, useForm } from "react-hook-form";[m
+[32m+[m[32mimport { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";[m
+[32m+[m[32mimport {[m
+[32m+[m[32m  Select,[m
+[32m+[m[32m  SelectContent,[m
+[32m+[m[32m  SelectItem,[m
+[32m+[m[32m  SelectTrigger,[m
+[32m+[m[32m  SelectValue,[m
+[32m+[m[32m} from "../ui/select";[m
+[32m+[m[32mimport { api } from "~/trpc/react";[m
+[32m+[m[32mimport { Input } from "../ui/input";[m
+[32m+[m[32mimport { type Inputs } from "../procedures/members-info";[m
+[32m+[m
+[32m+[m[32mtype InputsBilling = {[m
+[32m+[m[32m  product_name: string;[m
+[32m+[m[32m  name: string;[m
+[32m+[m[32m  id_type: string;[m
+[32m+[m[32m  id_number: string;[m
+[32m+[m[32m  fiscal_id_type: string;[m
+[32m+[m[32m  fiscal_id_number: string;[m
+[32m+[m[32m};[m
+[32m+[m[32mtype propsBillingInfo = {[m
+[32m+[m[32m  data: Inputs[];[m
+[32m+[m[32m};[m
+[32m+[m[32mexport default function BillingInfo({ data }: propsBillingInfo) {[m
+[32m+[m[32m  const isData = data.length > 0;[m
+[32m+[m[32m  const isBillingResponsible =[m
+[32m+[m[32m    isData &&[m
+[32m+[m[32m    data.filter((value) => value.isBillResponsible ?? value.birth_date).length >[m
+[32m+[m[32m      0;[m
+[32m+[m
+[32m+[m[32m  const billingResponsible = data.filter((value) => value.isBillResponsible)[0];[m
+[32m+[m
+[32m+[m[32m  const initialValues: InputsBilling = {[m
+[32m+[m[32m    product_name: "",[m
+[32m+[m[32m    name: isBillingResponsible ? billingResponsible!.name : "",[m
+[32m+[m[32m    id_type: isBillingResponsible ? billingResponsible!.id_type : "",[m
+[32m+[m[32m    id_number: isBillingResponsible ? billingResponsible!.id_number : "",[m
+[32m+[m[32m    fiscal_id_type: isBillingResponsible[m
+[32m+[m[32m      ? billingResponsible!.fiscal_id_type[m
+[32m+[m[32m      : "",[m
+[32m+[m[32m    fiscal_id_number: isBillingResponsible[m
+[32m+[m[32m      ? billingResponsible!.fiscal_id_number[m
+[32m+[m[32m      : "",[m
+[32m+[m[32m  };[m
+[32m+[m
+[32m+[m[32m  const form = useForm({ defaultValues: initialValues });[m
+[32m+[m
+[32m+[m[32m  //   const products = api.products.list.useQuery();[m
+[32m+[m
+[32m+[m[32m  //   const productsOptions = products.map((product) => ([m
+[32m+[m[32m  //     <SelectItem value={product.id}>{product.name}</SelectItem>[m
+[32m+[m[32m  //   ));[m
+[32m+[m[32m  const onSubmit: SubmitHandler<InputsBilling> = (data) => {[m
+[32m+[m[32m    console.log(data);[m
+[32m+[m[32m  };[m
+[32m+[m[32m  return ([m
+[32m+[m[32m    <Form {...form}>[m
+[32m+[m[32m      <form onSubmit={form.handleSubmit(onSubmit)}>[m
+[32m+[m[32m        <FormField[m
+[32m+[m[32m          control={form.control}[m
+[32m+[m[32m          name="product_name"[m
+[32m+[m[32m          render={({ field }) => ([m
+[32m+[m[32m            <FormItem>[m
+[32m+[m[32m              <FormLabel>Producto</FormLabel>[m
+[32m+[m[32m              <Select onValueChange={field.onChange} defaultValue={field.value}>[m
+[32m+[m[32m                <FormControl>[m
+[32m+[m[32m                  <SelectTrigger>[m
+[32m+[m[32m                    <SelectValue placeholder="eliga un producto" />[m
+[32m+[m[32m                  </SelectTrigger>[m
+[32m+[m[32m                </FormControl>[m
+[32m+[m[32m                <SelectContent>[m
+[32m+[m[32m                  {/* ingresa aca opciones de productos */}[m
+[32m+[m[32m                </SelectContent>[m
+[32m+[m[32m              </Select>[m
+[32m+[m[32m            </FormItem>[m
+[32m+[m[32m          )}[m
+[32m+[m[32m        />[m
+[32m+[m[32m        <FormField[m
+[32m+[m[32m          control={form.control}[m
+[32m+[m[32m          name="fiscal_id_type"[m
+[32m+[m[32m          render={({ field }) => ([m
+[32m+[m[32m            <FormItem>[m
+[32m+[m[32m              <FormLabel>Tipo de Id fiscal</FormLabel>[m
+[32m+[m[32m              <Select onValueChange={field.onChange} defaultValue={field.value}>[m
+[32m+[m[32m                <FormControl>[m
+[32m+[m[32m                  <SelectTrigger>[m
+[32m+[m[32m                    <SelectValue placeholder="eliga un tipo de id fiscal " />[m
+[32m+[m[32m                  </SelectTrigger>[m
+[32m+[m[32m                  <SelectContent>[m
+[32m+[m[32m                    <SelectItem value="cuit">CUIT</SelectItem>[m
+[32m+[m[32m                    <SelectItem value="cuil">CUIL</SelectItem>[m
+[32m+[m[32m                  </SelectContent>[m
+[32m+[m[32m                </FormControl>[m
+[32m+[m[32m              </Select>[m
+[32m+[m[32m            </FormItem>[m
+[32m+[m[32m          )}[m
+[32m+[m[32m        />[m
+[32m+[m[32m        <FormField[m
+[32m+[m[32m          control={form.control}[m
+[32m+[m[32m          name="fiscal_id_number"[m
+[32m+[m[32m          render={({ field }) => ([m
+[32m+[m[32m            <FormItem>[m
+[32m+[m[32m              <FormLabel>Numero de Id fiscal</FormLabel>[m
+[32m+[m[32m              <Input {...field} placeholder="ingrese su numero de id fiscal" />[m
+[32m+[m[32m            </FormItem>[m
+[32m+[m[32m          )}[m
+[32m+[m[32m        />[m
+[32m+[m[32m        <FormField[m
+[32m+[m[32m          control={form.control}[m
+[32m+[m[32m          name="fiscal_id_type"[m
+[32m+[m[32m          render={({ field }) => ([m
+[32m+[m[32m            <FormItem>[m
+[32m+[m[32m              <FormLabel>Tipo de Id </FormLabel>[m
+[32m+[m[32m              <Select onValueChange={field.onChange} defaultValue={field.value}>[m
+[32m+[m[32m                <FormControl>[m
+[32m+[m[32m                  <SelectTrigger>[m
+[32m+[m[32m                    <SelectValue placeholder="eliga un tipo de id " />[m
+[32m+[m[32m                  </SelectTrigger>[m
+[32m+[m[32m                  <SelectContent>[m
+[32m+[m[32m                    <SelectItem value="dni">DNI</SelectItem>[m
+[32m+[m[32m                    <SelectItem value="pasaport">Pasaporte</SelectItem>[m
+[32m+[m[32m                  </SelectContent>[m
+[32m+[m[32m                </FormControl>[m
+[32m+[m[32m              </Select>[m
+[32m+[m[32m            </FormItem>[m
+[32m+[m[32m          )}[m
+[32m+[m[32m        />[m
+[32m+[m[32m        <FormField[m
+[32m+[m[32m          control={form.control}[m
+[32m+[m[32m          name="fiscal_id_number"[m
+[32m+[m[32m          render={({ field }) => ([m
+[32m+[m[32m            <FormItem>[m
+[32m+[m[32m              <FormLabel>Numero de Id</FormLabel>[m
+[32m+[m[32m              <Input {...field} placeholder="ingrese su numero de id " />[m
+[32m+[m[32m            </FormItem>[m
+[32m+[m[32m          )}[m
+[32m+[m[32m        />[m
+[32m+[m[32m      </form>[m
+[32m+[m[32m    </Form>[m
+[32m+[m[32m  );[m
+[32m+[m[32m}[m
+[1mdiff --git a/src/components/procedures/member-tab.tsx b/src/components/procedures/member-tab.tsx[m
+[1mnew file mode 100644[m
+[1mindex 0000000..2fc4f59[m
+[1m--- /dev/null[m
+[1m+++ b/src/components/procedures/member-tab.tsx[m
+[36m@@ -0,0 +1,47 @@[m
+[32m+[m[32m"use client";[m
+[32m+[m[32mimport {[m
+[32m+[m[32m  Table,[m
+[32m+[m[32m  TableBody,[m
+[32m+[m[32m  TableCaption,[m
+[32m+[m[32m  TableCell,[m
+[32m+[m[32m  TableHead,[m
+[32m+[m[32m  TableHeader,[m
+[32m+[m[32m  TableRow,[m
+[32m+[m[32m} from "~/components/ui/table";[m
+[32m+[m[32mimport { type Inputs } from "./members-info";[m
+[32m+[m
+[32m+[m[32mtype MembersTableProps = {[m
+[32m+[m[32m  data: Inputs[];[m
+[32m+[m[32m};[m
+[32m+[m[32mexport default function MembersTable({ data }: MembersTableProps) {[m
+[32m+[m[32m  return ([m
+[32m+[m[32m    <Table>[m
+[32m+[m[32m      <TableCaption>Lista de miembros agregados </TableCaption>[m
+[32m+[m[32m      <TableHeader>[m
+[32m+[m[32m        <TableRow>[m
+[32m+[m[32m          <TableHead>Parentezco</TableHead>[m
+[32m+[m[32m          <TableHead className="w-[100px]">Nombre</TableHead>[m
+[32m+[m[32m          <TableHead>Numero de DNI</TableHead>[m
+[32m+[m[32m        </TableRow>[m
+[32m+[m[32m      </TableHeader>[m
+[32m+[m[32m      <TableBody>[m
+[32m+[m[32m        {data.length > 0 && ([m
+[32m+[m[32m          <>[m
+[32m+[m[32m            {data.map((member) => ([m
+[32m+[m[32m              <TableRow key={member.id_number}>[m
+[32m+[m[32m                <TableCell>{member.relationship}</TableCell>[m
+[32m+[m[32m                <TableCell>{member.name}</TableCell>[m
+[32m+[m[32m                <TableCell>{member.id_number}</TableCell>[m
+[32m+[m[32m              </TableRow>[m
+[32m+[m[32m            ))}[m
+[32m+[m[32m          </>[m
+[32m+[m[32m        )}[m
+[32m+[m[32m        {data.length === 0 && ([m
+[32m+[m[32m          <TableRow>[m
+[32m+[m[32m            <TableCell>No hay miembros agregados</TableCell>[m
+[32m+[m[32m          </TableRow>[m
+[32m+[m[32m        )}[m
+[32m+[m[32m      </TableBody>[m
+[32m+[m[32m    </Table>[m
+[32m+[m[32m  );[m
+[32m+[m[32m}[m
+[1mdiff --git a/src/components/procedures/members-info.tsx b/src/components/procedures/members-info.tsx[m
+[1mnew file mode 100644[m
+[1mindex 0000000..9102287[m
+[1m--- /dev/null[m
+[1m+++ b/src/components/procedures/members-info.tsx[m
+[36m@@ -0,0 +1,526 @@[m
+[32m+[m[32m"use client";[m
+[32m+[m[32mimport { useState } from "react";[m
+[32m+[m[32mimport dayjs from "dayjs";[m
+[32m+[m[32mimport "dayjs/locale/es";[m
+[32m+[m[32mimport utc from "dayjs/plugin/utc";[m
+[32m+[m[32mimport { Calendar } from "~/components/ui/calendar";[m
+[32m+[m[32mimport {[m
+[32m+[m[32m  Popover,[m
+[32m+[m[32m  PopoverContent,[m
+[32m+[m[32m  PopoverTrigger,[m
+[32m+[m[32m} from "~/components/ui/popover";[m
+[32m+[m[32mimport { Calendar as CalendarIcon } from "lucide-react";[m
+[32m+[m[32mimport {[m
+[32m+[m[32m  Form,[m
+[32m+[m[32m  FormControl,[m
+[32m+[m[32m  FormDescription,[m
+[32m+[m[32m  FormField,[m
+[32m+[m[32m  FormItem,[m
+[32m+[m[32m  FormLabel,[m
+[32m+[m[32m  FormMessage,[m
+[32m+[m[32m} from "../ui/form";[m
+[32m+[m[32mimport { Checkbox } from "../ui/checkbox";[m
+[32m+[m
+[32m+[m[32mimport { Input } from "../ui/input";[m
+[32m+[m[32mimport { Button } from "../ui/button";[m
+[32m+[m[32mimport {[m
+[32m+[m[32m  Select,[m
+[32m+[m[32m  SelectTrigger,[m
+[32m+[m[32m  SelectItem,[m
+[32m+[m[32m  SelectValue,[m
+[32m+[m[32m  SelectContent,[m
+[32m+[m[32m} from "../ui/select";[m
+[32m+[m[32mimport {[m
+[32m+[m[32m  Dialog,[m
+[32m+[m[32m  DialogTrigger,[m
+[32m+[m[32m  DialogContent,[m
+[32m+[m[32m  DialogHeader,[m
+[32m+[m[32m  DialogTitle,[m
+[32m+[m[32m  DialogDescription,[m
+[32m+[m[32m} from "../ui/dialog";[m
+[32m+[m[32mimport MembersTable from "./member-tab";[m
+[32m+[m[32mimport { useForm, type SubmitHandler } from "react-hook-form";[m
+[32m+[m[32mimport { cn } from "~/lib/utils";[m
+[32m+[m[32mimport { add } from "date-fns";[m
+[32m+[m[32mdayjs.extend(utc);[m
+[32m+[m[32mdayjs.locale("es");[m
+[32m+[m
+[32m+[m[32mexport type Inputs = {[m
+[32m+[m[32m  affiliate_type: string;[m
+[32m+[m[32m  relationship: string;[m
+[32m+[m[32m  name: string;[m
+[32m+[m[32m  id_type: string;[m
+[32m+[m[32m  id_number: string;[m
+[32m+[m[32m  birth_date: string;[m
+[32m+[m[32m  gender: string;[m
+[32m+[m[32m  civil_status: string;[m
+[32m+[m[32m  nationality: string;[m
+[32m+[m[32m  afip_status: string;[m
+[32m+[m[32m  fiscal_id_type: string;[m
+[32m+[m[32m  fiscal_id_number: string;[m
+[32m+[m[32m  address: string;[m
+[32m+[m[32m  address_number: string;[m
+[32m+[m[32m  floor: string;[m
+[32m+[m[32m  depto: string;[m
+[32m+[m[32m  localidad: string;[m
+[32m+[m[32m  county: string;[m
+[32m+[m[32m  state: string;[m
+[32m+[m[32m  cp: string;[m
+[32m+[m[32m  zone: string;[m
+[32m+[m[32m  phone_number: string;[m
+[32m+[m[32m  cellphone_number: string;[m
+[32m+[m[32m  mail: string;[m
+[32m+[m[32m  isHolder: boolean;[m
+[32m+[m[32m  isBillResponsible: boolean;[m
+[32m+[m[32m  isPaymentResponsible: boolean;[m
+[32m+[m[32m  isAffiliate: boolean;[m
+[32m+[m[32m};[m
+[32m+[m
+[32m+[m[32minterface AddMembersProps {[m
+[32m+[m[32m  membersData: Inputs[];[m
+[32m+[m[32m  addMember: (data: Inputs[]) => void;[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mexport default function AddMembers(props: AddMembersProps) {[m
+[32m+[m[32m  const form = useForm<Inputs>();[m
+[32m+[m
+[32m+[m[32m  const onSubmit: SubmitHandler<Inputs> = async (data) => {[m
+[32m+[m[32m    const { addMember, membersData } = props;[m
+[32m+[m[32m    addMember([...membersData, data]);[m
+[32m+[m[32m    console.log(data);[m
+[32m+[m[32m  };[m
+[32m+[m
+[32m+[m[32m  return ([m
+[32m+[m[32m    <Dialog>[m
+[32m+[m[32m      <DialogTrigger asChild>[m
+[32m+[m[32m        <Button variant="outline" className="border-2">[m
+[32m+[m[32m          Agregar miembro[m
+[32m+[m[32m        </Button>[m
+[32m+[m[32m      </DialogTrigger>[m
+[32m+[m[32m      <DialogContent className="h-[500px] min-w-[1200px] overflow-y-scroll">[m
+[32m+[m[32m        <DialogHeader>[m
+[32m+[m[32m          <DialogTitle>Agregar miembro</DialogTitle>[m
+[32m+[m[32m          <DialogDescription>[m
+[32m+[m[32m            Agregue un miembro aqui, especifique si es titular, responsable de[m
+[32m+[m[32m            pago, responsable de facturación o afiliado.[m
+[32m+[m[32m          </DialogDescription>[m
+[32m+[m[32m    
