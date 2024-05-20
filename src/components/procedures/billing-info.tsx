@@ -1,5 +1,9 @@
 "use client";
-import { type SubmitHandler, useForm } from "react-hook-form";
+import {
+  type SubmitHandler,
+  useForm,
+  type UseFormReturn,
+} from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
 import {
   Select,
@@ -10,7 +14,7 @@ import {
 } from "../ui/select";
 import { api } from "~/trpc/react";
 import { Input } from "../ui/input";
-import { type Inputs } from "../procedures/members-info";
+import { type InputsMembers } from "../procedures/members-info";
 import { useEffect } from "react";
 import { Button } from "../ui/button";
 export type InputsBilling = {
@@ -26,18 +30,21 @@ export type InputsBilling = {
   card_number: string;
   card_expiration_date: string;
   card_security_code: string;
+  cbu: string;
 };
 type propsBillingInfo = {
-  data: Inputs[];
+  data: InputsMembers[];
+  form: UseFormReturn<InputsBilling>;
   setBillingData: (data: InputsBilling) => void;
-  handlePreLoad: () => void;
-  handleFinish: () => void;
+  handlePreLoad?: () => void;
+  handleFinish?: () => void;
 };
 export default function BillingInfo({
   data,
   setBillingData,
   handlePreLoad,
   handleFinish,
+  form,
 }: propsBillingInfo) {
   const isData = data.length > 0;
   const isBillingResponsible =
@@ -56,59 +63,58 @@ export default function BillingInfo({
 
   const billingResponsible = data.filter((value) => value.isBillResponsible)[0];
   console.log(billingResponsible);
-  const initialValues: InputsBilling = {
-    product_name: "",
-    name: isBillingResponsible
-      ? billingResponsible!.name
-      : isAdult
-        ? adult!.name
-        : "",
-    id_type: isBillingResponsible
-      ? billingResponsible!.id_type
-      : isAdult
-        ? adult!.id_type
-        : "",
-    id_number: isBillingResponsible
-      ? billingResponsible!.id_number
-      : isAdult
-        ? adult!.id_number
-        : "",
-    fiscal_id_type: isBillingResponsible
-      ? billingResponsible!.fiscal_id_type
-      : isAdult
-        ? adult!.fiscal_id_type
-        : "",
-    fiscal_id_number: isBillingResponsible
-      ? billingResponsible!.fiscal_id_number
-      : isAdult
-        ? adult!.fiscal_id_number
-        : "",
-    address: isBillingResponsible
-      ? ` ${billingResponsible!.address} ${
-          billingResponsible!.address_number
-        } ${billingResponsible!.depto} ${billingResponsible!.floor} ${
-          billingResponsible!.county
-        } ${billingResponsible!.state} ${billingResponsible!.cp} ${
-          billingResponsible!.zone
-        }`
-      : isAdult
-        ? ` ${adult!.address} ${adult!.address_number} ${adult!.depto} ${
-            adult!.floor
-          } ${adult!.county} ${adult!.state} ${adult!.cp} ${adult!.zone}`
-        : "",
-    iva: "",
-    card_number: "",
-    card_expiration_date: "",
-    card_security_code: "",
-    afip_status: isBillingResponsible
-      ? billingResponsible!.afip_status
-      : isAdult
-        ? adult!.afip_status
-        : "",
-  };
-  const { setValue } = useForm<InputsBilling>({
-    defaultValues: initialValues,
-  });
+  // const initialValues: InputsBilling = {
+  //   product_name: "",
+  //   name: isBillingResponsible
+  //     ? billingResponsible!.name
+  //     : isAdult
+  //       ? adult!.name
+  //       : "",
+  //   id_type: isBillingResponsible
+  //     ? billingResponsible!.id_type
+  //     : isAdult
+  //       ? adult!.id_type
+  //       : "",
+  //   id_number: isBillingResponsible
+  //     ? billingResponsible!.id_number
+  //     : isAdult
+  //       ? adult!.id_number
+  //       : "",
+  //   fiscal_id_type: isBillingResponsible
+  //     ? billingResponsible!.fiscal_id_type
+  //     : isAdult
+  //       ? adult!.fiscal_id_type
+  //       : "",
+  //   fiscal_id_number: isBillingResponsible
+  //     ? billingResponsible!.fiscal_id_number
+  //     : isAdult
+  //       ? adult!.fiscal_id_number
+  //       : "",
+  //   address: isBillingResponsible
+  //     ? ` ${billingResponsible!.address} ${
+  //         billingResponsible!.address_number
+  //       } ${billingResponsible!.depto} ${billingResponsible!.floor} ${
+  //         billingResponsible!.county
+  //       } ${billingResponsible!.state} ${billingResponsible!.cp} ${
+  //         billingResponsible!.zone
+  //       }`
+  //     : isAdult
+  //       ? ` ${adult!.address} ${adult!.address_number} ${adult!.depto} ${
+  //           adult!.floor
+  //         } ${adult!.county} ${adult!.state} ${adult!.cp} ${adult!.zone}`
+  //       : "",
+  //   iva: "",
+  //   card_number: "",
+  //   card_expiration_date: "",
+  //   card_security_code: "",
+  //   afip_status: isBillingResponsible
+  //     ? billingResponsible!.afip_status
+  //     : isAdult
+  //       ? adult!.afip_status
+  //       : "",
+  // };
+
+  const { setValue } = form;
   useEffect(() => {
     setValue(
       "name",
@@ -159,7 +165,6 @@ export default function BillingInfo({
           : "",
     );
   }, [isBillingResponsible, billingResponsible, adult, setValue]);
-  const form = useForm({ defaultValues: initialValues });
   const { data: products } = api.products.list.useQuery(undefined);
   const productsOptions = products?.map((product) => (
     <SelectItem value={product.id}>{product.name}</SelectItem>
@@ -171,7 +176,10 @@ export default function BillingInfo({
     <>
       <h2 className="text-lg font-semibold">Responsable de facturacion</h2>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          onChange={() => setBillingData(form.getValues())}
+        >
           <FormField
             control={form.control}
             name="product_name"
@@ -332,6 +340,55 @@ export default function BillingInfo({
 
           <FormLabel>Campos para DebitoDirecto</FormLabel>
 
+          <FormField
+            control={form.control}
+            name="card_number"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Numero de tarjeta</FormLabel>
+                <Input {...field} placeholder="ingrese su numero de tarjeta" />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="card_expiration_date"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Fecha de vencimiento</FormLabel>
+                <Input
+                  {...field}
+                  placeholder="ingrese su fecha de vencimiento"
+                />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="card_security_code"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Codigo de seguridad</FormLabel>
+                <Input
+                  {...field}
+                  placeholder="ingrese su codigo de seguridad"
+                />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="cbu"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>CBU</FormLabel>
+                <Input {...field} placeholder="ingrese su cbu" />
+              </FormItem>
+            )}
+          />
           <Button onClick={() => handlePreLoad} type="submit">
             Precarga
           </Button>

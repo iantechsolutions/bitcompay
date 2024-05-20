@@ -17,16 +17,20 @@ import AddMembers from "~/components/procedures/members-info";
 import MembersTable from "~/components/procedures/member-tab";
 import { useState } from "react";
 import { api } from "~/trpc/react";
-import { type Inputs } from "~/components/procedures/members-info";
+import { type InputsMembers } from "~/components/procedures/members-info";
 import BillingInfo from "~/components/procedures/billing-info";
 import { type InputsBilling } from "~/components/procedures/billing-info";
 import { type InputsGeneralInfo } from "~/components/procedures/general-info-form";
-import { SubmitHandler } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 export default function AddProcedure() {
   const { mutateAsync: createIntegrant, isLoading } =
     api.integrants.create.useMutation();
   const { mutateAsync: updateProcedure } = api.procedure.change.useMutation();
-  const [membersData, setMembersData] = useState<Inputs[]>([]);
+  const { mutateAsync: createProcedure } = api.procedure.create.useMutation();
+  const { mutateAsync: createProspect } = api.prospects.create.useMutation();
+  const { mutateAsync: createPaymentInfo } =
+    api.payment_info.create.useMutation();
+  const [membersData, setMembersData] = useState<InputsMembers[]>([]);
   const [billingData, setBillingData] = useState<InputsBilling | null>(null);
   const [procedureData, setProcedureData] = useState<InputsProcedure | null>(
     null,
@@ -35,24 +39,17 @@ export default function AddProcedure() {
     null,
   );
 
-  const [currentTab, setCurrentTab] = useState("general_info");
-  function handleTabChange(tab: string) {
-    setCurrentTab(tab);
-  }
-  function handlePreLoad() {
-    updateProcedure({
-      id: procedureData!.id,
-      estado: "pendiente",
-    });
-  }
-  function handleFinish() {
-    updateProcedure({
-      id: procedureData!.id,
-      estado: "Completado",
-    });
-  }
+  const [memberProcedureStatus, setMemberProcedureStatus] = useState<
+    string | null
+  >(null);
+  const [procedureId, setProcedureId] = useState<string | null>(null);
+  const [prospectId, setProspectId] = useState<string | null>(null);
 
-  const handleSumbitMembers = async () => {
+  const generalInfoForm = useForm<InputsGeneralInfo>();
+  const membersForm = useForm<InputsMembers>();
+  const billingForm = useForm<InputsBilling>();
+
+  const handleSumbitMembers: SubmitHandler<InputsMembers> = async (data) => {
     const promises = membersData.map((member) => {
       let status: "single" | "married" | "divorced" | "widowed";
       switch (member.civil_status) {
@@ -72,7 +69,8 @@ export default function AddProcedure() {
           status = "single";
           break;
       }
-      createIntegrant({
+
+      return createIntegrant({
         affiliate_type: member.affiliate_type,
         relationship: member.relationship,
         name: member.name,
@@ -109,8 +107,99 @@ export default function AddProcedure() {
         prospect_id: prospectData?.id,
       });
     });
-    await Promise.all(promises);
+
+    await Promise.all(promises).catch((error) =>
+      console.log("An error has occurred", error),
+    );
   };
+
+  function handlePreload() {
+    createProspect({
+      businessUnit: prospectData?.bussinessUnit ?? "",
+      validity: new Date(prospectData!.validity),
+      plan: prospectData?.plan ?? "",
+      modo: prospectData?.mode ?? "",
+    })
+      .then(async (response) => {
+        setProspectId(response[0]!.id);
+      })
+      .catch((error) => {
+        console.log("An error has occurred", error);
+      });
+
+    createProcedure({
+      type: "GFC001",
+      estado: "pending",
+    })
+      .then(async (response) => {
+        setProcedureId(response[0]!.id);
+      })
+      .catch((error) => {
+        console.log("An error has occurred", error);
+      });
+
+    const promises = membersData.map((member) => {
+      let status: "single" | "married" | "divorced" | "widowed";
+      switch (member.civil_status) {
+        case "single":
+          status = "single";
+          break;
+        case "married":
+          status = "married";
+          break;
+        case "divorced":
+          status = "divorced";
+          break;
+        case "widowed":
+          status = "widowed";
+          break;
+        default:
+          status = "single";
+          break;
+      }
+
+      return createIntegrant({
+        affiliate_type: member.affiliate_type,
+        relationship: member.relationship,
+        name: member.name,
+        id_type: member.id_type,
+        id_number: member.id_number,
+        birth_date: member.birth_date,
+        gender:
+          member.gender == "male"
+            ? "male"
+            : member.gender == "female"
+              ? "female"
+              : "other",
+        civil_status: status,
+        nationality: member.nationality,
+        afip_status: member.afip_status,
+        fiscal_id_type: member.fiscal_id_type,
+        fiscal_id_number: member.fiscal_id_number,
+        address: member.address,
+        phone_number: member.phone_number,
+        cellphone_number: member.cellphone_number,
+        email: member.mail,
+        floor: member.floor,
+        department: member.depto,
+        lacality: member.localidad,
+        partido: member.county,
+        state: member.state,
+        cp: member.cp,
+        zone: member.zone,
+        isHolder: member.isHolder,
+        isPaymentHolder: member.isPaymentResponsible,
+        isAffiliate: member.isAffiliate,
+        isBillResponsiblee: member.isBillResponsible,
+        iva: member.iva,
+        prospect_id: prospectId ?? undefined,
+      });
+    });
+
+    Promise.all(promises).catch((error) =>
+      console.log("An error has occurred", error),
+    );
+  }
 
   return (
     <>
@@ -124,13 +213,7 @@ export default function AddProcedure() {
           <DialogHeader>
             <DialogTitle>Agregar tramite</DialogTitle>
           </DialogHeader>
-          <Tabs
-            defaultValue="account"
-            onValueChange={(value) => {
-              setCurrentTab(value);
-            }}
-            value={currentTab}
-          >
+          <Tabs>
             <TabsList>
               <TabsTrigger value="general_info">
                 Informacion General
@@ -144,7 +227,7 @@ export default function AddProcedure() {
               <GeneralInfoForm
                 setProspect={setProspectData}
                 setProcedureId={setProcedureData}
-                changeTab={handleTabChange}
+                form={generalInfoForm}
               />
             </TabsContent>
             <TabsContent value="members">
@@ -153,42 +236,32 @@ export default function AddProcedure() {
                   <AddMembers
                     addMember={setMembersData}
                     membersData={membersData}
+                    form={membersForm}
                   />
                 </div>
-
                 <MembersTable data={membersData} />
-                <Button
-                  onClick={() => {
-                    handleSumbitMembers;
-                    handleTabChange("billing");
-                  }}
-                  disabled={isLoading}
-                >
-                  Continuar
+                <Button onClick={() => setMemberProcedureStatus("pending")}>
+                  Precarga
+                </Button>
+                <Button onClick={() => setMemberProcedureStatus("completed")}>
+                  Finalizar
                 </Button>
               </div>
             </TabsContent>
             <TabsContent value="billing">
               <div>
                 <BillingInfo
-                  handleFinish={handleFinish}
-                  handlePreLoad={handlePreLoad}
+                  form={billingForm}
                   setBillingData={setBillingData}
                   data={membersData}
                 />
               </div>
             </TabsContent>
           </Tabs>
+          <Button onClick={handlePreload}>Pre carga </Button>
+          <Button>Confirmar</Button>
         </DialogContent>
       </Dialog>
     </>
   );
 }
-
-// plan de accion:
-// poner todo dentro de las tabs
-// crear componentes para los forms de cada uno:
-// form Datos basicos: de acuerdo al modo se renderizan otras cosas
-// tab int: form integrantes dentro de un popup, crear tabla interactiva
-// tab facturacion: form facturacion: select productos,
-// logica: si dentro de integrantes hay billResponsible o paymanetResponsible, autocompletar y poder editar
