@@ -1,27 +1,26 @@
 import { Title } from "~/components/title";
 import { List, ListTile } from "~/components/list";
 import LayoutContainer from "~/components/layout-container";
+
 import { api } from "~/trpc/server";
-import { AddModo } from "./add-modo";
-import { modos } from "~/server/db/schema";
 
 export default async function Home() {
-  const modo = await api.modos.list.query();
+  const transactions = await api.transactions.list.query();
   return (
     <LayoutContainer>
       <section className="space-y-2">
         <div className="flex justify-between">
-          <Title>modos</Title>
-            <AddModo/>
+          <Title>Cuenta corriente</Title>
+
         </div>
         <List>
-          {modo.map((modo) => {
+          {transactions.map((transactions) => {
             return (
               <ListTile
-                key={modo.id}
-                  leading={modo.description}
-                href={`/dashboard/admin/modos/${modo.id}`}
-                title={modo.description}
+                key={transactions.id}
+                leading={transactions.cbu}
+                href={`/dashboard/admin/products/${transactions.id}`}
+                title={transactions.name}
               />
             );
           })}

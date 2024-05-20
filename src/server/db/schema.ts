@@ -476,6 +476,13 @@ export const modos = pgTable("modos", {
   description: varchar("description", { length: 255 }).notNull(),
 });
 
+export const insertModosSchema = createInsertSchema(modos);
+export const selectModosSchema = createSelectSchema(modos);
+export const ModosSchemaDB = insertModosSchema.pick({
+  description: true,
+});
+export type Modos = z.infer<typeof selectModosSchema>;
+
 export const integrants = pgTable("integrant", {
   id: columnId,
   affiliate_type: varchar("affiliate_type", { length: 255 }),
@@ -519,6 +526,21 @@ export const integrants = pgTable("integrant", {
     .notNull()
     .references(() => billResponsible.id),
 });
+
+export const integrantsRelations = relations(integrants, ({ one, many }) => ({
+  billResponsible: one(billResponsible, {
+    fields: [integrants.billResponsible_id],
+    references: [billResponsible.id],
+  }),
+  paymentHolder: one(paymentHolders, {
+    fields: [integrants.paymentHolder_id],
+    references: [paymentHolders.id],
+  }),
+  procedure: one(procedure, {
+    fields: [integrants.procedure_id],
+    references: [procedure.id],
+  }),
+}));
 
 export const insertintegrantSchema = createInsertSchema(integrants);
 export const selectintegrantSchema = createSelectSchema(integrants);
@@ -567,9 +589,6 @@ export const paymentHolders = pgTable("paymentHolders", {
   fiscal_id_number: varchar("fiscal_id_number", { length: 255 }),
   address: varchar("address", { length: 255 }).notNull(),
   iva: varchar("iva", { length: 255 }).notNull(),
-
-  // integrant_id: varchar("integrant_id", { length: 255 })
-  // .references(() => integrants.id).notNull().default(""),
 });
 
 export const insertpaymentHoldersSchema = createInsertSchema(paymentHolders);
@@ -584,7 +603,6 @@ export const paymentHoldersSchemaDB = insertpaymentHoldersSchema.pick({
   fiscal_id_number: true,
   address: true,
   iva: true,
-  // integrant_id: true,
 });
 
 export type PaymentHolders = z.infer<typeof selectpaymentHoldersSchema>;
@@ -631,7 +649,7 @@ export const facturas = pgTable("facturas", {
   id: columnId,
   generated: timestamp("generated", { mode: "date" }),
   ptoVenta: integer("ptoVenta").notNull(),
-  nroFactura: integer("nroFactura").notNull(),
+  nroFactura: integer("nroFactura").notNull().default(0),
   tipoFactura: varchar("tipoFactura", { length: 255 }).notNull(),
   concepto: integer("concept").notNull(),
   tipoDocumento: integer("tipoDocumento").notNull(),
@@ -708,7 +726,25 @@ export const prospects = pgTable("prospects", {
   }).notNull(),
   receipt: varchar("receipt", { length: 255 }).notNull(),
   bonus: varchar("bonus", { length: 255 }).notNull(),
+  healthInsurances: varchar("healthInsurances")
+    .references(() => healthInsurances.id)
+    .notNull(),
 });
+
+export const prospectsRelations = relations(prospects, ({ one, many }) => ({
+  plan: one(plans, {
+    fields: [prospects.plan],
+    references: [plans.id],
+  }),
+  modo: one(modos, {
+    fields: [prospects.modo],
+    references: [modos.id],
+  }),
+  healthInsurances: one(healthInsurances, {
+    fields: [prospects.healthInsurances],
+    references: [healthInsurances.id],
+  }),
+}));
 
 export const insertProspectsSchema = createInsertSchema(prospects);
 export const selectProspectsSchema = createSelectSchema(prospects);

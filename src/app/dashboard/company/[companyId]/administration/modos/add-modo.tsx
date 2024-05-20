@@ -33,8 +33,7 @@ export function AddModo() {
   async function handleCreate() {
     try {
       await createProduct({
-        description: description
-
+        description: description,
       });
 
       toast.success("Producto creado correctamente");
@@ -61,7 +60,7 @@ export function AddModo() {
                 </DialogDescription> */}
           </DialogHeader>
           <div>
-            <Label htmlFor="description">name</Label>
+            <Label htmlFor="description">Descripción</Label>
             <Input
               id="description"
               placeholder="..."
