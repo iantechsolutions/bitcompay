@@ -689,8 +689,7 @@ export type Facturas = z.infer<typeof selectFacturasSchema>;
 
 export const procedure = pgTable("procedure", {
   id: columnId,
-  code: varchar("code", { length: 255 }).notNull(),
-  procedureNumber: varchar("procedureNumber", { length: 255 }).notNull(),
+  type: varchar("type", { length: 255 }),
   estado: varchar("estado", { length: 255 }).notNull(),
   prospect: varchar("prospect")
     .references(() => prospects.id)

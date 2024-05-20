@@ -4,9 +4,6 @@ import { db, schema } from "~/server/db";
 import { eq } from "drizzle-orm";
 import { procedure } from "~/server/db/schema";
 
-
-
-
 export const procedureRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({}) => {
     const procedures = await db.query.procedure.findMany();
@@ -26,27 +23,23 @@ export const procedureRouter = createTRPCRouter({
       return procedure;
     }),
 
-    create: protectedProcedure
-    .input(z.object({
-        code: z.string(),
-        procedureNumber: z.string(),
+  create: protectedProcedure
+    .input(
+      z.object({
+        type: z.string(),
         estado: z.string(),
         prospect: z.string(),
-
-}))
-.mutation(async ({ input }) => {
-      
-    await db.insert(procedure).values(input);
-  
-
+      }),
+    )
+    .mutation(async ({ input }) => {
+      await db.insert(procedure).values(input);
     }),
 
   change: protectedProcedure
     .input(
       z.object({
         id: z.string(),
-        code: z.string(),
-        procedureNumber: z.string(),
+        type: z.string(),
         estado: z.string(),
         prospect: z.string(),
       }),
