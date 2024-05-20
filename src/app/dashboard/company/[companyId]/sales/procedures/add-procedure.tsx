@@ -10,14 +10,11 @@ import {
 } from "~/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import GeneralInfoForm from "~/components/procedures/general-info-form";
+import { useCompanyData } from "../../company-provider";
 
-import AddMembers from "~/components/procedures/members-info";
-import MembersTable from "~/components/procedures/member-tab";
-import { useState } from "react";
-import { type Inputs } from "~/components/procedures/members-info";
-import BillingInfo from "~/components/procedures/billing-info";
 export default function AddProcedure() {
-  const [membersData, setMembersData] = useState<Inputs[]>([]);
+  const company = useCompanyData();
+  const companyId = company?.id;
   return (
     <>
       <Dialog>
@@ -30,7 +27,7 @@ export default function AddProcedure() {
           <DialogHeader>
             <DialogTitle>Agregar tramite</DialogTitle>
           </DialogHeader>
-          <Tabs defaultValue="account">
+          <Tabs defaultValue="account" className="w-[400px]">
             <TabsList>
               <TabsTrigger value="general_info">
                 Informacion General
@@ -44,21 +41,10 @@ export default function AddProcedure() {
               <GeneralInfoForm />
             </TabsContent>
             <TabsContent value="members">
-              <div className="flex w-full flex-col gap-2">
-                <div className="w-full self-end">
-                  <AddMembers
-                    addMember={setMembersData}
-                    membersData={membersData}
-                  />
-                </div>
-
-                <MembersTable data={membersData} />
-              </div>
+              // aca va el form de members
             </TabsContent>
             <TabsContent value="billing">
-              <div>
-                <BillingInfo data={membersData} />
-              </div>
+              // aca va el form de facturacion
             </TabsContent>
           </Tabs>
         </DialogContent>

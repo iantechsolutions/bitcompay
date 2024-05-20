@@ -689,7 +689,8 @@ export type Facturas = z.infer<typeof selectFacturasSchema>;
 
 export const procedure = pgTable("procedure", {
   id: columnId,
-  type: varchar("type", { length: 255 }),
+  // code: varchar("code", { length: 255 }).notNull(),
+  type: varchar("type", { length: 255 }).notNull(),
   estado: varchar("estado", { length: 255 }).notNull(),
   prospect: varchar("prospect")
     .references(() => prospects.id)
@@ -699,8 +700,8 @@ export const procedure = pgTable("procedure", {
 export const insertProcedureSchema = createInsertSchema(procedure);
 export const selectProcedureSchema = createSelectSchema(procedure);
 export const ProcedureSchemaDB = insertProcedureSchema.pick({
-  code: true,
-  procedureNumber: true,
+  // code: true,
+  type: true,
   estado: true,
   prospect: true,
 });
@@ -725,9 +726,9 @@ export const prospects = pgTable("prospects", {
   }).notNull(),
   receipt: varchar("receipt", { length: 255 }).notNull(),
   bonus: varchar("bonus", { length: 255 }).notNull(),
-  healthInsurances: varchar("healthInsurances")
-    .references(() => healthInsurances.id)
-    .notNull(),
+  // healthInsurances: varchar("healthInsurances")
+  //   .references(() => healthInsurances.id)
+  //   .notNull(),
 });
 
 export const prospectsRelations = relations(prospects, ({ one, many }) => ({

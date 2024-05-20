@@ -26,6 +26,7 @@ export const procedureRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
+        // code: z.string(),
         type: z.string(),
         estado: z.string(),
         prospect: z.string(),
@@ -39,6 +40,7 @@ export const procedureRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string(),
+        // code: z.string(),
         type: z.string(),
         estado: z.string(),
         prospect: z.string(),
