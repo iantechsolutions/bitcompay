@@ -6,10 +6,12 @@ import { procedure } from "~/server/db/schema";
 
 export const procedureRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({}) => {
-    const procedures = await db.query.procedure.findMany({with:{
-      administrative_audits:true,
-      medical_audits:true,
-    }});
+    const procedures = await db.query.procedure.findMany({
+      with: {
+        administrative_audits: true,
+        medical_audits: true,
+      },
+    });
     return procedures;
   }),
   get: protectedProcedure
@@ -35,9 +37,12 @@ export const procedureRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
-      const new_procedure = await db.insert(schema.procedure).values({
-        ...input,
-      }).returning();
+      const new_procedure = await db
+        .insert(schema.procedure)
+        .values({
+          ...input,
+        })
+        .returning();
       return new_procedure;
     }),
 
@@ -50,11 +55,12 @@ export const procedureRouter = createTRPCRouter({
         prospect: z.string().optional(),
       }),
     )
-    .mutation(async ({ input: { id, ...input } }) => {
+    .mutation(async ({ input }) => {
+      //editar cada tabla por separado.
       const updatedprocedure = await db
         .update(schema.procedure)
         .set(input)
-        .where(eq(schema.procedure.id, id));
+        .where(eq(schema.procedure.id, input.id));
       return updatedprocedure;
     }),
 

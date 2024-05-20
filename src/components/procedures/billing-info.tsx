@@ -184,16 +184,16 @@ export default function BillingInfo({
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="eliga un producto" />
+                      <SelectValue placeholder="elija un producto" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>{productsOptions}</SelectContent>
                 </Select>
-                {products?.map((product) =>
+                {/* {products?.map((product) =>
                   product.channels.map((channel) => (
                     <FormLabel>{channel.channel.name}</FormLabel>
                   )),
-                )}
+                )} */}
               </FormItem>
             )}
           />
@@ -224,7 +224,7 @@ export default function BillingInfo({
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="eliga un tipo de id fiscal " />
+                      <SelectValue placeholder="elija un tipo de id fiscal " />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -262,7 +262,7 @@ export default function BillingInfo({
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="eliga un tipo de id " />
+                      <SelectValue placeholder="elija un tipo de id " />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>

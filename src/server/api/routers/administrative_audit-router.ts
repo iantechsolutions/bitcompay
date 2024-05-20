@@ -2,11 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db, schema } from "~/server/db";
 import { eq } from "drizzle-orm";
-import { getServerAuthSession } from "~/server/auth";
-import { administrative_audit } from "~/server/db/schema";
 import { administrative_auditSchemaDB } from "~/server/db/schema";
-
-
 
 export const administrative_auditRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({}) => {
@@ -20,9 +16,13 @@ export const administrative_auditRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      const administrative_audit = await db.query.administrative_audit.findFirst({
-        where: eq(schema.administrative_audit.id, input.administrative_auditId),
-      });
+      const administrative_audit =
+        await db.query.administrative_audit.findFirst({
+          where: eq(
+            schema.administrative_audit.id,
+            input.administrative_auditId,
+          ),
+        });
 
       return administrative_audit;
     }),
@@ -30,16 +30,12 @@ export const administrative_auditRouter = createTRPCRouter({
   create: protectedProcedure
     .input(administrative_auditSchemaDB)
     .mutation(async ({ input }) => {
-      const session = await getServerAuthSession();
-      if (!session || !session.user) {
-        throw new Error("User not found");
-      }
-      const user = session?.user.id;
-      console.log(input);
       const newadministrative_audit = await db
         .insert(schema.administrative_audit)
-        .values({ ...input});
-      return administrative_audit;
+        .values({ ...input });
+      //hay que levantar el procedure y modificar el estado
+      await db.update(schema.procedure).set({ estado: input.state });
+      return newadministrative_audit;
     }),
 
   change: protectedProcedure
@@ -69,6 +65,8 @@ export const administrative_auditRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       await db
         .delete(schema.administrative_audit)
-        .where(eq(schema.administrative_audit.id, input.administrative_auditId));
+        .where(
+          eq(schema.administrative_audit.id, input.administrative_auditId),
+        );
     }),
 });

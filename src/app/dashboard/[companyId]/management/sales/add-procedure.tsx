@@ -23,7 +23,8 @@ import { type InputsBilling } from "~/components/procedures/billing-info";
 import { type InputsGeneralInfo } from "~/components/procedures/general-info-form";
 import { SubmitHandler } from "react-hook-form";
 export default function AddProcedure() {
-  const { mutateAsync: createIntegrant } = api.integrants.create.useMutation();
+  const { mutateAsync: createIntegrant, isLoading } =
+    api.integrants.create.useMutation();
   const { mutateAsync: updateProcedure } = api.procedure.change.useMutation();
   const [membersData, setMembersData] = useState<Inputs[]>([]);
   const [billingData, setBillingData] = useState<InputsBilling | null>(null);
@@ -36,12 +37,14 @@ export default function AddProcedure() {
 
   const [currentTab, setCurrentTab] = useState("general_info");
   function handleTabChange(tab: string) {
-    console.log("handleTabChange");
-    console.log(currentTab);
     setCurrentTab(tab);
-    console.log(currentTab);
   }
-  function handlePreLoad() {}
+  function handlePreLoad() {
+    updateProcedure({
+      id: procedureData!.id,
+      estado: "pendiente",
+    });
+  }
   function handleFinish() {
     updateProcedure({
       id: procedureData!.id,
@@ -161,6 +164,7 @@ export default function AddProcedure() {
                     handleSumbitMembers;
                     handleTabChange("billing");
                   }}
+                  disabled={isLoading}
                 >
                   Continuar
                 </Button>

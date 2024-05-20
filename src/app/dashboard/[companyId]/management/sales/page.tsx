@@ -17,7 +17,7 @@ export default async function Page(props: { params: { companyId: string } }) {
           {procedures.map((procedure) => (
             <ListTile
               key={procedure.id}
-              // href={`/dashboard/${props.params.companyId}/administration/bussiness_units/${procedure.id}`}
+              href={`/dashboard/${props.params.companyId}/management/sales/${procedure.id}`}
               title={procedure.estado}
             />
           ))}
