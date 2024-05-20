@@ -16,7 +16,6 @@ export default function Home(props: UploadContainerProps) {
   let batch: Record<string, unknown>[];
   const receiveData = (data: Record<string, unknown>[]) => {
     batch = data;
-    console.log("send data ejecutado", batch);
   };
 
   return (

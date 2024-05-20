@@ -110,8 +110,6 @@ export default function AddProcedure() {
       });
     });
     await Promise.all(promises);
-    console.log("membersData");
-    console.log(membersData);
   };
 
   return (

@@ -45,7 +45,7 @@ export async function ingresarAfip() {
     production: true,
   });
   // const res = await afipCuit.CreateCert(username, password, alias);
-  // // console.log("Certificado creado");
+  // console.log("Certificado creado");
   // console.log(res);
   // const wsid = "wsfe";
 
@@ -97,12 +97,8 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
       setLoading(true);
       const afip = await ingresarAfip();
       const ivas = await afip.ElectronicBilling.getAliquotTypes();
-      console.log("ivas");
-      console.log(ivas);
 
       const serverStatus = await afip.ElectronicBilling.getServerStatus();
-      console.log("status");
-      console.log(serverStatus);
 
       let last_voucher;
       try {
@@ -157,10 +153,6 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
       /**
        * Mostramos por pantalla los datos de la nueva Factura
        **/
-      console.log({
-        cae: res.CAE, //CAE asignado a la Factura
-        vencimiento: res.CAEFchVto, //Fecha de vencimiento del CAE
-      });
       const html = Factura({
         puntoDeVenta: puntoVenta,
         tipoFactura: tipoFactura,
@@ -192,7 +184,6 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
         file_name: name,
         options: options,
       });
-      console.log(resHtml.file);
       setLoading(false);
 
       saveFactura(numero_de_factura);
@@ -257,7 +248,6 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
                 ]}
                 onSelectionChange={(e) => {
                   setPuntoVenta(e);
-                  console.log(e);
                 }}
               />
             </div>
@@ -286,7 +276,6 @@ export function FacturaDialog({ receivedHtml }: FacturaDialog) {
                 ]}
                 onSelectionChange={(e) => {
                   setTipoFactura(e);
-                  console.log(e);
                 }}
               />
             </div>

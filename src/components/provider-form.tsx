@@ -143,7 +143,6 @@ export default function ProviderForm({
   const { mutateAsync: updateProvider } = api.providers.change.useMutation();
   const { errors } = form.formState;
   const { watch } = form;
-  console.log(errors);
   console.log(JSON.stringify(watch(), null, 2));
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     //aca manda al backend

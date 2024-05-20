@@ -19,8 +19,6 @@ export default async function Channel(props: {
   const brands = brandsData?.map((brand) => {
     return brand.brand;
   });
-
-  console.log(brands);
   const products = await api.products.list.query();
 
   if (!company || !session?.user) {

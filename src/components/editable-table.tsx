@@ -176,9 +176,6 @@ function Row(props: { style?: React.CSSProperties; index: number }) {
 
         if (header.label?.toString() === specialCellKey) {
           const handleVariableChange = (newValue: any) => {
-            console.log(props.index);
-            console.log(header.key);
-            console.log(header.label?.toString());
             setVariable(newValue);
             ctx.onInputChange!(props.index, header.key, newValue);
           };
