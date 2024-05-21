@@ -7,7 +7,7 @@ export const paymentInfoRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({}) => {
     const paymentInfo = await db.query.payment_info.findMany({
       with: {
-        payment: true,
+        integrant: true,
       },
     });
     return paymentInfo;

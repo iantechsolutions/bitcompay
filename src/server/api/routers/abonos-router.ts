@@ -25,7 +25,7 @@ export const abonosRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
-        valor: z.string(),
+        valor: z.number(),
         family_group: z.string().nullable(),
       }),
     )
@@ -41,7 +41,7 @@ export const abonosRouter = createTRPCRouter({
   update: protectedProcedure
     .input(
       z.object({
-        valor: z.string(),
+        valor: z.number(),
       }),
     )
     .mutation(async ({ input }) => {
