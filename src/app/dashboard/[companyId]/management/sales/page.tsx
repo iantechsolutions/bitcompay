@@ -5,7 +5,7 @@ import { api } from "~/trpc/server";
 import AddProcedure from "./add-procedure";
 export default async function Page(props: { params: { companyId: string } }) {
   // cambiar luego por tramite router
-  const procedures = await api.procedure.listPending.query();
+  const procedures = await api.procedure.list.query();
   return (
     <LayoutContainer>
       <section className="space-y-2">
