@@ -1,13 +1,12 @@
-import { getServerAuthSession } from "~/server/auth";
-import UploadResponsePage from "./upload-response-page";
-import { api } from "~/trpc/server";
+import { api } from '~/trpc/server'
+import UploadResponsePage from './upload-response-page'
 
 export default async function PageResponse(props: {
-  params: { channelId: string };
+    params: { channelId: string }
 }) {
-  const channel = await api.channels.get.query({
-    channelId: props.params.channelId,
-  });
+    const channel = await api.channels.get.query({
+        channelId: props.params.channelId,
+    })
 
-  return <>{channel && <UploadResponsePage channel={channel} />}</>;
+    return <>{channel && <UploadResponsePage channel={channel} />}</>
 }

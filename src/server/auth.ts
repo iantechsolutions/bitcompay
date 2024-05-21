@@ -1,15 +1,13 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth } from '@clerk/nextjs/server'
 
 export const getServerAuthSession = () => {
-  const user = auth()
+    const user = auth()
 
-  return {
-    user: {
-      id: user.userId!,
+    return {
+        user: {
+            id: user.userId!,
+        },
     }
-  }
-};
-
-export const getServerUser = () => {
-
 }
+
+export const getServerUser = () => {}

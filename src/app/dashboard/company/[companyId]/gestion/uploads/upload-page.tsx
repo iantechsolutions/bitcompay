@@ -1,48 +1,50 @@
-"use client";
+'use client'
 
-import LayoutContainer from "~/components/layout-container";
-import { Title } from "~/components/title";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { UploadDropzone } from "~/components/uploadthing";
-import { useCompanyData } from "../../company-provider";
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import LayoutContainer from '~/components/layout-container'
+import { Title } from '~/components/title'
+import { UploadDropzone } from '~/components/uploadthing'
+import { useCompanyData } from '../../company-provider'
 
 export default function UploadPage() {
-  const [errorMessage, setErrorMessage] = useState<string | null>();
+    const [errorMessage, setErrorMessage] = useState<string | null>()
 
-  const router = useRouter();
+    const router = useRouter()
 
-  const company = useCompanyData();
+    const company = useCompanyData()
 
-  return (
-    <LayoutContainer>
-      <Title>Cargar documento</Title>
+    return (
+        <LayoutContainer>
+            <Title>Cargar documento</Title>
 
-      {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+            {errorMessage && <p className='text-red-500'>{errorMessage}</p>}
 
-      <UploadDropzone
-        input={{ companyId: company.id }}
-        endpoint="documentUpload"
-        config={{
-          mode: "manual",
-          appendOnPaste: true,
-        }}
-        content={{
-          button: "Continuar",
-          allowedContent: "Archivos de excel",
-          label: "Arrastra y suelta el archivo aquí",
-        }}
-        onClientUploadComplete={(res) => {
-          const [file] = res;
+            <UploadDropzone
+                input={{ companyId: company.id }}
+                endpoint='documentUpload'
+                config={{
+                    mode: 'manual',
+                    appendOnPaste: true,
+                }}
+                content={{
+                    button: 'Continuar',
+                    allowedContent: 'Archivos de excel',
+                    label: 'Arrastra y suelta el archivo aquí',
+                }}
+                onClientUploadComplete={(res) => {
+                    const [file] = res
 
-          if (!file) return;
+                    if (!file) {
+                        return
+                    }
 
-          router.push(`./uploads/${file.serverData.uploadId}`);
-        }}
-        onUploadError={(error: Error) => {
-          setErrorMessage(error.message);
-        }}
-      />
-    </LayoutContainer>
-  );
+                    router.push(`./uploads/${file.serverData.uploadId}`)
+                }}
+                onUploadError={(error: Error) => {
+                    setErrorMessage(error.message)
+                }}
+            />
+        </LayoutContainer>
+    )
 }

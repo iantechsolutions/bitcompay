@@ -1,15 +1,15 @@
-import { api } from "~/trpc/server";
-import { Title } from "~/components/title";
-import BussinessPage from "./bussiness-page";
+import { Title } from '~/components/title'
+import { api } from '~/trpc/server'
+import BussinessPage from './bussiness-page'
 
 export default async function Page(props: { params: { bussinessId: string } }) {
-  const bussinessUnit = await api.bussinessUnits.get.query({
-    bussinessUnitId: props.params.bussinessId,
-  });
+    const bussinessUnit = await api.bussinessUnits.get.query({
+        bussinessUnitId: props.params.bussinessId,
+    })
 
-  if (!bussinessUnit) {
-    return <Title>No se encontraron las unidades de negocio</Title>;
-  }
+    if (!bussinessUnit) {
+        return <Title>No se encontraron las unidades de negocio</Title>
+    }
 
-  return <BussinessPage unit={bussinessUnit} />;
+    return <BussinessPage unit={bussinessUnit} />
 }
