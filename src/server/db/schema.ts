@@ -14,7 +14,7 @@ import { columnId, createdAt, pgTable, updatedAt } from "./schema/util";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { number, type z } from "zod";
 import { duration } from "html2canvas/dist/types/css/property-descriptors/duration";
-import { id, tr } from "date-fns/locale";
+import { id } from "date-fns/locale";
 export * from "./schema/auth";
 export { pgTable } from "./schema/util";
 
@@ -211,10 +211,10 @@ export const companies = pgTable(
     description: varchar("description", { length: 255 }).notNull(),
     concept: varchar("concept", { length: 255 }).notNull().default("concept"),
     enabled: boolean("enabled").notNull().default(true),
-    afipKey: varchar("afipKey").notNull(),
-    certificate: varchar("certificate").notNull(),
-    cuit: varchar("cuit").notNull(),
-    razon_social: varchar("razon_social").notNull(),
+    afipKey: varchar("afipKey"),
+    certificate: varchar("certificate"),
+    cuit: varchar("cuit"),
+    razon_social: varchar("razon_social"),
     createdAt,
     updatedAt,
   },
@@ -446,8 +446,8 @@ export const plans = pgTable("plans", {
   expiration_date: timestamp("expiration_date").notNull(),
   plan_code: varchar("plan_code", { length: 255 }).notNull(),
   description: varchar("description", { length: 255 }).notNull(),
-  age: integer("age").notNull(),
-  price: bigint("price", { mode: "number" }).notNull(),
+  // age: integer("age").notNull(),
+  // price: bigint("price", { mode: "number" }).notNull(),
   business_units_id: varchar("business_units_id", { length: 255 }).references(()=>bussinessUnits.id),
 });
 
@@ -693,6 +693,8 @@ export const FacturasSchemaDB = insertFacturasSchema.pick({
   iva: true,
   ptoVenta: true,
   nroFactura: true,
+  items_id:true,
+  liquidation_id:true,
 });
 export type Facturas = z.infer<typeof selectFacturasSchema>;
 
@@ -714,13 +716,13 @@ export const family_groups = pgTable("family_groups", {
   // healthInsurances: varchar("healthInsurances")
   //   .references(() => healthInsurances.id)
   //   .notNull(),
-  receipt: varchar("receipt", { length: 255 }).notNull(),
-  bonus: varchar("bonus", { length: 255 }).notNull(),
+  receipt: varchar("receipt", { length: 255 }),
+  bonus: varchar("bonus", { length: 255 }),
   procedureId: varchar("procedureId", { length: 255 }).references(
     () => procedure.id,
   ),
-  state: varchar("state", { length: 255 }).notNull(),
-  payment_status: varchar("payment_status", { length: 255 }).notNull(),
+  state: varchar("state", { length: 255 }),
+  payment_status: varchar("payment_status", { length: 255 }).notNull().default("pending"),
 
 });
 

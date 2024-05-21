@@ -24,8 +24,7 @@ export const plansRouter = createTRPCRouter({
         expiration_date: z.date(),
         plan_code: z.string().max(255),
         description: z.string().max(255),
-        age: z.number(),
-        price: z.number(),
+        business_units_id: z.string().max(255),
       }),
     )
     .mutation(async ({ input }) => {
@@ -39,8 +38,8 @@ export const plansRouter = createTRPCRouter({
         expiration_date: input.expiration_date,
         plan_code: input.plan_code,
         description: input.description,
-        age: input.age,
-        price: input.price,
+        business_units_id: input.business_units_id,
+        
       });
       return new_plan;
     }),
@@ -52,8 +51,7 @@ export const plansRouter = createTRPCRouter({
         expiration_date: z.date(),
         plan_code: z.string().max(255),
         description: z.string().max(255),
-        age: z.number(),
-        price: z.number(),
+        business_units_id: z.string().max(255),
       }),
     )
     .mutation(async ({ input }) => {
@@ -63,8 +61,7 @@ export const plansRouter = createTRPCRouter({
           expiration_date: input.expiration_date,
           plan_code: input.plan_code,
           description: input.description,
-          age: input.age,
-          price: input.price,
+          business_units_id: input.business_units_id,
         })
         .where(eq(schema.plans.id, input.planId));
       return modified_plan;
