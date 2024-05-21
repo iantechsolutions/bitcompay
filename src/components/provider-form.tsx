@@ -46,6 +46,7 @@ type Inputs = {
     unsubscription_motive: string
 }
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
 export default function ProviderForm({
     provider,
     setOpen,
@@ -109,8 +110,6 @@ export default function ProviderForm({
     ))
     const { mutateAsync: createProvider } = api.providers.create.useMutation()
     const { mutateAsync: updateProvider } = api.providers.change.useMutation()
-    const { errors } = form.formState
-    const { watch } = form
     const onSubmit: SubmitHandler<Inputs> = async (data) => {
         //aca manda al backend
         try {

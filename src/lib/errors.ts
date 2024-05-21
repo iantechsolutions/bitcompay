@@ -8,6 +8,7 @@ import type { AppRouter } from '~/server/api/root'
 // Disable eslint for this file
 /* eslint-disable */
 
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export function asDatabseError(error: any) {
     if (error.name === 'DatabaseError') {
         return {
@@ -33,6 +34,7 @@ export function newTRPCError(code: TRPC_ERROR_CODE_KEY, cause: string, message?:
     })
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export function newServerInternalError(_error: any, cause?: any, message?: string) {
     return new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
@@ -41,10 +43,12 @@ export function newServerInternalError(_error: any, cause?: any, message?: strin
     })
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export function asTRPCError(error: any) {
     if (isTRPCClientError(error)) {
         return {
             data: error.data as { zodError?: ZodError },
+            // biome-ignore lint/suspicious/noExplicitAny: <explanation>
             cause: ((error.data as any).cause as string) ?? 'UNKNOWN',
             message: error.message as string,
             code: error.data?.code ?? 'UNKNOWN',
@@ -53,6 +57,7 @@ export function asTRPCError(error: any) {
     return null
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export function asZODError<T>(error: any) {
     if (error instanceof ZodError || error.name === 'ZodError') {
         return error as ZodError<T>
@@ -61,6 +66,7 @@ export function asZODError<T>(error: any) {
     return null
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export function isTRPCClientError(error: any): error is TRPCClientError<AppRouter> {
     return error instanceof TRPCClientError || error.name === 'TRPCClientError'
 }

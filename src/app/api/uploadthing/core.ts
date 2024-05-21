@@ -17,7 +17,7 @@ export const ourFileRouter = {
         },
     })
         .input(z.object({ channel: z.string() }))
-        .middleware(async ({ req, input }) => {
+        .middleware(async ({ input }) => {
             // This code runs on your server before upload
             const session = await getServerAuthSession()
 
@@ -60,7 +60,7 @@ export const ourFileRouter = {
             }),
         )
         // Set permissions and file types for this FileRoute
-        .middleware(async ({ req, input }) => {
+        .middleware(async ({ input }) => {
             // This code runs on your server before upload
             const session = await getServerAuthSession()
 

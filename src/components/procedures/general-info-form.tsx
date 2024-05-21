@@ -42,7 +42,7 @@ export default function GeneralInfoForm() {
                                         <SelectValue placeholder='Seleccione una unidad de negocio' />
                                     </SelectTrigger>
                                 </FormControl>
-                                <SelectContent>/// aca van las unidaddes de negocio opciones con SelectItem //attr value</SelectContent>
+                                <SelectContent>{/*/ aca van las unidaddes de negocio opciones con SelectItem //attr value*/}</SelectContent>
                             </Select>
                         </FormItem>
                     )}
@@ -59,7 +59,7 @@ export default function GeneralInfoForm() {
                                         <SelectValue placeholder='Seleccione un Plan' />
                                     </SelectTrigger>
                                 </FormControl>
-                                <SelectContent>/// aca van los planes opciones con SelectItem // attr value</SelectContent>
+                                <SelectContent>{/*/ aca van los planes opciones con SelectItem // attr value*/}</SelectContent>
                             </Select>
                         </FormItem>
                     )}

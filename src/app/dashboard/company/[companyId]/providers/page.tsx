@@ -9,7 +9,7 @@ export default async function Page() {
                 <div className='flex justify-between'>
                     <Title>Proveedores</Title>
                 </div>
-                <List></List>
+                <List />
             </section>
         </LayoutContainer>
     )

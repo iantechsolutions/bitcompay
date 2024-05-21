@@ -14,7 +14,7 @@
         "start": "next start"
     },
     "dependencies": {
-        "@biomejs/biome": "1.7.3",
+        "@biomejs/biome": "1.7.1",
         "@afipsdk/afip.js": "^1.1.1",
         "@auth/drizzle-adapter": "^0.3.6",
         "@clerk/nextjs": "^5.1.0",

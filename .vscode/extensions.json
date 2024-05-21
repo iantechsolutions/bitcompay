@@ -1,3 +1,12 @@
 {
-    "recommendations": ["esbenp.prettier-vscode"]
+    "recommendations": [
+        "biomejs.biome",
+        "bradlc.vscode-tailwindcss",
+        "naumovs.color-highlight",
+        "usernamehw.errorlens",
+        "wix.vscode-import-cost",
+        "streetsidesoftware.code-spell-checker",
+        "kingwl.vscode-vitest-runner",
+        "vitest.explorer"
+    ]
 }

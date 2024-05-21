@@ -9,7 +9,7 @@ export default async function Home() {
                 <div className='flex justify-between'>
                     <Title>Diferenciales</Title>
                 </div>
-                <List></List>
+                <List />
             </section>
         </LayoutContainer>
     )
