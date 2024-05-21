@@ -30,21 +30,16 @@ export const family_groupsRouter = createTRPCRouter({
         validity: z.date(),
         plan: z.string(),
         modo: z.string(),
-        // cuit: z.string(),
-        // healthInsurances: z.string(),
-        // employerContribution: z.string(),
-        // receipt: z.string(),
-        // bonus: z.string(),
+        receipt: z.string().optional(),
+        bonus: z.string().optional(),
+        procedureId: z.string().optional(),
+        state:z.string().optional(),
+        payment_status:z.string().optional(),
       }),
     )
     .mutation(async ({ input }) => {
       const new_family_group = await db.insert(family_groups).values({
-        ...input,
-        cuit: " ",
-        // healthInsurances: " ",
-        employerContribution: " ",
-        receipt: " ",
-        bonus: " ",
+        ...input
       }).returning();
       return new_family_group;
     }),
@@ -57,11 +52,11 @@ export const family_groupsRouter = createTRPCRouter({
         validity: z.date(),
         plan: z.string(),
         modo: z.string(),
-        cuit: z.string(),
-        healthInsurances: z.string(),
-        employerContribution: z.string(),
-        receipt: z.string(),
-        bonus: z.string(),
+        receipt: z.string().optional(),
+        bonus: z.string().optional(),
+        procedureId: z.string().optional(),
+        state:z.string().optional(),
+        payment_status:z.string().optional(),
       }),
     )
     .mutation(async ({ input: { id, ...input } }) => {
