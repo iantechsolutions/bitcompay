@@ -13,10 +13,15 @@ import {
   SelectValue,
 } from "../ui/select";
 import { api } from "~/trpc/react";
+import { cn } from "~/lib/utils";
 import { Input } from "../ui/input";
 import { type InputsMembers } from "../procedures/members-info";
 import { useEffect } from "react";
 import { Button } from "../ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import dayjs from "dayjs";
+import { CalendarIcon } from "lucide-react";
+import { Calendar } from "../ui/calendar";
 export type InputsBilling = {
   product_name: string;
   name: string;
@@ -28,7 +33,7 @@ export type InputsBilling = {
   iva: string;
   afip_status: string;
   card_number: string;
-  card_expiration_date: string;
+  card_expiration_date: Date;
   card_security_code: string;
   cbu: string;
 };
@@ -357,10 +362,40 @@ export default function BillingInfo({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Fecha de vencimiento</FormLabel>
-                <Input
-                  {...field}
-                  placeholder="ingrese su fecha de vencimiento"
-                />
+                <br />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-[240px] pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground",
+                        )}
+                      >
+                        <p>
+                          {field.value ? (
+                            dayjs
+                              .utc(field.value)
+                              .format("D [de] MMMM [de] YYYY")
+                          ) : (
+                            <span>Escoga una fecha</span>
+                          )}
+                        </p>
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value ? new Date(field.value) : undefined}
+                      onSelect={field.onChange}
+                      disabled={(date: Date) => date < new Date("1900-01-01")}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
               </FormItem>
             )}
           />

@@ -22,6 +22,7 @@ import BillingInfo from "~/components/procedures/billing-info";
 import { type InputsBilling } from "~/components/procedures/billing-info";
 import { type InputsGeneralInfo } from "~/components/procedures/general-info-form";
 import { useForm, SubmitHandler } from "react-hook-form";
+import { create } from "domain";
 export default function AddProcedure() {
   const { mutateAsync: createIntegrant, isLoading } =
     api.integrants.create.useMutation();
@@ -112,32 +113,7 @@ export default function AddProcedure() {
       console.log("An error has occurred", error),
     );
   };
-
-  function handlePreload() {
-    createProspect({
-      businessUnit: prospectData?.bussinessUnit ?? "",
-      validity: new Date(prospectData!.validity),
-      plan: prospectData?.plan ?? "",
-      modo: prospectData?.mode ?? "",
-    })
-      .then(async (response) => {
-        setProspectId(response[0]!.id);
-      })
-      .catch((error) => {
-        console.log("An error has occurred", error);
-      });
-
-    createProcedure({
-      type: "GFC001",
-      estado: "pending",
-    })
-      .then(async (response) => {
-        setProcedureId(response[0]!.id);
-      })
-      .catch((error) => {
-        console.log("An error has occurred", error);
-      });
-
+  function createMembers(membersData: InputsMembers[]) {
     const promises = membersData.map((member) => {
       let status: "single" | "married" | "divorced" | "widowed";
       switch (member.civil_status) {
@@ -200,7 +176,90 @@ export default function AddProcedure() {
       console.log("An error has occurred", error),
     );
   }
+  function handlePreload() {
+    createProspect({
+      businessUnit: prospectData?.bussinessUnit ?? "",
+      validity: new Date(prospectData!.validity),
+      plan: prospectData?.plan ?? "",
+      modo: prospectData?.mode ?? "",
+    })
+      .then(async (response) => {
+        setProspectId(response[0]!.id);
+      })
+      .catch((error) => {
+        console.log("An error has occurred", error);
+      });
 
+    createProcedure({
+      type: "GFC001",
+      estado: "pending",
+    })
+      .then(async (response) => {
+        setProcedureId(response[0]!.id);
+      })
+      .catch((error) => {
+        console.log("An error has occurred", error);
+      });
+
+    createMembers(membersData);
+    createPaymentInfo({
+      card_number: billingData?.card_number,
+      expire_date: billingData?.card_expiration_date ?? null,
+      CCV: billingData?.card_security_code,
+      CBU: billingData?.cbu,
+    }).catch((error) => {
+      console.log("An error has occurred", error);
+    });
+  }
+
+  function handleConfirm() {
+    createProspect({
+      businessUnit: prospectData?.bussinessUnit ?? "",
+      validity: new Date(prospectData!.validity),
+      plan: prospectData?.plan ?? "",
+      modo: prospectData?.mode ?? "",
+    })
+      .then(async (response) => {
+        setProspectId(response[0]!.id);
+      })
+      .catch((error) => {
+        console.log("An error has occurred", error);
+      });
+
+    if (!procedureId) {
+      createProcedure({
+        type: "GFC001",
+        estado: "confirmed",
+        prospect: prospectId!,
+      })
+        .then((response) => {
+          console.log("Procedure created", response);
+        })
+        .catch((error) => {
+          console.log("An error has occurred", error);
+        });
+    } else {
+      updateProcedure({
+        id: procedureId,
+        estado: "confirmed",
+      })
+        .then((response) => {
+          console.log("Procedure updated", response);
+        })
+        .catch((error) => {
+          console.log("An error has occurred", error);
+        });
+    }
+    createMembers(membersData);
+    createPaymentInfo({
+      card_number: billingData?.card_number,
+      expire_date: billingData?.card_expiration_date ?? null,
+      CCV: billingData?.card_security_code,
+      CBU: billingData?.cbu,
+    }).catch((error) => {
+      console.log("An error has occurred", error);
+    });
+  }
   return (
     <>
       <Dialog>
@@ -240,12 +299,6 @@ export default function AddProcedure() {
                   />
                 </div>
                 <MembersTable data={membersData} />
-                <Button onClick={() => setMemberProcedureStatus("pending")}>
-                  Precarga
-                </Button>
-                <Button onClick={() => setMemberProcedureStatus("completed")}>
-                  Finalizar
-                </Button>
               </div>
             </TabsContent>
             <TabsContent value="billing">
@@ -259,7 +312,7 @@ export default function AddProcedure() {
             </TabsContent>
           </Tabs>
           <Button onClick={handlePreload}>Pre carga </Button>
-          <Button>Confirmar</Button>
+          <Button onClick={handleConfirm}>Confirmar</Button>
         </DialogContent>
       </Dialog>
     </>

@@ -20,10 +20,7 @@ import { prospectsRouter } from "./routers/prospects.router";
 import { procedureRouter } from "./routers/procedure.router";
 import { bonusesRouter } from "./routers/bonuses.router";
 import { administrative_auditRouter } from "./routers/administrative_audit-router";
-import {
-  medical_auditRouter,
-  medical_auditRouter,
-} from "./routers/medical_audit-router";
+import { medical_auditRouter } from "./routers/medical_audit-router";
 import { paymentInfoRouter } from "./routers/payment_info-router";
 /**
  * This is the primary router for your server.

@@ -2,15 +2,21 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db, schema } from "~/server/db";
 import { eq } from "drizzle-orm";
-import { procedure } from "~/server/db/schema";
 
 export const procedureRouter = createTRPCRouter({
-  list: protectedProcedure.query(async ({}) => {
+  listPending: protectedProcedure.query(async ({}) => {
     const procedures = await db.query.procedure.findMany({
+      where: eq(schema.procedure.estado, "pending"),
       with: {
         administrative_audits: true,
         medical_audits: true,
       },
+    });
+    return procedures;
+  }),
+  listConfirmed: protectedProcedure.query(async ({}) => {
+    const procedures = await db.query.procedure.findMany({
+      where: eq(schema.procedure.estado, "confirmed"),
     });
     return procedures;
   }),

@@ -29,10 +29,10 @@ export const paymentInfoRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
-        card_number: z.string(),
-        expire_date: z.date(),
-        CCV: z.string(),
-        CBU: z.string(),
+        card_number: z.string().nullable().optional(),
+        expire_date: z.date().nullable().optional(),
+        CCV: z.string().nullable().optional(),
+        CBU: z.string().nullable().optional(),
       }),
     )
     .mutation(async ({ input }) => {
@@ -46,10 +46,10 @@ export const paymentInfoRouter = createTRPCRouter({
     .input(
       z.object({
         paymentInfoId: z.string(),
-        card_number: z.string(),
-        expire_date: z.date(),
-        CCV: z.string(),
-        CBU: z.string(),
+        card_number: z.string().optional().nullable(),
+        expire_date: z.date().optional().nullable(),
+        CCV: z.string().optional().nullable(),
+        CBU: z.string().optional().nullable(),
       }),
     )
     .mutation(async ({ input }) => {
