@@ -1,13 +1,21 @@
-import { auth } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@clerk/nextjs/server'
 
+// https://clerk.com/docs/organizations/verify-user-permissions
 export const getServerAuthSession = () => {
-    const user = auth()
+    const { userId, ...session } = auth()
+
+    if (!userId) {
+        return null
+    }
 
     return {
+        ...session,
         user: {
-            id: user.userId!,
+            id: userId,
         },
     }
 }
 
-export const getServerUser = () => {}
+export const getServerAuthUser = () => {
+    return currentUser()
+}
