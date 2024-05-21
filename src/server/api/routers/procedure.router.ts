@@ -32,7 +32,7 @@ export const procedureRouter = createTRPCRouter({
       z.object({
         type: z.string(),
         estado: z.string(),
-        prospect: z.string().nullable().optional(),
+        family_group: z.string().nullable().optional(),
       }),
     )
     .mutation(async ({ input }) => {
@@ -51,7 +51,7 @@ export const procedureRouter = createTRPCRouter({
         id: z.string(),
         type: z.string().optional(),
         estado: z.string(),
-        prospect: z.string().nullable().optional(),
+        family_group: z.string().nullable().optional(),
       }),
     )
     .mutation(async ({ input }) => {

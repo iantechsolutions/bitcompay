@@ -16,7 +16,7 @@ import { clientStatusesRouter } from "./routers/client-statuses-router";
 import { integrantsRouter } from "./routers/integrant-router";
 import { facturasRouter } from "./routers/factura-router";
 import { modosRouter } from "./routers/modo.router";
-import { prospectsRouter } from "./routers/prospects.router";
+import { family_groupsRouter } from "./routers/family_group-router";
 import { procedureRouter } from "./routers/procedure.router";
 import { bonusesRouter } from "./routers/bonuses.router";
 import { administrative_auditRouter } from "./routers/administrative_audit-router";
@@ -45,7 +45,7 @@ export const appRouter = createTRPCRouter({
   integrants: integrantsRouter,
   facturas: facturasRouter,
   modos: modosRouter,
-  prospects: prospectsRouter,
+  family_groups: family_groupsRouter,
   procedure: procedureRouter,
   bonuses: bonusesRouter,
   administrative_audit: administrative_auditRouter,

@@ -28,7 +28,8 @@ export default function AddProcedure() {
     api.integrants.create.useMutation();
   const { mutateAsync: updateProcedure } = api.procedure.change.useMutation();
   const { mutateAsync: createProcedure } = api.procedure.create.useMutation();
-  const { mutateAsync: createProspect } = api.prospects.create.useMutation();
+  const { mutateAsync: createfamily_group } =
+    api.family_groups.create.useMutation();
   const { mutateAsync: createPaymentInfo } =
     api.payment_info.create.useMutation();
   const [membersData, setMembersData] = useState<InputsMembers[]>([]);
@@ -36,15 +37,14 @@ export default function AddProcedure() {
   const [procedureData, setProcedureData] = useState<InputsProcedure | null>(
     null,
   );
-  const [prospectData, setProspectData] = useState<InputsGeneralInfo | null>(
-    null,
-  );
+  const [family_groupData, setfamily_groupData] =
+    useState<InputsGeneralInfo | null>(null);
 
   const [memberProcedureStatus, setMemberProcedureStatus] = useState<
     string | null
   >(null);
   const [procedureId, setProcedureId] = useState<string | null>(null);
-  const [prospectId, setProspectId] = useState<string | null>(null);
+  const [family_groupId, setfamily_groupId] = useState<string | null>(null);
 
   const generalInfoForm = useForm<InputsGeneralInfo>();
   const membersForm = useForm<InputsMembers>();
@@ -105,7 +105,7 @@ export default function AddProcedure() {
         isAffiliate: member.isAffiliate,
         isBillResponsiblee: member.isBillResponsible,
         iva: member.iva,
-        prospect_id: prospectData?.id,
+        family_group_id: family_groupData?.id,
       });
     });
 
@@ -168,7 +168,7 @@ export default function AddProcedure() {
         isAffiliate: member.isAffiliate,
         isBillResponsiblee: member.isBillResponsible,
         iva: member.iva,
-        prospect_id: prospectId ?? undefined,
+        family_group_id: family_groupId ?? undefined,
       });
     });
 
@@ -177,14 +177,14 @@ export default function AddProcedure() {
     );
   }
   function handlePreload() {
-    createProspect({
-      businessUnit: prospectData?.bussinessUnit ?? "",
-      validity: new Date(prospectData!.validity),
-      plan: prospectData?.plan ?? "",
-      modo: prospectData?.mode ?? "",
+    createfamily_group({
+      businessUnit: family_groupData?.bussinessUnit ?? "",
+      validity: new Date(family_groupData!.validity),
+      plan: family_groupData?.plan ?? "",
+      modo: family_groupData?.mode ?? "",
     })
       .then(async (response) => {
-        setProspectId(response[0]!.id);
+        setfamily_groupId(response[0]!.id);
       })
       .catch((error) => {
         console.log("An error has occurred", error);
@@ -213,14 +213,14 @@ export default function AddProcedure() {
   }
 
   function handleConfirm() {
-    createProspect({
-      businessUnit: prospectData?.bussinessUnit ?? "",
-      validity: new Date(prospectData!.validity),
-      plan: prospectData?.plan ?? "",
-      modo: prospectData?.mode ?? "",
+    createfamily_group({
+      businessUnit: family_groupData?.bussinessUnit ?? "",
+      validity: new Date(family_groupData!.validity),
+      plan: family_groupData?.plan ?? "",
+      modo: family_groupData?.mode ?? "",
     })
       .then(async (response) => {
-        setProspectId(response[0]!.id);
+        setfamily_groupId(response[0]!.id);
       })
       .catch((error) => {
         console.log("An error has occurred", error);
@@ -230,7 +230,7 @@ export default function AddProcedure() {
       createProcedure({
         type: "GFC001",
         estado: "confirmed",
-        prospect: prospectId!,
+        family_group: family_groupId!,
       })
         .then((response) => {
           console.log("Procedure created", response);
@@ -284,7 +284,7 @@ export default function AddProcedure() {
             </TabsList>
             <TabsContent value="general_info">
               <GeneralInfoForm
-                setProspect={setProspectData}
+                setfamily_group={setfamily_groupData}
                 setProcedureId={setProcedureData}
                 form={generalInfoForm}
               />

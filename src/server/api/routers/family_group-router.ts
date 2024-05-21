@@ -2,25 +2,25 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db, schema } from "~/server/db";
 import { eq } from "drizzle-orm";
-import { administrative_audit, medical_audit, prospects } from "~/server/db/schema";
+import { administrative_audit, medical_audit, family_groups } from "~/server/db/schema";
 
-export const prospectsRouter = createTRPCRouter({
+export const family_groupsRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({}) => {
-    const prospects = await db.query.prospects.findMany();
-    return prospects;
+    const family_groups = await db.query.family_groups.findMany();
+    return family_groups;
   }),
   get: protectedProcedure
     .input(
       z.object({
-        prospectsId: z.string(),
+        family_groupsId: z.string(),
       }),
     )
     .query(async ({ input }) => {
-      const prospects = await db.query.prospects.findFirst({
-        where: eq(schema.prospects.id, input.prospectsId),
+      const family_groups = await db.query.family_groups.findFirst({
+        where: eq(schema.family_groups.id, input.family_groupsId),
       });
 
-      return prospects;
+      return family_groups;
     }),
 
   create: protectedProcedure
@@ -38,7 +38,7 @@ export const prospectsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
-      const new_prospect = await db.insert(prospects).values({
+      const new_family_group = await db.insert(family_groups).values({
         ...input,
         cuit: " ",
         // healthInsurances: " ",
@@ -46,7 +46,7 @@ export const prospectsRouter = createTRPCRouter({
         receipt: " ",
         bonus: " ",
       }).returning();
-      return new_prospect;
+      return new_family_group;
     }),
 
   change: protectedProcedure
@@ -67,23 +67,23 @@ export const prospectsRouter = createTRPCRouter({
     .mutation(async ({ input: { id, ...input } }) => {
       console.log("Function called");
 
-      const updatedprospects = await db
-        .update(schema.prospects)
+      const updatedfamily_groups = await db
+        .update(schema.family_groups)
         .set(input)
-        .where(eq(schema.prospects.id, id));
-      console.log(updatedprospects);
-      return updatedprospects;
+        .where(eq(schema.family_groups.id, id));
+      console.log(updatedfamily_groups);
+      return updatedfamily_groups;
     }),
 
   delete: protectedProcedure
     .input(
       z.object({
-        prospectsId: z.string(),
+        family_groupsId: z.string(),
       }),
     )
     .mutation(async ({ input }) => {
       await db
-        .delete(schema.prospects)
-        .where(eq(schema.prospects.id, input.prospectsId));
+        .delete(schema.family_groups)
+        .where(eq(schema.family_groups.id, input.family_groupsId));
     }),
 });
