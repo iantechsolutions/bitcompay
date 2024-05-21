@@ -5,7 +5,7 @@ import {
   index,
   integer,
   json,
-  numeric,
+  real,
   primaryKey,
   timestamp,
   varchar,
@@ -496,7 +496,7 @@ export const modos = pgTable("modos", {
 
 export const abonos = pgTable("abonos", {
   id: columnId,
-  valor: numeric("valor").notNull(),
+  valor: real("valor").notNull(),
   createdAt,
   family_group: varchar("family_group", { length: 255 }).references(()=>family_groups.id),
 });
@@ -599,9 +599,9 @@ export type Integrant = z.infer<typeof selectintegrantSchema>;
 export const contributions = pgTable("contributions", {
   id: columnId,
   integrant_id: varchar("integrant_id", { length: 255 }).references(() => integrants.id),
-  amount: numeric("amount").notNull(),
-  employerContribution: numeric("employerContribution").notNull(),
-  employeeContribution : numeric("employeeContribution ").notNull(),
+  amount: real("amount").notNull(),
+  employerContribution: real("employerContribution").notNull(),
+  employeeContribution : real("employeeContribution ").notNull(),
   cuitEmployer: varchar("bonus", { length: 255 }).notNull(),
 });
 
@@ -627,7 +627,7 @@ export const differentialsRelations = relations(differentials, ({ many }) => ({
 
 export const differentialsValues = pgTable("differentialsValues", {
   id: columnId,
-  amount: numeric("amount").notNull(),
+  amount: real("amount").notNull(),
   createdAt,
   differentialId: varchar("differentialId", { length: 255 }).references(()=>differentials.id)
 });
@@ -700,9 +700,9 @@ export type Facturas = z.infer<typeof selectFacturasSchema>;
 
 export const items = pgTable("items",{
   id: columnId,
-  abono: numeric("abono"),
-  differential_amount: numeric("differential_amount"),
-  bonificacion:  numeric("bonificacion"),
+  abono: real("abono"),
+  differential_amount: real("differential_amount"),
+  bonificacion:  real("bonificacion"),
 })
 
 
