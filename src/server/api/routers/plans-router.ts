@@ -28,14 +28,9 @@ export const plansRouter = createTRPCRouter({
         price: z.number(),
       }),
     )
-    .mutation(async ({ input }) => {
-      const session = await getServerAuthSession();
-      if (!session || !session.user) {
-        throw new Error("User not found");
-      }
-      const user = session?.user.id;
+    .mutation(async ({ input, ctx }) => {
       const new_plan = await db.insert(schema.plans).values({
-        user: user,
+        user: ctx.session.user.id,
         expiration_date: input.expiration_date,
         plan_code: input.plan_code,
         description: input.description,

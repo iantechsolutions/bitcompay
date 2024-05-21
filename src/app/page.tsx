@@ -7,12 +7,9 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import LandingPage from "~/components/landing";
+import { redirect } from "next/navigation";
 
 
 export default async function Home() {
-  // const session = await getServerAuthSession();
-
-  return (
-    <LandingPage/>
-  );
+  return redirect("/dashboard");
 }

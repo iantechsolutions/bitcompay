@@ -5,12 +5,12 @@ import { CompanyProvider } from "./company-provider";
 import { api } from "~/trpc/server";
 import Sidenav, { SidenavItem } from "~/components/sidenav";
 import { ArrowLeftIcon } from "lucide-react";
+import { currentUser } from "@clerk/nextjs/server";
 
 export default async function Layout(props: {
   children?: React.ReactNode;
   params: { companyId: string };
 }) {
-  const session = await getServerAuthSession();
   const company = await api.companies.get.query({
     companyId: props.params.companyId,
   });
@@ -28,7 +28,6 @@ export default async function Layout(props: {
       // }
       headerClass="bg-[#e9fcf8]"
       sidenavClass="top-0"
-      user={session?.user}
       sidenav={
         company ? (
           <CompanySidenav companyId={company.id} />

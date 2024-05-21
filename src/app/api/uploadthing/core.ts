@@ -6,13 +6,9 @@ import { db } from "~/server/db";
 import * as schema from "~/server/db/schema";
 import { eq } from "drizzle-orm";
 import dayjs from "dayjs";
+import { auth } from "@clerk/nextjs/server";
 
 const f = createUploadthing();
-
-const auth = async (_: Request) => {
-  const session = await getServerAuthSession();
-  return session?.user;
-};
 
 // FileRouter for your app, can contain multiple FileRoutes
 export const ourFileRouter = {
@@ -26,13 +22,13 @@ export const ourFileRouter = {
     .input(z.object({ channel: z.string() }))
     .middleware(async ({ req, input }) => {
       // This code runs on your server before upload
-      const user = await auth(req);
+      const session = await getServerAuthSession();
 
       // If you throw, the user will not be able to upload
-      if (!user) throw new Error("Unauthorized");
+      if (!session) throw new Error("Unauthorized");
 
       // Whatever is returned here is accessible in onUploadComplete as `metadata`
-      return { userId: user.id, channelName: input.channel };
+      return { userId: session.user.id, channelName: input.channel };
     })
     .onUploadComplete(async ({ metadata, file }) => {
       // This code RUNS ON YOUR SERVER after upload
@@ -70,13 +66,13 @@ export const ourFileRouter = {
     // Set permissions and file types for this FileRoute
     .middleware(async ({ req, input }) => {
       // This code runs on your server before upload
-      const user = await auth(req);
+      const session = await getServerAuthSession();
 
       // If you throw, the user will not be able to upload
-      if (!user) throw new Error("Unauthorized");
+      if (!session) throw new Error("Unauthorized");
 
       // Whatever is returned here is accessible in onUploadComplete as `metadata`
-      return { userId: user.id, companyId: input.companyId };
+      return { userId: session.user.id, companyId: input.companyId };
     })
     .onUploadComplete(async ({ metadata, file }) => {
       // This code RUNS ON YOUR SERVER after upload

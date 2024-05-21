@@ -22,16 +22,15 @@ import { Clock9 } from "lucide-react";
 import { Overview } from "~/components/dashboard/overview";
 import { RecentSales } from "~/components/dashboard/recent-sales";
 import Image from "next/image";
+import { useUser } from "@clerk/nextjs";
+import { currentUser } from "@clerk/nextjs/server";
 export default async function page() {
-  const session = await getServerAuthSession();
-  const user = session?.user;
-  if (!user) {
-    return <Title>No se encontró el usuario</Title>;
-  }
+  const user = await currentUser();
+
   return (
     <main className="ml-18 ">
       <Title>
-        Hola, <span className="text-[#8fefdc]"> {user.name!}!</span>
+        Hola, <span className="text-[#8fefdc]"> {user?.fullName}!</span>
       </Title>
 
       <section>

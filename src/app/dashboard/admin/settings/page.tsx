@@ -1,16 +1,12 @@
 import AppSidenav from "~/components/admin-sidenav";
 import AppLayout from "~/components/applayout";
 import { Button } from "~/components/ui/button";
-import { getServerAuthSession } from "~/server/auth";
 
-export default async function Home() {
-  const session = await getServerAuthSession();
-
+export default function Home() {
   return (
     <AppLayout
       sidenavClass="top-[70px]"
       title={<h1>Configuraciones del sistema</h1>}
-      user={session?.user}
       sidenav={<AppSidenav />}
     >
       <div className="mb-10 flex justify-center">

@@ -6,7 +6,6 @@ export default async function Layout(props: {
   children?: React.ReactNode;
   params?: { companyId: string };
 }) {
-  const session = await getServerAuthSession();
 
   // TODO: chequear permisos
 
@@ -14,7 +13,6 @@ export default async function Layout(props: {
     <AppLayout
       title="Gestión"
       sidenavClass="top-[70px]"
-      user={session?.user}
       sidenav={<ManagementSidenav />}
     >
       {props.children}

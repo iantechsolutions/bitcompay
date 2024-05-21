@@ -4,7 +4,6 @@ import { type MouseEventHandler, useState } from "react";
 import { toast } from "sonner";
 import LayoutContainer from "~/components/layout-container";
 import { List, ListTile } from "~/components/list";
-import { type NavUserData } from "~/components/nav-user-section";
 import { Title } from "~/components/title";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -38,7 +37,6 @@ export default function ChannelPage({
   channel,
 }: {
   channel: NonNullable<RouterOutputs["channels"]["get"]>;
-  user: NavUserData;
 }) {
   const [requiredColumns, setRequiredColumns] = useState<Set<string>>(
     new Set(channel.requiredColumns),

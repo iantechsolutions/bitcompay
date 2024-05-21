@@ -1,6 +1,7 @@
 import "~/styles/globals.css";
 
 import { Roboto } from "next/font/google";
+import { ClerkProvider } from "@clerk/nextjs";
 
 const roboto = Roboto({
   subsets: ["latin-ext"],
@@ -15,10 +16,12 @@ export const metadata = {
 
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
-    <html lang="es">
-      <body className={`font-family ${roboto.className}`}>
-        {props.children}
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="es">
+        <body className={`font-family ${roboto.className}`}>
+          {props.children}
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

@@ -6,7 +6,7 @@ import { getServerAuthSession } from "~/server/auth";
 import { ProviderSchemaDB } from "~/server/db/schema";
 
 export const providersRouter = createTRPCRouter({
-  list: protectedProcedure.query(async ({}) => {
+  list: protectedProcedure.query(async ({ }) => {
     const providers = await db.query.providers.findMany();
     return providers;
   }),
@@ -26,15 +26,13 @@ export const providersRouter = createTRPCRouter({
 
   create: protectedProcedure
     .input(ProviderSchemaDB)
-    .mutation(async ({ input }) => {
-      const session = await getServerAuthSession();
-      if (!session || !session.user) {
-        throw new Error("User not found");
-      }
-      const user = session?.user.id;
+    .mutation(async ({ input, ctx }) => {
       const newProvider = await db
         .insert(schema.providers)
-        .values({ ...input, user });
+        .values({
+          ...input,
+          user: ctx.session.user.id
+        });
 
       return newProvider;
     }),

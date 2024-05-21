@@ -13,14 +13,11 @@ import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 
 export default async function Home() {
-  const session = await getServerAuthSession();
-
   const companies = await api.companies.list.query();
 
   return (
     <AppLayout
       title={<h1>BITCOMPAY</h1>}
-      user={session?.user}
       sidenavClass="top-[70px]"
       sidenav={
         <Sidenav>
