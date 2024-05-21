@@ -20,17 +20,17 @@ function formatDate(date: Date | null) {
 
 export default async function Home() {
   const session = await getServerAuthSession();
-  const html = fs.readFileSync(
-    "src/app/dashboard/admin/factura/bill.html",
-    "utf8",
-  );
+  // const html = fs.readFileSync(
+  //   "src/app/dashboard/admin/factura/bill.html",
+  //   "utf8",
+  // );
   const products = await api.facturas.list.query();
   return (
     <LayoutContainer>
       <section className="space-y-2">
         <div className="flex justify-between">
           <Title>Facturas</Title>
-          <FacturaDialog receivedHtml={html}></FacturaDialog>
+          <FacturaDialog></FacturaDialog>
         </div>
         <List>
           {products.map((product) => {
