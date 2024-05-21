@@ -2,11 +2,11 @@
 
 // import { TransactionsFiltersDialog } from "./transactions-filters";
 import dayjs from 'dayjs'
+import 'dayjs/locale/es' // import the locale
 import utc from 'dayjs/plugin/utc'
 import { useLayoutEffect, useState } from 'react'
 import { LargeTable } from '~/components/table'
 import { recHeaders } from '~/server/uploads/validators'
-import 'dayjs/locale/es' // import the locale
 import type { RouterOutputs } from '~/trpc/shared'
 dayjs.extend(utc)
 dayjs.locale('es')

@@ -1,8 +1,8 @@
 'use client'
 import dayjs from 'dayjs'
-import { useRouter } from 'next/navigation'
 import 'dayjs/locale/es'
 import utc from 'dayjs/plugin/utc'
+import { useRouter } from 'next/navigation'
 import { Calendar } from '~/components/ui/calendar'
 import { Input } from '~/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover'
@@ -61,9 +61,6 @@ export default function PlanPage(props: {
         resolver: zodResolver(PlanSchema),
         defaultValues: { ...initialValues },
     })
-
-    const { errors } = form.formState
-    const { watch } = form
 
     const { mutateAsync: changePlan } = api.plans.change.useMutation()
     const onSubmit: SubmitHandler<Inputs> = async (data) => {

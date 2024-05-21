@@ -46,14 +46,14 @@ export const uploadsRouter = createTRPCRouter({
             })
             return outputUpload
         }),
-    list: protectedProcedure.query(async ({}) => {
+    list: protectedProcedure.query(async () => {
         return await db.query.documentUploads.findMany()
     }),
 
-    listResponse: protectedProcedure.query(async ({}) => {
+    listResponse: protectedProcedure.query(async () => {
         return await db.query.responseDocumentUploads.findMany()
     }),
-    listOutput: protectedProcedure.query(async ({}) => {
+    listOutput: protectedProcedure.query(async () => {
         return await db.query.uploadedOutputFiles.findMany()
     }),
     readUploadContents: protectedProcedure
@@ -270,7 +270,8 @@ async function getCompanyBrands(companyId: string) {
     return brands
 }
 
-async function readResponseUploadContents(db: DBTX, id: string, type: string | undefined) {
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
+async function readResponseUploadContents(db: DBTX, id: string, inputType: string | undefined) {
     const upload = await db.query.responseDocumentUploads.findFirst({
         where: eq(schema.responseDocumentUploads.id, id),
     })
@@ -279,13 +280,12 @@ async function readResponseUploadContents(db: DBTX, id: string, type: string | u
         throw new TRPCError({ code: 'NOT_FOUND' })
     }
 
-    if (!type) {
-        type = upload.documentType ?? undefined
-    }
+    const type = inputType ?? upload.documentType ?? undefined
 
     if (!type) {
         throw new TRPCError({ code: 'BAD_REQUEST' })
     }
+
     const response = await fetch(upload.fileUrl)
     const fileContent = await response.text()
     const lines: string[] = fileContent.trim().split(/\r?\n/)
@@ -333,10 +333,11 @@ async function readResponseUploadContents(db: DBTX, id: string, type: string | u
 type ProductsOfCompany = Awaited<ReturnType<typeof getCompanyProducts>>
 type BrandsOfCompany = Awaited<ReturnType<typeof getCompanyBrands>>
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
 async function readUploadContents(
     db: DBTX,
     id: string,
-    type: string | undefined,
+    inputType: string | undefined,
     companyId: string,
     products: ProductsOfCompany,
     brands: BrandsOfCompany,
@@ -349,9 +350,7 @@ async function readUploadContents(
         throw new TRPCError({ code: 'NOT_FOUND' })
     }
 
-    if (!type) {
-        type = upload.documentType ?? undefined
-    }
+    const type = inputType ?? upload.documentType ?? undefined
 
     if (!type) {
         throw new TRPCError({ code: 'BAD_REQUEST' })
@@ -368,6 +367,7 @@ async function readUploadContents(
 
     const trimmedRows = rows.map(trimObject)
 
+    // biome-ignore lint/complexity/noForEach: <explanation>
     trimmedRows.forEach((row) => {
         if ('Período' in row) {
             row.Período = row.Período?.toString()
@@ -525,8 +525,10 @@ async function readUploadContents(
     //descartar encabezados no requeridos
     const companyReqColumns = new Set()
     // Iterar sobre cada objeto en el array products
+    // biome-ignore lint/complexity/noForEach: <explanation>
     products.forEach((product) => {
         // Iterar sobre cada elemento del set requiredColumns del objeto actual
+        // biome-ignore lint/complexity/noForEach: <explanation>
         product.requiredColumns.forEach((column) => {
             // Añadir cada columna al conjunto companyReqColumns
             companyReqColumns.add(column)

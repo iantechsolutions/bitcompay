@@ -5,10 +5,7 @@ import { useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '~/components/ui/dialog'
 
-export function TransactionsFiltersDialog(_props: {
-    filters: any
-    onChange: (filters: any) => void
-}) {
+export function TransactionsFiltersDialog() {
     const [open, setOpen] = useState(false)
 
     return (

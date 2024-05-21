@@ -6,7 +6,6 @@ import { type MouseEventHandler, useState } from 'react'
 import { toast } from 'sonner'
 import LayoutContainer from '~/components/layout-container'
 import { List, ListTile } from '~/components/list'
-import type { NavUserData } from '~/components/nav-user-section'
 import { Title } from '~/components/title'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '~/components/ui/accordion'
 import {
@@ -36,12 +35,10 @@ interface Brand {
 
 export default function CompanyPage({
     company,
-    user,
     products,
     brands,
 }: {
     company: NonNullable<RouterOutputs['companies']['get']>
-    user: NavUserData
     products: RouterOutputs['products']['list']
     brands: Brand[] | undefined
 }) {

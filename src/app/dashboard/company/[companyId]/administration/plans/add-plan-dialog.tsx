@@ -4,10 +4,10 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 import dayjs from 'dayjs'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog'
 import 'dayjs/locale/es'
 import utc from 'dayjs/plugin/utc'
 import { Calendar } from '~/components/ui/calendar'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog'
 import { Input } from '~/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover'
 
@@ -47,9 +47,6 @@ export default function AddPlanDialog() {
         resolver: zodResolver(PlanSchema),
         defaultValues: { ...initialValues },
     })
-
-    const { errors } = form.formState
-    const { watch } = form
 
     const { mutateAsync: createPlan } = api.plans.create.useMutation()
 

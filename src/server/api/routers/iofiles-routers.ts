@@ -1,10 +1,10 @@
 import { TRPCError } from '@trpc/server'
 import dayjs from 'dayjs'
+import 'dayjs/locale/es'
 import { and, eq, inArray, isNull } from 'drizzle-orm'
 import { z } from 'zod'
 import { type DBTX, db, schema } from '~/server/db'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
-import 'dayjs/locale/es'
 dayjs.locale('es')
 import dayOfYear from 'dayjs/plugin/dayOfYear'
 import timezone from 'dayjs/plugin/timezone'

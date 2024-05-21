@@ -11,7 +11,7 @@ import { LargeTable } from '~/components/table'
 import { Title } from '~/components/title'
 import { Button } from '~/components/ui/button'
 import { Card } from '~/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow as TableRowType } from '~/components/ui/table'
 import { asTRPCError } from '~/lib/errors'
 import { api } from '~/trpc/react'
 import type { RouterOutputs } from '~/trpc/shared'
@@ -22,7 +22,7 @@ import UploadedConfirmedPage from './uploaded-confirmed-page'
 export type UploadedPageProps = {
     upload: NonNullable<RouterOutputs['uploads']['upload']>
 }
-interface TableRow {
+interface TableRowType {
     period: string | undefined
     g_c: number | null
     name: string | null
@@ -208,17 +208,17 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
                         {data && (
                             <Table>
                                 <TableHeader>
-                                    <TableRow>
+                                    <TableRowType>
                                         <TableHead>Producto</TableHead>
                                         <TableHead>Cant. Transacciones</TableHead>
                                         <TableHead>Recaudado por producto</TableHead>
-                                    </TableRow>
+                                    </TableRowType>
                                 </TableHeader>
                                 <TableBody>
                                     {productsBatchArray
                                         .filter((row) => row.records_number !== 0)
                                         .map((row) => (
-                                            <TableRow key={row.product as React.Key}>
+                                            <TableRowType key={row.product as React.Key}>
                                                 <TableCell className='font-medium'>
                                                     {typeof row.productName === 'string' ? row.productName : ''}
                                                 </TableCell>
@@ -226,7 +226,7 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
                                                 <TableCell>
                                                     {typeof row.amount_collected === 'number' ? row.amount_collected : ''}
                                                 </TableCell>
-                                            </TableRow>
+                                            </TableRowType>
                                         ))}
                                 </TableBody>
                             </Table>

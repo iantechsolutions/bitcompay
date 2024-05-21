@@ -138,8 +138,10 @@ export default function GenerateChannelOutputPage(props: {
             {props.outputFiles.length > 0 && (
                 <div>
                     <Title>Archivos generados</Title>
-                    {props.outputFiles.map((file) => (
-                        <a href={file.fileUrl}>{file.fileName}</a>
+                    {props.outputFiles.map((file, i) => (
+                        <a key={`${file.fileUrl} ${i}`} href={file.fileUrl}>
+                            {file.fileName}
+                        </a>
                     ))}
                 </div>
             )}

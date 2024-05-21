@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
-import { z } from 'zod'
 import 'dayjs/locale/es'
 import utc from 'dayjs/plugin/utc'
+import { z } from 'zod'
 dayjs.extend(utc)
 dayjs.locale('es')
 

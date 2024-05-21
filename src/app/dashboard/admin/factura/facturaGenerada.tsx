@@ -21,7 +21,7 @@ interface FacturaProps {
 
 export function Factura({
     puntoDeVenta,
-    concepto,
+    concepto: _concepto,
     tipoFactura,
     nroComprobante,
     facturadoDesde,
