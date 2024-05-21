@@ -509,6 +509,9 @@ export const integrants = pgTable("integrant", {
   isPaymentHolder: boolean("isPaymentHolder").notNull().default(false),
   isAffiliate: boolean("isAffiliate").notNull().default(false),
   isBillResponsible: boolean("isBillResponsible").notNull().default(false),
+  // differentialValue: varchar("differentialValue", { length: 255 }).references(
+  //   () => differentialValues.id_differential,
+  // ),
   prospect_id: varchar("prospect_id", { length: 255 }).references(
     () => procedure.id,
   ),
@@ -751,24 +754,29 @@ export const payment_info = pgTable("payment_info", {
   CCV: varchar("CCV", { length: 255 }),
   CBU: varchar("CBU", { length: 255 }),
 });
+/////
+// export const differential = pgTable("differential", {
+//   id: columnId,
+//   code: varchar("code", { length: 255 }).notNull(),
+//   description: varchar("description", { length: 255 }).notNull(),
+// });
 
-export const differential = pgTable("differential", {
-  id: columnId,
-  codigo: varchar("codigo", { length: 255 }).notNull(),
-  descripcion: varchar("descripcion", { length: 255 }).notNull(),
-});
+// export const differentialValues = pgTable("diferencialValue", {
+//   id: columnId,
+//   id_differential: varchar("id_differential", { length: 255 }),
+//   value: varchar("value", { length: 255 }).notNull(),
+// });
 
-export const diferencialValues = pgTable("diferencialValue", {
-  id: columnId,
-  id_diferencial: varchar("id_diferencial", { length: 255 }).references(
-    () => differential.id,
-  ),
-  value: varchar("value", { length: 255 }).notNull(),
-});
+// export const diferencialRelations = relations(differential, ({ many }) => ({
+//   values: many(differentialValues),
+// }));
 
-export const diferencialRelations = relations(differential, ({ many }) => ({
-  values: many(diferencialValues, {
-    fields: [differential.id],
-    references: [diferencialValues.id_diferencial],
-  }),
-}));
+// export const differentialRelations = relations(
+//   differentialValues,
+//   ({ one }) => ({
+//     differential: one(differential, {
+//       fields: [differentialValues.id_differential],
+//       references: [differential.id],
+//     }),
+//   }),
+// );
