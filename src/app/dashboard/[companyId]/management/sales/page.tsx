@@ -2,6 +2,7 @@ import LayoutContainer from "~/components/layout-container";
 import { List, ListTile } from "~/components/list";
 import { Title } from "~/components/title";
 import { api } from "~/trpc/server";
+import { Badge } from "~/components/ui/badge";
 import AddProcedure from "./add-procedure";
 export default async function Page(props: { params: { companyId: string } }) {
   // cambiar luego por tramite router
@@ -18,7 +19,9 @@ export default async function Page(props: { params: { companyId: string } }) {
             <ListTile
               key={procedure.id}
               href={`/dashboard/${props.params.companyId}/management/sales/${procedure.id}`}
-              title={procedure.estado}
+              leading={<Badge>{procedure.estado}</Badge>}
+              title={procedure.type}
+              subtitle={procedure.id}
             />
           ))}
         </List>
