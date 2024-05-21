@@ -14,7 +14,7 @@ import { columnId, createdAt, pgTable, updatedAt } from "./schema/util";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { number, type z } from "zod";
 import { duration } from "html2canvas/dist/types/css/property-descriptors/duration";
-import { id } from "date-fns/locale";
+import { id, tr } from "date-fns/locale";
 export * from "./schema/auth";
 export { pgTable } from "./schema/util";
 
@@ -448,7 +448,18 @@ export const plans = pgTable("plans", {
   description: varchar("description", { length: 255 }).notNull(),
   age: integer("age").notNull(),
   price: bigint("price", { mode: "number" }).notNull(),
+  business_units_id: varchar("business_units_id", { length: 255 }).references(()=>bussinessUnits.id),
 });
+
+export const plansRelations = relations(plans, ({ many,one }) => ({
+  pricesPerAge: many(pricePerAge),
+  business_units: one(bussinessUnits, {
+    fields: [plans.business_units_id],
+    references: [bussinessUnits.id],
+  }),
+})
+);
+
 
 export const bussinessUnits = pgTable("bussiness_units", {
   id: columnId,
@@ -459,11 +470,12 @@ export const bussinessUnits = pgTable("bussiness_units", {
     .references(() => companies.id),
 });
 
-export const bussinessUnitsRelations = relations(bussinessUnits, ({ one }) => ({
+export const bussinessUnitsRelations = relations(bussinessUnits, ({ one,many }) => ({
   company: one(companies, {
     fields: [bussinessUnits.companyId],
     references: [companies.id],
   }),
+  plans: many(plans),
 }));
 
 export const healthInsurances = pgTable("health_insurances", {
@@ -646,13 +658,18 @@ export const facturas = pgTable("facturas", {
   prodName: varchar("prodName", { length: 255 }).notNull(),
   iva: varchar("iva", { length: 255 }).notNull(),
   billLink: varchar("billLink", { length: 255 }).notNull(),
-  items_id: varchar("billLink", { length: 255 }).references(()=>items.id),
+  items_id: varchar("items_id", { length: 255 }).references(()=>items.id),
+  liquidation_id: varchar("liquidation_id",{length:255}).references(()=>liquidations.id)
 });
 
 export const facturasRelations = relations(facturas, ({ one, many }) => ({
   items: one(items, {
     fields: [facturas.items_id],
     references: [items.id],
+  }),
+  liquidations: one(liquidations, {
+    fields: [facturas.liquidation_id],
+    references: [liquidations.id],
   }),
 }));
 
@@ -833,10 +850,79 @@ export type Administrative_audit = z.infer<
   typeof selectadministrative_auditSchema
 >;
 
-export const payment_info = pgTable("payment_info", {
+export const liquidations = pgTable("payment_info", {
   id: columnId,
-  card_number: varchar("card_number", { length: 255 }),
-  expire_date: timestamp("expire_date", { mode: "date" }),
-  CCV: varchar("CCV", { length: 255 }),
-  CBU: varchar("CBU", { length: 255 }),
+  createdAt,
+  updatedAt,
+  userCreated: varchar("userCreated", { length: 255 }).notNull(),
+  userApproved:varchar("userApproved", { length: 255 }).notNull(),
+  estado: varchar("estado", { length: 255 }).notNull(),
+
 });
+
+export const liquidationsRelations = relations(liquidations, ({ one, many }) => ({
+  facturas:many(facturas),
+}));
+
+export const insertliquidationsSchema = createInsertSchema(liquidations);
+export const selectliquidationsSchema = createSelectSchema(liquidations);
+export const liquidationsSchemaDB = selectliquidationsSchema.pick({
+  createdAt: true,
+  updatedAt: true,
+  userCreated: true,
+  userApproved: true,
+  estado: true,
+});
+export type liquidations = z.infer<typeof selectliquidationsSchema>;
+
+
+export const billingDocuments = pgTable("billingDocuments", {
+  id: columnId,
+  url: varchar("url", { length: 255 }).notNull(),
+  factura_id: varchar("factura_id", { length: 255 }).references(()=>facturas.id),
+});
+
+export const billingDocumentsRelations = relations(billingDocuments, ({ one, many }) => ({
+  facturas: one(facturas, {
+    fields: [billingDocuments.factura_id],
+    references: [facturas.id],
+  }),
+}));
+
+export const insertbillingDocumentsSchema = createInsertSchema(billingDocuments);
+export const selectbillingDocumentsSchema = createSelectSchema(billingDocuments);
+export const billingDocumentsSchemaDB = selectbillingDocumentsSchema.pick({
+  url:true,
+  factura_id:true,
+});
+export type billingDocuments = z.infer<typeof selectbillingDocumentsSchema>;
+
+
+
+export const pricePerAge = pgTable("pricePerAge", {
+  id: columnId,
+  fromAge: integer("fromAge").notNull(),
+  toAge: integer("toAge").notNull(),
+  amount: bigint("amount", { mode: "number" }).notNull(),
+  createdAt,
+  plan_id: varchar("plan_id", { length: 255 }).references(()=>plans.id),
+});
+
+export const pricePerAgeRelations = relations(pricePerAge, ({ one, many }) => ({
+  plans: one(plans, {
+    fields: [pricePerAge.plan_id],
+    references: [plans.id],
+  }),
+}));
+
+export const insertpricePerAgeSchema = createInsertSchema(pricePerAge);
+export const selectpricePerAgeSchema = createSelectSchema(pricePerAge);
+export const pricePerAgeSchemaDB = selectpricePerAgeSchema.pick({
+  fromAge: true,
+  toAge:true,
+  amount:true,
+  plan_id:true,
+  createdAt:true,
+});
+export type pricePerAge = z.infer<typeof selectpricePerAgeSchema>;
+
