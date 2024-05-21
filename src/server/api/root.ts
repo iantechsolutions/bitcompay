@@ -27,6 +27,9 @@ import { contributionsRouter } from "./routers/contributions-router";
 import { differentialsRouter } from "./routers/differentials-router";
 import { differentialsValuesRouter } from "./routers/differentialValues-router";
 import { itemsRouter } from "./routers/items-router";
+import { liquidationsRouter } from "./routers/liquidations-router";
+import { billingDocumentsRouter } from "./routers/billing-documents-router";
+import { pricePerAgeRouter } from "./routers/price-per-age-router";
 /**
  * This is the primary router for your server.
  *
@@ -61,6 +64,9 @@ export const appRouter = createTRPCRouter({
   differentials: differentialsRouter,
   differentialsValues: differentialsValuesRouter,
   items: itemsRouter,
+  liquidations: liquidationsRouter,
+  billingDocuments: billingDocumentsRouter,
+  pricePerAge: pricePerAgeRouter,
 });
 
 // export type definition of API

@@ -602,10 +602,12 @@ export type Integrant = z.infer<typeof selectintegrantSchema>;
 
 export const contributions = pgTable("contributions", {
   id: columnId,
-  integrant_id: varchar("integrant_id", { length: 255 }).references(() => integrants.id),
+  integrant_id: varchar("integrant_id", { length: 255 }).references(
+    () => integrants.id,
+  ),
   amount: real("amount").notNull(),
   employerContribution: real("employerContribution").notNull(),
-  employeeContribution : real("employeeContribution ").notNull(),
+  employeeContribution: real("employeeContribution ").notNull(),
   cuitEmployer: varchar("bonus", { length: 255 }).notNull(),
 });
 
@@ -708,10 +710,8 @@ export const items = pgTable("items", {
   id: columnId,
   abono: real("abono"),
   differential_amount: real("differential_amount"),
-  bonificacion:  real("bonificacion"),
+  bonificacion: real("bonificacion"),
 });
-
-
 
 export const family_groups = pgTable("family_groups", {
   id: columnId,
@@ -961,3 +961,39 @@ export const pricePerAgeSchemaDB = selectpricePerAgeSchema.pick({
   createdAt: true,
 });
 export type pricePerAge = z.infer<typeof selectpricePerAgeSchema>;
+
+export const currentAccount = pgTable("currentAccount", {
+  id: columnId,
+  company_id: varchar("company_id", { length: 255 }).references(
+    () => companies.id,
+  ),
+  family_group: varchar("family_group"),
+});
+
+export const currentAccountRelations = relations(
+  currentAccount,
+  ({ one, many }) => ({
+    company: one(companies, {
+      fields: [currentAccount.company_id],
+      references: [companies.id],
+    }),
+    events: many(events),
+  }),
+);
+
+export const events = pgTable("events", {
+  id: columnId,
+  description: varchar("description", { length: 255 }).notNull(),
+  type: varchar("type", { enum: ["NC", "FC", "REC"] }),
+  currentAccount_id: varchar("currentAccount_id", { length: 255 }),
+  event_amount: real("event_amount").notNull(),
+  current_amount: real("event_amout").notNull(),
+  createdAt,
+});
+
+export const eventsRelations = relations(events, ({ one }) => ({
+  currentAccount: one(currentAccount, {
+    fields: [events.currentAccount_id],
+    references: [currentAccount.id],
+  }),
+}));
