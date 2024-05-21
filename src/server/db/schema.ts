@@ -852,7 +852,25 @@ export type Administrative_audit = z.infer<
   typeof selectadministrative_auditSchema
 >;
 
-export const liquidations = pgTable("payment_info", {
+export const payment_info = pgTable("payment_info", {
+  id: columnId,
+  card_number: varchar("card_number", { length: 255 }),
+  expire_date: timestamp("expire_date", { mode: "date" }),
+  CCV: varchar("CCV", { length: 255 }),
+  CBU: varchar("CBU", { length: 255 }),
+  integrant_id: varchar("integrant_id", { length: 255 }).references(()=>integrants.id),
+});
+
+export const payment_infoRelations = relations(payment_info, ({ one }) => ({
+  integrant: one(integrants, {
+    fields: [payment_info.integrant_id],
+    references: [integrants.id],
+  }),
+})
+);
+
+
+export const liquidations = pgTable("liquidations", {
   id: columnId,
   createdAt,
   updatedAt,
