@@ -3,7 +3,6 @@ import { bigint, boolean, index, integer, json, primaryKey, timestamp, varchar }
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import type { z } from 'zod'
 import { columnId, createdAt, pgTable, updatedAt } from './schema/util'
-export * from './schema/auth'
 export { pgTable } from './schema/util'
 
 export const documentUploads = pgTable(
@@ -491,7 +490,7 @@ export const integrants = pgTable('integrant', {
         .references(() => billResponsible.id),
 })
 
-export const integrantsRelations = relations(integrants, ({ one, many }) => ({
+export const integrantsRelations = relations(integrants, ({ one }) => ({
     billResponsible: one(billResponsible, {
         fields: [integrants.billResponsible_id],
         references: [billResponsible.id],
@@ -695,7 +694,7 @@ export const prospects = pgTable('prospects', {
     //   .notNull(),
 })
 
-export const prospectsRelations = relations(prospects, ({ one, many }) => ({
+export const prospectsRelations = relations(prospects, ({ one }) => ({
     plan: one(plans, {
         fields: [prospects.plan],
         references: [plans.id],

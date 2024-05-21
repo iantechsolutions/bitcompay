@@ -446,7 +446,8 @@ async function readUploadContents(
         const row = transformedRows[i]!
         const rowNum = i + 2
         // verificar producto
-        let product
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+        let product: any = undefined
         if (row.product_number) {
             if (row.product_number in productsMap) {
                 product = productsMap[row.product_number]

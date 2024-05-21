@@ -80,19 +80,15 @@ export function LargeTable(props: {
                     })}
                     <div className='min-w-[100px]' />
                 </div>
-                <List
-                    className={uniqueClassName}
-                    height={listHeight}
-                    itemCount={props.rows.length}
-                    itemSize={35}
-                    width={'100%'}
-                    children={Row}
-                />
+                <List className={uniqueClassName} height={listHeight} itemCount={props.rows.length} itemSize={35} width={'100%'}>
+                    {Row}
+                </List>
             </div>
         </tableContext.Provider>
     )
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 function useTableHeaders(headers: TableHeaders | undefined, data: Record<string, any>[]): TableHeaders {
     return useMemo(() => {
         if (headers) {
@@ -128,6 +124,7 @@ function Row(props: { style?: React.CSSProperties; index: number }) {
             className='flex border-b last:border-none'
         >
             {ctx.headers.map((header) => {
+                // biome-ignore lint/suspicious/noExplicitAny: <explanation>
                 let value: any = row[header.key]
 
                 if (value instanceof Date) {

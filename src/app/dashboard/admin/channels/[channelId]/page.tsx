@@ -1,5 +1,4 @@
 import { Title } from '~/components/title'
-import { channelsRelations } from '~/server/db/schema'
 import { api } from '~/trpc/server'
 import ChannelPage from './channel-page'
 
@@ -10,7 +9,7 @@ export default async function Channel(props: {
         channelId: props.params.channelId,
     })
 
-    if (!channelsRelations) {
+    if (!channel) {
         return <Title>No se encontró el canal</Title>
     }
 
