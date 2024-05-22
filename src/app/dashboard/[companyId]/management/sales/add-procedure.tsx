@@ -134,6 +134,11 @@ export default function AddProcedure() {
           break;
       }
 
+      const eighteenYearsAgo = new Date();
+      eighteenYearsAgo.setFullYear(eighteenYearsAgo.getFullYear() - 18);
+      const isAdultHolder =
+        member.isHolder && new Date(member.birth_date) <= eighteenYearsAgo;
+
       return createIntegrant({
         affiliate_type: member.affiliate_type,
         relationship: member.relationship,
@@ -163,12 +168,12 @@ export default function AddProcedure() {
         state: member.state,
         cp: member.cp,
         zone: member.zone,
-        isHolder: member.isHolder,
-        isPaymentHolder: member.isPaymentResponsible,
         isAffiliate: member.isAffiliate,
-        isBillResponsiblee: member.isBillResponsible,
         iva: member.iva,
         family_group_id: family_groupId ?? undefined,
+        isHolder: member.isHolder,
+        isPaymentHolder: member.isPaymentResponsible || isAdultHolder,
+        isBillResponsiblee: member.isBillResponsible || isAdultHolder,
       });
     });
 
@@ -192,7 +197,7 @@ export default function AddProcedure() {
 
     createProcedure({
       type: "GFC001",
-      estado: "pending",
+      estado: "precarga",
     })
       .then(async (response) => {
         setProcedureId(response[0]!.id);
@@ -229,7 +234,7 @@ export default function AddProcedure() {
     if (!procedureId) {
       createProcedure({
         type: "GFC001",
-        estado: "confirmed",
+        estado: "cargado",
         family_group: family_groupId!,
       })
         .then((response) => {
@@ -241,7 +246,7 @@ export default function AddProcedure() {
     } else {
       updateProcedure({
         id: procedureId,
-        estado: "confirmed",
+        estado: "cargado",
       })
         .then((response) => {
           console.log("Procedure updated", response);
@@ -311,8 +316,10 @@ export default function AddProcedure() {
               </div>
             </TabsContent>
           </Tabs>
-          <Button onClick={handlePreload}>Pre carga </Button>
-          <Button onClick={handleConfirm}>Confirmar</Button>
+          <section className="flex justify-between">
+            <Button onClick={handlePreload}>Pre carga </Button>
+            <Button onClick={handleConfirm}>Cargar</Button>
+          </section>
         </DialogContent>
       </Dialog>
     </>

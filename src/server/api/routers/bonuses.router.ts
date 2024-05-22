@@ -2,11 +2,8 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db, schema } from "~/server/db";
 import { eq } from "drizzle-orm";
-import { getServerAuthSession } from "~/server/auth";
-import { bonuses } from "~/server/db/schema";
+
 import { bonusesSchemaDB } from "~/server/db/schema";
-
-
 
 export const bonusesRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({}) => {
@@ -30,14 +27,7 @@ export const bonusesRouter = createTRPCRouter({
   create: protectedProcedure
     .input(bonusesSchemaDB)
     .mutation(async ({ input }) => {
-      const session = await getServerAuthSession();
-      if (!session || !session.user) {
-        throw new Error("User not found");
-      }
-      const user = session?.user.id;
-      const newbonuses = await db
-        .insert(schema.bonuses)
-        .values({ ...input});
+      const newbonuses = await db.insert(schema.bonuses).values({ ...input });
 
       return newbonuses;
     }),
@@ -50,8 +40,6 @@ export const bonusesRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input: { id, ...input } }) => {
-      console.log("Function called");
-
       const updatedbonuses = await db
         .update(schema.bonuses)
         .set(input)

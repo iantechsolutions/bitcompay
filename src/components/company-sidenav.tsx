@@ -137,6 +137,13 @@ export default function CompanySidenav(props: { companyId: string }) {
             >
               Cotizaciones
             </SidenavItem>
+            <SidenavItem
+              href={`/dashboard/${props.companyId}/administration/bonuses`}
+              icon={<Gift />}
+            >
+              {" "}
+              Bonificaciones
+            </SidenavItem>
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="item-2" className="border-none">

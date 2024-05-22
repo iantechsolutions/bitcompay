@@ -29,7 +29,7 @@ export default async function page() {
     return <Title>No se encontró el usuario</Title>;
   }
   return (
-    <main className="ml-18 ">
+    <main>
       <Title>
         Hola, <span className="text-[#8fefdc]"> {user.name!}!</span>
       </Title>
@@ -85,7 +85,7 @@ export default async function page() {
           </CardContent>
         </Card>
       </section>
-      <section className="mt-8">
+      <section className="mt-5">
         <h2 className="mb-3 text-xl font-semibold  ">
           Saldo en <span className="text-[#8fefdc]">cuenta</span>
         </h2>{" "}
@@ -120,7 +120,7 @@ export default async function page() {
           </Card>
         </div>
       </section>
-      <div className="mt-7 grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+      <div className="mt-1 grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="cardDashboard col-span-4">
           <CardHeader>
             <div className="flex justify-between">

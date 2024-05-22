@@ -1,7 +1,5 @@
 "use client";
 
-import { datetime } from "drizzle-orm/mysql-core";
-import { date } from "drizzle-orm/pg-core";
 import { Loader2Icon, PlusCircleIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -25,7 +23,6 @@ export function AddModo() {
 
   const [description, setDescription] = useState("");
 
-
   const [open, setOpen] = useState(false);
 
   const router = useRouter();
@@ -33,8 +30,7 @@ export function AddModo() {
   async function handleCreate() {
     try {
       await createProduct({
-        description: description
-
+        description: description,
       });
 
       toast.success("Producto creado correctamente");
@@ -56,9 +52,6 @@ export function AddModo() {
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Crear un modo</DialogTitle>
-            {/* <DialogDescription>
-                    
-                </DialogDescription> */}
           </DialogHeader>
           <div>
             <Label htmlFor="description">name</Label>

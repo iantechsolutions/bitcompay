@@ -40,7 +40,7 @@ export default function AppLayout(props: AppLayoutProps) {
       >
         {props.sidenav}
       </aside>
-      <main className="relative mt-[70px] p-3 md:ml-[250px] md:p-10">
+      <main className="relative mt-[60px] p-3 md:ml-[250px] md:p-10">
         {props.children}
       </main>
     </div>
