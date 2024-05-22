@@ -18,7 +18,8 @@ export default function RootLayout(props: { children: React.ReactNode }) {
     return (
         <ClerkProvider>
             <html lang='es'>
-                <body className={`font-family${roboto.className}`}>{props.children}</body>
+                {/* biome-ignore lint/nursery/useSortedClasses: <explanation> */}
+                <body className={`font-family ${roboto.className}`}>{props.children}</body>
             </html>
         </ClerkProvider>
     )

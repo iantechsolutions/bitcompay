@@ -15,7 +15,8 @@ export default function AppLayout(props: AppLayoutProps) {
     return (
         <div>
             <header
-                className={`fixed top-0 right-0 left-0 z-10 flex h-[70px] items-center border-b px-2 backdrop-blur-md md:px-4${props.headerClass}`}
+                // biome-ignore lint/nursery/useSortedClasses: <explanation>
+                className={`fixed top-0 right-0 left-0 z-10 flex h-[70px] items-center border-b px-2 backdrop-blur-md md:px-4 ${props.headerClass}`}
             >
                 <SidenavSheet
                     trigger={
@@ -29,7 +30,8 @@ export default function AppLayout(props: AppLayoutProps) {
                 <UserButton />
             </header>
             <aside
-                className={`fixed bottom-0 left-0 z-20 hidden max-h-full w-[250px] overflow-y-auto border-r md:block${props.sidenavClass}`}
+                // biome-ignore lint/nursery/useSortedClasses: <explanation>
+                className={`fixed bottom-0 left-0 z-20 hidden max-h-full w-[250px] overflow-y-auto border-r md:block ${props.sidenavClass}`}
             >
                 {props.sidenav}
             </aside>

@@ -10,7 +10,7 @@
         "db:studio": "dotenv drizzle-kit studio",
         "dev": "next dev",
         "lint": "biome check .",
-        "format": "biome check . --apply-unsafe",
+        "format": "biome check . --apply",
         "start": "next start"
     },
     "dependencies": {
