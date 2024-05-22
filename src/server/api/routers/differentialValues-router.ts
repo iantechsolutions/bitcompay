@@ -23,6 +23,7 @@ export const differentialsValuesRouter = createTRPCRouter({
       z.object({
         differentialId: z.string(),
         amount: z.number(),
+        integrant_id: z.string(),
       }),
     )
     .mutation(async ({ input }) => {
@@ -31,6 +32,7 @@ export const differentialsValuesRouter = createTRPCRouter({
         .values({
           differentialId: input.differentialId,
           amount: input.amount,
+          integrant_id: input.integrant_id,
         });
       return newDifferentialValue;
     }),
@@ -40,12 +42,14 @@ export const differentialsValuesRouter = createTRPCRouter({
         differentialValueId: z.string(),
         differentialId: z.string(),
         amount: z.number(),
+        integrant_id: z.string(),
+
       }),
     )
     .mutation(async ({ input }) => {
       const differentialValue_changed = await db
         .update(schema.differentialsValues)
-        .set({ differentialId: input.differentialId, amount: input.amount })
+        .set({ differentialId: input.differentialId, amount: input.amount, integrant_id: input.integrant_id,        })
         .where(eq(schema.differentialsValues.id, input.differentialValueId));
       return differentialValue_changed;
     }),

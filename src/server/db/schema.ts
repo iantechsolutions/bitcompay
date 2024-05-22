@@ -138,6 +138,7 @@ export const payments = pgTable(
 
     createdAt,
     updatedAt,
+    factura_id: varchar("factura_id", { length: 255 }).references(()=>facturas.id)
   },
   (payments) => ({
     userIdIdx: index("payment_userId_idx").on(payments.userId),
@@ -172,6 +173,10 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
   outputFile: one(uploadedOutputFiles, {
     fields: [payments.outputFileId],
     references: [uploadedOutputFiles.id],
+  }),
+  factura: one(facturas, {
+    fields: [payments.factura_id],
+    references: [facturas.id],
   }),
 }));
 
@@ -547,9 +552,6 @@ export const integrants = pgTable("integrant", {
   family_group_id: varchar("family_group_id", { length: 255 }).references(
     () => procedure.id,
   ),
-  differentialValues_id: varchar("differentialValues_id", {
-    length: 255,
-  }).references(() => differentials.id),
 });
 
 export const integrantsRelations = relations(integrants, ({ one, many }) => ({
@@ -558,10 +560,7 @@ export const integrantsRelations = relations(integrants, ({ one, many }) => ({
     references: [family_groups.id],
   }),
   contributions: many(contributions),
-  differentialsValues: one(differentialsValues, {
-    fields: [integrants.differentialValues_id],
-    references: [differentialsValues.id],
-  }),
+  differentialsValues: many(differentialsValues),
 }));
 
 export const insertintegrantSchema = createInsertSchema(integrants);
@@ -635,6 +634,9 @@ export const differentialsValues = pgTable("differentialsValues", {
   differentialId: varchar("differentialId", { length: 255 }).references(
     () => differentials.id,
   ),
+  integrant_id: varchar("integrant_id", { length: 255 }).references(
+    () => integrants.id,
+  ),
 });
 
 export const differentialsValuesRelations = relations(
@@ -643,6 +645,10 @@ export const differentialsValuesRelations = relations(
     differential: one(differentials, {
       fields: [differentialsValues.differentialId],
       references: [differentials.id],
+    }),
+    integrant: one(integrants, {
+      fields: [differentialsValues.integrant_id],
+      references: [integrants.id],
     }),
   }),
 );
@@ -668,6 +674,9 @@ export const facturas = pgTable("facturas", {
   liquidation_id: varchar("liquidation_id", { length: 255 }).references(
     () => liquidations.id,
   ),
+  family_group_id: varchar("family_group_id", { length: 255 }).references(
+    () => family_groups.id,
+  ),
 });
 
 export const facturasRelations = relations(facturas, ({ one, many }) => ({
@@ -678,6 +687,10 @@ export const facturasRelations = relations(facturas, ({ one, many }) => ({
   liquidations: one(liquidations, {
     fields: [facturas.liquidation_id],
     references: [liquidations.id],
+  }),
+  family_group: one(family_groups, {
+    fields: [facturas.family_group_id],
+    references: [family_groups.id],
   }),
 }));
 
@@ -703,6 +716,7 @@ export const FacturasSchemaDB = insertFacturasSchema.pick({
   nroFactura: true,
   items_id: true,
   liquidation_id: true,
+  family_group_id: true,
 });
 export type Facturas = z.infer<typeof selectFacturasSchema>;
 
@@ -746,6 +760,7 @@ export const family_groupsRelations = relations(
     }),
     integrants: many(integrants),
     abonos: many(abonos),
+    facturas: many(facturas),
   }),
 );
 
