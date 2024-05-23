@@ -96,8 +96,9 @@ export default function GeneralInfoForm(props: GeneralInfoProps) {
       <form
         className="space-y-8"
         onSubmit={props.form.handleSubmit(onSubmit)}
-        onChange={() => {
-          console.log(props.form.getValues());
+        onChange={(e) => {
+          console.log(e.target.name);
+          console.log(e.target.value);
           props.setfamily_group(props.form.getValues());
         }}
       >
@@ -126,11 +127,14 @@ export default function GeneralInfoForm(props: GeneralInfoProps) {
         />
         <FormField
           control={props.form.control}
-          name="plan"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Plan</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                name="plan3"
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccione un Plan" />

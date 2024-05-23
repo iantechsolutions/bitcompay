@@ -250,6 +250,7 @@ export const brands = pgTable(
     enabled: boolean("enabled").notNull().default(true),
     createdAt,
     updatedAt,
+    logo_url: varchar("logo_url")
   },
   (brands) => ({
     nameIdx: index("brand_name_idx").on(brands.name),
@@ -470,14 +471,21 @@ export const bussinessUnits = pgTable("bussiness_units", {
   id: columnId,
   description: varchar("description", { length: 255 }).notNull(),
   createdAt,
-  companyId: varchar("companyId", { length: 255 })
+  brandId: varchar("brandId", { length: 255 })
+    .notNull()
+    .references(() => brands.id),
+    companyId: varchar("companyId", { length: 255 })
     .notNull()
     .references(() => companies.id),
 });
 
 export const bussinessUnitsRelations = relations(
-  bussinessUnits,
+  bussinessUnits, 
   ({ one, many }) => ({
+    brand: one(brands, {
+      fields: [bussinessUnits.brandId],
+      references: [brands.id],
+    }),
     company: one(companies, {
       fields: [bussinessUnits.companyId],
       references: [companies.id],
@@ -552,6 +560,7 @@ export const integrants = pgTable("integrant", {
   family_group_id: varchar("family_group_id", { length: 255 }).references(
     () => procedure.id,
   ),
+  affiliate_number: varchar("affiliate_number",{length:255})
 });
 
 export const integrantsRelations = relations(integrants, ({ one, many }) => ({
