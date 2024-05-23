@@ -30,6 +30,7 @@ import { itemsRouter } from "./routers/items-router";
 import { liquidationsRouter } from "./routers/liquidations-router";
 import { billingDocumentsRouter } from "./routers/billing-documents-router";
 import { pricePerAgeRouter } from "./routers/price-per-age-router";
+import { postalCodeRouter } from "./routers/postal_codes-router";
 /**
  * This is the primary router for your server.
  *
@@ -67,6 +68,7 @@ export const appRouter = createTRPCRouter({
   liquidations: liquidationsRouter,
   billingDocuments: billingDocumentsRouter,
   pricePerAge: pricePerAgeRouter,
+  postal_code: postalCodeRouter
 });
 
 // export type definition of API

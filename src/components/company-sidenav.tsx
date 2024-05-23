@@ -291,6 +291,12 @@ export default function CompanySidenav(props: { companyId: string }) {
             </SidenavItem>
             <SidenavItem
               icon={<Contact />}
+              href={`/dashboard/${props.companyId}/billing/information`}
+            >
+              Informacion
+            </SidenavItem>
+            <SidenavItem
+              icon={<Contact />}
               href={`/dashboard/${props.companyId}/billing/consults`}
             >
               Consultas
