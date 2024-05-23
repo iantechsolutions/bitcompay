@@ -1,4 +1,32 @@
 import { z } from "zod";
+import dayjs from "dayjs";
+const stringAsDate = z
+  .string()
+  .or(z.number())
+  .transform((value) => {
+    if (typeof value === "number") {
+      value = value.toString().padStart(8, "0");
+    }
+
+    const last4 = parseInt(value.substring(4, 8));
+
+    let day = value.substring(6, 8);
+    let month = value.substring(4, 6);
+    let year = value.substring(0, 4);
+
+    if (last4 > 2000) {
+      day = value.substring(0, 2);
+      month = value.substring(2, 4);
+      year = value.substring(4, 8);
+    }
+
+    return dayjs(`${year}-${month}-${day}`).toDate();
+  })
+  .refine((value) => {
+    if (value.getFullYear() < 2000) return false;
+    if (value.getFullYear() > 3000) return false;
+    return true;
+  });
 
 export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
   return z.array(recDocumentValidator).parse(rows);
@@ -9,8 +37,8 @@ export const recDocumentValidator = z
     "UNIDAD DE NEGOCIO": z.string().min(0).max(140),
     OS: z.string().min(0).max(140).nullable().optional(),
     "OS ORIGEN": z.string().min(0).max(140).nullable().optional(),
-    VIGENCIA: z.string().min(0).max(140).nullable().optional(),
-    MODO: z.string().min(0).max(140).nullable().optional(),
+    VIGENCIA: stringAsDate.nullable().optional(),
+    MODO: z.string().min(0).max(140),
     BONIFICACION: z.string().min(0).max(140).nullable().optional(),
     "DESDE BONIF.": z.string().min(0).max(140).nullable().optional(),
     "HASTA BONIF.": z.string().min(0).max(140).nullable().optional(),
@@ -44,47 +72,44 @@ export const recDocumentValidator = z
     "ES RESP PAGADOR": z.string().min(0).max(140).nullable().optional(),
     "APORTE 3%": z.string().min(0).max(140).nullable().optional(),
     DIFERENCIAL: z.string().min(0).max(140).nullable().optional(),
+    PLAN: z.string().min(0).max(140),
   })
   .transform((value) => {
     // Translated to english
     return {
-      business_unit: z.string().min(0).max(140),
-      os: z.string().min(0).max(140).nullable().optional(),
-      "originating os": z.string().min(0).max(140).nullable().optional(),
-      validity: z.string().min(0).max(140).nullable().optional(),
-      mode: z.string().min(0).max(140).nullable().optional(),
-      bonus: z.string().min(0).max(140).nullable().optional(),
-      "from bonus": z.string().min(0).max(140).nullable().optional(),
-      "to bonus": z.string().min(0).max(140).nullable().optional(),
-      "differential own doc type": z
-        .string()
-        .min(0)
-        .max(140)
-        .nullable()
-        .optional(),
-      "own doc number": z.string().min(0).max(140).nullable().optional(),
-      pair: z.string().min(0).max(140).nullable().optional(),
-      "birth date": z.string().min(0).max(140).nullable().optional(),
-      gender: z.string().min(0).max(140).nullable().optional(),
-      "marital status": z.string().min(0).max(140).nullable().optional(),
-      nationality: z.string().min(0).max(140).nullable().optional(),
-      "afip status": z.string().min(0).max(140).nullable().optional(),
-      fiscal_id_type: z.string().min(0).max(140).nullable().optional(),
-      fiscal_id_number: z.string().min(0).max(140).nullable().optional(),
-      city: z.string().min(0).max(140).nullable().optional(),
-      district: z.string().min(0).max(140).nullable().optional(),
-      address: z.string().min(0).max(140).nullable().optional(),
-      floor: z.string().min(0).max(140).nullable().optional(),
-      apartment: z.string().min(0).max(140).nullable().optional(),
-      "postal code": z.string().min(0).max(140).nullable().optional(),
-      phone: z.string().min(0).max(140).nullable().optional(),
-      cellphone: z.string().min(0).max(140).nullable().optional(),
-      email: z.string().min(0).max(140).nullable().optional(),
-      isAffiliated: z.string().min(0).max(140).nullable().optional(),
-      isHolder: z.string().min(0).max(140).nullable().optional(),
-      isPaymentHolder: z.string().min(0).max(140).nullable().optional(),
-      isPaymentResponsible: z.string().min(0).max(140).nullable().optional(),
-      "3% contribution": z.string().min(0).max(140).nullable().optional(),
-      differential: z.string().min(0).max(140).nullable().optional(),
+      business_unit: value["UNIDAD DE NEGOCIO"] ?? null,
+      os: value.OS ?? null,
+      "originating os": value["OS ORIGEN"] ?? null,
+      validity: value.VIGENCIA ?? null,
+      mode: value.MODO ?? null,
+      bonus: value.BONIFICACION ?? "0",
+      "from bonus": value["DESDE BONIF."] ?? null,
+      "to bonus": value["HASTA BONIF."] ?? null,
+      "differential own doc type": value["DIFERENCIAL TIPO DOC PROPIO"] ?? null,
+      "own doc number": value["NRO DOC PROPIO"] ?? null,
+      pair: value.PAR ?? null,
+      "birth date": value["FECHA NACIMIENTO"] ?? null,
+      gender: value.GENERO ?? null,
+      "marital status": value["ESTADO CIVIL"] ?? null,
+      nationality: value.NACIONALIDAD ?? null,
+      "afip status": value["ESTADO AFIP"] ?? null,
+      fiscal_id_type: value["TIPO DOC FISCAL"] ?? null,
+      fiscal_id_number: value["NRO DOC FISCAL"] ?? null,
+      city: value.LOCALIDAD ?? null,
+      district: value.PARTIDO ?? null,
+      address: value.DIRECCION ?? null,
+      floor: value.PISO ?? null,
+      apartment: value.DEPTO ?? null,
+      "postal code": value.CP ?? null,
+      phone: value.TELEFONO ?? null,
+      cellphone: value.CELULAR ?? null,
+      email: value.EMAIL ?? null,
+      isAffiliated: value["ES AFILIADO"] ?? null,
+      isHolder: value["ES TITULAR"] ?? null,
+      isPaymentHolder: value["ES TITULAR DEL PAGO"] ?? null,
+      isPaymentResponsible: value["ES RESP PAGADOR"] ?? null,
+      "3% contribution": value["APORTE 3%"] ?? null,
+      differential: value.DIFERENCIAL ?? null,
+      plan: value.PLAN ?? null,
     };
   });
