@@ -489,16 +489,6 @@ export default function AddMembers(props: AddMembersProps) {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={props.form.control}
-                name="mail"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <Input {...field} placeholder="Ingrese el email" />
-                  </FormItem>
-                )}
-              />
 
               <FormField
                 control={props.form.control}

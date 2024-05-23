@@ -37,6 +37,9 @@ export default async function ProcedurePage(props: { procedure: Procedure }) {
   return (
     <div>
       <div>
+      <Title>Tramite N{props.procedure.id}</Title>
+      <Title>Estado actual: {props.procedure.estado}</Title>
+
         <Select
           onValueChange={(value: string) => {
             setState(value);
@@ -47,7 +50,7 @@ export default async function ProcedurePage(props: { procedure: Procedure }) {
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectLabel>Fruits</SelectLabel>
+              <SelectLabel>Seleccione un estado</SelectLabel>
               {states.map((state) => {
                 return <SelectItem value={state}>{state}</SelectItem>;
               })}

@@ -276,12 +276,12 @@ export default function CompanySidenav(props: { companyId: string }) {
             >
               Pre-Liquidacion
             </SidenavItem>
-            <SidenavItem
+            {/* <SidenavItem
               icon={<Contact />}
               href={`/dashboard/${props.companyId}/billing/liquidation`}
             >
               Liquidacion
-            </SidenavItem>
+            </SidenavItem> */}
             <SidenavItem
               icon={<Contact />}
               href={`/dashboard/${props.companyId}/billing/consults`}

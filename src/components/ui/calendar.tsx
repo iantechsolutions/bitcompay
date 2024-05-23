@@ -20,7 +20,7 @@ function Calendar({
       locale={es}
       captionLayout="dropdown-buttons"
       fromYear={1900}
-      toYear={2024}
+      toYear={2030}
       showOutsideDays={showOutsideDays}
       className={cn("p-3", className)}
       classNames={{
