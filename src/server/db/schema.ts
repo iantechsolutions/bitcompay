@@ -771,6 +771,10 @@ export const family_groups = pgTable("family_groups", {
 export const family_groupsRelations = relations(
   family_groups,
   ({ one, many }) => ({
+    businessUnit: one(bussinessUnits, {
+      fields: [family_groups.businessUnit],
+      references: [bussinessUnits.id],
+    }),
     plan: one(plans, {
       fields: [family_groups.plan],
       references: [plans.id],
