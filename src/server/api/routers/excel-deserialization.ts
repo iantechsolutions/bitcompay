@@ -18,19 +18,56 @@ export const excelDeserializationRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
-
-
       const contents = await readExcelFile(db, input.id, input.type);
 
       await db.transaction(async (db) => {
         for (const row of contents) {
-            await db.query.bussinessUnits.findFirst({where:eq(schema.bussinessUnits.description, row.business_unit)});
-            await.db.insert(schema.family_groups).values({
-    
-            })
+          const business_unit = await db.query.bussinessUnits.findFirst({
+            where: eq(schema.bussinessUnits.description, row.business_unit),
+          });
+          const mode = await db.query.modos.findFirst({
+            where: eq(schema.modos.description, row.mode),
+          });
+          const plan = await db.query.plans.findFirst({
+            where: eq(schema.plans.plan_code, row.plan),
+          });
+          const primerIntegrante = false;
+          if (primerIntegrante) {
+            const bonus = await db
+              .insert(schema.bonuses)
+              .values({
+                amount: row.bonus,
+                appliedUser: " ", //a rellenar
+                approverUser: " ", //a rellenar
+                duration: "", //row["from bonus"]-row["to bonus"], cambiar schema a desde hasta
+                reason: "", //a rellenar
+              })
+              .returning();
+
+            const procedure = await db
+              .insert(schema.procedure)
+              .values({
+                type: "", //a rellenar
+                estado: "", //a rellenar
+              })
+              .returning();
+            const familygroup = await db
+              .insert(schema.family_groups)
+              .values({
+                businessUnit: business_unit!.id,
+                validity: row.validity, // viene del excel "vigencia"
+                plan: plan!.id,
+                modo: mode!.id,
+                receipt: " ", //a rellenar
+                bonus: bonus[0]!.id,
+                state: "Cargado", //queremos agregar columna con estado?
+                procedureId: procedure[0]!.id,
+                //payment_status default es pending
+              })
+              .returning();
+          }
         }
       });
-      
     }),
 });
 
