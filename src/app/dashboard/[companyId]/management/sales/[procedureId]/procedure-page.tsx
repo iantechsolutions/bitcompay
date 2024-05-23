@@ -29,23 +29,50 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
-import { type Procedure } from "~/server/db/schema";
+import {
+  PaymentInfo,
+  type Procedure,
+  type paymentInfo,
+  type Integrant,
+  type FamilyGroup,
+} from "~/server/db/schema";
 import { api } from "~/trpc/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import GeneralInfoForm from "~/components/procedures/general-info-form";
 import AddMembers from "~/components/procedures/members-info";
 import MembersTable from "~/components/procedures/member-tab";
 import BillingInfo from "~/components/procedures/billing-info";
-import { get } from "http";
-export default function ProcedurePage(props: { procedure: Procedure }) {
-  console.log(props.procedure);
+import { useForm } from "react-hook-form";
+import { type InputsGeneralInfo } from "~/components/procedures/general-info-form";
+import { type InputsBilling } from "~/components/procedures/billing-info";
+import { type InputsMembers } from "~/components/procedures/members-info";
+interface ProcedurePageProps {
+  procedure: Procedure;
+  family_group: FamilyGroup;
+  integrants: Integrant;
+  payment_info: PaymentInfo;
+}
+export default function ProcedurePage(props: ProcedurePageProps) {
+  const generalInfoForm = useForm<InputsGeneralInfo>();
+  const membersForm = useForm<InputsMembers>();
+  const billingForm = useForm<InputsBilling>();
+
   const [family_groupData, setfamily_groupData] = useState();
   const { mutateAsync: updateProcedure, isLoading } =
     api.procedure.change.useMutation();
+  const { mutateAsync: updateFamilyGroup, isLoading: isLoadingFamilyGroup } =
+    api.family_groups.change.useMutation();
+  const { mutateAsync: updateIntegrants, isLoading: isLoadingIntegrants } =
+    api.integrants.change.useMutation();
+  const { mutateAsync: paymenteInfo, isLoading: isLoadingPaymentInfo } =
+    api.payment_info.change.useMutation();
   const handleChange = async () => {
     try {
-      // await updateProcedure({ procedureId: props.procedure.id }); // agregar campos
-      toast.success("Procedimiento aplicado correctamente");
+      await updateFamilyGroup(props.family_group);
+      await updateIntegrants();
+      await paymenteInfo();
+      await updateProcedure();
+      toast.success("tramite actualizado correctamente");
     } catch (e) {
       const error = asTRPCError(e)!;
       toast.error(error.message);
@@ -63,7 +90,7 @@ export default function ProcedurePage(props: { procedure: Procedure }) {
             ) : (
               <CheckIcon className="mr-2" />
             )}
-            Aplicar
+            Aplicar cambios
           </Button>
         </div>
 
@@ -75,7 +102,7 @@ export default function ProcedurePage(props: { procedure: Procedure }) {
             <AccordionContent>
               <Card className="p-5">
                 <div>
-                  {/* <Tabs>
+                  <Tabs>
                     <TabsList>
                       <TabsTrigger value="general_info">
                         Informacion General
@@ -113,7 +140,7 @@ export default function ProcedurePage(props: { procedure: Procedure }) {
                         />
                       </div>
                     </TabsContent>
-                  </Tabs> */}
+                  </Tabs>
                 </div>
               </Card>
             </AccordionContent>

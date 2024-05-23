@@ -41,7 +41,7 @@ export type InputsGeneralInfo = {
   id: string;
   bussinessUnit: string;
   plan: string;
-  validity: string;
+  validity: Date;
   mode: string;
   name: string;
   cuit: string;
@@ -93,15 +93,7 @@ export default function GeneralInfoForm(props: GeneralInfoProps) {
 
   return (
     <Form {...props.form}>
-      <form
-        className="space-y-8"
-        onSubmit={props.form.handleSubmit(onSubmit)}
-        onChange={(e) => {
-          console.log(e.target.name);
-          console.log(e.target.value);
-          props.setfamily_group(props.form.getValues());
-        }}
-      >
+      <form className="space-y-8" onSubmit={props.form.handleSubmit(onSubmit)}>
         <FormField
           control={props.form.control}
           name="bussinessUnit"
@@ -127,14 +119,11 @@ export default function GeneralInfoForm(props: GeneralInfoProps) {
         />
         <FormField
           control={props.form.control}
+          name="plan"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Plan</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-                name="plan3"
-              >
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccione un Plan" />
