@@ -23,7 +23,18 @@ export const integrantsRouter = createTRPCRouter({
 
       return integrants;
     }),
-
+  getByGroup: protectedProcedure
+    .input(
+      z.object({
+        family_group_id: z.string(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const integrants = await db.query.integrants.findMany({
+        where: eq(schema.integrants.family_group_id, input.family_group_id),
+      });
+      return integrants;
+    }),
   create: protectedProcedure
     .input(
       z.object({

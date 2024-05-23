@@ -2,7 +2,11 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db, schema } from "~/server/db";
 import { eq } from "drizzle-orm";
-import { administrative_audit, medical_audit, family_groups } from "~/server/db/schema";
+import {
+  administrative_audit,
+  medical_audit,
+  family_groups,
+} from "~/server/db/schema";
 
 export const family_groupsRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({}) => {
@@ -22,25 +26,39 @@ export const family_groupsRouter = createTRPCRouter({
 
       return family_groups;
     }),
-
+  getbyProcedure: protectedProcedure
+    .input(
+      z.object({
+        procedureId: z.string(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const family_group = await db.query.family_groups.findFirst({
+        where: eq(schema.family_groups.procedureId, input.procedureId),
+      });
+      return family_group;
+    }),
   create: protectedProcedure
     .input(
       z.object({
-        businessUnit: z.string(),
+        businessUnit: z.string().optional(), // optional() solo con motivos de testing
         validity: z.date(),
         plan: z.string(),
         modo: z.string(),
         receipt: z.string().optional(),
         bonus: z.string().optional(),
         procedureId: z.string().optional(),
-        state:z.string().optional(),
-        payment_status:z.string().optional(),
+        state: z.string().optional(),
+        payment_status: z.string().optional(),
       }),
     )
     .mutation(async ({ input }) => {
-      const new_family_group = await db.insert(family_groups).values({
-        ...input
-      }).returning();
+      const new_family_group = await db
+        .insert(family_groups)
+        .values({
+          ...input,
+        })
+        .returning();
       return new_family_group;
     }),
 
@@ -48,15 +66,15 @@ export const family_groupsRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string(),
-        businessUnit: z.string(),
-        validity: z.date(),
-        plan: z.string(),
-        modo: z.string(),
-        receipt: z.string().optional(),
-        bonus: z.string().optional(),
-        procedureId: z.string().optional(),
-        state:z.string().optional(),
-        payment_status:z.string().optional(),
+        businessUnit: z.string().nullable(),
+        validity: z.date().nullable(),
+        plan: z.string().nullable(),
+        modo: z.string().nullable(),
+        receipt: z.string().nullable().optional(),
+        bonus: z.string().nullable().optional(),
+        procedureId: z.string().nullable().optional(),
+        state: z.string().nullable().optional(),
+        payment_status: z.string().nullable().optional(),
       }),
     )
     .mutation(async ({ input: { id, ...input } }) => {

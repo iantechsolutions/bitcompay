@@ -140,7 +140,9 @@ export const payments = pgTable(
 
     createdAt,
     updatedAt,
-    factura_id: varchar("factura_id", { length: 255 }).references(()=>facturas.id)
+    factura_id: varchar("factura_id", { length: 255 }).references(
+      () => facturas.id,
+    ),
   },
   (payments) => ({
     userIdIdx: index("payment_userId_idx").on(payments.userId),
@@ -252,7 +254,7 @@ export const brands = pgTable(
     enabled: boolean("enabled").notNull().default(true),
     createdAt,
     updatedAt,
-    logo_url: varchar("logo_url")
+    logo_url: varchar("logo_url"),
   },
   (brands) => ({
     nameIdx: index("brand_name_idx").on(brands.name),
@@ -476,13 +478,13 @@ export const bussinessUnits = pgTable("bussiness_units", {
   brandId: varchar("brandId", { length: 255 })
     .notNull()
     .references(() => brands.id),
-    companyId: varchar("companyId", { length: 255 })
+  companyId: varchar("companyId", { length: 255 })
     .notNull()
     .references(() => companies.id),
 });
 
 export const bussinessUnitsRelations = relations(
-  bussinessUnits, 
+  bussinessUnits,
   ({ one, many }) => ({
     brand: one(brands, {
       fields: [bussinessUnits.brandId],
@@ -563,10 +565,11 @@ export const integrants = pgTable("integrant", {
   family_group_id: varchar("family_group_id", { length: 255 }).references(
     () => procedure.id,
   ),
-  affiliate_number: varchar("affiliate_number",{length:255}),
+  affiliate_number: varchar("affiliate_number", { length: 255 }),
   extention: varchar("extention", { length: 255 }),
-  postal_codeId:  varchar("postalcodeid").references(()=> postal_code.id).notNull(),
-
+  postal_codeId: varchar("postalcodeid")
+    .references(() => postal_code.id)
+    .notNull(),
 });
 
 export const integrantsRelations = relations(integrants, ({ one, many }) => ({
@@ -617,7 +620,7 @@ export const integrantSchemaDB = insertintegrantSchema.pick({
   billResponsible_id: true,
   postal_code: true,
   age: true,
-  extention: true
+  extention: true,
 });
 export type Integrant = z.infer<typeof selectintegrantSchema>;
 
@@ -802,7 +805,7 @@ export const family_groupsSchemaDB = insertfamily_groupsSchema.pick({
   receipt: true,
   bonus: true,
 });
-export type family_groups = z.infer<typeof selectfamily_groupsSchema>;
+export type FamilyGroup = z.infer<typeof selectfamily_groupsSchema>;
 
 export const bonuses = pgTable("bonuses", {
   id: columnId,
@@ -912,6 +915,9 @@ export const payment_info = pgTable("payment_info", {
     () => integrants.id,
   ),
 });
+
+export const selectPaymentInfo = createSelectSchema(payment_info);
+export type PaymentInfo = z.infer<typeof selectPaymentInfo>;
 
 export const payment_infoRelations = relations(payment_info, ({ one }) => ({
   integrant: one(integrants, {
@@ -1045,8 +1051,6 @@ export const postal_code = pgTable("postalcodes", {
   zone: varchar("zone", { length: 255 }),
 });
 
-export const postal_codeRelations = relations(postal_code, ({many }) => ({
+export const postal_codeRelations = relations(postal_code, ({ many }) => ({
   postal_code: many(integrants),
-  
 }));
-
