@@ -182,6 +182,7 @@ export default function AddProcedure() {
     );
   }
   function handlePreload() {
+    console.log("esta es la id de modo", family_groupData?.mode);
     createfamily_group({
       businessUnit: family_groupData?.bussinessUnit ?? "",
       validity: new Date(family_groupData!.validity),

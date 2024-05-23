@@ -96,7 +96,10 @@ export default function GeneralInfoForm(props: GeneralInfoProps) {
       <form
         className="space-y-8"
         onSubmit={props.form.handleSubmit(onSubmit)}
-        onChange={() => props.setfamily_group(props.form.getValues())}
+        onChange={() => {
+          console.log(props.form.getValues());
+          props.setfamily_group(props.form.getValues());
+        }}
       >
         <FormField
           control={props.form.control}
