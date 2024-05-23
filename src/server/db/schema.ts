@@ -642,7 +642,6 @@ export const contributionsRelations = relations(contributions, ({ one }) => ({
 export const differentials = pgTable("differentials", {
   id: columnId,
   codigo: varchar("codigo", { length: 255 }).notNull(),
-  descripcion: varchar("descripcion", { length: 255 }).notNull(),
 });
 
 export const differentialsRelations = relations(differentials, ({ many }) => ({
