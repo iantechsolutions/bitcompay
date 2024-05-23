@@ -3,11 +3,10 @@
 
 "use client";
 
-import { Dialog, DialogContent, DialogTitle } from "@radix-ui/react-dialog";
 import { Loader2Icon, PlusCircleIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "~/components/ui/button";
-import { DialogFooter, DialogHeader } from "~/components/ui/dialog";
+import { DialogFooter, DialogHeader, Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { api } from "~/trpc/react";
