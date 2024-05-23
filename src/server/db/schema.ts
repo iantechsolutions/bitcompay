@@ -15,6 +15,8 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { number, type z } from "zod";
 import { duration } from "html2canvas/dist/types/css/property-descriptors/duration";
 import { id } from "date-fns/locale";
+import { int } from "drizzle-orm/mysql-core";
+import { text } from "stream/consumers";
 export * from "./schema/auth";
 export { pgTable } from "./schema/util";
 
@@ -557,16 +559,24 @@ export const integrants = pgTable("integrant", {
   isPaymentHolder: boolean("isPaymentHolder").notNull().default(false),
   isAffiliate: boolean("isAffiliate").notNull().default(false),
   isBillResponsible: boolean("isBillResponsible").notNull().default(false),
+  age: integer("age"),
   family_group_id: varchar("family_group_id", { length: 255 }).references(
     () => procedure.id,
   ),
-  affiliate_number: varchar("affiliate_number",{length:255})
+  affiliate_number: varchar("affiliate_number",{length:255}),
+  extention: varchar("extention", { length: 255 }),
+  postal_codeId:  varchar("postalcodeid").references(()=> postal_code.id).notNull(),
+
 });
 
 export const integrantsRelations = relations(integrants, ({ one, many }) => ({
   family_group: one(family_groups, {
     fields: [integrants.family_group_id],
     references: [family_groups.id],
+  }),
+  postal_code: one(postal_code, {
+    fields: [integrants.postal_codeId],
+    references: [postal_code.id],
   }),
   contributions: many(contributions),
   differentialsValues: many(differentialsValues),
@@ -605,6 +615,9 @@ export const integrantSchemaDB = insertintegrantSchema.pick({
   procedure_id: true,
   paymentHolder_id: true,
   billResponsible_id: true,
+  postal_code: true,
+  age: true,
+  extention: true
 });
 export type Integrant = z.infer<typeof selectintegrantSchema>;
 
@@ -963,9 +976,9 @@ export const pricePerAge = pgTable("pricePerAge", {
   id: columnId,
   fromAge: integer("fromAge").notNull(),
   toAge: integer("toAge").notNull(),
-  amount: bigint("amount", { mode: "number" }).notNull(),
   createdAt,
   plan_id: varchar("plan_id", { length: 255 }).references(() => plans.id),
+  amount: real("amount").notNull(),
 });
 
 export const pricePerAgeRelations = relations(pricePerAge, ({ one, many }) => ({
@@ -1021,3 +1034,16 @@ export const eventsRelations = relations(events, ({ one }) => ({
     references: [currentAccount.id],
   }),
 }));
+
+export const postal_code = pgTable("postalcodes", {
+  id: columnId,
+  name: varchar("name", { length: 255 }).notNull(),
+  cp: varchar("cp", { length: 255 }),
+  zone: varchar("zone", { length: 255 }),
+});
+
+export const postal_codeRelations = relations(postal_code, ({many }) => ({
+  postal_code: many(integrants),
+  
+}));
+
