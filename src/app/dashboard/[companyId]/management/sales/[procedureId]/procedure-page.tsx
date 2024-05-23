@@ -1,64 +1,139 @@
 "use client";
-import { useState } from "react";
+import { CheckIcon, Loader2 } from "lucide-react";
+import { type MouseEventHandler, useState } from "react";
+import { toast } from "sonner";
+import LayoutContainer from "~/components/layout-container";
+import { List, ListTile } from "~/components/list";
 import { Title } from "~/components/title";
 import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import { Switch } from "~/components/ui/switch";
+import { asTRPCError } from "~/lib/errors";
+import { type RouterOutputs } from "~/trpc/shared";
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
-import { Procedure } from "~/server/db/schema";
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "~/components/ui/accordion";
+import { Card } from "~/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
+import { type Procedure } from "~/server/db/schema";
 import { api } from "~/trpc/react";
-
-export default async function ProcedurePage(props: { procedure: Procedure }) {
-  //   const procedure = await api.procedure.get.query({ id: props.params. });+
-  const [states, setStates] = useState<string[]>([
-    "Confirmado",
-    "Pre-Aprobado",
-    "Estudiar",
-    "Devuelto",
-    "No Aprobado",
-  ]);
-  const [state, setState] = useState<string>("pendiente");
-  const { mutateAsync: changeProcedureState, isLoading } =
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import GeneralInfoForm from "~/components/procedures/general-info-form";
+import AddMembers from "~/components/procedures/members-info";
+import MembersTable from "~/components/procedures/member-tab";
+import BillingInfo from "~/components/procedures/billing-info";
+import { get } from "http";
+export default function ProcedurePage(props: { procedure: Procedure }) {
+  console.log(props.procedure);
+  const [family_groupData, setfamily_groupData] = useState();
+  const { mutateAsync: updateProcedure, isLoading } =
     api.procedure.change.useMutation();
-  // async function handleConfirm() {}
-  async function handleConfirm() {
-    changeProcedureState({ id: props.procedure.id, estado: state });
-  }
+  const handleChange = async () => {
+    try {
+      // await updateProcedure({ procedureId: props.procedure.id }); // agregar campos
+      toast.success("Procedimiento aplicado correctamente");
+    } catch (e) {
+      const error = asTRPCError(e)!;
+      toast.error(error.message);
+    }
+  };
 
-  if (!props.procedure) {
-    return <Title>El grupo familiar no existe.</Title>;
-  }
   return (
-    <div>
-      <div>
-        <Select
-          onValueChange={(value: string) => {
-            setState(value);
-          }}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Seleccione un estado" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Fruits</SelectLabel>
-              {states.map((state) => {
-                return <SelectItem value={state}>{state}</SelectItem>;
-              })}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      </div>
-      <br></br>
-      <div>
-        <Button onClick={handleConfirm}>Confirmar</Button>
-      </div>
-    </div>
+    <LayoutContainer>
+      <section className="space-y-2">
+        <div className="flex justify-between">
+          <Title> {props.procedure.type}</Title>
+          <Button disabled={isLoading} onClick={handleChange}>
+            {isLoading ? (
+              <Loader2 className="mr-2 animate-spin" />
+            ) : (
+              <CheckIcon className="mr-2" />
+            )}
+            Aplicar
+          </Button>
+        </div>
+
+        <Accordion type="single" collapsible className="w-full">
+          <AccordionItem value="item-2">
+            <AccordionTrigger>
+              <h2 className="text-md">Info. de del tramite</h2>
+            </AccordionTrigger>
+            <AccordionContent>
+              <Card className="p-5">
+                <div>
+                  {/* <Tabs>
+                    <TabsList>
+                      <TabsTrigger value="general_info">
+                        Informacion General
+                      </TabsTrigger>
+                      <TabsTrigger value="members">Integrantes</TabsTrigger>
+                      <TabsTrigger value="billing">
+                        Informacion de Facturacion
+                      </TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="general_info">
+                      <GeneralInfoForm
+                        setfamily_group={setfamily_groupData}
+                        setProcedureId={setProcedureData}
+                        form={generalInfoForm}
+                      />
+                    </TabsContent>
+                    <TabsContent value="members">
+                      <div className="flex w-full flex-col gap-2">
+                        <div className="w-full self-end">
+                          <AddMembers
+                            addMember={setMembersData}
+                            membersData={membersData}
+                            form={membersForm}
+                          />
+                        </div>
+                        <MembersTable data={membersData} />
+                      </div>
+                    </TabsContent>
+                    <TabsContent value="billing">
+                      <div>
+                        <BillingInfo
+                          form={billingForm}
+                          setBillingData={setBillingData}
+                          data={membersData}
+                        />
+                      </div>
+                    </TabsContent>
+                  </Tabs> */}
+                </div>
+              </Card>
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="item-5" className="border-none">
+            <AccordionTrigger>
+              <h2 className="text-md">Eliminar Marca</h2>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="flex justify-end"></div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </section>
+    </LayoutContainer>
   );
 }
+
+//pregunta desde este pagina se puede ver los tramite precargados o cargados?? onda
+// en principio se puede todos los tramits
+// pero:
+// al guardar los cambios hay un cambio de estado?? a cargado por ej. pero en caso de que ya este cargado, no cambia
+// el estado?. Por otra parte, es preferible un acordion o no ?

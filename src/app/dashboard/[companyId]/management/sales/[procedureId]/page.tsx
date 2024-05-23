@@ -6,7 +6,7 @@ export default async function Home(props: { params: { procedureId: string } }) {
   const procedure = await api.procedure.get.query({
     procedureId: props.params.procedureId,
   });
-
+  console.log(procedure);
   if (!procedure) {
     return <Title>El documento no existe.</Title>;
   }

@@ -190,6 +190,7 @@ export default function AddProcedure() {
     })
       .then(async (response) => {
         setfamily_groupId(response[0]!.id);
+        console.log("Family group created", response[0]!);
       })
       .catch((error) => {
         console.log("An error has occurred", error);
@@ -198,6 +199,7 @@ export default function AddProcedure() {
     createProcedure({
       type: "GFC001",
       estado: "precarga",
+      family_group: family_groupId!,
     })
       .then(async (response) => {
         setProcedureId(response[0]!.id);
