@@ -6,7 +6,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
 
 export const recDocumentValidator = z
   .object({
-    "UNIDAD DE NEGOCIO": z.string().min(0).max(140).nullable().optional(),
+    "UNIDAD DE NEGOCIO": z.string().min(0).max(140),
     OS: z.string().min(0).max(140).nullable().optional(),
     "OS ORIGEN": z.string().min(0).max(140).nullable().optional(),
     VIGENCIA: z.string().min(0).max(140).nullable().optional(),
@@ -48,7 +48,7 @@ export const recDocumentValidator = z
   .transform((value) => {
     // Translated to english
     return {
-      "business unit": z.string().min(0).max(140).nullable().optional(),
+      business_unit: z.string().min(0).max(140),
       os: z.string().min(0).max(140).nullable().optional(),
       "originating os": z.string().min(0).max(140).nullable().optional(),
       validity: z.string().min(0).max(140).nullable().optional(),

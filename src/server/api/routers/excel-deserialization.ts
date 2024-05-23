@@ -18,8 +18,19 @@ export const excelDeserializationRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
+
+
       const contents = await readExcelFile(db, input.id, input.type);
-      return contents;
+
+      await db.transaction(async (db) => {
+        for (const row of contents) {
+            await db.query.bussinessUnits.findFirst({where:eq(schema.bussinessUnits.description, row.business_unit)});
+            await.db.insert(schema.family_groups).values({
+    
+            })
+        }
+      });
+      
     }),
 });
 
@@ -59,6 +70,8 @@ async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
     const rowNum = i + 2;
     console.log(row, rowNum);
   }
+
+  return transformedRows;
 }
 
 function trimObject(obj: Record<string, unknown>) {
