@@ -786,6 +786,10 @@ export const family_groupsRelations = relations(
       fields: [family_groups.modo],
       references: [modos.id],
     }),
+    bonus: one(bonuses, {
+      fields: [family_groups.bonus],
+      references: [bonuses.id],
+    }),
     integrants: many(integrants),
     abonos: many(abonos),
     facturas: many(facturas),
