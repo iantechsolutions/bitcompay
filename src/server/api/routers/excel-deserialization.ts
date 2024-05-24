@@ -92,15 +92,18 @@ export const excelDeserializationRouter = createTRPCRouter({
             postal_code_id = check_postal_code;
           }
           const new_integrant = await db.insert(schema.integrants).values({
+            postal_codeId: "", //a rellenar
+
+            extention: "",
             family_group_id: familyGroupId,
             affiliate_type: "",
             relationship: row.relationship,
             name: row.name,
             id_type: row.own_id_type,
             id_number: row.own_id_number,
-            birth_date: row["birth date"],
-            gender: row.gender,
-            civil_status: row["marital status"],
+            // birth_date: row["birth date"],
+            // gender: row.gender,
+            // civil_status: row["marital status"],
             nationality: row.nationality,
             afip_status: row["afip status"],
             fiscal_id_type: row.fiscal_id_type,
@@ -115,13 +118,12 @@ export const excelDeserializationRouter = createTRPCRouter({
             partido: row.district,
             state: row.state,
             zone: " ", //a rellenar
-            isHolder: row.isHolder,
-            isPaymentHolder: row.isPaymentHolder,
-            isAffiliate: row.isAffiliated,
-            isBillResponsible: row.isPaymentResponsible,
-            age: "", //a rellenar,
+            // isHolder: row.isHolder,
+            // isPaymentHolder: row.isPaymentHolder,
+            // isAffiliate: row.isAffiliated,
+            // isBillResponsible: row.isPaymentResponsible,
+            // age: "", //a rellenar, hay que calcular
             affiliate_number: row.affiliate_number,
-            postal_code: new_postal_code[0]!.id, //a rellenar,
           });
         }
       });
