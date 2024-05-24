@@ -62,7 +62,7 @@ export const recDocumentValidator = z
     DIRECCION: z.string().min(0).max(140).nullable().optional(),
     PISO: z.string().min(0).max(140).nullable().optional(),
     DEPTO: z.string().min(0).max(140).nullable().optional(),
-    CP: z.string().min(0).max(140).nullable().optional(),
+    CP: z.string().min(0).max(140),
     TELEFONO: z.string().min(0).max(140).nullable().optional(),
     CELULAR: z.string().min(0).max(140).nullable().optional(),
     EMAIL: z.string().min(0).max(140).nullable().optional(),
@@ -71,8 +71,8 @@ export const recDocumentValidator = z
     "ES TITULAR DEL PAGO": z.boolean().nullable().optional(),
     "ES RESP PAGADOR": z.boolean().nullable().optional(),
     "APORTE 3%": z.string().min(0).max(140).nullable().optional(),
-    "DIFERENCIAL CODIGO": z.string().min(0).max(140).nullable().optional(),
-    "DIFERENCIAL VALOR": z.string().min(0).max(140).nullable().optional(),
+    "DIFERENCIAL CODIGO": z.string().min(0).max(140),
+    "DIFERENCIAL VALOR": z.string().min(0).max(140),
     PLAN: z.string().min(0).max(140),
   })
   .transform((value) => {
@@ -114,7 +114,7 @@ export const recDocumentValidator = z
       isHolder: value["ES TITULAR"] ?? null,
       isPaymentHolder: value["ES TITULAR DEL PAGO"] ?? null,
       isPaymentResponsible: value["ES RESP PAGADOR"] ?? null,
-      "3% contribution": value["APORTE 3%"] ?? null,
+      contribution: value["APORTE 3%"] ?? null,
       differential_code: value["DIFERENCIAL CODIGO"] ?? null,
       differential_value: value["DIFERENCIAL VALOR"] ?? null,
       plan: value.PLAN ?? null,
