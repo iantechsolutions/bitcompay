@@ -92,8 +92,7 @@ export const excelDeserializationRouter = createTRPCRouter({
             postal_code_id = check_postal_code;
           }
           const new_integrant = await db.insert(schema.integrants).values({
-            postal_codeId: "", //a rellenar
-
+            postal_codeId: postal_code_id, //a rellenar
             extention: "",
             family_group_id: familyGroupId,
             affiliate_type: "",
