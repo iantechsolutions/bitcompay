@@ -19,6 +19,7 @@ export const excelDeserializationRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       const contents = await readExcelFile(db, input.id, input.type);
+      let familyGroupMap = new Map<string | null, string>();
 
       await db.transaction(async (db) => {
         for (const row of contents) {
@@ -31,8 +32,9 @@ export const excelDeserializationRouter = createTRPCRouter({
           const plan = await db.query.plans.findFirst({
             where: eq(schema.plans.plan_code, row.plan),
           });
-          const primerIntegrante = false;
-          if (primerIntegrante) {
+          let familyGroupId = "";
+          const primerIntegrante = isKeyPresent(row["own doc number"], familyGroupMap);
+          if (!primerIntegrante) {
             const bonus = await db
               .insert(schema.bonuses)
               .values({
@@ -65,11 +67,20 @@ export const excelDeserializationRouter = createTRPCRouter({
                 //payment_status default es pending
               })
               .returning();
+              familyGroupMap.set(row["own doc number"], familygroup[0]!.id);
+              familyGroupId = familygroup[0]!.id;
+          }
+          else{
+            familyGroupId = familyGroupMap.get(row["own doc number"]) ?? "";
           }
         }
       });
     }),
 });
+
+function isKeyPresent(key: string | null, dictionary: Map<string | null,string>): boolean {
+  return dictionary.has(key ?? "");
+}
 
 async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
   const upload = await db.query.documentUploads.findFirst({
