@@ -75,6 +75,22 @@ export const excelDeserializationRouter = createTRPCRouter({
           } else {
             familyGroupId = familyGroupMap.get(row["own doc number"]) ?? "";
           }
+
+          const postal_code = row["postal code"];
+          const check_postal_code = await db.query.postal_code.findMany({
+            where: eq(schema.postal_code.cp, postal_code),
+          });
+          let postal_code_id = "";
+          if (check_postal_code.length == 0) {
+            const new_postal_code = await db.insert(schema.postal_code).values({
+              name: "", //a rellenar
+              cp: postal_code,
+              zone: row.city,
+            });
+            postal_code_id = new_postal_code[0]!.id;
+          } else {
+            postal_code_id = check_postal_code;
+          }
           const new_integrant = await db.insert(schema.integrants).values({
             family_group_id: familyGroupId,
             affiliate_type: "",
@@ -98,7 +114,6 @@ export const excelDeserializationRouter = createTRPCRouter({
             locality: row.city,
             partido: row.district,
             state: row.state,
-            cp: row["postal code"],
             zone: " ", //a rellenar
             isHolder: row.isHolder,
             isPaymentHolder: row.isPaymentHolder,
@@ -106,7 +121,7 @@ export const excelDeserializationRouter = createTRPCRouter({
             isBillResponsible: row.isPaymentResponsible,
             age: "", //a rellenar,
             affiliate_number: row.affiliate_number,
-            postal_code: "", //a rellenar,
+            postal_code: new_postal_code[0]!.id, //a rellenar,
           });
         }
       });
