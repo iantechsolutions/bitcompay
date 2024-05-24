@@ -621,6 +621,7 @@ export const integrantSchemaDB = insertintegrantSchema.pick({
   postal_code: true,
   age: true,
   extention: true,
+  family_group_id:true  
 });
 export type Integrant = z.infer<typeof selectintegrantSchema>;
 
