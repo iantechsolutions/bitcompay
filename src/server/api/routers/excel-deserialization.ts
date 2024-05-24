@@ -31,6 +31,8 @@ export const excelDeserializationRouter = createTRPCRouter({
           const plan = await db.query.plans.findFirst({
             where: eq(schema.plans.plan_code, row.plan),
           });
+
+          const integrante = await db.insert(schema.integrants).values({});
           const primerIntegrante = false;
           if (primerIntegrante) {
             const bonus = await db
