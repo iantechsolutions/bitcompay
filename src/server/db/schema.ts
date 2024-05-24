@@ -552,7 +552,7 @@ export const integrants = pgTable("integrant", {
   email: varchar("email", { length: 255 }),
   floor: varchar("floor", { length: 255 }),
   department: varchar("department", { length: 255 }),
-  lacality: varchar("lacality", { length: 255 }),
+  locality: varchar("lacality", { length: 255 }),
   partido: varchar("partido", { length: 255 }),
   state: varchar("state", { length: 255 }),
   cp: varchar("cp", { length: 255 }),
@@ -563,7 +563,7 @@ export const integrants = pgTable("integrant", {
   isBillResponsible: boolean("isBillResponsible").notNull().default(false),
   age: integer("age"),
   family_group_id: varchar("family_group_id", { length: 255 }).references(
-    () => procedure.id,
+    () => family_groups.id,
   ),
   affiliate_number: varchar("affiliate_number", { length: 255 }),
   extention: varchar("extention", { length: 255 }),

@@ -42,13 +42,13 @@ export const recDocumentValidator = z
     BONIFICACION: z.string().min(0).max(140).nullable().optional(),
     "DESDE BONIF.": z.string().min(0).max(140).nullable().optional(),
     "HASTA BONIF.": z.string().min(0).max(140).nullable().optional(),
-    "DIFERENCIAL TIPO DOC PROPIO": z
-      .string()
-      .min(0)
-      .max(140)
-      .nullable()
-      .optional(),
-    "NRO DOC PROPIO": z.string().min(0).max(140).nullable().optional(),
+    ESTADO: z.string().min(0).max(140).nullable().optional(),
+    "NRO DOC TITULAR": z.string().min(0).max(140).nullable().optional(),
+    NOMBRE: z.string().min(0).max(140).nullable().optional(),
+    "NRO AFILIADO": z.string().min(0).max(140).nullable().optional(),
+    EXTENSION: z.string().min(0).max(140).nullable().optional(),
+    "TIPO DOC PROPIO": z.string().min(0).max(140).nullable().optional(),
+    "NRO DE DOCUMENTO PROPIO": z.string().min(0).max(140).nullable().optional(),
     PAR: z.string().min(0).max(140).nullable().optional(),
     "FECHA NACIMIENTO": z.string().min(0).max(140).nullable().optional(),
     GENERO: z.string().min(0).max(140).nullable().optional(),
@@ -71,7 +71,8 @@ export const recDocumentValidator = z
     "ES TITULAR DEL PAGO": z.string().min(0).max(140).nullable().optional(),
     "ES RESP PAGADOR": z.string().min(0).max(140).nullable().optional(),
     "APORTE 3%": z.string().min(0).max(140).nullable().optional(),
-    DIFERENCIAL: z.string().min(0).max(140).nullable().optional(),
+    "DIFERENCIAL CODIGO": z.string().min(0).max(140).nullable().optional(),
+    "DIFERENCIAL VALOR": z.string().min(0).max(140).nullable().optional(),
     PLAN: z.string().min(0).max(140),
   })
   .transform((value) => {
@@ -85,9 +86,14 @@ export const recDocumentValidator = z
       bonus: value.BONIFICACION ?? "0",
       "from bonus": value["DESDE BONIF."] ?? null,
       "to bonus": value["HASTA BONIF."] ?? null,
-      "differential own doc type": value["DIFERENCIAL TIPO DOC PROPIO"] ?? null,
-      "own doc number": value["NRO DOC PROPIO"] ?? null,
-      pair: value.PAR ?? null,
+      state: value.ESTADO ?? null,
+      holder_id_number: value["NRO DOC TITULAR"] ?? null,
+      name: value.NOMBRE ?? null,
+      affiliate_number: value["NRO AFILIADO"] ?? null,
+      extension: value.EXTENSION ?? null,
+      own_id_type: value["TIPO DOC PROPIO"] ?? null,
+      own_id_number: value["NRO DE DOCUMENTO PROPIO"] ?? null,
+      relationship: value.PAR ?? null,
       "birth date": value["FECHA NACIMIENTO"] ?? null,
       gender: value.GENERO ?? null,
       "marital status": value["ESTADO CIVIL"] ?? null,
@@ -109,7 +115,8 @@ export const recDocumentValidator = z
       isPaymentHolder: value["ES TITULAR DEL PAGO"] ?? null,
       isPaymentResponsible: value["ES RESP PAGADOR"] ?? null,
       "3% contribution": value["APORTE 3%"] ?? null,
-      differential: value.DIFERENCIAL ?? null,
+      differential_code: value["DIFERENCIAL CODIGO"] ?? null,
+      differential_value: value["DIFERENCIAL VALOR"] ?? null,
       plan: value.PLAN ?? null,
     };
   });

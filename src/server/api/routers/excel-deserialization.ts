@@ -33,11 +33,11 @@ export const excelDeserializationRouter = createTRPCRouter({
             where: eq(schema.plans.plan_code, row.plan),
           });
           let familyGroupId = "";
-          const primerIntegrante = isKeyPresent(
+          const existGroup = isKeyPresent(
             row["own doc number"],
             familyGroupMap,
           );
-          if (!primerIntegrante) {
+          if (!existGroup) {
             const bonus = await db
               .insert(schema.bonuses)
               .values({
@@ -75,6 +75,39 @@ export const excelDeserializationRouter = createTRPCRouter({
           } else {
             familyGroupId = familyGroupMap.get(row["own doc number"]) ?? "";
           }
+          const new_integrant = await db.insert(schema.integrants).values({
+            family_group_id: familyGroupId,
+            affiliate_type: "",
+            relationship: row.relationship,
+            name: row.name,
+            id_type: row.own_id_type,
+            id_number: row.own_id_number,
+            birth_date: row["birth date"],
+            gender: row.gender,
+            civil_status: row["marital status"],
+            nationality: row.nationality,
+            afip_status: row["afip status"],
+            fiscal_id_type: row.fiscal_id_type,
+            fiscal_id_number: row.fiscal_id_number,
+            address: row.address,
+            phone_number: row.phone,
+            cellphone_number: row.cellphone,
+            email: row.email,
+            floor: row.floor,
+            department: row.apartment,
+            locality: row.city,
+            partido: row.district,
+            state: row.state,
+            cp: row["postal code"],
+            zone: " ", //a rellenar
+            isHolder: row.isHolder,
+            isPaymentHolder: row.isPaymentHolder,
+            isAffiliate: row.isAffiliated,
+            isBillResponsible: row.isPaymentResponsible,
+            age: "", //a rellenar,
+            affiliate_number: row.affiliate_number,
+            postal_code: "", //a rellenar,
+          });
         }
       });
     }),
