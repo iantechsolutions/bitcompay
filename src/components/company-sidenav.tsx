@@ -27,6 +27,18 @@ import {
   Percent,
   DollarSign,
   MapPin,
+  CloudUpload,
+  Cloud,
+  CloudDownload,
+  MessageCircle,
+  BookOpen,
+  Clock,
+  CreditCard,
+  HelpCircle,
+  Database,
+  Hand,
+  Wallet,
+  Search,
 } from "lucide-react";
 import {
   Accordion,
@@ -35,6 +47,7 @@ import {
   AccordionTrigger,
 } from "./ui/accordion";
 import { usePathname } from "next/navigation";
+import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 
 export default function CompanySidenav(props: { companyId: string }) {
   const menu: Record<string, string> = {
@@ -137,13 +150,6 @@ export default function CompanySidenav(props: { companyId: string }) {
               icon={<FileText />}
             >
               Cotizaciones
-            </SidenavItem>
-            <SidenavItem
-              href={`/dashboard/${props.companyId}/administration/bonuses`}
-              icon={<Gift />}
-            >
-              {" "}
-              Bonificaciones
             </SidenavItem>
           </AccordionContent>
         </AccordionItem>
@@ -265,25 +271,25 @@ export default function CompanySidenav(props: { companyId: string }) {
                 </AccordionTrigger>
                 <AccordionContent>
                   <SidenavItem
-                    icon={<UserPlus />}
+                    icon={<CloudUpload />}
                     href={`/dashboard/${props.companyId}/management/documents/massive-upload`}
                   >
                     Carga Masiva
                   </SidenavItem>
                   <SidenavItem
-                    icon={<UserPlus />}
+                    icon={<Cloud />}
                     href={`/dashboard/${props.companyId}/management/documents/rec-upload`}
                   >
                     Carga REC
                   </SidenavItem>
                   <SidenavItem
-                    icon={<UserPlus />}
+                    icon={<CloudDownload />}
                     href={`/dashboard/${props.companyId}/management/documents/output`}
                   >
                     Archivos de salida
                   </SidenavItem>
                   <SidenavItem
-                    icon={<UserPlus />}
+                    icon={<MessageCircle />}
                     href={`/dashboard/${props.companyId}/management/documents/response`}
                   >
                     Respuesta
@@ -351,31 +357,31 @@ export default function CompanySidenav(props: { companyId: string }) {
           </AccordionTrigger>
           <AccordionContent>
             <SidenavItem
-              icon={<Contact />}
+              icon={<FilePlus />}
               href={`/dashboard/${props.companyId}/billing/manual_issuance`}
             >
               Generar manual
             </SidenavItem>
             <SidenavItem
-              icon={<Contact />}
+              icon={<Clock />}
               href={`/dashboard/${props.companyId}/billing/pre-liquidation`}
             >
               Pre-Liquidacion
             </SidenavItem>
             <SidenavItem
-              icon={<Contact />}
+              icon={<CreditCard />}
               href={`/dashboard/${props.companyId}/billing/liquidation`}
             >
               Liquidacion
             </SidenavItem>
             <SidenavItem
-              icon={<Contact />}
+              icon={<HelpCircle />}
               href={`/dashboard/${props.companyId}/billing/information`}
             >
               Informacion
             </SidenavItem>
             <SidenavItem
-              icon={<Contact />}
+              icon={<Search />}
               href={`/dashboard/${props.companyId}/billing/consults`}
             >
               Consultas
@@ -394,19 +400,19 @@ export default function CompanySidenav(props: { companyId: string }) {
           </AccordionTrigger>
           <AccordionContent>
             <SidenavItem
-              icon={<Contact />}
+              icon={<Database />}
               href={`/dashboard/${props.companyId}/treasury/current_count`}
             >
               Cuenta actual
             </SidenavItem>
             <SidenavItem
-              icon={<Contact />}
+              icon={<Hand />}
               href={`/dashboard/${props.companyId}/treasury/collection`}
             >
               Recoleccion
             </SidenavItem>
             <SidenavItem
-              icon={<Contact />}
+              icon={<Wallet />}
               href={`/dashboard/${props.companyId}/treasury/payments`}
             >
               Pagos

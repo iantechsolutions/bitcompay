@@ -4,37 +4,39 @@ import LayoutContainer from "~/components/layout-container";
 import { api } from "~/trpc/server";
 
 const items = [
-  { es: "documentos subidos", en: "uploaded_documents" },
-  { es: "generos", en: "genders" },
-  { es: "estados civiles", en: "civil_status" },
-  { es: "parental", en: "parental" },
-  { es: "modos", en: "modos" },
-  { es: "obras sociales", en: "health_insurances" },
-  { es: "niveles comerciales", en: "market_levels" },
-  { es: "entidades financieras", en: "financial_entities" },
-  { es: "estados", en: "status" },
-  { es: "comprobantes", en: "receipt" },
-  { es: "impuestos", en: "taxes" },
-  { es: "rubros", en: "items" },
-  { es: "conceptos", en: "concepts" },
-  { es: "unidades de negocios", en: "bussiness_unit" },
-  { es: "categorias", en: "categories" },
-  { es: "nomenclador", en: "Nomenclator" },
-  { es: "provincias", en: "state" },
-  { es: "paises", en: "countries" },
-  { es: "zonas", en: "zone" },
-  { es: "condicion afip", en: "afip_status" },
-  { es: "iva", en: "iva" },
-  { es: "condicion iibb", en: "ingresos_brutos" },
-  { es: "codigos postales", en: "postal_codes" }
+  { es: "Documentos Subidos", en: "uploaded_documents" },
+  { es: "Generos", en: "genders" },
+  { es: "Estados Civiles", en: "civil_status" },
+  { es: "Parental", en: "parental" },
+  { es: "Modos", en: "modos" },
+  { es: "Obras Sociales", en: "health_insurances" },
+  { es: "Niveles Comerciales", en: "market_levels" },
+  { es: "Entidades Financieras", en: "financial_entities" },
+  { es: "Estados", en: "status" },
+  { es: "Comprobantes", en: "receipt" },
+  { es: "Impuestos", en: "taxes" },
+  { es: "Rubros", en: "items" },
+  { es: "Conceptos", en: "concepts" },
+  { es: "Unidades de negocio", en: "bussiness_unit" },
+  { es: "Categorias", en: "categories" },
+  { es: "Nomenclador", en: "Nomenclator" },
+  { es: "Provincias", en: "state" },
+  { es: "Paises", en: "countries" },
+  { es: "Zonas", en: "zone" },
+  { es: "Condiciones AFIP", en: "afip_status" },
+  { es: "IVA", en: "iva" },
+  { es: "Condicion IIBB", en: "ingresos_brutos" },
+  { es: "Codigos postales", en: "postal_codes" },
 ];
 
-export default async function Maintenance(props: { params: { companyId: string } }) {
+export default async function Maintenance(props: {
+  params: { companyId: string };
+}) {
   return (
     <LayoutContainer>
       <section className="space-y-2">
         <div className="flex justify-between">
-          <Title>Mantenimiento</Title>
+          <Title>Tablas</Title>
         </div>
         <List>
           {items.map(({ es, en }) => (
