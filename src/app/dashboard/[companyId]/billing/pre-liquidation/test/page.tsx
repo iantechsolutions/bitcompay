@@ -1,3 +1,4 @@
+"use client"
 import { Title } from "~/components/title";
 import LayoutContainer from "~/components/layout-container";
 import {
@@ -7,8 +8,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { api } from "~/trpc/react";
-const { data: marcas } = api.brands.list.useQuery(undefined);
+// import { api } from "~/trpc/react";
+// const { data: marcas } = api.brands.list.useQuery(undefined);
 export default async function Page(props: { params: { companyId: string } }) {
   return (
     <LayoutContainer>

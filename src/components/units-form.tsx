@@ -33,6 +33,7 @@ export default function UnitsForm({
   const router = useRouter();
   const UnitSchema = z.object({
     description: z.string().min(1, { message: "La descripción es requerida" }),
+    brandId: z.string(),
   });
   const form = useForm<Inputs>({
     resolver: zodResolver(UnitSchema),

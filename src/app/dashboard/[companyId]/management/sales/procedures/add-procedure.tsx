@@ -43,22 +43,22 @@ export default function AddProcedure() {
     family_groupId?: string,
   ) {
     const promises = membersData.map((member) => {
-      let status: "single" | "married" | "divorced" | "widowed";
+      let status: "soltero" | "casado" | "divorciado" | "viudo";
       switch (member.civil_status) {
-        case "single":
-          status = "single";
+        case "solter":
+          status = "soltero";
           break;
-        case "married":
-          status = "married";
+        case "casado":
+          status = "casado";
           break;
-        case "divorced":
-          status = "divorced";
+        case "divorciado":
+          status = "divorciado";
           break;
-        case "widowed":
-          status = "widowed";
+        case "viudo":
+          status = "viudo";
           break;
         default:
-          status = "single";
+          status = "soltero";
           break;
       }
 
@@ -68,6 +68,7 @@ export default function AddProcedure() {
         member.isHolder && new Date(member.birth_date) <= eighteenYearsAgo;
 
       return createIntegrant({
+        postal_codeId: "",
         affiliate_type: member.affiliate_type,
         relationship: member.relationship,
         name: member.name,
