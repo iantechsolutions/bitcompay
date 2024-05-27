@@ -14,7 +14,7 @@ export default async function Page(props: { params: { companyId: string } }) {
             <ListTile
               key={1}
               leading={"Modos"}
-              href={`/dashboard/faIKDivwt7Z8Gp-B5yFrv/administration/modos`}
+              href={`/dashboard/faIKDivwt7Z8Gp-B5yFrv/maintenance/tables/modos`}
               title={"Modos"}
             />
           </List>

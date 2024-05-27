@@ -20,7 +20,7 @@ export default async function Home(props: { params: { companyId: string } }) {
               <ListTile
                 key={modo.id}
                 leading={modo.description}
-                href={`/dashboard/faIKDivwt7Z8Gp-B5yFrv/administration/modos/${modo.id}`}
+                href={`/dashboard/faIKDivwt7Z8Gp-B5yFrv/maintenance/tables/modos/${modo.id}`}
                 title={modo.id}
               />
             );
