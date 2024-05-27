@@ -22,6 +22,19 @@ export const contributionsRouter = createTRPCRouter({
       return contribution;
     }),
 
+  getByIntegrant: protectedProcedure
+    .input(
+      z.object({
+        integrantId: z.string(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const contributions = await db.query.contributions.findMany({
+        where: eq(schema.contributions.integrant_id, input.integrantId),
+      });
+
+      return contributions;
+    }),
   create: protectedProcedure
     .input(
       z.object({

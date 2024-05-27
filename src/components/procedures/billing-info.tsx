@@ -40,17 +40,8 @@ export type InputsBilling = {
 type propsBillingInfo = {
   data: InputsMembers[];
   form: UseFormReturn<InputsBilling>;
-  setBillingData: (data: InputsBilling) => void;
-  handlePreLoad?: () => void;
-  handleFinish?: () => void;
 };
-export default function BillingInfo({
-  data,
-  setBillingData,
-  handlePreLoad,
-  handleFinish,
-  form,
-}: propsBillingInfo) {
+export default function BillingInfo({ data, form }: propsBillingInfo) {
   const isData = data.length > 0;
   const isBillingResponsible =
     isData && data.filter((value) => value.isBillResponsible).length > 0;
@@ -67,57 +58,6 @@ export default function BillingInfo({
   )[0];
 
   const billingResponsible = data.filter((value) => value.isBillResponsible)[0];
-  console.log(billingResponsible);
-  // const initialValues: InputsBilling = {
-  //   product_name: "",
-  //   name: isBillingResponsible
-  //     ? billingResponsible!.name
-  //     : isAdult
-  //       ? adult!.name
-  //       : "",
-  //   id_type: isBillingResponsible
-  //     ? billingResponsible!.id_type
-  //     : isAdult
-  //       ? adult!.id_type
-  //       : "",
-  //   id_number: isBillingResponsible
-  //     ? billingResponsible!.id_number
-  //     : isAdult
-  //       ? adult!.id_number
-  //       : "",
-  //   fiscal_id_type: isBillingResponsible
-  //     ? billingResponsible!.fiscal_id_type
-  //     : isAdult
-  //       ? adult!.fiscal_id_type
-  //       : "",
-  //   fiscal_id_number: isBillingResponsible
-  //     ? billingResponsible!.fiscal_id_number
-  //     : isAdult
-  //       ? adult!.fiscal_id_number
-  //       : "",
-  //   address: isBillingResponsible
-  //     ? ` ${billingResponsible!.address} ${
-  //         billingResponsible!.address_number
-  //       } ${billingResponsible!.depto} ${billingResponsible!.floor} ${
-  //         billingResponsible!.county
-  //       } ${billingResponsible!.state} ${billingResponsible!.cp} ${
-  //         billingResponsible!.zone
-  //       }`
-  //     : isAdult
-  //       ? ` ${adult!.address} ${adult!.address_number} ${adult!.depto} ${
-  //           adult!.floor
-  //         } ${adult!.county} ${adult!.state} ${adult!.cp} ${adult!.zone}`
-  //       : "",
-  //   iva: "",
-  //   card_number: "",
-  //   card_expiration_date: "",
-  //   card_security_code: "",
-  //   afip_status: isBillingResponsible
-  //     ? billingResponsible!.afip_status
-  //     : isAdult
-  //       ? adult!.afip_status
-  //       : "",
-  // };
 
   const { setValue } = form;
   useEffect(() => {
@@ -174,17 +114,12 @@ export default function BillingInfo({
   const productsOptions = products?.map((product) => (
     <SelectItem value={product.id}>{product.name}</SelectItem>
   ));
-  const onSubmit: SubmitHandler<InputsBilling> = async (data) => {
-    setBillingData(data);
-  };
+
   return (
     <>
       <h2 className="text-lg font-semibold">Responsable de facturacion</h2>
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          onChange={() => setBillingData(form.getValues())}
-        >
+        <form>
           <div className="grid grid-cols-3 gap-x-16 gap-y-6">
             <FormField
               control={form.control}

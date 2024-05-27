@@ -17,11 +17,29 @@ export default async function Home(props: { params: { procedureId: string } }) {
   if (!family_group) {
     throw new Error("No se encontro el grupo familiar");
   }
-  const Integrantes = await api.integrants.getByGroup.query({
+  const integrants = await api.integrants.getByGroup.query({
     family_group_id: family_group?.id,
   });
-  if (!Integrantes) {
+  if (!integrants) {
     throw new Error("No se encontraron integrantes");
   }
-  return <ProcedurePage procedure={procedure} family_group={family_group} />;
+  const paymentHolder = integrants.filter(
+    (integrant) => integrant.isPaymentHolder,
+  )![0];
+  const payment_info = await api.payment_info.getByIntegrant.query({
+    integrantId: paymentHolder!.id,
+  });
+  if (!payment_info) {
+    throw new Error("No se encontro la informacion de pago");
+  }
+
+  const contribution;
+  return (
+    <ProcedurePage
+      payment_info={payment_info}
+      integrants={integrants}
+      procedure={procedure}
+      family_group={family_group}
+    />
+  );
 }

@@ -76,12 +76,12 @@ export default function BonusPage(props: BonusPageProps) {
     try {
       await changeBonus({
         id: props.bonus.id,
-        appliedUser: bonusData?.appliedUser,
-        approverUser: bonusData?.aprovedUser,
+        appliedUser: bonusData?.appliedUser ?? "",
+        approverUser: bonusData?.aprovedUser ?? " ",
         validationDate: bonusData?.validationDate,
-        duration: bonusData?.duration,
-        amount: bonusData?.amount,
-        reason: bonusData?.reason,
+        duration: bonusData?.duration ?? " ",
+        amount: bonusData?.amount ?? "",
+        reason: bonusData?.reason ?? " ",
       });
       toast.success("Se ha actualizad la informacion del bono");
       router.refresh();
