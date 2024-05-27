@@ -1,19 +1,18 @@
-import { api } from "~/trpc/server";
 import { Title } from "~/components/title";
 import { List, ListTile } from "~/components/list";
 import LayoutContainer from "~/components/layout-container";
-import { CircleUserRound } from "lucide-react";
+import { api } from "~/trpc/server";
 
+export default async function Home(props: { params: { companyId: string } }) {
 
-export default async function Page(props: { params: { companyId: string } }) {
- 
   return (
     <LayoutContainer>
       <section className="space-y-2">
         <div className="flex justify-between">
-          <Title>Recoleccion</Title>
+          <Title>Servicios</Title>
+
         </div>
-        
+       
       </section>
     </LayoutContainer>
   );
