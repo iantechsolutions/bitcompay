@@ -28,6 +28,9 @@ const stringAsDate = z
     return true;
   });
 
+export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
+  return z.array(recDocumentValidator).parse(rows);
+};
 const stringAsBoolean = z
   .string()
   .nullable()
@@ -42,9 +45,18 @@ const stringAsBoolean = z
     return false;
   });
 
-export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
-  return z.array(recDocumentValidator).parse(rows);
-};
+const stringAsNumber = z
+  .string()
+  .or(z.number())
+  .refine((value) => {
+    if (typeof value === "number") return true;
+    if (typeof value === "string") {
+      if (!isNaN(Number(value))) {
+        return true;
+      }
+      return false;
+    }
+  });
 
 export const recDocumentValidator = z
   .object({
@@ -57,12 +69,12 @@ export const recDocumentValidator = z
     "DESDE BONIF.": z.string().min(0).max(140).nullable().optional(),
     "HASTA BONIF.": z.string().min(0).max(140).nullable().optional(),
     ESTADO: z.string().min(0).max(140).nullable().optional(),
-    "NRO DOC TITULAR": z.string().min(0).max(140).nullable().optional(),
+    "NRO DOC TITULAR": stringAsNumber.nullable().optional(),
     NOMBRE: z.string().min(0).max(140).nullable().optional(),
-    "NRO AFILIADO": z.string().min(0).max(140).nullable().optional(),
+    "NRO AFILIADO": stringAsNumber.nullable().optional(),
     EXTENSION: z.string().min(0).max(140).nullable().optional(),
     "TIPO DOC PROPIO": z.string().min(0).max(140).nullable().optional(),
-    "NRO DE DOCUMENTO PROPIO": z.string().min(0).max(140).nullable().optional(),
+    "NRO DE DOCUMENTO PROPIO": stringAsNumber.nullable().optional(),
     PAR: z.string().min(0).max(140).nullable().optional(),
     "FECHA NACIMIENTO": stringAsDate,
     GENERO: z.enum(["male", "female", "other"]).nullable().optional(),
@@ -73,15 +85,15 @@ export const recDocumentValidator = z
     NACIONALIDAD: z.string().min(0).max(140).nullable().optional(),
     "ESTADO AFIP": z.string().min(0).max(140).nullable().optional(),
     "TIPO DOC FISCAL": z.string().min(0).max(140).nullable().optional(),
-    "NRO DOC FISCAL": z.string().min(0).max(140).nullable().optional(),
+    "NRO DOC FISCAL": stringAsNumber.nullable().optional(),
     LOCALIDAD: z.string().min(0).max(140).nullable().optional(),
     PARTIDO: z.string().min(0).max(140).nullable().optional(),
     DIRECCION: z.string().min(0).max(140).nullable().optional(),
-    PISO: z.string().min(0).max(140).nullable().optional(),
-    DEPTO: z.string().min(0).max(140).nullable().optional(),
-    CP: z.string().min(0).max(140),
-    TELEFONO: z.string().min(0).max(140).nullable().optional(),
-    CELULAR: z.string().min(0).max(140).nullable().optional(),
+    PISO: stringAsNumber.optional().nullable(),
+    DEPTO: stringAsNumber.nullable().optional(),
+    CP: stringAsNumber,
+    TELEFONO: stringAsNumber.nullable().optional(),
+    CELULAR: stringAsNumber.nullable().optional(),
     EMAIL: z.string().min(0).max(140).nullable().optional(),
     "ES AFILIADO": stringAsBoolean,
     "ES TITULAR": stringAsBoolean,

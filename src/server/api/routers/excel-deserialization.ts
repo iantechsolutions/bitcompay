@@ -159,7 +159,6 @@ export const excelDeserializationRouter = createTRPCRouter({
           });
         }
       });
-
       return contents;
     }),
 });

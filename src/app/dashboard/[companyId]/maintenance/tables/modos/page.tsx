@@ -2,7 +2,7 @@ import { Title } from "~/components/title";
 import { List, ListTile } from "~/components/list";
 import LayoutContainer from "~/components/layout-container";
 import { api } from "~/trpc/server";
-import { AddModo } from "./add-modo";
+import { AddModo } from "./add-modo"; 
 import { modos } from "~/server/db/schema";
 
 export default async function Home(props: { params: { companyId: string } }) {
