@@ -32,7 +32,6 @@ import {
 import {
   PaymentInfo,
   type Procedure,
-  type paymentInfo,
   type Integrant,
   type FamilyGroup,
 } from "~/server/db/schema";
@@ -49,10 +48,20 @@ import { type InputsMembers } from "~/components/procedures/members-info";
 interface ProcedurePageProps {
   procedure: Procedure;
   family_group: FamilyGroup;
-  integrants: Integrant;
+  integrants: Integrant[];
   payment_info: PaymentInfo;
 }
 export default function ProcedurePage(props: ProcedurePageProps) {
+  const [membersData, setMembersData] = useState<InputsMembers[]>([]);
+  const initialValuesGeneralInfo: InputsGeneralInfo = {
+    id: props.family_group.id,
+    bussinessUnit: props.family_group.businessUnit!,
+    plan: props.family_group.plan!,
+    validity: props.family_group.validity!,
+    mode: props.family_group.modo!,
+    receipt: props.family_group.receipt!,
+    bonus: props.family_group.bonus!,
+  };
   const generalInfoForm = useForm<InputsGeneralInfo>();
   const membersForm = useForm<InputsMembers>();
   const billingForm = useForm<InputsBilling>();

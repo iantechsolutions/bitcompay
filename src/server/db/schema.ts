@@ -12,7 +12,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { columnId, createdAt, pgTable, updatedAt } from "./schema/util";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { number, type z } from "zod";
+import { literal, number, type z } from "zod";
 import { duration } from "html2canvas/dist/types/css/property-descriptors/duration";
 import { id } from "date-fns/locale";
 import { int } from "drizzle-orm/mysql-core";
@@ -621,7 +621,7 @@ export const integrantSchemaDB = insertintegrantSchema.pick({
   postal_code: true,
   age: true,
   extention: true,
-  family_group_id:true  
+  family_group_id: true,
 });
 export type Integrant = z.infer<typeof selectintegrantSchema>;
 
@@ -986,6 +986,26 @@ export const billingDocumentsSchemaDB = selectbillingDocumentsSchema.pick({
 });
 export type billingDocuments = z.infer<typeof selectbillingDocumentsSchema>;
 
+export const excelBilling = pgTable("excel_billing", {
+  id: columnId,
+  userId: varchar("userId", { length: 255 }).notNull(),
+  url: varchar("url", { length: 255 }).notNull(),
+  documentType: varchar("documentType", { length: 255 }).$type<"rec" | null>(),
+  fileName: varchar("fileName", { length: 255 }).notNull(),
+  companyId: varchar("companyId", { length: 255 })
+    .notNull()
+    .references(() => companies.id),
+  createdAt,
+});
+
+export const insertExcelBillingSchema = createInsertSchema(excelBilling);
+export const selectExcelBillingSchema = createSelectSchema(excelBilling);
+export const excelBillingSchemaDB = selectExcelBillingSchema.pick({
+  id: true,
+  url: true,
+});
+export type ExcelBilling = z.infer<typeof selectExcelBillingSchema>;
+
 export const pricePerAge = pgTable("pricePerAge", {
   id: columnId,
   fromAge: integer("fromAge").notNull(),
@@ -1035,10 +1055,10 @@ export const currentAccountRelations = relations(
 export const events = pgTable("events", {
   id: columnId,
   description: varchar("description", { length: 255 }).notNull(),
-  type: varchar("type", { enum: ["NC", "FC", "REC"] }),
+  type: varchar("type", { enum: ["NC", "FC", "REC"] }),  //alta = rec
   currentAccount_id: varchar("currentAccount_id", { length: 255 }),
   event_amount: real("event_amount").notNull(),
-  current_amount: real("event_amout").notNull(),
+  current_amount: real("current_amout").notNull(), // saldo post transaccion
   createdAt,
 });
 

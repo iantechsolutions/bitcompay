@@ -31,48 +31,77 @@ const stringAsDate = z
 export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
   return z.array(recDocumentValidator).parse(rows);
 };
+const stringAsBoolean = z
+  .string()
+  .nullable()
+  .optional()
+  .transform((value) => {
+    if (value === undefined || value === null || value === "") {
+      return false;
+    }
+    if (value.toLowerCase() === "verdadero") {
+      return true;
+    }
+    return false;
+  });
+
+const stringAsNumber = z
+  .string()
+  .or(z.number())
+  .refine((value) => {
+    if (typeof value === "number") return true;
+    if (typeof value === "string") {
+      if (!isNaN(Number(value))) {
+        return true;
+      }
+      return false;
+    }
+  });
 
 export const recDocumentValidator = z
   .object({
     "UNIDAD DE NEGOCIO": z.string().min(0).max(140),
     OS: z.string().min(0).max(140).nullable().optional(),
     "OS ORIGEN": z.string().min(0).max(140).nullable().optional(),
-    VIGENCIA: stringAsDate.nullable().optional(),
+    VIGENCIA: stringAsDate,
     MODO: z.string().min(0).max(140),
     BONIFICACION: z.string().min(0).max(140).nullable().optional(),
     "DESDE BONIF.": z.string().min(0).max(140).nullable().optional(),
     "HASTA BONIF.": z.string().min(0).max(140).nullable().optional(),
     ESTADO: z.string().min(0).max(140).nullable().optional(),
-    "NRO DOC TITULAR": z.string().min(0).max(140).nullable().optional(),
+    "NRO DOC TITULAR": stringAsNumber.nullable().optional(),
     NOMBRE: z.string().min(0).max(140).nullable().optional(),
-    "NRO AFILIADO": z.string().min(0).max(140).nullable().optional(),
+    "NRO AFILIADO": stringAsNumber.nullable().optional(),
     EXTENSION: z.string().min(0).max(140).nullable().optional(),
     "TIPO DOC PROPIO": z.string().min(0).max(140).nullable().optional(),
-    "NRO DE DOCUMENTO PROPIO": z.string().min(0).max(140).nullable().optional(),
+    "NRO DE DOCUMENTO PROPIO": stringAsNumber.nullable().optional(),
     PAR: z.string().min(0).max(140).nullable().optional(),
-    "FECHA NACIMIENTO": z.string().min(0).max(140).nullable().optional(),
+    "FECHA NACIMIENTO": stringAsDate,
     GENERO: z.enum(["male", "female", "other"]).nullable().optional(),
-    "ESTADO CIVIL": z.string().min(0).max(140).nullable().optional(),
+    "ESTADO CIVIL": z
+      .enum(["married", "single", "divorced", "widowed"])
+      .nullable()
+      .optional(),
     NACIONALIDAD: z.string().min(0).max(140).nullable().optional(),
     "ESTADO AFIP": z.string().min(0).max(140).nullable().optional(),
     "TIPO DOC FISCAL": z.string().min(0).max(140).nullable().optional(),
-    "NRO DOC FISCAL": z.string().min(0).max(140).nullable().optional(),
+    "NRO DOC FISCAL": stringAsNumber.nullable().optional(),
     LOCALIDAD: z.string().min(0).max(140).nullable().optional(),
     PARTIDO: z.string().min(0).max(140).nullable().optional(),
     DIRECCION: z.string().min(0).max(140).nullable().optional(),
-    PISO: z.string().min(0).max(140).nullable().optional(),
-    DEPTO: z.string().min(0).max(140).nullable().optional(),
-    CP: z.string().min(0).max(140).nullable().optional(),
-    TELEFONO: z.string().min(0).max(140).nullable().optional(),
-    CELULAR: z.string().min(0).max(140).nullable().optional(),
+    PISO: stringAsNumber.optional().nullable(),
+    DEPTO: stringAsNumber.nullable().optional(),
+    CP: stringAsNumber,
+    TELEFONO: stringAsNumber.nullable().optional(),
+    CELULAR: stringAsNumber.nullable().optional(),
     EMAIL: z.string().min(0).max(140).nullable().optional(),
-    "ES AFILIADO": z.boolean().nullable().optional(),
-    "ES TITULAR": z.boolean().nullable().optional(),
-    "ES TITULAR DEL PAGO": z.boolean().nullable().optional(),
-    "ES RESP PAGADOR": z.boolean().nullable().optional(),
+    "ES AFILIADO": stringAsBoolean,
+    "ES TITULAR": stringAsBoolean,
+    "ES TITULAR DEL PAGO": stringAsBoolean,
+    "ES RESP PAGADOR": stringAsBoolean,
     "APORTE 3%": z.string().min(0).max(140).nullable().optional(),
-    "DIFERENCIAL CODIGO": z.string().min(0).max(140).nullable().optional(),
-    "DIFERENCIAL VALOR": z.string().min(0).max(140).nullable().optional(),
+    "DIFERENCIAL CODIGO": z.string().min(0).max(140),
+    "DIFERENCIAL VALOR": z.string().min(0).max(140),
     PLAN: z.string().min(0).max(140),
   })
   .transform((value) => {
@@ -94,7 +123,7 @@ export const recDocumentValidator = z
       own_id_type: value["TIPO DOC PROPIO"] ?? null,
       own_id_number: value["NRO DE DOCUMENTO PROPIO"] ?? null,
       relationship: value.PAR ?? null,
-      "birth date": value["FECHA NACIMIENTO"] ?? null,
+      birth_date: value["FECHA NACIMIENTO"] ?? null,
       gender: value.GENERO ?? null,
       "marital status": value["ESTADO CIVIL"] ?? null,
       nationality: value.NACIONALIDAD ?? null,
@@ -114,7 +143,7 @@ export const recDocumentValidator = z
       isHolder: value["ES TITULAR"] ?? null,
       isPaymentHolder: value["ES TITULAR DEL PAGO"] ?? null,
       isPaymentResponsible: value["ES RESP PAGADOR"] ?? null,
-      "3% contribution": value["APORTE 3%"] ?? null,
+      contribution: value["APORTE 3%"] ?? null,
       differential_code: value["DIFERENCIAL CODIGO"] ?? null,
       differential_value: value["DIFERENCIAL VALOR"] ?? null,
       plan: value.PLAN ?? null,
