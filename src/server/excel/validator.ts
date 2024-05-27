@@ -56,7 +56,6 @@ const numberAsString = z.union([z.number(), z.string()]).transform((value) => {
   ) {
     return value.toString();
   }
-  throw new Error("Invalid value");
 });
 
 export const recDocumentValidator = z
@@ -75,12 +74,12 @@ export const recDocumentValidator = z
     "NRO AFILIADO": numberAsString.nullable().optional(),
     EXTENSION: z.string().min(0).max(140).nullable().optional(),
     "TIPO DOC PROPIO": z.string().min(0).max(140).nullable().optional(),
-    "NRO DE DOCUMENTO PROPIO": numberAsString.nullable().optional(),
+    "NRO DOC PROPIO": numberAsString.nullable().optional(),
     PAR: z.string().min(0).max(140).nullable().optional(),
     "FECHA NACIMIENTO": stringAsDate,
     GENERO: z.enum(["male", "female", "other"]).nullable().optional(),
     "ESTADO CIVIL": z
-      .enum(["casado", "soltero", "divorciado", "vuido"])
+      .enum(["casado", "soltero", "divorciado", "viudo"])
       .nullable()
       .optional(),
     NACIONALIDAD: z.string().min(0).max(140).nullable().optional(),
@@ -122,7 +121,7 @@ export const recDocumentValidator = z
       affiliate_number: value["NRO AFILIADO"] ?? null,
       extension: value.EXTENSION ?? null,
       own_id_type: value["TIPO DOC PROPIO"] ?? null,
-      own_id_number: value["NRO DE DOCUMENTO PROPIO"] ?? null,
+      own_id_number: value["NRO DOC PROPIO"] ?? null,
       relationship: value.PAR ?? null,
       birth_date: value["FECHA NACIMIENTO"] ?? null,
       gender: value.GENERO ?? null,
@@ -146,7 +145,7 @@ export const recDocumentValidator = z
       isPaymentResponsible: value["ES RESP PAGADOR"] ?? null,
       contribution: value["APORTE 3%"] ?? null,
       differential_code: value["DIFERENCIAL CODIGO"] ?? null,
-      differential_value: value["DIFERENCIAL VALOR"] ?? null,
+      differential_value: value["DIFERENCIAL VALOR"],
       plan: value.PLAN ?? null,
     };
   });

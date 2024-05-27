@@ -540,7 +540,7 @@ export const integrants = pgTable("integrant", {
   birth_date: timestamp("birth_date", { mode: "date" }),
   gender: varchar("gender", { enum: ["female", "male", "other"] }),
   civil_status: varchar("civil_status", {
-    enum: ["soltero", "casado", "divociado", "viudo"],
+    enum: ["soltero", "casado", "divorciado", "viudo"],
   }),
   nationality: varchar("nationality", { length: 255 }),
   afip_status: varchar("afip_status", { length: 255 }),

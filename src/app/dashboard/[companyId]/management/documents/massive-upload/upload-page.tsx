@@ -37,7 +37,7 @@ export default function UploadPage() {
 
           if (!file) return;
 
-          router.push(`./massive-generation/${file.serverData.uploadId}`);
+          router.push(`./massive-upload/${file.serverData.uploadId}`);
         }}
         onUploadError={(error: Error) => {
           setErrorMessage(error.message);

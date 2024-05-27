@@ -119,7 +119,7 @@ export const excelDeserializationRouter = createTRPCRouter({
           const new_integrant = await db
             .insert(schema.integrants)
             .values({
-              // postal_codeId: postal_code_id,
+              postal_codeId: postal_code_id,
               extention: " ",
               family_group_id: familyGroupId,
               affiliate_type: "",
@@ -153,7 +153,7 @@ export const excelDeserializationRouter = createTRPCRouter({
             })
             .returning();
           await db.insert(schema.differentialsValues).values({
-            amount: parseInt(row.differential_value),
+            amount: parseInt(row.differential_value!),
             differentialId: differentialId,
             integrant_id: new_integrant[0]!.id,
           });
