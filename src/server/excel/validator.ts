@@ -28,6 +28,20 @@ const stringAsDate = z
     return true;
   });
 
+const stringAsBoolean = z
+  .string()
+  .nullable()
+  .optional()
+  .transform((value) => {
+    if (value === undefined || value === null || value === "") {
+      return false;
+    }
+    if (value.toLowerCase() === "verdadero") {
+      return true;
+    }
+    return false;
+  });
+
 export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
   return z.array(recDocumentValidator).parse(rows);
 };
@@ -37,7 +51,7 @@ export const recDocumentValidator = z
     "UNIDAD DE NEGOCIO": z.string().min(0).max(140),
     OS: z.string().min(0).max(140).nullable().optional(),
     "OS ORIGEN": z.string().min(0).max(140).nullable().optional(),
-    VIGENCIA: stringAsDate.nullable().optional(),
+    VIGENCIA: stringAsDate,
     MODO: z.string().min(0).max(140),
     BONIFICACION: z.string().min(0).max(140).nullable().optional(),
     "DESDE BONIF.": z.string().min(0).max(140).nullable().optional(),
@@ -50,9 +64,12 @@ export const recDocumentValidator = z
     "TIPO DOC PROPIO": z.string().min(0).max(140).nullable().optional(),
     "NRO DE DOCUMENTO PROPIO": z.string().min(0).max(140).nullable().optional(),
     PAR: z.string().min(0).max(140).nullable().optional(),
-    "FECHA NACIMIENTO": z.string().min(0).max(140).nullable().optional(),
+    "FECHA NACIMIENTO": stringAsDate,
     GENERO: z.enum(["male", "female", "other"]).nullable().optional(),
-    "ESTADO CIVIL": z.string().min(0).max(140).nullable().optional(),
+    "ESTADO CIVIL": z
+      .enum(["married", "single", "divorced", "widowed"])
+      .nullable()
+      .optional(),
     NACIONALIDAD: z.string().min(0).max(140).nullable().optional(),
     "ESTADO AFIP": z.string().min(0).max(140).nullable().optional(),
     "TIPO DOC FISCAL": z.string().min(0).max(140).nullable().optional(),
@@ -66,10 +83,10 @@ export const recDocumentValidator = z
     TELEFONO: z.string().min(0).max(140).nullable().optional(),
     CELULAR: z.string().min(0).max(140).nullable().optional(),
     EMAIL: z.string().min(0).max(140).nullable().optional(),
-    "ES AFILIADO": z.boolean().nullable().optional(),
-    "ES TITULAR": z.boolean().nullable().optional(),
-    "ES TITULAR DEL PAGO": z.boolean().nullable().optional(),
-    "ES RESP PAGADOR": z.boolean().nullable().optional(),
+    "ES AFILIADO": stringAsBoolean,
+    "ES TITULAR": stringAsBoolean,
+    "ES TITULAR DEL PAGO": stringAsBoolean,
+    "ES RESP PAGADOR": stringAsBoolean,
     "APORTE 3%": z.string().min(0).max(140).nullable().optional(),
     "DIFERENCIAL CODIGO": z.string().min(0).max(140),
     "DIFERENCIAL VALOR": z.string().min(0).max(140),
@@ -94,7 +111,7 @@ export const recDocumentValidator = z
       own_id_type: value["TIPO DOC PROPIO"] ?? null,
       own_id_number: value["NRO DE DOCUMENTO PROPIO"] ?? null,
       relationship: value.PAR ?? null,
-      "birth date": value["FECHA NACIMIENTO"] ?? null,
+      birth_date: value["FECHA NACIMIENTO"] ?? null,
       gender: value.GENERO ?? null,
       "marital status": value["ESTADO CIVIL"] ?? null,
       nationality: value.NACIONALIDAD ?? null,

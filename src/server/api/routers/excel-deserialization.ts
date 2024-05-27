@@ -19,7 +19,7 @@ export const excelDeserializationRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       const contents = await readExcelFile(db, input.id, input.type);
       const familyGroupMap = new Map<string | null, string>();
-
+      console.log("contents:  ", contents);
       await db.transaction(async (db) => {
         for (const row of contents) {
           const business_unit = await db.query.bussinessUnits.findFirst({
@@ -105,6 +105,17 @@ export const excelDeserializationRouter = createTRPCRouter({
             differentialId = new_differential[0]!.id;
           }
 
+          const birthDate = new Date(row.birth_date);
+          const today = new Date();
+          let age = today.getFullYear() - birthDate.getFullYear();
+          // Additional logic to handle cases where the birth date hasn't occurred yet this year
+          if (
+            today.getMonth() < birthDate.getMonth() ||
+            (today.getMonth() === birthDate.getMonth() &&
+              today.getDate() < birthDate.getDate())
+          ) {
+            age--;
+          }
           const new_integrant = await db
             .insert(schema.integrants)
             .values({
@@ -116,9 +127,9 @@ export const excelDeserializationRouter = createTRPCRouter({
               name: row.name,
               id_type: row.own_id_type,
               id_number: row.own_id_number,
-              // birth_date: row["birth date"],
-              // gender: row.gender,
-              // civil_status: row["marital status"],
+              birth_date: row.birth_date,
+              gender: row.gender,
+              civil_status: row["marital status"],
               nationality: row.nationality,
               afip_status: row["afip status"],
               fiscal_id_type: row.fiscal_id_type,
@@ -133,11 +144,11 @@ export const excelDeserializationRouter = createTRPCRouter({
               partido: row.district,
               state: row.state,
               zone: " ", //a rellenar
-              // isHolder: row.isHolder,
-              // isPaymentHolder: row.isPaymentHolder,
-              // isAffiliate: row.isAffiliated,
-              // isBillResponsible: row.isPaymentResponsible,
-              // age: "", //a rellenar, hay que calcular
+              isHolder: row.isHolder,
+              isPaymentHolder: row.isPaymentHolder,
+              isAffiliate: row.isAffiliated,
+              isBillResponsible: row.isPaymentResponsible,
+              age: age,
               affiliate_number: row.affiliate_number,
             })
             .returning();
@@ -148,6 +159,8 @@ export const excelDeserializationRouter = createTRPCRouter({
           });
         }
       });
+
+      return contents;
     }),
 });
 
@@ -160,7 +173,7 @@ function isKeyPresent(
 
 async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
   const upload = await db.query.documentUploads.findFirst({
-    where: eq(schema.documentUploads.id, id),
+    where: eq(schema.excelBilling.id, id),
   }); // aca se cambia por la tabla correcta despues
 
   if (!upload) {
