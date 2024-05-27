@@ -40,17 +40,8 @@ export type InputsBilling = {
 type propsBillingInfo = {
   data: InputsMembers[];
   form: UseFormReturn<InputsBilling>;
-  setBillingData: (data: InputsBilling) => void;
-  handlePreLoad?: () => void;
-  handleFinish?: () => void;
 };
-export default function BillingInfo({
-  data,
-  setBillingData,
-  handlePreLoad,
-  handleFinish,
-  form,
-}: propsBillingInfo) {
+export default function BillingInfo({ data, form }: propsBillingInfo) {
   const isData = data.length > 0;
   const isBillingResponsible =
     isData && data.filter((value) => value.isBillResponsible).length > 0;
@@ -67,57 +58,6 @@ export default function BillingInfo({
   )[0];
 
   const billingResponsible = data.filter((value) => value.isBillResponsible)[0];
-  console.log(billingResponsible);
-  // const initialValues: InputsBilling = {
-  //   product_name: "",
-  //   name: isBillingResponsible
-  //     ? billingResponsible!.name
-  //     : isAdult
-  //       ? adult!.name
-  //       : "",
-  //   id_type: isBillingResponsible
-  //     ? billingResponsible!.id_type
-  //     : isAdult
-  //       ? adult!.id_type
-  //       : "",
-  //   id_number: isBillingResponsible
-  //     ? billingResponsible!.id_number
-  //     : isAdult
-  //       ? adult!.id_number
-  //       : "",
-  //   fiscal_id_type: isBillingResponsible
-  //     ? billingResponsible!.fiscal_id_type
-  //     : isAdult
-  //       ? adult!.fiscal_id_type
-  //       : "",
-  //   fiscal_id_number: isBillingResponsible
-  //     ? billingResponsible!.fiscal_id_number
-  //     : isAdult
-  //       ? adult!.fiscal_id_number
-  //       : "",
-  //   address: isBillingResponsible
-  //     ? ` ${billingResponsible!.address} ${
-  //         billingResponsible!.address_number
-  //       } ${billingResponsible!.depto} ${billingResponsible!.floor} ${
-  //         billingResponsible!.county
-  //       } ${billingResponsible!.state} ${billingResponsible!.cp} ${
-  //         billingResponsible!.zone
-  //       }`
-  //     : isAdult
-  //       ? ` ${adult!.address} ${adult!.address_number} ${adult!.depto} ${
-  //           adult!.floor
-  //         } ${adult!.county} ${adult!.state} ${adult!.cp} ${adult!.zone}`
-  //       : "",
-  //   iva: "",
-  //   card_number: "",
-  //   card_expiration_date: "",
-  //   card_security_code: "",
-  //   afip_status: isBillingResponsible
-  //     ? billingResponsible!.afip_status
-  //     : isAdult
-  //       ? adult!.afip_status
-  //       : "",
-  // };
 
   const { setValue } = form;
   useEffect(() => {
@@ -174,262 +114,258 @@ export default function BillingInfo({
   const productsOptions = products?.map((product) => (
     <SelectItem value={product.id}>{product.name}</SelectItem>
   ));
-  const onSubmit: SubmitHandler<InputsBilling> = async (data) => {
-    setBillingData(data);
-  };
+
   return (
     <>
       <h2 className="text-lg font-semibold">Responsable de facturacion</h2>
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          onChange={() => setBillingData(form.getValues())}
-        >
-          <FormField
-            control={form.control}
-            name="product_name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Producto</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="elija un producto" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>{productsOptions}</SelectContent>
-                </Select>
-                {/* {products?.map((product) =>
+        <form>
+          <div className="grid grid-cols-3 gap-x-16 gap-y-6">
+            <FormField
+              control={form.control}
+              name="product_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Producto</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="elija un producto" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>{productsOptions}</SelectContent>
+                  </Select>
+                  {/* {products?.map((product) =>
                   product.channels.map((channel) => (
                     <FormLabel>{channel.channel.name}</FormLabel>
                   )),
                 )} */}
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nombre</FormLabel>
-                <Input
-                  {...field}
-                  placeholder="ingrese su nombre"
-                  disabled={isBillingResponsible}
-                />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="fiscal_id_type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tipo de Id fiscal</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  disabled={isBillingResponsible}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="elija un tipo de id fiscal " />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="cuit">CUIT</SelectItem>
-                    <SelectItem value="cuil">CUIL</SelectItem>
-                  </SelectContent>
-                </Select>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="fiscal_id_number"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Numero de Id fiscal</FormLabel>
-                <Input
-                  {...field}
-                  placeholder="ingrese su numero de id fiscal"
-                  disabled={isBillingResponsible}
-                />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="id_type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tipo de Id </FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  disabled={isBillingResponsible}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="elija un tipo de id " />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="dni">DNI</SelectItem>
-                    <SelectItem value="pasaport">Pasaporte</SelectItem>
-                  </SelectContent>
-                </Select>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="afip_status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Estado de AFIP</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  disabled={isBillingResponsible}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccione un estado de AFIP" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="monotributista">
-                      Monotributista
-                    </SelectItem>
-                    <SelectItem value="responsable_inscripto">
-                      Responsable Inscripto
-                    </SelectItem>
-                    <SelectItem value="exento">Exento</SelectItem>
-                    <SelectItem value="consumidor_final">
-                      Consumidor Final
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="id_number"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Numero de Id</FormLabel>
-                <Input
-                  {...field}
-                  placeholder="ingrese su numero de id "
-                  disabled={isBillingResponsible}
-                />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="iva"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>IVA</FormLabel>
-                <Input {...field} placeholder="ingrese su iva" />
-              </FormItem>
-            )}
-          />
-
-          <FormLabel>Campos para DebitoDirecto</FormLabel>
-
-          <FormField
-            control={form.control}
-            name="card_number"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Numero de tarjeta</FormLabel>
-                <Input {...field} placeholder="ingrese su numero de tarjeta" />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="card_expiration_date"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Fecha de vencimiento</FormLabel>
-                <br />
-                <Popover>
-                  <PopoverTrigger asChild>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nombre</FormLabel>
+                  <Input
+                    {...field}
+                    placeholder="ingrese su nombre"
+                    disabled={isBillingResponsible}
+                  />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="fiscal_id_type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo de Id fiscal</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    disabled={isBillingResponsible}
+                  >
                     <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-[240px] pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground",
-                        )}
-                      >
-                        <p>
-                          {field.value ? (
-                            dayjs
-                              .utc(field.value)
-                              .format("D [de] MMMM [de] YYYY")
-                          ) : (
-                            <span>Escoga una fecha</span>
-                          )}
-                        </p>
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
+                      <SelectTrigger>
+                        <SelectValue placeholder="elija un tipo de id fiscal " />
+                      </SelectTrigger>
                     </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value ? new Date(field.value) : undefined}
-                      onSelect={field.onChange}
-                      disabled={(date: Date) => date < new Date("1900-01-01")}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </FormItem>
-            )}
-          />
+                    <SelectContent>
+                      <SelectItem value="cuit">CUIT</SelectItem>
+                      <SelectItem value="cuil">CUIL</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="fiscal_id_number"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Numero de Id fiscal</FormLabel>
+                  <Input
+                    {...field}
+                    placeholder="ingrese su numero de id fiscal"
+                    disabled={isBillingResponsible}
+                  />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="id_type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo de Id </FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    disabled={isBillingResponsible}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="elija un tipo de id " />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="dni">DNI</SelectItem>
+                      <SelectItem value="pasaport">Pasaporte</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="afip_status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Estado de AFIP</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    disabled={isBillingResponsible}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccione un estado de AFIP" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="monotributista">
+                        Monotributista
+                      </SelectItem>
+                      <SelectItem value="responsable_inscripto">
+                        Responsable Inscripto
+                      </SelectItem>
+                      <SelectItem value="exento">Exento</SelectItem>
+                      <SelectItem value="consumidor_final">
+                        Consumidor Final
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="id_number"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Numero de Id</FormLabel>
+                  <Input
+                    {...field}
+                    placeholder="ingrese su numero de id "
+                    disabled={isBillingResponsible}
+                  />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="iva"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>IVA</FormLabel>
+                  <Input {...field} placeholder="ingrese su iva" />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="card_security_code"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Codigo de seguridad</FormLabel>
-                <Input
-                  {...field}
-                  placeholder="ingrese su codigo de seguridad"
-                />
-              </FormItem>
-            )}
-          />
+            <FormLabel>Campos para DebitoDirecto</FormLabel>
 
-          <FormField
-            control={form.control}
-            name="cbu"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>CBU</FormLabel>
-                <Input {...field} placeholder="ingrese su cbu" />
-              </FormItem>
-            )}
-          />
-          <Button onClick={() => handlePreLoad} type="submit">
-            Precarga
-          </Button>
-          <Button onClick={() => handleFinish} type="submit">
-            Finalizar
-          </Button>
+            <FormField
+              control={form.control}
+              name="card_number"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Numero de tarjeta</FormLabel>
+                  <Input
+                    {...field}
+                    placeholder="ingrese su numero de tarjeta"
+                  />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="card_expiration_date"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Fecha de vencimiento</FormLabel>
+                  <br />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-[240px] pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground",
+                          )}
+                        >
+                          <p>
+                            {field.value ? (
+                              dayjs
+                                .utc(field.value)
+                                .format("D [de] MMMM [de] YYYY")
+                            ) : (
+                              <span>Escoga una fecha</span>
+                            )}
+                          </p>
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={
+                          field.value ? new Date(field.value) : undefined
+                        }
+                        onSelect={field.onChange}
+                        disabled={(date: Date) => date < new Date("1900-01-01")}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="card_security_code"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Codigo de seguridad</FormLabel>
+                  <Input
+                    {...field}
+                    placeholder="ingrese su codigo de seguridad"
+                  />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="cbu"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>CBU</FormLabel>
+                  <Input {...field} placeholder="ingrese su cbu" />
+                </FormItem>
+              )}
+            />
+          </div>
         </form>
       </Form>
     </>

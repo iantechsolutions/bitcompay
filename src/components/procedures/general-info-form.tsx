@@ -41,12 +41,11 @@ export type InputsGeneralInfo = {
   id: string;
   bussinessUnit: string;
   plan: string;
-  validity: string;
+  validity: Date;
   mode: string;
   name: string;
   cuit: string;
   healthInsurances: string;
-  employerContribution: string;
   receipt: string;
   bonus: string;
 };
@@ -55,49 +54,17 @@ export type InputsProcedure = {
 };
 
 type GeneralInfoProps = {
-  setfamily_group: (data: InputsGeneralInfo) => void;
-  setProcedureId: (data: InputsProcedure) => void;
   form: UseFormReturn<InputsGeneralInfo>;
 };
 
 export default function GeneralInfoForm(props: GeneralInfoProps) {
-  const [procedureStatus, setProcedureStatus] = useState<string | null>(null);
   const { data: bussinessUnits } = api.bussinessUnits.list.useQuery(undefined);
   const { data: plans } = api.plans.list.useQuery(undefined);
   const { data: modos } = api.modos.list.useQuery(undefined);
-  const { mutateAsync: createProcedure } = api.procedure.create.useMutation();
-  const { mutateAsync: createfamily_group, isLoading } =
-    api.family_groups.create.useMutation();
-  const [family_groupId, setfamily_groupId] = useState("");
-
-  const onSubmit: SubmitHandler<InputsGeneralInfo> = async (data) => {
-    const { setfamily_group, setProcedureId } = props;
-    await createfamily_group({
-      businessUnit: data.bussinessUnit,
-      validity: new Date(data.validity),
-      plan: data.plan,
-      modo: data.mode,
-    }).then(async (response) => {
-      setfamily_groupId(response[0]!.id);
-      setfamily_group(data);
-      if (procedureStatus) {
-        const procedure = await createProcedure({
-          type: "family_group",
-          estado: procedureStatus,
-          family_group: response[0]!.id,
-        });
-        setProcedureId({ id: procedure[0]!.id });
-      }
-    });
-  };
 
   return (
     <Form {...props.form}>
-      <form
-        className="space-y-8"
-        onSubmit={props.form.handleSubmit(onSubmit)}
-        onChange={() => props.setfamily_group(props.form.getValues())}
-      >
+      <form className="space-y-8">
         <FormField
           control={props.form.control}
           name="bussinessUnit"

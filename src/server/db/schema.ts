@@ -12,9 +12,11 @@ import {
 } from "drizzle-orm/pg-core";
 import { columnId, createdAt, pgTable, updatedAt } from "./schema/util";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { number, type z } from "zod";
+import { literal, number, type z } from "zod";
 import { duration } from "html2canvas/dist/types/css/property-descriptors/duration";
 import { id } from "date-fns/locale";
+import { int } from "drizzle-orm/mysql-core";
+import { text } from "stream/consumers";
 export * from "./schema/auth";
 export { pgTable } from "./schema/util";
 
@@ -138,7 +140,9 @@ export const payments = pgTable(
 
     createdAt,
     updatedAt,
-    factura_id: varchar("factura_id", { length: 255 }).references(()=>facturas.id)
+    factura_id: varchar("factura_id", { length: 255 }).references(
+      () => facturas.id,
+    ),
   },
   (payments) => ({
     userIdIdx: index("payment_userId_idx").on(payments.userId),
@@ -250,6 +254,7 @@ export const brands = pgTable(
     enabled: boolean("enabled").notNull().default(true),
     createdAt,
     updatedAt,
+    logo_url: varchar("logo_url"),
   },
   (brands) => ({
     nameIdx: index("brand_name_idx").on(brands.name),
@@ -470,6 +475,9 @@ export const bussinessUnits = pgTable("bussiness_units", {
   id: columnId,
   description: varchar("description", { length: 255 }).notNull(),
   createdAt,
+  brandId: varchar("brandId", { length: 255 })
+    .notNull()
+    .references(() => brands.id),
   companyId: varchar("companyId", { length: 255 })
     .notNull()
     .references(() => companies.id),
@@ -478,6 +486,10 @@ export const bussinessUnits = pgTable("bussiness_units", {
 export const bussinessUnitsRelations = relations(
   bussinessUnits,
   ({ one, many }) => ({
+    brand: one(brands, {
+      fields: [bussinessUnits.brandId],
+      references: [brands.id],
+    }),
     company: one(companies, {
       fields: [bussinessUnits.companyId],
       references: [companies.id],
@@ -528,7 +540,7 @@ export const integrants = pgTable("integrant", {
   birth_date: timestamp("birth_date", { mode: "date" }),
   gender: varchar("gender", { enum: ["female", "male", "other"] }),
   civil_status: varchar("civil_status", {
-    enum: ["single", "married", "divorced", "widowed"],
+    enum: ["soltero", "casado", "divorciado", "viudo"],
   }),
   nationality: varchar("nationality", { length: 255 }),
   afip_status: varchar("afip_status", { length: 255 }),
@@ -540,7 +552,7 @@ export const integrants = pgTable("integrant", {
   email: varchar("email", { length: 255 }),
   floor: varchar("floor", { length: 255 }),
   department: varchar("department", { length: 255 }),
-  lacality: varchar("lacality", { length: 255 }),
+  locality: varchar("lacality", { length: 255 }),
   partido: varchar("partido", { length: 255 }),
   state: varchar("state", { length: 255 }),
   cp: varchar("cp", { length: 255 }),
@@ -549,15 +561,25 @@ export const integrants = pgTable("integrant", {
   isPaymentHolder: boolean("isPaymentHolder").notNull().default(false),
   isAffiliate: boolean("isAffiliate").notNull().default(false),
   isBillResponsible: boolean("isBillResponsible").notNull().default(false),
+  age: integer("age"),
   family_group_id: varchar("family_group_id", { length: 255 }).references(
-    () => procedure.id,
+    () => family_groups.id,
   ),
+  affiliate_number: varchar("affiliate_number", { length: 255 }),
+  extention: varchar("extention", { length: 255 }),
+  postal_codeId: varchar("postalcodeid")
+    .references(() => postal_code.id)
+    .notNull(),
 });
 
 export const integrantsRelations = relations(integrants, ({ one, many }) => ({
   family_group: one(family_groups, {
     fields: [integrants.family_group_id],
     references: [family_groups.id],
+  }),
+  postal_code: one(postal_code, {
+    fields: [integrants.postal_codeId],
+    references: [postal_code.id],
   }),
   contributions: many(contributions),
   differentialsValues: many(differentialsValues),
@@ -596,6 +618,10 @@ export const integrantSchemaDB = insertintegrantSchema.pick({
   procedure_id: true,
   paymentHolder_id: true,
   billResponsible_id: true,
+  postal_code: true,
+  age: true,
+  extention: true,
+  family_group_id: true,
 });
 export type Integrant = z.infer<typeof selectintegrantSchema>;
 
@@ -620,7 +646,6 @@ export const contributionsRelations = relations(contributions, ({ one }) => ({
 export const differentials = pgTable("differentials", {
   id: columnId,
   codigo: varchar("codigo", { length: 255 }).notNull(),
-  descripcion: varchar("descripcion", { length: 255 }).notNull(),
 });
 
 export const differentialsRelations = relations(differentials, ({ many }) => ({
@@ -743,13 +768,16 @@ export const family_groups = pgTable("family_groups", {
   ),
   state: varchar("state", { length: 255 }),
   payment_status: varchar("payment_status", { length: 255 })
-    .notNull()
     .default("pending"),
 });
 
 export const family_groupsRelations = relations(
   family_groups,
   ({ one, many }) => ({
+    businessUnit: one(bussinessUnits, {
+      fields: [family_groups.businessUnit],
+      references: [bussinessUnits.id],
+    }),
     plan: one(plans, {
       fields: [family_groups.plan],
       references: [plans.id],
@@ -757,6 +785,10 @@ export const family_groupsRelations = relations(
     modo: one(modos, {
       fields: [family_groups.modo],
       references: [modos.id],
+    }),
+    bonus: one(bonuses, {
+      fields: [family_groups.bonus],
+      references: [bonuses.id],
     }),
     integrants: many(integrants),
     abonos: many(abonos),
@@ -777,7 +809,7 @@ export const family_groupsSchemaDB = insertfamily_groupsSchema.pick({
   receipt: true,
   bonus: true,
 });
-export type family_groups = z.infer<typeof selectfamily_groupsSchema>;
+export type FamilyGroup = z.infer<typeof selectfamily_groupsSchema>;
 
 export const bonuses = pgTable("bonuses", {
   id: columnId,
@@ -888,6 +920,9 @@ export const payment_info = pgTable("payment_info", {
   ),
 });
 
+export const selectPaymentInfo = createSelectSchema(payment_info);
+export type PaymentInfo = z.infer<typeof selectPaymentInfo>;
+
 export const payment_infoRelations = relations(payment_info, ({ one }) => ({
   integrant: one(integrants, {
     fields: [payment_info.integrant_id],
@@ -950,13 +985,33 @@ export const billingDocumentsSchemaDB = selectbillingDocumentsSchema.pick({
 });
 export type billingDocuments = z.infer<typeof selectbillingDocumentsSchema>;
 
+export const excelBilling = pgTable("excel_billing", {
+  id: columnId,
+  userId: varchar("userId", { length: 255 }).notNull(),
+  url: varchar("url", { length: 255 }).notNull(),
+  documentType: varchar("documentType", { length: 255 }).$type<"rec" | null>(),
+  fileName: varchar("fileName", { length: 255 }).notNull(),
+  companyId: varchar("companyId", { length: 255 })
+    .notNull()
+    .references(() => companies.id),
+  createdAt,
+});
+
+export const insertExcelBillingSchema = createInsertSchema(excelBilling);
+export const selectExcelBillingSchema = createSelectSchema(excelBilling);
+export const excelBillingSchemaDB = selectExcelBillingSchema.pick({
+  id: true,
+  url: true,
+});
+export type ExcelBilling = z.infer<typeof selectExcelBillingSchema>;
+
 export const pricePerAge = pgTable("pricePerAge", {
   id: columnId,
   fromAge: integer("fromAge").notNull(),
   toAge: integer("toAge").notNull(),
-  amount: bigint("amount", { mode: "number" }).notNull(),
   createdAt,
   plan_id: varchar("plan_id", { length: 255 }).references(() => plans.id),
+  amount: real("amount").notNull(),
 });
 
 export const pricePerAgeRelations = relations(pricePerAge, ({ one, many }) => ({
@@ -999,10 +1054,10 @@ export const currentAccountRelations = relations(
 export const events = pgTable("events", {
   id: columnId,
   description: varchar("description", { length: 255 }).notNull(),
-  type: varchar("type", { enum: ["NC", "FC", "REC"] }),
+  type: varchar("type", { enum: ["NC", "FC", "REC"] }), //alta = rec
   currentAccount_id: varchar("currentAccount_id", { length: 255 }),
   event_amount: real("event_amount").notNull(),
-  current_amount: real("event_amout").notNull(),
+  current_amount: real("current_amout").notNull(), // saldo post transaccion
   createdAt,
 });
 
@@ -1011,4 +1066,15 @@ export const eventsRelations = relations(events, ({ one }) => ({
     fields: [events.currentAccount_id],
     references: [currentAccount.id],
   }),
+}));
+
+export const postal_code = pgTable("postalcodes", {
+  id: columnId,
+  name: varchar("name", { length: 255 }).notNull(),
+  cp: varchar("cp", { length: 255 }),
+  zone: varchar("zone", { length: 255 }),
+});
+
+export const postal_codeRelations = relations(postal_code, ({ many }) => ({
+  postal_code: many(integrants),
 }));

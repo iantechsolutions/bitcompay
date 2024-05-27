@@ -84,7 +84,7 @@ const data = [
 
 export function Overview() {
   return (
-    <ResponsiveContainer width={"99%"} height={300}>
+    <ResponsiveContainer width={"99%"} height={250}>
       <AreaChart
         width={500}
         height={400}

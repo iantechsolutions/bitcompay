@@ -25,7 +25,19 @@ export const paymentInfoRouter = createTRPCRouter({
 
       return paymentInfo;
     }),
+  getByIntegrant: protectedProcedure
+    .input(
+      z.object({
+        integrantId: z.string(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const paymentInfo = await db.query.payment_info.findFirst({
+        where: eq(schema.payment_info.integrant_id, input.integrantId),
+      });
 
+      return paymentInfo;
+    }),
   create: protectedProcedure
     .input(
       z.object({

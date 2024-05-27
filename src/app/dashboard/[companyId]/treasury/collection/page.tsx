@@ -11,7 +11,7 @@ export default async function Page(props: { params: { companyId: string } }) {
     <LayoutContainer>
       <section className="space-y-2">
         <div className="flex justify-between">
-          <Title>Recollecion</Title>
+          <Title>Recoleccion</Title>
         </div>
         
       </section>

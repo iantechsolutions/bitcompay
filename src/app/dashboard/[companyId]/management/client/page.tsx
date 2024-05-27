@@ -6,7 +6,7 @@ import { CircleUserRound } from "lucide-react";
 import { AddClientDialog } from "./add-client-dialog";
 
 export default async function Page(props: { params: { companyId: string } }) {
-    // const client = await api..list.query();
+  // const client = await api..list.query();
   return (
     <LayoutContainer>
       <section className="space-y-2">

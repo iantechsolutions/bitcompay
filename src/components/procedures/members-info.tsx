@@ -56,7 +56,7 @@ export type InputsMembers = {
   name: string;
   id_type: string;
   id_number: string;
-  birth_date: string;
+  birth_date: Date;
   gender: string;
   civil_status: string;
   nationality: string;

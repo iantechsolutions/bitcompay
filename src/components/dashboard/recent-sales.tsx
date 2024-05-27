@@ -47,7 +47,7 @@ export function RecentSales() {
     },
   ];
   return (
-    <ResponsiveContainer width={"99%"} height={300}>
+    <ResponsiveContainer width={"99%"} height={250}>
       <BarChart width={500} height={300} data={data} layout="vertical">
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis type="number" />

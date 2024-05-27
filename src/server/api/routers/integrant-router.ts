@@ -5,9 +5,6 @@ import { eq } from "drizzle-orm";
 import { getServerAuthSession } from "~/server/auth";
 import { integrants } from "~/server/db/schema";
 
-
-
-
 export const integrantsRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({}) => {
     const integrants = await db.query.integrants.findMany();
@@ -26,46 +23,60 @@ export const integrantsRouter = createTRPCRouter({
 
       return integrants;
     }),
-
-    create: protectedProcedure
-    .input(z.object({ 
-      iva:z.string(),
-      affiliate_type:z.string(),
-      relationship: z.string(),
-      name: z.string(),
-      id_type: z.string(),
-      id_number: z.string(),
-      birth_date: z.string().transform(value => new Date(value)),
-      gender: z.enum(["female", "male", "other"]),
-      civil_status: z.enum(["single", "married", "divorced", "widowed"]),
-      nationality:z.string(),
-      afip_status:z.string(),
-      fiscal_id_type: z.string(),
-      fiscal_id_number: z.string(),
-      address: z.string(),
-      phone_number: z.string(),
-      cellphone_number: z.string(),
-      email: z.string(),
-      floor: z.string(),
-      department: z.string(),
-      lacality: z.string(),
-      partido: z.string(),
-      state: z.string(),
-      cp: z.string(),
-      zone: z.string(),
-      isHolder:  z.boolean(),
-      isPaymentHolder: z.boolean(),
-      isAffiliate: z.boolean(),
-      isBillResponsiblee: z.boolean(),
-      family_group_id: z.string().optional(),
-    }))
+  getByGroup: protectedProcedure
+    .input(
+      z.object({
+        family_group_id: z.string(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const integrants = await db.query.integrants.findMany({
+        where: eq(schema.integrants.family_group_id, input.family_group_id),
+      });
+      return integrants;
+    }),
+  create: protectedProcedure
+    .input(
+      z.object({
+        iva: z.string().optional().optional(),
+        affiliate_type: z.string().optional(),
+        relationship: z.string().optional(),
+        name: z.string().optional(),
+        id_type: z.string().optional(),
+        id_number: z.string().optional(),
+        birth_date: z.date().optional(),
+        gender: z.enum(["female", "male", "other"]).optional(),
+        civil_status: z
+          .enum(["soltero", "casado", "divorciado", "viudo"])
+          .optional(),
+        nationality: z.string().optional(),
+        afip_status: z.string().optional(),
+        fiscal_id_type: z.string().optional(),
+        fiscal_id_number: z.string().optional(),
+        address: z.string().optional(),
+        phone_number: z.string().optional(),
+        cellphone_number: z.string().optional(),
+        email: z.string().optional(),
+        floor: z.string().optional(),
+        department: z.string().optional(),
+        lacality: z.string().optional(),
+        partido: z.string().optional(),
+        state: z.string().optional(),
+        cp: z.string().optional(),
+        zone: z.string().optional(),
+        isHolder: z.boolean().optional(),
+        isPaymentHolder: z.boolean().optional(),
+        isAffiliate: z.boolean().optional(),
+        isBillResponsiblee: z.boolean().optional(),
+        family_group_id: z.string().optional(),
+        postal_codeId: z.string(),
+      }),
+    )
     .mutation(async ({ input }) => {
-      
       const integrant = await db.insert(integrants).values(input).returning();
-      
+
       return integrant;
-  
-      }), 
+    }),
   change: protectedProcedure
     .input(
       z.object({
@@ -73,12 +84,12 @@ export const integrantsRouter = createTRPCRouter({
         id: z.string(),
         affiliate_type: z.string(),
         relationship: z.string(),
-        name:z.string(),
+        name: z.string(),
         id_type: z.string(),
         id_number: z.string(),
-        birth_date: z.string().transform(value => new Date(value)),
+        birth_date: z.string().transform((value) => new Date(value)),
         gender: z.enum(["female", "male", "other"]),
-        civil_status: z.enum(["single", "married", "divorced", "widowed"]),
+        civil_status: z.enum(["soltero", "casado", "divorciado", "viudo"]),
         nationality: z.string(),
         afip_status: z.string(),
         fiscal_id_type: z.string(),
@@ -86,7 +97,7 @@ export const integrantsRouter = createTRPCRouter({
         address: z.string(),
         phone_number: z.string(),
         cellphone_number: z.string(),
-        email:z.string(),
+        email: z.string(),
         floor: z.string(),
         department: z.string(),
         localidad: z.string(),
@@ -94,12 +105,12 @@ export const integrantsRouter = createTRPCRouter({
         provincia: z.string(),
         cp: z.string(),
         zona: z.string(),
-        isHolder:  z.boolean(),
+        isHolder: z.boolean(),
         isPaymentHolder: z.boolean(),
         isAffiliate: z.boolean(),
         isBillResponsible: z.boolean(),
         family_group_id: z.string(),
-        }),
+      }),
     )
     .mutation(async ({ input: { id, ...input } }) => {
       console.log("Function called");
