@@ -3,8 +3,7 @@ import { List, ListTile } from "~/components/list";
 import { Title } from "~/components/title";
 import { api } from "~/trpc/server";
 import { Badge } from "~/components/ui/badge";
-import AddPlans from "./AddPlans"; 
-
+import AddPlanDialog from "./add-plan-dialog";
 
 export default async function Page(props: { params: { companyId: string } }) {
   // cambiar luego por tramite router
@@ -14,7 +13,7 @@ export default async function Page(props: { params: { companyId: string } }) {
       <section className="space-y-2">
         <div className="flex justify-between">
           <Title>Planes</Title>
-          <AddPlans />
+          <AddPlanDialog />
         </div>
         <List>
           {planes.map((planes) => (

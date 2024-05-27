@@ -32,8 +32,6 @@ export default async function Home(props: { params: { procedureId: string } }) {
   if (!payment_info) {
     throw new Error("No se encontro la informacion de pago");
   }
-
-  const contribution;
   return (
     <ProcedurePage
       payment_info={payment_info}
