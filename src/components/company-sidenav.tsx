@@ -233,7 +233,7 @@ export default function CompanySidenav(props: { companyId: string }) {
                   </SidenavItem>
                   <SidenavItem
                     icon={<Percent />}
-                    href={`/dashboard/${props.companyId}/management/sales/bonifications`}
+                    href={`/dashboard/${props.companyId}/management/sales/bonuses`}
                   >
                     Bonificaciones
                   </SidenavItem>
@@ -266,25 +266,25 @@ export default function CompanySidenav(props: { companyId: string }) {
                 <AccordionContent>
                   <SidenavItem
                     icon={<UserPlus />}
-                    href={`/dashboard/${props.companyId}/management/documents/advisors`}
+                    href={`/dashboard/${props.companyId}/management/documents/massive-upload`}
                   >
                     Carga Masiva
                   </SidenavItem>
                   <SidenavItem
                     icon={<UserPlus />}
-                    href={`/dashboard/${props.companyId}/management/documents/advisors`}
+                    href={`/dashboard/${props.companyId}/management/documents/rec-upload`}
                   >
                     Carga REC
                   </SidenavItem>
                   <SidenavItem
                     icon={<UserPlus />}
-                    href={`/dashboard/${props.companyId}/management/documents/advisors`}
+                    href={`/dashboard/${props.companyId}/management/documents/output`}
                   >
                     Archivos de salida
                   </SidenavItem>
                   <SidenavItem
                     icon={<UserPlus />}
-                    href={`/dashboard/${props.companyId}/management/documents/advisors`}
+                    href={`/dashboard/${props.companyId}/management/documents/response`}
                   >
                     Respuesta
                   </SidenavItem>

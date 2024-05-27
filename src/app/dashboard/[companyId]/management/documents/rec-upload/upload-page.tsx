@@ -5,7 +5,7 @@ import { Title } from "~/components/title";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { UploadDropzone } from "~/components/uploadthing";
-import { useCompanyData } from "../../company-provider";
+import { useCompanyData } from "../../../company-provider";
 
 export default function UploadPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>();
@@ -16,13 +16,13 @@ export default function UploadPage() {
 
   return (
     <LayoutContainer>
-      <Title>Cargar documento para generación masiva</Title>
+      <Title>Cargar documento</Title>
 
       {errorMessage && <p className="text-red-500">{errorMessage}</p>}
 
       <UploadDropzone
         input={{ companyId: company.id }}
-        endpoint="massiveGenerationUpload"
+        endpoint="documentUpload"
         config={{
           mode: "manual",
           appendOnPaste: true,
@@ -37,7 +37,7 @@ export default function UploadPage() {
 
           if (!file) return;
 
-          router.push(`./massive-generation/${file.serverData.uploadId}`);
+          router.push(`./uploads/${file.serverData.uploadId}`);
         }}
         onUploadError={(error: Error) => {
           setErrorMessage(error.message);

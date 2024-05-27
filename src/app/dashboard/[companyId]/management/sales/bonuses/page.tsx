@@ -1,18 +1,37 @@
 import LayoutContainer from "~/components/layout-container";
+import { api } from "~/trpc/server";
+import AddBonusDialog from "./add-bonus-dialog";
 import { Title } from "~/components/title";
+import { List, ListTile } from "~/components/list";
+import { type Bonuses } from "~/server/db/schema";
+interface Props {
+  params: {
+    companyId: string;
+  };
+}
 
-
-
-export default async function Page(props: { params: { companyId: string } }) {
-  // cambiar luego por tramite router
+export default async function Home(props: Props) {
+  const bonuses: Bonuses[] = await api.bonuses.list.query();
 
   return (
     <LayoutContainer>
-        <section className="space-y-2">
+      <section className="space-y-2">
         <div className="flex justify-between">
-            <Title>Bonificaciones</Title>
+          <Title>Bonos</Title>
+          <AddBonusDialog />
         </div>
-        </section>
+        <List>
+          {bonuses.map((bonus) => {
+            return (
+              <ListTile
+                key={bonus.id}
+                title={bonus.reason}
+                href={`/dashboard/${props.params.companyId}/administration/bonuses/${bonus.id}`}
+              />
+            );
+          })}
+        </List>
+      </section>
     </LayoutContainer>
   );
 }
