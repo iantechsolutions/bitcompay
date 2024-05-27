@@ -34,7 +34,7 @@ export default function AppLayout(props: AppLayoutProps) {
       </header>
       <aside
         className={
-          "fixed bottom-0 left-0 z-20 hidden max-h-full w-[250px] overflow-y-auto border-r md:block " +
+          "max-h-300px fixed bottom-0 left-0 z-20 hidden w-[250px] overflow-y-auto border-r md:block " +
           props.sidenavClass
         }
       >

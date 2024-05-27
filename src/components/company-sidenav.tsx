@@ -1,20 +1,9 @@
 "use client";
 import Sidenav, { SidenavItem, SidenavSeparator } from "./sidenav";
 import {
-  ActivitySquareIcon,
-  FileUpIcon,
   LayoutDashboardIcon,
-  BadgeDollarSign,
   Contact,
   Users,
-  LayoutPanelLeft,
-  Boxes,
-  HeartPulse,
-  Option,
-  Gem,
-  NotebookPen,
-  Blend,
-  Briefcase,
   BriefcaseBusiness,
   Package,
   Sliders,
@@ -32,8 +21,13 @@ import {
   Gift,
   Calendar,
   Settings,
+  UserPlus,
+  FilePlus,
+  BarChart2,
+  Percent,
+  DollarSign,
+  MapPin,
 } from "lucide-react";
-import { Notebook } from "lucide-react";
 import {
   Accordion,
   AccordionItem,
@@ -51,6 +45,8 @@ export default function CompanySidenav(props: { companyId: string }) {
     Auditoria: "audit/",
     Tesoreria: "treasury/",
     Facturacion: "billing/",
+    Ventas: "management/sales/",
+    Documentos: "management/documents/",
   };
   const pathname = usePathname();
   const isActive = (href: keyof typeof menu) => {
@@ -63,6 +59,7 @@ export default function CompanySidenav(props: { companyId: string }) {
       }
     }
   };
+
   return (
     <Sidenav className="h-full bg-[#e9fcf8]">
       <img
@@ -70,7 +67,11 @@ export default function CompanySidenav(props: { companyId: string }) {
         src="https://utfs.io/f/2241aac5-d6d9-4310-bc31-db91cf5565cb-j8i4q3.png"
         alt="logo"
       ></img>
-      <Accordion type="single" className="pl-5 pr-5 pt-5" collapsible>
+      <Accordion
+        type="single"
+        className="bg-[#e9fcf8] pl-5 pr-5 pt-5"
+        collapsible
+      >
         <AccordionItem value="item-1" className="border-none">
           <AccordionTrigger
             className={
@@ -188,12 +189,57 @@ export default function CompanySidenav(props: { companyId: string }) {
             <SidenavSeparator>Gestion</SidenavSeparator>
           </AccordionTrigger>
           <AccordionContent>
-            <SidenavItem
-              href={`/dashboard/${props.companyId}/management/sales`}
-              icon={<ShoppingCart />}
-            >
-              Ventas
-            </SidenavItem>
+            <Accordion type="single" collapsible className="pl-3">
+              <AccordionItem value="item-1" className="border-none">
+                <AccordionTrigger
+                  className={
+                    isActive("Ventas")
+                      ? "rounded-lg bg-[#9ef4e3] px-1 py-1.5 hover:no-underline"
+                      : "rounded-lg px-1 py-1.5 hover:no-underline"
+                  }
+                >
+                  <SidenavSeparator>Ventas </SidenavSeparator>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <SidenavItem
+                    icon={<UserPlus />}
+                    href={`/dashboard/${props.companyId}/management/sales/advisors`}
+                  >
+                    Asesores
+                  </SidenavItem>
+                  <SidenavItem
+                    icon={<FilePlus />}
+                    href={`/dashboard/${props.companyId}/management/sales/procedures`}
+                  >
+                    Tramites
+                  </SidenavItem>
+                  <SidenavItem
+                    icon={<MapPin />}
+                    href={`/dashboard/${props.companyId}/management/sales/plans`}
+                  >
+                    Planes
+                  </SidenavItem>
+                  <SidenavItem
+                    icon={<BarChart2 />}
+                    href={`/dashboard/${props.companyId}/management/sales/differentials`}
+                  >
+                    Diferenciales
+                  </SidenavItem>
+                  <SidenavItem
+                    icon={<DollarSign />}
+                    href={`/dashboard/${props.companyId}/management/sales/comissions`}
+                  >
+                    Comisiones
+                  </SidenavItem>
+                  <SidenavItem
+                    icon={<Percent />}
+                    href={`/dashboard/${props.companyId}/management/sales/bonifications`}
+                  >
+                    Bonificaciones
+                  </SidenavItem>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
             <SidenavItem
               href={`/dashboard/${props.companyId}/management/client`}
               icon={<Users />}
@@ -206,12 +252,45 @@ export default function CompanySidenav(props: { companyId: string }) {
             >
               Proveedores
             </SidenavItem>
-            <SidenavItem
-              href={`/dashboard/${props.companyId}/management/documents`}
-              icon={<File />}
-            >
-              Documentos
-            </SidenavItem>
+            <Accordion type="single" collapsible className="pl-3">
+              <AccordionItem value="item-1" className="border-none">
+                <AccordionTrigger
+                  className={
+                    isActive("Documentos")
+                      ? "rounded-lg bg-[#9ef4e3] px-1 py-1.5 hover:no-underline"
+                      : "rounded-lg px-1 py-1.5 hover:no-underline"
+                  }
+                >
+                  <SidenavSeparator>Documentos</SidenavSeparator>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <SidenavItem
+                    icon={<UserPlus />}
+                    href={`/dashboard/${props.companyId}/management/documents/advisors`}
+                  >
+                    Carga Masiva
+                  </SidenavItem>
+                  <SidenavItem
+                    icon={<UserPlus />}
+                    href={`/dashboard/${props.companyId}/management/documents/advisors`}
+                  >
+                    Carga REC
+                  </SidenavItem>
+                  <SidenavItem
+                    icon={<UserPlus />}
+                    href={`/dashboard/${props.companyId}/management/documents/advisors`}
+                  >
+                    Archivos de salida
+                  </SidenavItem>
+                  <SidenavItem
+                    icon={<UserPlus />}
+                    href={`/dashboard/${props.companyId}/management/documents/advisors`}
+                  >
+                    Respuesta
+                  </SidenavItem>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </AccordionContent>
         </AccordionItem>
 
