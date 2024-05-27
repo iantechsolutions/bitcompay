@@ -172,7 +172,7 @@ function isKeyPresent(
 }
 
 async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
-  const upload = await db.query.documentUploads.findFirst({
+  const upload = await db.query.excelBilling.findFirst({
     where: eq(schema.excelBilling.id, id),
   }); // aca se cambia por la tabla correcta despues
 
@@ -187,7 +187,7 @@ async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
   if (!type) {
     throw new TRPCError({ code: "BAD_REQUEST" });
   }
-  const response = await fetch(upload.fileUrl);
+  const response = await fetch(upload.url);
   const content = await response.arrayBuffer();
 
   const workbook = xlsx.read(content, { type: "buffer" });
