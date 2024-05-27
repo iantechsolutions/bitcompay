@@ -5,7 +5,7 @@ import { List, ListTile } from "~/components/list";
 import { type RouterOutputs } from "~/trpc/shared";
 import { ChevronRight } from "lucide-react";
 export default async function Page(props: {
-  params: { companyId: string; channelId: string };
+  params: { companyId: string; companySubId: string; channelId: string };
 }) {
   const channel: RouterOutputs["channels"]["get"] =
     await api.channels.get.query({
@@ -13,11 +13,11 @@ export default async function Page(props: {
     });
   const company: RouterOutputs["companies"]["get"] =
     await api.companies.get.query({
-      companyId: props.params.companyId,
+      companyId: props.params.companySubId,
     });
   const brands: RouterOutputs["brands"]["getbyCompany"] =
     await api.brands.getbyCompany.query({
-      companyId: props.params.companyId,
+      companyId: props.params.companySubId,
     });
 
   return (
@@ -31,7 +31,7 @@ export default async function Page(props: {
           return (
             <ListTile
               key={brand?.id}
-              href={`/dashboard/management/generate/${props.params.channelId}/${props.params.companyId}/${brand?.id}`}
+              href={`/dashboard/${props.params.companyId}/management/documents/output/${props.params.channelId}/${props.params.companySubId}/${brand?.id}`}
               title={brand?.name}
               leading={<Building2Icon />}
             />

@@ -6,12 +6,12 @@ import CompanyPage from "./company-page";
 import { api } from "~/trpc/server";
 
 export default async function Channel(props: {
-  params: { companyId: string };
+  params: { companySubId: string };
 }) {
   const session = await getServerAuthSession();
 
   const company = await api.companies.get.query({
-    companyId: props.params.companyId,
+    companyId: props.params.companySubId,
   });
 
   const brandsData = company?.brands;

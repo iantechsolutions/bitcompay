@@ -7,26 +7,24 @@ import GenerateChannelOutputPage from "./generate-channel-output";
 export default async function page({
   params,
 }: {
-  params: { channelId: string; companyId: string; brandId: string };
+  params: { channelId: string; companySubId: string; brandId: string };
 }) {
   const company = await api.companies.get.query({
-    companyId: params.companyId,
+    companyId: params.companySubId,
   });
-
 
   if (!company) {
     return <Title>company not found</Title>;
   }
 
-
   const { brand, channel } = await getBrandAndChannel(db, {
     companyId: company.id,
     channelId: params.channelId,
     brandId: params.brandId,
-  })
+  });
 
   // Productos del canal
-  const productsNumbers = channel.products.map(p => p.product.number)
+  const productsNumbers = channel.products.map((p) => p.product.number);
 
   // Pagos que no tienen archivo de salida que corresponden a la marca y los productos del canal
   const payments = await db.query.payments.findMany({
@@ -38,13 +36,11 @@ export default async function page({
     ),
   });
 
-
   const outputFiles = await api.iofiles.list.query({
     channelId: params.channelId,
-    companyId: params.companyId,
+    companyId: params.companySubId,
     brandId: params.brandId,
-  })
-
+  });
 
   // TODO: cambiar esto por un dict<status<record,amount>>
   const status_batch = [
@@ -54,7 +50,6 @@ export default async function page({
     status_batch[0]!.records += 1;
     status_batch[0]!.amount_collected +=
       transaction?.collected_amount ?? transaction?.first_due_amount ?? 0;
-
   }
   return (
     <>

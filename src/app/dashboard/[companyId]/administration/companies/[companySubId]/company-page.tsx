@@ -186,7 +186,7 @@ export default function CompanyPage({
             </AccordionTrigger>
             <AccordionContent>
               <div className="flex justify-end">
-                <DeleteChannel companyId={company.id} />
+                <DeleteChannel companySubId={company.id} />
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -196,7 +196,7 @@ export default function CompanyPage({
   );
 }
 
-function DeleteChannel(props: { companyId: string }) {
+function DeleteChannel(props: { companySubId: string }) {
   const { mutateAsync: deleteChannel, isLoading } =
     api.companies.delete.useMutation();
 
@@ -204,7 +204,7 @@ function DeleteChannel(props: { companyId: string }) {
 
   const handleDelete: MouseEventHandler<HTMLButtonElement> = (e) => {
     e.preventDefault();
-    deleteChannel({ companyId: props.companyId })
+    deleteChannel({ companyId: props.companySubId })
       .then(() => {
         toast.success("Se ha eliminado el canal");
         router.push("../");
