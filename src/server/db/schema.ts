@@ -1035,10 +1035,10 @@ export const currentAccountRelations = relations(
 export const events = pgTable("events", {
   id: columnId,
   description: varchar("description", { length: 255 }).notNull(),
-  type: varchar("type", { enum: ["NC", "FC", "REC"] }),
+  type: varchar("type", { enum: ["NC", "FC", "REC"] }),  //alta = rec
   currentAccount_id: varchar("currentAccount_id", { length: 255 }),
   event_amount: real("event_amount").notNull(),
-  current_amount: real("event_amout").notNull(),
+  current_amount: real("current_amout").notNull(), // saldo post transaccion
   createdAt,
 });
 
