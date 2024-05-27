@@ -55,10 +55,10 @@ export const excelDeserializationRouter = createTRPCRouter({
             const familygroup = await db
               .insert(schema.family_groups)
               .values({
-                businessUnit: business_unit!.id,
+                businessUnit: business_unit?.id,
                 validity: row.validity, // viene del excel "vigencia"
-                plan: plan!.id,
-                modo: mode!.id,
+                plan: plan?.id,
+                modo: mode?.id,
                 receipt: " ", //a rellenar
                 bonus: bonus[0]!.id,
                 state: "Cargado", //queremos agregar columna con estado?
@@ -119,8 +119,8 @@ export const excelDeserializationRouter = createTRPCRouter({
           const new_integrant = await db
             .insert(schema.integrants)
             .values({
-              postal_codeId: postal_code_id, //a rellenar
-              extention: "",
+              // postal_codeId: postal_code_id,
+              extention: " ",
               family_group_id: familyGroupId,
               affiliate_type: "",
               relationship: row.relationship,

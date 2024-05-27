@@ -31,32 +31,33 @@ const stringAsDate = z
 export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
   return z.array(recDocumentValidator).parse(rows);
 };
+
 const stringAsBoolean = z
-  .string()
+  .union([z.string(), z.boolean()])
   .nullable()
   .optional()
   .transform((value) => {
     if (value === undefined || value === null || value === "") {
       return false;
     }
-    if (value.toLowerCase() === "verdadero") {
+    if (typeof value === "string" && value.toLowerCase() === "verdadero") {
       return true;
     }
-    return false;
+    if (typeof value === "boolean") {
+      return value;
+    }
+    throw new Error("invalid boolean value");
   });
 
-const stringAsNumber = z
-  .string()
-  .or(z.number())
-  .refine((value) => {
-    if (typeof value === "number") return true;
-    if (typeof value === "string") {
-      if (!isNaN(Number(value))) {
-        return true;
-      }
-      return false;
-    }
-  });
+const numberAsString = z.union([z.number(), z.string()]).transform((value) => {
+  if (
+    typeof value === "number" ||
+    (typeof value === "string" && !isNaN(Number(value)))
+  ) {
+    return value.toString();
+  }
+  throw new Error("Invalid value");
+});
 
 export const recDocumentValidator = z
   .object({
@@ -69,39 +70,39 @@ export const recDocumentValidator = z
     "DESDE BONIF.": z.string().min(0).max(140).nullable().optional(),
     "HASTA BONIF.": z.string().min(0).max(140).nullable().optional(),
     ESTADO: z.string().min(0).max(140).nullable().optional(),
-    "NRO DOC TITULAR": stringAsNumber.nullable().optional(),
+    "NRO DOC TITULAR": numberAsString.nullable().optional(),
     NOMBRE: z.string().min(0).max(140).nullable().optional(),
-    "NRO AFILIADO": stringAsNumber.nullable().optional(),
+    "NRO AFILIADO": numberAsString.nullable().optional(),
     EXTENSION: z.string().min(0).max(140).nullable().optional(),
     "TIPO DOC PROPIO": z.string().min(0).max(140).nullable().optional(),
-    "NRO DE DOCUMENTO PROPIO": stringAsNumber.nullable().optional(),
+    "NRO DE DOCUMENTO PROPIO": numberAsString.nullable().optional(),
     PAR: z.string().min(0).max(140).nullable().optional(),
     "FECHA NACIMIENTO": stringAsDate,
     GENERO: z.enum(["male", "female", "other"]).nullable().optional(),
     "ESTADO CIVIL": z
-      .enum(["married", "single", "divorced", "widowed"])
+      .enum(["casado", "soltero", "divorciado", "vuido"])
       .nullable()
       .optional(),
     NACIONALIDAD: z.string().min(0).max(140).nullable().optional(),
     "ESTADO AFIP": z.string().min(0).max(140).nullable().optional(),
     "TIPO DOC FISCAL": z.string().min(0).max(140).nullable().optional(),
-    "NRO DOC FISCAL": stringAsNumber.nullable().optional(),
+    "NRO DOC FISCAL": numberAsString.nullable().optional(),
     LOCALIDAD: z.string().min(0).max(140).nullable().optional(),
     PARTIDO: z.string().min(0).max(140).nullable().optional(),
     DIRECCION: z.string().min(0).max(140).nullable().optional(),
-    PISO: stringAsNumber.optional().nullable(),
-    DEPTO: stringAsNumber.nullable().optional(),
-    CP: stringAsNumber,
-    TELEFONO: stringAsNumber.nullable().optional(),
-    CELULAR: stringAsNumber.nullable().optional(),
+    PISO: numberAsString.optional().nullable(),
+    DEPTO: numberAsString.nullable().optional(),
+    CP: numberAsString,
+    TELEFONO: numberAsString.nullable().optional(),
+    CELULAR: numberAsString.nullable().optional(),
     EMAIL: z.string().min(0).max(140).nullable().optional(),
     "ES AFILIADO": stringAsBoolean,
     "ES TITULAR": stringAsBoolean,
     "ES TITULAR DEL PAGO": stringAsBoolean,
     "ES RESP PAGADOR": stringAsBoolean,
-    "APORTE 3%": z.string().min(0).max(140).nullable().optional(),
+    "APORTE 3%": numberAsString.nullable().optional(),
     "DIFERENCIAL CODIGO": z.string().min(0).max(140),
-    "DIFERENCIAL VALOR": z.string().min(0).max(140),
+    "DIFERENCIAL VALOR": numberAsString,
     PLAN: z.string().min(0).max(140),
   })
   .transform((value) => {
