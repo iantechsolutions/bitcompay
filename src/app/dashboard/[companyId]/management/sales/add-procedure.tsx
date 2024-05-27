@@ -33,18 +33,6 @@ export default function AddProcedure() {
   const { mutateAsync: createPaymentInfo } =
     api.payment_info.create.useMutation();
   const [membersData, setMembersData] = useState<InputsMembers[]>([]);
-  const [billingData, setBillingData] = useState<InputsBilling | null>(null);
-  const [procedureData, setProcedureData] = useState<InputsProcedure | null>(
-    null,
-  );
-  const [family_groupData, setfamily_groupData] =
-    useState<InputsGeneralInfo | null>(null);
-
-  const [memberProcedureStatus, setMemberProcedureStatus] = useState<
-    string | null
-  >(null);
-  const [procedureId, setProcedureId] = useState<string | null>(null);
-  const [family_groupId, setfamily_groupId] = useState<string | null>(null);
 
   const generalInfoForm = useForm<InputsGeneralInfo>();
   const membersForm = useForm<InputsMembers>();
@@ -175,11 +163,7 @@ export default function AddProcedure() {
               </TabsTrigger>
             </TabsList>
             <TabsContent value="general_info">
-              <GeneralInfoForm
-                setfamily_group={setfamily_groupData}
-                setProcedureId={setProcedureData}
-                form={generalInfoForm}
-              />
+              <GeneralInfoForm form={generalInfoForm} />
             </TabsContent>
             <TabsContent value="members">
               <div className="flex w-full flex-col gap-2">
@@ -195,11 +179,7 @@ export default function AddProcedure() {
             </TabsContent>
             <TabsContent value="billing">
               <div>
-                <BillingInfo
-                  form={billingForm}
-                  setBillingData={setBillingData}
-                  data={membersData}
-                />
+                <BillingInfo form={billingForm} data={membersData} />
               </div>
             </TabsContent>
           </Tabs>
