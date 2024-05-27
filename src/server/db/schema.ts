@@ -540,7 +540,7 @@ export const integrants = pgTable("integrant", {
   birth_date: timestamp("birth_date", { mode: "date" }),
   gender: varchar("gender", { enum: ["female", "male", "other"] }),
   civil_status: varchar("civil_status", {
-    enum: ["single", "married", "divorced", "widowed"],
+    enum: ["soltero", "casado", "divociado", "viudo"],
   }),
   nationality: varchar("nationality", { length: 255 }),
   afip_status: varchar("afip_status", { length: 255 }),
@@ -1055,7 +1055,7 @@ export const currentAccountRelations = relations(
 export const events = pgTable("events", {
   id: columnId,
   description: varchar("description", { length: 255 }).notNull(),
-  type: varchar("type", { enum: ["NC", "FC", "REC"] }),  //alta = rec
+  type: varchar("type", { enum: ["NC", "FC", "REC"] }), //alta = rec
   currentAccount_id: varchar("currentAccount_id", { length: 255 }),
   event_amount: real("event_amount").notNull(),
   current_amount: real("current_amout").notNull(), // saldo post transaccion

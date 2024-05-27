@@ -19,13 +19,10 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { asTRPCError } from "~/lib/errors";
 import { api } from "~/trpc/react";
-import UploadPage from "../documents/upload-page";
+import UploadPage from "../documents/rec-upload/upload-page";
 
 export function AddClientDialog() {
- 
   const [open, setOpen] = useState(false);
-
-
 
   return (
     <>
@@ -36,10 +33,10 @@ export function AddClientDialog() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-              <DialogTitle>Crear un cliente</DialogTitle>
-            </DialogHeader>
-              <UploadPage/>
-            </DialogContent>
+            <DialogTitle>Crear un cliente</DialogTitle>
+          </DialogHeader>
+          <UploadPage />
+        </DialogContent>
       </Dialog>
     </>
   );
