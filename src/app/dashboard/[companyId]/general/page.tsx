@@ -11,15 +11,14 @@ import { Button } from '~/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select'
 export default async function page() {
-  const session = await getServerAuthSession();
-  const user = session?.user;
+  const user = await currentUser();
   if (!user) {
     return <Title>No se encontró el usuario</Title>;
   }
   return (
     <main>
       <Title>
-        Hola, <span className="text-[#8fefdc]"> {user.name!}!</span>
+        Hola, <span className="text-[#8fefdc]"> {user.firstName!}!</span>
       </Title>
 
             <section>

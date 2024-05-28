@@ -47,6 +47,7 @@ import {
 } from "./ui/accordion";
 import { usePathname } from "next/navigation";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
+import Sidenav, { SidenavItem, SidenavSeparator } from "./sidenav";
 
 export default function CompanySidenav(props: { companyId: string }) {
   const menu: Record<string, string> = {

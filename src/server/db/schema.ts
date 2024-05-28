@@ -17,7 +17,6 @@ import { duration } from "html2canvas/dist/types/css/property-descriptors/durati
 import { id } from "date-fns/locale";
 import { int } from "drizzle-orm/mysql-core";
 import { text } from "stream/consumers";
-export * from "./schema/auth";
 export { pgTable } from "./schema/util";
 
 export const documentUploads = pgTable(
@@ -559,21 +558,6 @@ export const integrantsRelations = relations(integrants, ({ one, many }) => ({
   contributions: many(contributions),
   differentialsValues: many(differentialsValues),
 }));
-
-export const integrantsRelations = relations(integrants, ({ one }) => ({
-    billResponsible: one(billResponsible, {
-        fields: [integrants.billResponsible_id],
-        references: [billResponsible.id],
-    }),
-    paymentHolder: one(paymentHolders, {
-        fields: [integrants.paymentHolder_id],
-        references: [paymentHolders.id],
-    }),
-    procedure: one(procedure, {
-        fields: [integrants.procedure_id],
-        references: [procedure.id],
-    }),
-}))
 
 export const insertintegrantSchema = createInsertSchema(integrants)
 export const selectintegrantSchema = createSelectSchema(integrants)

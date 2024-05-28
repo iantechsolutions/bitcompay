@@ -5,8 +5,6 @@ import CompanyPage from './company-page'
 export default async function Channel(props: {
   params: { companySubId: string };
 }) {
-  const session = await getServerAuthSession();
-
   const company = await api.companies.get.query({
     companyId: props.params.companySubId,
   });
@@ -18,9 +16,9 @@ export default async function Channel(props: {
   });
   const products = await api.products.list.query();
 
-  if (!company || !session?.user) {
-    return <Title>No se encontró la empresa</Title>;
-  }
+  if (!company) {
+    return <Title>No se encontró la empresa</Title>
+}
 
     return <CompanyPage company={company} brands={brands} products={products} />
 }

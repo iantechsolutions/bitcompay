@@ -16,7 +16,7 @@ export default async function Channel(props: {
   return (
     <ChannelPage
       channel={channel}
-      user={session.user}
+      // user={session.user}
       companyId={props.params.companyId}
     />
   );

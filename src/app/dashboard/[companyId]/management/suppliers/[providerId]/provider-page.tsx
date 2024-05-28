@@ -5,7 +5,6 @@ import { toast } from 'sonner'
 import LayoutContainer from '~/components/layout-container'
 import ProviderForm from '~/components/provider-form'
 import { Title } from '~/components/title'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '~/components/ui/accordion'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,6 +25,10 @@ import {
 // import { useCompanyData } from "../../../company-provider";
 import { useCompanyData } from "../../../company-provider";
 import { asTRPCError } from "~/lib/errors";
+import { RouterOutputs } from '~/trpc/shared'
+import { Card } from '~/components/ui/card'
+import { Button } from '~/components/ui/button'
+import { api } from '~/trpc/react'
 
 export default function ProviderPage(props: {
     provider: RouterOutputs['providers']['get']

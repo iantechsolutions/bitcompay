@@ -14,7 +14,6 @@ function formatDate(date: Date | null) {
 }
 
 export default async function Home() {
-  const session = await getServerAuthSession();
   // const html = fs.readFileSync(
   //   "src/app/dashboard/admin/factura/bill.html",
   //   "utf8",

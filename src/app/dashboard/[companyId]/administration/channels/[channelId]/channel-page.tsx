@@ -7,6 +7,7 @@ import LayoutContainer from '~/components/layout-container'
 import { List, ListTile } from '~/components/list'
 import { Title } from '~/components/title'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '~/components/ui/accordion'
+// import { type NavUserData } from "~/components/nav-user-section";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -33,7 +34,7 @@ export default function ChannelPage({
   companyId,
 }: {
   channel: NonNullable<RouterOutputs["channels"]["get"]>;
-  user: NavUserData;
+  // user: NavUserData;
   companyId: string;
 }) {
     const [requiredColumns, setRequiredColumns] = useState<Set<string>>(new Set(channel.requiredColumns))

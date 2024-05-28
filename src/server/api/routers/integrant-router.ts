@@ -2,7 +2,6 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db, schema } from "~/server/db";
 import { eq } from "drizzle-orm";
-import { getServerAuthSession } from "~/server/auth";
 import { integrants } from "~/server/db/schema";
 
 export const integrantsRouter = createTRPCRouter({

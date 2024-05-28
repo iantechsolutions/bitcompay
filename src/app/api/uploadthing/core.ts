@@ -9,7 +9,8 @@ const f = createUploadthing()
 
 // FileRouter for your app, can contain multiple FileRoutes
 export const ourFileRouter = {
-  // Define as many FileRoutes as you like, each with a unique routeSlug
+
+
   massiveGenerationUpload: f({
     "application/vnd.ms-excel": {
       maxFileCount: 1,
@@ -21,16 +22,18 @@ export const ourFileRouter = {
     },
   })
     .input(z.object({ companyId: z.string() }))
-    .middleware(async ({ req, input }) => {
+    .middleware(async ({ input }) => {
       // This code runs on your server before upload
-      const user = await auth(req);
+      const session = await getServerAuthSession()
 
       // If you throw, the user will not be able to upload
-      if (!user) throw new Error("Unauthorized");
+      if (!session) {
+          throw new Error('Unauthorized')
+      }
 
       // Whatever is returned here is accessible in onUploadComplete as `metadata`
-      return { userId: user.id, companyId: input.companyId };
-    })
+      return { userId: session.user.id, companyId: input.companyId }
+  })
     .onUploadComplete(async ({ metadata, file }) => {
       // This code RUNS ON YOUR SERVER after upload
       console.log("Upload complete for userId:", metadata.userId);
@@ -48,17 +51,17 @@ export const ourFileRouter = {
       // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback
       return { uploadId };
     }),
-
-  responseUpload: f({
-    "text/plain": {
-      maxFileCount: 1,
-      maxFileSize: "1MB",
-    },
-  })
-    .input(z.object({ channel: z.string() }))
-    .middleware(async ({ req, input }) => {
-      // This code runs on your server before upload
-      const user = await auth(req);
+    // Define as many FileRoutes as you like, each with a unique routeSlug
+    responseUpload: f({
+        'text/plain': {
+            maxFileCount: 1,
+            maxFileSize: '1MB',
+        },
+    })
+        .input(z.object({ channel: z.string() }))
+        .middleware(async ({ input }) => {
+            // This code runs on your server before upload
+            const session = await getServerAuthSession()
 
             // If you throw, the user will not be able to upload
             if (!session) {

@@ -215,17 +215,17 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
                         {data && (
                             <Table>
                                 <TableHeader>
-                                    <TableRowType>
+                                    <TableRow>
                                         <TableHead>Producto</TableHead>
                                         <TableHead>Cant. Transacciones</TableHead>
                                         <TableHead>Recaudado por producto</TableHead>
-                                    </TableRowType>
+                                    </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {productsBatchArray
                                         .filter((row) => row.records_number !== 0)
                                         .map((row) => (
-                                            <TableRowType key={row.product as React.Key}>
+                                            <TableRow key={row.product as React.Key}>
                                                 <TableCell className='font-medium'>
                                                     {typeof row.productName === 'string' ? row.productName : ''}
                                                 </TableCell>
@@ -233,7 +233,7 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
                                                 <TableCell>
                                                     {typeof row.amount_collected === 'number' ? row.amount_collected : ''}
                                                 </TableCell>
-                                            </TableRowType>
+                                            </TableRow>
                                         ))}
                                 </TableBody>
                             </Table>

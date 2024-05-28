@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 import { db, schema } from '~/server/db'
 import { createTRPCRouter, protectedProcedure } from '../trpc'
+import { currentUser } from '@clerk/nextjs/server'
 
 export const plansRouter = createTRPCRouter({
     get: protectedProcedure.input(z.object({ planId: z.string() })).query(async ({ input }) => {
@@ -24,13 +25,9 @@ export const plansRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
-      const session = await getServerAuthSession();
-      if (!session || !session.user) {
-        throw new Error("User not found");
-      }
-      const user = session?.user.id;
+      const user = await currentUser();
       const new_plan = await db.insert(schema.plans).values({
-        user: user,
+        user: user?.id ?? "",
         expiration_date: input.expiration_date,
         plan_code: input.plan_code,
         description: input.description,

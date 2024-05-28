@@ -83,9 +83,7 @@ export default function AddPlanDialog() {
         router.push(`/dashboard/company/${company.id}/administration/units`)
         router.refresh()
     }
-    router.push(`/dashboard/${company.id}/administration/plans`);
-    router.refresh();
-  };
+  
 
   return (
     <>
@@ -195,4 +193,4 @@ export default function AddPlanDialog() {
       </Dialog>
     </>
   );
-}
+};

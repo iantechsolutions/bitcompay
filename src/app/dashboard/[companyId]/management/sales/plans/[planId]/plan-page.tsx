@@ -11,7 +11,6 @@ import {
   PopoverTrigger,
 } from "~/components/ui/popover";
 import { Input } from "~/components/ui/input";
-
 import {
   Form,
   FormControl,
@@ -38,26 +37,24 @@ import {
 import { useCompanyData } from "~/app/dashboard/[companyId]/company-provider";
 import { type RouterOutputs } from "~/trpc/shared";
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from '~/components/ui/alert-dialog'
-import { AlertDialogFooter, AlertDialogHeader } from '~/components/ui/alert-dialog'
-import { Button } from '~/components/ui/button'
-import { Card } from '~/components/ui/card'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '~/components/ui/form'
-import { asTRPCError } from '~/lib/errors'
-import { cn } from '~/lib/utils'
-import { PlanSchema } from '~/server/forms/plans-schema'
-import { api } from '~/trpc/react'
-import type { RouterOutputs } from '~/trpc/shared'
-import { useCompanyData } from '../../../company-provider'
-dayjs.extend(utc)
-dayjs.locale('es')
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogCancel,
+  AlertDialogAction,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
+import {
+  AlertDialogHeader,
+  AlertDialogFooter,
+} from "~/components/ui/alert-dialog";
+import { Card } from "~/components/ui/card";
+import LayoutContainer from "~/components/layout-container";
+import { plans } from "~/server/db/schema";
+import { Title } from "~/components/title";
+dayjs.extend(utc);
+dayjs.locale("es");
 
 type Inputs = {
   expiration_date: string;
@@ -66,7 +63,7 @@ type Inputs = {
 };
 
 export default function PlanPage(props: {
-    plan: RouterOutputs['plans']['get']
+  plan: RouterOutputs["plans"]["get"];
 }) {
   const router = useRouter();
   const company = useCompanyData();
@@ -76,10 +73,10 @@ export default function PlanPage(props: {
     description: props.plan!.description!,
   };
 
-    const form = useForm<Inputs>({
-        resolver: zodResolver(PlanSchema),
-        defaultValues: { ...initialValues },
-    })
+  const form = useForm<Inputs>({
+    resolver: zodResolver(PlanSchema),
+    defaultValues: { ...initialValues },
+  });
 
   const { errors } = form.formState;
   const { watch } = form;
@@ -99,6 +96,7 @@ export default function PlanPage(props: {
       const error = asTRPCError(e)!;
       toast.error(error.message);
     }
+  };
 
   return (
     <LayoutContainer>
@@ -232,30 +230,35 @@ export function DeletePlan(props: { planId: string }) {
       const error = asTRPCError(e)!;
       toast.error(error.message);
     }
+  };
 
-    return (
-        <AlertDialog>
-            <AlertDialogTrigger asChild={true}>
-                <Button variant='destructive' className='w-[160px]'>
-                    Eliminar Proveedor
-                </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>¿Estás seguro que querés eliminar este proveedor?</AlertDialogTitle>
-                    <AlertDialogDescription>Eliminar Plan permanentemente.</AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction
-                        className='bg-red-500 active:bg-red-700 hover:bg-red-600'
-                        onClick={handleDelete}
-                        disabled={isLoading}
-                    >
-                        Eliminar
-                    </AlertDialogAction>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
-    )
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button variant="destructive" className="w-[160px]">
+          Eliminar Proveedor
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>
+            ¿Estás seguro que querés eliminar este proveedor?
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            Eliminar Plan permanentemente.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogAction
+            className="bg-red-500 hover:bg-red-600 active:bg-red-700"
+            onClick={handleDelete}
+            disabled={isLoading}
+          >
+            Eliminar
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
 }
