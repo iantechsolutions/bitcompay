@@ -13,16 +13,6 @@ export default async function Home() {
         <AppLayout
             title={<h1>BITCOMPAY</h1>}
             sidenavClass='top-[70px]'
-            sidenav={
-                <Sidenav>
-                    <SidenavItem icon={<Settings2Icon />} href='/dashboard/admin'>
-                        Administración
-                    </SidenavItem>
-                    <SidenavItem icon={<LayoutDashboardIcon />} href='/dashboard/management/transactions'>
-                        Gestión bitcompay
-                    </SidenavItem>
-                </Sidenav>
-            }
         >
             <div className='flex justify-between'>
                 <Title>Ingresar como empresa</Title>
@@ -33,7 +23,7 @@ export default async function Home() {
                     return (
                         <ListTile
                             key={company.id}
-                            href={`/dashboard/company/${company.id}/general/dashboard`}
+                            href={`/dashboard/${company.id}/general`}
                             title={company.name}
                             leading={<Building2Icon />}
                         />
