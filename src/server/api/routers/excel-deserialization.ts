@@ -18,8 +18,24 @@ export const excelDeserializationRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       const contents = await readExcelFile(db, input.id, input.type);
-      const familyGroupMap = new Map<string | null, string>();
+      //agregar a readExcel verificacion de columnas obligatorias. 
       console.log("contents:  ", contents);
+
+      return contents;
+    }),
+
+  confirmData: protectedProcedure
+    .input(
+      z.object({
+        type: z.literal("rec"),
+        uploadId: z.string(),
+        companyId: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      console.log("escribiendo en tablas: integrantes,unidad de negocio,family group,differencial, codigo postal, payment_info  ")
+      const familyGroupMap = new Map<string | null, string>();
+      const contents = await readExcelFile(db, input.uploadId, input.type);
       await db.transaction(async (db) => {
         for (const row of contents) {
           const business_unit = await db.query.bussinessUnits.findFirst({
@@ -157,9 +173,18 @@ export const excelDeserializationRouter = createTRPCRouter({
             differentialId: differentialId,
             integrant_id: new_integrant[0]!.id,
           });
+
+          if(row.isPaymentResponsible){
+            await db.insert(schema.payment_info).values({
+              card_number: row.card_number,  
+              CBU: row.cbu_number,
+              card_brand: row.card_brand,
+              new_registration: row.new_registration,
+              integrant_id: new_integrant[0]!.id,
+            });
+          }
         }
       });
-      return contents;
     }),
 });
 
@@ -204,7 +229,17 @@ async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
   for (let i = 0; i < transformedRows.length; i++) {
     const row = transformedRows[i]!;
     const rowNum = i + 2;
-    console.log(row, rowNum);
+
+    // for (const column of product.requiredColumns) {
+    //   const value = (row as Record<string, unknown>)[column];
+    //   if (!value) {
+    //     const columnName = columnLabelByKey[column] ?? column;
+
+    //     errors.push(
+    //       `La columna ${columnName} es obligatoria y no esta en el archivo(fila:${rowNum})`,
+    //     );
+    //   }
+    // }
   }
 
   return transformedRows;

@@ -103,6 +103,11 @@ export const recDocumentValidator = z
     "DIFERENCIAL CODIGO": z.string().min(0).max(140),
     "DIFERENCIAL VALOR": numberAsString,
     PLAN: z.string().min(0).max(140),
+
+    "NRO CBU": numberAsString,
+    "TC MARCA": z.string(),
+    "ALTA NUEVA": stringAsBoolean,
+    "NRO. TARJETA": z.string(),
   })
   .transform((value) => {
     // Translated to english
@@ -147,5 +152,10 @@ export const recDocumentValidator = z
       differential_code: value["DIFERENCIAL CODIGO"] ?? null,
       differential_value: value["DIFERENCIAL VALOR"],
       plan: value.PLAN ?? null,
+
+      cbu_number: value["NRO CBU"] ?? null,
+      card_brand: value["TC MARCA"] ?? null,
+      new_registration: value["ALTA NUEVA"] ?? null,
+      card_number: value["NRO. TARJETA"] ?? null,
     };
   });

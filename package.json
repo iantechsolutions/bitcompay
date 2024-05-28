@@ -6,7 +6,7 @@
     "scripts": {
         "build": "next build",
 
-        "db:push": "dotenv drizzle-kit push:pg",
+        "db:push": "dotenv drizzle-kit push",
         "db:studio": "dotenv drizzle-kit studio",
         "dev": "next dev",
         "lint": "biome check .",

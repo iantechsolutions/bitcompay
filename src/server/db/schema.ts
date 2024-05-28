@@ -889,6 +889,8 @@ export const payment_info = pgTable("payment_info", {
   expire_date: timestamp("expire_date", { mode: "date" }),
   CCV: varchar("CCV", { length: 255 }),
   CBU: varchar("CBU", { length: 255 }),
+  card_brand: varchar("card_brand", { length: 255 }),
+  new_registration: boolean("new_registration").notNull().default(true),
   integrant_id: varchar("integrant_id", { length: 255 }).references(
     () => integrants.id,
   ),
