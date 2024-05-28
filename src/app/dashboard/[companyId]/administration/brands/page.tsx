@@ -1,8 +1,8 @@
-import { Title } from "~/components/title";
-import { List, ListTile } from "~/components/list";
-import { AddBrandDialog } from "./add-brand-dialog";
-import LayoutContainer from "~/components/layout-container";
-import { api } from "~/trpc/server";
+import LayoutContainer from '~/components/layout-container'
+import { List, ListTile } from '~/components/list'
+import { Title } from '~/components/title'
+import { api } from '~/trpc/server'
+import { AddBrandDialog } from './add-brand-dialog'
 
 export default async function Home(props: { params: { companyId: string } }) {
   const brands = await api.brands.list.query();

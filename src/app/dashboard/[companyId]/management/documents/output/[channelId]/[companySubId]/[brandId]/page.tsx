@@ -1,11 +1,11 @@
-import { api } from "~/trpc/server";
-import { Title } from "~/components/title";
-import { db, schema } from "~/server/db";
-import { getBrandAndChannel } from "~/server/api/routers/iofiles-routers";
-import { eq, and, inArray, isNull } from "drizzle-orm";
-import GenerateChannelOutputPage from "./generate-channel-output";
+import { and, eq, inArray, isNull } from 'drizzle-orm'
+import { Title } from '~/components/title'
+import { getBrandAndChannel } from '~/server/api/routers/iofiles-routers'
+import { db, schema } from '~/server/db'
+import { api } from '~/trpc/server'
+import GenerateChannelOutputPage from './generate-channel-output'
 export default async function page({
-  params,
+    params,
 }: {
   params: { channelId: string; companySubId: string; brandId: string };
 }) {

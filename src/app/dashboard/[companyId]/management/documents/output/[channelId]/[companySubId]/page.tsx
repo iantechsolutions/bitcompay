@@ -1,9 +1,9 @@
-import { Title } from "~/components/title";
-import { api } from "~/trpc/server";
-import { Building2Icon } from "lucide-react";
-import { List, ListTile } from "~/components/list";
-import { type RouterOutputs } from "~/trpc/shared";
-import { ChevronRight } from "lucide-react";
+import { Building2Icon } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
+import { List, ListTile } from '~/components/list'
+import { Title } from '~/components/title'
+import { api } from '~/trpc/server'
+import type { RouterOutputs } from '~/trpc/shared'
 export default async function Page(props: {
   params: { companyId: string; companySubId: string; channelId: string };
 }) {

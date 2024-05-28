@@ -28,9 +28,9 @@ export function AddAuditDialog(props: auditDialog) {
   const [description, setDescription] = useState("");
   const [state, setState] = useState("");
 
-  const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(false)
 
-  const router = useRouter();
+    const router = useRouter()
 
   async function handleCreate() {
     try {

@@ -1,107 +1,88 @@
-"use client";
+'use client'
 
-import { CheckIcon, Loader2 } from "lucide-react";
-import { MouseEventHandler, useState } from "react";
-import { toast } from "sonner";
-import AppSidenav from "~/components/admin-sidenav";
-import AppLayout from "~/components/applayout";
-import LayoutContainer from "~/components/layout-container";
-import { List, ListTile } from "~/components/list";
-import { NavUserData } from "~/components/nav-user-section";
-import { Title } from "~/components/title";
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
-import { Switch } from "~/components/ui/switch";
-import { asTRPCError } from "~/lib/errors";
-import { recHeaders } from "~/server/uploads/validators";
-import { api } from "~/trpc/react";
-import { RouterOutputs } from "~/trpc/shared";
+import { CheckIcon, Loader2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { type MouseEventHandler, useState } from 'react'
+import { toast } from 'sonner'
+import LayoutContainer from '~/components/layout-container'
+import { List, ListTile } from '~/components/list'
+import { Title } from '~/components/title'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '~/components/ui/accordion'
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "~/components/ui/accordion";
-import { Card } from "~/components/ui/card";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "~/components/ui/alert-dialog";
-import { useRouter } from "next/navigation";
-import { revalidatePath } from "next/cache";
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '~/components/ui/alert-dialog'
+import { Button } from '~/components/ui/button'
+import { Card } from '~/components/ui/card'
+import { Input } from '~/components/ui/input'
+import { Label } from '~/components/ui/label'
+import { Switch } from '~/components/ui/switch'
+import { asTRPCError } from '~/lib/errors'
+import { api } from '~/trpc/react'
+import type { RouterOutputs } from '~/trpc/shared'
 
 interface Brand {
-  name: string;
-  id: string;
+    name: string
+    id: string
 }
 
 export default function CompanyPage({
-  company,
-  user,
-  products,
-  brands,
+    company,
+    products,
+    brands,
 }: {
-  company: NonNullable<RouterOutputs["companies"]["get"]>;
-  user: NavUserData;
-  products: RouterOutputs["products"]["list"];
-  brands: Brand[] | undefined;
+    company: NonNullable<RouterOutputs['companies']['get']>
+    products: RouterOutputs['products']['list']
+    brands: Brand[] | undefined
 }) {
-  const [name, setName] = useState(company.name);
-  const [description, setDescription] = useState(company.description);
+    const [name, setName] = useState(company.name)
+    const [description, setDescription] = useState(company.description)
 
-  const [companyProducts, setCompanyProducts] = useState<Set<string>>(
-    new Set(company.products.map((c) => c.productId)),
-  );
+    const [companyProducts, setCompanyProducts] = useState<Set<string>>(new Set(company.products.map((c) => c.productId)))
 
-  const { mutateAsync: changeCompany, isLoading } =
-    api.companies.change.useMutation();
+    const { mutateAsync: changeCompany, isLoading } = api.companies.change.useMutation()
 
-  async function handleChange() {
-    try {
-      await changeCompany({
-        companyId: company.id,
-        products: Array.from(companyProducts),
-        name,
-        description,
-      });
-      toast.success("Se han guardado los cambios");
-    } catch (e) {
-      const error = asTRPCError(e)!;
-      toast.error(error.message);
+    async function handleChange() {
+        try {
+            await changeCompany({
+                companyId: company.id,
+                products: Array.from(companyProducts),
+                name,
+                description,
+            })
+            toast.success('Se han guardado los cambios')
+        } catch (e) {
+            const error = asTRPCError(e)!
+            toast.error(error.message)
+        }
     }
-  }
 
-  function changeCompanyChannel(channelId: string, enabled: boolean) {
-    if (enabled) {
-      companyProducts.add(channelId);
-    } else {
-      companyProducts.delete(channelId);
+    function changeCompanyChannel(channelId: string, enabled: boolean) {
+        if (enabled) {
+            companyProducts.add(channelId)
+        } else {
+            companyProducts.delete(channelId)
+        }
+        setCompanyProducts(new Set(companyProducts))
     }
-    setCompanyProducts(new Set(companyProducts));
-  }
 
-  return (
-    <LayoutContainer>
-      <section className="space-y-2">
-        <div className="flex justify-between">
-          <Title>{company.name}</Title>
-          <Button disabled={isLoading} onClick={handleChange}>
-            {isLoading ? (
-              <Loader2 className="mr-2 animate-spin" />
-            ) : (
-              <CheckIcon className="mr-2" />
-            )}
-            Aplicar
-          </Button>
-        </div>
+    return (
+        <LayoutContainer>
+            <section className='space-y-2'>
+                <div className='flex justify-between'>
+                    <Title>{company.name}</Title>
+                    <Button disabled={isLoading} onClick={handleChange}>
+                        {isLoading ? <Loader2 className='mr-2 animate-spin' /> : <CheckIcon className='mr-2' />}
+                        Aplicar
+                    </Button>
+                </div>
 
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="item-1">
@@ -200,7 +181,7 @@ function DeleteChannel(props: { companySubId: string }) {
   const { mutateAsync: deleteChannel, isLoading } =
     api.companies.delete.useMutation();
 
-  const router = useRouter();
+    const router = useRouter()
 
   const handleDelete: MouseEventHandler<HTMLButtonElement> = (e) => {
     e.preventDefault();

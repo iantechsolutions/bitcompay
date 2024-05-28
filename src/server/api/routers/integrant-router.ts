@@ -123,15 +123,13 @@ export const integrantsRouter = createTRPCRouter({
       return updatedintegrants;
     }),
 
-  delete: protectedProcedure
-    .input(
-      z.object({
-        integrantsId: z.string(),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      await db
-        .delete(schema.integrants)
-        .where(eq(schema.integrants.id, input.integrantsId));
-    }),
-});
+    delete: protectedProcedure
+        .input(
+            z.object({
+                integrantsId: z.string(),
+            }),
+        )
+        .mutation(async ({ input }) => {
+            await db.delete(schema.integrants).where(eq(schema.integrants.id, input.integrantsId))
+        }),
+})

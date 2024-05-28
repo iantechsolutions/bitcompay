@@ -1,5 +1,4 @@
-"use client";
-import Sidenav, { SidenavItem, SidenavSeparator } from "./sidenav";
+'use client'
 import {
   LayoutDashboardIcon,
   Contact,

@@ -18,8 +18,7 @@ import { asTRPCError } from "~/lib/errors";
 import { api } from "~/trpc/react";
 
 export function AddModo() {
-  const { mutateAsync: createProduct, isLoading } =
-    api.modos.create.useMutation();
+    const { mutateAsync: createProduct, isLoading } = api.modos.create.useMutation()
 
   const [description, setDescription] = useState("");
 

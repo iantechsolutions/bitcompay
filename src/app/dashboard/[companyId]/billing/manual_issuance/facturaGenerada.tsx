@@ -1,43 +1,43 @@
-import dayjs from "dayjs";
+import dayjs from 'dayjs'
 
 interface FacturaProps {
-  puntoDeVenta: string;
-  concepto: string;
-  tipoFactura: string;
-  nroComprobante: string;
-  facturadoDesde: string | null;
-  facturadoHasta: string | null;
-  vtoPago: string | null;
-  documentoComprador: string;
-  nroDocumento: string;
-  nombreComprador: string;
-  domicilioComprador: string;
-  nombreServicio: string;
-  cantidad: number;
-  nroCae: string;
-  vtoCae: string;
-  total: number;
+    puntoDeVenta: string
+    concepto: string
+    tipoFactura: string
+    nroComprobante: string
+    facturadoDesde: string | null
+    facturadoHasta: string | null
+    vtoPago: string | null
+    documentoComprador: string
+    nroDocumento: string
+    nombreComprador: string
+    domicilioComprador: string
+    nombreServicio: string
+    cantidad: number
+    nroCae: string
+    vtoCae: string
+    total: number
 }
 
 export function Factura({
-  puntoDeVenta,
-  concepto,
-  tipoFactura,
-  nroComprobante,
-  facturadoDesde,
-  facturadoHasta,
-  vtoPago,
-  documentoComprador,
-  nroDocumento,
-  nombreComprador,
-  domicilioComprador,
-  nombreServicio,
-  cantidad,
-  nroCae,
-  vtoCae,
-  total,
+    puntoDeVenta,
+    concepto: _concepto,
+    tipoFactura,
+    nroComprobante,
+    facturadoDesde,
+    facturadoHasta,
+    vtoPago,
+    documentoComprador,
+    nroDocumento,
+    nombreComprador,
+    domicilioComprador,
+    nombreServicio,
+    cantidad,
+    nroCae,
+    vtoCae,
+    total,
 }: FacturaProps) {
-  const htmlString = `<!DOCTYPE html>
+    const htmlString = `<!DOCTYPE html>
 <html>
 <head>
 	<title>Factura</title>
@@ -221,8 +221,8 @@ export function Factura({
             </p>
           </div>
           <p>
-            <strong>Fecha de Emisión:</strong>${" "}
-            ${dayjs(new Date()).format("DD/MM/YYYY")}
+            <strong>Fecha de Emisión:</strong>${' '}
+            ${dayjs(new Date()).format('DD/MM/YYYY')}
           </p>
           <p>
             <strong>${documentoComprador}:</strong> ${nroDocumento}
@@ -365,7 +365,7 @@ export function Factura({
     </tr>
   </table>
 </body>
-</html>`;
+</html>`
 
-  return htmlString;
+    return htmlString
 }

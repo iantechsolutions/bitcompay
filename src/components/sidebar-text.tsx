@@ -1,13 +1,13 @@
-"use client";
-import { usePathname } from "next/navigation";
+'use client'
+import { usePathname } from 'next/navigation'
 type SidebarTimeProps = {
-  children: string;
-};
+    children: string
+}
 
 const SidebarText: React.FC<SidebarTimeProps> = ({ children }) => {
-  const pathname = usePathname();
-  const sombreado = " shadow-2xl";
-  return <span className="shadow-3xl inline-block">{children}</span>;
-};
+    const _pathname = usePathname()
+    const _sombreado = ' shadow-2xl'
+    return <span className='inline-block shadow-3xl'>{children}</span>
+}
 
-export default SidebarText;
+export default SidebarText

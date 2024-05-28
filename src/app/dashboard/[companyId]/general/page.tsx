@@ -1,27 +1,15 @@
-import { Title } from "~/components/title";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardDescription,
-} from "~/components/ui/card";
-import Link from "next/link";
-import { getServerAuthSession } from "~/server/auth";
-import { Button } from "~/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
-import { HandCoins, LogOut, ArrowLeftRight, Import } from "lucide-react";
-import { EyeOff } from "lucide-react";
-import { Clock9 } from "lucide-react";
-import { Overview } from "~/components/dashboard/overview";
-import { RecentSales } from "~/components/dashboard/recent-sales";
-import Image from "next/image";
+import { currentUser } from '@clerk/nextjs/server'
+import { ArrowLeftRight, HandCoins, Import, LogOut } from 'lucide-react'
+import { EyeOff } from 'lucide-react'
+import { Clock9 } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { Overview } from '~/components/dashboard/overview'
+import { RecentSales } from '~/components/dashboard/recent-sales'
+import { Title } from '~/components/title'
+import { Button } from '~/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select'
 export default async function page() {
   const session = await getServerAuthSession();
   const user = session?.user;
@@ -34,48 +22,48 @@ export default async function page() {
         Hola, <span className="text-[#8fefdc]"> {user.name!}!</span>
       </Title>
 
-      <section>
-        <Card className="cardDashboard max-w-[1000px]">
-          <CardContent className="mt-5 flex w-full flex-wrap items-center justify-between gap-2">
-            <Link href={"sdfksdf"} className=" h-auto w-auto">
-              <Button className=" bg-white text-black shadow-none hover:bg-white">
-                <div className="mr-4 box-border rounded-full bg-[#1bdfb7] p-2">
-                  <HandCoins className="h-6 w-6" />
-                </div>
+            <section>
+                <Card className='cardDashboard max-w-[1000px]'>
+                    <CardContent className='mt-5 flex w-full flex-wrap items-center justify-between gap-2'>
+                        <Link href={'sdfksdf'} className='h-auto w-auto'>
+                            <Button className='bg-white text-black shadow-none hover:bg-white'>
+                                <div className='mr-4 box-border rounded-full bg-[#1bdfb7] p-2'>
+                                    <HandCoins className='h-6 w-6' />
+                                </div>
 
-                <p className="text-wrap text-basis w-[120px] overflow-hidden   whitespace-normal text-left text-[16px]">
-                  Generacion de Recaudacion
-                </p>
-              </Button>
-            </Link>
-            <Link href={"sdfksdf"} className=" h-auto w-auto">
-              <Button className="  bg-white text-black shadow-none hover:bg-white">
-                <div className="mr-4 box-border rounded-full bg-[#1bdfb7] p-2 ">
-                  <ArrowLeftRight className="h-6 w-6" />
-                </div>
+                                <p className='w-[120px] overflow-hidden whitespace-normal text-wrap text-left text-[16px] text-basis'>
+                                    Generacion de Recaudacion
+                                </p>
+                            </Button>
+                        </Link>
+                        <Link href={'sdfksdf'} className='h-auto w-auto'>
+                            <Button className='bg-white text-black shadow-none hover:bg-white'>
+                                <div className='mr-4 box-border rounded-full bg-[#1bdfb7] p-2'>
+                                    <ArrowLeftRight className='h-6 w-6' />
+                                </div>
 
-                <p className="text-wrap text-basis   w-[120px] overflow-hidden  whitespace-normal text-left text-[16px]">
-                  Transacciones de la fecha
-                </p>
-              </Button>
-            </Link>
-            <Link href={"sdfksdf"} className=" h-auto w-auto">
-              <Button className=" bg-white text-black shadow-none hover:bg-white">
-                <div className="mr-4 box-border rounded-full border-none bg-[#1bdfb7] p-2 ">
-                  <LogOut className="h-6 w-6" />
-                </div>
+                                <p className='w-[120px] overflow-hidden whitespace-normal text-wrap text-left text-[16px] text-basis'>
+                                    Transacciones de la fecha
+                                </p>
+                            </Button>
+                        </Link>
+                        <Link href={'sdfksdf'} className='h-auto w-auto'>
+                            <Button className='bg-white text-black shadow-none hover:bg-white'>
+                                <div className='mr-4 box-border rounded-full border-none bg-[#1bdfb7] p-2'>
+                                    <LogOut className='h-6 w-6' />
+                                </div>
 
-                <p className="text-wrap text-basis  w-[120px] overflow-hidden whitespace-normal text-left text-[16px]">
-                  Informacion de facturacion
-                </p>
-              </Button>
-            </Link>
+                                <p className='w-[120px] overflow-hidden whitespace-normal text-wrap text-left text-[16px] text-basis'>
+                                    Informacion de facturacion
+                                </p>
+                            </Button>
+                        </Link>
 
-            <Link href={"sdfksdf"} className=" h-auto w-auto">
-              <Button className=" bg-white text-black shadow-none hover:bg-white ">
-                <div className="mr-4 box-border rounded-full bg-[#1bdfb7] p-2 ">
-                  <Import className="h-6 w-6" />
-                </div>
+                        <Link href={'sdfksdf'} className='h-auto w-auto'>
+                            <Button className='bg-white text-black shadow-none hover:bg-white'>
+                                <div className='mr-4 box-border rounded-full bg-[#1bdfb7] p-2'>
+                                    <Import className='h-6 w-6' />
+                                </div>
 
                 <p className="text-wrap text-basis w-[120px] overflow-hidden whitespace-normal text-left text-[16px]">
                   Solicitar transferencia
@@ -137,31 +125,28 @@ export default async function page() {
                     Pendiente
                   </SelectItem>
 
-                  <SelectItem
-                    value="Recaudado"
-                    className="rounded-none border-b border-gray-600"
-                  >
-                    Recaudado
-                  </SelectItem>
+                                    <SelectItem value='Recaudado' className='rounded-none border-gray-600 border-b'>
+                                        Recaudado
+                                    </SelectItem>
 
-                  <SelectItem value="Liquidado">Liquidado</SelectItem>
-                </SelectContent>
-              </Select>
+                                    <SelectItem value='Liquidado'>Liquidado</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </CardHeader>
+                    <CardContent className='pl-2'>
+                        <Overview />
+                    </CardContent>
+                </Card>
+                <Card className='cardDashboard col-span-3'>
+                    <CardHeader>
+                        <CardTitle className='text-xl'>Transacciones del dia</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <RecentSales />
+                    </CardContent>
+                </Card>
             </div>
-          </CardHeader>
-          <CardContent className="pl-2">
-            <Overview />
-          </CardContent>
-        </Card>
-        <Card className="cardDashboard col-span-3">
-          <CardHeader>
-            <CardTitle className="text-xl">Transacciones del dia</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <RecentSales />
-          </CardContent>
-        </Card>
-      </div>
-    </main>
-  );
+        </main>
+    )
 }

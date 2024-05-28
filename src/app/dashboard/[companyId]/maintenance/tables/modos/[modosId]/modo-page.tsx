@@ -57,20 +57,20 @@ dayjs.extend(utc);
 dayjs.locale("es");
 
 type Inputs = {
-  description: string;
-};
+    description: string
+}
 
 export default function ModoPage(props: {
-  modo: RouterOutputs["modos"]["get"];
+    modo: RouterOutputs['modos']['get']
 }) {
-  const router = useRouter();
-  const company = useCompanyData();
-  const initialValues: Inputs = {
-    description: props.modo!.description!,
-  };
-  return (
-    <div>
-      <h1>hola</h1>
-    </div>
-  )
+    const _router = useRouter()
+    const _company = useCompanyData()
+    const _initialValues: Inputs = {
+        description: props.modo!.description!,
+    }
+    return (
+        <div>
+            <h1>hola</h1>
+        </div>
+    )
 }

@@ -1,9 +1,9 @@
-import { api } from "~/trpc/server";
-import { Title } from "~/components/title";
-import { List, ListTile } from "~/components/list";
-import LayoutContainer from "~/components/layout-container";
-import { CircleUserRound } from "lucide-react";
-import { AddProviderDialog } from "./add-provider-dialog";
+import { CircleUserRound } from 'lucide-react'
+import LayoutContainer from '~/components/layout-container'
+import { List, ListTile } from '~/components/list'
+import { Title } from '~/components/title'
+import { api } from '~/trpc/server'
+import { AddProviderDialog } from './add-provider-dialog'
 
 export default async function Page(props: { params: { companyId: string } }) {
   const providers = await api.providers.list.query();

@@ -1,21 +1,16 @@
-"use server";
-import AppLayout from "~/components/applayout";
-import fs from "fs";
-import Sidenav, { SidenavItem } from "~/components/sidenav";
-import { LayoutDashboardIcon, Settings2Icon } from "lucide-react";
-import { getServerAuthSession } from "~/server/auth";
-import { Title } from "~/components/title";
-import { FacturaDialog } from "./generarFactura";
-import LayoutContainer from "~/components/layout-container";
-import { api } from "~/trpc/server";
-import { List, ListTile } from "~/components/list";
+'use server'
+import fs from 'node:fs'
+import LayoutContainer from '~/components/layout-container'
+import { List, ListTile } from '~/components/list'
+import { Title } from '~/components/title'
+import { api } from '~/trpc/server'
+import { FacturaDialog } from './generarFactura'
 
 function formatDate(date: Date | null) {
-  if (date) {
-    return date.getFullYear() + "/" + date.getMonth() + "/" + date.getDay();
-  } else {
-    return "";
-  }
+    if (date) {
+        return `${date.getFullYear()}/${date.getMonth()}/${date.getDay()}`
+    }
+    return ''
 }
 
 export default async function Home() {

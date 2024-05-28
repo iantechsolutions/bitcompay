@@ -1,9 +1,6 @@
-import AppSidenav from "~/components/admin-sidenav";
-import AppLayout from "~/components/applayout";
-import { Title } from "~/components/title";
-import { getServerAuthSession } from "~/server/auth";
-import CompanyPage from "./company-page";
-import { api } from "~/trpc/server";
+import { Title } from '~/components/title'
+import { api } from '~/trpc/server'
+import CompanyPage from './company-page'
 
 export default async function Channel(props: {
   params: { companySubId: string };
@@ -14,7 +11,7 @@ export default async function Channel(props: {
     companyId: props.params.companySubId,
   });
 
-  const brandsData = company?.brands;
+    const brandsData = company?.brands
 
   const brands = brandsData?.map((brand) => {
     return brand.brand;
@@ -25,12 +22,5 @@ export default async function Channel(props: {
     return <Title>No se encontró la empresa</Title>;
   }
 
-  return (
-    <CompanyPage
-      company={company}
-      user={session.user}
-      brands={brands}
-      products={products}
-    />
-  );
+    return <CompanyPage company={company} brands={brands} products={products} />
 }

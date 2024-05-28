@@ -1,16 +1,7 @@
-"use client";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  LabelList,
-} from "recharts";
-import { Cell } from "recharts";
-import { ResponsiveContainer } from "recharts";
+'use client'
+import { Bar, BarChart, CartesianGrid, LabelList, Tooltip, XAxis, YAxis } from 'recharts'
+import { Cell } from 'recharts'
+import { ResponsiveContainer } from 'recharts'
 
 export function RecentSales() {
   const COLORS = ["#8DCDC1", "#6DB6A8", "#B9CCC8", "#578670", "#41776C"];

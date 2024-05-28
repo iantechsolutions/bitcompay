@@ -1,18 +1,14 @@
-import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { db, schema } from "~/server/db";
-import { eq } from "drizzle-orm";
-import { getServerAuthSession } from "~/server/auth";
-
+import { eq } from 'drizzle-orm'
+import { z } from 'zod'
+import { db, schema } from '~/server/db'
+import { createTRPCRouter, protectedProcedure } from '../trpc'
 
 export const plansRouter = createTRPCRouter({
-  get: protectedProcedure
-    .input(z.object({ planId: z.string() }))
-    .query(async ({ input }) => {
-      const plan_found = await db.query.plans.findFirst({
-        where: eq(schema.plans.id, input.planId),
-      });
-      return plan_found;
+    get: protectedProcedure.input(z.object({ planId: z.string() })).query(async ({ input }) => {
+        const plan_found = await db.query.plans.findFirst({
+            where: eq(schema.plans.id, input.planId),
+        })
+        return plan_found
     }),
   list: protectedProcedure.query(async () => {
     const plans = await db.query.plans.findMany();
@@ -74,4 +70,4 @@ export const plansRouter = createTRPCRouter({
         .where(eq(schema.plans.id, input.planId));
       return deleted_plan;
     }),
-});
+})

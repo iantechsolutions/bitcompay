@@ -24,8 +24,8 @@ export const procedureRouter = createTRPCRouter({
         where: eq(schema.procedure.id, input.procedureId),
       });
 
-      return procedure;
-    }),
+            return procedure
+        }),
 
   create: protectedProcedure
     .input(
@@ -63,15 +63,13 @@ export const procedureRouter = createTRPCRouter({
       return updatedprocedure;
     }),
 
-  delete: protectedProcedure
-    .input(
-      z.object({
-        procedureId: z.string(),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      await db
-        .delete(schema.procedure)
-        .where(eq(schema.procedure.id, input.procedureId));
-    }),
-});
+    delete: protectedProcedure
+        .input(
+            z.object({
+                procedureId: z.string(),
+            }),
+        )
+        .mutation(async ({ input }) => {
+            await db.delete(schema.procedure).where(eq(schema.procedure.id, input.procedureId))
+        }),
+})

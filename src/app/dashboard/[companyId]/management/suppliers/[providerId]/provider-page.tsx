@@ -1,19 +1,11 @@
-"use client";
-import LayoutContainer from "~/components/layout-container";
-import { Title } from "~/components/title";
-import React, {
-  MouseEventHandler,
-  createContext,
-  useContext,
-  useState,
-} from "react";
-import { Card } from "~/components/ui/card";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import ProviderForm from "~/components/provider-form";
-import { type RouterOutputs } from "~/trpc/shared";
-import { api } from "~/trpc/react";
-import { Button } from "~/components/ui/button";
+'use client'
+import { useRouter } from 'next/navigation'
+import type { MouseEventHandler } from 'react'
+import { toast } from 'sonner'
+import LayoutContainer from '~/components/layout-container'
+import ProviderForm from '~/components/provider-form'
+import { Title } from '~/components/title'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '~/components/ui/accordion'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,45 +28,44 @@ import { useCompanyData } from "../../../company-provider";
 import { asTRPCError } from "~/lib/errors";
 
 export default function ProviderPage(props: {
-  provider: RouterOutputs["providers"]["get"];
+    provider: RouterOutputs['providers']['get']
 }) {
-  return (
-    <LayoutContainer>
-      <section className="space-y-2">
-        <div className="flex-col justify-between">
-          <Title>{props.provider?.name}</Title>
-          <Accordion type="single" collapsible>
-            <AccordionItem value="item-1">
-              <AccordionTrigger>Informacion de proveedor</AccordionTrigger>
-              <AccordionContent>
-                <Card className="p-5">
-                  <ProviderForm provider={props.provider} />
-                </Card>
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="item-2">
-              <AccordionTrigger>Eliminar proveedor</AccordionTrigger>
-              <AccordionContent>
-                <Card className="p-5">
-                  <div className="flex justify-end">
-                    <DeleteProvider providerId={props.provider!.id} />
-                  </div>
-                </Card>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </div>
-      </section>
-    </LayoutContainer>
-  );
+    return (
+        <LayoutContainer>
+            <section className='space-y-2'>
+                <div className='flex-col justify-between'>
+                    <Title>{props.provider?.name}</Title>
+                    <Accordion type='single' collapsible={true}>
+                        <AccordionItem value='item-1'>
+                            <AccordionTrigger>Informacion de proveedor</AccordionTrigger>
+                            <AccordionContent>
+                                <Card className='p-5'>
+                                    <ProviderForm provider={props.provider} />
+                                </Card>
+                            </AccordionContent>
+                        </AccordionItem>
+                        <AccordionItem value='item-2'>
+                            <AccordionTrigger>Eliminar proveedor</AccordionTrigger>
+                            <AccordionContent>
+                                <Card className='p-5'>
+                                    <div className='flex justify-end'>
+                                        <DeleteProvider providerId={props.provider!.id} />
+                                    </div>
+                                </Card>
+                            </AccordionContent>
+                        </AccordionItem>
+                    </Accordion>
+                </div>
+            </section>
+        </LayoutContainer>
+    )
 }
 
 function DeleteProvider(props: { providerId: string }) {
-  const company = useCompanyData();
-  const { mutateAsync: deleteProvider, isLoading } =
-    api.providers.delete.useMutation();
+    const company = useCompanyData()
+    const { mutateAsync: deleteProvider, isLoading } = api.providers.delete.useMutation()
 
-  const router = useRouter();
+    const router = useRouter()
 
   const handleDelete: MouseEventHandler<HTMLButtonElement> = (e) => {
     e.preventDefault();

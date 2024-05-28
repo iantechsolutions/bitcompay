@@ -48,46 +48,40 @@ dayjs.extend(utc);
 dayjs.locale("es");
 
 type Inputs = {
-  expiration_date: string;
-  plan_code: string;
-  description: string;
-  age: string;
-  price: string;
-};
+    expiration_date: string
+    plan_code: string
+    description: string
+    age: string
+    price: string
+}
 
 export default function AddPlanDialog() {
-  const router = useRouter();
-  const company = useCompanyData();
-  const [open, setOpen] = useState(false);
-  const initialValues: Inputs = {
-    expiration_date: "",
-    plan_code: "",
-    description: "",
-    age: "",
-    price: "",
-  };
+    const router = useRouter()
+    const company = useCompanyData()
+    const [open, setOpen] = useState(false)
+    const initialValues: Inputs = {
+        expiration_date: '',
+        plan_code: '',
+        description: '',
+        age: '',
+        price: '',
+    }
 
-  const form = useForm<Inputs>({
-    resolver: zodResolver(PlanSchema),
-    defaultValues: { ...initialValues },
-  });
+    const form = useForm<Inputs>({
+        resolver: zodResolver(PlanSchema),
+        defaultValues: { ...initialValues },
+    })
 
-  const { errors } = form.formState;
-  const { watch } = form;
-  console.log(errors);
-  console.log(JSON.stringify(watch(), null, 2));
+    const { mutateAsync: createPlan } = api.plans.create.useMutation()
 
-  const { mutateAsync: createPlan } = api.plans.create.useMutation();
-
-  const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    // Send data to backend
-
-    console.log("handleSubmit");
-    console.log(data);
-    const parsedData = PlanSchema.parse(data);
-    await createPlan(parsedData);
-    if (setOpen) {
-      setOpen(false);
+    const onSubmit: SubmitHandler<Inputs> = async (data) => {
+        const parsedData = PlanSchema.parse(data)
+        await createPlan(parsedData)
+        if (setOpen) {
+            setOpen(false)
+        }
+        router.push(`/dashboard/company/${company.id}/administration/units`)
+        router.refresh()
     }
     router.push(`/dashboard/${company.id}/administration/plans`);
     router.refresh();

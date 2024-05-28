@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { stringAsDate } from "./providers-schema";
+import { z } from 'zod'
+import { stringAsDate } from './providers-schema'
 
 export const PlanSchema = z.object({
   user: z.string().max(255),

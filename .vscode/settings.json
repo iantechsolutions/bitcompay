@@ -1,3 +1,27 @@
 {
-    "editor.formatOnSave": true
+    "editor.tabSize": 4,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports.biome": "explicit",
+        "quickfix.biome": "explicit"
+    },
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "biomejs.biome",
+    "[typescript]": {
+        "editor.defaultFormatter": "biomejs.biome"
+    },
+    "[json]": {
+        "editor.defaultFormatter": "biomejs.biome"
+    },
+    "[jsonc]": {
+        "editor.defaultFormatter": "biomejs.biome"
+    },
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "biomejs.biome"
+    },
+    "files.associations": {
+        "*.json": "jsonc"
+    },
+    "[markdown]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    }
 }

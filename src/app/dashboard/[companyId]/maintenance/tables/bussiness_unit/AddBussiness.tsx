@@ -1,4 +1,4 @@
-"use client";
+'use client'
 
 import { Loader2Icon, PlusCircleIcon } from "lucide-react";
 import { useRouter } from "next/navigation";

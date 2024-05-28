@@ -1,8 +1,8 @@
-import { Title } from "~/components/title";
-import { List, ListTile } from "~/components/list";
-import LayoutContainer from "~/components/layout-container";
-import { AddProductDialog } from "./add-product-dialog";
-import { api } from "~/trpc/server";
+import LayoutContainer from '~/components/layout-container'
+import { List, ListTile } from '~/components/list'
+import { Title } from '~/components/title'
+import { api } from '~/trpc/server'
+import { AddProductDialog } from './add-product-dialog'
 
 export default async function Home(props: { params: { companyId: string } }) {
   const products = await api.products.list.query();
