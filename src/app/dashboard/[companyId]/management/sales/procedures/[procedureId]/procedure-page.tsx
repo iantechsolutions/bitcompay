@@ -54,6 +54,9 @@ interface ProcedurePageProps {
 export default function ProcedurePage(props: ProcedurePageProps) {
   const [membersData, setMembersData] = useState<InputsMembers[]>([]);
   const initialValuesGeneralInfo: InputsGeneralInfo = {
+    name: "",
+    healthInsurances: "",
+    cuit: "",
     id: props.family_group.id,
     bussinessUnit: props.family_group.businessUnit!,
     plan: props.family_group.plan!,
@@ -77,10 +80,10 @@ export default function ProcedurePage(props: ProcedurePageProps) {
     api.payment_info.change.useMutation();
   const handleChange = async () => {
     try {
-      await updateFamilyGroup(props.family_group);
-      await updateIntegrants();
-      await paymenteInfo();
-      await updateProcedure();
+      // await updateFamilyGroup(props.family_group);
+      // await updateIntegrants();
+      // await paymenteInfo();
+      // await updateProcedure();
       toast.success("tramite actualizado correctamente");
     } catch (e) {
       const error = asTRPCError(e)!;
@@ -123,8 +126,8 @@ export default function ProcedurePage(props: ProcedurePageProps) {
                     </TabsList>
                     <TabsContent value="general_info">
                       <GeneralInfoForm
-                        setfamily_group={setfamily_groupData}
-                        setProcedureId={setProcedureData}
+                        // setfamily_group={setfamily_groupData}
+                        // setProcedureId={setProcedureData}
                         form={generalInfoForm}
                       />
                     </TabsContent>
@@ -144,7 +147,7 @@ export default function ProcedurePage(props: ProcedurePageProps) {
                       <div>
                         <BillingInfo
                           form={billingForm}
-                          setBillingData={setBillingData}
+                          // setBillingData={setBillingData}
                           data={membersData}
                         />
                       </div>

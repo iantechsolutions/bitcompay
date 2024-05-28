@@ -35,7 +35,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "~/components/ui/accordion";
-import { useCompanyData } from "../../../company-provider";
+import { useCompanyData } from "~/app/dashboard/[companyId]/company-provider";
 import { type RouterOutputs } from "~/trpc/shared";
 import {
   AlertDialog,
@@ -61,8 +61,6 @@ type Inputs = {
   expiration_date: string;
   plan_code: string;
   description: string;
-  age: string;
-  price: string;
 };
 
 export default function PlanPage(props: {
@@ -74,8 +72,6 @@ export default function PlanPage(props: {
     expiration_date: props.plan!.expiration_date.toString(),
     plan_code: props.plan!.plan_code!,
     description: props.plan!.description!,
-    age: props.plan!.age.toString(),
-    price: props.plan!.price.toString(),
   };
 
   const form = useForm<Inputs>({
@@ -194,32 +190,6 @@ export default function PlanPage(props: {
                           </FormLabel>
                           <FormControl>
                             <Input id="description" type="text" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="age"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel htmlFor="age">Edad</FormLabel>
-                          <FormControl>
-                            <Input id="age" type="text" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="price"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel htmlFor="price">Precio</FormLabel>
-                          <FormControl>
-                            <Input id="price" type="text" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

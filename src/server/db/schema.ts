@@ -768,7 +768,6 @@ export const family_groups = pgTable("family_groups", {
   ),
   state: varchar("state", { length: 255 }),
   payment_status: varchar("payment_status", { length: 255 })
-    .notNull()
     .default("pending"),
 });
 

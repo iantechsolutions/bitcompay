@@ -31,7 +31,8 @@ export function AddBussiness(props: { params: { companyId: string } }) {
     try {
       await createProduct({
         description: description,
-        companyId: props.params.companyId
+        companyId: props.params.companyId,
+        brandId: "",
       });
 
       toast.success("Producto creado correctamente");
@@ -68,7 +69,7 @@ export function AddBussiness(props: { params: { companyId: string } }) {
               {isLoading && (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}
-              Crear 
+              Crear
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -22,10 +22,12 @@ export const bussinessUnitsRouter = createTRPCRouter({
       z.object({
         description: z.string(),
         companyId: z.string(),
+        brandId: z.string(),
       }),
     )
     .mutation(async ({ input }) => {
       const new_bussinessUnit = await db.insert(schema.bussinessUnits).values({
+        brandId: input.brandId,
         description: input.description,
         companyId: input.companyId,
       });
