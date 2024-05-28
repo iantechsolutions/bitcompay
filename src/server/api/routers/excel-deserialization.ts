@@ -18,8 +18,22 @@ export const excelDeserializationRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       const contents = await readExcelFile(db, input.id, input.type);
-      const familyGroupMap = new Map<string | null, string>();
+
       console.log("contents:  ", contents);
+
+      return contents;
+    }),
+  confirmData: protectedProcedure
+    .input(
+      z.object({
+        type: z.literal("rec"),
+        uploadId: z.string(),
+        companyId: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const familyGroupMap = new Map<string | null, string>();
+      const contents = await readExcelFile(db, input.uploadId, input.type);
       await db.transaction(async (db) => {
         for (const row of contents) {
           const business_unit = await db.query.bussinessUnits.findFirst({
@@ -159,7 +173,6 @@ export const excelDeserializationRouter = createTRPCRouter({
           });
         }
       });
-      return contents;
     }),
 });
 
@@ -204,7 +217,17 @@ async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
   for (let i = 0; i < transformedRows.length; i++) {
     const row = transformedRows[i]!;
     const rowNum = i + 2;
-    console.log(row, rowNum);
+
+    // for (const column of product.requiredColumns) {
+    //   const value = (row as Record<string, unknown>)[column];
+    //   if (!value) {
+    //     const columnName = columnLabelByKey[column] ?? column;
+
+    //     errors.push(
+    //       `La columna ${columnName} es obligatoria y no esta en el archivo(fila:${rowNum})`,
+    //     );
+    //   }
+    // }
   }
 
   return transformedRows;
