@@ -60,12 +60,30 @@ export const excelDeserializationRouter = createTRPCRouter({
           const business_unit = await db.query.bussinessUnits.findFirst({
             where: eq(schema.bussinessUnits.description, row.business_unit!),
           });
+          if (!business_unit) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "No se encontro la unidad de negocio",
+            });
+          }
           const mode = await db.query.modos.findFirst({
             where: eq(schema.modos.description, row.mode!),
           });
+          if (!mode) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "No se encontro el modo",
+            });
+          }
           const plan = await db.query.plans.findFirst({
             where: eq(schema.plans.plan_code, row.plan!),
           });
+          if (!plan) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "No se encontro el plan",
+            });
+          }
           let familyGroupId = "";
           const existGroup = isKeyPresent(row.holder_id_number, familyGroupMap);
           if (!existGroup) {
