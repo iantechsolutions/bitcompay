@@ -163,12 +163,12 @@ export const recDocumentValidator = z
 export const recHeaders: TableHeaders = [
   { key: "business_unit", label: "UNIDAD DE NEGOCIO", width: 140 },
   { key: "os", label: "OS", width: 140 },
-  { key: "originating_os", label: "OS ORIGEN", width: 140 },
+  { key: "originating os", label: "OS ORIGEN", width: 140 },
   { key: "validity", label: "VIGENCIA", width: 140 },
   { key: "mode", label: "MODO", width: 140 },
   { key: "bonus", label: "BONIFICACION", width: 140 },
-  { key: "from_bonus", label: "DESDE BONIF.", width: 140 },
-  { key: "to_bonus", label: "HASTA BONIF.", width: 140 },
+  { key: "from bonus", label: "DESDE BONIF.", width: 140 },
+  { key: "to bonus", label: "HASTA BONIF.", width: 140 },
   { key: "state", label: "ESTADO", width: 140 },
   { key: "holder_id_number", label: "NRO DOC TITULAR", width: 140 },
   { key: "name", label: "NOMBRE", width: 140 },
@@ -179,9 +179,9 @@ export const recHeaders: TableHeaders = [
   { key: "relationship", label: "PAR", width: 140 },
   { key: "birth_date", label: "FECHA NACIMIENTO", width: 140 },
   { key: "gender", label: "GENERO", width: 140 },
-  { key: "marital_status", label: "ESTADO CIVIL", width: 140 },
+  { key: "marital status", label: "ESTADO CIVIL", width: 140 },
   { key: "nationality", label: "NACIONALIDAD", width: 140 },
-  { key: "afip_status", label: "ESTADO AFIP", width: 140 },
+  { key: "afip status", label: "ESTADO AFIP", width: 140 },
   { key: "fiscal_id_type", label: "TIPO DOC FISCAL", width: 140 },
   { key: "fiscal_id_number", label: "NRO DOC FISCAL", width: 140 },
   { key: "city", label: "LOCALIDAD", width: 140 },
@@ -189,7 +189,7 @@ export const recHeaders: TableHeaders = [
   { key: "address", label: "DIRECCION", width: 140 },
   { key: "floor", label: "PISO", width: 140 },
   { key: "apartment", label: "DEPTO", width: 140 },
-  { key: "postal_code", label: "CP", width: 140 },
+  { key: "postal code", label: "CP", width: 140 },
   { key: "phone", label: "TELEFONO", width: 140 },
   { key: "cellphone", label: "CELULAR", width: 140 },
   { key: "email", label: "EMAIL", width: 140 },
@@ -207,20 +207,51 @@ export const recHeaders: TableHeaders = [
   { key: "card_number", label: "Nro. TARJETA", width: 140 },
 ];
 
+export const requiredColumns = [
+  { key: "business_unit", label: "UNIDAD DE NEGOCIO" },
+  { key: "os", label: "OS" },
+  { key: "originating os", label: "OS ORIGEN" },
+  { key: "validity", label: "VIGENCIA" },
+  { key: "mode", label: "MODO" },
+  { key: "bonus", label: "BONIFICACION" },
+  { key: "from bonus", label: "DESDE BONIF." },
+  { key: "to bonus", label: "HASTA BONIF." },
+  { key: "state", label: "ESTADO" },
+  { key: "holder_id_number", label: "NRO DOC TITULAR" },
+  { key: "name", label: "NOMBRE" },
+  { key: "affiliate_number", label: "NRO AFILIADO" },
+  { key: "extension", label: "EXTENSION" },
+  { key: "own_id_type", label: "TIPO DOC PROPIO" },
+  { key: "own_id_number", label: "NRO DOC PROPIO" },
+  { key: "relationship", label: "PAR" },
+  { key: "birth_date", label: "FECHA NACIMIENTO" },
+  { key: "gender", label: "GENERO" },
+  { key: "marital status", label: "ESTADO CIVIL" },
+  { key: "nationality", label: "NACIONALIDAD" },
+  { key: "afip status", label: "ESTADO AFIP" },
+  { key: "fiscal_id_type", label: "TIPO DOC FISCAL" },
+  { key: "fiscal_id_number", label: "NRO DOC FISCAL" },
+  { key: "city", label: "LOCALIDAD" },
+  { key: "district", label: "PARTIDO" },
+  { key: "address", label: "DIRECCION" },
+  { key: "floor", label: "PISO" },
+  { key: "apartment", label: "DEPTO" },
+  { key: "postal code", label: "CP" },
+  { key: "phone", label: "TELEFONO" },
+  { key: "cellphone", label: "CELULAR" },
+  { key: "email", label: "EMAIL" },
+  { key: "contribution", label: "APORTE 3%" },
+  { key: "differential_code", label: "DIFERENCIAL CODIGO" },
+  { key: "differential_value", label: "DIFERENCIAL VALOR" },
+  { key: "plan", label: "PLAN" },
+];
+
 export const columnLabelByKey = Object.fromEntries(
-  recHeaders
-    .filter(
-      (header) =>
-        header.key !== "card_number" &&
-        header.key !== "card_brand" &&
-        header.key !== "new_registration" &&
-        header.key !== "cbu_number"
-    )
-    .map((header) => {
-      return [header.key, header.label];
-    })
+  requiredColumns.map((header) => {
+    return [header.key, header.label];
+  })
 ) as Record<string, string>;
 
-export const keysArray = recHeaders.map((header) => header.key);
+export const keysArray = requiredColumns.map((header) => header.key);
 
 export type RecDocument = z.infer<typeof recDocumentValidator>;

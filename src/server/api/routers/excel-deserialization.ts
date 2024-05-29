@@ -251,12 +251,15 @@ async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
 
   const trimmedRows = rows.map(trimObject);
   const transformedRows = recRowsTransformer(trimmedRows);
+  console.log(transformedRows);
   const errors: string[] = [];
   for (let i = 0; i < transformedRows.length; i++) {
     const row = transformedRows[i]!;
     const rowNum = i + 2;
     for (const column of keysArray) {
       const value = (row as Record<string, unknown>)[column];
+
+      console.log(column, value, typeof value, row["originating os"]);
       if (!value) {
         const columnName = columnLabelByKey[column] ?? column;
 
