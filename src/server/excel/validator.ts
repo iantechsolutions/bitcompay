@@ -1,5 +1,6 @@
 import { z } from "zod";
 import dayjs from "dayjs";
+import type { TableHeaders } from "~/components/table";
 const stringAsDate = z
   .string()
   .or(z.number())
@@ -60,11 +61,11 @@ const numberAsString = z.union([z.number(), z.string()]).transform((value) => {
 
 export const recDocumentValidator = z
   .object({
-    "UNIDAD DE NEGOCIO": z.string().min(0).max(140),
+    "UNIDAD DE NEGOCIO": z.string().min(0).max(140).nullable().optional(),
     OS: z.string().min(0).max(140).nullable().optional(),
     "OS ORIGEN": z.string().min(0).max(140).nullable().optional(),
-    VIGENCIA: stringAsDate,
-    MODO: z.string().min(0).max(140),
+    VIGENCIA: stringAsDate.nullable().optional(),
+    MODO: z.string().min(0).max(140).nullable().optional(),
     BONIFICACION: z.string().min(0).max(140).nullable().optional(),
     "DESDE BONIF.": z.string().min(0).max(140).nullable().optional(),
     "HASTA BONIF.": z.string().min(0).max(140).nullable().optional(),
@@ -76,7 +77,7 @@ export const recDocumentValidator = z
     "TIPO DOC PROPIO": z.string().min(0).max(140).nullable().optional(),
     "NRO DOC PROPIO": numberAsString.nullable().optional(),
     PAR: z.string().min(0).max(140).nullable().optional(),
-    "FECHA NACIMIENTO": stringAsDate,
+    "FECHA NACIMIENTO": stringAsDate.nullable().optional(),
     GENERO: z.enum(["male", "female", "other"]).nullable().optional(),
     "ESTADO CIVIL": z
       .enum(["casado", "soltero", "divorciado", "viudo"])
@@ -91,23 +92,23 @@ export const recDocumentValidator = z
     DIRECCION: z.string().min(0).max(140).nullable().optional(),
     PISO: numberAsString.optional().nullable(),
     DEPTO: numberAsString.nullable().optional(),
-    CP: numberAsString,
+    CP: numberAsString.nullable().optional(),
     TELEFONO: numberAsString.nullable().optional(),
     CELULAR: numberAsString.nullable().optional(),
     EMAIL: z.string().min(0).max(140).nullable().optional(),
-    "ES AFILIADO": stringAsBoolean,
-    "ES TITULAR": stringAsBoolean,
-    "ES TITULAR DEL PAGO": stringAsBoolean,
-    "ES RESP PAGADOR": stringAsBoolean,
+    "ES AFILIADO": stringAsBoolean.nullable().optional(),
+    "ES TITULAR": stringAsBoolean.nullable().optional(),
+    "ES TITULAR DEL PAGO": stringAsBoolean.nullable().optional(),
+    "ES RESP PAGADOR": stringAsBoolean.nullable().optional(),
     "APORTE 3%": numberAsString.nullable().optional(),
-    "DIFERENCIAL CODIGO": z.string().min(0).max(140),
-    "DIFERENCIAL VALOR": numberAsString,
-    PLAN: z.string().min(0).max(140),
+    "DIFERENCIAL CODIGO": z.string().min(0).max(140).nullable().optional(),
+    "DIFERENCIAL VALOR": numberAsString.optional().nullable(),
+    PLAN: z.string().min(0).max(140).nullable().optional(),
 
-    "NRO CBU": numberAsString,
-    "TC MARCA": z.string(),
-    "ALTA NUEVA": stringAsBoolean,
-    "NRO. TARJETA": z.string(),
+    "NRO CBU": numberAsString.nullable().optional(),
+    "TC MARCA": z.string().nullable().optional(),
+    "ALTA NUEVA": stringAsBoolean.nullable().optional(),
+    "NRO. TARJETA": z.string().nullable().optional(),
   })
   .transform((value) => {
     // Translated to english
@@ -159,3 +160,57 @@ export const recDocumentValidator = z
       card_number: value["NRO. TARJETA"] ?? null,
     };
   });
+
+export const recHeaders: TableHeaders = [
+  { key: "business_unit", label: "UNIDAD DE NEGOCIO", width: 140 },
+  { key: "os", label: "OS", width: 140 },
+  { key: "originating_os", label: "OS ORIGEN", width: 140 },
+  { key: "validity", label: "VIGENCIA", width: 140 },
+  { key: "mode", label: "MODO", width: 140 },
+  { key: "bonus", label: "BONIFICACION", width: 140 },
+  { key: "from_bonus", label: "DESDE BONIF.", width: 140 },
+  { key: "to_bonus", label: "HASTA BONIF.", width: 140 },
+  { key: "state", label: "ESTADO", width: 140 },
+  { key: "holder_id_number", label: "NRO DOC TITULAR", width: 140 },
+  { key: "name", label: "NOMBRE", width: 140 },
+  { key: "affiliate_number", label: "NRO AFILIADO", width: 140 },
+  { key: "extension", label: "EXTENSION", width: 140 },
+  { key: "own_id_type", label: "TIPO DOC PROPIO", width: 140 },
+  { key: "own_id_number", label: "NRO DOC PROPIO", width: 140 },
+  { key: "relationship", label: "PAR", width: 140 },
+  { key: "birth_date", label: "FECHA NACIMIENTO", width: 140 },
+  { key: "gender", label: "GENERO", width: 140 },
+  { key: "marital_status", label: "ESTADO CIVIL", width: 140 },
+  { key: "nationality", label: "NACIONALIDAD", width: 140 },
+  { key: "afip_status", label: "ESTADO AFIP", width: 140 },
+  { key: "fiscal_id_type", label: "TIPO DOC FISCAL", width: 140 },
+  { key: "fiscal_id_number", label: "NRO DOC FISCAL", width: 140 },
+  { key: "city", label: "LOCALIDAD", width: 140 },
+  { key: "district", label: "PARTIDO", width: 140 },
+  { key: "address", label: "DIRECCION", width: 140 },
+  { key: "floor", label: "PISO", width: 140 },
+  { key: "apartment", label: "DEPTO", width: 140 },
+  { key: "postal_code", label: "CP", width: 140 },
+  { key: "phone", label: "TELEFONO", width: 140 },
+  { key: "cellphone", label: "CELULAR", width: 140 },
+  { key: "email", label: "EMAIL", width: 140 },
+  { key: "isAffiliated", label: "ES AFILIADO", width: 140 },
+  { key: "isHolder", label: "ES TITULAR", width: 140 },
+  { key: "isPaymentHolder", label: "ES TITULAR DEL PAGO", width: 140 },
+  { key: "isPaymentResponsible", label: "ES RESP PAGADOR", width: 140 },
+  { key: "contribution", label: "APORTE 3%", width: 140 },
+  { key: "differential_code", label: "DIFERENCIAL CODIGO", width: 140 },
+  { key: "differential_value", label: "DIFERENCIAL VALOR", width: 140 },
+  { key: "plan", label: "PLAN", width: 140 },
+  { key: "cbu_number", label: "NRO CBU", width: 140 },
+  { key: "card_brand", label: "TC MARCA", width: 140 },
+  { key: "new_registration", label: "ALTA NUEVA", width: 140 },
+  { key: "card_number", label: "Nro. TARJETA", width: 140 },
+];
+
+export const columnLabelByKey = Object.fromEntries(
+  recHeaders.map((header) => [header.key, header.label])
+) as Record<string, string>;
+export const keysArray = recHeaders.map((header) => header.key);
+
+export type RecDocument = z.infer<typeof recDocumentValidator>;

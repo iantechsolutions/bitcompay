@@ -5,9 +5,22 @@ import { type DBTX, db } from "~/server/db";
 import { eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import * as xlsx from "xlsx";
-import { recRowsTransformer } from "~/server/excel/validator";
+import { recRowsTransformer, columnLabelByKey, keysArray } from "~/server/excel/validator";
 
 export const excelDeserializationRouter = createTRPCRouter({
+  upload: protectedProcedure
+    .input(
+      z.object({
+        uploadId:z.string(),
+      }),
+    )
+    .query(async ({input})=>{
+      const upload= await db.query.excelBilling.findFirst({
+        where: eq(schema.excelBilling.id, input.uploadId),
+      });
+      return upload;
+    }),
+
   deserialization: protectedProcedure
     .input(
       z.object({
@@ -39,13 +52,13 @@ export const excelDeserializationRouter = createTRPCRouter({
       await db.transaction(async (db) => {
         for (const row of contents) {
           const business_unit = await db.query.bussinessUnits.findFirst({
-            where: eq(schema.bussinessUnits.description, row.business_unit),
+            where: eq(schema.bussinessUnits.description, row.business_unit!),
           });
           const mode = await db.query.modos.findFirst({
-            where: eq(schema.modos.description, row.mode),
+            where: eq(schema.modos.description, row.mode!),
           });
           const plan = await db.query.plans.findFirst({
-            where: eq(schema.plans.plan_code, row.plan),
+            where: eq(schema.plans.plan_code, row.plan!),
           });
           let familyGroupId = "";
           const existGroup = isKeyPresent(row.holder_id_number, familyGroupMap);
@@ -109,19 +122,19 @@ export const excelDeserializationRouter = createTRPCRouter({
 
           let differentialId;
           const check_differential = await db.query.differentials.findMany({
-            where: eq(schema.differentials.codigo, row.differential_code),
+            where: eq(schema.differentials.codigo, row.differential_code!),
           });
           if (check_differential.length == 0) {
             const new_differential = await db
               .insert(schema.differentials)
               .values({
-                codigo: row.differential_code,
+                codigo: row.differential_code!,
               })
               .returning();
             differentialId = new_differential[0]!.id;
           }
 
-          const birthDate = new Date(row.birth_date);
+          const birthDate = new Date(row.birth_date!);
           const today = new Date();
           let age = today.getFullYear() - birthDate.getFullYear();
           // Additional logic to handle cases where the birth date hasn't occurred yet this year
@@ -176,14 +189,21 @@ export const excelDeserializationRouter = createTRPCRouter({
 
           if(row.isPaymentResponsible){
             await db.insert(schema.payment_info).values({
-              card_number: row.card_number,  
-              CBU: row.cbu_number,
-              card_brand: row.card_brand,
-              new_registration: row.new_registration,
+              card_number: row.card_number!,  
+              CBU: row.cbu_number!,
+              card_brand: row.card_brand!,
+              new_registration: row.new_registration!,
               integrant_id: new_integrant[0]!.id,
             });
           }
         }
+        await db
+        .update(schema.excelBilling)
+        .set({
+            confirmed: true,
+            confirmedAt: new Date(),
+        })
+        .where(eq(schema.excelBilling.id, input.uploadId))
       });
     }),
 });
@@ -225,25 +245,29 @@ async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
 
   const trimmedRows = rows.map(trimObject);
   const transformedRows = recRowsTransformer(trimmedRows);
-
+  const errors: string[] = []
   for (let i = 0; i < transformedRows.length; i++) {
     const row = transformedRows[i]!;
     const rowNum = i + 2;
+    for (const column of keysArray) {
+      const value = (row as Record<string, unknown>)[column];
+      if (!value) {
+        const columnName = columnLabelByKey[column] ?? column;
 
-    // for (const column of product.requiredColumns) {
-    //   const value = (row as Record<string, unknown>)[column];
-    //   if (!value) {
-    //     const columnName = columnLabelByKey[column] ?? column;
-
-    //     errors.push(
-    //       `La columna ${columnName} es obligatoria y no esta en el archivo(fila:${rowNum})`,
-    //     );
-    //   }
-    // }
+        errors.push(
+          `La columna ${columnName} es obligatoria y no esta en el archivo(fila:${rowNum})`,
+        );
+      }
+    }
   }
+
+  if (errors.length > 0) {
+    throw new TRPCError({ code: 'BAD_REQUEST', message: errors.join('\n') })
+}
 
   return transformedRows;
 }
+
 
 function trimObject(obj: Record<string, unknown>) {
   return Object.fromEntries(

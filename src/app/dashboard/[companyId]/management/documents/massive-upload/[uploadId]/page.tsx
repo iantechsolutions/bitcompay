@@ -1,22 +1,15 @@
+import { Title } from "~/components/title";
 import { api } from "~/trpc/server";
-import { Button } from "~/components/ui/button";
-export default async function Home(props: {
+import UnconfirmedPage from "./unconfirmed-page";
+
+export default async function page(props: {
   params: { uploadId: string; companyId: string };
 }) {
-  const data = await api.excelDeserialization.deserialization.mutate({
-    type: "rec",
-    id: props.params.uploadId,
-    companyId: props.params.companyId,
+  const upload = await api.excelDeserialization.upload.query({
+    uploadId: props.params.uploadId,
   });
-  function handleClick() {
-    api.excelDeserialization.confirmData.mutate({
-      type: "rec",
-      uploadId: props.params.uploadId,
-      companyId: props.params.companyId,
-    });
+  if (!upload) {
+    return <Title>El documento no existe.</Title>;
   }
-  console.log(data);
-  return <div>
-    <Button onClick={()=> handleClick}>Escribir a la base de datos</Button>
-  </div>;
+  return <UnconfirmedPage upload={upload} companyId={props.params.companyId} />;
 }

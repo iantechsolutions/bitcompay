@@ -970,7 +970,10 @@ export const excelBilling = pgTable("excel_billing", {
   companyId: varchar("companyId", { length: 255 })
     .notNull()
     .references(() => companies.id),
+  confirmed: boolean("confirmed").notNull().default(false),
+  confirmedAt: timestamp("confirmedAt", { mode: "date" }),
   createdAt,
+  updatedAt,
 });
 
 export const insertExcelBillingSchema = createInsertSchema(excelBilling);

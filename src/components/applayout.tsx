@@ -13,7 +13,7 @@ export type AppLayoutProps = {
 
 export default function AppLayout(props: AppLayoutProps) {
     return (
-        <div>
+        <>
             <header
                 // biome-ignore lint/nursery/useSortedClasses: <explanation>
                 className={`fixed top-0 right-0 left-0 z-10 flex h-[70px] items-center border-b px-2 backdrop-blur-md md:px-4 ${props.headerClass}`}
@@ -36,6 +36,6 @@ export default function AppLayout(props: AppLayoutProps) {
                 {props.sidenav}
             </aside>
             <main className='relative mt-[70px] p-3 md:ml-[250px] md:p-10'>{props.children}</main>
-        </div>
+            </>
     )
 }
