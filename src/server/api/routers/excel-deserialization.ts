@@ -5,17 +5,21 @@ import { type DBTX, db } from "~/server/db";
 import { eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import * as xlsx from "xlsx";
-import { recRowsTransformer, columnLabelByKey, keysArray } from "~/server/excel/validator";
+import {
+  recRowsTransformer,
+  columnLabelByKey,
+  keysArray,
+} from "~/server/excel/validator";
 
 export const excelDeserializationRouter = createTRPCRouter({
   upload: protectedProcedure
     .input(
       z.object({
-        uploadId:z.string(),
-      }),
+        uploadId: z.string(),
+      })
     )
-    .query(async ({input})=>{
-      const upload= await db.query.excelBilling.findFirst({
+    .query(async ({ input }) => {
+      const upload = await db.query.excelBilling.findFirst({
         where: eq(schema.excelBilling.id, input.uploadId),
       });
       return upload;
@@ -27,11 +31,11 @@ export const excelDeserializationRouter = createTRPCRouter({
         type: z.literal("rec"),
         id: z.string(),
         companyId: z.string(),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       const contents = await readExcelFile(db, input.id, input.type);
-      //agregar a readExcel verificacion de columnas obligatorias. 
+      //agregar a readExcel verificacion de columnas obligatorias.
       console.log("contents:  ", contents);
 
       return contents;
@@ -43,10 +47,12 @@ export const excelDeserializationRouter = createTRPCRouter({
         type: z.literal("rec"),
         uploadId: z.string(),
         companyId: z.string(),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
-      console.log("escribiendo en tablas: integrantes,unidad de negocio,family group,differencial, codigo postal, payment_info  ")
+      console.log(
+        "escribiendo en tablas: integrantes,unidad de negocio,family group,differencial, codigo postal, payment_info  "
+      );
       const familyGroupMap = new Map<string | null, string>();
       const contents = await readExcelFile(db, input.uploadId, input.type);
       await db.transaction(async (db) => {
@@ -173,10 +179,10 @@ export const excelDeserializationRouter = createTRPCRouter({
               partido: row.district,
               state: row.state,
               zone: " ", //a rellenar
-              isHolder: row.isHolder,
-              isPaymentHolder: row.isPaymentHolder,
-              isAffiliate: row.isAffiliated,
-              isBillResponsible: row.isPaymentResponsible,
+              isHolder: row.isHolder == true,
+              isPaymentHolder: row.isPaymentHolder == true,
+              isAffiliate: row.isAffiliated == true,
+              isBillResponsible: row.isPaymentResponsible == true,
               age: age,
               affiliate_number: row.affiliate_number,
             })
@@ -187,9 +193,9 @@ export const excelDeserializationRouter = createTRPCRouter({
             integrant_id: new_integrant[0]!.id,
           });
 
-          if(row.isPaymentResponsible){
+          if (row.isPaymentResponsible) {
             await db.insert(schema.payment_info).values({
-              card_number: row.card_number!,  
+              card_number: row.card_number!,
               CBU: row.cbu_number!,
               card_brand: row.card_brand!,
               new_registration: row.new_registration!,
@@ -198,19 +204,19 @@ export const excelDeserializationRouter = createTRPCRouter({
           }
         }
         await db
-        .update(schema.excelBilling)
-        .set({
+          .update(schema.excelBilling)
+          .set({
             confirmed: true,
             confirmedAt: new Date(),
-        })
-        .where(eq(schema.excelBilling.id, input.uploadId))
+          })
+          .where(eq(schema.excelBilling.id, input.uploadId));
       });
     }),
 });
 
 function isKeyPresent(
   key: string | null,
-  dictionary: Map<string | null, string>,
+  dictionary: Map<string | null, string>
 ): boolean {
   return dictionary.has(key ?? "");
 }
@@ -245,7 +251,7 @@ async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
 
   const trimmedRows = rows.map(trimObject);
   const transformedRows = recRowsTransformer(trimmedRows);
-  const errors: string[] = []
+  const errors: string[] = [];
   for (let i = 0; i < transformedRows.length; i++) {
     const row = transformedRows[i]!;
     const rowNum = i + 2;
@@ -255,19 +261,18 @@ async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
         const columnName = columnLabelByKey[column] ?? column;
 
         errors.push(
-          `La columna ${columnName} es obligatoria y no esta en el archivo(fila:${rowNum})`,
+          `La columna ${columnName} es obligatoria y no esta en el archivo(fila:${rowNum})`
         );
       }
     }
   }
 
   if (errors.length > 0) {
-    throw new TRPCError({ code: 'BAD_REQUEST', message: errors.join('\n') })
-}
+    throw new TRPCError({ code: "BAD_REQUEST", message: errors.join("\n") });
+  }
 
   return transformedRows;
 }
-
 
 function trimObject(obj: Record<string, unknown>) {
   return Object.fromEntries(
@@ -281,6 +286,6 @@ function trimObject(obj: Record<string, unknown>) {
       }
 
       return [key, value];
-    }),
+    })
   );
 }
