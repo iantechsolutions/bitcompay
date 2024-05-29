@@ -56,7 +56,11 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
         <Button onClick={handleRead}>Leer archivo</Button>
         <Button onClick={handleConfirm}>Escribir a la base de datos</Button>
       </div>
-      {errorRead && <div>{errorRead.message}</div>}
+      {errorRead && (
+        <pre className="mt-5 overflow-auto rounded-md border border-dashed p-4">
+          {errorRead?.data?.cause?.trim() ?? errorRead?.message}
+        </pre>
+      )}
     </LayoutContainer>
   );
 }

@@ -260,9 +260,7 @@ async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
       if (!value) {
         const columnName = columnLabelByKey[column] ?? column;
 
-        errors.push(
-          `La columna ${columnName} es obligatoria y no esta en el archivo(fila:${rowNum})`
-        );
+        errors.push(`Falta valor en la columna ${columnName} (fila:${rowNum})`);
       }
     }
   }

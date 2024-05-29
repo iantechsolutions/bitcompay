@@ -2,8 +2,7 @@ import { z } from "zod";
 import dayjs from "dayjs";
 import type { TableHeaders } from "~/components/table";
 const stringAsDate = z
-  .string()
-  .or(z.number())
+  .union([z.string(), z.number()])
   .transform((value) => {
     if (typeof value === "number") {
       value = value.toString().padStart(8, "0");
@@ -67,8 +66,8 @@ export const recDocumentValidator = z
     VIGENCIA: stringAsDate.nullable().optional(),
     MODO: z.string().min(0).max(140).nullable().optional(),
     BONIFICACION: z.string().min(0).max(140).nullable().optional(),
-    "DESDE BONIF.": z.string().min(0).max(140).nullable().optional(),
-    "HASTA BONIF.": z.string().min(0).max(140).nullable().optional(),
+    "DESDE BONIF.": stringAsDate.nullable().optional(),
+    "HASTA BONIF.": stringAsDate.nullable().optional(),
     ESTADO: z.string().min(0).max(140).nullable().optional(),
     "NRO DOC TITULAR": numberAsString.nullable().optional(),
     NOMBRE: z.string().min(0).max(140).nullable().optional(),
@@ -108,7 +107,7 @@ export const recDocumentValidator = z
     "NRO CBU": numberAsString.nullable().optional(),
     "TC MARCA": z.string().nullable().optional(),
     "ALTA NUEVA": stringAsBoolean.nullable().optional(),
-    "NRO. TARJETA": z.string().nullable().optional(),
+    "NRO. TARJETA": numberAsString.nullable().optional(),
   })
   .transform((value) => {
     // Translated to english
@@ -209,8 +208,19 @@ export const recHeaders: TableHeaders = [
 ];
 
 export const columnLabelByKey = Object.fromEntries(
-  recHeaders.map((header) => [header.key, header.label])
+  recHeaders
+    .filter(
+      (header) =>
+        header.key !== "card_number" &&
+        header.key !== "card_brand" &&
+        header.key !== "new_registration" &&
+        header.key !== "cbu_number"
+    )
+    .map((header) => {
+      return [header.key, header.label];
+    })
 ) as Record<string, string>;
+
 export const keysArray = recHeaders.map((header) => header.key);
 
 export type RecDocument = z.infer<typeof recDocumentValidator>;
