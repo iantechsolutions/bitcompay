@@ -62,7 +62,7 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
         <Button onClick={handleRead} disabled={isReadingLoading}>
           Leer archivo
         </Button>
-        <Button onClick={handleConfirm} disabled={isDataLoading}>
+        <Button onClick={handleConfirm} disabled={true}>
           Escribir a la base de datos
         </Button>
       </div>
