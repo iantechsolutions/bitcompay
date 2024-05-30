@@ -65,9 +65,9 @@ export const brandsRouter = createTRPCRouter({
         number: z.number().min(1).max(255),
         description: z.string().min(0).max(1023),
         redescription: z.string().min(0).max(10),
-        iva: z.string(),
-        billType: z.string(),
-        concept: z.string(),
+        iva: z.string().optional(),
+        billType: z.string().optional(),
+        concept: z.string().optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -97,10 +97,10 @@ export const brandsRouter = createTRPCRouter({
         name: z.string().min(1).max(255),
         description: z.string().min(0).max(1023).optional(),
         reducedDescription: z.string().min(0).max(10).optional(),
-        iva: z.string(),
-        billType: z.string(),
+        iva: z.string().optional(),
+        billType: z.string().optional(),
         companiesId: z.set(z.string()),
-        concept: z.string(),
+        concept: z.string().optional(),
       })
     )
     .mutation(async ({ input }) => {

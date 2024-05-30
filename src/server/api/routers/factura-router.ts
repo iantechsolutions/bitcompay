@@ -66,136 +66,136 @@ type grupoCompleto = {
   abonos: any[];
   integrants: Integrant[];
 };
-async function generateFactura(
-  afip: Afip,
-  grupo: grupoCompleto,
-  dateDesde: Date,
-  dateHasta: Date,
-  dateVencimiento: Date
-) {
-  const ivaDictionary = {
-    "0%": 3,
-    "10.5%": 4,
-    "21%": 5,
-    "27%": 6,
-    "5%": 8,
-    "2.5%": 9,
-    "": 0,
-  };
+// async function generateFactura(
+//   afip: Afip,
+//   grupo: grupoCompleto,
+//   dateDesde: Date,
+//   dateHasta: Date,
+//   dateVencimiento: Date
+// ) {
+//   const ivaDictionary = {
+//     "0%": 3,
+//     "10.5%": 4,
+//     "21%": 5,
+//     "27%": 6,
+//     "5%": 8,
+//     "2.5%": 9,
+//     "": 0,
+//   };
 
-  const conceptDictionary = {
-    Productos: 1,
-    Servicios: 2,
-    "Productos y Servicios": 3,
-    "": 0,
-  };
+//   const conceptDictionary = {
+//     Productos: 1,
+//     Servicios: 2,
+//     "Productos y Servicios": 3,
+//     "": 0,
+//   };
 
-  const facturaDictionary = {
-    "FACTURA A": 3,
-    "FACTURA B": 6,
-    "FACTURA C": 11,
-    "FACTURA M": 51,
-    "FACTURA E": 19,
-    "NOTA DE DEBITO A": 8,
-    "NOTA DE DEBITO B": 13,
-    "NOTA DE DEBITO C": 15,
-    "NOTA DE DEBITO M": 52,
-    "NOTA DE DEBITO E": 20,
-    "NOTA DE CREDITO A": 2,
-    "NOTA DE CREDITO B": 12,
-    "NOTA DE CREDITO C": 14,
-    "NOTA DE CREDITO M": 53,
-    "NOTA DE CREDITO E": 21,
-    "": 0,
-  };
+//   const facturaDictionary = {
+//     "FACTURA A": 3,
+//     "FACTURA B": 6,
+//     "FACTURA C": 11,
+//     "FACTURA M": 51,
+//     "FACTURA E": 19,
+//     "NOTA DE DEBITO A": 8,
+//     "NOTA DE DEBITO B": 13,
+//     "NOTA DE DEBITO C": 15,
+//     "NOTA DE DEBITO M": 52,
+//     "NOTA DE DEBITO E": 20,
+//     "NOTA DE CREDITO A": 2,
+//     "NOTA DE CREDITO B": 12,
+//     "NOTA DE CREDITO C": 14,
+//     "NOTA DE CREDITO M": 53,
+//     "NOTA DE CREDITO E": 21,
+//     "": 0,
+//   };
 
-  let last_voucher;
-  const puntoVenta = grupo.businessUnitData?.company?.puntoVenta;
-  try {
-    last_voucher = await afip.ElectronicBilling.getLastVoucher(puntoVenta, 11);
-  } catch {
-    last_voucher = 0;
-  }
-  const billResponsible = grupo.integrants.find(
-    (integrant) => integrant.isBillResponsible
-  );
-  const numero_de_factura = last_voucher + 1;
+//   let last_voucher;
+//   const puntoVenta = grupo.businessUnitData?.company?.puntoVenta;
+//   try {
+//     last_voucher = await afip.ElectronicBilling.getLastVoucher(puntoVenta, 11);
+//   } catch {
+//     last_voucher = 0;
+//   }
+//   const billResponsible = grupo.integrants.find(
+//     (integrant) => integrant.isBillResponsible
+//   );
+//   const numero_de_factura = last_voucher + 1;
 
-  const fecha = new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
-    .toISOString()
-    .split("T")[0];
+//   const fecha = new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
+//     .toISOString()
+//     .split("T")[0];
 
-  const data = {
-    CantReg: 1, // Cantidad de facturas a registrar
-    PtoVta: puntoVenta,
-    CbteTipo: facturaDictionary[grupo.businessUnitData?.brand?.bill_type ?? ""],
-    Concepto: conceptDictionary[grupo.businessUnitData?.brand?.concept],
-    DocTipo: billResponsible?.fiscal_id_type,
-    DocNro: billResponsible?.fiscal_id_number,
-    CbteDesde: numero_de_factura,
-    CbteHasta: numero_de_factura,
-    CbteFch: parseInt(fecha?.replace(/-/g, "") ?? ""),
-    FchServDesde: formatDateAFIP(dateDesde),
-    FchServHasta: formatDateAFIP(dateHasta),
-    FchVtoPago: formatDateAFIP(dateVencimiento),
-    ImpTotal: importe,
-    ImpTotConc: 0, // Importe neto no gravado
-    ImpNeto: (Number(importe) * 1).toString(),
-    ImpOpEx: 0,
-    ImpIVA: 0,
-    ImpTrib: 0,
-    MonId: "PES",
-    MonCotiz: 1,
-    Iva: {
-      Id: ivaDictionary[grupo.businessUnitData?.brand?.iva ?? ""],
-      BaseImp: importe,
-      Importe: (Number(importe) * 0, 21).toString(),
-    },
-  };
-  /**
-   * Creamos la Factura
-   **/
-  const res = await afip.ElectronicBilling.createVoucher(data);
-}
-async function preparateFactura(
-  afip: Afip,
-  grupos: grupoCompleto[],
-  dateDesde: Date,
-  dateHasta: Date,
-  dateVencimiento: Date
-) {
-  const user = await currentUser();
-  const liquidation = await db
-    .insert(schema.liquidations)
-    .values({
-      estado: "pendiente",
-      userCreated: user?.id ?? "",
-    })
-    .returning();
-  grupos.forEach((grupo) => {
-    const factura = db.insert(schema.facturas).values({
-      ptoVenta: grupo.businessUnitData?.company?.puntoVenta ?? 0,
-      nroFactura: "",
-      tipoFactura: grupo.businessUnitData?.brand?.bill_type ?? "",
-      // concepto: grupo.businessUnitData?.brand?.concept ?? 0,
-      // tipoDocumento:
-      //   grupo.integrants.find((integrant) => integrant.isBillResponsible)
-      //     ?.fiscal_id_type ?? "",
-      // nroDocumento:
-      //   grupo.integrants.find((integrant) => integrant.isBillResponsible)
-      //     ?.fiscal_id_number ?? "",
-      importe: total,
-      fromPeriod: dateDesde,
-      toPeriod: dateHasta,
-      dueDate: dateVencimiento,
-      prodName: "Servicio",
-      iva: grupo.businessUnitData?.brand?.iva ?? "",
-      billLink: "",
-      liquidation_id: liquidation[0]!.id,
-      family_group_id: grupo.id,
-    });
-  });
-}
+//   const data = {
+//     CantReg: 1, // Cantidad de facturas a registrar
+//     PtoVta: puntoVenta,
+//     CbteTipo: facturaDictionary[grupo.businessUnitData?.brand?.bill_type ?? ""],
+//     Concepto: conceptDictionary[grupo.businessUnitData?.brand?.concept],
+//     DocTipo: billResponsible?.fiscal_id_type,
+//     DocNro: billResponsible?.fiscal_id_number,
+//     CbteDesde: numero_de_factura,
+//     CbteHasta: numero_de_factura,
+//     CbteFch: parseInt(fecha?.replace(/-/g, "") ?? ""),
+//     FchServDesde: formatDateAFIP(dateDesde),
+//     FchServHasta: formatDateAFIP(dateHasta),
+//     FchVtoPago: formatDateAFIP(dateVencimiento),
+//     ImpTotal: importe,
+//     ImpTotConc: 0, // Importe neto no gravado
+//     ImpNeto: (Number(importe) * 1).toString(),
+//     ImpOpEx: 0,
+//     ImpIVA: 0,
+//     ImpTrib: 0,
+//     MonId: "PES",
+//     MonCotiz: 1,
+//     Iva: {
+//       Id: ivaDictionary[grupo.businessUnitData?.brand?.iva ?? ""],
+//       BaseImp: importe,
+//       Importe: (Number(importe) * 0, 21).toString(),
+//     },
+//   };
+//   /**
+//    * Creamos la Factura
+//    **/
+//   const res = await afip.ElectronicBilling.createVoucher(data);
+// }
+// async function preparateFactura(
+//   afip: Afip,
+//   grupos: grupoCompleto[],
+//   dateDesde: Date,
+//   dateHasta: Date,
+//   dateVencimiento: Date
+// ) {
+//   const user = await currentUser();
+//   const liquidation = await db
+//     .insert(schema.liquidations)
+//     .values({
+//       estado: "pendiente",
+//       userCreated: user?.id ?? "",
+//     })
+//     .returning();
+//   grupos.forEach((grupo) => {
+//     const factura = db.insert(schema.facturas).values({
+//       ptoVenta: grupo.businessUnitData?.company?.puntoVenta ?? 0,
+//       nroFactura: "",
+//       tipoFactura: grupo.businessUnitData?.brand?.bill_type ?? "",
+//       // concepto: grupo.businessUnitData?.brand?.concept ?? 0,
+//       // tipoDocumento:
+//       //   grupo.integrants.find((integrant) => integrant.isBillResponsible)
+//       //     ?.fiscal_id_type ?? "",
+//       // nroDocumento:
+//       //   grupo.integrants.find((integrant) => integrant.isBillResponsible)
+//       //     ?.fiscal_id_number ?? "",
+//       importe: total,
+//       fromPeriod: dateDesde,
+//       toPeriod: dateHasta,
+//       dueDate: dateVencimiento,
+//       prodName: "Servicio",
+//       iva: grupo.businessUnitData?.brand?.iva ?? "",
+//       billLink: "",
+//       liquidation_id: liquidation[0]!.id,
+//       family_group_id: grupo.id,
+//     });
+//   });
+// }
 
 async function getGroupAmount(grupo: grupoCompleto) {
   let importeBase = 0;
@@ -291,7 +291,7 @@ export const facturasRouter = createTRPCRouter({
       const grupos = await getGruposByBrandId(input.brandId);
       const afip = await ingresarAfip();
       grupos.forEach((grupo) => {
-        generateFactura(afip, grupo, dateDesde, dateHasta, dateDue);
+        // generateFactura(afip, grupo, dateDesde, dateHasta, dateDue);
         // const billResposible = grupo.integrants.find((integrant) => integrant.isBillResponsible);
       });
     }),
