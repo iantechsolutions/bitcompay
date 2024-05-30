@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { Loader2Icon, PlusCircleIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -12,6 +12,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
+import {
+  SelectItem,
+  Select,
+  SelectContent,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { asTRPCError } from "~/lib/errors";
@@ -22,17 +29,24 @@ export function AddBussiness(props: { params: { companyId: string } }) {
     api.bussinessUnits.create.useMutation();
 
   const [description, setDescription] = useState("");
-
+  const [brand, setBrand] = useState("");
   const [open, setOpen] = useState(false);
 
   const router = useRouter();
+  const { data: brands } = api.brands.list.useQuery();
+  const selectBrandOptions = brands?.map((brand) => (
+    <SelectItem key={brand.id} value={brand.id}>
+      {" "}
+      {brand.name}{" "}
+    </SelectItem>
+  ));
 
   async function handleCreate() {
     try {
       await createProduct({
         description: description,
         companyId: props.params.companyId,
-        brandId: "",
+        brandId: brand,
       });
 
       toast.success("Producto creado correctamente");
@@ -56,13 +70,26 @@ export function AddBussiness(props: { params: { companyId: string } }) {
             <DialogTitle>Crear una unidad de negocio</DialogTitle>
           </DialogHeader>
           <div>
-            <Label htmlFor="description">name</Label>
+            <Label htmlFor="description">Descripcion</Label>
             <Input
               id="description"
-              placeholder="..."
+              placeholder="escriba una descripción"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
+          </div>
+          <div>
+            <Label htmlFor="description">Marca</Label>
+            <Select
+              onValueChange={(value) => {
+                setBrand(value);
+              }}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="seleccione una marca" />
+              </SelectTrigger>
+              <SelectContent>{selectBrandOptions}</SelectContent>
+            </Select>
           </div>
           <DialogFooter>
             <Button disabled={isLoading} onClick={handleCreate}>

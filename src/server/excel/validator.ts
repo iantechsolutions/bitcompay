@@ -22,15 +22,16 @@ const stringAsDate = z
 
     return dayjs(`${year}-${month}-${day}`).toDate();
   })
-  .refine((value) => {
-    if (value.getFullYear() < 2000) return false;
-    if (value.getFullYear() > 3000) return false;
-    return true;
-  });
+  .refine(
+    (value) => {
+      if (value.getFullYear() < 2000) return false;
+      if (value.getFullYear() > 3000) return false;
+      if (!dayjs(value, "YYYYMMDD").isValid()) return false;
 
-export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
-  return z.array(recDocumentValidator).parse(rows);
-};
+      return true;
+    },
+    { message: "la fecha proporcionada no es valida" }
+  );
 
 const stringAsBoolean = z
   .union([z.string(), z.boolean()])
@@ -46,17 +47,28 @@ const stringAsBoolean = z
     if (typeof value === "boolean") {
       return value;
     }
-    throw new Error("invalid boolean value");
+  })
+  .refine((value) => typeof value === "boolean", {
+    message: "el valor proporcionado no es valor de verdad valido",
   });
 
-const numberAsString = z.union([z.number(), z.string()]).transform((value) => {
-  if (
-    typeof value === "number" ||
-    (typeof value === "string" && !isNaN(Number(value)))
-  ) {
-    return value.toString();
-  }
-});
+const numberAsString = z
+  .union([z.number(), z.string()])
+  .transform((value) => {
+    if (
+      typeof value === "number" ||
+      (typeof value === "string" && !isNaN(Number(value)))
+    ) {
+      return value.toString();
+    }
+  })
+  .refine((value) => !isNaN(Number(value)), {
+    message: "el valor propocionado no es un numero valido",
+  });
+
+export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
+  return z.array(recDocumentValidator).parse(rows);
+};
 
 export const recDocumentValidator = z
   .object({
@@ -68,23 +80,31 @@ export const recDocumentValidator = z
     BONIFICACION: z.string().min(0).max(140).nullable().optional(),
     "DESDE BONIF.": stringAsDate.nullable().optional(),
     "HASTA BONIF.": stringAsDate.nullable().optional(),
-    ESTADO: z.string().min(0).max(140).nullable().optional(),
+    ESTADO: z.enum(["ACTIVO", "INACTIVO"]).nullable().optional(),
     "NRO DOC TITULAR": numberAsString.nullable().optional(),
     NOMBRE: z.string().min(0).max(140).nullable().optional(),
     "NRO AFILIADO": numberAsString.nullable().optional(),
     EXTENSION: z.string().min(0).max(140).nullable().optional(),
-    "TIPO DOC PROPIO": z.string().min(0).max(140).nullable().optional(),
+    "TIPO DOC PROPIO": z.enum(["DNI", "PASAPORTE"]).nullable().optional(),
     "NRO DOC PROPIO": numberAsString.nullable().optional(),
     PAR: z.string().min(0).max(140).nullable().optional(),
     "FECHA NACIMIENTO": stringAsDate.nullable().optional(),
-    GENERO: z.enum(["male", "female", "other"]).nullable().optional(),
+    GENERO: z.enum(["MASCULINO", "FEMENINO", "OTRO"]).nullable().optional(),
     "ESTADO CIVIL": z
-      .enum(["casado", "soltero", "divorciado", "viudo"])
+      .enum(["CASADO", "SOLTERO", "DIVORCIADO", "VIUDO"])
       .nullable()
       .optional(),
     NACIONALIDAD: z.string().min(0).max(140).nullable().optional(),
-    "ESTADO AFIP": z.string().min(0).max(140).nullable().optional(),
-    "TIPO DOC FISCAL": z.string().min(0).max(140).nullable().optional(),
+    "ESTADO AFIP": z
+      .enum([
+        "CONSUMIDOR FINAL",
+        "MONOTRIBUTISTA",
+        "EXENTO",
+        "RESPONSABLE INSCRIPTO",
+      ])
+      .nullable()
+      .optional(),
+    "TIPO DOC FISCAL": z.enum(["CUIT", "CUIL"]).nullable().optional(),
     "NRO DOC FISCAL": numberAsString.nullable().optional(),
     LOCALIDAD: z.string().min(0).max(140).nullable().optional(),
     PARTIDO: z.string().min(0).max(140).nullable().optional(),
@@ -103,7 +123,7 @@ export const recDocumentValidator = z
     "DIFERENCIAL CODIGO": z.string().min(0).max(140).nullable().optional(),
     "DIFERENCIAL VALOR": numberAsString.optional().nullable(),
     PLAN: z.string().min(0).max(140).nullable().optional(),
-
+    PRODUCTO: z.string().optional().nullable(),
     "NRO CBU": numberAsString.nullable().optional(),
     "TC MARCA": z.string().nullable().optional(),
     "ALTA NUEVA": stringAsBoolean.nullable().optional(),
@@ -152,10 +172,10 @@ export const recDocumentValidator = z
       differential_code: value["DIFERENCIAL CODIGO"] ?? null,
       differential_value: value["DIFERENCIAL VALOR"],
       plan: value.PLAN ?? null,
-
+      product: value.PRODUCTO ?? null,
       cbu_number: value["NRO CBU"] ?? null,
       card_brand: value["TC MARCA"] ?? null,
-      new_registration: value["ALTA NUEVA"] ?? null,
+      is_new: value["ALTA NUEVA"] ?? null,
       card_number: value["NRO. TARJETA"] ?? null,
     };
   });
@@ -163,12 +183,12 @@ export const recDocumentValidator = z
 export const recHeaders: TableHeaders = [
   { key: "business_unit", label: "UNIDAD DE NEGOCIO", width: 140 },
   { key: "os", label: "OS", width: 140 },
-  { key: "originating_os", label: "OS ORIGEN", width: 140 },
+  { key: "originating os", label: "OS ORIGEN", width: 140 },
   { key: "validity", label: "VIGENCIA", width: 140 },
   { key: "mode", label: "MODO", width: 140 },
   { key: "bonus", label: "BONIFICACION", width: 140 },
-  { key: "from_bonus", label: "DESDE BONIF.", width: 140 },
-  { key: "to_bonus", label: "HASTA BONIF.", width: 140 },
+  { key: "from bonus", label: "DESDE BONIF.", width: 140 },
+  { key: "to bonus", label: "HASTA BONIF.", width: 140 },
   { key: "state", label: "ESTADO", width: 140 },
   { key: "holder_id_number", label: "NRO DOC TITULAR", width: 140 },
   { key: "name", label: "NOMBRE", width: 140 },
@@ -179,9 +199,9 @@ export const recHeaders: TableHeaders = [
   { key: "relationship", label: "PAR", width: 140 },
   { key: "birth_date", label: "FECHA NACIMIENTO", width: 140 },
   { key: "gender", label: "GENERO", width: 140 },
-  { key: "marital_status", label: "ESTADO CIVIL", width: 140 },
+  { key: "marital status", label: "ESTADO CIVIL", width: 140 },
   { key: "nationality", label: "NACIONALIDAD", width: 140 },
-  { key: "afip_status", label: "ESTADO AFIP", width: 140 },
+  { key: "afip status", label: "ESTADO AFIP", width: 140 },
   { key: "fiscal_id_type", label: "TIPO DOC FISCAL", width: 140 },
   { key: "fiscal_id_number", label: "NRO DOC FISCAL", width: 140 },
   { key: "city", label: "LOCALIDAD", width: 140 },
@@ -189,7 +209,7 @@ export const recHeaders: TableHeaders = [
   { key: "address", label: "DIRECCION", width: 140 },
   { key: "floor", label: "PISO", width: 140 },
   { key: "apartment", label: "DEPTO", width: 140 },
-  { key: "postal_code", label: "CP", width: 140 },
+  { key: "postal code", label: "CP", width: 140 },
   { key: "phone", label: "TELEFONO", width: 140 },
   { key: "cellphone", label: "CELULAR", width: 140 },
   { key: "email", label: "EMAIL", width: 140 },
@@ -201,26 +221,59 @@ export const recHeaders: TableHeaders = [
   { key: "differential_code", label: "DIFERENCIAL CODIGO", width: 140 },
   { key: "differential_value", label: "DIFERENCIAL VALOR", width: 140 },
   { key: "plan", label: "PLAN", width: 140 },
+  { key: "product", label: "PRODUCTO", width: 140 },
   { key: "cbu_number", label: "NRO CBU", width: 140 },
   { key: "card_brand", label: "TC MARCA", width: 140 },
-  { key: "new_registration", label: "ALTA NUEVA", width: 140 },
+  { key: "is_new", label: "ALTA NUEVA", width: 140 },
   { key: "card_number", label: "Nro. TARJETA", width: 140 },
 ];
 
+export const requiredColumns = [
+  { key: "business_unit", label: "UNIDAD DE NEGOCIO" },
+  { key: "os", label: "OS" },
+  { key: "originating os", label: "OS ORIGEN" },
+  { key: "validity", label: "VIGENCIA" },
+  { key: "mode", label: "MODO" },
+  { key: "bonus", label: "BONIFICACION" },
+  { key: "from bonus", label: "DESDE BONIF." },
+  { key: "to bonus", label: "HASTA BONIF." },
+  { key: "state", label: "ESTADO" },
+  { key: "holder_id_number", label: "NRO DOC TITULAR" },
+  { key: "name", label: "NOMBRE" },
+  { key: "affiliate_number", label: "NRO AFILIADO" },
+  { key: "extension", label: "EXTENSION" },
+  { key: "own_id_type", label: "TIPO DOC PROPIO" },
+  { key: "own_id_number", label: "NRO DOC PROPIO" },
+  { key: "relationship", label: "PAR" },
+  { key: "birth_date", label: "FECHA NACIMIENTO" },
+  { key: "gender", label: "GENERO" },
+  { key: "marital status", label: "ESTADO CIVIL" },
+  { key: "nationality", label: "NACIONALIDAD" },
+  { key: "afip status", label: "ESTADO AFIP" },
+  { key: "fiscal_id_type", label: "TIPO DOC FISCAL" },
+  { key: "fiscal_id_number", label: "NRO DOC FISCAL" },
+  { key: "city", label: "LOCALIDAD" },
+  { key: "district", label: "PARTIDO" },
+  { key: "address", label: "DIRECCION" },
+  { key: "floor", label: "PISO" },
+  { key: "apartment", label: "DEPTO" },
+  { key: "postal code", label: "CP" },
+  { key: "phone", label: "TELEFONO" },
+  { key: "cellphone", label: "CELULAR" },
+  { key: "email", label: "EMAIL" },
+  { key: "contribution", label: "APORTE 3%" },
+  { key: "differential_code", label: "DIFERENCIAL CODIGO" },
+  { key: "differential_value", label: "DIFERENCIAL VALOR" },
+  { key: "plan", label: "PLAN" },
+  { key: "product", label: "PRODUCTO" },
+];
+
 export const columnLabelByKey = Object.fromEntries(
-  recHeaders
-    .filter(
-      (header) =>
-        header.key !== "card_number" &&
-        header.key !== "card_brand" &&
-        header.key !== "new_registration" &&
-        header.key !== "cbu_number"
-    )
-    .map((header) => {
-      return [header.key, header.label];
-    })
+  recHeaders.map((header) => {
+    return [header.key, header.label];
+  })
 ) as Record<string, string>;
 
-export const keysArray = recHeaders.map((header) => header.key);
+export const keysArray = requiredColumns.map((header) => header.key);
 
 export type RecDocument = z.infer<typeof recDocumentValidator>;

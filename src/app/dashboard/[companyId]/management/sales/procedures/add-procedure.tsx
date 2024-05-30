@@ -40,28 +40,39 @@ export default function AddProcedure() {
 
   async function createMembers(
     membersData: InputsMembers[],
-    family_groupId?: string,
+    family_groupId?: string
   ) {
     const promises = membersData.map((member) => {
-      let status: "soltero" | "casado" | "divorciado" | "viudo";
+      let status: "SOLTERO" | "CASADO" | "DIVORCIADO" | "VIUDO";
+      let gender: "MASCULINO" | "FEMENINO" | "OTRO" = "OTRO";
       switch (member.civil_status) {
-        case "solter":
-          status = "soltero";
+        case "SOLTERO":
+          status = "SOLTERO";
           break;
-        case "casado":
-          status = "casado";
+        case "CASADO":
+          status = "CASADO";
           break;
-        case "divorciado":
-          status = "divorciado";
+        case "DIVORCIADO":
+          status = "DIVORCIADO";
           break;
-        case "viudo":
-          status = "viudo";
+        case "VIUDO":
+          status = "VIUDO";
           break;
         default:
-          status = "soltero";
+          status = "SOLTERO";
           break;
       }
-
+      switch (member.gender) {
+        case "MASCULINO":
+          gender = "MASCULINO";
+          break;
+        case "FEMENINO":
+          gender = "FEMENINO";
+          break;
+        case "OTRO":
+          gender = "OTRO";
+          break;
+      }
       const eighteenYearsAgo = new Date();
       eighteenYearsAgo.setFullYear(eighteenYearsAgo.getFullYear() - 18);
       const isAdultHolder =
@@ -75,12 +86,7 @@ export default function AddProcedure() {
         id_type: member.id_type,
         id_number: member.id_number,
         birth_date: member.birth_date,
-        gender:
-          member.gender == "male"
-            ? "male"
-            : member.gender == "female"
-              ? "female"
-              : "other",
+        gender: gender ?? null,
         civil_status: status,
         nationality: member.nationality,
         afip_status: member.afip_status,
@@ -92,7 +98,7 @@ export default function AddProcedure() {
         email: member.mail,
         floor: member.floor,
         department: member.depto,
-        lacality: member.localidad,
+        locality: member.localidad,
         partido: member.county,
         state: member.state,
         cp: member.cp,
@@ -107,7 +113,7 @@ export default function AddProcedure() {
     });
 
     Promise.all(promises).catch((error) =>
-      console.log("An error has occurred", error),
+      console.log("An error has occurred", error)
     );
   }
   async function handleload(procedureStatus: string) {
