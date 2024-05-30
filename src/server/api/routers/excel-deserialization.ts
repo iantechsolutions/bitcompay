@@ -182,10 +182,10 @@ export const excelDeserializationRouter = createTRPCRouter({
               state: row.state,
               cp: row["postal code"],
               zone: " ", //a rellenar
-              // isHolder: row.isHolder,
-              // isPaymentHolder: row.isPaymentHolder,
-              // isAffiliate: row.isAffiliated,
-              // isBillResponsible: row.isPaymentResponsible,
+              isHolder: row.isHolder == true,
+              isPaymentHolder: row.isPaymentHolder == true,
+              isAffiliate: row.isAffiliated == true,
+              isBillResponsible: row.isPaymentResponsible == true,
               age: age,
               family_group_id: familyGroupId,
               affiliate_number: row.affiliate_number,
@@ -257,7 +257,7 @@ async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
 
   const trimmedRows = rows.map(trimObject);
   const transformedRows = recRowsTransformer(trimmedRows);
-  console.log(transformedRows);
+
   const errors: string[] = [];
   for (let i = 0; i < transformedRows.length; i++) {
     const row = transformedRows[i]!;
@@ -302,7 +302,7 @@ async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
       }
     }
     if (!mode) {
-      errors.push(`modo no valido en (fila:${rowNum})`);
+      errors.push(`MODO no valido en (fila:${rowNum})`);
     }
     const plan = await db.query.plans.findFirst({
       where: eq(schema.plans.plan_code, row.plan!),

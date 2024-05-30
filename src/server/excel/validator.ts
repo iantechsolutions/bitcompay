@@ -1,5 +1,7 @@
 import { z } from "zod";
 import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+dayjs.extend(customParseFormat);
 import type { TableHeaders } from "~/components/table";
 const stringAsDate = z
   .union([z.string(), z.number()])
@@ -19,16 +21,16 @@ const stringAsDate = z
       month = value.substring(2, 4);
       year = value.substring(4, 8);
     }
-
-    return dayjs(`${year}-${month}-${day}`).toDate();
+    console.log(`${year}-${month}-${day}`);
+    return dayjs(`${year}-${month}-${day}`, "YYYY-MM-DD", true).toDate();
   })
   .refine(
     (value) => {
       if (value.getFullYear() < 2000) return false;
       if (value.getFullYear() > 3000) return false;
-      if (!dayjs(value, "YYYYMMDD").isValid()) return false;
-
-      return true;
+      console.log(value);
+      console.log(dayjs(value).isValid());
+      return dayjs(value).isValid();
     },
     { message: "la fecha proporcionada no es valida" }
   );
@@ -72,29 +74,99 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
 
 export const recDocumentValidator = z
   .object({
-    "UNIDAD DE NEGOCIO": z.string().min(0).max(140).nullable().optional(),
-    OS: z.string().min(0).max(140).nullable().optional(),
-    "OS ORIGEN": z.string().min(0).max(140).nullable().optional(),
-    VIGENCIA: stringAsDate.nullable().optional(),
-    MODO: z.string().min(0).max(140).nullable().optional(),
-    BONIFICACION: z.string().min(0).max(140).nullable().optional(),
-    "DESDE BONIF.": stringAsDate.nullable().optional(),
-    "HASTA BONIF.": stringAsDate.nullable().optional(),
-    ESTADO: z.enum(["ACTIVO", "INACTIVO"]).nullable().optional(),
-    "NRO DOC TITULAR": numberAsString.nullable().optional(),
-    NOMBRE: z.string().min(0).max(140).nullable().optional(),
-    "NRO AFILIADO": numberAsString.nullable().optional(),
-    EXTENSION: z.string().min(0).max(140).nullable().optional(),
-    "TIPO DOC PROPIO": z.enum(["DNI", "PASAPORTE"]).nullable().optional(),
-    "NRO DOC PROPIO": numberAsString.nullable().optional(),
-    PAR: z.string().min(0).max(140).nullable().optional(),
-    "FECHA NACIMIENTO": stringAsDate.nullable().optional(),
-    GENERO: z.enum(["MASCULINO", "FEMENINO", "OTRO"]).nullable().optional(),
-    "ESTADO CIVIL": z
-      .enum(["CASADO", "SOLTERO", "DIVORCIADO", "VIUDO"])
+    "UNIDAD DE NEGOCIO": z
+      .string()
+      .min(0)
+      .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
       .nullable()
       .optional(),
-    NACIONALIDAD: z.string().min(0).max(140).nullable().optional(),
+    OS: z
+      .string()
+      .min(0)
+      .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
+      .nullable()
+      .optional(),
+    "OS ORIGEN": z
+      .string()
+      .min(0)
+      .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
+      .nullable()
+      .optional(),
+    VIGENCIA: stringAsDate.nullable().optional(),
+    MODO: z
+      .string()
+      .min(0)
+      .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
+      .nullable()
+      .optional(),
+    BONIFICACION: z
+      .string()
+      .min(0)
+      .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
+      .nullable()
+      .optional(),
+    "DESDE BONIF.": stringAsDate.nullable().optional(),
+    "HASTA BONIF.": stringAsDate.nullable().optional(),
+    ESTADO: z
+      .enum(["ACTIVO", "INACTIVO"])
+      .refine((value) => ["ACTIVO", "INACTIVO"].includes(value), {
+        message: "El estado debe ser 'ACTIVO' o 'INACTIVO'",
+      })
+      .nullable()
+      .optional(),
+    "NRO DOC TITULAR": numberAsString.nullable().optional(),
+    NOMBRE: z
+      .string()
+      .min(0)
+      .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
+      .nullable()
+      .optional(),
+    "NRO AFILIADO": numberAsString.nullable().optional(),
+    EXTENSION: z
+      .string()
+      .min(0)
+      .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
+      .nullable()
+      .optional(),
+    "TIPO DOC PROPIO": z
+      .enum(["DNI", "PASAPORTE"])
+      .refine((value) => ["DNI", "PASAPORTE"].includes(value), {
+        message: "El tipo de documento debe ser DNI o PASAPORTE",
+      })
+      .nullable()
+      .optional(),
+    "NRO DOC PROPIO": numberAsString.nullable().optional(),
+    PAR: z
+      .string()
+      .min(0)
+      .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
+      .nullable()
+      .optional(),
+    "FECHA NACIMIENTO": stringAsDate.nullable().optional(),
+    GENERO: z
+      .enum(["MASCULINO", "FEMENINO", "OTRO"])
+      .refine((value) => ["MASCULINO", "FEMENINO", "OTRO"].includes(value), {
+        message: "El genero debe ser 'MASCULINO', 'FEMENINO' o 'OTRO'",
+      })
+      .nullable()
+      .optional(),
+    "ESTADO CIVIL": z
+      .enum(["CASADO", "SOLTERO", "DIVORCIADO", "VIUDO"])
+      .refine(
+        (value) => ["CASADO", "SOLTERO", "DIVORCIADO", "VIUDO"].includes(value),
+        {
+          message:
+            "El estado civil debe ser 'CASADO', 'SOLTERO', 'DIVORCIADO' o 'VIUDO'",
+        }
+      )
+      .nullable()
+      .optional(),
+    NACIONALIDAD: z
+      .string()
+      .min(0)
+      .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
+      .nullable()
+      .optional(),
     "ESTADO AFIP": z
       .enum([
         "CONSUMIDOR FINAL",
@@ -114,7 +186,11 @@ export const recDocumentValidator = z
     CP: numberAsString.nullable().optional(),
     TELEFONO: numberAsString.nullable().optional(),
     CELULAR: numberAsString.nullable().optional(),
-    EMAIL: z.string().min(0).max(140).nullable().optional(),
+    EMAIL: z
+      .string()
+      .email({ message: "Ingrese un email valido" })
+      .nullable()
+      .optional(),
     "ES AFILIADO": stringAsBoolean.nullable().optional(),
     "ES TITULAR": stringAsBoolean.nullable().optional(),
     "ES TITULAR DEL PAGO": stringAsBoolean.nullable().optional(),
@@ -123,9 +199,17 @@ export const recDocumentValidator = z
     "DIFERENCIAL CODIGO": z.string().min(0).max(140).nullable().optional(),
     "DIFERENCIAL VALOR": numberAsString.optional().nullable(),
     PLAN: z.string().min(0).max(140).nullable().optional(),
-    PRODUCTO: z.string().optional().nullable(),
+    PRODUCTO: z
+      .string()
+      .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
+      .optional()
+      .nullable(),
     "NRO CBU": numberAsString.nullable().optional(),
-    "TC MARCA": z.string().nullable().optional(),
+    "TC MARCA": z
+      .string()
+      .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
+      .nullable()
+      .optional(),
     "ALTA NUEVA": stringAsBoolean.nullable().optional(),
     "NRO. TARJETA": numberAsString.nullable().optional(),
   })
