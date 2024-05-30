@@ -21,18 +21,17 @@ const stringAsDate = z
       month = value.substring(2, 4);
       year = value.substring(4, 8);
     }
-    console.log(`${year}-${month}-${day}`);
+
     return dayjs(`${year}-${month}-${day}`, "YYYY-MM-DD", true).toDate();
   })
   .refine(
     (value) => {
       if (value.getFullYear() < 2000) return false;
       if (value.getFullYear() > 3000) return false;
-      console.log(value);
-      console.log(dayjs(value).isValid());
+
       return dayjs(value).isValid();
     },
-    { message: "Error leyendo la fila por caracteres incorrectos" }
+    { message: "Caracteres incorrecos en columna:" }
   );
 
 const stringAsBoolean = z
@@ -51,7 +50,7 @@ const stringAsBoolean = z
     }
   })
   .refine((value) => typeof value === "boolean", {
-    message: "Error leyendo la fila por caracteres incorrectos",
+    message: "Caracteres incorrecos en columna:",
   });
 
 const numberAsString = z
@@ -65,11 +64,135 @@ const numberAsString = z
     }
   })
   .refine((value) => !isNaN(Number(value)), {
-    message: "Error leyendo la fila por caracteres incorrectos",
+    message: "Caracteres incorrecos en columna:",
   });
 
 export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
-  return z.array(recDocumentValidator).parse(rows);
+  let finishedArray: {
+    business_unit: string | null;
+    os: string | null;
+    "originating os": string | null;
+    validity: Date | null;
+    mode: string | null;
+    bonus: string;
+    "from bonus": Date | null;
+    "to bonus": Date | null;
+    state: "ACTIVO" | "INACTIVO" | null;
+    holder_id_number: string | null;
+    name: string | null;
+    affiliate_number: string | null;
+    extension: string | null;
+    own_id_type: "DNI" | "PASAPORTE" | null;
+    own_id_number: string | null;
+    relationship: string | null;
+    birth_date: Date | null;
+    gender: "MASCULINO" | "FEMENINO" | "OTRO" | null;
+    "marital status": "CASADO" | "SOLTERO" | "DIVORCIADO" | "VIUDO" | null;
+    nationality: string | null;
+    "afip status":
+      | "CONSUMIDOR FINAL"
+      | "MONOTRIBUTISTA"
+      | "EXENTO"
+      | "RESPONSABLE INSCRIPTO"
+      | null;
+    fiscal_id_type: "CUIT" | "CUIL" | null;
+    fiscal_id_number: string | null;
+    city: string | null;
+    district: string | null;
+    address: string | null;
+    floor: string | null;
+    apartment: string | null;
+    "postal code": string | null;
+    phone: string | null;
+    cellphone: string | null;
+    email: string | null;
+    isAffiliated: boolean | null;
+    isHolder: boolean | null;
+    isPaymentHolder: boolean | null;
+    isPaymentResponsible: boolean | null;
+    contribution: string | null;
+    differential_code: string | null;
+    differential_value: string | null | undefined;
+    plan: string | null;
+    product: string | null;
+    cbu_number: string | null;
+    card_brand: string | null;
+    is_new: boolean | null;
+    card_number: string | null;
+  }[] = [];
+  let errors: z.ZodError<
+    {
+      "UNIDAD DE NEGOCIO"?: string | null | undefined;
+      OS?: string | null | undefined;
+      "OS ORIGEN"?: string | null | undefined;
+      VIGENCIA?: string | number | null | undefined;
+      MODO?: string | null | undefined;
+      BONIFICACION?: string | null | undefined;
+      "DESDE BONIF."?: string | number | null | undefined;
+      "HASTA BONIF."?: string | number | null | undefined;
+      ESTADO?: "ACTIVO" | "INACTIVO" | null | undefined;
+      "NRO DOC TITULAR"?: string | number | null | undefined;
+      NOMBRE?: string | null | undefined;
+      "NRO AFILIADO"?: string | number | null | undefined;
+      EXTENSION?: string | null | undefined;
+      "TIPO DOC PROPIO"?: "DNI" | "PASAPORTE" | null | undefined;
+      "NRO DOC PROPIO"?: string | number | null | undefined;
+      PAR?: string | null | undefined;
+      "FECHA NACIMIENTO"?: string | number | null | undefined;
+      GENERO?: "MASCULINO" | "FEMENINO" | "OTRO" | null | undefined;
+      "ESTADO CIVIL"?:
+        | "CASADO"
+        | "SOLTERO"
+        | "DIVORCIADO"
+        | "VIUDO"
+        | null
+        | undefined;
+      NACIONALIDAD?: string | null | undefined;
+      "ESTADO AFIP"?:
+        | "CONSUMIDOR FINAL"
+        | "MONOTRIBUTISTA"
+        | "EXENTO"
+        | "RESPONSABLE INSCRIPTO"
+        | null
+        | undefined;
+      "TIPO DOC FISCAL"?: "CUIT" | "CUIL" | null | undefined;
+      "NRO DOC FISCAL"?: string | number | null | undefined;
+      LOCALIDAD?: string | null | undefined;
+      PARTIDO?: string | null | undefined;
+      DIRECCION?: string | null | undefined;
+      PISO?: string | number | null | undefined;
+      DEPTO?: string | number | null | undefined;
+      CP?: string | number | null | undefined;
+      TELEFONO?: string | number | null | undefined;
+      CELULAR?: string | number | null | undefined;
+      EMAIL?: string | null | undefined;
+      "ES AFILIADO"?: string | boolean | null | undefined;
+      "ES TITULAR"?: string | boolean | null | undefined;
+      "ES TITULAR DEL PAGO"?: string | boolean | null | undefined;
+      "ES RESP PAGADOR"?: string | boolean | null | undefined;
+      "APORTE 3%"?: string | number | null | undefined;
+      "DIFERENCIAL CODIGO"?: string | null | undefined;
+      "DIFERENCIAL VALOR"?: string | number | null | undefined;
+      PLAN?: string | null | undefined;
+      PRODUCTO?: string | null | undefined;
+      "NRO CBU"?: string | number | null | undefined;
+      "TC MARCA"?: string | null | undefined;
+      "ALTA NUEVA"?: string | boolean | null | undefined;
+      "NRO. TARJETA"?: string | number | null | undefined;
+    }[]
+  >[] = [];
+  rows.map((row) => {
+    const result = z.array(recDocumentValidator).safeParse([row]);
+    if (result.success) {
+      const item = result.data[0];
+      if (item) {
+        finishedArray.push(item);
+      }
+    } else {
+      errors.push(result.error);
+    }
+  });
+  return { finishedArray, errors };
 };
 
 export const recDocumentValidator = z
