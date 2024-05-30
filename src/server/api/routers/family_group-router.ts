@@ -38,6 +38,33 @@ export const family_groupsRouter = createTRPCRouter({
       });
       return family_group;
     }),
+  getByBrand: protectedProcedure
+    .input(
+      z.object({
+        brandId: z.string(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const family_group = await db.query.family_groups.findMany({
+        with:{
+          businessUnitData: true,
+          abonos: true,
+          integrants: {
+            with:{
+              contributions: true,
+              differentialsValues: true,
+            }
+          },
+          bonus: true,
+          plan: true,
+          modo: true,
+        },
+      });
+      const family_group_reduced = family_group.filter((family_group) => {
+        return family_group.businessUnitData?.brandId  === input.brandId;
+      })
+      return family_group_reduced;
+    }),
   create: protectedProcedure
     .input(
       z.object({

@@ -76,6 +76,8 @@ export const excelDeserializationRouter = createTRPCRouter({
                 appliedUser: " ", //a rellenar
                 approverUser: " ", //a rellenar
                 duration: "", //row["from bonus"]-row["to bonus"], cambiar schema a desde hasta
+                from: row["from bonus"],
+                to: row["to bonus"],
                 reason: "", //a rellenar
               })
               .returning();
@@ -154,7 +156,7 @@ export const excelDeserializationRouter = createTRPCRouter({
           const new_integrant = await db
             .insert(schema.integrants)
             .values({
-              postal_codeId: postal_code_id,
+              postal_codeId: "",
               extention: " ",
               family_group_id: familyGroupId,
               affiliate_type: "",
@@ -179,10 +181,10 @@ export const excelDeserializationRouter = createTRPCRouter({
               partido: row.district,
               state: row.state,
               zone: " ", //a rellenar
-              isHolder: row.isHolder == true,
-              isPaymentHolder: row.isPaymentHolder == true,
-              isAffiliate: row.isAffiliated == true,
-              isBillResponsible: row.isPaymentResponsible == true,
+              // isHolder: row.isHolder,
+              // isPaymentHolder: row.isPaymentHolder,
+              // isAffiliate: row.isAffiliated,
+              // isBillResponsible: row.isPaymentResponsible,
               age: age,
               affiliate_number: row.affiliate_number,
             })
@@ -260,7 +262,9 @@ async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
       if (!value) {
         const columnName = columnLabelByKey[column] ?? column;
 
-        errors.push(`Falta valor en la columna ${columnName} (fila:${rowNum})`);
+        errors.push(
+          `La columna ${columnName} es obligatoria y no esta en el archivo(fila:${rowNum})`
+        );
       }
     }
   }

@@ -11,7 +11,7 @@ export default async function Page(props: { params: { companyId: string } }) {
       <section className="space-y-2">
         <div className="flex justify-between">
           <Title>Pre-Liquidation</Title>
-          <AddPreLiquidation />
+          <AddPreLiquidation companyId={props.params.companyId} />
         </div>
       </section>
     </LayoutContainer>

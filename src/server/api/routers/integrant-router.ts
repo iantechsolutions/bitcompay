@@ -3,17 +3,23 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db, schema } from "~/server/db";
 import { eq } from "drizzle-orm";
 import { integrants } from "~/server/db/schema";
+import { RouterOutputs } from "~/trpc/shared";
 
 export const integrantsRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({}) => {
-    const integrants = await db.query.integrants.findMany();
+    const integrants = await db.query.integrants.findMany({
+      with: {
+        contributions: true,
+        differentialsValues: true,
+      },
+    });
     return integrants;
   }),
   get: protectedProcedure
     .input(
       z.object({
         integrantsId: z.string(),
-      }),
+      })
     )
     .query(async ({ input }) => {
       const integrants = await db.query.integrants.findFirst({
@@ -26,7 +32,7 @@ export const integrantsRouter = createTRPCRouter({
     .input(
       z.object({
         family_group_id: z.string(),
-      }),
+      })
     )
     .query(async ({ input }) => {
       const integrants = await db.query.integrants.findMany({
@@ -69,7 +75,7 @@ export const integrantsRouter = createTRPCRouter({
         isBillResponsiblee: z.boolean().optional(),
         family_group_id: z.string().optional(),
         postal_codeId: z.string(),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       const integrant = await db.insert(integrants).values(input).returning();
@@ -109,7 +115,7 @@ export const integrantsRouter = createTRPCRouter({
         isAffiliate: z.boolean(),
         isBillResponsible: z.boolean(),
         family_group_id: z.string(),
-      }),
+      })
     )
     .mutation(async ({ input: { id, ...input } }) => {
       console.log("Function called");
@@ -122,13 +128,17 @@ export const integrantsRouter = createTRPCRouter({
       return updatedintegrants;
     }),
 
-    delete: protectedProcedure
-        .input(
-            z.object({
-                integrantsId: z.string(),
-            }),
-        )
-        .mutation(async ({ input }) => {
-            await db.delete(schema.integrants).where(eq(schema.integrants.id, input.integrantsId))
-        }),
-})
+  delete: protectedProcedure
+    .input(
+      z.object({
+        integrantsId: z.string(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      await db
+        .delete(schema.integrants)
+        .where(eq(schema.integrants.id, input.integrantsId));
+    }),
+});
+
+export type Integrant = RouterOutputs["integrants"]["list"][number];

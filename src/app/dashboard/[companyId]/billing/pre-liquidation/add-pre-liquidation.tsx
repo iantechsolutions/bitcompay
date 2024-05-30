@@ -1,4 +1,7 @@
 "use client";
+import dayjs from "dayjs";
+import "dayjs/locale/es";
+import utc from "dayjs/plugin/utc";
 import { useState } from "react";
 import { PlusCircleIcon } from "lucide-react";
 import { Button } from "~/components/ui/button";
@@ -8,8 +11,48 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-export default function AddPreLiquidation() {
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import { cn } from "~/lib/utils";
+import { Calendar } from "~/components/ui/calendar";
+import { CalendarIcon } from "lucide-react";
+import { Label } from "~/components/ui/label";
+import { api } from "~/trpc/react";
+
+export default function AddPreLiquidation(props: { companyId: string }) {
   const [open, setOpen] = useState(false);
+  const [fechaVencimiento1, setFechaVencimiento1] = useState<Date>();
+  const [fechaVencimiento2, setFechaVencimiento2] = useState<Date>();
+  const [fechaDesde, setFechaDesde] = useState<Date>();
+  const [fechaHasta, setFechaHasta] = useState<Date>();
+  console.log(props);
+  const { data: marcas } = api.brands.getbyCompany.useQuery({
+    companyId: props.companyId,
+  });
+  const [brandId, setBrandId] = useState("");
+  const { mutateAsync: createFacturas } =
+    api.facturas.createPreLiquidation.useMutation();
+  // const { mutateAsync: createFacturas } = api.family_groups.createPreLiquidation.useMutation();
+  function handleCreate() {
+    console.log(marcas?.at(0));
+    // const { data:grupos } = api.family_groups.getByBrand.useQuery({brandId: brandId});
+    createFacturas({
+      brandId: brandId,
+      dateDesde: fechaDesde,
+      dateHasta: fechaHasta,
+      dateDue: fechaVencimiento2,
+    });
+  }
   return (
     <>
       <Button onClick={() => setOpen(true)}>
@@ -20,6 +63,167 @@ export default function AddPreLiquidation() {
           <DialogHeader>
             <DialogTitle>Crear Pre liquidacion</DialogTitle>
           </DialogHeader>
+          <div>
+            <Label>Marca</Label>
+            <Select onValueChange={setBrandId}>
+              <SelectTrigger className="w-[180px] font-bold">
+                <SelectValue placeholder="Seleccione una marca" />
+              </SelectTrigger>
+              <SelectContent>
+                {marcas &&
+                  marcas.map((marca) => (
+                    <SelectItem
+                      key={marca!.id}
+                      value={marca!.id}
+                      className="rounded-none border-b border-gray-600"
+                    >
+                      {marca!.name}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>1er Fecha de vencimiento</Label>
+            <br />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
+                    !fechaVencimiento1 && "text-muted-foreground"
+                  )}
+                >
+                  <p>
+                    {fechaVencimiento1 ? (
+                      dayjs(fechaVencimiento1).format("D [de] MMMM [de] YYYY")
+                    ) : (
+                      <span>Seleccione una fecha</span>
+                    )}
+                  </p>
+                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={
+                    fechaVencimiento1 ? new Date(fechaVencimiento1) : undefined
+                  }
+                  onSelect={(e) => setFechaVencimiento1(e)}
+                  disabled={(date: Date) => date < new Date()}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div>
+            <Label>2da Fecha de vencimiento</Label>
+            <br />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
+                    !fechaVencimiento2 && "text-muted-foreground"
+                  )}
+                >
+                  <p>
+                    {fechaVencimiento2 ? (
+                      dayjs(fechaVencimiento2).format("D [de] MMMM [de] YYYY")
+                    ) : (
+                      <span>Seleccione una fecha</span>
+                    )}
+                  </p>
+                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={fechaVencimiento1 ? fechaVencimiento2 : undefined}
+                  onSelect={(e) => setFechaVencimiento2(e)}
+                  disabled={(date: Date) => date < new Date()}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div>
+            <Label>Fecha inicio de servicio</Label>
+            <br />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
+                    !fechaDesde && "text-muted-foreground"
+                  )}
+                >
+                  <p>
+                    {fechaDesde ? (
+                      dayjs(fechaDesde).format("D [de] MMMM [de] YYYY")
+                    ) : (
+                      <span>Seleccione una fecha</span>
+                    )}
+                  </p>
+                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={fechaDesde ? fechaDesde : undefined}
+                  onSelect={(e) => setFechaDesde(e)}
+                  disabled={(date: Date) => date < new Date()}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div>
+            <Label>2da Fecha de vencimiento</Label>
+            <br />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
+                    !fechaHasta && "text-muted-foreground"
+                  )}
+                >
+                  <p>
+                    {fechaHasta ? (
+                      dayjs(fechaHasta).format("D [de] MMMM [de] YYYY")
+                    ) : (
+                      <span>Seleccione una fecha</span>
+                    )}
+                  </p>
+                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={fechaHasta ? fechaHasta : undefined}
+                  onSelect={(e) => setFechaHasta(e)}
+                  disabled={(date: Date) => date < new Date()}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <Button
+            className="mt-2"
+            type="submit"
+            onClick={(e) => handleCreate()}
+          >
+            Crear Pre-liquidacion
+          </Button>
         </DialogContent>
       </Dialog>
     </>

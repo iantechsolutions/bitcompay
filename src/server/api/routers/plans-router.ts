@@ -1,18 +1,28 @@
-import { eq } from 'drizzle-orm'
-import { z } from 'zod'
-import { db, schema } from '~/server/db'
-import { createTRPCRouter, protectedProcedure } from '../trpc'
-import { currentUser } from '@clerk/nextjs/server'
+import { eq } from "drizzle-orm";
+import { z } from "zod";
+import { db, schema } from "~/server/db";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { currentUser } from "@clerk/nextjs/server";
+import { RouterOutputs } from "~/trpc/shared";
 
 export const plansRouter = createTRPCRouter({
-    get: protectedProcedure.input(z.object({ planId: z.string() })).query(async ({ input }) => {
-        const plan_found = await db.query.plans.findFirst({
-            where: eq(schema.plans.id, input.planId),
-        })
-        return plan_found
+  get: protectedProcedure
+    .input(z.object({ planId: z.string() }))
+    .query(async ({ input }) => {
+      const plan_found = await db.query.plans.findFirst({
+        where: eq(schema.plans.id, input.planId),
+        with: {
+          pricesPerAge: true,
+        },
+      });
+      return plan_found;
     }),
   list: protectedProcedure.query(async () => {
-    const plans = await db.query.plans.findMany();
+    const plans = await db.query.plans.findMany({
+      with: {
+        pricesPerAge: true,
+      },
+    });
     return plans;
   }),
   create: protectedProcedure
@@ -22,7 +32,7 @@ export const plansRouter = createTRPCRouter({
         plan_code: z.string().max(255),
         description: z.string().max(255),
         business_units_id: z.string().max(255),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       const user = await currentUser();
@@ -32,7 +42,6 @@ export const plansRouter = createTRPCRouter({
         plan_code: input.plan_code,
         description: input.description,
         business_units_id: input.business_units_id,
-        
       });
       return new_plan;
     }),
@@ -45,7 +54,7 @@ export const plansRouter = createTRPCRouter({
         plan_code: z.string().max(255),
         description: z.string().max(255),
         business_units_id: z.string().max(255),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       const modified_plan = await db
@@ -67,4 +76,6 @@ export const plansRouter = createTRPCRouter({
         .where(eq(schema.plans.id, input.planId));
       return deleted_plan;
     }),
-})
+});
+
+export type Plans = RouterOutputs["plans"]["list"][number];
