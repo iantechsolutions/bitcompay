@@ -1,9 +1,9 @@
-import { z } from 'zod'
-import { stringAsDate } from './providers-schema'
+import { z } from "zod";
+import { stringAsDate } from "./providers-schema";
 
 export const PlanSchema = z.object({
-  user: z.string().max(255),
-  createdAt:stringAsDate,
+  user: z.string().max(255).optional(),
+  createdAt: stringAsDate,
   expiration_date: stringAsDate,
   plan_code: z
     .string()
@@ -11,5 +11,5 @@ export const PlanSchema = z.object({
   description: z
     .string()
     .max(255, { message: "ingrese una descripción válida" }),
-  business_units_id:z.string().max(255),
+  business_units_id: z.string().max(255),
 });

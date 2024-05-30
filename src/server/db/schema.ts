@@ -1015,9 +1015,10 @@ export type ExcelBilling = z.infer<typeof selectExcelBillingSchema>;
 
 export const pricePerAge = pgTable("pricePerAge", {
   id: columnId,
-  fromAge: integer("fromAge").notNull(),
-  toAge: integer("toAge").notNull(),
+  age: integer("age"),
+  condition:varchar("condition"),
   createdAt,
+  isAmountByAge: boolean("isAmountByAge").notNull(), 
   plan_id: varchar("plan_id", { length: 255 }).references(() => plans.id),
   amount: real("amount").notNull(),
 });
@@ -1032,8 +1033,9 @@ export const pricePerAgeRelations = relations(pricePerAge, ({ one, many }) => ({
 export const insertpricePerAgeSchema = createInsertSchema(pricePerAge);
 export const selectpricePerAgeSchema = createSelectSchema(pricePerAge);
 export const pricePerAgeSchemaDB = selectpricePerAgeSchema.pick({
-  fromAge: true,
-  toAge: true,
+  age: true,
+  condition:true,
+  isAmountByAge: true,
   amount: true,
   plan_id: true,
   createdAt: true,

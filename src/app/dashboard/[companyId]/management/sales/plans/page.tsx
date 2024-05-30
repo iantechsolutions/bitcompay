@@ -19,7 +19,7 @@ export default async function Page(props: { params: { companyId: string } }) {
           {planes.map((planes) => (
             <ListTile
               key={planes.id}
-              href={`/dashboard/${props.params.companyId}/management/sales/${planes.id}`}
+              href={`/dashboard/${props.params.companyId}/management/sales/plans/${planes.id}`}
               leading={<Badge>{planes.description}</Badge>}
               title={planes.plan_code}
             />
