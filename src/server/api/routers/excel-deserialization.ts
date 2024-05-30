@@ -60,30 +60,15 @@ export const excelDeserializationRouter = createTRPCRouter({
           const business_unit = await db.query.bussinessUnits.findFirst({
             where: eq(schema.bussinessUnits.description, row.business_unit!),
           });
-          if (!business_unit) {
-            throw new TRPCError({
-              code: "BAD_REQUEST",
-              message: "No se encontro la unidad de negocio",
-            });
-          }
+
           const mode = await db.query.modos.findFirst({
             where: eq(schema.modos.description, row.mode!),
           });
-          if (!mode) {
-            throw new TRPCError({
-              code: "BAD_REQUEST",
-              message: "No se encontro el modo",
-            });
-          }
+
           const plan = await db.query.plans.findFirst({
             where: eq(schema.plans.plan_code, row.plan!),
           });
-          if (!plan) {
-            throw new TRPCError({
-              code: "BAD_REQUEST",
-              message: "No se encontro el plan",
-            });
-          }
+
           let familyGroupId = "";
           const existGroup = isKeyPresent(row.holder_id_number, familyGroupMap);
           if (!existGroup) {
@@ -172,10 +157,7 @@ export const excelDeserializationRouter = createTRPCRouter({
           const new_integrant = await db
             .insert(schema.integrants)
             .values({
-              postal_codeId: postal_code_id,
-              extention: " ",
-              family_group_id: familyGroupId,
-              affiliate_type: "",
+              affiliate_type: "type",
               relationship: row.relationship,
               name: row.name,
               id_type: row.own_id_type,
@@ -196,13 +178,17 @@ export const excelDeserializationRouter = createTRPCRouter({
               locality: row.city,
               partido: row.district,
               state: row.state,
+              cp: row["postal code"],
               zone: " ", //a rellenar
               isHolder: row.isHolder == true,
               isPaymentHolder: row.isPaymentHolder == true,
               isAffiliate: row.isAffiliated == true,
               isBillResponsible: row.isPaymentResponsible == true,
               age: age,
+              family_group_id: familyGroupId,
               affiliate_number: row.affiliate_number,
+              extention: " ",
+              postal_codeId: postal_code_id,
             })
             .returning();
           await db.insert(schema.differentialsValues).values({
@@ -216,7 +202,7 @@ export const excelDeserializationRouter = createTRPCRouter({
               card_number: row.card_number!,
               CBU: row.cbu_number!,
               card_brand: row.card_brand!,
-              new_registration: row.new_registration!,
+              new_registration: row.is_new!,
               integrant_id: new_integrant[0]!.id,
             });
           }
@@ -284,6 +270,60 @@ async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
         errors.push(`Falta valor en la columna ${columnName} (fila:${rowNum})`);
       }
     }
+
+    const business_unit = await db.query.bussinessUnits.findFirst({
+      where: eq(schema.bussinessUnits.description, row.business_unit!),
+    });
+    if (!business_unit) {
+      errors.push(`UNIDAD DE NEGOCIO no valida en (fila:${rowNum})`);
+    }
+
+    const health_insurance = await db.query.healthInsurances.findFirst({
+      where: eq(schema.healthInsurances.name, row.os!),
+    });
+
+    if (!health_insurance) {
+      errors.push(`OBRA SOCIAL no valida en (fila:${rowNum})`);
+    }
+    const mode = await db.query.modos.findFirst({
+      where: eq(schema.modos.description, row.mode!),
+    });
+
+    if (row["originating os"]) {
+      const originating_os = await db.query.healthInsurances.findFirst({
+        where: eq(schema.healthInsurances.name, row["originating os"]!),
+      });
+      if (!originating_os) {
+        errors.push(`OBRA SOCIAL DE ORIGEN no valida en (fila:${rowNum})`);
+      }
+    }
+    if (!mode) {
+      errors.push(`modo no valido en (fila:${rowNum})`);
+    }
+    const plan = await db.query.plans.findFirst({
+      where: eq(schema.plans.plan_code, row.plan!),
+    });
+    if (!plan) {
+      errors.push(`PLAN no valido en (fila:${rowNum})`);
+    }
+    const product = await db.query.products.findFirst({
+      where: eq(schema.products.name, row.product!),
+    });
+    if (!product) {
+      errors.push(`PRODUCTO no valido en (fila:${rowNum})`);
+    }
+    if (product) {
+      const requiredColumns = await getRequiredColums(product.description);
+      for (const column of requiredColumns) {
+        const columnName = columnLabelByKey[column];
+        const value = row[column as keyof typeof row];
+        if (column in row && !value) {
+          errors.push(
+            `La columna ${columnName} no puede ser nula, es obligatoria para el producto (fila:${rowNum})`
+          );
+        }
+      }
+    }
   }
 
   if (errors.length > 0) {
@@ -307,4 +347,29 @@ function trimObject(obj: Record<string, unknown>) {
       return [key, value];
     })
   );
+}
+
+async function getRequiredColums(productName: string) {
+  const product = await db.query.products.findFirst({
+    where: eq(schema.products.description, productName),
+    with: {
+      channels: {
+        with: {
+          channel: {
+            columns: {
+              id: true,
+              requiredColumns: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const requiredColumns = new Set(
+    product?.channels
+      .map((c) => c.channel.requiredColumns)
+      .reduce((acc, val) => acc.concat(val), [])
+  );
+  return requiredColumns;
 }

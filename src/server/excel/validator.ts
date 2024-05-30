@@ -22,15 +22,16 @@ const stringAsDate = z
 
     return dayjs(`${year}-${month}-${day}`).toDate();
   })
-  .refine((value) => {
-    if (value.getFullYear() < 2000) return false;
-    if (value.getFullYear() > 3000) return false;
-    return true;
-  });
+  .refine(
+    (value) => {
+      if (value.getFullYear() < 2000) return false;
+      if (value.getFullYear() > 3000) return false;
+      if (!dayjs(value, "YYYYMMDD").isValid()) return false;
 
-export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
-  return z.array(recDocumentValidator).parse(rows);
-};
+      return true;
+    },
+    { message: "la fecha proporcionada no es valida" }
+  );
 
 const stringAsBoolean = z
   .union([z.string(), z.boolean()])
@@ -46,17 +47,28 @@ const stringAsBoolean = z
     if (typeof value === "boolean") {
       return value;
     }
-    throw new Error("invalid boolean value");
+  })
+  .refine((value) => typeof value === "boolean", {
+    message: "el valor proporcionado no es valor de verdad valido",
   });
 
-const numberAsString = z.union([z.number(), z.string()]).transform((value) => {
-  if (
-    typeof value === "number" ||
-    (typeof value === "string" && !isNaN(Number(value)))
-  ) {
-    return value.toString();
-  }
-});
+const numberAsString = z
+  .union([z.number(), z.string()])
+  .transform((value) => {
+    if (
+      typeof value === "number" ||
+      (typeof value === "string" && !isNaN(Number(value)))
+    ) {
+      return value.toString();
+    }
+  })
+  .refine((value) => !isNaN(Number(value)), {
+    message: "el valor propocionado no es un numero valido",
+  });
+
+export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
+  return z.array(recDocumentValidator).parse(rows);
+};
 
 export const recDocumentValidator = z
   .object({
@@ -68,23 +80,31 @@ export const recDocumentValidator = z
     BONIFICACION: z.string().min(0).max(140).nullable().optional(),
     "DESDE BONIF.": stringAsDate.nullable().optional(),
     "HASTA BONIF.": stringAsDate.nullable().optional(),
-    ESTADO: z.string().min(0).max(140).nullable().optional(),
+    ESTADO: z.enum(["ACTIVO", "INACTIVO"]).nullable().optional(),
     "NRO DOC TITULAR": numberAsString.nullable().optional(),
     NOMBRE: z.string().min(0).max(140).nullable().optional(),
     "NRO AFILIADO": numberAsString.nullable().optional(),
     EXTENSION: z.string().min(0).max(140).nullable().optional(),
-    "TIPO DOC PROPIO": z.string().min(0).max(140).nullable().optional(),
+    "TIPO DOC PROPIO": z.enum(["DNI", "PASAPORTE"]).nullable().optional(),
     "NRO DOC PROPIO": numberAsString.nullable().optional(),
     PAR: z.string().min(0).max(140).nullable().optional(),
     "FECHA NACIMIENTO": stringAsDate.nullable().optional(),
-    GENERO: z.enum(["male", "female", "other"]).nullable().optional(),
+    GENERO: z.enum(["MASCULINO", "FEMENINO", "OTRO"]).nullable().optional(),
     "ESTADO CIVIL": z
-      .enum(["casado", "soltero", "divorciado", "viudo"])
+      .enum(["CASADO", "SOLTERO", "DIVORCIADO", "VIUDO"])
       .nullable()
       .optional(),
     NACIONALIDAD: z.string().min(0).max(140).nullable().optional(),
-    "ESTADO AFIP": z.string().min(0).max(140).nullable().optional(),
-    "TIPO DOC FISCAL": z.string().min(0).max(140).nullable().optional(),
+    "ESTADO AFIP": z
+      .enum([
+        "CONSUMIDOR FINAL",
+        "MONOTRIBUTISTA",
+        "EXENTO",
+        "RESPONSABLE INSCRIPTO",
+      ])
+      .nullable()
+      .optional(),
+    "TIPO DOC FISCAL": z.enum(["CUIT", "CUIL"]).nullable().optional(),
     "NRO DOC FISCAL": numberAsString.nullable().optional(),
     LOCALIDAD: z.string().min(0).max(140).nullable().optional(),
     PARTIDO: z.string().min(0).max(140).nullable().optional(),
@@ -103,7 +123,7 @@ export const recDocumentValidator = z
     "DIFERENCIAL CODIGO": z.string().min(0).max(140).nullable().optional(),
     "DIFERENCIAL VALOR": numberAsString.optional().nullable(),
     PLAN: z.string().min(0).max(140).nullable().optional(),
-
+    PRODUCTO: z.string().optional().nullable(),
     "NRO CBU": numberAsString.nullable().optional(),
     "TC MARCA": z.string().nullable().optional(),
     "ALTA NUEVA": stringAsBoolean.nullable().optional(),
@@ -152,10 +172,10 @@ export const recDocumentValidator = z
       differential_code: value["DIFERENCIAL CODIGO"] ?? null,
       differential_value: value["DIFERENCIAL VALOR"],
       plan: value.PLAN ?? null,
-
+      product: value.PRODUCTO ?? null,
       cbu_number: value["NRO CBU"] ?? null,
       card_brand: value["TC MARCA"] ?? null,
-      new_registration: value["ALTA NUEVA"] ?? null,
+      is_new: value["ALTA NUEVA"] ?? null,
       card_number: value["NRO. TARJETA"] ?? null,
     };
   });
@@ -201,9 +221,10 @@ export const recHeaders: TableHeaders = [
   { key: "differential_code", label: "DIFERENCIAL CODIGO", width: 140 },
   { key: "differential_value", label: "DIFERENCIAL VALOR", width: 140 },
   { key: "plan", label: "PLAN", width: 140 },
+  { key: "product", label: "PRODUCTO", width: 140 },
   { key: "cbu_number", label: "NRO CBU", width: 140 },
   { key: "card_brand", label: "TC MARCA", width: 140 },
-  { key: "new_registration", label: "ALTA NUEVA", width: 140 },
+  { key: "is_new", label: "ALTA NUEVA", width: 140 },
   { key: "card_number", label: "Nro. TARJETA", width: 140 },
 ];
 
@@ -244,10 +265,11 @@ export const requiredColumns = [
   { key: "differential_code", label: "DIFERENCIAL CODIGO" },
   { key: "differential_value", label: "DIFERENCIAL VALOR" },
   { key: "plan", label: "PLAN" },
+  { key: "product", label: "PRODUCTO" },
 ];
 
 export const columnLabelByKey = Object.fromEntries(
-  requiredColumns.map((header) => {
+  recHeaders.map((header) => {
     return [header.key, header.label];
   })
 ) as Record<string, string>;

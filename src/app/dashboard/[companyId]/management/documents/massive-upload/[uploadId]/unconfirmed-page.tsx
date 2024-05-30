@@ -16,11 +16,17 @@ interface unconfirmedPageProps {
 export default function UnconfirmedPage(props: unconfirmedPageProps) {
   const { upload, companyId } = props;
   const [confirmed, setConfirmed] = useState(upload!.confirmed);
-  const { mutateAsync: confirmData, error: dataError } =
-    api.excelDeserialization.confirmData.useMutation();
+  const {
+    mutateAsync: confirmData,
+    error: dataError,
+    isLoading: isDataLoading,
+  } = api.excelDeserialization.confirmData.useMutation();
 
-  const { mutateAsync: readData, error: errorRead } =
-    api.excelDeserialization.deserialization.useMutation();
+  const {
+    mutateAsync: readData,
+    error: errorRead,
+    isLoading: isReadingLoading,
+  } = api.excelDeserialization.deserialization.useMutation();
 
   function handleRead() {
     readData({
@@ -53,12 +59,22 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
       </Card>
 
       <div className="flex gap-1">
-        <Button onClick={handleRead}>Leer archivo</Button>
-        <Button onClick={handleConfirm}>Escribir a la base de datos</Button>
+        <Button onClick={handleRead} disabled={isReadingLoading}>
+          Leer archivo
+        </Button>
+        <Button onClick={handleConfirm} disabled={isDataLoading}>
+          Escribir a la base de datos
+        </Button>
       </div>
       {errorRead && (
         <pre className="mt-5 overflow-auto rounded-md border border-dashed p-4">
           {errorRead?.data?.cause?.trim() ?? errorRead?.message}
+        </pre>
+      )}
+
+      {dataError && (
+        <pre className="mt-5 overflow-auto rounded-md border border-dashed p-4">
+          {dataError?.data?.cause?.trim() ?? dataError?.message}
         </pre>
       )}
     </LayoutContainer>
