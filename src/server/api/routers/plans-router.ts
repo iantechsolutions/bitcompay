@@ -36,13 +36,16 @@ export const plansRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       const user = await currentUser();
-      const new_plan = await db.insert(schema.plans).values({
-        user: user?.id ?? "",
-        expiration_date: input.expiration_date,
-        plan_code: input.plan_code,
-        description: input.description,
-        business_units_id: input.business_units_id,
-      });
+      const new_plan = await db
+        .insert(schema.plans)
+        .values({
+          user: user?.id ?? "",
+          expiration_date: input.expiration_date,
+          plan_code: input.plan_code,
+          description: input.description,
+          business_units_id: input.business_units_id,
+        })
+        .returning();
       return new_plan;
     }),
 

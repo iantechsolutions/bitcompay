@@ -10,6 +10,7 @@ import {
   columnLabelByKey,
   keysArray,
 } from "~/server/excel/validator";
+import { error } from "console";
 
 export const excelDeserializationRouter = createTRPCRouter({
   upload: protectedProcedure
@@ -36,7 +37,6 @@ export const excelDeserializationRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       const contents = await readExcelFile(db, input.id, input.type);
       //agregar a readExcel verificacion de columnas obligatorias.
-      console.log("contents:  ", contents);
 
       return contents;
     }),
@@ -256,26 +256,33 @@ async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
   >[];
 
   const trimmedRows = rows.map(trimObject);
-  const transformedRows = recRowsTransformer(trimmedRows);
-  if (transformedRows.length === 0) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: "No se encontraron datos en el archivo",
-    });
-  }
+  const { finishedArray: transformedRows, errors: errorsTransform } =
+    recRowsTransformer(trimmedRows);
+
   const errors: string[] = [];
+  errorsTransform.forEach((error) => {
+    errors.push(
+      (error.errors.at(0)?.message ?? "") +
+        " " +
+        (error.errors.at(0)?.path.at(1) ?? "ILEGIBLE") +
+        " (fila:" +
+        (
+          parseInt(error.errors.at(0)?.path.at(0)?.toString() ?? "0") + 1
+        ).toString() +
+        ")"
+    );
+  });
   for (let i = 0; i < transformedRows.length; i++) {
     const row = transformedRows[i]!;
     const rowNum = i + 2;
     for (const column of keysArray) {
       const value = (row as Record<string, unknown>)[column];
 
-      console.log(column, value, typeof value, row["originating os"]);
       if (!value) {
         const columnName = columnLabelByKey[column] ?? column;
 
         errors.push(
-          `La columna ${columnName} es obligatoria y no esta en el archivo(fila:${rowNum})`
+          `La columna ${columnName} es obligatoria y no esta en el archivo (fila:${rowNum})`
         );
       }
     }

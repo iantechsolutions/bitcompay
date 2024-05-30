@@ -66,6 +66,49 @@ type grupoCompleto = {
   abonos: any[];
   integrants: Integrant[];
 };
+const ivaDictionary = {
+  "0%": 3,
+  "10.5%": 4,
+  "21%": 5,
+  "27%": 6,
+  "5%": 8,
+  "2.5%": 9,
+  "": 0,
+};
+
+const conceptDictionary = {
+  Productos: 1,
+  Servicios: 2,
+  "Productos y Servicios": 3,
+  "": 0,
+};
+
+const facturaDictionary = {
+  "FACTURA A": 3,
+  "FACTURA B": 6,
+  "FACTURA C": 11,
+  "FACTURA M": 51,
+  "FACTURA E": 19,
+  "NOTA DE DEBITO A": 8,
+  "NOTA DE DEBITO B": 13,
+  "NOTA DE DEBITO C": 15,
+  "NOTA DE DEBITO M": 52,
+  "NOTA DE DEBITO E": 20,
+  "NOTA DE CREDITO A": 2,
+  "NOTA DE CREDITO B": 12,
+  "NOTA DE CREDITO C": 14,
+  "NOTA DE CREDITO M": 53,
+  "NOTA DE CREDITO E": 21,
+  "": 0,
+};
+
+const idDictionary = {
+  CUIT: "80",
+  CUIL: "86",
+  DNI: "96",
+  "Consumidor Final": "99",
+};
+
 // async function generateFactura(
 //   afip: Afip,
 //   grupo: grupoCompleto,
@@ -73,42 +116,6 @@ type grupoCompleto = {
 //   dateHasta: Date,
 //   dateVencimiento: Date
 // ) {
-//   const ivaDictionary = {
-//     "0%": 3,
-//     "10.5%": 4,
-//     "21%": 5,
-//     "27%": 6,
-//     "5%": 8,
-//     "2.5%": 9,
-//     "": 0,
-//   };
-
-//   const conceptDictionary = {
-//     Productos: 1,
-//     Servicios: 2,
-//     "Productos y Servicios": 3,
-//     "": 0,
-//   };
-
-//   const facturaDictionary = {
-//     "FACTURA A": 3,
-//     "FACTURA B": 6,
-//     "FACTURA C": 11,
-//     "FACTURA M": 51,
-//     "FACTURA E": 19,
-//     "NOTA DE DEBITO A": 8,
-//     "NOTA DE DEBITO B": 13,
-//     "NOTA DE DEBITO C": 15,
-//     "NOTA DE DEBITO M": 52,
-//     "NOTA DE DEBITO E": 20,
-//     "NOTA DE CREDITO A": 2,
-//     "NOTA DE CREDITO B": 12,
-//     "NOTA DE CREDITO C": 14,
-//     "NOTA DE CREDITO M": 53,
-//     "NOTA DE CREDITO E": 21,
-//     "": 0,
-//   };
-
 //   let last_voucher;
 //   const puntoVenta = grupo.businessUnitData?.company?.puntoVenta;
 //   try {
@@ -157,45 +164,62 @@ type grupoCompleto = {
 //    **/
 //   const res = await afip.ElectronicBilling.createVoucher(data);
 // }
-// async function preparateFactura(
-//   afip: Afip,
-//   grupos: grupoCompleto[],
-//   dateDesde: Date,
-//   dateHasta: Date,
-//   dateVencimiento: Date
-// ) {
-//   const user = await currentUser();
-//   const liquidation = await db
-//     .insert(schema.liquidations)
-//     .values({
-//       estado: "pendiente",
-//       userCreated: user?.id ?? "",
-//     })
-//     .returning();
-//   grupos.forEach((grupo) => {
-//     const factura = db.insert(schema.facturas).values({
-//       ptoVenta: grupo.businessUnitData?.company?.puntoVenta ?? 0,
-//       nroFactura: "",
-//       tipoFactura: grupo.businessUnitData?.brand?.bill_type ?? "",
-//       // concepto: grupo.businessUnitData?.brand?.concept ?? 0,
-//       // tipoDocumento:
-//       //   grupo.integrants.find((integrant) => integrant.isBillResponsible)
-//       //     ?.fiscal_id_type ?? "",
-//       // nroDocumento:
-//       //   grupo.integrants.find((integrant) => integrant.isBillResponsible)
-//       //     ?.fiscal_id_number ?? "",
-//       importe: total,
-//       fromPeriod: dateDesde,
-//       toPeriod: dateHasta,
-//       dueDate: dateVencimiento,
-//       prodName: "Servicio",
-//       iva: grupo.businessUnitData?.brand?.iva ?? "",
-//       billLink: "",
-//       liquidation_id: liquidation[0]!.id,
-//       family_group_id: grupo.id,
-//     });
-//   });
-// }
+async function preparateFactura(
+  afip: Afip,
+  grupos: grupoCompleto[],
+  dateDesde: Date,
+  dateHasta: Date,
+  dateVencimiento: Date
+) {
+  const user = await currentUser();
+  const liquidation = await db
+    .insert(schema.liquidations)
+    .values({
+      estado: "pendiente",
+      userCreated: user?.id ?? "",
+    })
+    .returning();
+  grupos.forEach(async (grupo) => {
+    const items = await db
+      .insert(schema.items)
+      .values({
+        abono: 0,
+        bonificacion: 0,
+        differential_amount: 0,
+      })
+      .returning();
+
+    const factura = db.insert(schema.facturas).values({
+      items_id: items[0]!.id,
+      ptoVenta: grupo.businessUnitData?.company?.puntoVenta ?? 0,
+      // ptoVenta: 0,
+      // nroFactura: "",
+      nroFactura: 0,
+      tipoFactura: grupo.businessUnitData?.brand?.bill_type ?? "",
+      // concepto: grupo.businessUnitData?.brand?.concept ?? 0,
+      concepto: 1,
+
+      // tipoDocumento:idDictionary[
+      //   grupo.integrants.find((integrant) => integrant.isBillResponsible)
+      //     ?.fiscal_id_type ?? ""],
+      tipoDocumento: 80,
+
+      // nroDocumento:
+      //   grupo.integrants.find((integrant) => integrant.isBillResponsible)
+      //     ?.fiscal_id_number ?? "",
+      nroDocumento: 0,
+      importe: 0,
+      fromPeriod: dateDesde,
+      toPeriod: dateHasta,
+      due_date: dateVencimiento,
+      prodName: "Servicio",
+      iva: grupo.businessUnitData?.brand?.iva ?? "",
+      billLink: "",
+      liquidation_id: liquidation[0]!.id,
+      family_group_id: grupo.id,
+    });
+  });
+}
 
 async function getGroupAmount(grupo: grupoCompleto) {
   let importeBase = 0;

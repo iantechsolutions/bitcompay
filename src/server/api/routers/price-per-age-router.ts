@@ -20,16 +20,18 @@ export const pricePerAgeRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
-        fromAge: z.number(),
-        toAge: z.number(),
+        age: z.number().optional(),
         amount: z.number(),
         plan_id: z.string(),
-      }),
+        isAmountByAge: z.boolean(),
+        condition: z.string().optional(),
+      })
     )
     .mutation(async ({ input }) => {
       const new_pricePerAge = await db.insert(schema.pricePerAge).values({
-        fromAge: input.fromAge,
-        toAge: input.toAge,
+        age: input.age,
+        isAmountByAge: input.isAmountByAge,
+        condition: input.condition,
         amount: input.amount,
         plan_id: input.plan_id,
       });
@@ -39,18 +41,20 @@ export const pricePerAgeRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string(),
-        fromAge: z.number(),
-        toAge: z.number(),
+        age: z.number().optional(),
         amount: z.number(),
         plan_id: z.string(),
-      }),
+        isAmountByAge: z.boolean(),
+        condition: z.string().optional(),
+      })
     )
     .mutation(async ({ input }) => {
       const pricePerAge_changed = await db
         .update(schema.pricePerAge)
         .set({
-          fromAge: input.fromAge,
-          toAge: input.toAge,
+          age: input.age,
+          isAmountByAge: input.isAmountByAge,
+          condition: input.condition,
           amount: input.amount,
           plan_id: input.plan_id,
         })
