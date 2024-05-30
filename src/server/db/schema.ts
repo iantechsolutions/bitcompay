@@ -570,6 +570,12 @@ export const integrants = pgTable("integrant", {
   affiliate_number: varchar("affiliate_number", { length: 255 }),
   extention: varchar("extention", { length: 255 }),
   postal_codeId: varchar("postalcodeid").references(() => postal_code.id),
+  health_insuranceId: varchar("health_insuranceId", { length: 255 }).references(
+    () => healthInsurances.id
+  ),
+  originating_health_insuranceId: varchar("originating_health_insuranceId", {
+    length: 255,
+  }).references(() => healthInsurances.id),
 });
 
 export const integrantsRelations = relations(integrants, ({ one, many }) => ({
@@ -580,6 +586,14 @@ export const integrantsRelations = relations(integrants, ({ one, many }) => ({
   postal_code: one(postal_code, {
     fields: [integrants.postal_codeId],
     references: [postal_code.id],
+  }),
+  healthInsurances: one(healthInsurances, {
+    fields: [integrants.health_insuranceId],
+    references: [healthInsurances.id],
+  }),
+  originatingHealthInsurances: one(healthInsurances, {
+    fields: [integrants.originating_health_insuranceId],
+    references: [healthInsurances.id],
   }),
   contributions: many(contributions),
   differentialsValues: many(differentialsValues),
@@ -622,6 +636,9 @@ export const integrantSchemaDB = insertintegrantSchema.pick({
   age: true,
   extention: true,
   family_group_id: true,
+  health_insuranceId: true,
+  originating_health_insuranceId: true,
+  affiliate_number: true,
 });
 export type Integrant = z.infer<typeof selectintegrantSchema>;
 
@@ -1016,9 +1033,9 @@ export type ExcelBilling = z.infer<typeof selectExcelBillingSchema>;
 export const pricePerAge = pgTable("pricePerAge", {
   id: columnId,
   age: integer("age"),
-  condition:varchar("condition"),
+  condition: varchar("condition"),
   createdAt,
-  isAmountByAge: boolean("isAmountByAge").notNull(), 
+  isAmountByAge: boolean("isAmountByAge").notNull(),
   plan_id: varchar("plan_id", { length: 255 }).references(() => plans.id),
   amount: real("amount").notNull(),
 });
@@ -1034,7 +1051,7 @@ export const insertpricePerAgeSchema = createInsertSchema(pricePerAge);
 export const selectpricePerAgeSchema = createSelectSchema(pricePerAge);
 export const pricePerAgeSchemaDB = selectpricePerAgeSchema.pick({
   age: true,
-  condition:true,
+  condition: true,
   isAmountByAge: true,
   amount: true,
   plan_id: true,
