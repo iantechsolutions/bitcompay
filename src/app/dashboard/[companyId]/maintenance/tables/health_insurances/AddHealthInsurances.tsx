@@ -33,7 +33,7 @@ export function AddHealthInsurances() {
         name: description,
       });
 
-      toast.success("Producto creado correctamente");
+      toast.success("Obra social creada correctamente");
       router.refresh();
       setOpen(false);
     } catch (e) {
@@ -67,7 +67,7 @@ export function AddHealthInsurances() {
               {isLoading && (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}
-              Crear 
+              Crear
             </Button>
           </DialogFooter>
         </DialogContent>

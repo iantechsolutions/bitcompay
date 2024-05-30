@@ -59,7 +59,7 @@ export default function AddBonusDialog() {
         amount: data.amount,
         reason: data.reason,
       });
-      toast.success("bono creada correctamente");
+      toast.success("Bono creado correctamente");
       router.refresh();
       setOpen(false);
     } catch (e) {
@@ -122,7 +122,7 @@ export default function AddBonusDialog() {
                               variant={"outline"}
                               className={cn(
                                 "w-[240px] pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground",
+                                !field.value && "text-muted-foreground"
                               )}
                             >
                               <p>

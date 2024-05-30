@@ -18,7 +18,8 @@ import { asTRPCError } from "~/lib/errors";
 import { api } from "~/trpc/react";
 
 export function AddModo() {
-    const { mutateAsync: createProduct, isLoading } = api.modos.create.useMutation()
+  const { mutateAsync: createProduct, isLoading } =
+    api.modos.create.useMutation();
 
   const [description, setDescription] = useState("");
 
@@ -32,7 +33,7 @@ export function AddModo() {
         description: description,
       });
 
-      toast.success("Producto creado correctamente");
+      toast.success("Modo creado correctamente");
       router.refresh();
       setOpen(false);
     } catch (e) {

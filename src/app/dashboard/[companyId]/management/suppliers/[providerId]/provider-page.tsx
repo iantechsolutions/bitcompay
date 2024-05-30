@@ -1,10 +1,10 @@
-'use client'
-import { useRouter } from 'next/navigation'
-import type { MouseEventHandler } from 'react'
-import { toast } from 'sonner'
-import LayoutContainer from '~/components/layout-container'
-import ProviderForm from '~/components/provider-form'
-import { Title } from '~/components/title'
+"use client";
+import { useRouter } from "next/navigation";
+import type { MouseEventHandler } from "react";
+import { toast } from "sonner";
+import LayoutContainer from "~/components/layout-container";
+import ProviderForm from "~/components/provider-form";
+import { Title } from "~/components/title";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,56 +25,57 @@ import {
 // import { useCompanyData } from "../../../company-provider";
 import { useCompanyData } from "../../../company-provider";
 import { asTRPCError } from "~/lib/errors";
-import { RouterOutputs } from '~/trpc/shared'
-import { Card } from '~/components/ui/card'
-import { Button } from '~/components/ui/button'
-import { api } from '~/trpc/react'
+import { RouterOutputs } from "~/trpc/shared";
+import { Card } from "~/components/ui/card";
+import { Button } from "~/components/ui/button";
+import { api } from "~/trpc/react";
 
 export default function ProviderPage(props: {
-    provider: RouterOutputs['providers']['get']
+  provider: RouterOutputs["providers"]["get"];
 }) {
-    return (
-        <LayoutContainer>
-            <section className='space-y-2'>
-                <div className='flex-col justify-between'>
-                    <Title>{props.provider?.name}</Title>
-                    <Accordion type='single' collapsible={true}>
-                        <AccordionItem value='item-1'>
-                            <AccordionTrigger>Informacion de proveedor</AccordionTrigger>
-                            <AccordionContent>
-                                <Card className='p-5'>
-                                    <ProviderForm provider={props.provider} />
-                                </Card>
-                            </AccordionContent>
-                        </AccordionItem>
-                        <AccordionItem value='item-2'>
-                            <AccordionTrigger>Eliminar proveedor</AccordionTrigger>
-                            <AccordionContent>
-                                <Card className='p-5'>
-                                    <div className='flex justify-end'>
-                                        <DeleteProvider providerId={props.provider!.id} />
-                                    </div>
-                                </Card>
-                            </AccordionContent>
-                        </AccordionItem>
-                    </Accordion>
-                </div>
-            </section>
-        </LayoutContainer>
-    )
+  return (
+    <LayoutContainer>
+      <section className="space-y-2">
+        <div className="flex-col justify-between">
+          <Title>{props.provider?.name}</Title>
+          <Accordion type="single" collapsible={true}>
+            <AccordionItem value="item-1">
+              <AccordionTrigger>Informacion de proveedor</AccordionTrigger>
+              <AccordionContent>
+                <Card className="p-5">
+                  <ProviderForm provider={props.provider} />
+                </Card>
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-2">
+              <AccordionTrigger>Eliminar proveedor</AccordionTrigger>
+              <AccordionContent>
+                <Card className="p-5">
+                  <div className="flex justify-end">
+                    <DeleteProvider providerId={props.provider!.id} />
+                  </div>
+                </Card>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+      </section>
+    </LayoutContainer>
+  );
 }
 
 function DeleteProvider(props: { providerId: string }) {
-    const company = useCompanyData()
-    const { mutateAsync: deleteProvider, isLoading } = api.providers.delete.useMutation()
+  const company = useCompanyData();
+  const { mutateAsync: deleteProvider, isLoading } =
+    api.providers.delete.useMutation();
 
-    const router = useRouter()
+  const router = useRouter();
 
   const handleDelete: MouseEventHandler<HTMLButtonElement> = (e) => {
     e.preventDefault();
     deleteProvider({ providerId: props.providerId })
       .then(() => {
-        toast.success("Se ha eliminado el canal");
+        toast.success("Se ha eliminado el proveedor correctamente");
         router.push(`/dashboard/${company.id}/administration/providers`);
         router.refresh();
       })

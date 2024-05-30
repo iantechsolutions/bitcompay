@@ -257,7 +257,12 @@ async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
 
   const trimmedRows = rows.map(trimObject);
   const transformedRows = recRowsTransformer(trimmedRows);
-
+  if (transformedRows.length === 0) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "No se encontraron datos en el archivo",
+    });
+  }
   const errors: string[] = [];
   for (let i = 0; i < transformedRows.length; i++) {
     const row = transformedRows[i]!;

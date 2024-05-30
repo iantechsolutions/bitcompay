@@ -32,7 +32,10 @@ const stringAsDate = z
       console.log(dayjs(value).isValid());
       return dayjs(value).isValid();
     },
-    { message: "la fecha proporcionada no es valida" }
+    // (value) => value.getDay()>5,
+    (value) => ({
+      message: `la fila no pudo ser leida por caracteres invalidos`,
+    })
   );
 
 const stringAsBoolean = z

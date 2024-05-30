@@ -49,7 +49,7 @@ export function AddBussiness(props: { params: { companyId: string } }) {
         brandId: brand,
       });
 
-      toast.success("Producto creado correctamente");
+      toast.success("Unidad creada correctamente");
       router.refresh();
       setOpen(false);
     } catch (e) {

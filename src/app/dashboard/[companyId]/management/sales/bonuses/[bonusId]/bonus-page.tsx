@@ -83,7 +83,7 @@ export default function BonusPage(props: BonusPageProps) {
         amount: bonusData?.amount ?? "",
         reason: bonusData?.reason ?? " ",
       });
-      toast.success("Se ha actualizad la informacion del bono");
+      toast.success("Se ha actualizado la informacion del bono");
       router.refresh();
     } catch (e) {
       const error = asTRPCError(e)!;
@@ -154,7 +154,7 @@ export default function BonusPage(props: BonusPageProps) {
                                     variant={"outline"}
                                     className={cn(
                                       "w-[240px] pl-3 text-left font-normal",
-                                      !field.value && "text-muted-foreground",
+                                      !field.value && "text-muted-foreground"
                                     )}
                                   >
                                     <p>
