@@ -258,6 +258,7 @@ async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
   const trimmedRows = rows.map(trimObject);
   const { finishedArray: transformedRows, errors: errorsTransform } =
     recRowsTransformer(trimmedRows);
+  console.log("rows", transformedRows);
   if (trimmedRows.length === 0) {
     throw new TRPCError({
       code: "BAD_REQUEST",

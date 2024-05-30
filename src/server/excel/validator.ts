@@ -31,7 +31,7 @@ const stringAsDate = z
 
       return dayjs(value).isValid();
     },
-    { message: "Caracteres incorrecos en columna:" }
+    { message: "Caracteres incorrectos en columna:" }
   );
 
 const stringAsBoolean = z
@@ -50,7 +50,7 @@ const stringAsBoolean = z
     }
   })
   .refine((value) => typeof value === "boolean", {
-    message: "Caracteres incorrecos en columna:",
+    message: "Caracteres incorrectos en columna:",
   });
 
 const numberAsString = z
@@ -64,7 +64,7 @@ const numberAsString = z
     }
   })
   .refine((value) => !isNaN(Number(value)), {
-    message: "Caracteres incorrecos en columna:",
+    message: "Caracteres incorrectos en columna:",
   });
 
 export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
