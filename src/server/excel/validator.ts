@@ -32,7 +32,7 @@ const stringAsDate = z
       console.log(dayjs(value).isValid());
       return dayjs(value).isValid();
     },
-    { message: "la fecha proporcionada no es valida" }
+    { message: "Error leyendo la fila por caracteres incorrectos" }
   );
 
 const stringAsBoolean = z
@@ -51,7 +51,7 @@ const stringAsBoolean = z
     }
   })
   .refine((value) => typeof value === "boolean", {
-    message: "el valor proporcionado no es valor de verdad valido",
+    message: "Error leyendo la fila por caracteres incorrectos",
   });
 
 const numberAsString = z
@@ -65,7 +65,7 @@ const numberAsString = z
     }
   })
   .refine((value) => !isNaN(Number(value)), {
-    message: "el valor propocionado no es un numero valido",
+    message: "Error leyendo la fila por caracteres incorrectos",
   });
 
 export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
