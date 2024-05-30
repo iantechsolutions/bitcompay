@@ -68,6 +68,15 @@ export const excelDeserializationRouter = createTRPCRouter({
           const plan = await db.query.plans.findFirst({
             where: eq(schema.plans.plan_code, row.plan!),
           });
+          // buscar obra social y obra social de origen (puede ser null esta)
+          const health_insurance = await db.query.healthInsurances.findFirst({
+            where: eq(schema.healthInsurances.name, row.os!),
+          });
+
+          const health_insurance_origin =
+            await db.query.healthInsurances.findFirst({
+              where: eq(schema.healthInsurances.name, row["originating os"]!),
+            });
 
           let familyGroupId = "";
           const existGroup = isKeyPresent(row.holder_id_number, familyGroupMap);
@@ -88,8 +97,8 @@ export const excelDeserializationRouter = createTRPCRouter({
             const procedure = await db
               .insert(schema.procedure)
               .values({
-                type: "", //a rellenar
-                estado: "", //a rellenar
+                type: "alta",
+                estado: "finalizado",
               })
               .returning();
             const familygroup = await db
@@ -101,7 +110,7 @@ export const excelDeserializationRouter = createTRPCRouter({
                 modo: mode?.id,
                 receipt: " ", //a rellenar
                 bonus: bonus[0]!.id,
-                state: "Cargado", //queremos agregar columna con estado?
+                state: "ACTIVO", //queremos agregar columna con estado?
                 procedureId: procedure[0]!.id,
                 //payment_status default es pending
               })
@@ -117,6 +126,7 @@ export const excelDeserializationRouter = createTRPCRouter({
             where: eq(schema.postal_code.cp, postal_code ?? " "),
           });
           let postal_code_id = "";
+          // no agregar codigo postal, solo levantarlo
           if (check_postal_code.length == 0) {
             const new_postal_code = await db
               .insert(schema.postal_code)
@@ -131,6 +141,8 @@ export const excelDeserializationRouter = createTRPCRouter({
             postal_code_id = check_postal_code[0]!.id;
           }
 
+          // si el codigo de diferencial existe, agrego un value a la tabla diferencial_values
+          // si el codigo de diferencial no existe, agrego un diferencial y un value a la tabla diferencial_values
           let differentialId;
           const check_differential = await db.query.differentials.findMany({
             where: eq(schema.differentials.codigo, row.differential_code!),
@@ -194,7 +206,7 @@ export const excelDeserializationRouter = createTRPCRouter({
             })
             .returning();
           await db.insert(schema.differentialsValues).values({
-            amount: parseInt(row.differential_value!),
+            amount: parseFloat(row.differential_value!),
             differentialId: differentialId,
             integrant_id: new_integrant[0]!.id,
           });
@@ -208,6 +220,16 @@ export const excelDeserializationRouter = createTRPCRouter({
               integrant_id: new_integrant[0]!.id,
             });
           }
+          const employeeContribution = parseFloat(row.contribution!);
+          const employerContribution =
+            (parseFloat(row.contribution!) / 3) * 7.038;
+          await db.insert(schema.contributions).values({
+            employeeContribution: employeeContribution,
+            employerContribution: employerContribution,
+            amount: employeeContribution + employerContribution,
+            integrant_id: new_integrant[0]!.id,
+            cuitEmployer: " ", //a rellenar
+          });
         }
         await db
           .update(schema.excelBilling)

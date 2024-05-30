@@ -390,7 +390,6 @@ export const recDocumentValidator = z
 export const recHeaders: TableHeaders = [
   { key: "business_unit", label: "UNIDAD DE NEGOCIO", width: 140 },
   { key: "os", label: "OS", width: 140 },
-  { key: "originating os", label: "OS ORIGEN", width: 140 },
   { key: "validity", label: "VIGENCIA", width: 140 },
   { key: "mode", label: "MODO", width: 140 },
   { key: "bonus", label: "BONIFICACION", width: 140 },
