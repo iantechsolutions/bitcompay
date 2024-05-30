@@ -73,10 +73,14 @@ export const excelDeserializationRouter = createTRPCRouter({
             where: eq(schema.healthInsurances.name, row.os!),
           });
 
-          const health_insurance_origin =
-            await db.query.healthInsurances.findFirst({
-              where: eq(schema.healthInsurances.name, row["originating os"]!),
-            });
+          try {
+            const health_insurance_origin =
+              await db.query.healthInsurances.findFirst({
+                where: eq(schema.healthInsurances.name, row["originating os"]!),
+              });
+          } catch (e) {
+            console.log("no se encontro obra social de origen");
+          }
 
           let familyGroupId = "";
           const existGroup = isKeyPresent(row.holder_id_number, familyGroupMap);
