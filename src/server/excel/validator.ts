@@ -39,11 +39,11 @@ const stringAsBoolean = z
   .nullable()
   .optional()
   .transform((value) => {
-    if (value === undefined || value === null || value === "") {
-      return false;
-    }
     if (typeof value === "string" && value.toLowerCase() === "verdadero") {
       return true;
+    }
+    if (typeof value === "string" && value.toLowerCase() === "falso") {
+      return false;
     }
     if (typeof value === "boolean") {
       return value;
@@ -322,7 +322,7 @@ export const recDocumentValidator = z
     "DIFERENCIAL CODIGO": z.string().min(0).max(140).nullable().optional(),
     "DIFERENCIAL VALOR": numberAsString.optional().nullable(),
     PLAN: z.string().min(0).max(140).nullable().optional(),
-    PRODUCTO: z
+    "PRODUCTO (MEDIO DE PAGO)": z
       .string()
       .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
       .optional()
@@ -379,7 +379,7 @@ export const recDocumentValidator = z
       differential_code: value["DIFERENCIAL CODIGO"] ?? null,
       differential_value: value["DIFERENCIAL VALOR"],
       plan: value.PLAN ?? null,
-      product: value.PRODUCTO ?? null,
+      product: value["PRODUCTO (MEDIO DE PAGO)"] ?? null,
       cbu_number: value["NRO CBU"] ?? null,
       card_brand: value["TC MARCA"] ?? null,
       is_new: value["ALTA NUEVA"] ?? null,

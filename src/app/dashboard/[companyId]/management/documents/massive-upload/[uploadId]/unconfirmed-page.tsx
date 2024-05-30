@@ -8,6 +8,8 @@ import { Card } from "~/components/ui/card";
 import { FileSpreadsheetIcon } from "lucide-react";
 import { RouterOutputs } from "~/trpc/shared";
 import { useState } from "react";
+import { recHeaders } from "~/server/excel/validator";
+import { LargeTable } from "~/components/table";
 interface unconfirmedPageProps {
   upload: RouterOutputs["excelDeserialization"]["upload"];
   companyId: string;
@@ -16,6 +18,9 @@ interface unconfirmedPageProps {
 export default function UnconfirmedPage(props: unconfirmedPageProps) {
   const { upload, companyId } = props;
   const [confirmed, setConfirmed] = useState(upload!.confirmed);
+  const [data, setData] = useState<
+    RouterOutputs["excelDeserialization"]["deserialization"] | null
+  >(null);
   const {
     mutateAsync: confirmData,
     error: dataError,
@@ -28,12 +33,13 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
     isLoading: isReadingLoading,
   } = api.excelDeserialization.deserialization.useMutation();
 
-  function handleRead() {
-    readData({
+  async function handleRead() {
+    const data = await readData({
       type: "rec",
       id: upload!.id,
       companyId: companyId,
     });
+    setData(data);
   }
   function handleConfirm() {
     confirmData({
@@ -77,6 +83,10 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
           {dataError?.data?.cause?.trim() ?? dataError?.message}
         </pre>
       )}
+
+      <div className="mt-5">
+        {data && <LargeTable rows={data} headers={recHeaders} />}
+      </div>
     </LayoutContainer>
   );
 }
