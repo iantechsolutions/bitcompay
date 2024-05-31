@@ -68,19 +68,15 @@ export const excelDeserializationRouter = createTRPCRouter({
           const plan = await db.query.plans.findFirst({
             where: eq(schema.plans.plan_code, row.plan!),
           });
-          // buscar obra social y obra social de origen (puede ser null esta)
+
           const health_insurance = await db.query.healthInsurances.findFirst({
             where: eq(schema.healthInsurances.name, row.os!),
           });
 
-          try {
-            const health_insurance_origin =
-              await db.query.healthInsurances.findFirst({
-                where: eq(schema.healthInsurances.name, row["originating os"]!),
-              });
-          } catch (e) {
-            console.log("no se encontro obra social de origen");
-          }
+          const health_insurance_origin =
+            await db.query.healthInsurances.findMany({
+              where: eq(schema.healthInsurances.name, row["originating os"]!),
+            });
 
           let familyGroupId = "";
           const existGroup = isKeyPresent(row.holder_id_number, familyGroupMap);
@@ -91,7 +87,7 @@ export const excelDeserializationRouter = createTRPCRouter({
                 amount: row.bonus,
                 appliedUser: " ", //a rellenar
                 approverUser: " ", //a rellenar
-                duration: "", //row["from bonus"]-row["to bonus"], cambiar schema a desde hasta
+                duration: "",
                 from: row["from bonus"],
                 to: row["to bonus"],
                 reason: "", //a rellenar
@@ -109,14 +105,13 @@ export const excelDeserializationRouter = createTRPCRouter({
               .insert(schema.family_groups)
               .values({
                 businessUnit: business_unit?.id,
-                validity: row.validity, // viene del excel "vigencia"
+                validity: row.validity,
                 plan: plan?.id,
                 modo: mode?.id,
-                receipt: " ", //a rellenar
+                receipt: " ",
                 bonus: bonus[0]!.id,
-                state: "ACTIVO", //queremos agregar columna con estado?
+                state: "ACTIVO",
                 procedureId: procedure[0]!.id,
-                //payment_status default es pending
               })
               .returning();
             familyGroupMap.set(row.holder_id_number, familygroup[0]!.id);
@@ -126,27 +121,10 @@ export const excelDeserializationRouter = createTRPCRouter({
           }
 
           const postal_code = row["postal code"];
-          const check_postal_code = await db.query.postal_code.findMany({
+          const postal_code_schema = await db.query.postal_code.findFirst({
             where: eq(schema.postal_code.cp, postal_code ?? " "),
           });
-          let postal_code_id = "";
-          // no agregar codigo postal, solo levantarlo
-          if (check_postal_code.length == 0) {
-            const new_postal_code = await db
-              .insert(schema.postal_code)
-              .values({
-                name: "", //a rellenar
-                cp: postal_code,
-                zone: row.city,
-              })
-              .returning();
-            postal_code_id = new_postal_code[0]!.id;
-          } else {
-            postal_code_id = check_postal_code[0]!.id;
-          }
 
-          // si el codigo de diferencial existe, agrego un value a la tabla diferencial_values
-          // si el codigo de diferencial no existe, agrego un diferencial y un value a la tabla diferencial_values
           let differentialId;
           const check_differential = await db.query.differentials.findMany({
             where: eq(schema.differentials.codigo, row.differential_code!),
@@ -159,12 +137,13 @@ export const excelDeserializationRouter = createTRPCRouter({
               })
               .returning();
             differentialId = new_differential[0]!.id;
+          } else {
+            differentialId = check_differential[0]!.id;
           }
 
           const birthDate = new Date(row.birth_date!);
           const today = new Date();
           let age = today.getFullYear() - birthDate.getFullYear();
-          // Additional logic to handle cases where the birth date hasn't occurred yet this year
           if (
             today.getMonth() < birthDate.getMonth() ||
             (today.getMonth() === birthDate.getMonth() &&
@@ -206,7 +185,12 @@ export const excelDeserializationRouter = createTRPCRouter({
               family_group_id: familyGroupId,
               affiliate_number: row.affiliate_number,
               extention: " ",
-              postal_codeId: postal_code_id,
+              postal_codeId: postal_code_schema?.id,
+              health_insuranceId: health_insurance?.id,
+              originating_health_insuranceId:
+                health_insurance_origin.length > 0
+                  ? health_insurance_origin[0]!.id
+                  : null,
             })
             .returning();
           await db.insert(schema.differentialsValues).values({
@@ -357,6 +341,15 @@ async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
     const product = await db.query.products.findFirst({
       where: eq(schema.products.name, row.product!),
     });
+
+    const postal_code = row["postal code"];
+    const check_postal_code = await db.query.postal_code.findMany({
+      where: eq(schema.postal_code.cp, postal_code ?? " "),
+    });
+
+    if (check_postal_code.length == 0) {
+      errors.push(`CODIGO POSTAL no valido en (fila:${rowNum})`);
+    }
     if (!product) {
       errors.push(`PRODUCTO no valido en (fila:${rowNum})`);
     }
