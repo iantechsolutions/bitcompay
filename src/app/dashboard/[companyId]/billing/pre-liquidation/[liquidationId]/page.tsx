@@ -69,37 +69,11 @@ export default function Home() {
               <TableHead className="w-[100px]">Invoice</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Method</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
+              <TableHead>Amount</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             <TableRowContainer />
-            <TableRow>
-              {/* <TableCell colSpan={4}>
-                <Accordion type="single" collapsible={true} className="w-full">
-                  <AccordionItem value="item-2">
-                    <AccordionTrigger>
-                      <h2 className="text-md">Info. de la marca</h2>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <Card className="p-5">
-                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                          <div>
-                            <p>Nombre</p>
-                          </div>
-                          <div className="col-span-2">
-                            <p>Descripción</p>
-                          </div>
-                          <div className="col-span-2">
-                            <p>Descripción Reducida</p>
-                          </div>
-                        </div>
-                      </Card>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-              </TableCell> */}
-            </TableRow>
           </TableBody>
         </Table>
         <br />
