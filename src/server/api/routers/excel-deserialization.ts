@@ -50,9 +50,6 @@ export const excelDeserializationRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input }) => {
-      console.log(
-        "escribiendo en tablas: integrantes,unidad de negocio,family group,differencial, codigo postal, payment_info  "
-      );
       const familyGroupMap = new Map<string | null, string>();
       const contents = await readExcelFile(db, input.uploadId, input.type);
       await db.transaction(async (db) => {
@@ -81,6 +78,7 @@ export const excelDeserializationRouter = createTRPCRouter({
           let familyGroupId = "";
           const existGroup = isKeyPresent(row.holder_id_number, familyGroupMap);
           if (!existGroup) {
+            console.log("creando bono");
             const bonus = await db
               .insert(schema.bonuses)
               .values({
@@ -94,6 +92,7 @@ export const excelDeserializationRouter = createTRPCRouter({
               })
               .returning();
 
+            console.log("creando tramite");
             const procedure = await db
               .insert(schema.procedure)
               .values({
@@ -101,6 +100,7 @@ export const excelDeserializationRouter = createTRPCRouter({
                 estado: "finalizado",
               })
               .returning();
+            console.log("creando grupo familiar");
             const familygroup = await db
               .insert(schema.family_groups)
               .values({
@@ -130,6 +130,7 @@ export const excelDeserializationRouter = createTRPCRouter({
             where: eq(schema.differentials.codigo, row.differential_code!),
           });
           if (check_differential.length == 0) {
+            console.log("creando diferencial codigo");
             const new_differential = await db
               .insert(schema.differentials)
               .values({
@@ -151,6 +152,7 @@ export const excelDeserializationRouter = createTRPCRouter({
           ) {
             age--;
           }
+          console.log("creando integrante");
           const new_integrant = await db
             .insert(schema.integrants)
             .values({
@@ -193,6 +195,7 @@ export const excelDeserializationRouter = createTRPCRouter({
                   : null,
             })
             .returning();
+          console.log("creando valores diferencial valor");
           await db.insert(schema.differentialsValues).values({
             amount: parseFloat(row.differential_value!),
             differentialId: differentialId,
@@ -200,6 +203,7 @@ export const excelDeserializationRouter = createTRPCRouter({
           });
 
           if (row.isPaymentResponsible) {
+            console.log("creando informacion de pago");
             await db.insert(schema.payment_info).values({
               card_number: row.card_number!,
               CBU: row.cbu_number!,
@@ -211,6 +215,7 @@ export const excelDeserializationRouter = createTRPCRouter({
           const employeeContribution = parseFloat(row.contribution!);
           const employerContribution =
             (parseFloat(row.contribution!) / 3) * 7.038;
+          console.log("creando aportes");
           await db.insert(schema.contributions).values({
             employeeContribution: employeeContribution,
             employerContribution: employerContribution,
