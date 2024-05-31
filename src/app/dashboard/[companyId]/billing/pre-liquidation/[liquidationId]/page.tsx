@@ -10,6 +10,14 @@ import {
 } from "~/components/ui/table";
 
 import TableRowContainer from "./table-row";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "~/components/ui/accordion";
+import { Card } from "~/components/ui/card";
+import { Label } from "~/components/ui/label";
 
 export default function Home() {
   return (
@@ -57,6 +65,7 @@ export default function Home() {
           <TableCaption>A list of your recent invoices.</TableCaption>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-[50px]"></TableHead>
               <TableHead className="w-[100px]">Invoice</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Method</TableHead>
@@ -64,13 +73,36 @@ export default function Home() {
             </TableRow>
           </TableHeader>
           <TableBody>
+            <TableRowContainer />
             <TableRow>
-              <TableCell colSpan={4}>
-                <TableRowContainer />
-              </TableCell>
+              {/* <TableCell colSpan={4}>
+                <Accordion type="single" collapsible={true} className="w-full">
+                  <AccordionItem value="item-2">
+                    <AccordionTrigger>
+                      <h2 className="text-md">Info. de la marca</h2>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <Card className="p-5">
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                          <div>
+                            <p>Nombre</p>
+                          </div>
+                          <div className="col-span-2">
+                            <p>Descripción</p>
+                          </div>
+                          <div className="col-span-2">
+                            <p>Descripción Reducida</p>
+                          </div>
+                        </div>
+                      </Card>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </TableCell> */}
             </TableRow>
           </TableBody>
         </Table>
+        <br />
       </div>
     </LayoutContainer>
   );
