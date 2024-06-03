@@ -13,18 +13,18 @@ interface TriggerTableProps {
 
 export default function TriggerTable({ setActive, active }: TriggerTableProps) {
   return (
-    <TableRow>
-      <TableCell>
+    <TableRow className="relative overflow-visible">
+      <TableCell className="  border-gray-600 p-1.5 flex items-center">
         <button onClick={() => setActive(!active)}>
           {active && <CircleChevronDown />}
           {!active && <CircleChevronRight />}
         </button>
       </TableCell>
+
       <TableCell>Hello</TableCell>
       <TableCell>how </TableCell>
-      <TableCell>how </TableCell>
       <TableCell>are </TableCell>
-      <TableCell>you</TableCell>
+      <TableCell> u</TableCell>
     </TableRow>
   );
 }
