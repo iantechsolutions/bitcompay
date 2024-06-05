@@ -278,21 +278,33 @@ async function getGruposByBrandId(brandId: string) {
 
 export const facturasRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({}) => {
-    const facturas = await db.query.facturas.findMany();
+    const facturas = await db.query.facturas.findMany({
+      with: {
+        items: true,
+        family_group: {
+          with: {
+            integrants: {
+              where: eq(schema.integrants.isBillResponsible, true),
+            },
+            plan: true,
+          },
+        },
+      },
+    });
     return facturas;
   }),
   get: protectedProcedure
     .input(
       z.object({
-        providerId: z.string(),
+        facturaId: z.string(),
       })
     )
     .query(async ({ input }) => {
-      const provider = await db.query.facturas.findFirst({
-        where: eq(schema.facturas.id, input.providerId),
+      const factura = await db.query.facturas.findFirst({
+        where: eq(schema.facturas.id, input.facturaId),
       });
 
-      return provider;
+      return factura;
     }),
 
   create: protectedProcedure

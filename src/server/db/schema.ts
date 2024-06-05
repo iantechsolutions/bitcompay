@@ -497,6 +497,7 @@ export const bussinessUnitsRelations = relations(
       references: [companies.id],
     }),
     plans: many(plans),
+    liquidations: many(liquidations),
   })
 );
 
@@ -767,6 +768,9 @@ export const items = pgTable("items", {
   abono: real("abono"),
   differential_amount: real("differential_amount"),
   bonificacion: real("bonificacion"),
+  interest: real("interest"),
+  contribution: real("contribution"),
+  previous_bill: real("previous_bill"),
 });
 
 export const family_groups = pgTable("family_groups", {
@@ -959,11 +963,23 @@ export const liquidations = pgTable("liquidations", {
   userCreated: varchar("userCreated", { length: 255 }).notNull(),
   userApproved: varchar("userApproved", { length: 255 }),
   estado: varchar("estado", { length: 255 }).notNull(),
+  razon_social: varchar("razon_social", { length: 255 }),
+  cuit: varchar("cuit", { length: 255 }),
+  pdv: integer("pdv").notNull(),
+  period: timestamp("period", { mode: "date" }),
+  number: integer("number").notNull(),
+  bussinessUnits_id: varchar("bussinessUnits_id", { length: 255 }).references(
+    () => bussinessUnits.id
+  ),
 });
 
 export const liquidationsRelations = relations(
   liquidations,
   ({ one, many }) => ({
+    bussinessUnits: one(bussinessUnits, {
+      fields: [liquidations.bussinessUnits_id],
+      references: [bussinessUnits.id],
+    }),
     facturas: many(facturas),
   })
 );
@@ -976,6 +992,11 @@ export const liquidationsSchemaDB = selectliquidationsSchema.pick({
   userCreated: true,
   userApproved: true,
   estado: true,
+  razon_social: true,
+  cuit: true,
+  pdv: true,
+  period: true,
+  number: true,
 });
 export type liquidations = z.infer<typeof selectliquidationsSchema>;
 

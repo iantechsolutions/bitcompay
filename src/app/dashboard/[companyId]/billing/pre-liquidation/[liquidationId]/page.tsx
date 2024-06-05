@@ -1,3 +1,5 @@
+// falta formatear fecha y hora, usuario
+
 import LayoutContainer from "~/components/layout-container";
 // import {
 //   Table,
@@ -14,46 +16,63 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/tablePreliq";
+import { Title } from "~/components/title";
+import { api } from "~/trpc/server";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import "dayjs/locale/es";
+dayjs.extend(utc);
+dayjs.locale("es");
+import { RouterOutputs } from "~/trpc/shared";
 
-export default function Home() {
+export default async function Home(props: {
+  params: { liquidationId: string };
+}) {
+  const preliquidation = await api.liquidations.get.query({
+    id: props.params.liquidationId,
+  });
+  // if (!preliquidation) return <Title>Preliquidacion no encotrada</Title>;
+  const facturas = preliquidation?.facturas;
+  const periodo =
+    dayjs.utc(preliquidation?.period).format("MMMM [de] YYYY") ?? "-";
   return (
     <LayoutContainer>
       <div className="grid grid-cols-3 gap-x-2 gap-y-2">
         <p className="opacity-70">
           <span className="font-bold opacity-100">Razon social: </span>
-          Consult-Rent-SRL
+          {preliquidation?.razon_social ?? "-"}
         </p>
         <p className="opacity-70">
           <span className="font-bold opacity-100">Periodo: </span>
-          mm/aaaa
+          {periodo}
         </p>
         <p className="opacity-70">
           <span className="font-bold opacity-100">Hora: </span>
-          hh:mm:ss
+          {dayjs.utc(new Date()).format("HH:mm") ?? "-"}
         </p>
         <p className="opacity-70">
-          <span className="font-bold opacity-100">CUIT </span>
-          Consult-Rent-SRL
+          <span className="font-bold opacity-100">CUIT: </span>
+          {preliquidation?.cuit ?? "-"}
         </p>
         <p className="opacity-70">
           <span className="font-bold opacity-100">Nro. Pre-liq: </span>
-          ###
+          {preliquidation?.number ?? "-"}
         </p>
         <p className="opacity-70">
-          <span className="font-bold opacity-100">Gerenciador: </span>
-          RAS
+          <span className="font-bold opacity-100">Unidad de negocio: </span>
+          {preliquidation?.bussinessUnits?.description ?? "-"}
         </p>
         <p className="opacity-70">
           <span className="font-bold opacity-100">PDV: </span>
-          00009
+          {preliquidation?.pdv?.toString() ?? "-"}
         </p>
         <p className="opacity-70">
           <span className="font-bold opacity-100">Fecha: </span>
-          ###
+          {dayjs.utc(preliquidation?.createdAt).format("DD/MM/YYYY") ?? "-"}
         </p>
         <p className="opacity-70">
           <span className="font-bold opacity-100">Usuario: </span>
-          Juan Hernandez
+          {preliquidation?.userCreated ?? "-"}
         </p>
       </div>
       <div>
@@ -138,7 +157,15 @@ export default function Home() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            <TableRowContainer />
+            {facturas?.map(
+              (factura: RouterOutputs["facturas"]["list"][number]) => (
+                <TableRowContainer
+                  key={factura.id}
+                  factura={factura}
+                  periodo={periodo}
+                />
+              )
+            )}
           </TableBody>
         </Table>
         <br />
