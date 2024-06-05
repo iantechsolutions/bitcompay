@@ -2,6 +2,7 @@ import { z } from "zod";
 import { stringAsDate } from "./providers-schema";
 
 export const PlanSchema = z.object({
+  id: z.string().max(255).optional(),
   user: z.string().max(255).optional(),
   createdAt: stringAsDate,
   expiration_date: stringAsDate,
