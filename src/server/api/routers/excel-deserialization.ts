@@ -204,12 +204,16 @@ export const excelDeserializationRouter = createTRPCRouter({
 
           if (row.isPaymentResponsible) {
             console.log("creando informacion de pago");
+            const product = await db.query.products.findFirst({
+              where: eq(schema.products.name, row.product!),
+            });
             await db.insert(schema.payment_info).values({
               card_number: row.card_number!,
               CBU: row.cbu_number!,
               card_brand: row.card_brand!,
               new_registration: row.is_new!,
               integrant_id: new_integrant[0]!.id,
+              product: product?.id,
             });
           }
           const employeeContribution = parseFloat(row.contribution!);
@@ -224,6 +228,7 @@ export const excelDeserializationRouter = createTRPCRouter({
             cuitEmployer: " ", //a rellenar
           });
         }
+
         await db
           .update(schema.excelBilling)
           .set({

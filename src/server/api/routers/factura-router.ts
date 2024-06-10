@@ -177,6 +177,8 @@ async function preparateFactura(
     .values({
       estado: "pendiente",
       userCreated: user?.id ?? "",
+      number: 0,
+      pdv: 0,
     })
     .returning();
   grupos.forEach(async (grupo) => {

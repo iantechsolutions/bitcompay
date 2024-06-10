@@ -37,7 +37,7 @@ export default function UploadPage() {
 
           if (!file) return;
 
-          router.push(`./uploads/${file.serverData.uploadId}`);
+          router.push(`./rec-upload/${file.serverData.uploadId}`);
         }}
         onUploadError={(error: Error) => {
           setErrorMessage(error.message);

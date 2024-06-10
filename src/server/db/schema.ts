@@ -236,6 +236,8 @@ export const companiesRelations = relations(companies, ({ many }) => ({
   products: many(companyProducts),
   bussinessUnits: many(bussinessUnits),
 }));
+export const selectCompanySchema = createSelectSchema(companies);
+export type Company = z.infer<typeof selectCompanySchema>;
 
 export const brands = pgTable(
   "brand",
@@ -596,6 +598,7 @@ export const integrantsRelations = relations(integrants, ({ one, many }) => ({
     fields: [integrants.originating_health_insuranceId],
     references: [healthInsurances.id],
   }),
+  payment_info: many(payment_info),
   contributions: many(contributions),
   differentialsValues: many(differentialsValues),
 }));
@@ -944,6 +947,7 @@ export const payment_info = pgTable("payment_info", {
   integrant_id: varchar("integrant_id", { length: 255 }).references(
     () => integrants.id
   ),
+  product: varchar("product", { length: 255 }),
 });
 
 export const selectPaymentInfo = createSelectSchema(payment_info);
@@ -953,6 +957,10 @@ export const payment_infoRelations = relations(payment_info, ({ one }) => ({
   integrant: one(integrants, {
     fields: [payment_info.integrant_id],
     references: [integrants.id],
+  }),
+  product: one(products, {
+    fields: [payment_info.product],
+    references: [products.id],
   }),
 }));
 
