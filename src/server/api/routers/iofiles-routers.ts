@@ -12,17 +12,11 @@ import utc from "dayjs/plugin/utc";
 import { createId } from "~/lib/utils";
 import { utapi } from "~/server/uploadthing";
 import type { RouterOutputs } from "~/trpc/shared";
+import { Payment } from "~/server/db/schema";
+import { Factura } from "~/app/dashboard/[companyId]/billing/manual_issuance/facturaGenerada";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(dayOfYear);
-type massiveGenPayments = {
-  due_date: Date;
-  importe: number;
-  invoice_number: number;
-  fiscal_id_number: string;
-  cbu: string;
-  name: string;
-};
 
 export const iofilesRouter = createTRPCRouter({
   generate: protectedProcedure
@@ -42,29 +36,20 @@ export const iofilesRouter = createTRPCRouter({
         // Productos del canal
         const productsNumbers = channel.products.map((p) => p.product.number);
         console.log("productsNumbers", productsNumbers);
-        // Pagos que no tienen archivo de salida que corresponden a la marca y los productos del canal
-        const payments = await db.query.payments.findMany({
-          where: and(
-            eq(schema.payments.companyId, input.companyId),
-            eq(schema.payments.g_c, brand.number),
-            inArray(schema.payments.product_number, productsNumbers), // Solo los productos de la marca y producto -> (los productos salen del canal)
-            isNull(schema.payments.outputFileId) // Si no tiene archivo de salida, es que no le generaron el archivo
-          ),
-        });
-
-        console.log("payments: ", payments);
-
+        // insertamos payments de la carga masiva
         const business_units = await db.query.bussinessUnits.findMany({
           where: and(
             eq(schema.bussinessUnits.companyId, input.companyId),
             eq(schema.bussinessUnits.brandId, input.brandId)
           ),
           with: {
+            brand: true,
             liquidations: {
               with: {
                 facturas: {
                   orderBy: (facturas, { desc }) => [desc(facturas.due_date)],
                   columns: {
+                    id: true,
                     nroFactura: true,
                     due_date: true,
                     importe: true,
@@ -77,15 +62,10 @@ export const iofilesRouter = createTRPCRouter({
                       with: {
                         integrants: {
                           where: eq(schema.integrants.isBillResponsible, true),
-
-                          columns: {
-                            fiscal_id_number: true,
-                            name: true,
-                          },
                           with: {
                             payment_info: {
-                              columns: {
-                                CBU: true,
+                              with: {
+                                product: true,
                               },
                             },
                           },
@@ -99,26 +79,58 @@ export const iofilesRouter = createTRPCRouter({
           },
         });
         console.log("business_units", business_units);
-        const massiveGenPayments: massiveGenPayments[] =
-          business_units?.flatMap((bu) => {
-            const family_group_map = new Map();
-            return bu?.liquidations?.flatMap((l) =>
-              l.facturas.flatMap((f) => {
-                if (family_group_map.has(f.family_group?.id)) {
-                  return [];
-                }
-                family_group_map.set(f.family_group?.id, true);
-                return (f.family_group?.integrants || []).map((i) => ({
-                  due_date: f.due_date!,
-                  importe: f.importe!,
-                  invoice_number: f.nroFactura!,
-                  fiscal_id_number: i.fiscal_id_number!,
-                  cbu: i.payment_info[0]?.CBU!,
-                  name: i.name!,
-                }));
-              })
-            );
-          });
+        const massiveGenPayments = business_units?.flatMap((bu) => {
+          const family_group_map = new Map();
+          return bu?.liquidations?.flatMap((l) =>
+            l.facturas.flatMap(async (f) => {
+              const payment_found = await db.query.payments.findFirst({
+                where: eq(schema.payments.factura_id, f.id!),
+              });
+              if (payment_found) {
+                return [];
+              }
+              if (family_group_map.has(f.family_group?.id)) {
+                return [];
+              }
+              family_group_map.set(f.family_group?.id, true);
+
+              return (f.family_group?.integrants || []).map((i) => ({
+                userId: ctx.session.user.id,
+                g_c: bu.brand.number!,
+                name: i.name!,
+                fiscal_id_type: i.id_type!,
+                fiscal_id_number: Number(i.fiscal_id_number!),
+                du_type: i.id_type!,
+                du_number: Number(i.id_number!),
+                product_number: i?.payment_info[0]?.product?.number!,
+                invoice_number: f.nroFactura!,
+                period: f.due_date!,
+                first_due_amount: f.importe!,
+                first_due_date: f.due_date!,
+                payment_channel: input.channelId,
+                companyId: input.companyId,
+                cbu: i.payment_info[0]?.CBU!,
+                factura_id: f.id,
+              }));
+            })
+          );
+        });
+
+        const result = await massiveGenPayments;
+        await db.insert(schema.payments).values(result);
+
+        // Pagos que no tienen archivo de salida que corresponden a la marca y los productos del canal
+        const payments = await db.query.payments.findMany({
+          where: and(
+            eq(schema.payments.companyId, input.companyId),
+            eq(schema.payments.g_c, brand.number),
+            inArray(schema.payments.product_number, productsNumbers), // Solo los productos de la marca y producto -> (los productos salen del canal)
+            isNull(schema.payments.outputFileId) // Si no tiene archivo de salida, es que no le generaron el archivo
+          ),
+        });
+
+        console.log("payments: ", payments);
+
         console.log("generacion masiva :", massiveGenPayments);
         let text: string;
 
@@ -132,11 +144,7 @@ export const iofilesRouter = createTRPCRouter({
 
         // Generamos el archivo de salida segun el canal
         if (channel.name.includes("DEBITO DIRECTO")) {
-          text = generateDebitoDirecto(
-            generateInput,
-            payments,
-            massiveGenPayments
-          );
+          text = generateDebitoDirecto(generateInput, payments);
         } else if (channel.name.includes("PAGOMISCUENTAS")) {
           text = generatePagomiscuentas(generateInput, payments);
         } else if (channel.name.includes("PAGO FACIL")) {
@@ -203,8 +211,7 @@ function generateDebitoDirecto(
     concept: string;
     redescription: string;
   },
-  transactions: RouterOutputs["transactions"]["list"],
-  massiveGenPayments: massiveGenPayments[]
+  transactions: RouterOutputs["transactions"]["list"]
 ) {
   let currentDate = dayjs().utc().tz("America/Argentina/Buenos_Aires");
   const currentHour = currentDate.hour();
@@ -282,61 +289,6 @@ function generateDebitoDirecto(
     total_collected +=
       transaction.collected_amount ?? transaction.first_due_amount ?? 0;
   }
-
-  for (const transaction of massiveGenPayments) {
-    const date = dayjs(transaction.due_date);
-    const year = date.year();
-    const monthName = date.format("MMMM").toUpperCase();
-    const period = formatString(" ", `${monthName} ${year}`, 22, true);
-    const dateYYYYMMDD = date.format("YYYYMMDD");
-    let collected_amount;
-    if (transaction.importe) {
-      collected_amount = transaction.importe?.toString();
-    } else {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: ` no hay informacion sobre importe a cobrar (invoice number:${transaction.invoice_number}`,
-      });
-    }
-    const collectedAmount = formatString("0", collected_amount, 15, false);
-    const fiscalNumber = formatString(
-      " ",
-      transaction.fiscal_id_number!.toString(),
-      22,
-      true
-    );
-    if (!transaction.cbu) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: ` no hay informacion sobre CBU (invoice number:${transaction.invoice_number}`,
-      });
-    }
-    const invoice_number = formatString(
-      "0",
-      transaction.invoice_number!.toString(),
-      15,
-      false
-    );
-    const CBU = transaction.cbu;
-    text += `421002513  ${fiscalNumber}${CBU}${collectedAmount}00    ${period}${dateYYYYMMDD}  ${invoice_number}${" ".repeat(
-      127
-    )}\r\n`;
-    let name;
-    if (transaction.name!.length > 36) {
-      name = transaction.name!.slice(0, 36);
-    } else {
-      name = formatString(" ", transaction.name!, 36, true);
-    }
-    text += `422002513  ${fiscalNumber}${name}${" ".repeat(181)}\r\n`;
-    text += `423002513  ${fiscalNumber}${" ".repeat(217)}\r\n`;
-    const concept = formatString(" ", input.concept ?? "", 40, true);
-    text += `424002513  ${fiscalNumber}${concept}${" ".repeat(177)}\r\n`;
-
-    total_records += 4;
-    total_operations += 1;
-    total_collected += transaction.importe ?? 0;
-  }
-  total_records += 1;
 
   const total_collected_string = formatString(
     "0",

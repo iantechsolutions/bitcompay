@@ -98,9 +98,9 @@ export const payments = pgTable(
   {
     id: columnId,
     userId: varchar("userId", { length: 255 }).notNull(),
-    documentUploadId: varchar("document_upload_id", { length: 255 })
-      .notNull()
-      .references(() => documentUploads.id),
+    documentUploadId: varchar("document_upload_id", { length: 255 }).references(
+      () => documentUploads.id
+    ),
     responseDocumentId: varchar("response_document_upload_id", { length: 255 }),
     // Rec fields
     g_c: bigint("g_c", { mode: "number" }),
@@ -151,6 +151,8 @@ export const payments = pgTable(
     invoiceNumberIdx: index("invoiceNumber_idx").on(payments.invoice_number),
   })
 );
+export const selectPaymentSchema = createSelectSchema(payments);
+export type Payment = z.infer<typeof selectPaymentSchema>;
 
 export const paymentsRelations = relations(payments, ({ one }) => ({
   documentUpload: one(documentUploads, {
