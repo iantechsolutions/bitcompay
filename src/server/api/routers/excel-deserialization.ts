@@ -207,7 +207,7 @@ export const excelDeserializationRouter = createTRPCRouter({
             const product = await db.query.products.findFirst({
               where: eq(schema.products.name, row.product!),
             });
-            await db.insert(schema.payment_info).values({
+            await db.insert(schema.pa).values({
               card_number: row.card_number!,
               CBU: row.cbu_number!,
               card_brand: row.card_brand!,

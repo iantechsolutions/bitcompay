@@ -133,7 +133,7 @@ export const payments = pgTable(
 
     statusId: varchar("status_id", { length: 255 }),
     outputFileId: varchar("output_file_id", { length: 255 }),
-    genChannels: json("required_columns")
+    genChannels: json("gen_channels")
       .$type<number[]>()
       .notNull()
       .default([]),
@@ -977,7 +977,7 @@ export const liquidations = pgTable("liquidations", {
   id: columnId,
   createdAt,
   updatedAt,
-  userCreated: varchar("userCreated", { length: 255 }).notNull(),
+  userCreated: varchar("userCreated", { length: 255 }),
   userApproved: varchar("userApproved", { length: 255 }),
   estado: varchar("estado", { length: 255 }).notNull(),
   razon_social: varchar("razon_social", { length: 255 }),
