@@ -1,14 +1,10 @@
 "use client";
 import { CheckIcon, Loader2 } from "lucide-react";
-import { type MouseEventHandler, useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import LayoutContainer from "~/components/layout-container";
-import { List, ListTile } from "~/components/list";
 import { Title } from "~/components/title";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
-import { Switch } from "~/components/ui/switch";
 import { asTRPCError } from "~/lib/errors";
 import { type RouterOutputs } from "~/trpc/shared";
 import {
@@ -18,17 +14,6 @@ import {
   AccordionTrigger,
 } from "~/components/ui/accordion";
 import { Card } from "~/components/ui/card";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "~/components/ui/alert-dialog";
 import {
   PaymentInfo,
   type Procedure,
@@ -45,12 +30,14 @@ import { useForm } from "react-hook-form";
 import { type InputsGeneralInfo } from "~/components/procedures/general-info-form";
 import { type InputsBilling } from "~/components/procedures/billing-info";
 import { type InputsMembers } from "~/components/procedures/members-info";
+
 interface ProcedurePageProps {
   procedure: Procedure;
   family_group: FamilyGroup;
   integrants: Integrant[];
   payment_info: PaymentInfo;
 }
+
 export default function ProcedurePage(props: ProcedurePageProps) {
   const [membersData, setMembersData] = useState<InputsMembers[]>([]);
   const initialValuesGeneralInfo: InputsGeneralInfo = {
@@ -65,39 +52,129 @@ export default function ProcedurePage(props: ProcedurePageProps) {
     receipt: props.family_group.receipt!,
     bonus: props.family_group.bonus!,
   };
-  const generalInfoForm = useForm<InputsGeneralInfo>();
+  const generalInfoForm = useForm<InputsGeneralInfo>({
+    defaultValues: initialValuesGeneralInfo,
+  });
   const membersForm = useForm<InputsMembers>();
   const billingForm = useForm<InputsBilling>();
 
-  const [family_groupData, setfamily_groupData] = useState();
-  const { mutateAsync: updateProcedure, isLoading } =
+  const { mutateAsync: updateProcedure, isLoading: isLoadingProcedure } =
     api.procedure.change.useMutation();
   const { mutateAsync: updateFamilyGroup, isLoading: isLoadingFamilyGroup } =
     api.family_groups.change.useMutation();
-  const { mutateAsync: updateIntegrants, isLoading: isLoadingIntegrants } =
+  const { mutateAsync: updateIntegrant, isLoading: isLoadingIntegrants } =
     api.integrants.change.useMutation();
-  const { mutateAsync: paymenteInfo, isLoading: isLoadingPaymentInfo } =
+  const { mutateAsync: createIntegrant, isLoading: isCreatingIntegrants } =
+    api.integrants.create.useMutation();
+  const { mutateAsync: updatePaymentInfo, isLoading: isLoadingPaymentInfo } =
     api.payment_info.change.useMutation();
+
   const handleChange = async () => {
     try {
-      // await updateFamilyGroup(props.family_group);
-      // await updateIntegrants();
-      // await paymenteInfo();
-      // await updateProcedure();
-      toast.success("tramite actualizado correctamente");
+      const generalInfoValues = generalInfoForm.getValues();
+      const billingInfoValues = billingForm.getValues();
+
+      await updateFamilyGroup({
+        id: props.family_group.id,
+        businessUnit: generalInfoValues.bussinessUnit,
+        validity: generalInfoValues.validity,
+        plan: generalInfoValues.plan,
+        modo: generalInfoValues.mode,
+        receipt: generalInfoValues.receipt,
+        bonus: generalInfoValues.bonus,
+      });
+
+      await updateProcedure({
+        id: props.procedure.id,
+        type: props.procedure.type ?? "",
+        estado: "updated",
+      });
+
+      for (const member of membersData) {
+        if (member.id) {
+          await updateIntegrant({
+            postal_codeId: "",
+            affiliate_type: member.affiliate_type,
+            relationship: member.relationship,
+            name: member.name,
+            id_type: member.id_type,
+            id_number: member.id_number,
+            birth_date: member.birth_date,
+            gender: gender ?? null,
+            civil_status: status,
+            nationality: member.nationality,
+            afip_status: member.afip_status,
+            fiscal_id_type: member.fiscal_id_type,
+            fiscal_id_number: member.fiscal_id_number,
+            address: member.address,
+            address_number: member.address_number,
+            phone_number: member.phone_number,
+            cellphone_number: member.cellphone_number,
+            email: member.mail,
+            floor: member.floor,
+            department: member.depto,
+            locality: member.localidad,
+            partido: member.county,
+            state: member.state,
+            cp: member.cp,
+            zone: member.zone,
+            isAffiliate: member.isAffiliate,
+            iva: member.iva,
+            family_group_id: family_groupId,
+            isHolder: member.isHolder,
+            isPaymentHolder: member.isPaymentResponsible,
+            isBillResponsiblee: member.isBillResponsible,
+            family_group_id: props.family_group.id,
+          });
+        } else {
+          await createIntegrant({
+            ...member,
+            family_group_id: props.family_group.id,
+          });
+        }
+      }
+
+      await updatePaymentInfo({
+        paymentInfoId: props.payment_info.id,
+        card_number: billingInfoValues.card_number,
+        expire_date: billingInfoValues.card_expiration_date ?? null,
+        CCV: billingInfoValues.card_security_code,
+        CBU: billingInfoValues.cbu,
+      });
+
+      toast.success("Tramite actualizado correctamente");
     } catch (e) {
       const error = asTRPCError(e)!;
       toast.error(error.message);
     }
   };
 
+  useEffect(() => {
+    setMembersData(
+      props.integrants.map((integrant) => ({
+        ...integrant,
+        id: integrant.id, // Ensure the ID is set for existing integrants
+        depto: integrant.department,
+        localidad: integrant.locality,
+        county: integrant.partido,
+        mail: integrant.email,
+        isAffiliate: integrant.isAffiliate,
+        isHolder: integrant.isHolder,
+        isPaymentResponsible: integrant.isPaymentHolder,
+        address_number: integrant.address,
+        iva: integrant.iva,
+        affiliate_type: integrant.affiliate_type ?? "",
+      }))
+    );
+  }, [props.integrants]);
+
   return (
     <LayoutContainer>
       <section className="space-y-2">
         <div className="flex justify-between">
           <Title> {props.procedure.type}</Title>
-          <Button disabled={isLoading} onClick={handleChange}>
-            {isLoading ? (
+          <Button disabled={isLoadingProcedure} onClick={handleChange}>
+            {isLoadingProcedure ? (
               <Loader2 className="mr-2 animate-spin" />
             ) : (
               <CheckIcon className="mr-2" />
@@ -109,7 +186,7 @@ export default function ProcedurePage(props: ProcedurePageProps) {
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="item-2">
             <AccordionTrigger>
-              <h2 className="text-md">Info. de del tramite</h2>
+              <h2 className="text-md">Info. del tramite</h2>
             </AccordionTrigger>
             <AccordionContent>
               <Card className="p-5">
@@ -125,11 +202,7 @@ export default function ProcedurePage(props: ProcedurePageProps) {
                       </TabsTrigger>
                     </TabsList>
                     <TabsContent value="general_info">
-                      <GeneralInfoForm
-                        // setfamily_group={setfamily_groupData}
-                        // setProcedureId={setProcedureData}
-                        form={generalInfoForm}
-                      />
+                      <GeneralInfoForm form={generalInfoForm} />
                     </TabsContent>
                     <TabsContent value="members">
                       <div className="flex w-full flex-col gap-2">
@@ -145,11 +218,7 @@ export default function ProcedurePage(props: ProcedurePageProps) {
                     </TabsContent>
                     <TabsContent value="billing">
                       <div>
-                        <BillingInfo
-                          form={billingForm}
-                          // setBillingData={setBillingData}
-                          data={membersData}
-                        />
+                        <BillingInfo form={billingForm} data={membersData} />
                       </div>
                     </TabsContent>
                   </Tabs>
@@ -170,9 +239,3 @@ export default function ProcedurePage(props: ProcedurePageProps) {
     </LayoutContainer>
   );
 }
-
-//pregunta desde este pagina se puede ver los tramite precargados o cargados?? onda
-// en principio se puede todos los tramits
-// pero:
-// al guardar los cambios hay un cambio de estado?? a cargado por ej. pero en caso de que ya este cargado, no cambia
-// el estado?. Por otra parte, es preferible un acordion o no ?

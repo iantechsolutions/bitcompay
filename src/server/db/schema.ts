@@ -411,6 +411,7 @@ export const providers = pgTable(
     }),
     nationality: varchar("nationality", { length: 255 }),
     address: varchar("address", { length: 255 }),
+    address_number: varchar("address_number", { length: 255 }),
     phone_number: varchar("phone_number", { length: 255 }),
     cellphone_number: varchar("cellphone_number", { length: 255 }),
     email: varchar("email", { length: 255 }),
@@ -538,6 +539,7 @@ export const abonosRelations = relations(abonos, ({ one }) => ({
 
 export const integrants = pgTable("integrant", {
   id: columnId,
+  iva: varchar("iva", { length: 255 }),
   affiliate_type: varchar("affiliate_type", { length: 255 }),
   relationship: varchar("relationship", { length: 255 }),
   name: varchar("name", { length: 255 }),
@@ -615,6 +617,8 @@ export const integrantSchemaDB = insertintegrantSchema.pick({
   birth_date: true,
   gender: true,
   civil_status: true,
+  iva: true,
+  address_number: true,
   nationality: true,
   afip_status: true,
   fiscal_id_type: true,
