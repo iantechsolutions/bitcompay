@@ -174,7 +174,7 @@ export const uploadsRouter = createTRPCRouter({
                 )
               );
 
-            const payments = await tx.query.payments.findMany({
+            const payment = await tx.query.payments.findFirst({
               where: and(
                 eq(schema.payments.payment_channel, input.channelId),
                 eq(schema.payments.g_c, input.brandId),
@@ -193,42 +193,48 @@ export const uploadsRouter = createTRPCRouter({
                 },
               },
             });
-
-            payments.forEach(async (payment) => {
-              if (payment.factura) {
-                if (payment.factura.family_group) {
-                  tx.update(schema.family_groups)
-                    .set({
-                      payment_status: "paid",
-                    })
-                    .where(
-                      eq(
-                        schema.family_groups.id,
-                        payment.factura.family_group.id
-                      )
-                    );
-                  const cc = await tx.query.currentAccount.findFirst({
-                    where: eq(
-                      schema.currentAccount.id,
-                      payment.factura.family_group.cc[0]?.id ?? ""
-                    ),
-                    with: {
-                      events: true,
-                    },
-                  });
-
-                  if (cc?.events && cc?.events?.length > 0) {
-                    const lastEvent = cc?.events[cc.events.length - 1];
-                    tx.insert(schema.events).values({
-                      description: "Pago de factura",
-                      type: "FC", 
-                      current_account_id: cc.id,
-                      event_amount: 
-                    })
-                  }
-                }
+            const recordAmount =
+              record.collected_amount ?? record.first_due_amount;
+            if (payment?.factura && payment.factura.family_group) {
+              if (payment?.factura.importe == recordAmount) {
+                tx.update(schema.family_groups)
+                  .set({
+                    payment_status: "paid",
+                  })
+                  .where(
+                    eq(schema.family_groups.id, payment.factura.family_group.id)
+                  );
+              } else {
+                tx.update(schema.family_groups)
+                  .set({
+                    payment_status: "partial",
+                  })
+                  .where(
+                    eq(schema.family_groups.id, payment.factura.family_group.id)
+                  );
               }
-            });
+              const cc = await tx.query.currentAccount.findFirst({
+                where: eq(
+                  schema.currentAccount.family_group,
+                  payment.factura.family_group.cc[0]?.id ?? ""
+                ),
+                with: {
+                  events: true,
+                },
+              });
+
+              if (cc?.events && cc?.events?.length > 0) {
+                const lastEvent = cc?.events[cc.events.length - 1];
+                tx.insert(schema.events).values({
+                  description: "Pago de factura",
+                  type: "REC",
+                  currentAccount_id: cc.id,
+                  event_amount: payment.factura.importe,
+                  current_amount:
+                    (lastEvent?.current_amount ?? 0) + payment.factura.importe,
+                });
+              }
+            }
           })
         );
       });
