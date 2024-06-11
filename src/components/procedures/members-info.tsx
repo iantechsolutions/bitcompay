@@ -50,6 +50,7 @@ dayjs.extend(utc);
 dayjs.locale("es");
 
 export type InputsMembers = {
+  id: string;
   iva: string;
   affiliate_type: string;
   relationship: string;
@@ -204,7 +205,7 @@ export default function AddMembers(props: AddMembersProps) {
                             variant={"outline"}
                             className={cn(
                               "w-[240px] pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground",
+                              !field.value && "text-muted-foreground"
                             )}
                           >
                             <p>

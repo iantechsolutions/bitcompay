@@ -93,6 +93,7 @@ export default function AddProcedure() {
         fiscal_id_type: member.fiscal_id_type,
         fiscal_id_number: member.fiscal_id_number,
         address: member.address,
+        address_number: member.address_number,
         phone_number: member.phone_number,
         cellphone_number: member.cellphone_number,
         email: member.mail,
