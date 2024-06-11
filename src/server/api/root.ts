@@ -60,7 +60,7 @@ export const appRouter = createTRPCRouter({
   bonuses: bonusesRouter,
   administrative_audit: administrative_auditRouter,
   medical_audit: medical_auditRouter,
-  payment_info: paymentInfoRouter,
+  pa: paymentInfoRouter,
   abonos: abonosRouter,
   contributions: contributionsRouter,
   differentials: differentialsRouter,
@@ -74,4 +74,4 @@ export const appRouter = createTRPCRouter({
 });
 
 // export type definition of API
-export type AppRouter = typeof appRouter
+export type AppRouter = typeof appRouter;

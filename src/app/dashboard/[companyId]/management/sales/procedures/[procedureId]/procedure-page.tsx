@@ -35,7 +35,7 @@ interface ProcedurePageProps {
   procedure: Procedure;
   family_group: FamilyGroup;
   integrants: Integrant[];
-  payment_info: PaymentInfo;
+  pa: PaymentInfo;
 }
 
 export default function ProcedurePage(props: ProcedurePageProps) {
@@ -67,7 +67,7 @@ export default function ProcedurePage(props: ProcedurePageProps) {
   const { mutateAsync: createIntegrant, isLoading: isCreatingIntegrants } =
     api.integrants.create.useMutation();
   const { mutateAsync: updatePaymentInfo, isLoading: isLoadingPaymentInfo } =
-    api.payment_info.change.useMutation();
+    api.pa.change.useMutation();
 
   const handleChange = async () => {
     try {
@@ -185,7 +185,7 @@ export default function ProcedurePage(props: ProcedurePageProps) {
       }
 
       await updatePaymentInfo({
-        paymentInfoId: props.payment_info.id,
+        paymentInfoId: props.pa.id,
         card_number: billingInfoValues.card_number,
         expire_date: billingInfoValues.card_expiration_date ?? null,
         CCV: billingInfoValues.card_security_code,
