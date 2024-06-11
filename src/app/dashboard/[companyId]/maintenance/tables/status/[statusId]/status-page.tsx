@@ -81,6 +81,7 @@ export default function StatusPage({
                     <div className="col-span-2">
                       <Label htmlFor="code">Codigo</Label>
                       <Input
+                        disabled={true}
                         id="code"
                         value={code}
                         onChange={(e) => setCode(e.target.value)}
@@ -135,7 +136,7 @@ function DeleteStatus(props: { statusId: string }) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive" className="w-[160px]">
+        <Button variant="destructive" disabled={true} className="w-[160px]">
           Eliminar estado
         </Button>
       </AlertDialogTrigger>
