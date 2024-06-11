@@ -508,6 +508,7 @@ export const bussinessUnitsRelations = relations(
 export const healthInsurances = pgTable("health_insurances", {
   id: columnId,
   name: varchar("name", { length: 255 }).notNull(),
+  identificationNumber: varchar("identificationNumber", { length: 255 }),
 });
 
 export const clientStatuses = pgTable("client_statuses", {
