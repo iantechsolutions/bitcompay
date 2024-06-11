@@ -107,7 +107,7 @@ export default function BonusPage(props: BonusPageProps) {
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="item-1">
             <AccordionTrigger>
-              <h2 className="text-md">Info. del bono</h2>
+              <h2 className="text-md">Info. de la bonificacion</h2>
             </AccordionTrigger>
             <AccordionContent>
               <Card className="p-5">
@@ -231,7 +231,7 @@ export default function BonusPage(props: BonusPageProps) {
 
           <AccordionItem value="item-2" className="border-none">
             <AccordionTrigger>
-              <h2 className="text-md">Eliminar Bono</h2>
+              <h2 className="text-md">Eliminar bonificacion</h2>
             </AccordionTrigger>
             <AccordionContent>
               <div className="flex justify-end">
