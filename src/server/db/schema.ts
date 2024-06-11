@@ -133,7 +133,7 @@ export const payments = pgTable(
 
     statusId: varchar("status_id", { length: 255 }),
     outputFileId: varchar("output_file_id", { length: 255 }),
-    genChannels: json("gen_channels").$type<number[]>().notNull().default([]),
+    genChannels: json("gen_channels").$type<string[]>().notNull().default([]),
     createdAt,
     updatedAt,
     factura_id: varchar("factura_id", { length: 255 }).references(

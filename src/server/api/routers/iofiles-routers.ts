@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
-import { and, eq, inArray, isNull, desc } from "drizzle-orm";
+import { and, eq, inArray, isNull, desc, not } from "drizzle-orm";
 import { z } from "zod";
 import { type DBTX, db, schema } from "~/server/db";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
@@ -35,14 +35,17 @@ export const iofilesRouter = createTRPCRouter({
         const { brand, channel } = await getBrandAndChannel(db, input);
         // Productos del canal
         const productsNumbers = channel.products.map((p) => p.product.number);
-
+        // estado completado:
+        const genFileStatus = await db.query.paymentStatus.findFirst({
+          where: eq(schema.paymentStatus.code, "92"),
+        });
         // Pagos que no tienen archivo de salida que corresponden a la marca y los productos del canal
         const payments = await db.query.payments.findMany({
           where: and(
             eq(schema.payments.companyId, input.companyId),
             eq(schema.payments.g_c, brand.number),
-            inArray(schema.payments.product_number, productsNumbers), // Solo los productos de la marca y producto -> (los productos salen del canal)
-            isNull(schema.payments.outputFileId) // Si no tiene archivo de salida, es que no le generaron el archivo
+            inArray(schema.payments.product_number, productsNumbers),
+            not(eq(schema.payments.statusId, genFileStatus?.id!))
           ),
         });
 
@@ -75,31 +78,28 @@ export const iofilesRouter = createTRPCRouter({
         }
 
         // Subimos el archivo a Uploadthing
-        const uploaded = await utapi.uploadFiles(
-          new File([text], input.fileName, { type: "text/plain" })
-        );
+        // const uploaded = await utapi.uploadFiles(
+        //   new File([text], input.fileName, { type: "text/plain" })
+        // );
 
         // Guardamos el archivo en la base de datos
-        const id = createId();
+        // const id = createId();
 
-        await db.insert(schema.uploadedOutputFiles).values({
-          id,
-          brandId: brand.id,
-          channelId: channel.id,
-          companyId: input.companyId,
-          fileName: input.fileName,
-          fileSize: text.length,
-          fileUrl: uploaded.data!.url,
-          userId: ctx.session.user.id,
-        });
+        // await db.insert(schema.uploadedOutputFiles).values({
+        //   id,
+        //   brandId: brand.id,
+        //   channelId: channel.id,
+        //   companyId: input.companyId,
+        //   fileName: input.fileName,
+        //   fileSize: text.length,
+        //   fileUrl: uploaded.data!.url,
+        //   userId: ctx.session.user.id,
+        // });
 
         // Actualizamos los pagos con el archivo generado
         // si el archivo tiene todos sus archivos generados:
-        const genFileStatus = await db.query.paymentStatus.findFirst({
-          where: eq(schema.paymentStatus.code, "92"),
-        });
 
-        payments.forEach(async (payment) => {
+        for (const payment of payments) {
           const product = await db.query.products.findFirst({
             where: eq(schema.products.number, payment.product_number),
             with: {
@@ -107,7 +107,7 @@ export const iofilesRouter = createTRPCRouter({
                 with: {
                   channel: {
                     columns: {
-                      number: true,
+                      id: true,
                     },
                   },
                 },
@@ -116,24 +116,45 @@ export const iofilesRouter = createTRPCRouter({
           });
           console.log("product", product);
           const channelsList = product?.channels.map((c) => {
-            return c.channel.number;
+            return c.channel.id;
           });
 
           console.log("channelsList", channelsList);
           const processedPayment =
             channelsList?.every((item) => payment.genChannels.includes(item)) &&
             payment.genChannels.length === channelsList?.length;
-
+          console.log("processedPayment", processedPayment);
+          console.log(payment.id);
+          const newGenChannles = [...payment.genChannels, channel.id];
           if (!processedPayment) {
-            await db
-              .update(schema.payments)
-              .set({
-                statusId: genFileStatus?.id,
-                genChannels: [...payment.genChannels, channel.number],
-              })
-              .where(eq(schema.payments.id, payment.id));
+            console.log("updating gen Channels");
+            try {
+              if (payment.genChannels.length === channelsList?.length! - 1) {
+                await db
+                  .update(schema.payments)
+                  .set({
+                    genChannels: newGenChannles,
+                    statusId: genFileStatus?.id,
+                  })
+                  .where(eq(schema.payments.id, payment.id));
+              }
+              await db
+                .update(schema.payments)
+                .set({
+                  genChannels: newGenChannles,
+                })
+                .where(eq(schema.payments.id, payment.id));
+              console.log(
+                "gen channes updated",
+                // updated_payment,
+                "old: ",
+                payment.genChannels
+              );
+            } catch (e) {
+              console.log(e);
+            }
           }
-        });
+        }
 
         return text;
       });
