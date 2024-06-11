@@ -818,6 +818,7 @@ export const family_groupsRelations = relations(
     integrants: many(integrants),
     abonos: many(abonos),
     facturas: many(facturas),
+    cc: many(currentAccount),
   })
 );
 
@@ -1104,6 +1105,10 @@ export const currentAccountRelations = relations(
     company: one(companies, {
       fields: [currentAccount.company_id],
       references: [companies.id],
+    }),
+    family_groups: one(family_groups, {
+      fields: [currentAccount.family_group],
+      references: [family_groups.id],
     }),
     events: many(events),
   })
