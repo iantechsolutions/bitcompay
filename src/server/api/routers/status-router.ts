@@ -9,10 +9,10 @@ export const statusRouter = createTRPCRouter({
     return status;
   }),
   get: protectedProcedure
-    .input(z.object({ statusId: z.string() }))
+    .input(z.object({ statusCode: z.string() }))
     .query(async ({ input }) => {
       const status_found = await db.query.paymentStatus.findFirst({
-        where: eq(schema.paymentStatus.id, input.statusId),
+        where: eq(schema.paymentStatus.code, input.statusCode),
       });
       return status_found;
     }),

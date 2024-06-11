@@ -39,13 +39,17 @@ export const iofilesRouter = createTRPCRouter({
         const genFileStatus = await db.query.paymentStatus.findFirst({
           where: eq(schema.paymentStatus.code, "92"),
         });
+        const estadoposta = genFileStatus?.id;
         // Pagos que no tienen archivo de salida que corresponden a la marca y los productos del canal
+        const pp = await db.query.payments.findMany({});
+        for (const p of pp) {
+          console.log(p.statusId, p.statusId === estadoposta);
+        }
         const payments = await db.query.payments.findMany({
           where: and(
             eq(schema.payments.companyId, input.companyId),
             eq(schema.payments.g_c, brand.number),
-            inArray(schema.payments.product_number, productsNumbers),
-            not(eq(schema.payments.statusId, genFileStatus?.id!))
+            inArray(schema.payments.product_number, productsNumbers)
           ),
         });
 
@@ -125,8 +129,12 @@ export const iofilesRouter = createTRPCRouter({
             payment.genChannels.length === channelsList?.length;
           console.log("processedPayment", processedPayment);
           console.log(payment.id);
-          const newGenChannles = [...payment.genChannels, channel.id];
-          if (!processedPayment) {
+
+          if (
+            !processedPayment &&
+            !payment.genChannels.includes(channel?.id!)
+          ) {
+            const newGenChannles = [...payment.genChannels, channel.id];
             console.log("updating gen Channels");
             try {
               if (payment.genChannels.length === channelsList?.length! - 1) {
@@ -137,19 +145,20 @@ export const iofilesRouter = createTRPCRouter({
                     statusId: genFileStatus?.id,
                   })
                   .where(eq(schema.payments.id, payment.id));
+              } else {
+                await db
+                  .update(schema.payments)
+                  .set({
+                    genChannels: newGenChannles,
+                  })
+                  .where(eq(schema.payments.id, payment.id));
+                console.log(
+                  "gen channes updated",
+                  // updated_payment,
+                  "old: ",
+                  payment.genChannels
+                );
               }
-              await db
-                .update(schema.payments)
-                .set({
-                  genChannels: newGenChannles,
-                })
-                .where(eq(schema.payments.id, payment.id));
-              console.log(
-                "gen channes updated",
-                // updated_payment,
-                "old: ",
-                payment.genChannels
-              );
             } catch (e) {
               console.log(e);
             }
@@ -211,7 +220,10 @@ function generateDebitoDirecto(
     let collected_amount;
     if (transaction.collected_amount) {
       collected_amount = transaction.collected_amount?.toString();
-    } else if (transaction.first_due_amount) {
+    } else if (
+      transaction.first_due_amount ||
+      transaction.first_due_amount === 0
+    ) {
       collected_amount = transaction.first_due_amount?.toString();
     } else {
       throw new TRPCError({
