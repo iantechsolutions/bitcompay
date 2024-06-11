@@ -737,6 +737,7 @@ export const facturasRelations = relations(facturas, ({ one, many }) => ({
     fields: [facturas.liquidation_id],
     references: [liquidations.id],
   }),
+  payments: many(payments),
   family_group: one(family_groups, {
     fields: [facturas.family_group_id],
     references: [family_groups.id],
