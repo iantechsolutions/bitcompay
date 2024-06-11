@@ -17,7 +17,7 @@ export default async function Home(props: Props) {
     <LayoutContainer>
       <section className="space-y-2">
         <div className="flex justify-between">
-          <Title>Bonos</Title>
+          <Title>Bonificaciones</Title>
           <AddBonusDialog />
         </div>
         <List>
