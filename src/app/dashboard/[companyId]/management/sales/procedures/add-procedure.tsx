@@ -31,7 +31,7 @@ export default function AddProcedure() {
   const { mutateAsync: createfamily_group } =
     api.family_groups.create.useMutation();
   const { mutateAsync: createPaymentInfo } =
-    api.payment_info.create.useMutation();
+    api.pa.create.useMutation();
   const [membersData, setMembersData] = useState<InputsMembers[]>([]);
 
   const generalInfoForm = useForm<InputsGeneralInfo>();

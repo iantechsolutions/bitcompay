@@ -24,17 +24,17 @@ export default async function Home(props: { params: { procedureId: string } }) {
     throw new Error("No se encontraron integrantes");
   }
   const paymentHolder = integrants.filter(
-    (integrant) => integrant.isPaymentHolder,
+    (integrant) => integrant.isPaymentHolder
   )![0];
-  const payment_info = await api.payment_info.getByIntegrant.query({
+  const pa = await api.pa.getByIntegrant.query({
     integrantId: paymentHolder!.id,
   });
-  if (!payment_info) {
+  if (!pa) {
     throw new Error("No se encontro la informacion de pago");
   }
   return (
     <ProcedurePage
-      payment_info={payment_info}
+      pa={pa}
       integrants={integrants}
       procedure={procedure}
       family_group={family_group}

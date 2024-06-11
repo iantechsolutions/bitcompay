@@ -133,10 +133,7 @@ export const payments = pgTable(
 
     statusId: varchar("status_id", { length: 255 }),
     outputFileId: varchar("output_file_id", { length: 255 }),
-    genChannels: json("gen_channels")
-      .$type<number[]>()
-      .notNull()
-      .default([]),
+    genChannels: json("gen_channels").$type<number[]>().notNull().default([]),
     createdAt,
     updatedAt,
     factura_id: varchar("factura_id", { length: 255 }).references(
@@ -945,7 +942,7 @@ export type Administrative_audit = z.infer<
   typeof selectadministrative_auditSchema
 >;
 
-export const pa = pgTable("payment_info", {
+export const pa = pgTable("pa", {
   id: columnId,
   card_number: varchar("card_number", { length: 255 }),
   expire_date: timestamp("expire_date", { mode: "date" }),
