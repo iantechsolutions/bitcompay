@@ -16,7 +16,7 @@ export default async function Page() {
         transaction.statusId = "ARCHIVO GENERADO";
       }
       return transaction;
-    }),
+    })
   );
 
   return (

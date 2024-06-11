@@ -213,7 +213,7 @@ async function preparateFactura(
     const randomNumber = Math.floor(Math.random() * (100000 - 1000 + 1)) + 1000;
     const status = await db.query.paymentStatus.findFirst({
       where: eq(schema.paymentStatus.code, "91"),
-    })
+    });
     console.log("numero", producto?.number);
     const payment = await db
       .insert(schema.payments)
