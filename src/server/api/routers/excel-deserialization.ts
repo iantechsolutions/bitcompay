@@ -213,7 +213,13 @@ export const excelDeserializationRouter = createTRPCRouter({
               card_brand: row.card_brand!,
               new_registration: row.is_new!,
               integrant_id: new_integrant[0]!.id,
-              product: product?.id,
+              product_id: product!.id!,
+              // card_number: row.card_number!,
+              // CBU: row.cbu_number!,
+              // card_brand: row.card_brand!,
+              // new_registration: row.is_new!,
+              // integrant_id: new_integrant[0]!.id,
+              // product: product?.id,
             });
           }
           const employeeContribution = parseFloat(row.contribution!);
