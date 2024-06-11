@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import * as xlsx from "xlsx";
 import { z } from "zod";
 import { createId } from "~/lib/utils";
@@ -137,6 +137,9 @@ export const uploadsRouter = createTRPCRouter({
     .input(
       z.object({
         uploadId: z.string(),
+        brandId: z.number(),
+        channelId: z.string(),
+        companyId: z.string(),
       })
     )
     .mutation(async ({ input }) => {
@@ -155,15 +158,77 @@ export const uploadsRouter = createTRPCRouter({
             confirmedAt: new Date(),
           })
           .where(eq(schema.responseDocumentUploads.id, input.uploadId));
-
+        // TODO:
         await Promise.all(
           records.map(async (record) => {
             const invoiceNumber = record.invoice_number || 0;
-
             await tx
               .update(schema.payments)
               .set({ statusId: record.statusId })
-              .where(eq(schema.payments.invoice_number, invoiceNumber));
+              .where(
+                and(
+                  eq(schema.payments.payment_channel, input.channelId),
+                  eq(schema.payments.g_c, input.brandId),
+                  eq(schema.payments.companyId, input.companyId),
+                  eq(schema.payments.invoice_number, invoiceNumber)
+                )
+              );
+
+            const payments = await tx.query.payments.findMany({
+              where: and(
+                eq(schema.payments.payment_channel, input.channelId),
+                eq(schema.payments.g_c, input.brandId),
+                eq(schema.payments.companyId, input.companyId),
+                eq(schema.payments.invoice_number, invoiceNumber)
+              ),
+              with: {
+                factura: {
+                  with: {
+                    family_group: {
+                      with: {
+                        cc: true,
+                      },
+                    },
+                  },
+                },
+              },
+            });
+
+            payments.forEach(async (payment) => {
+              if (payment.factura) {
+                if (payment.factura.family_group) {
+                  tx.update(schema.family_groups)
+                    .set({
+                      payment_status: "paid",
+                    })
+                    .where(
+                      eq(
+                        schema.family_groups.id,
+                        payment.factura.family_group.id
+                      )
+                    );
+                  const cc = await tx.query.currentAccount.findFirst({
+                    where: eq(
+                      schema.currentAccount.id,
+                      payment.factura.family_group.cc[0]?.id ?? ""
+                    ),
+                    with: {
+                      events: true,
+                    },
+                  });
+
+                  if (cc?.events && cc?.events?.length > 0) {
+                    const lastEvent = cc?.events[cc.events.length - 1];
+                    tx.insert(schema.events).values({
+                      description: "Pago de factura",
+                      type: "FC", 
+                      current_account_id: cc.id,
+                      event_amount: 
+                    })
+                  }
+                }
+              }
+            });
           })
         );
       });
