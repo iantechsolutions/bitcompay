@@ -273,7 +273,9 @@ export const uploadsRouter = createTRPCRouter({
             })
             .where(eq(schema.documentUploads.id, input.id));
 
-          // arreglar esto, row tiene campos que no van a payments parece o se llaman distinto
+          const defaultStatus = await tx.query.paymentStatus.findFirst({
+            where: eq(schema.paymentStatus.code, "91"),
+          });
           await tx.insert(schema.payments).values(
             rows.map((row) => ({
               id: createId(),
@@ -298,7 +300,7 @@ export const uploadsRouter = createTRPCRouter({
               payment_date: row.payment_date ?? null,
               collected_amount: row.collected_amount ?? null,
               cbu: row.cbu ?? null,
-              statusId: "91",
+              statusId: defaultStatus?.description!,
             }))
           );
         }

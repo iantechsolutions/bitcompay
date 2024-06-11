@@ -108,7 +108,6 @@ export const payments = pgTable(
     du_type: varchar("du_type", { length: 255 }),
     du_number: bigint("du_number", { mode: "number" }),
     product: varchar("product", { length: 255 }),
-    //
     product_number: integer("product_number")
       .notNull()
       .default(0)
@@ -134,7 +133,10 @@ export const payments = pgTable(
 
     statusId: varchar("status_id", { length: 255 }),
     outputFileId: varchar("output_file_id", { length: 255 }),
-
+    genChannels: json("required_columns")
+      .$type<number[]>()
+      .notNull()
+      .default([]),
     createdAt,
     updatedAt,
     factura_id: varchar("factura_id", { length: 255 }).references(

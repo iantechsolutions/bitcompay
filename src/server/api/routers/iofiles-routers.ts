@@ -35,90 +35,6 @@ export const iofilesRouter = createTRPCRouter({
         const { brand, channel } = await getBrandAndChannel(db, input);
         // Productos del canal
         const productsNumbers = channel.products.map((p) => p.product.number);
-        console.log("productsNumbers", productsNumbers);
-        // insertamos payments de la carga masiva
-        const business_units = await db.query.bussinessUnits.findMany({
-          where: and(
-            eq(schema.bussinessUnits.companyId, input.companyId),
-            eq(schema.bussinessUnits.brandId, input.brandId)
-          ),
-          with: {
-            brand: true,
-            ls: {
-              with: {
-                facturas: {
-                  orderBy: (facturas, { desc }) => [desc(facturas.due_date)],
-                  columns: {
-                    id: true,
-                    nroFactura: true,
-                    due_date: true,
-                    importe: true,
-                  },
-                  with: {
-                    payments: true,
-                    family_group: {
-                      columns: {
-                        id: true,
-                      },
-                      with: {
-                        integrants: {
-                          where: eq(schema.integrants.isBillResponsible, true),
-                          with: {
-                            pa: {
-                              with: {
-                                product: true,
-                              },
-                            },
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        });
-        console.log("business_units", business_units);
-        const massiveGenPayments = business_units?.flatMap((bu) => {
-          const family_group_map = new Map();
-          return bu?.ls?.flatMap((l) =>
-            l.facturas.flatMap((f) => {
-              // Si la factura ya tiene un pago, no lo generamos
-              if (f.payments && f.payments.length > 0) {
-                return [];
-              }
-
-              if (family_group_map.has(f.family_group?.id)) {
-                return [];
-              }
-              family_group_map.set(f.family_group?.id, true);
-
-              return (f.family_group?.integrants || []).map((i) => ({
-                userId: ctx.session.user.id,
-                g_c: bu.brand.number!,
-                name: i.name!,
-                documentUploadId: "0AspRyw8g4jgDAuNGAeBX",
-                fiscal_id_type: i.id_type!,
-                fiscal_id_number: Number(i.fiscal_id_number!),
-                du_type: i.id_type!,
-                du_number: Number(i.id_number!),
-                // product_number: i?.payment_info[0]?.product?.number!,
-                product_number: 3,
-                invoice_number: f.nroFactura!,
-                period: f.due_date!,
-                first_due_amount: f.importe!,
-                first_due_date: f.due_date!,
-                payment_channel: input.channelId,
-                companyId: input.companyId,
-                cbu: i.pa[0]?.CBU!,
-                factura_id: f.id,
-              }));
-            })
-          );
-        });
-        console.log("massiveGenPayments", massiveGenPayments);
-        await db.insert(schema.payments).values(massiveGenPayments);
 
         // Pagos que no tienen archivo de salida que corresponden a la marca y los productos del canal
         const payments = await db.query.payments.findMany({
@@ -132,7 +48,6 @@ export const iofilesRouter = createTRPCRouter({
 
         console.log("payments: ", payments);
 
-        console.log("generacion masiva :", massiveGenPayments);
         let text: string;
 
         const generateInput = {
@@ -179,8 +94,45 @@ export const iofilesRouter = createTRPCRouter({
         });
 
         // Actualizamos los pagos con el archivo generado
-        await db.update(schema.payments).set({
-          outputFileId: id,
+        // si el archivo tiene todos sus archivos generados:
+        const genFileStatus = await db.query.paymentStatus.findFirst({
+          where: eq(schema.paymentStatus.code, "92"),
+        });
+
+        payments.forEach(async (payment) => {
+          const product = await db.query.products.findFirst({
+            where: eq(schema.products.number, payment.product_number),
+            with: {
+              channels: {
+                with: {
+                  channel: {
+                    columns: {
+                      number: true,
+                    },
+                  },
+                },
+              },
+            },
+          });
+          console.log("product", product);
+          const channelsList = product?.channels.map((c) => {
+            return c.channel.number;
+          });
+
+          console.log("channelsList", channelsList);
+          const processedPayment =
+            channelsList?.every((item) => payment.genChannels.includes(item)) &&
+            payment.genChannels.length === channelsList?.length;
+
+          if (!processedPayment) {
+            await db
+              .update(schema.payments)
+              .set({
+                statusId: genFileStatus?.id,
+                genChannels: [...payment.genChannels, channel.number],
+              })
+              .where(eq(schema.payments.id, payment.id));
+          }
         });
 
         return text;
