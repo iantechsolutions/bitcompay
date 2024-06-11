@@ -26,7 +26,7 @@ export default async function Home(props: Props) {
               <ListTile
                 key={bonus.id}
                 title={bonus.reason}
-                href={`/dashboard/${props.params.companyId}/administration/bonuses/${bonus.id}`}
+                href={`/dashboard/${props.params.companyId}/management/sales/bonuses/${bonus.id}`}
               />
             );
           })}
