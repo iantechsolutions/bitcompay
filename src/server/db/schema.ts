@@ -143,9 +143,9 @@ export const payments = pgTable(
   },
   (payments) => ({
     userIdIdx: index("payment_userId_idx").on(payments.userId),
-    documentUploadIdIdx: index("documentUploadId_idx").on(
-      payments.documentUploadId
-    ),
+    // documentUploadIdIdx: index("documentUploadId_idx").on(
+    //   payments.documentUploadId
+    // ),
     invoiceNumberIdx: index("invoiceNumber_idx").on(payments.invoice_number),
   })
 );
@@ -500,7 +500,7 @@ export const bussinessUnitsRelations = relations(
       references: [companies.id],
     }),
     plans: many(plans),
-    liquidations: many(liquidations),
+    ls: many(liquidations),
   })
 );
 
@@ -601,7 +601,7 @@ export const integrantsRelations = relations(integrants, ({ one, many }) => ({
     fields: [integrants.originating_health_insuranceId],
     references: [healthInsurances.id],
   }),
-  payment_info: many(payment_info),
+  pa: many(pa),
   contributions: many(contributions),
   differentialsValues: many(differentialsValues),
 }));
@@ -942,7 +942,7 @@ export type Administrative_audit = z.infer<
   typeof selectadministrative_auditSchema
 >;
 
-export const payment_info = pgTable("payment_info", {
+export const pa = pgTable("payment_info", {
   id: columnId,
   card_number: varchar("card_number", { length: 255 }),
   expire_date: timestamp("expire_date", { mode: "date" }),
@@ -953,19 +953,19 @@ export const payment_info = pgTable("payment_info", {
   integrant_id: varchar("integrant_id", { length: 255 }).references(
     () => integrants.id
   ),
-  product: varchar("product", { length: 255 }),
+  product_id: varchar("product", { length: 255 }),
 });
 
-export const selectPaymentInfo = createSelectSchema(payment_info);
+export const selectPaymentInfo = createSelectSchema(pa);
 export type PaymentInfo = z.infer<typeof selectPaymentInfo>;
 
-export const payment_infoRelations = relations(payment_info, ({ one }) => ({
+export const paRelations = relations(pa, ({ one }) => ({
   integrant: one(integrants, {
-    fields: [payment_info.integrant_id],
+    fields: [pa.integrant_id],
     references: [integrants.id],
   }),
   product: one(products, {
-    fields: [payment_info.product],
+    fields: [pa.product_id],
     references: [products.id],
   }),
 }));
