@@ -44,7 +44,7 @@ export const iofilesRouter = createTRPCRouter({
           ),
           with: {
             brand: true,
-            liquidations: {
+            ls: {
               with: {
                 facturas: {
                   orderBy: (facturas, { desc }) => [desc(facturas.due_date)],
@@ -55,6 +55,7 @@ export const iofilesRouter = createTRPCRouter({
                     importe: true,
                   },
                   with: {
+                    payments: true,
                     family_group: {
                       columns: {
                         id: true,
@@ -63,7 +64,7 @@ export const iofilesRouter = createTRPCRouter({
                         integrants: {
                           where: eq(schema.integrants.isBillResponsible, true),
                           with: {
-                            payment_info: {
+                            pa: {
                               with: {
                                 product: true,
                               },
@@ -81,14 +82,13 @@ export const iofilesRouter = createTRPCRouter({
         console.log("business_units", business_units);
         const massiveGenPayments = business_units?.flatMap((bu) => {
           const family_group_map = new Map();
-          return bu?.liquidations?.flatMap((l) =>
-            l.facturas.flatMap(async (f) => {
-              const payment_found = await db.query.payments.findFirst({
-                where: eq(schema.payments.factura_id, f.id!),
-              });
-              if (payment_found) {
+          return bu?.ls?.flatMap((l) =>
+            l.facturas.flatMap((f) => {
+              // Si la factura ya tiene un pago, no lo generamos
+              if (f.payments && f.payments.length > 0) {
                 return [];
               }
+
               if (family_group_map.has(f.family_group?.id)) {
                 return [];
               }
@@ -98,26 +98,27 @@ export const iofilesRouter = createTRPCRouter({
                 userId: ctx.session.user.id,
                 g_c: bu.brand.number!,
                 name: i.name!,
+                documentUploadId: "0AspRyw8g4jgDAuNGAeBX",
                 fiscal_id_type: i.id_type!,
                 fiscal_id_number: Number(i.fiscal_id_number!),
                 du_type: i.id_type!,
                 du_number: Number(i.id_number!),
-                product_number: i?.payment_info[0]?.product?.number!,
+                // product_number: i?.payment_info[0]?.product?.number!,
+                product_number: 3,
                 invoice_number: f.nroFactura!,
                 period: f.due_date!,
                 first_due_amount: f.importe!,
                 first_due_date: f.due_date!,
                 payment_channel: input.channelId,
                 companyId: input.companyId,
-                cbu: i.payment_info[0]?.CBU!,
+                cbu: i.pa[0]?.CBU!,
                 factura_id: f.id,
               }));
             })
           );
         });
-
-        const result = await massiveGenPayments;
-        await db.insert(schema.payments).values(result);
+        console.log("massiveGenPayments", massiveGenPayments);
+        await db.insert(schema.payments).values(massiveGenPayments);
 
         // Pagos que no tienen archivo de salida que corresponden a la marca y los productos del canal
         const payments = await db.query.payments.findMany({
