@@ -91,8 +91,64 @@ export default function ProcedurePage(props: ProcedurePageProps) {
       });
 
       for (const member of membersData) {
+        let status: "SOLTERO" | "CASADO" | "DIVORCIADO" | "VIUDO" = "SOLTERO";
+        switch (member.civil_status) {
+          case "CASADO":
+          case "DIVORCIADO":
+          case "VIUDO":
+            status = member.civil_status;
+            break;
+          default:
+            status = "SOLTERO";
+            break;
+        }
+
+        let gender: "MASCULINO" | "FEMENINO" | "OTRO" = "OTRO";
+        switch (member.gender) {
+          case "MASCULINO":
+          case "FEMENINO":
+            gender = member.gender;
+            break;
+          default:
+            gender = "OTRO";
+            break;
+        }
         if (member.id) {
           await updateIntegrant({
+            id: member.id,
+            affiliate_type: member.affiliate_type,
+            relationship: member.relationship,
+            name: member.name,
+            id_type: member.id_type,
+            id_number: member.id_number,
+            birth_date: member.birth_date.toString(),
+            gender: gender ?? null,
+            civil_status: status,
+            nationality: member.nationality,
+            afip_status: member.afip_status,
+            fiscal_id_type: member.fiscal_id_type,
+            fiscal_id_number: member.fiscal_id_number,
+            address: member.address,
+            address_number: member.address_number,
+            phone_number: member.phone_number,
+            cellphone_number: member.cellphone_number,
+            email: member.mail,
+            floor: member.floor,
+            department: member.depto,
+            localidad: member.localidad,
+            partido: member.county,
+            provincia: member.state,
+            cp: member.cp,
+            zona: member.zone,
+            isAffiliate: member.isAffiliate,
+            iva: member.iva,
+            isHolder: member.isHolder,
+            isPaymentHolder: member.isPaymentResponsible,
+            isBillResponsible: member.isBillResponsible,
+            family_group_id: props.family_group.id,
+          });
+        } else {
+          await createIntegrant({
             postal_codeId: "",
             affiliate_type: member.affiliate_type,
             relationship: member.relationship,
@@ -120,16 +176,10 @@ export default function ProcedurePage(props: ProcedurePageProps) {
             zone: member.zone,
             isAffiliate: member.isAffiliate,
             iva: member.iva,
-            family_group_id: family_groupId,
+            family_group_id: props.family_group.id,
             isHolder: member.isHolder,
             isPaymentHolder: member.isPaymentResponsible,
             isBillResponsiblee: member.isBillResponsible,
-            family_group_id: props.family_group.id,
-          });
-        } else {
-          await createIntegrant({
-            ...member,
-            family_group_id: props.family_group.id,
           });
         }
       }
@@ -151,20 +201,68 @@ export default function ProcedurePage(props: ProcedurePageProps) {
 
   useEffect(() => {
     setMembersData(
-      props.integrants.map((integrant) => ({
-        ...integrant,
-        id: integrant.id, // Ensure the ID is set for existing integrants
-        depto: integrant.department,
-        localidad: integrant.locality,
-        county: integrant.partido,
-        mail: integrant.email,
-        isAffiliate: integrant.isAffiliate,
-        isHolder: integrant.isHolder,
-        isPaymentResponsible: integrant.isPaymentHolder,
-        address_number: integrant.address,
-        iva: integrant.iva,
-        affiliate_type: integrant.affiliate_type ?? "",
-      }))
+      props.integrants.map((integrant) => {
+        let status;
+        switch (integrant.civil_status) {
+          case "CASADO":
+          case "DIVORCIADO":
+          case "VIUDO":
+            status = integrant.civil_status;
+            break;
+          default:
+            status = "SOLTERO";
+            break;
+        }
+
+        let gender;
+        switch (integrant.gender) {
+          case "MASCULINO":
+          case "FEMENINO":
+            gender = integrant.gender;
+            break;
+          default:
+            gender = "OTRO";
+            break;
+        }
+
+        return {
+          id: integrant.id,
+          localidad: integrant.locality ?? "",
+          county: integrant.partido ?? "",
+          depto: integrant.department ?? "",
+          affiliate_type: integrant.affiliate_type ?? "",
+          relationship: integrant.relationship ?? "",
+          name: integrant.name ?? "",
+          id_type: integrant.id_type ?? "",
+          id_number: integrant.id_number ?? "",
+          birth_date: integrant.birth_date ? integrant.birth_date : new Date(),
+          gender: gender,
+          civil_status: status,
+          nationality: integrant.nationality ?? "",
+          afip_status: integrant.afip_status ?? "",
+          fiscal_id_type: integrant.fiscal_id_type ?? "",
+          fiscal_id_number: integrant.fiscal_id_number ?? "",
+          address: integrant.address ?? "",
+          address_number: integrant.address_number ?? "",
+          phone_number: integrant.phone_number ?? "",
+          cellphone_number: integrant.cellphone_number ?? "",
+          email: integrant.email ?? "",
+          floor: integrant.floor ?? "",
+          department: integrant.department ?? "",
+          locality: integrant.locality ?? "",
+          partido: integrant.partido ?? "",
+          state: integrant.state ?? "",
+          cp: integrant.cp ?? "",
+          zone: integrant.zone ?? "",
+          isAffiliate: integrant.isAffiliate ?? "",
+          iva: integrant.iva ?? "",
+          family_group_id: props.family_group.id ?? "",
+          isHolder: integrant.isHolder ?? "",
+          isBillResponsible: integrant.isBillResponsible ?? "",
+          mail: integrant.email ?? "",
+          isPaymentResponsible: integrant.isPaymentHolder ?? "",
+        };
+      })
     );
   }, [props.integrants]);
 
