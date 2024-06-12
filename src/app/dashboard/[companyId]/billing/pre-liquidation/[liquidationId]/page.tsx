@@ -194,7 +194,7 @@ export default async function Home(props: {
           </TableBody>
         </Table>
         <br />
-        <Button onClick={approveLiquidation}>Aprobar Liquidacion</Button>
+        {/* <Button onClick={approveLiquidation}>Aprobar Liquidacion</Button> */}
       </div>
     </LayoutContainer>
   );

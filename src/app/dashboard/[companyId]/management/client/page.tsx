@@ -5,7 +5,6 @@ export default async function Page() {
   const transactions = await api.transactions.list.query();
   const transactionsTable = await Promise.all(
     transactions.map(async (transaction) => {
-      console.log("statusid", transaction.statusId);
       if (transaction.statusId) {
         const payment_status = await api.status.getByDescripcion.query({
           statusDes: transaction.statusId,
