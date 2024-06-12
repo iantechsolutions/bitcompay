@@ -5,6 +5,7 @@ import utc from "dayjs/plugin/utc";
 import { useState } from "react";
 import { PlusCircleIcon, Loader2Icon } from "lucide-react";
 import { Button } from "~/components/ui/button";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -45,16 +46,18 @@ export default function AddPreLiquidation(props: { companyId: string }) {
   const { mutateAsync: createFacturas, isLoading } =
     api.facturas.createPreLiquidation.useMutation();
   // const { mutateAsync: createFacturas } = api.family_groups.createPreLiquidation.useMutation();
-  function handleCreate() {
-    console.log(marcas?.at(0));
+  async function handleCreate() {
     // const { data:grupos } = api.family_groups.getByBrand.useQuery({brandId: brandId});
-    createFacturas({
+    await createFacturas({
       pv: puntoVenta,
       brandId: brandId,
       dateDesde: fechaDesde,
       dateHasta: fechaHasta,
       dateDue: fechaVencimiento2,
+      companyId: props.companyId,
     });
+    toast.success("Pre-liquidacion creada correctamente");
+    setOpen(false);
   }
   return (
     <>

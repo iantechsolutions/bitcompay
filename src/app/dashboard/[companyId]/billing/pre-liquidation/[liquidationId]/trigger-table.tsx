@@ -29,7 +29,6 @@ export default function TriggerTable({
   const iva = Number(factura?.iva ?? 0) * subTotal;
 
   const billResponsible = factura?.family_group?.integrants[0];
-
   return (
     <TableRow
       className="rounded-lg bg-[#f0f0f0]
@@ -47,7 +46,7 @@ export default function TriggerTable({
             <CircleChevronRight className="bg-[#6cebd1] h-4 w-4 rounded-full" />
           )}
         </button>
-        {factura.nroFactura ?? "N/A"}
+        {factura?.family_group_id ?? "N/A"}
       </TableCell>
 
       <TableCell className="border border-[#6cebd1] p-2 py-4">
@@ -62,7 +61,7 @@ export default function TriggerTable({
       </TableCell>
       <TableCell className="border border-[#6cebd1] p-2 py-4">
         {" "}
-        saldo pagador{" "}
+        0
       </TableCell>
       <TableCell className="border border-[#6cebd1] p-2 py-4">
         {" "}
