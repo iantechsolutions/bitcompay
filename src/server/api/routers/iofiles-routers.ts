@@ -30,7 +30,8 @@ export const iofilesRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      return await db.transaction(async (db) => {
+      let text: string = "";
+      await db.transaction(async (db) => {
         // Obtenemos la marca y el canal
         const { brand, channel } = await getBrandAndChannel(db, input);
         // Productos del canal
@@ -41,10 +42,10 @@ export const iofilesRouter = createTRPCRouter({
         });
         const estadoposta = genFileStatus?.id;
         // Pagos que no tienen archivo de salida que corresponden a la marca y los productos del canal
-        const pp = await db.query.payments.findMany({});
-        for (const p of pp) {
-          console.log(p.statusId, p.statusId === estadoposta);
-        }
+        // const pp = await db.query.payments.findMany({});
+        // for (const p of pp) {
+        //   console.log(p.statusId, p.statusId === estadoposta);
+        // }
         const paymentsFull = await db.query.payments.findMany({
           where: and(
             eq(schema.payments.companyId, input.companyId),
@@ -55,8 +56,6 @@ export const iofilesRouter = createTRPCRouter({
         const payments = paymentsFull.filter(
           (p) => p.genChannels.includes(channel.id) === false
         );
-
-        let text: string;
 
         const generateInput = {
           channelId: channel.id,
@@ -165,9 +164,8 @@ export const iofilesRouter = createTRPCRouter({
             }
           }
         }
-
-        return text;
       });
+      return text;
     }),
   list: protectedProcedure
     .input(
