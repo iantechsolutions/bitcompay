@@ -168,7 +168,7 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
     fields: [payments.product_number],
     references: [products.number],
   }),
-  statusCode: one(paymentStatus, {
+  status: one(paymentStatus, {
     fields: [payments.statusId],
     references: [paymentStatus.id],
   }),
