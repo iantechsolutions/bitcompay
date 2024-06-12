@@ -63,7 +63,8 @@ export default function AddPreLiquidation(props: { companyId: string }) {
     console.log("liquidation", liquidation);
     if (liquidation) {
       toast.success("Pre-liquidacion creada correctamente");
-      router.push("./pre-liquidation/" + liquidation?.id);
+      router.refresh();
+      setOpen(false);
     } else {
       toast.error("Error al crear la pre-liquidacion");
     }
