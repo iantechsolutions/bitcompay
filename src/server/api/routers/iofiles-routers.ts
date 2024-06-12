@@ -45,7 +45,7 @@ export const iofilesRouter = createTRPCRouter({
         for (const p of pp) {
           console.log(p.statusId, p.statusId === estadoposta);
         }
-        const payments = await db.query.payments.findMany({
+        let payments = await db.query.payments.findMany({
           where: and(
             eq(schema.payments.companyId, input.companyId),
             eq(schema.payments.g_c, brand.number),
@@ -53,6 +53,9 @@ export const iofilesRouter = createTRPCRouter({
           ),
         });
 
+        payments = payments.filter(
+          (p) => !p.genChannels.includes(input.channelId)
+        );
         console.log("payments: ", payments);
 
         let text: string;
