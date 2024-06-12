@@ -56,8 +56,6 @@ export const iofilesRouter = createTRPCRouter({
           (p) => p.genChannels.includes(channel.id) === false
         );
 
-        console.log("payments: ", payments);
-
         let text: string;
 
         const generateInput = {
