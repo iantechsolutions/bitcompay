@@ -129,7 +129,13 @@ export default function GenerateChannelOutputPage(props: {
 
       <Dialog>
         <DialogTrigger asChild={true}>
-          <Button disabled={isLoading || disabled} size="lg" className="w-full">
+          <Button
+            disabled={
+              isLoading || disabled || props.status_batch[0]!.records === 0
+            }
+            size="lg"
+            className="w-full"
+          >
             {isLoading && <Loader2Icon className="mr-2 animate-spin" />}
             Generar Archivo
           </Button>
