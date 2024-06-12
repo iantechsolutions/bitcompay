@@ -1,32 +1,33 @@
 import { api } from "~/trpc/server";
-import { Title } from "~/components/title";
-import { List, ListTile } from "~/components/list";
-import LayoutContainer from "~/components/layout-container";
-import { CircleUserRound } from "lucide-react";
-import { AddClientDialog } from "./add-client-dialog";
+import TransactionsPage from "./transactions-page";
 
-export default async function Page(props: { params: { companyId: string } }) {
-  // const client = await api..list.query();
+export default async function Page() {
+  const transactions = await api.transactions.list.query();
+  const transactionsTable = await Promise.all(
+    transactions.map(async (transaction) => {
+      try {
+        if (transaction.statusId) {
+          const payment_status = await api.status.getByDescripcion.query({
+            statusDes: transaction.statusId,
+          });
+          transaction.statusId = payment_status!.description;
+        } else if (!transaction.outputFileId) {
+          transaction.statusId = "CARGADO";
+        } else if (transaction.outputFileId) {
+          transaction.statusId = "ARCHIVO GENERADO";
+        }
+      } catch (error) {
+        transaction.statusId = "CARGADO";
+      }
+      return transaction;
+    })
+  );
+
   return (
-    <LayoutContainer>
-      <section className="space-y-2">
-        <div className="flex justify-between">
-          <Title>Clientes</Title>
-          {/* <AddClientDialog /> */}
-        </div>
-        {/* <List>
-          {client.map((client) => {
-            return (
-              <ListTile
-                key={client.id}
-                // href={`/dashboard/audit/benefits/${procedureComplete.id}`}
-                leading={client.estado}
-                title={client.id}
-              />
-            );
-          })}
-        </List> */}
-      </section>
-    </LayoutContainer>
+    <div className="absolute bottom-0 left-0 right-0 top-0 h-[calc(100dvh_-_70px)]">
+      {transactionsTable && (
+        <TransactionsPage transactions={transactionsTable} />
+      )}
+    </div>
   );
 }

@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import { Loader2Icon, PlusCircleIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import dayjs from "dayjs";
@@ -53,24 +54,64 @@ import { Card } from "~/components/ui/card";
 import LayoutContainer from "~/components/layout-container";
 import { modos } from "~/server/db/schema";
 import { Title } from "~/components/title";
+import { Label } from "~/components/ui/label";
 dayjs.extend(utc);
 dayjs.locale("es");
 
 type Inputs = {
-    description: string
-}
+  description: string;
+};
 
 export default function ModoPage(props: {
-    modo: RouterOutputs['modos']['get']
+  modo: RouterOutputs["modos"]["get"];
 }) {
-    const _router = useRouter()
-    const _company = useCompanyData()
-    const _initialValues: Inputs = {
-        description: props.modo!.description!,
+  const router = useRouter();
+  const [description, setDescription] = useState(props.modo!.description!);
+
+  const { mutateAsync: updateModo, isLoading } = api.modos.change.useMutation();
+
+  const handleUpdate: SubmitHandler<Inputs> = async (data) => {
+    try {
+      await updateModo({
+        id: props.modo!.id,
+        description: data.description,
+      });
+
+      toast.success("Modo actualizado correctamente");
+      router.refresh();
+    } catch (e) {
+      const error = asTRPCError(e)!;
+      toast.error(error.message);
     }
-    return (
+  };
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<Inputs>({
+    defaultValues: { description },
+  });
+
+  return (
+    <div>
+      <h1 className=" m-3 text-lg">Actualizar Modo</h1>
+      <form onSubmit={handleSubmit(handleUpdate)} className="m-3">
         <div>
-            <h1>hola</h1>
+          <Label htmlFor="description">Descripción</Label>
+          <Input
+            id="description"
+            placeholder="..."
+            {...register("description", { required: true })}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+          {errors.description && <span>Este campo es requerido</span>}
         </div>
-    )
+        <Button type="submit" disabled={isLoading} className="m-3 ml-0">
+          {isLoading && <Loader2Icon className="mr-2 animate-spin" size={20} />}
+          Actualizar Modo
+        </Button>
+      </form>
+    </div>
+  );
 }

@@ -151,7 +151,7 @@ export default function AddPlanDialog() {
                 render={({ field }) => (
                   <FormItem className="flex flex-col ">
                     <FormLabel htmlFor="expiration_date">
-                      Fecha de vencimiento
+                      Fecha de vigencia
                     </FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
@@ -243,7 +243,7 @@ export default function AddPlanDialog() {
                             <FormLabel
                               htmlFor={`conditional_prices.${index}.isConditional`}
                             >
-                              Es condicional?
+                              ¿Rango de edad?
                             </FormLabel>
                             <br />
                             <FormControl>
@@ -251,17 +251,15 @@ export default function AddPlanDialog() {
                                 className="border-green-300 focus-visible:ring-green-400"
                                 id={`conditional_prices.${index}.isConditional`}
                                 checked={
-                                  initialValues.conditional_prices[index]
+                                  !initialValues.conditional_prices[index]
                                     ?.isConditional
                                 }
                                 onCheckedChange={(e) => {
                                   const updatedValues = [
                                     ...initialValues.conditional_prices,
                                   ];
-                                  updatedValues[index]!.isConditional =
-                                    e.valueOf().toString() === "true"
-                                      ? true
-                                      : false;
+                                  updatedValues[index]!.isConditional = !initialValues.conditional_prices[index]
+                                  ?.isConditional
                                   setInitialValues({
                                     ...initialValues,
                                     conditional_prices: updatedValues,
@@ -390,14 +388,14 @@ export default function AddPlanDialog() {
                       age_from: "",
                       age_to: "",
                       price: "",
-                      isConditional: true,
+                      isConditional: false,
                     });
                     initialValues.conditional_prices.push({
                       condition: "",
                       age_from: "",
                       age_to: "",
                       price: "",
-                      isConditional: true,
+                      isConditional: false,
                     });
                   }}
                 >

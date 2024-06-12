@@ -3,8 +3,9 @@ import dayjs from "dayjs";
 import "dayjs/locale/es";
 import utc from "dayjs/plugin/utc";
 import { useState } from "react";
-import { PlusCircleIcon } from "lucide-react";
+import { PlusCircleIcon, Loader2Icon } from "lucide-react";
 import { Button } from "~/components/ui/button";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -28,6 +29,8 @@ import { Calendar } from "~/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
 import { Label } from "~/components/ui/label";
 import { api } from "~/trpc/react";
+import { ComboboxDemo } from "~/components/ui/combobox";
+import { useRouter } from "next/navigation";
 
 export default function AddPreLiquidation(props: { companyId: string }) {
   const [open, setOpen] = useState(false);
@@ -35,23 +38,36 @@ export default function AddPreLiquidation(props: { companyId: string }) {
   const [fechaVencimiento2, setFechaVencimiento2] = useState<Date>();
   const [fechaDesde, setFechaDesde] = useState<Date>();
   const [fechaHasta, setFechaHasta] = useState<Date>();
+  const [puntoVenta, setPuntoVenta] = useState("");
   console.log(props);
   const { data: marcas } = api.brands.getbyCompany.useQuery({
     companyId: props.companyId,
   });
+  const router = useRouter();
+
   const [brandId, setBrandId] = useState("");
-  const { mutateAsync: createFacturas } =
+  const { mutateAsync: createLiquidation, isLoading } =
     api.facturas.createPreLiquidation.useMutation();
   // const { mutateAsync: createFacturas } = api.family_groups.createPreLiquidation.useMutation();
-  function handleCreate() {
-    console.log(marcas?.at(0));
+  async function handleCreate() {
     // const { data:grupos } = api.family_groups.getByBrand.useQuery({brandId: brandId});
-    createFacturas({
+    console.log("acaaaaaaaaaaa");
+    const liquidation = await createLiquidation({
+      pv: puntoVenta,
       brandId: brandId,
       dateDesde: fechaDesde,
       dateHasta: fechaHasta,
       dateDue: fechaVencimiento2,
+      companyId: props.companyId,
     });
+    console.log("liquidation", liquidation);
+    if (liquidation) {
+      toast.success("Pre-liquidacion creada correctamente");
+      router.refresh();
+      setOpen(false);
+    } else {
+      toast.error("Error al crear la pre-liquidacion");
+    }
   }
   return (
     <>
@@ -178,14 +194,13 @@ export default function AddPreLiquidation(props: { companyId: string }) {
                   mode="single"
                   selected={fechaDesde ? fechaDesde : undefined}
                   onSelect={(e) => setFechaDesde(e)}
-                  disabled={(date: Date) => date < new Date()}
                   initialFocus
                 />
               </PopoverContent>
             </Popover>
           </div>
           <div>
-            <Label>2da Fecha de vencimiento</Label>
+            <Label>Fecha fin de servicio</Label>
             <br />
             <Popover>
               <PopoverTrigger asChild>
@@ -211,17 +226,35 @@ export default function AddPreLiquidation(props: { companyId: string }) {
                   mode="single"
                   selected={fechaHasta ? fechaHasta : undefined}
                   onSelect={(e) => setFechaHasta(e)}
-                  disabled={(date: Date) => date < new Date()}
                   initialFocus
                 />
               </PopoverContent>
             </Popover>
           </div>
+          <div>
+            <Label htmlFor="name">Punto de venta a utilizar</Label>
+            <br />
+            <ComboboxDemo
+              title="Seleccionar PV..."
+              placeholder="_"
+              options={[
+                { value: "1", label: "1" },
+                { value: "2", label: "2" },
+              ]}
+              onSelectionChange={(e) => {
+                setPuntoVenta(e);
+              }}
+            />
+          </div>
           <Button
             className="mt-2"
             type="submit"
-            onClick={(e) => handleCreate()}
+            disabled={isLoading}
+            onClick={handleCreate}
           >
+            {isLoading && (
+              <Loader2Icon className="mr-2 animate-spin" size={20} />
+            )}
             Crear Pre-liquidacion
           </Button>
         </DialogContent>

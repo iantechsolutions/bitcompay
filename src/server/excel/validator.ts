@@ -438,7 +438,6 @@ export const recHeaders: TableHeaders = [
 export const requiredColumns = [
   { key: "business_unit", label: "UNIDAD DE NEGOCIO" },
   { key: "os", label: "OS" },
-  { key: "originating os", label: "OS ORIGEN" },
   { key: "validity", label: "VIGENCIA" },
   { key: "mode", label: "MODO" },
   { key: "bonus", label: "BONIFICACION" },

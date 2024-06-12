@@ -10,11 +10,29 @@ export const liquidationsRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const liquidation_found = await db.query.liquidations.findFirst({
         where: eq(schema.liquidations.id, input.id),
+        with: {
+          facturas: {
+            with: {
+              items: true,
+              family_group: {
+                with: {
+                  integrants: {
+                    where: eq(schema.integrants.isBillResponsible, true),
+                  },
+                  plan: true,
+                },
+              },
+            },
+          },
+          bussinessUnits: true,
+        },
       });
       return liquidation_found;
     }),
   list: protectedProcedure.query(async () => {
-    const liquidations = await db.query.liquidations.findMany();
+    const liquidations = await db.query.liquidations.findMany({
+      with: { bussinessUnits: true },
+    });
     return liquidations;
   }),
   create: protectedProcedure
@@ -23,13 +41,22 @@ export const liquidationsRouter = createTRPCRouter({
         userCreated: z.string(),
         userApproved: z.string(),
         estado: z.string(),
-      }),
+        razonSocial: z.string(),
+        periodo: z.date(),
+        cuit: z.string(),
+        pdv: z.number(),
+      })
     )
     .mutation(async ({ input }) => {
       const new_liquidation = await db.insert(schema.liquidations).values({
         userCreated: input.userCreated,
         userApproved: input.userApproved,
         estado: input.estado,
+        razon_social: input.razonSocial,
+        period: input.periodo,
+        cuit: input.cuit,
+        pdv: input.pdv,
+        number: 1,
       });
       return new_liquidation;
     }),
@@ -40,7 +67,11 @@ export const liquidationsRouter = createTRPCRouter({
         userCreated: z.string(),
         userApproved: z.string(),
         estado: z.string(),
-      }),
+        razonSocial: z.string(),
+        periodo: z.date(),
+        cuit: z.string(),
+        pdv: z.number(),
+      })
     )
     .mutation(async ({ input }) => {
       const liquidation_changed = await db
@@ -49,6 +80,11 @@ export const liquidationsRouter = createTRPCRouter({
           userCreated: input.userCreated,
           userApproved: input.userApproved,
           estado: input.estado,
+          razon_social: input.razonSocial,
+          period: input.periodo,
+          cuit: input.cuit,
+          pdv: input.pdv,
+          number: 1,
         })
         .where(eq(schema.liquidations.id, input.id));
       return liquidation_changed;

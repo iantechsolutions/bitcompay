@@ -61,9 +61,9 @@ const stringAsPeriod = z.string().transform((value) => {
   const first2 = value.substring(0, 2);
   if (Number.parseInt(first2) < 12) {
     const year = value.substring(2, 8);
-    return dayjs(`${year}${first2}`, "MMYYYY").toDate();
+    return dayjs(`${year}${first2}`, "YYYYMM").toDate();
   }
-  return dayjs(value, "MMYYYY").toDate();
+  return dayjs(value, "YYYYMM").toDate();
 });
 
 const cbuSchema = z

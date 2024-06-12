@@ -50,9 +50,6 @@ export const excelDeserializationRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input }) => {
-      console.log(
-        "escribiendo en tablas: integrantes,unidad de negocio,family group,differencial, codigo postal, payment_info  "
-      );
       const familyGroupMap = new Map<string | null, string>();
       const contents = await readExcelFile(db, input.uploadId, input.type);
       await db.transaction(async (db) => {
@@ -69,41 +66,52 @@ export const excelDeserializationRouter = createTRPCRouter({
             where: eq(schema.plans.plan_code, row.plan!),
           });
 
+          const health_insurance = await db.query.healthInsurances.findFirst({
+            where: eq(schema.healthInsurances.name, row.os!),
+          });
+
+          const health_insurance_origin =
+            await db.query.healthInsurances.findMany({
+              where: eq(schema.healthInsurances.name, row["originating os"]!),
+            });
+
           let familyGroupId = "";
           const existGroup = isKeyPresent(row.holder_id_number, familyGroupMap);
           if (!existGroup) {
+            console.log("creando bono");
             const bonus = await db
               .insert(schema.bonuses)
               .values({
                 amount: row.bonus,
                 appliedUser: " ", //a rellenar
                 approverUser: " ", //a rellenar
-                duration: "", //row["from bonus"]-row["to bonus"], cambiar schema a desde hasta
+                duration: "",
                 from: row["from bonus"],
                 to: row["to bonus"],
                 reason: "", //a rellenar
               })
               .returning();
 
+            console.log("creando tramite");
             const procedure = await db
               .insert(schema.procedure)
               .values({
-                type: "", //a rellenar
-                estado: "", //a rellenar
+                type: "alta",
+                estado: "finalizado",
               })
               .returning();
+            console.log("creando grupo familiar");
             const familygroup = await db
               .insert(schema.family_groups)
               .values({
                 businessUnit: business_unit?.id,
-                validity: row.validity, // viene del excel "vigencia"
+                validity: row.validity,
                 plan: plan?.id,
                 modo: mode?.id,
-                receipt: " ", //a rellenar
+                receipt: " ",
                 bonus: bonus[0]!.id,
-                state: "Cargado", //queremos agregar columna con estado?
+                state: "ACTIVO",
                 procedureId: procedure[0]!.id,
-                //payment_status default es pending
               })
               .returning();
             familyGroupMap.set(row.holder_id_number, familygroup[0]!.id);
@@ -113,29 +121,16 @@ export const excelDeserializationRouter = createTRPCRouter({
           }
 
           const postal_code = row["postal code"];
-          const check_postal_code = await db.query.postal_code.findMany({
+          const postal_code_schema = await db.query.postal_code.findFirst({
             where: eq(schema.postal_code.cp, postal_code ?? " "),
           });
-          let postal_code_id = "";
-          if (check_postal_code.length == 0) {
-            const new_postal_code = await db
-              .insert(schema.postal_code)
-              .values({
-                name: "", //a rellenar
-                cp: postal_code,
-                zone: row.city,
-              })
-              .returning();
-            postal_code_id = new_postal_code[0]!.id;
-          } else {
-            postal_code_id = check_postal_code[0]!.id;
-          }
 
           let differentialId;
           const check_differential = await db.query.differentials.findMany({
             where: eq(schema.differentials.codigo, row.differential_code!),
           });
           if (check_differential.length == 0) {
+            console.log("creando diferencial codigo");
             const new_differential = await db
               .insert(schema.differentials)
               .values({
@@ -143,12 +138,13 @@ export const excelDeserializationRouter = createTRPCRouter({
               })
               .returning();
             differentialId = new_differential[0]!.id;
+          } else {
+            differentialId = check_differential[0]!.id;
           }
 
           const birthDate = new Date(row.birth_date!);
           const today = new Date();
           let age = today.getFullYear() - birthDate.getFullYear();
-          // Additional logic to handle cases where the birth date hasn't occurred yet this year
           if (
             today.getMonth() < birthDate.getMonth() ||
             (today.getMonth() === birthDate.getMonth() &&
@@ -156,6 +152,7 @@ export const excelDeserializationRouter = createTRPCRouter({
           ) {
             age--;
           }
+          console.log("creando integrante");
           const new_integrant = await db
             .insert(schema.integrants)
             .values({
@@ -190,25 +187,54 @@ export const excelDeserializationRouter = createTRPCRouter({
               family_group_id: familyGroupId,
               affiliate_number: row.affiliate_number,
               extention: " ",
-              postal_codeId: postal_code_id,
+              postal_codeId: postal_code_schema?.id,
+              health_insuranceId: health_insurance?.id,
+              originating_health_insuranceId:
+                health_insurance_origin.length > 0
+                  ? health_insurance_origin[0]!.id
+                  : null,
             })
             .returning();
+          console.log("creando valores diferencial valor");
           await db.insert(schema.differentialsValues).values({
-            amount: parseInt(row.differential_value!),
+            amount: parseFloat(row.differential_value!),
             differentialId: differentialId,
             integrant_id: new_integrant[0]!.id,
           });
 
           if (row.isPaymentResponsible) {
-            await db.insert(schema.payment_info).values({
+            console.log("creando informacion de pago");
+            const product = await db.query.products.findFirst({
+              where: eq(schema.products.name, row.product!),
+            });
+            await db.insert(schema.pa).values({
               card_number: row.card_number!,
               CBU: row.cbu_number!,
               card_brand: row.card_brand!,
               new_registration: row.is_new!,
               integrant_id: new_integrant[0]!.id,
+              product_id: product!.id!,
+              // card_number: row.card_number!,
+              // CBU: row.cbu_number!,
+              // card_brand: row.card_brand!,
+              // new_registration: row.is_new!,
+              // integrant_id: new_integrant[0]!.id,
+              // product: product?.id,
             });
           }
+          const employeeContribution = parseFloat(row.contribution!);
+          const employerContribution =
+            (parseFloat(row.contribution!) / 3) * 7.038;
+          console.log("creando aportes");
+          await db.insert(schema.contributions).values({
+            employeeContribution: employeeContribution,
+            employerContribution: employerContribution,
+            amount: employeeContribution + employerContribution,
+            integrant_id: new_integrant[0]!.id,
+            cuitEmployer: " ", //a rellenar
+          });
         }
+
         await db
           .update(schema.excelBilling)
           .set({
@@ -331,6 +357,15 @@ async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
     const product = await db.query.products.findFirst({
       where: eq(schema.products.name, row.product!),
     });
+
+    const postal_code = row["postal code"];
+    const check_postal_code = await db.query.postal_code.findMany({
+      where: eq(schema.postal_code.cp, postal_code ?? " "),
+    });
+
+    if (check_postal_code.length == 0) {
+      errors.push(`CODIGO POSTAL no valido en (fila:${rowNum})`);
+    }
     if (!product) {
       errors.push(`PRODUCTO no valido en (fila:${rowNum})`);
     }

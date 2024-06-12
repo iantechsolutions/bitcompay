@@ -118,8 +118,9 @@ export default function PlanPage(props: {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel htmlFor="expiration_date">
-                            Fecha de vencimiento
+                            Fecha de vigencia
                           </FormLabel>
+                          <br />
                           <Popover>
                             <PopoverTrigger asChild>
                               <FormControl>
@@ -127,7 +128,7 @@ export default function PlanPage(props: {
                                   variant={"outline"}
                                   className={cn(
                                     "w-[240px] pl-3 text-left font-normal",
-                                    !field.value && "text-muted-foreground",
+                                    !field.value && "text-muted-foreground"
                                   )}
                                 >
                                   <p>
@@ -194,7 +195,9 @@ export default function PlanPage(props: {
                         </FormItem>
                       )}
                     />
-                    <Button type="submit">Guardar cambios</Button>
+                    <div className="pb-5">
+                      <Button type="submit">Guardar cambios</Button>
+                    </div>
                   </form>
                 </Form>
               </AccordionContent>
