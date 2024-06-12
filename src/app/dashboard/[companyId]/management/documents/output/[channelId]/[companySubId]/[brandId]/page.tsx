@@ -30,13 +30,15 @@ export default async function page({
   const genFileStatus = await db.query.paymentStatus.findFirst({
     where: eq(schema.paymentStatus.code, "92"),
   });
-  const payments = await db.query.payments.findMany({
+  let payments = await db.query.payments.findMany({
     where: and(
       eq(schema.payments.companyId, company.id),
       eq(schema.payments.g_c, brand.number),
       inArray(schema.payments.product_number, productsNumbers) // Solo los productos de la marca y producto -> (los productos salen del canal)
     ),
   });
+
+  payments = payments.filter((p) => !p.genChannels.includes(params.channelId));
 
   const outputFiles = await api.iofiles.list.query({
     channelId: params.channelId,
@@ -53,6 +55,8 @@ export default async function page({
     status_batch[0]!.amount_collected +=
       transaction?.collected_amount ?? transaction?.first_due_amount ?? 0;
   }
+
+  console.log("status_batch", status_batch);
   return (
     <>
       {channel ? (
