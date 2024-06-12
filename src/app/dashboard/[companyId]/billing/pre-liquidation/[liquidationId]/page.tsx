@@ -1,5 +1,5 @@
 // falta formatear fecha y hora, usuario
-
+import { currentUser } from "@clerk/nextjs/server";
 import LayoutContainer from "~/components/layout-container";
 // import {
 //   Table,
@@ -9,6 +9,7 @@ import LayoutContainer from "~/components/layout-container";
 //   TableHeader,
 // } from "~/components/ui/tablePreliq";
 import TableRowContainer from "./table-row";
+import { Button } from "~/components/ui/button";
 import {
   Table,
   TableBody,
@@ -25,10 +26,12 @@ dayjs.extend(utc);
 dayjs.locale("es");
 import { RouterOutputs } from "~/trpc/shared";
 import { clerkClient } from "@clerk/nextjs/server";
+import UpdateLiquidationEstadoDialog from "./approve-liquidation-dialog";
 
 export default async function Home(props: {
   params: { liquidationId: string };
 }) {
+  const userActual = await currentUser();
   const preliquidation = await api.liquidations.get.query({
     id: props.params.liquidationId,
   });
@@ -39,6 +42,7 @@ export default async function Home(props: {
   const facturas = preliquidation?.facturas;
   const periodo =
     dayjs.utc(preliquidation?.period).format("MMMM [de] YYYY") ?? "-";
+
   return (
     <LayoutContainer>
       <div className="grid grid-cols-3 gap-x-2 gap-y-2">
@@ -173,6 +177,12 @@ export default async function Home(props: {
           </TableBody>
         </Table>
         <br />
+        {preliquidation?.estado === "pendiente" && (
+          <UpdateLiquidationEstadoDialog
+            liquidationId={props.params.liquidationId}
+            userId={userActual?.id ? userActual?.id : ""}
+          />
+        )}
       </div>
     </LayoutContainer>
   );

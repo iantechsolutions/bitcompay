@@ -5,18 +5,22 @@ export default async function Page() {
   const transactions = await api.transactions.list.query();
   const transactionsTable = await Promise.all(
     transactions.map(async (transaction) => {
-      if (transaction.statusId) {
-        const payment_status = await api.status.get.query({
-          statusId: transaction.statusId,
-        });
-        transaction.statusId = payment_status!.description;
-      } else if (!transaction.outputFileId) {
+      try {
+        if (transaction.statusId) {
+          const payment_status = await api.status.getByDescripcion.query({
+            statusDes: transaction.statusId,
+          });
+          transaction.statusId = payment_status!.description;
+        } else if (!transaction.outputFileId) {
+          transaction.statusId = "CARGADO";
+        } else if (transaction.outputFileId) {
+          transaction.statusId = "ARCHIVO GENERADO";
+        }
+      } catch (error) {
         transaction.statusId = "CARGADO";
-      } else if (transaction.outputFileId) {
-        transaction.statusId = "ARCHIVO GENERADO";
       }
       return transaction;
-    }),
+    })
   );
 
   return (
