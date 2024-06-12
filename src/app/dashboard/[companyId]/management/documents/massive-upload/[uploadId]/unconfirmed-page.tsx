@@ -1,6 +1,7 @@
 "use client";
 import LayoutContainer from "~/components/layout-container";
 import dayjs from "dayjs";
+import { toast } from "sonner";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import { Title } from "~/components/title";
@@ -10,6 +11,8 @@ import { RouterOutputs } from "~/trpc/shared";
 import { useState } from "react";
 import { recHeaders } from "~/server/excel/validator";
 import { LargeTable } from "~/components/table";
+import { useRouter } from "next/navigation";
+
 interface unconfirmedPageProps {
   upload: RouterOutputs["excelDeserialization"]["upload"];
   companyId: string;
@@ -21,6 +24,7 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
   const [data, setData] = useState<
     RouterOutputs["excelDeserialization"]["deserialization"] | null
   >(null);
+  const router = useRouter();
   const {
     mutateAsync: confirmData,
     error: dataError,
@@ -41,12 +45,14 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
     });
     setData(data);
   }
-  function handleConfirm() {
-    confirmData({
+  async function handleConfirm() {
+    await confirmData({
       type: "rec",
       uploadId: upload!.id,
       companyId: companyId,
     });
+    toast.success("Datos subidos correctamente");
+    router.push(`./`);
   }
 
   return (
