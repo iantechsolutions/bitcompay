@@ -1,5 +1,5 @@
 // falta formatear fecha y hora, usuario
-
+import { currentUser } from "@clerk/nextjs/server";
 import LayoutContainer from "~/components/layout-container";
 // import {
 //   Table,
@@ -9,6 +9,7 @@ import LayoutContainer from "~/components/layout-container";
 //   TableHeader,
 // } from "~/components/ui/tablePreliq";
 import TableRowContainer from "./table-row";
+import { Button } from "~/components/ui/button";
 import {
   Table,
   TableBody,
@@ -29,6 +30,7 @@ import { clerkClient } from "@clerk/nextjs/server";
 export default async function Home(props: {
   params: { liquidationId: string };
 }) {
+  const userActual = await currentUser();
   const preliquidation = await api.liquidations.get.query({
     id: props.params.liquidationId,
   });
@@ -39,6 +41,25 @@ export default async function Home(props: {
   const facturas = preliquidation?.facturas;
   const periodo =
     dayjs.utc(preliquidation?.period).format("MMMM [de] YYYY") ?? "-";
+
+  const approveLiquidation = async () => {
+    try {
+      await api.liquidations.change.mutate({
+        id: props.params.liquidationId,
+        estado: "aprobado",
+        cuit: preliquidation?.cuit ?? "",
+        periodo: preliquidation?.period ?? new Date(),
+        pdv: preliquidation?.pdv ?? 0,
+        razonSocial: preliquidation?.razon_social ?? "",
+        userCreated: preliquidation?.userCreated ?? "",
+        userApproved: userActual?.id ?? "",
+      });
+      // Optionally, add a success message or refresh the data/page
+      console.log("Liquidation approved successfully");
+    } catch (error) {
+      console.error("Failed to approve liquidation", error);
+    }
+  };
   return (
     <LayoutContainer>
       <div className="grid grid-cols-3 gap-x-2 gap-y-2">
@@ -173,6 +194,7 @@ export default async function Home(props: {
           </TableBody>
         </Table>
         <br />
+        <Button onClick={approveLiquidation}>Aprobar Liquidacion</Button>
       </div>
     </LayoutContainer>
   );
