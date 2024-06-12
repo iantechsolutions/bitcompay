@@ -95,116 +95,114 @@ export default function GenerateChannelOutputPage(props: {
         <ChevronRight />
         {props.brand.name}
       </div>
-      <Title>Generar entrada</Title>
+
       {props.status_batch[0]!.records !== 0 && (
-        <Table className="mb-5 w-full">
-          <TableHeader>
-            <TableRow>
-              <TableHead>Estado transaccion</TableHead>
-              <TableHead>Cant. Transacciones</TableHead>
-              <TableHead>Recaudacion </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {props.status_batch
-              .filter((row) => row.records !== 0)
-              .map((row) => (
-                <TableRow key={row.product as React.Key}>
-                  <TableCell className="font-medium">
-                    {typeof row.status === "string" ? row.status : ""}
-                  </TableCell>
-                  <TableCell>
-                    {typeof row.records === "number" ? row.records : ""}
-                  </TableCell>
-                  <TableCell>
-                    {typeof row.amount_collected === "number"
-                      ? "$".concat(row.amount_collected.toString())
-                      : ""}
-                  </TableCell>
+        <>
+          <Title>Generar entrada</Title>
+          {props.status_batch[0]!.records !== 0 && (
+            <Table className="mb-5 w-full">
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Estado transaccion</TableHead>
+                  <TableHead>Cant. Transacciones</TableHead>
+                  <TableHead>Recaudacion </TableHead>
                 </TableRow>
-              ))}
-          </TableBody>
-        </Table>
-      )}
+              </TableHeader>
+              <TableBody>
+                {props.status_batch
+                  .filter((row) => row.records !== 0)
+                  .map((row) => (
+                    <TableRow key={row.product as React.Key}>
+                      <TableCell className="font-medium">
+                        {typeof row.status === "string" ? row.status : ""}
+                      </TableCell>
+                      <TableCell>
+                        {typeof row.records === "number" ? row.records : ""}
+                      </TableCell>
+                      <TableCell>
+                        {typeof row.amount_collected === "number"
+                          ? "$".concat(row.amount_collected.toString())
+                          : ""}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+          )}
 
-      <Dialog>
-        <DialogTrigger asChild={true}>
-          <Button
-            disabled={
-              isLoading || disabled || props.status_batch[0]!.records === 0
-            }
-            size="lg"
-            className="w-full"
-          >
-            {isLoading && <Loader2Icon className="mr-2 animate-spin" />}
-            Generar Archivo
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Ingresar nombre para el archivo</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="fileName" className="text-right">
-                Nombre del archivo
-              </Label>
-              <Input
-                id="fileName"
-                value={fileName}
-                onChange={handleName}
-                className="col-span-3"
-              />
-              {error && (
-                <span className="w-full text-red-600 text-xs">{error}</span>
-              )}
-            </div>
-          </div>
-          <DialogFooter>
-            <DialogClose>
-              <Button type="button" onClick={handleGenerate}>
-                generar archivo
+          <Dialog>
+            <DialogTrigger asChild={true}>
+              <Button
+                disabled={isLoading || disabled}
+                size="lg"
+                className="w-full"
+              >
+                {isLoading && <Loader2Icon className="mr-2 animate-spin" />}
+                Generar Archivo
               </Button>
-            </DialogClose>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Ingresar nombre para el archivo</DialogTitle>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="fileName" className="text-right">
+                    Nombre del archivo
+                  </Label>
+                  <Input
+                    id="fileName"
+                    value={fileName}
+                    onChange={handleName}
+                    className="col-span-3"
+                  />
+                  {error && (
+                    <span className="w-full text-red-600 text-xs">{error}</span>
+                  )}
+                </div>
+              </div>
+              <DialogFooter>
+                <DialogClose>
+                  <Button type="button" onClick={handleGenerate}>
+                    generar archivo
+                  </Button>
+                </DialogClose>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
-      {props.outputFiles.length > 0 && (
-        <div className="mt-3">
-          <Title>Archivos generados</Title>
-          {props.outputFiles.map((file, i) => (
-            <a key={`${file.fileUrl} ${i}`} href={file.fileUrl}>
-              {file.fileName}
-            </a>
-          ))}
-        </div>
+          <div className="mt-3">
+            <h3>No hay transacciones para generar archivo</h3>
+          </div>
+
+          {data !== undefined && (
+            <div className="mt-5">
+              <Title>Resultado</Title>
+              {dataDataURL && (
+                <a href={dataDataURL} download={`${fileName}.txt`}>
+                  <Button size="lg">
+                    <DownloadIcon className="mr-2" />
+                    Descargar archivo
+                  </Button>
+                </a>
+              )}
+              <pre className="mt-5 overflow-auto rounded-md border border-dashed p-4">
+                {data}
+                {!data && (
+                  <p className="my-10 text-center text-sm text-stone-500">
+                    No se generó nada
+                  </p>
+                )}
+              </pre>
+            </div>
+          )}
+        </>
       )}
       {props.status_batch[0]!.records === 0 && (
-        <div className="mt-3">
-          <h3>No hay transacciones para generar archivo</h3>
-        </div>
-      )}
-
-      {data !== undefined && (
-        <div className="mt-5">
-          <Title>Resultado</Title>
-          {dataDataURL && (
-            <a href={dataDataURL} download={`${fileName}.txt`}>
-              <Button size="lg">
-                <DownloadIcon className="mr-2" />
-                Descargar archivo
-              </Button>
-            </a>
-          )}
-          <pre className="mt-5 overflow-auto rounded-md border border-dashed p-4">
-            {data}
-            {!data && (
-              <p className="my-10 text-center text-sm text-stone-500">
-                No se generó nada
-              </p>
-            )}
-          </pre>
+        <div>
+          <h3 className="text-red-600">
+            No hay transacciones para generar archivo
+          </h3>
         </div>
       )}
     </>

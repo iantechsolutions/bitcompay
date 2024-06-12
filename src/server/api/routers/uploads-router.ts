@@ -294,7 +294,7 @@ export const uploadsRouter = createTRPCRouter({
               payment_date: row.payment_date ?? null,
               collected_amount: row.collected_amount ?? null,
               cbu: row.cbu ?? null,
-              statusId: defaultStatus?.description!,
+              statusId: defaultStatus?.id!,
             }))
           );
         }

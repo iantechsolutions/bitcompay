@@ -40,12 +40,7 @@ export const iofilesRouter = createTRPCRouter({
         const genFileStatus = await db.query.paymentStatus.findFirst({
           where: eq(schema.paymentStatus.code, "92"),
         });
-        const estadoposta = genFileStatus?.id;
-        // Pagos que no tienen archivo de salida que corresponden a la marca y los productos del canal
-        // const pp = await db.query.payments.findMany({});
-        // for (const p of pp) {
-        //   console.log(p.statusId, p.statusId === estadoposta);
-        // }
+
         const paymentsFull = await db.query.payments.findMany({
           where: and(
             eq(schema.payments.companyId, input.companyId),
