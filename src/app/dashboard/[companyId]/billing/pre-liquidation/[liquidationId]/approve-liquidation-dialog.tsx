@@ -9,6 +9,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "~/components/ui/dialog";
+import { useRouter } from "next/navigation";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 import { Loader2Icon } from "lucide-react";
@@ -20,6 +21,7 @@ function UpdateLiquidationEstadoDialog({
   liquidationId: string;
   userId: string;
 }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const { mutateAsync: updateLiquidation, isLoading } =
     api.liquidations.change.useMutation();
@@ -36,7 +38,7 @@ function UpdateLiquidationEstadoDialog({
       userCreated: data?.userCreated ?? "",
       userApproved: userId ?? "",
     });
-    setOpen(false);
+    router.push("./");
   };
 
   return (

@@ -30,6 +30,7 @@ import { CalendarIcon } from "lucide-react";
 import { Label } from "~/components/ui/label";
 import { api } from "~/trpc/react";
 import { ComboboxDemo } from "~/components/ui/combobox";
+import { useRouter } from "next/navigation";
 
 export default function AddPreLiquidation(props: { companyId: string }) {
   const [open, setOpen] = useState(false);
@@ -42,13 +43,16 @@ export default function AddPreLiquidation(props: { companyId: string }) {
   const { data: marcas } = api.brands.getbyCompany.useQuery({
     companyId: props.companyId,
   });
+  const router = useRouter();
+
   const [brandId, setBrandId] = useState("");
-  const { mutateAsync: createFacturas, isLoading } =
+  const { mutateAsync: createLiquidation, isLoading } =
     api.facturas.createPreLiquidation.useMutation();
   // const { mutateAsync: createFacturas } = api.family_groups.createPreLiquidation.useMutation();
   async function handleCreate() {
     // const { data:grupos } = api.family_groups.getByBrand.useQuery({brandId: brandId});
-    await createFacturas({
+    console.log("acaaaaaaaaaaa");
+    const liquidation = await createLiquidation({
       pv: puntoVenta,
       brandId: brandId,
       dateDesde: fechaDesde,
@@ -56,8 +60,13 @@ export default function AddPreLiquidation(props: { companyId: string }) {
       dateDue: fechaVencimiento2,
       companyId: props.companyId,
     });
-    toast.success("Pre-liquidacion creada correctamente");
-    setOpen(false);
+    console.log("liquidation", liquidation);
+    if (liquidation) {
+      toast.success("Pre-liquidacion creada correctamente");
+      router.push("./pre-liquidation/" + liquidation?.id);
+    } else {
+      toast.error("Error al crear la pre-liquidacion");
+    }
   }
   return (
     <>

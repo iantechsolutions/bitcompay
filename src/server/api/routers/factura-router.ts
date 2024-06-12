@@ -156,32 +156,12 @@ async function preparateFactura(
   dateVencimiento: Date | undefined,
   pv: string,
   brandId: string,
-  companyId: string
+  companyId: string,
+  liquidationId: string,
 ) {
   const user = await currentUser();
-  const brand = await db.query.brands.findFirst({
-    where: eq(schema.brands.id, brandId),
-  });
-  const company = await db.query.companies.findFirst({
-    where: eq(schema.companies.id, companyId),
-  });
-  const randomNumberLiq = Math.floor(Math.random() * (1000 - 10 + 1)) + 10;
 
-  const liquidation = await db
-    .insert(schema.liquidations)
-    .values({
-      brandId: brandId,
-      createdAt: new Date(),
-      razon_social: brand?.razon_social ?? "",
-      estado: "pendiente",
-      cuit: company?.cuit ?? "",
-      period: dateDesde,
-      userCreated: user?.id ?? "",
-      userApproved: user?.id ?? "",
-      number: randomNumberLiq,
-      pdv: parseInt(pv),
-    })
-    .returning();
+  
   grupos.forEach(async (grupo) => {
     const billResponsible = grupo.integrants.find(
       (integrant) => integrant.isBillResponsible
@@ -221,7 +201,7 @@ async function preparateFactura(
         prodName: "Servicio",
         iva: grupo.businessUnitData?.brand?.iva ?? "",
         billLink: "",
-        liquidation_id: liquidation[0]!.id,
+        liquidation_id: liquidationId,
         family_group_id: grupo.id,
       })
       .returning();
@@ -255,6 +235,7 @@ async function preparateFactura(
       })
       .returning();
   });
+  return "OK";
 }
 
 async function getGroupAmount(grupo: grupoCompleto) {
@@ -370,6 +351,30 @@ export const facturasRouter = createTRPCRouter({
       const grupos = await getGruposByBrandId(input.brandId);
       console.log("grupos", grupos);
       const afip = await ingresarAfip();
+      const user = await currentUser();
+      const brand = await db.query.brands.findFirst({
+        where: eq(schema.brands.id, input.brandId),
+      });
+      const company = await db.query.companies.findFirst({
+        where: eq(schema.companies.id, input.companyId),
+      });
+      const randomNumberLiq = Math.floor(Math.random() * (1000 - 10 + 1)) + 10;
+
+      const [liquidation] = await db
+        .insert(schema.liquidations)
+        .values({
+          brandId: input.brandId,
+          createdAt: new Date(),
+          razon_social: brand?.razon_social ?? "",
+          estado: "pendiente",
+          cuit: company?.cuit ?? "",
+          period: input.dateDesde,
+          userCreated: user?.id ?? "",
+          userApproved: "",
+          number: randomNumberLiq,
+          pdv: parseInt(input.pv),
+        })
+        .returning();
       await preparateFactura(
         afip,
         grupos,
@@ -378,12 +383,10 @@ export const facturasRouter = createTRPCRouter({
         input.dateDue,
         input.pv,
         input.brandId,
-        input.companyId
+        input.companyId,
+        liquidation!.id,
       );
-      // grupos.forEach((grupo) => {
-      //   // preparateFactura(afip, grupo, dateDesde, dateHasta, dateDue, pv);
-      //   // const billResposible = grupo.integrants.find((integrant) => integrant.isBillResponsible);
-      // });
+      return liquidation;
     }),
 
   change: protectedProcedure
