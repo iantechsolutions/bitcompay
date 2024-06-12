@@ -974,6 +974,7 @@ export const liquidations = pgTable("liquidations", {
   id: columnId,
   createdAt,
   updatedAt,
+  brandId: varchar("brandId", { length: 255 }),
   userCreated: varchar("userCreated", { length: 255 }),
   userApproved: varchar("userApproved", { length: 255 }),
   estado: varchar("estado", { length: 255 }).notNull(),
@@ -993,6 +994,10 @@ export const liquidationsRelations = relations(
     bussinessUnits: one(bussinessUnits, {
       fields: [liquidations.bussinessUnits_id],
       references: [bussinessUnits.id],
+    }),
+    brand: one(brands, {
+      fields: [liquidations.brandId],
+      references: [brands.id],
     }),
     facturas: many(facturas),
   })

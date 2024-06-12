@@ -154,17 +154,32 @@ async function preparateFactura(
   dateDesde: Date | undefined,
   dateHasta: Date | undefined,
   dateVencimiento: Date | undefined,
-  pv: string
+  pv: string,
+  brandId: string,
+  companyId: string
 ) {
   const user = await currentUser();
+  const brand = await db.query.brands.findFirst({
+    where: eq(schema.brands.id, brandId),
+  });
+  const company = await db.query.companies.findFirst({
+    where: eq(schema.companies.id, companyId),
+  });
+  const randomNumberLiq = Math.floor(Math.random() * (1000 - 10 + 1)) + 10;
+
   const liquidation = await db
     .insert(schema.liquidations)
     .values({
+      brandId: brandId,
+      createdAt: new Date(),
+      razon_social: brand?.razon_social ?? "",
       estado: "pendiente",
+      cuit: company?.cuit ?? "",
+      period: dateDesde,
       userCreated: user?.id ?? "",
       userApproved: user?.id ?? "",
-      number: 0,
-      pdv: 0,
+      number: randomNumberLiq,
+      pdv: parseInt(pv),
     })
     .returning();
   grupos.forEach(async (grupo) => {
@@ -344,6 +359,7 @@ export const facturasRouter = createTRPCRouter({
     .input(
       z.object({
         pv: z.string(),
+        companyId: z.string(),
         brandId: z.string(),
         dateDesde: z.date().optional(),
         dateHasta: z.date().optional(),
@@ -360,7 +376,9 @@ export const facturasRouter = createTRPCRouter({
         input.dateDesde,
         input.dateHasta,
         input.dateDue,
-        input.pv
+        input.pv,
+        input.brandId,
+        input.companyId
       );
       // grupos.forEach((grupo) => {
       //   // preparateFactura(afip, grupo, dateDesde, dateHasta, dateDue, pv);

@@ -54,6 +54,7 @@ export default function AddPreLiquidation(props: { companyId: string }) {
       dateDesde: fechaDesde,
       dateHasta: fechaHasta,
       dateDue: fechaVencimiento2,
+      companyId: props.companyId,
     });
     toast.success("Pre-liquidacion creada correctamente");
     setOpen(false);

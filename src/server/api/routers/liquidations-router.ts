@@ -30,7 +30,9 @@ export const liquidationsRouter = createTRPCRouter({
       return liquidation_found;
     }),
   list: protectedProcedure.query(async () => {
-    const liquidations = await db.query.liquidations.findMany();
+    const liquidations = await db.query.liquidations.findMany({
+      with: { bussinessUnits: true },
+    });
     return liquidations;
   }),
   create: protectedProcedure

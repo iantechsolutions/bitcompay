@@ -24,6 +24,7 @@ import "dayjs/locale/es";
 dayjs.extend(utc);
 dayjs.locale("es");
 import { RouterOutputs } from "~/trpc/shared";
+import { clerkClient } from "@clerk/nextjs/server";
 
 export default async function Home(props: {
   params: { liquidationId: string };
@@ -31,6 +32,9 @@ export default async function Home(props: {
   const preliquidation = await api.liquidations.get.query({
     id: props.params.liquidationId,
   });
+  const user = await clerkClient.users.getUser(
+    preliquidation?.userCreated ?? ""
+  );
   // if (!preliquidation) return <Title>Preliquidacion no encotrada</Title>;
   const facturas = preliquidation?.facturas;
   const periodo =
@@ -72,7 +76,7 @@ export default async function Home(props: {
         </p>
         <p className="opacity-70">
           <span className="font-bold opacity-100">Usuario: </span>
-          {preliquidation?.userCreated ?? "-"}
+          {user?.emailAddresses.at(0)?.emailAddress ?? "-"}
         </p>
       </div>
       <div>
@@ -80,7 +84,7 @@ export default async function Home(props: {
           <TableHeader className="overflow-hidden">
             <TableRow className="bg-[#79edd6]">
               <TableHead className="text-gray-800 rounded-l-md border-r-[1.5px] border-[#4af0d4]">
-                Nro. GF
+                Id. GF
               </TableHead>
               <TableHead
                 className="text-gray-800

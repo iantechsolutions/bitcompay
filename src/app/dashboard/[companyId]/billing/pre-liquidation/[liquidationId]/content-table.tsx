@@ -32,7 +32,7 @@ function ContentTable({ factura, period }: propsContentTable) {
         <Table>
           <TableCell
             className="text-center font-bold border-r border-gray-400 bg-[#ccfbf1]"
-            rowSpan={5}
+            rowSpan={9}
           >
             Mes Vigencia
           </TableCell>
@@ -61,15 +61,17 @@ function ContentTable({ factura, period }: propsContentTable) {
             </TableCell>
             <TableCell className="border border-gray-400 bg-[#b7f3e6]">{`Cuota Plan ${factura?.family_group?.plan?.description} ${period} `}</TableCell>
             <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              {factura?.items?.abono}
+              ${factura?.items?.abono}
             </TableCell>
             <TableCell className="border border-gray-400 bg-[#b7f3e6]">
+              $
               {computeIva(
                 factura?.items?.abono ?? 0,
                 Number(factura?.iva) ?? 0
               )}
             </TableCell>
             <TableCell className="border border-gray-400 bg-[#b7f3e6]">
+              $
               {computeTotal(
                 factura?.items?.abono ?? 0,
                 Number(factura?.iva) ?? 0
@@ -81,16 +83,16 @@ function ContentTable({ factura, period }: propsContentTable) {
               {factura?.tipoFactura ?? "-"}
             </TableCell>
             <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              {`Bonificacion %${factura?.items?.bonificacion}`}
+              {`Bonificacion ${factura?.items?.bonificacion}%`}
             </TableCell>
             <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              {bonificationValue}
+              ${bonificationValue}
             </TableCell>
             <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              {computeIva(bonificationValue, Number(factura?.iva) ?? 0)}
+              ${computeIva(bonificationValue, Number(factura?.iva) ?? 0)}
             </TableCell>
             <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              {computeTotal(bonificationValue, Number(factura?.iva) ?? 0)}
+              ${computeTotal(bonificationValue, Number(factura?.iva) ?? 0)}
             </TableCell>
           </TableRow>
           <TableRow>
@@ -103,13 +105,13 @@ function ContentTable({ factura, period }: propsContentTable) {
               Aportes{" "}
             </TableCell>
             <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              {contributionValue}
+              ${contributionValue}
             </TableCell>
             <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              {computeIva(contributionValue, Number(factura?.iva) ?? 0)}
+              ${computeIva(contributionValue, Number(factura?.iva) ?? 0)}
             </TableCell>
             <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              {computeTotal(contributionValue, Number(factura?.iva) ?? 0)}
+              ${computeTotal(contributionValue, Number(factura?.iva) ?? 0)}
             </TableCell>
           </TableRow>
           <TableRow>
@@ -120,15 +122,20 @@ function ContentTable({ factura, period }: propsContentTable) {
               Factura periodo anterior impaga
             </TableCell>
             <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              {factura?.items?.previous_bill}
+              $
+              {factura?.items?.previous_bill
+                ? factura?.items?.previous_bill
+                : 0}
             </TableCell>
             <TableCell className="border border-gray-400 bg-[#b7f3e6]">
+              $
               {computeIva(
                 factura?.items?.previous_bill ?? 0,
                 Number(factura?.iva) ?? 0
               )}
             </TableCell>
             <TableCell className="border border-gray-400 bg-[#b7f3e6]">
+              $
               {computeTotal(
                 factura?.items?.previous_bill ?? 0,
                 Number(factura?.iva) ?? 0
@@ -143,16 +150,15 @@ function ContentTable({ factura, period }: propsContentTable) {
               Interes por pago fuera de término
             </TableCell>
             <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              {interestValue}
+              ${interestValue}
             </TableCell>
             <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              {computeIva(interestValue, Number(factura?.iva) ?? 0)}
+              ${computeIva(interestValue, Number(factura?.iva) ?? 0)}
             </TableCell>
             <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              {computeTotal(interestValue, Number(factura?.iva) ?? 0)}
+              ${computeTotal(interestValue, Number(factura?.iva) ?? 0)}
             </TableCell>
           </TableRow>
-          // footer
           <TableRow>
             <TableCell className="font-bold border border-gray-400 border-t-black bg-[#ccfbf1]">
               Total FC B
@@ -161,6 +167,7 @@ function ContentTable({ factura, period }: propsContentTable) {
               {" "}
             </Table>
             <TableCell className="border border-gray-400 bg-[#ccfbf1] border-t-black">
+              $
               {factura?.items?.abono ??
                 0 +
                   bonificationValue +
@@ -169,6 +176,7 @@ function ContentTable({ factura, period }: propsContentTable) {
                   interestValue}
             </TableCell>
             <TableCell className="border border-gray-400 bg-[#ccfbf1] border-t-black">
+              $
               {computeIva(
                 factura?.items?.abono ??
                   0 +
@@ -180,6 +188,7 @@ function ContentTable({ factura, period }: propsContentTable) {
               )}
             </TableCell>
             <TableCell className="border border-gray-400 bg-[#ccfbf1] border-t-black">
+              $
               {computeTotal(
                 factura?.items?.abono ??
                   0 +
@@ -197,13 +206,13 @@ function ContentTable({ factura, period }: propsContentTable) {
             </TableCell>
             <TableCell className="border border-gray-400 bg-[#ccfbf1]"></TableCell>
             <TableCell className="border border-gray-400 bg-[#ccfbf1]">
-              Cell 3
+              $0
             </TableCell>
             <TableCell className="border border-gray-400 bg-[#ccfbf1]">
-              Cell 4
+              $0
             </TableCell>
             <TableCell className="border border-gray-400 bg-[#ccfbf1]">
-              Cell 5
+              $0
             </TableCell>
           </TableRow>
         </Table>
