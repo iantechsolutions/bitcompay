@@ -27,6 +27,7 @@ const items = [
   { es: "IVA", en: "iva" },
   { es: "Condicion IIBB", en: "ingresos_brutos" },
   { es: "Codigos postales", en: "postal_codes" },
+  { es: "Establecimientos", en: "establishments" },
 ];
 
 export default async function Maintenance(props: {

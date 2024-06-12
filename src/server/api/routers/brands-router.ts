@@ -46,17 +46,17 @@ export const brandsRouter = createTRPCRouter({
       })
     )
     .query(async ({ input }) => {
-      const relations = await db.query.companiesToBrands.findMany({
-        where: eq(schema.companiesToBrands.companyId, input.companyId),
+      const company = await db.query.companies.findFirst({
+        where: eq(schema.companies.id, input.companyId),
+        with: {
+          brands: {
+            with: {
+              brand: true,
+            },
+          },
+        },
       });
-      const brands = [];
-      for (const relation of relations) {
-        const brand = await db.query.brands.findFirst({
-          where: eq(schema.brands.id, relation.brandId),
-        });
-        brands.push(brand);
-      }
-      return brands;
+      return company?.brands.map((b) => b.brand);
     }),
   create: protectedProcedure
     .input(

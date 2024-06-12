@@ -17,6 +17,7 @@ import { duration } from "html2canvas/dist/types/css/property-descriptors/durati
 import { id } from "date-fns/locale";
 import { int } from "drizzle-orm/mysql-core";
 import { text } from "stream/consumers";
+import { channel } from "diagnostics_channel";
 export { pgTable } from "./schema/util";
 
 export const documentUploads = pgTable(
@@ -1149,3 +1150,23 @@ export const postal_code = pgTable("postalcodes", {
 export const postal_codeRelations = relations(postal_code, ({ many }) => ({
   postal_code: many(integrants),
 }));
+
+export const establishments = pgTable("establishments", {
+  id: columnId,
+  establishment_number: bigint("establishment_number", {
+    mode: "number",
+  }).notNull(),
+  flag: varchar("flag", { length: 255 }).notNull(),
+  brandId: varchar("brandId", { length: 255 }).notNull(),
+  createdAt,
+});
+
+export const establishmentsRelations = relations(establishments, ({ one }) => ({
+  brand: one(brands, {
+    fields: [establishments.brandId],
+    references: [brands.id],
+  }),
+}));
+
+export const selectEstablishmentSchema = createSelectSchema(establishments);
+export type Establishment = z.infer<typeof selectEstablishmentSchema>;
