@@ -180,6 +180,11 @@ export default function GenerateChannelOutputPage(props: {
           ))}
         </div>
       )}
+      {props.status_batch[0]!.records === 0 && (
+        <div className="mt-3">
+          <h3>No hay transacciones para generar archivo</h3>
+        </div>
+      )}
 
       {data !== undefined && (
         <div className="mt-5">

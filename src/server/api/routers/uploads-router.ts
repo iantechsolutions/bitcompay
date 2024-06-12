@@ -137,9 +137,9 @@ export const uploadsRouter = createTRPCRouter({
     .input(
       z.object({
         uploadId: z.string(),
-        brandId: z.number(),
-        channelId: z.string(),
-        companyId: z.string(),
+        // brandId: z.number(),
+        // channelId: z.string(),
+        // companyId: z.string(),
       })
     )
     .mutation(async ({ input }) => {
@@ -162,79 +162,73 @@ export const uploadsRouter = createTRPCRouter({
         await Promise.all(
           records.map(async (record) => {
             const invoiceNumber = record.invoice_number || 0;
+            console.log("record.statusId", record.statusId);
             await tx
               .update(schema.payments)
               .set({ statusId: record.statusId })
-              .where(
-                and(
-                  eq(schema.payments.payment_channel, input.channelId),
-                  eq(schema.payments.g_c, input.brandId),
-                  eq(schema.payments.companyId, input.companyId),
-                  eq(schema.payments.invoice_number, invoiceNumber)
-                )
-              );
+              .where(eq(schema.payments.invoice_number, invoiceNumber));
 
-            const payment = await tx.query.payments.findFirst({
-              where: and(
-                eq(schema.payments.payment_channel, input.channelId),
-                eq(schema.payments.g_c, input.brandId),
-                eq(schema.payments.companyId, input.companyId),
-                eq(schema.payments.invoice_number, invoiceNumber)
-              ),
-              with: {
-                factura: {
-                  with: {
-                    family_group: {
-                      with: {
-                        cc: true,
-                      },
-                    },
-                  },
-                },
-              },
-            });
-            const recordAmount =
-              record.collected_amount ?? record.first_due_amount;
-            if (payment?.factura && payment.factura.family_group) {
-              if (payment?.factura.importe == recordAmount) {
-                tx.update(schema.family_groups)
-                  .set({
-                    payment_status: "paid",
-                  })
-                  .where(
-                    eq(schema.family_groups.id, payment.factura.family_group.id)
-                  );
-              } else {
-                tx.update(schema.family_groups)
-                  .set({
-                    payment_status: "partial",
-                  })
-                  .where(
-                    eq(schema.family_groups.id, payment.factura.family_group.id)
-                  );
-              }
-              const cc = await tx.query.currentAccount.findFirst({
-                where: eq(
-                  schema.currentAccount.family_group,
-                  payment.factura.family_group.cc[0]?.id ?? ""
-                ),
-                with: {
-                  events: true,
-                },
-              });
+            // const payment = await tx.query.payments.findFirst({
+            //   where: and(
+            //     eq(schema.payments.payment_channel, input.channelId),
+            //     eq(schema.payments.g_c, input.brandId),
+            //     eq(schema.payments.companyId, input.companyId),
+            //     eq(schema.payments.invoice_number, invoiceNumber)
+            //   ),
+            //   with: {
+            //     factura: {
+            //       with: {
+            //         family_group: {
+            //           with: {
+            //             cc: true,
+            //           },
+            //         },
+            //       },
+            //     },
+            //   },
+            // });
+            // const recordAmount =
+            //   record.collected_amount ?? record.first_due_amount;
+            // if (payment?.factura && payment.factura.family_group) {
+            //   if (payment?.factura.importe == recordAmount) {
+            //     tx.update(schema.family_groups)
+            //       .set({
+            //         payment_status: "paid",
+            //       })
+            //       .where(
+            //         eq(schema.family_groups.id, payment.factura.family_group.id)
+            //       );
+            //   } else {
+            //     tx.update(schema.family_groups)
+            //       .set({
+            //         payment_status: "partial",
+            //       })
+            //       .where(
+            //         eq(schema.family_groups.id, payment.factura.family_group.id)
+            //       );
+            //   }
+            //   const cc = await tx.query.currentAccount.findFirst({
+            //     where: eq(
+            //       schema.currentAccount.family_group,
+            //       payment.factura.family_group.cc[0]?.id ?? ""
+            //     ),
+            //     with: {
+            //       events: true,
+            //     },
+            //   });
 
-              if (cc?.events && cc?.events?.length > 0) {
-                const lastEvent = cc?.events[cc.events.length - 1];
-                tx.insert(schema.events).values({
-                  description: "Pago de factura",
-                  type: "REC",
-                  currentAccount_id: cc.id,
-                  event_amount: payment.factura.importe,
-                  current_amount:
-                    (lastEvent?.current_amount ?? 0) + payment.factura.importe,
-                });
-              }
-            }
+            //   if (cc?.events && cc?.events?.length > 0) {
+            //     const lastEvent = cc?.events[cc.events.length - 1];
+            //     tx.insert(schema.events).values({
+            //       description: "Pago de factura",
+            //       type: "REC",
+            //       currentAccount_id: cc.id,
+            //       event_amount: payment.factura.importe,
+            //       current_amount:
+            //         (lastEvent?.current_amount ?? 0) + payment.factura.importe,
+            //     });
+            //   }
+            // }
           })
         );
       });
@@ -438,6 +432,8 @@ async function readResponseUploadContents(
         if (original_transaction) {
           original_transaction.statusId =
             statusCodeMap.get(status_code) ?? "91";
+          console.log("statusCode", status_code);
+          console.log("status", original_transaction.statusId);
           records.push(original_transaction);
         }
       } else {

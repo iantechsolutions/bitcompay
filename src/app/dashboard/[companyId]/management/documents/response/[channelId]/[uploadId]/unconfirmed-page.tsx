@@ -65,9 +65,9 @@ export default function ResponseUnconfirmedPage(props: UploadedPageProps) {
     try {
       await confirmResponseUpload({
         uploadId: upload.id,
-        companyId: "",
-        brandId: 0,
-        channelId: "",
+        // companyId: "",
+        // brandId: 0,
+        // channelId: "",
       });
       toast.success("Documento cargado correctamente");
       router.refresh();
