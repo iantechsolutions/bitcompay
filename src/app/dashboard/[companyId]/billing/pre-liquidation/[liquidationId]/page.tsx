@@ -26,6 +26,7 @@ dayjs.extend(utc);
 dayjs.locale("es");
 import { RouterOutputs } from "~/trpc/shared";
 import { clerkClient } from "@clerk/nextjs/server";
+import UpdateLiquidationEstadoDialog from "./approve-liquidation-dialog";
 
 export default async function Home(props: {
   params: { liquidationId: string };
@@ -42,24 +43,6 @@ export default async function Home(props: {
   const periodo =
     dayjs.utc(preliquidation?.period).format("MMMM [de] YYYY") ?? "-";
 
-  const approveLiquidation = async () => {
-    try {
-      await api.liquidations.change.mutate({
-        id: props.params.liquidationId,
-        estado: "aprobado",
-        cuit: preliquidation?.cuit ?? "",
-        periodo: preliquidation?.period ?? new Date(),
-        pdv: preliquidation?.pdv ?? 0,
-        razonSocial: preliquidation?.razon_social ?? "",
-        userCreated: preliquidation?.userCreated ?? "",
-        userApproved: userActual?.id ?? "",
-      });
-      // Optionally, add a success message or refresh the data/page
-      console.log("Liquidation approved successfully");
-    } catch (error) {
-      console.error("Failed to approve liquidation", error);
-    }
-  };
   return (
     <LayoutContainer>
       <div className="grid grid-cols-3 gap-x-2 gap-y-2">
@@ -194,7 +177,12 @@ export default async function Home(props: {
           </TableBody>
         </Table>
         <br />
-        {/* <Button onClick={approveLiquidation}>Aprobar Liquidacion</Button> */}
+        {preliquidation?.estado === "pendiente" && (
+          <UpdateLiquidationEstadoDialog
+            liquidationId={props.params.liquidationId}
+            userId={userActual?.id ? userActual?.id : ""}
+          />
+        )}
       </div>
     </LayoutContainer>
   );
