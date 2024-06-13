@@ -583,3 +583,57 @@ export async function getBrandAndChannel(
 
   return { brand, channel };
 }
+
+type generateDAprops = {
+  payments: Payment[];
+  presentationDate: Date;
+  EstablishmentNumber: string;
+  cardType: string;
+  flag: string;
+};
+function generateDebitoAutomatico(props: generateDAprops) {
+  const FileNameMap: Record<string, string> = {
+    "Visa Credito": "DEBLIQC_",
+    "Visa Debito": "DEBLIQD_",
+    "Mastercard Credito": "DEBLIMC_",
+  };
+  const key = `${props.flag} ${props.cardType}`;
+  const fileName = FileNameMap[key];
+  const presentationDate = dayjs(props.presentationDate).format("YYYYMMDD");
+  const hour = dayjs().format("HHmm");
+  let header = `0${fileName}${
+    props.EstablishmentNumber
+  }900000    ${presentationDate}${hour}0  ${" ".repeat(55)}*\r\n`;
+  let body = "";
+  let total_collected = 0;
+  for (const payment of props.payments) {
+    const importe = payment.collected_amount ?? payment.first_due_amount;
+    const importeString = formatString("0", importe!.toString(), 15, false);
+    const registrationCode = payment.is_new ? "E" : " ";
+    body += `1NroTarjeta   ${
+      payment.invoice_number
+    }${presentationDate}0005${importeString}00000${
+      payment.fiscal_id_number
+    }${registrationCode}${" ".repeat(28)}*\r\n`;
+    total_collected += importe!;
+  }
+  const total_records = formatString(
+    "0",
+    props.payments.length.toString(),
+    7,
+    false
+  );
+  const total_collected_string = formatString(
+    "0",
+    total_collected.toString(),
+    15,
+    false
+  );
+  let footer = `9 ${fileName} ${
+    props.EstablishmentNumber
+  } 900000    ${presentationDate}${hour}${total_records}${total_collected_string}${" ".repeat(
+    36
+  )}*`;
+
+  return header + body + footer;
+}

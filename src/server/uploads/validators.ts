@@ -372,6 +372,7 @@ export const recHeaders: TableHeaders = [
   { key: "product_number", label: "Producto", width: 80, alwaysRequired: true },
   { key: "cbu", label: "Nro CBU", width: 140 },
   { key: "card_brand", label: "TC Marca", width: 140 },
+  { key: "card_type", label: "Tipo de Tarjeta", width: 140 },
   { key: "is_new", label: "Alta Nueva", width: 140 },
   { key: "card_number", label: "Nro. Tarjeta", width: 140 },
   {

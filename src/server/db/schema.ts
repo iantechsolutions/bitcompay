@@ -126,6 +126,10 @@ export const payments = pgTable(
     payment_date: timestamp("payment_date", { mode: "date" }),
     collected_amount: bigint("collected_amount", { mode: "number" }),
     cbu: varchar("cbu", { length: 22 }).default(" "),
+    card_brand: varchar("card_brand", { length: 255 }),
+    card_number: varchar("card_number", { length: 255 }),
+    card_type: varchar("card_type", { length: 255 }), // tipo de tarjeta
+    is_new: boolean("is_new").notNull().default(false),
     // end Rec fields
 
     companyId: varchar("companyId", { length: 255 })
