@@ -33,6 +33,7 @@ import { pricePerAgeRouter } from "./routers/price-per-age-router";
 import { postalCodeRouter } from "./routers/postal_codes-router";
 import { excelDeserializationRouter } from "./routers/excel-deserialization";
 import { establishmentsRouter } from "./routers/establishments-router";
+import { relativeRouter } from "./routers/relative-router";
 /**
  * This is the primary router for your server.
  *
@@ -73,6 +74,7 @@ export const appRouter = createTRPCRouter({
   postal_code: postalCodeRouter,
   excelDeserialization: excelDeserializationRouter,
   establishments: establishmentsRouter,
+  relative: relativeRouter,
 });
 
 // export type definition of API

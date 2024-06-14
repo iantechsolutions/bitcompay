@@ -155,6 +155,14 @@ export const excelDeserializationRouter = createTRPCRouter({
           ) {
             age--;
           }
+          const relativeExist = await db.query.relative.findMany({
+            where: eq(schema.relative.relation, row.relationship!),
+          });
+          if (!relativeExist || relativeExist.length == 0) {
+            await db.insert(schema.relative).values({
+              relation: row.relationship,
+            });
+          }
           console.log("creando integrante");
           const new_integrant = await db
             .insert(schema.integrants)

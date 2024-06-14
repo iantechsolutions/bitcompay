@@ -80,6 +80,7 @@ export default function AddPlanDialog() {
   const company = useCompanyData();
   const [open, setOpen] = useState(false);
   const [brand, setBrand] = useState("");
+  const [condition, setCondition] = useState("");
   const initValues: Inputs = {
     validy_date: "",
     plan_code: "",
@@ -97,7 +98,8 @@ export default function AddPlanDialog() {
     control: form.control,
     name: "conditional_prices",
   });
-  const { data: brands } = api.brands.list.useQuery(undefined);
+  const { data: brands } = api.brands.getbyCompany.useQuery({companyId: company.id});
+  const { data: relatives } = api.relative.list.useQuery(undefined);
   const { mutateAsync: createPlan } = api.plans.create.useMutation();
   const { mutateAsync: createPricePerAge } =
     api.pricePerAge.create.useMutation();
@@ -157,7 +159,7 @@ export default function AddPlanDialog() {
               onSubmit={form.handleSubmit(onSubmit)}
               className="flex-col items-center justify-center gap-2 space-y-8"
             >
-              <div className="flex flex-row justify-around">
+              <div className="">
                 <FormField
                   control={form.control}
                   name="validy_date"
@@ -205,27 +207,26 @@ export default function AddPlanDialog() {
                     </FormItem>
                   )}
                 />
-                <Label>Unidad de negocio</Label>
-                <br />
-                <Select onValueChange={setBrand} defaultValue={brand}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccione una unidad de negocio" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {brands?.map((brand) => (
-                      <SelectItem
-                        key={brand.id}
-                        value={brand.id}
-                      >
-                        {brand.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div>
+                  <Label>Marca</Label>
+
+                  <Select onValueChange={setBrand} defaultValue={brand}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccione una unidad de negocio" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {brands?.map((brand) => (
+                        <SelectItem key={brand.id} value={brand.id}>
+                          {brand.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              <div className="flex flex-row justify-around">
+              <div className="">
                 <FormField
                   control={form.control}
                   name="plan_code"
@@ -319,7 +320,7 @@ export default function AddPlanDialog() {
                                     value="true"
                                     className="rounded-none border-b border-gray-600"
                                   >
-                                    Parentezco
+                                    Parentesco
                                   </SelectItem>
                                 </SelectContent>
                               </Select>
@@ -342,12 +343,21 @@ export default function AddPlanDialog() {
                               Condición
                             </FormLabel>
                             <FormControl>
-                              <Input
-                                className="border-green-300 focus-visible:ring-green-400"
-                                id={`conditional_prices.${index}.condition`}
-                                type="text"
-                                {...field}
-                              />
+                              <Select
+                                onValueChange={(value) => setCondition(value)}
+                              >
+                                <SelectTrigger></SelectTrigger>
+                                <SelectContent>
+                                  {relatives?.map((relative) => (
+                                    <SelectItem
+                                      key={relative.relation}
+                                      value={relative.relation ?? ""}
+                                    >
+                                      {relative.relation}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                             </FormControl>
                             <FormMessage />
                           </FormItem>

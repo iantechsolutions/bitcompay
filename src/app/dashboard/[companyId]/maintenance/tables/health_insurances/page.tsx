@@ -21,7 +21,7 @@ export default async function Home(props: { params: { companyId: string } }) {
               <ListTile
                 key={obraSocial.id}
                 leading={obraSocial.identificationNumber}
-                href={`/dashboard/faIKDivwt7Z8Gp-B5yFrv/maintenance/tables/health_insurances/${obraSocial.id}`}
+                href={`/dashboard/${props.params.companyId}/maintenance/tables/health_insurances/${obraSocial.id}`}
                 title={obraSocial.name}
               />
             );

@@ -43,7 +43,7 @@ export default async function Maintenance(props: {
           {items.map(({ es, en }) => (
             <ListTile
               key={en}
-              href={`/dashboard/faIKDivwt7Z8Gp-B5yFrv/maintenance/tables/${en}`}
+              href={`/dashboard/${props.params.companyId}/maintenance/tables/${en}`}
               title={es as React.ReactNode}
             />
           ))}
