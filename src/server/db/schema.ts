@@ -1073,6 +1073,7 @@ export type ExcelBilling = z.infer<typeof selectExcelBillingSchema>;
 
 export const pricePerAge = pgTable("pricePerAge", {
   id: columnId,
+  validy_date: timestamp("vigency_date").notNull(),
   age: integer("age"),
   condition: varchar("condition"),
   createdAt,
@@ -1097,6 +1098,7 @@ export const pricePerAgeSchemaDB = selectpricePerAgeSchema.pick({
   amount: true,
   plan_id: true,
   createdAt: true,
+  validy_date: true,
 });
 export type pricePerAge = z.infer<typeof selectpricePerAgeSchema>;
 

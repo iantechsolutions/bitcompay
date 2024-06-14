@@ -25,6 +25,7 @@ export const pricePerAgeRouter = createTRPCRouter({
         plan_id: z.string(),
         isAmountByAge: z.boolean(),
         condition: z.string().optional(),
+        validy_date: z.date(),
       })
     )
     .mutation(async ({ input }) => {
@@ -34,6 +35,7 @@ export const pricePerAgeRouter = createTRPCRouter({
         condition: input.condition,
         amount: input.amount,
         plan_id: input.plan_id,
+        validy_date: input.validy_date,
       });
       return new_pricePerAge;
     }),
@@ -46,6 +48,7 @@ export const pricePerAgeRouter = createTRPCRouter({
         plan_id: z.string(),
         isAmountByAge: z.boolean(),
         condition: z.string().optional(),
+        validy_date: z.date(),
       })
     )
     .mutation(async ({ input }) => {
@@ -57,6 +60,7 @@ export const pricePerAgeRouter = createTRPCRouter({
           condition: input.condition,
           amount: input.amount,
           plan_id: input.plan_id,
+          validy_date: input.validy_date,
         })
         .where(eq(schema.pricePerAge.id, input.id));
       return pricePerAge_changed;
