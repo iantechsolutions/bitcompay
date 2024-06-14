@@ -273,19 +273,7 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
                 </TableBody>
               </Table>
             )}
-            {/* <div className="mt-5">
-              <h3>Filas con errores a arreglar</h3>
 
-              {data && (
-                <LargeEditableTable
-                  rows={editableTableRows}
-                  headers={data.headers}
-                  height={100}
-                  columns={colsOnly}
-                  onRowChange={handleRowChange}
-                />
-              )}
-            </div> */}
             <div className="flex gap-2">
               <Button variant="destructive" onClick={handleDelete}>
                 Cancelar y eliminar

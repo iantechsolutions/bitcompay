@@ -88,6 +88,7 @@ const cbuSchema = z
   .string()
   .or(z.number())
   .transform((value) => {
+    console.log("cbu", value);
     return value.toString().replaceAll("/", "").padStart(22, "0");
   })
   .refine((value) => value.length === 22);
@@ -392,7 +393,7 @@ export const recHeaders: TableHeaders = [
   { key: "du_type", label: "Tipo DNI", width: 140 },
   { key: "du_number", label: "Nro DU", width: 140 },
   { key: "product_number", label: "Producto", width: 80, alwaysRequired: true },
-  { key: "cbu_number", label: "Nro CBU", width: 140 },
+  { key: "cbu", label: "Nro CBU", width: 140 },
   { key: "card_brand", label: "TC Marca", width: 140 },
   { key: "card_type", label: "Tipo de Tarjeta", width: 140 },
   { key: "is_new", label: "Alta Nueva", width: 140 },

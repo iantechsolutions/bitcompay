@@ -55,6 +55,7 @@ export const iofilesRouter = createTRPCRouter({
           (p) => p.genChannels.includes(channel.id) === false
         );
 
+        const regexPagoFacil = /pago\s*f[aá]cil/i;
         // Generamos el archivo de salida segun el canal
         if (channel.name.includes("DEBITO DIRECTO")) {
           const generateInput = {
@@ -74,7 +75,7 @@ export const iofilesRouter = createTRPCRouter({
             redescription: brand.redescription,
           };
           text = generatePagomiscuentas(generateInput, payments);
-        } else if (channel.name.includes("PAGO FACIL")) {
+        } else if (channel.name.match(regexPagoFacil)) {
           const generateInput = {
             channelId: channel.id,
             companyId: input.companyId,
@@ -433,7 +434,14 @@ async function generatePagoFacil(
   const hours = dayjs().format("HHmmss");
   const companyName = formatString(" ", "BITCOM SRL", 40, true);
   const originName = formatString(" ", "PAGO FACIL", 10, true);
-  text += `1${date}90063509${companyName}${originName}${"0".repeat(123)}\r\n`;
+  const records_number = formatString(
+    " ",
+    transactions.length.toString(),
+    9,
+    true
+  );
+  const utility = "";
+  text += `01${records_number}A\r\n`;
   let total_records = 0;
   let total_collected = 0;
   for (const transaction of transactions) {

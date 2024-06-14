@@ -1,17 +1,24 @@
 import { api } from "~/trpc/server";
-import { Title } from "~/components/title";
-import { List, ListTile } from "~/components/list";
-import LayoutContainer from "~/components/layout-container";
-import { CircleUserRound } from "lucide-react";
+import TransactionsPage from "./transactions-page";
 
-export default async function Page(props: { params: { companyId: string } }) {
+export default async function Page() {
+  const transactions = await api.transactions.list.query();
+  const transactionsTable = await Promise.all(
+    transactions.map(async (transaction) => {
+      const payment_status = await api.status.get.query({
+        statusId: transaction?.statusId!,
+      });
+      transaction.statusId = payment_status!.description;
+
+      return transaction;
+    })
+  );
+
   return (
-    <LayoutContainer>
-      <section className="space-y-2">
-        <div className="flex justify-between">
-          <Title>Cobranzas</Title>
-        </div>
-      </section>
-    </LayoutContainer>
+    <div className="absolute bottom-0 left-0 right-0 top-0 h-[calc(100dvh_-_70px)]">
+      {transactionsTable && (
+        <TransactionsPage transactions={transactionsTable} />
+      )}
+    </div>
   );
 }
