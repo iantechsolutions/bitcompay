@@ -46,7 +46,7 @@ export default function TriggerTable({
             <CircleChevronRight className="bg-[#6cebd1] h-4 w-4 rounded-full" />
           )}
         </button>
-        {factura?.family_group_id ?? "N/A"}
+        {factura?.family_group?.numericalId ?? "N/A"}
       </TableCell>
 
       <TableCell className="border border-[#6cebd1] p-2 py-4">
@@ -59,10 +59,7 @@ export default function TriggerTable({
         {" "}
         {billResponsible?.fiscal_id_number ?? "-"}
       </TableCell>
-      <TableCell className="border border-[#6cebd1] p-2 py-4">
-        {" "}
-        0
-      </TableCell>
+      <TableCell className="border border-[#6cebd1] p-2 py-4"> 0</TableCell>
       <TableCell className="border border-[#6cebd1] p-2 py-4">
         {" "}
         {factura?.items?.abono}

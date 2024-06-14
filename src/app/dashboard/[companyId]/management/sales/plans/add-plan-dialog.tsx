@@ -3,6 +3,13 @@ import { CircleX, PlusCircle, PlusCircleIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "~/components/ui/select";
 // import {
 //   Dialog,
 //   DialogContent,
@@ -47,6 +54,8 @@ import { useCompanyData } from "../../../company-provider";
 
 import { Checkbox } from "~/components/ui/checkbox";
 import { useFieldArray } from "react-hook-form";
+import { Label } from "~/components/ui/label";
+import { brandsRouter } from "~/server/api/routers/brands-router";
 
 dayjs.extend(utc);
 dayjs.locale("es");
@@ -60,7 +69,7 @@ type ConditionalPrice = {
 };
 
 type Inputs = {
-  expiration_date: string;
+  validy_date: string;
   plan_code: string;
   description: string;
   conditional_prices: ConditionalPrice[];
@@ -70,8 +79,10 @@ export default function AddPlanDialog() {
   const router = useRouter();
   const company = useCompanyData();
   const [open, setOpen] = useState(false);
+  const [brand, setBrand] = useState("");
+  const [condition, setCondition] = useState("");
   const initValues: Inputs = {
-    expiration_date: "",
+    validy_date: "",
     plan_code: "",
     description: "",
     conditional_prices: [],
@@ -87,14 +98,17 @@ export default function AddPlanDialog() {
     control: form.control,
     name: "conditional_prices",
   });
-
+  const { data: brands } = api.brands.getbyCompany.useQuery({companyId: company.id});
+  const { data: relatives } = api.relative.list.useQuery(undefined);
   const { mutateAsync: createPlan } = api.plans.create.useMutation();
   const { mutateAsync: createPricePerAge } =
     api.pricePerAge.create.useMutation();
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
-      const parsedData = PlanSchema.parse(data);
+      const dataWithBrands = { ...data, brand_id: brand };
+
+      const parsedData = PlanSchema.parse(dataWithBrands);
       const plan = await createPlan(parsedData);
       data.conditional_prices.map((item) => {
         if (item.isConditional) {
@@ -145,92 +159,114 @@ export default function AddPlanDialog() {
               onSubmit={form.handleSubmit(onSubmit)}
               className="flex-col items-center justify-center gap-2 space-y-8"
             >
-              <FormField
-                control={form.control}
-                name="expiration_date"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col ">
-                    <FormLabel htmlFor="expiration_date">
-                      Fecha de vigencia
-                    </FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            <p>
-                              {field.value ? (
-                                dayjs
-                                  .utc(field.value)
-                                  .format("D [de] MMMM [de] YYYY")
-                              ) : (
-                                <span>Seleccione una fecha</span>
+              <div className="">
+                <FormField
+                  control={form.control}
+                  name="validy_date"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col ">
+                      <FormLabel htmlFor="validy_date">
+                        Fecha de vigencia
+                      </FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
+                                !field.value && "text-muted-foreground"
                               )}
-                            </p>
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={
-                            field.value ? new Date(field.value) : undefined
-                          }
-                          onSelect={field.onChange}
-                          disabled={(date: Date) => date < new Date()}
-                          initialFocus
+                            >
+                              <p>
+                                {field.value ? (
+                                  dayjs
+                                    .utc(field.value)
+                                    .format("D [de] MMMM [de] YYYY")
+                                ) : (
+                                  <span>Seleccione una fecha</span>
+                                )}
+                              </p>
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={
+                              field.value ? new Date(field.value) : undefined
+                            }
+                            onSelect={field.onChange}
+                            disabled={(date: Date) => date < new Date()}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div>
+                  <Label>Marca</Label>
+
+                  <Select onValueChange={setBrand} defaultValue={brand}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccione una unidad de negocio" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {brands?.map((brand) => (
+                        <SelectItem key={brand.id} value={brand.id}>
+                          {brand.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="">
+                <FormField
+                  control={form.control}
+                  name="plan_code"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel htmlFor="plan_code">Código de plan</FormLabel>
+                      <FormControl>
+                        <Input
+                          className="border-green-300 focus-visible:ring-green-400"
+                          id="plan_code"
+                          type="text"
+                          {...field}
                         />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="plan_code"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel htmlFor="plan_code">Código de plan</FormLabel>
-                    <FormControl>
-                      <Input
-                        className="border-green-300 focus-visible:ring-green-400"
-                        id="plan_code"
-                        type="text"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel htmlFor="description">Descripción</FormLabel>
-                    <FormControl>
-                      <Input
-                        className="border-green-300 focus-visible:ring-green-400"
-                        id="description"
-                        type="text"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel htmlFor="description">Descripción</FormLabel>
+                      <FormControl>
+                        <Input
+                          className="border-green-300 focus-visible:ring-green-400"
+                          id="description"
+                          type="text"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <div className="space-y-4">
-                <FormLabel>Precios Condicionales</FormLabel>
+                <FormLabel>Condicion</FormLabel>
                 <br />
                 {fields.map((item, index) => (
                   <div key={item.id} className="flex space-x-4 items-center">
@@ -243,29 +279,51 @@ export default function AddPlanDialog() {
                             <FormLabel
                               htmlFor={`conditional_prices.${index}.isConditional`}
                             >
-                              ¿Rango de edad?
+                              Condicion
                             </FormLabel>
                             <br />
                             <FormControl>
-                              <Checkbox
-                                className="border-green-300 focus-visible:ring-green-400"
-                                id={`conditional_prices.${index}.isConditional`}
-                                checked={
-                                  !initialValues.conditional_prices[index]
-                                    ?.isConditional
-                                }
-                                onCheckedChange={(e) => {
+                              <Select
+                                onValueChange={(value) => {
                                   const updatedValues = [
                                     ...initialValues.conditional_prices,
                                   ];
-                                  updatedValues[index]!.isConditional = !initialValues.conditional_prices[index]
-                                  ?.isConditional
+                                  updatedValues[index] = {
+                                    ...updatedValues[index],
+                                    isConditional: value === "true",
+                                    condition:
+                                      updatedValues[index]?.condition ?? "",
+                                    age_from:
+                                      updatedValues[index]?.age_from ?? "",
+                                    age_to: updatedValues[index]?.age_to ?? "",
+                                    price: updatedValues[index]?.price ?? "",
+                                  };
                                   setInitialValues({
                                     ...initialValues,
                                     conditional_prices: updatedValues,
                                   });
+                                  field.onChange(value === "true");
                                 }}
-                              />
+                                value={field.value ? "true" : "false"}
+                              >
+                                <SelectTrigger className="w-[180px] font-bold">
+                                  <SelectValue placeholder="Seleccione una opción" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem
+                                    value="false"
+                                    className="rounded-none border-b border-gray-600"
+                                  >
+                                    Rango de edad
+                                  </SelectItem>
+                                  <SelectItem
+                                    value="true"
+                                    className="rounded-none border-b border-gray-600"
+                                  >
+                                    Parentesco
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -285,12 +343,21 @@ export default function AddPlanDialog() {
                               Condición
                             </FormLabel>
                             <FormControl>
-                              <Input
-                                className="border-green-300 focus-visible:ring-green-400"
-                                id={`conditional_prices.${index}.condition`}
-                                type="text"
-                                {...field}
-                              />
+                              <Select
+                                onValueChange={(value) => setCondition(value)}
+                              >
+                                <SelectTrigger></SelectTrigger>
+                                <SelectContent>
+                                  {relatives?.map((relative) => (
+                                    <SelectItem
+                                      key={relative.relation}
+                                      value={relative.relation ?? ""}
+                                    >
+                                      {relative.relation}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                             </FormControl>
                             <FormMessage />
                           </FormItem>

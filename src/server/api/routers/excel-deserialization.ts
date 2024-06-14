@@ -67,12 +67,15 @@ export const excelDeserializationRouter = createTRPCRouter({
           });
 
           const health_insurance = await db.query.healthInsurances.findFirst({
-            where: eq(schema.healthInsurances.name, row.os!),
+            where: eq(schema.healthInsurances.identificationNumber, row.os!),
           });
 
           const health_insurance_origin =
             await db.query.healthInsurances.findMany({
-              where: eq(schema.healthInsurances.name, row["originating os"]!),
+              where: eq(
+                schema.healthInsurances.identificationNumber,
+                row["originating os"]!
+              ),
             });
 
           let familyGroupId = "";
@@ -152,6 +155,14 @@ export const excelDeserializationRouter = createTRPCRouter({
           ) {
             age--;
           }
+          const relativeExist = await db.query.relative.findMany({
+            where: eq(schema.relative.relation, row.relationship!),
+          });
+          if (!relativeExist || relativeExist.length == 0) {
+            await db.insert(schema.relative).values({
+              relation: row.relationship,
+            });
+          }
           console.log("creando integrante");
           const new_integrant = await db
             .insert(schema.integrants)
@@ -160,7 +171,7 @@ export const excelDeserializationRouter = createTRPCRouter({
               relationship: row.relationship,
               name: row.name,
               id_type: row.own_id_type,
-              id_number: row.own_id_number,
+              id_number: row.du_number,
               birth_date: row.birth_date,
               gender: row.gender,
               civil_status: row["marital status"],
@@ -209,7 +220,7 @@ export const excelDeserializationRouter = createTRPCRouter({
 
             await db.insert(schema.pa).values({
               card_number: row.card_number!,
-              CBU: row.cbu_number!,
+              CBU: row.cbu!,
               new_registration: row.is_new!,
               integrant_id: new_integrant[0]!.id,
               product_id: product!.id!,
@@ -350,7 +361,7 @@ async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
     }
 
     const health_insurance = await db.query.healthInsurances.findFirst({
-      where: eq(schema.healthInsurances.name, row.os!),
+      where: eq(schema.healthInsurances.identificationNumber, row.os!),
     });
 
     if (!health_insurance) {
@@ -362,7 +373,10 @@ async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
 
     if (row["originating os"]) {
       const originating_os = await db.query.healthInsurances.findFirst({
-        where: eq(schema.healthInsurances.name, row["originating os"]!),
+        where: eq(
+          schema.healthInsurances.identificationNumber,
+          row["originating os"]!
+        ),
       });
       if (!originating_os) {
         errors.push(`OBRA SOCIAL DE ORIGEN no valida en (fila:${rowNum})`);
@@ -394,12 +408,20 @@ async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
     }
     if (product) {
       const requiredColumns = await getRequiredColums(product.description);
+      console.log("required", requiredColumns);
+      console.log("row", row);
       for (const column of requiredColumns) {
+        console.log(column);
         const columnName = columnLabelByKey[column];
+        console.log(columnName);
         const value = row[column as keyof typeof row];
-        if (column in row && !value) {
+        console.log(value);
+        if (
+          (column in row && !value) ||
+          (column in row && value?.toString() === "")
+        ) {
           errors.push(
-            `La columna ${columnName} no puede ser nula, es obligatoria para el producto (fila:${rowNum})`
+            `La columna ${columnName} no puede ser nula ni estar vacia, es obligatoria para el producto (fila:${rowNum})`
           );
         }
       }

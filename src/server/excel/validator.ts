@@ -6,23 +6,10 @@ import type { TableHeaders } from "~/components/table";
 const stringAsDate = z
   .union([z.string(), z.number()])
   .transform((value) => {
-    if (typeof value === "number") {
-      value = value.toString().padStart(8, "0");
-    }
+    const date = excelDateToJSDate({ exceldate: Number(value) });
+    console.log(value);
 
-    const last4 = parseInt(value.substring(4, 8));
-
-    let day = value.substring(6, 8);
-    let month = value.substring(4, 6);
-    let year = value.substring(0, 4);
-
-    if (last4 > 2000) {
-      day = value.substring(0, 2);
-      month = value.substring(2, 4);
-      year = value.substring(4, 8);
-    }
-
-    return dayjs(`${year}-${month}-${day}`, "YYYY-MM-DD", true).toDate();
+    return date;
   })
   .refine(
     (value) => {
@@ -33,6 +20,12 @@ const stringAsDate = z
     },
     { message: "Caracteres incorrectos en columna:" }
   );
+
+function excelDateToJSDate({ exceldate }: { exceldate: number }) {
+  const excelEpoch = new Date(1899, 11, 30); // December 30, 1899
+  const jsDate = new Date(excelEpoch.getTime() + exceldate * 86400000);
+  return jsDate;
+}
 
 const stringAsBoolean = z
   .union([z.string(), z.boolean()])
@@ -56,6 +49,7 @@ const stringAsBoolean = z
 const numberAsString = z
   .union([z.number(), z.string()])
   .transform((value) => {
+    console.log(value);
     if (
       typeof value === "number" ||
       (typeof value === "string" && !isNaN(Number(value)))
@@ -83,7 +77,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     affiliate_number: string | null;
     extension: string | null;
     own_id_type: "DNI" | "PASAPORTE" | null;
-    own_id_number: string | null;
+    du_number: string | null;
     relationship: string | null;
     birth_date: Date | null;
     gender: "MASCULINO" | "FEMENINO" | "OTRO" | null;
@@ -115,7 +109,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     differential_value: string | null | undefined;
     plan: string | null;
     product: string | null;
-    cbu_number: string | null;
+    cbu: string | null;
     card_brand: string | null;
     is_new: boolean | null;
     card_number: string | null;
@@ -224,12 +218,7 @@ export const recDocumentValidator = z
       .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
       .nullable()
       .optional(),
-    BONIFICACION: z
-      .string()
-      .min(0)
-      .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
-      .nullable()
-      .optional(),
+    BONIFICACION: numberAsString.nullable().optional(),
     "DESDE BONIF.": stringAsDate.nullable().optional(),
     "HASTA BONIF.": stringAsDate.nullable().optional(),
     ESTADO: z
@@ -246,7 +235,12 @@ export const recDocumentValidator = z
       .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
       .nullable()
       .optional(),
-    "NRO AFILIADO": numberAsString.nullable().optional(),
+    "NRO AFILIADO": z
+      .string()
+      .min(0)
+      .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
+      .nullable()
+      .optional(),
     EXTENSION: z
       .string()
       .min(0)
@@ -356,7 +350,7 @@ export const recDocumentValidator = z
       affiliate_number: value["NRO AFILIADO"] ?? null,
       extension: value.EXTENSION ?? null,
       own_id_type: value["TIPO DOC PROPIO"] ?? null,
-      own_id_number: value["NRO DOC PROPIO"] ?? null,
+      du_number: value["NRO DOC PROPIO"] ?? null,
       relationship: value.PAR ?? null,
       birth_date: value["FECHA NACIMIENTO"] ?? null,
       gender: value.GENERO ?? null,
@@ -383,7 +377,7 @@ export const recDocumentValidator = z
       differential_value: value["DIFERENCIAL VALOR"],
       plan: value.PLAN ?? null,
       product: value["PRODUCTO (MEDIO DE PAGO)"] ?? null,
-      cbu_number: value["NRO CBU"] ?? null,
+      cbu: value["NRO CBU"] ?? null,
       card_brand: value["TC MARCA"] ?? null,
       is_new: value["ALTA NUEVA"] ?? null,
       card_number: value["NRO. TARJETA"] ?? null,
@@ -405,8 +399,8 @@ export const recHeaders: TableHeaders = [
   { key: "name", label: "NOMBRE", width: 140 },
   { key: "affiliate_number", label: "NRO AFILIADO", width: 140 },
   { key: "extension", label: "EXTENSION", width: 140 },
-  { key: "own_id_type", label: "TIPO DOC PROPIO", width: 140 },
-  { key: "own_id_number", label: "NRO DOC PROPIO", width: 140 },
+  { key: "du_type", label: "TIPO DOC PROPIO", width: 140 },
+  { key: "du_number", label: "NRO DOC PROPIO", width: 140 },
   { key: "relationship", label: "PAR", width: 140 },
   { key: "birth_date", label: "FECHA NACIMIENTO", width: 140 },
   { key: "gender", label: "GENERO", width: 140 },
@@ -432,8 +426,8 @@ export const recHeaders: TableHeaders = [
   { key: "differential_code", label: "DIFERENCIAL CODIGO", width: 140 },
   { key: "differential_value", label: "DIFERENCIAL VALOR", width: 140 },
   { key: "plan", label: "PLAN", width: 140 },
-  { key: "product", label: "PRODUCTO", width: 140 },
-  { key: "cbu_number", label: "NRO CBU", width: 140 },
+  { key: "product_number", label: "PRODUCTO", width: 140 },
+  { key: "cbu", label: "NRO CBU", width: 140 },
   { key: "card_brand", label: "TC MARCA", width: 140 },
   { key: "is_new", label: "ALTA NUEVA", width: 140 },
   { key: "card_type", label: "TIPO DE TARJETA", width: 140 },
@@ -454,7 +448,7 @@ export const requiredColumns = [
   { key: "affiliate_number", label: "NRO AFILIADO" },
   { key: "extension", label: "EXTENSION" },
   { key: "own_id_type", label: "TIPO DOC PROPIO" },
-  { key: "own_id_number", label: "NRO DOC PROPIO" },
+  { key: "du_number", label: "NRO DOC PROPIO" },
   { key: "relationship", label: "PAR" },
   { key: "birth_date", label: "FECHA NACIMIENTO" },
   { key: "gender", label: "GENERO" },

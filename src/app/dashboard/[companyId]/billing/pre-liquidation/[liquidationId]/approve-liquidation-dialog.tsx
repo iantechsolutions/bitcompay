@@ -24,20 +24,13 @@ function UpdateLiquidationEstadoDialog({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const { mutateAsync: updateLiquidation, isLoading } =
-    api.liquidations.change.useMutation();
+    api.facturas.approvePreLiquidation.useMutation();
   const { data } = api.liquidations.get.useQuery({ id: liquidationId });
   const approveLiquidation = async () => {
-    console.log("Approve liquidation logic goes here");
     await updateLiquidation({
-      id: liquidationId,
-      estado: "aprobado",
-      cuit: data?.cuit ?? "",
-      periodo: data?.period ?? new Date(),
-      pdv: data?.pdv ?? 0,
-      razonSocial: data?.razon_social ?? "",
-      userCreated: data?.userCreated ?? "",
-      userApproved: userId ?? "",
+      liquidationId: liquidationId,
     });
+
     router.push("./");
   };
 

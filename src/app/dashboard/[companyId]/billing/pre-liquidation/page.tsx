@@ -18,7 +18,7 @@ export default async function Page(props: { params: { companyId: string } }) {
   });
   const liquidations = liquidationsFull.filter(
     (liquidation) =>
-      // possibleBrands.some((brand) => brand?.id === liquidation.brandId) &&
+      possibleBrands?.some((brand) => brand?.id === liquidation.brandId) &&
       liquidation.estado === "pendiente"
   );
   return (

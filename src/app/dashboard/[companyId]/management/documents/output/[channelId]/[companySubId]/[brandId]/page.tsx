@@ -56,7 +56,6 @@ export default async function page({
       transaction?.collected_amount ?? transaction?.first_due_amount ?? 0;
   }
 
-  console.log("status_batch", status_batch);
   return (
     <>
       {channel ? (

@@ -148,6 +148,84 @@ const idDictionary: { [key: string]: number } = {
 //    **/
 //   const res = await afip.ElectronicBilling.createVoucher(data);
 // }
+
+async function approbateFactura(liquidationId: string) {
+  const liquidation = await db.query.liquidations.findFirst({
+    where: eq(schema.liquidations.id, liquidationId),
+    with: {
+      facturas: {
+        with: {
+          items: true,
+          family_group: {
+            with: {
+              integrants: {
+                with: {
+                  pa: true,
+                },
+              },
+              businessUnitData: {
+                with: {
+                  company: true,
+                  brand: true,
+                },
+              },
+              plan: true,
+            },
+          },
+        },
+      },
+    },
+  });
+  if (liquidation?.estado === "pendiente") {
+    const user = await currentUser();
+    const updatedLiquidation = await db
+      .update(schema.liquidations)
+      .set({ estado: "aprobada", userApproved: user?.id })
+      .where(eq(schema.liquidations.id, liquidationId));
+
+    for (let factura of liquidation?.facturas) {
+      const randomNumber =
+        Math.floor(Math.random() * (100000 - 1000 + 1)) + 1000;
+      const billResponsible = factura.family_group?.integrants.find(
+        (integrant) => integrant.isBillResponsible
+      );
+      const producto = await db.query.products.findFirst({
+        where: eq(schema.products.id, billResponsible?.pa[0]?.product_id ?? ""),
+      });
+      const status = await db.query.paymentStatus.findFirst({
+        where: eq(schema.paymentStatus.code, "91"),
+      });
+      const payment = await db
+        .insert(schema.payments)
+        .values({
+          companyId: factura.family_group?.businessUnitData?.company?.id ?? "",
+          invoice_number: randomNumber,
+          userId: user?.id ?? "",
+          g_c: factura.family_group?.businessUnitData?.brand?.number ?? 0,
+          name: billResponsible?.name ?? "",
+          fiscal_id_type: billResponsible?.fiscal_id_type,
+          fiscal_id_number: parseInt(billResponsible?.fiscal_id_number ?? "0"),
+          du_type: billResponsible?.id_type,
+          du_number: parseInt(billResponsible?.id_number ?? "0"),
+          product: producto?.id,
+          period: factura.due_date,
+          first_due_amount: factura?.importe,
+          first_due_date: factura.due_date,
+          cbu: billResponsible?.pa[0]?.CBU,
+          factura_id: factura?.id,
+          documentUploadId: "0AspRyw8g4jgDAuNGAeBX",
+          product_number: producto?.number ?? 0,
+          statusId: status?.id,
+          // address: billResponsible?.address,
+        })
+        .returning();
+    }
+    return "OK";
+  } else {
+    return "Error";
+  }
+}
+
 async function preparateFactura(
   afip: Afip,
   grupos: grupoCompleto[],
@@ -157,11 +235,10 @@ async function preparateFactura(
   pv: string,
   brandId: string,
   companyId: string,
-  liquidationId: string,
+  liquidationId: string
 ) {
   const user = await currentUser();
 
-  
   grupos.forEach(async (grupo) => {
     const billResponsible = grupo.integrants.find(
       (integrant) => integrant.isBillResponsible
@@ -185,7 +262,7 @@ async function preparateFactura(
         ptoVenta: parseInt(pv),
 
         nroFactura: 0,
-        tipoFactura: grupo.businessUnitData?.brand?.bill_type ?? "",
+        tipoFactura: grupo.businessUnitData?.brand?.bill_type,
         concepto: parseInt(grupo.businessUnitData?.brand?.concept ?? "0"),
         // concepto: 1,
 
@@ -210,30 +287,6 @@ async function preparateFactura(
       where: eq(schema.paymentStatus.code, "91"),
     });
     console.log("numero", producto?.number);
-    const payment = await db
-      .insert(schema.payments)
-      .values({
-        companyId: grupo?.businessUnitData?.company?.id ?? "",
-        invoice_number: randomNumber,
-        userId: user?.id ?? "",
-        g_c: grupo?.businessUnitData?.brand?.number ?? 0,
-        name: billResponsible?.name ?? "",
-        fiscal_id_type: billResponsible?.fiscal_id_type,
-        fiscal_id_number: parseInt(billResponsible?.fiscal_id_number ?? "0"),
-        du_type: billResponsible?.id_type,
-        du_number: parseInt(billResponsible?.id_number ?? "0"),
-        product: producto?.id,
-        period: dateVencimiento,
-        first_due_amount: factura[0]?.importe,
-        first_due_date: dateVencimiento,
-        cbu: billResponsible?.pa[0]?.CBU,
-        factura_id: factura[0]?.id,
-        documentUploadId: "0AspRyw8g4jgDAuNGAeBX",
-        product_number: producto?.number ?? 0,
-        statusId: status?.id,
-        // address: billResponsible?.address,
-      })
-      .returning();
   });
   return "OK";
 }
@@ -336,6 +389,16 @@ export const facturasRouter = createTRPCRouter({
 
       return newProvider;
     }),
+  approvePreLiquidation: protectedProcedure
+    .input(
+      z.object({
+        liquidationId: z.string(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const response = await approbateFactura(input.liquidationId);
+      // return response;
+    }),
   createPreLiquidation: protectedProcedure
     .input(
       z.object({
@@ -384,7 +447,7 @@ export const facturasRouter = createTRPCRouter({
         input.pv,
         input.brandId,
         input.companyId,
-        liquidation!.id,
+        liquidation!.id
       );
       return liquidation;
     }),

@@ -57,7 +57,7 @@ dayjs.extend(utc);
 dayjs.locale("es");
 
 type Inputs = {
-  expiration_date: string;
+  validy_date: string;
   plan_code: string;
   description: string;
 };
@@ -68,7 +68,7 @@ export default function PlanPage(props: {
   const router = useRouter();
   const company = useCompanyData();
   const initialValues: Inputs = {
-    expiration_date: props.plan!.expiration_date.toString(),
+    validy_date: props.plan!.validy_date.toString(),
     plan_code: props.plan!.plan_code!,
     description: props.plan!.description!,
   };
@@ -80,14 +80,10 @@ export default function PlanPage(props: {
 
   const { errors } = form.formState;
   const { watch } = form;
-  console.log(errors);
-  console.log(JSON.stringify(watch(), null, 2));
 
   const { mutateAsync: changePlan } = api.plans.change.useMutation();
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
-      console.log("handleSubmit");
-      console.log(data);
       const parsedData = PlanSchema.parse(data);
       await changePlan({ ...parsedData, planId: company.id });
       router.push(`/dashboard/${company.id}/administration/units`);
@@ -114,10 +110,10 @@ export default function PlanPage(props: {
                   >
                     <FormField
                       control={form.control}
-                      name="expiration_date"
+                      name="validy_date"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel htmlFor="expiration_date">
+                          <FormLabel htmlFor="validy_date">
                             Fecha de vigencia
                           </FormLabel>
                           <br />

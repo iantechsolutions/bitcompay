@@ -39,7 +39,6 @@ export default function AddPreLiquidation(props: { companyId: string }) {
   const [fechaDesde, setFechaDesde] = useState<Date>();
   const [fechaHasta, setFechaHasta] = useState<Date>();
   const [puntoVenta, setPuntoVenta] = useState("");
-  console.log(props);
   const { data: marcas } = api.brands.getbyCompany.useQuery({
     companyId: props.companyId,
   });
@@ -51,7 +50,7 @@ export default function AddPreLiquidation(props: { companyId: string }) {
   // const { mutateAsync: createFacturas } = api.family_groups.createPreLiquidation.useMutation();
   async function handleCreate() {
     // const { data:grupos } = api.family_groups.getByBrand.useQuery({brandId: brandId});
-    console.log("acaaaaaaaaaaa");
+
     const liquidation = await createLiquidation({
       pv: puntoVenta,
       brandId: brandId,
@@ -60,7 +59,6 @@ export default function AddPreLiquidation(props: { companyId: string }) {
       dateDue: fechaVencimiento2,
       companyId: props.companyId,
     });
-    console.log("liquidation", liquidation);
     if (liquidation) {
       toast.success("Pre-liquidacion creada correctamente");
       router.refresh();
