@@ -7,14 +7,14 @@ import { CircleUserRound } from "lucide-react";
 export default async function Page(props: { params: { companyId: string } }) {
   const procedure = await api.procedure.list.query();
   const procedureComplete = procedure.filter(
-    (procedure) => procedure.estado === "completado",
+    (procedure) => procedure.estado === "completado"
   );
 
   return (
     <LayoutContainer>
       <section className="space-y-2">
         <div className="flex justify-between">
-          <Title>Beneficios</Title>
+          <Title>Beneficios por prestaciones</Title>
         </div>
         <List>
           {procedureComplete.map((procedureComplete) => {

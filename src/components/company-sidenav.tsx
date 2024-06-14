@@ -64,6 +64,7 @@ export default function CompanySidenav(props: { companyId: string }) {
     Tesoreria: "treasury/",
     Facturacion: "billing/",
     Ventas: "management/sales/",
+    Proveedores: "management/suppliers/",
     Documentos: "management/documents/",
   };
   const pathname = usePathname();
@@ -378,7 +379,7 @@ export default function CompanySidenav(props: { companyId: string }) {
               href={`/dashboard/${props.companyId}/audit/benefits`}
               icon={<Gift />}
             >
-              Beneficios
+              Beneficios por prestaciones
             </SidenavItem>
             <SidenavItem
               href={`/dashboard/${props.companyId}/audit/fixed_eventual`}
