@@ -30,8 +30,7 @@ export default function AddProcedure() {
   const { mutateAsync: createProcedure } = api.procedure.create.useMutation();
   const { mutateAsync: createfamily_group } =
     api.family_groups.create.useMutation();
-  const { mutateAsync: createPaymentInfo } =
-    api.pa.create.useMutation();
+  const { mutateAsync: createPaymentInfo } = api.pa.create.useMutation();
   const [membersData, setMembersData] = useState<InputsMembers[]>([]);
 
   const generalInfoForm = useForm<InputsGeneralInfo>();
@@ -141,6 +140,8 @@ export default function AddProcedure() {
         expire_date: billingFormValues.card_expiration_date ?? null,
         CCV: billingFormValues.card_security_code,
         CBU: billingFormValues.cbu,
+        card_type: billingFormValues.card_type ?? null,
+        card_brand: billingFormValues.card_brand ?? null,
       });
     } catch (e) {
       const error = asTRPCError(e)!;

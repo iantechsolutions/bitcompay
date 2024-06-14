@@ -950,6 +950,7 @@ export const pa = pgTable("pa", {
   CCV: varchar("CCV", { length: 255 }),
   CBU: varchar("CBU", { length: 255 }),
   card_brand: varchar("card_brand", { length: 255 }),
+  card_type: varchar("card_type", { length: 255 }),
   new_registration: boolean("new_registration").notNull().default(true),
   integrant_id: varchar("integrant_id", { length: 255 }).references(
     () => integrants.id

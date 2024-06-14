@@ -214,20 +214,19 @@ export const excelDeserializationRouter = createTRPCRouter({
           });
 
           if (row.isPaymentResponsible) {
-            console.log("creando informacion de pago");
             const product = await db.query.products.findFirst({
               where: eq(schema.products.name, row.product!),
             });
+
             await db.insert(schema.pa).values({
               card_number: row.card_number!,
               CBU: row.cbu!,
-              card_brand: row.card_brand!,
               new_registration: row.is_new!,
               integrant_id: new_integrant[0]!.id,
               product_id: product!.id!,
-              // card_number: row.card_number!,
               // CBU: row.cbu_number!,
-              // card_brand: row.card_brand!,
+              card_brand: row.card_brand ?? null,
+              card_type: row.card_type ?? null,
               // new_registration: row.is_new!,
               // integrant_id: new_integrant[0]!.id,
               // product: product?.id,
@@ -318,6 +317,30 @@ async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
   for (let i = 0; i < transformedRows.length; i++) {
     const row = transformedRows[i]!;
     const rowNum = i + 2;
+    // autocompletar info de tarjeta o tirar error si no encuntra
+    const response = await fetch(
+      `https://data.handyapi.com/bin/${row.card_number?.slice(0, 8)}`
+    );
+
+    const json = await response?.json();
+    let row_card_type = row.card_type ?? json?.card_type;
+    let row_card_brand = row.card_brand ?? json?.card_brand;
+
+    if (!row_card_brand || !row_card_type) {
+      errors.push(
+        `No se pudo obtener (${!row_card_brand ? "Marca" : ""}, ${
+          !row_card_type ? "Tipo" : ""
+        }) de la tarjeta en fila: ${rowNum} \n`
+      );
+    }
+
+    if (!row_card_brand) {
+      row_card_brand = json?.Scheme;
+    }
+    if (!row_card_type) {
+      row_card_type = json?.Type;
+    }
+
     for (const column of keysArray) {
       const value = (row as Record<string, unknown>)[column];
 

@@ -149,7 +149,6 @@ export const uploadsRouter = createTRPCRouter({
           input.uploadId,
           undefined
         );
-        console.log(records);
 
         await tx
           .update(schema.responseDocumentUploads)
@@ -162,7 +161,7 @@ export const uploadsRouter = createTRPCRouter({
         await Promise.all(
           records.map(async (record) => {
             const invoiceNumber = record.invoice_number || 0;
-            console.log("record.statusId", record.statusId);
+
             await tx
               .update(schema.payments)
               .set({ statusId: record.statusId })
@@ -295,6 +294,9 @@ export const uploadsRouter = createTRPCRouter({
               collected_amount: row.collected_amount ?? null,
               cbu: row.cbu ?? null,
               statusId: defaultStatus?.id!,
+              card_number: row.card_number?.toString() ?? null,
+              card_type: row.card_type ?? null,
+              card_brand: row.card_brand ?? null,
             }))
           );
         }
@@ -402,7 +404,7 @@ async function readResponseUploadContents(
   // encabezado
   lines.shift();
   lines.pop();
-  console.log("lines: ", lines);
+
   let total_rows = 2;
   let recordIndex = 1;
   const records = [];
@@ -500,6 +502,7 @@ async function readUploadContents(
 
   // const transformedRows = recRowsTransformer(trimmedRows);
   const temp = recRowsTransformer(trimmedRows);
+  console.log(temp);
   const transformedRows = temp.transformedRows;
   const cellsToEdit = temp.cellsToEdit;
   const productsMap = Object.fromEntries(
@@ -571,14 +574,36 @@ async function readUploadContents(
     const rowNum = i + 2;
     // verificar producto
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    console.log(row.card_number);
+    console.log(
+      `https://data.handyapi.com/bin/${row.card_number
+        ?.toString()
+        .replace(/\s/g, "")
+        .slice(0, 8)}`
+    );
+    const response = await fetch(
+      `https://data.handyapi.com/bin/${row.card_number
+        ?.toString()
+        .replace(/\s/g, "")
+        .slice(0, 8)}`
+    );
 
-    if (row.card_number) {
-      const response = await fetch(
-        `https://data.handyapi.com/bin/${row.card_number.slice(0, 8)}`
+    const json = await response?.json();
+    console.log(json);
+    let row_card_type = row.card_type ?? json?.Type;
+    let row_card_brand = row.card_brand ?? json?.Scheme;
+    if (!row_card_brand || !row_card_type) {
+      errors.push(
+        `No se pudo obtener (${!row_card_brand ? "Marca" : ""}, ${
+          !row_card_type ? "Tipo" : ""
+        }) de la tarjeta en fila: ${rowNum} \n`
       );
-      const json = await response.json();
-      row.card_type = json.Type;
-      row.card_brand = json.Scheme;
+    }
+    if (!row_card_brand) {
+      row_card_brand = json?.Scheme;
+    }
+    if (!row_card_type) {
+      row_card_type = json?.Type;
     }
 
     let product: any = undefined;

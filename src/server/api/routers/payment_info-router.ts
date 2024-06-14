@@ -42,6 +42,8 @@ export const paymentInfoRouter = createTRPCRouter({
     .input(
       z.object({
         card_number: z.string().nullable().optional(),
+        card_type: z.string().nullable().optional(),
+        card_brand: z.string().nullable().optional(),
         expire_date: z.date().nullable().optional(),
         CCV: z.string().nullable().optional(),
         CBU: z.string().nullable().optional(),
