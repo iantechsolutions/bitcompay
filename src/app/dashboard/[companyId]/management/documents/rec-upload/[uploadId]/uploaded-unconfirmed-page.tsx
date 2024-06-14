@@ -182,10 +182,7 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
         let formattedPeriod: string | undefined;
 
         if (row.period && row.period instanceof Date) {
-          console.log("ACAEMPIEZAFORMATEADO");
-          console.log(row.period);
           formattedPeriod = dayjs(row.period).format("MM-YYYY");
-          console.log(formattedPeriod);
         }
 
         return { ...row, period: formattedPeriod };

@@ -262,7 +262,7 @@ async function preparateFactura(
         ptoVenta: parseInt(pv),
 
         nroFactura: 0,
-        tipoFactura: grupo.businessUnitData?.brand?.bill_type ?? "",
+        tipoFactura: grupo.businessUnitData?.brand?.bill_type,
         concepto: parseInt(grupo.businessUnitData?.brand?.concept ?? "0"),
         // concepto: 1,
 

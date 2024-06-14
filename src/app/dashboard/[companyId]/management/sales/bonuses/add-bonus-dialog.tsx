@@ -50,7 +50,6 @@ export default function AddBonusDialog() {
   const form = useForm<Inputs>();
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
-      console.log(data);
       await createBonus({
         appliedUser: data.appliedUser,
         approverUser: data.aprovedUser,
