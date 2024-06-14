@@ -98,7 +98,9 @@ export default function AddPlanDialog() {
     control: form.control,
     name: "conditional_prices",
   });
-  const { data: brands } = api.brands.getbyCompany.useQuery({companyId: company.id});
+  const { data: brands } = api.brands.getbyCompany.useQuery({
+    companyId: company.id,
+  });
   const { data: relatives } = api.relative.list.useQuery(undefined);
   const { mutateAsync: createPlan } = api.plans.create.useMutation();
   const { mutateAsync: createPricePerAge } =
@@ -113,10 +115,11 @@ export default function AddPlanDialog() {
       data.conditional_prices.map((item) => {
         if (item.isConditional) {
           createPricePerAge({
-            condition: item.condition,
+            condition: condition,
             amount: parseFloat(item.price),
-            plan_id: "1",
+            plan_id: plan[0]!.id,
             isAmountByAge: false,
+            validy_date: dayjs.utc(data.validy_date).toDate(),
           });
         } else {
           for (
@@ -127,8 +130,9 @@ export default function AddPlanDialog() {
             createPricePerAge({
               age: i,
               amount: parseFloat(item.price),
-              plan_id: "1",
+              plan_id: plan[0]!.id,
               isAmountByAge: true,
+              validy_date: dayjs.utc(data.validy_date).toDate(),
             });
           }
         }
@@ -340,13 +344,15 @@ export default function AddPlanDialog() {
                             <FormLabel
                               htmlFor={`conditional_prices.${index}.condition`}
                             >
-                              Condición
+                              Relacion
                             </FormLabel>
                             <FormControl>
                               <Select
                                 onValueChange={(value) => setCondition(value)}
                               >
-                                <SelectTrigger></SelectTrigger>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Seleccione una opción" />
+                                </SelectTrigger>
                                 <SelectContent>
                                   {relatives?.map((relative) => (
                                     <SelectItem
@@ -455,14 +461,14 @@ export default function AddPlanDialog() {
                       age_from: "",
                       age_to: "",
                       price: "",
-                      isConditional: false,
+                      isConditional: true,
                     });
                     initialValues.conditional_prices.push({
                       condition: "",
                       age_from: "",
                       age_to: "",
                       price: "",
-                      isConditional: false,
+                      isConditional: true,
                     });
                   }}
                 >

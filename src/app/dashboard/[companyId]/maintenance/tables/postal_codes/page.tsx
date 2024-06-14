@@ -4,6 +4,7 @@ import LayoutContainer from "~/components/layout-container";
 import { api } from "~/trpc/server";
 
 import { healthInsurances, modos } from "~/server/db/schema";
+import { AddPostalCode } from "./add-postalcode-dialog";
 
 export default async function Home(props: { params: { companyId: string } }) {
   return (
@@ -13,6 +14,7 @@ export default async function Home(props: { params: { companyId: string } }) {
           <Title>Codigo postal</Title>
         </div>
       </section>
+      <AddPostalCode/>
     </LayoutContainer>
   );
 }

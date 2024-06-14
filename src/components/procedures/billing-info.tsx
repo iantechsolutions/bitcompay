@@ -5,7 +5,6 @@ import {
   type UseFormReturn,
 } from "react-hook-form";
 import { z } from "zod";
-import * as yup from "yup";
 import {
   Form,
   FormControl,
