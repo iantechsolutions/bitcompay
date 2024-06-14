@@ -6,23 +6,10 @@ import type { TableHeaders } from "~/components/table";
 const stringAsDate = z
   .union([z.string(), z.number()])
   .transform((value) => {
-    if (typeof value === "number") {
-      value = value.toString().padStart(8, "0");
-    }
+    const date = excelDateToJSDate({ exceldate: Number(value) });
+    console.log(value);
 
-    const last4 = parseInt(value.substring(4, 8));
-
-    let day = value.substring(6, 8);
-    let month = value.substring(4, 6);
-    let year = value.substring(0, 4);
-
-    if (last4 > 2000) {
-      day = value.substring(0, 2);
-      month = value.substring(2, 4);
-      year = value.substring(4, 8);
-    }
-
-    return dayjs(`${year}-${month}-${day}`, "YYYY-MM-DD", true).toDate();
+    return date;
   })
   .refine(
     (value) => {
@@ -33,6 +20,12 @@ const stringAsDate = z
     },
     { message: "Caracteres incorrectos en columna:" }
   );
+
+function excelDateToJSDate({ exceldate }: { exceldate: number }) {
+  const excelEpoch = new Date(1899, 11, 30); // December 30, 1899
+  const jsDate = new Date(excelEpoch.getTime() + exceldate * 86400000);
+  return jsDate;
+}
 
 const stringAsBoolean = z
   .union([z.string(), z.boolean()])
@@ -56,6 +49,7 @@ const stringAsBoolean = z
 const numberAsString = z
   .union([z.number(), z.string()])
   .transform((value) => {
+    console.log(value);
     if (
       typeof value === "number" ||
       (typeof value === "string" && !isNaN(Number(value)))
@@ -222,12 +216,7 @@ export const recDocumentValidator = z
       .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
       .nullable()
       .optional(),
-    BONIFICACION: z
-      .string()
-      .min(0)
-      .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
-      .nullable()
-      .optional(),
+    BONIFICACION: numberAsString.nullable().optional(),
     "DESDE BONIF.": stringAsDate.nullable().optional(),
     "HASTA BONIF.": stringAsDate.nullable().optional(),
     ESTADO: z
@@ -244,7 +233,12 @@ export const recDocumentValidator = z
       .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
       .nullable()
       .optional(),
-    "NRO AFILIADO": numberAsString.nullable().optional(),
+    "NRO AFILIADO": z
+      .string()
+      .min(0)
+      .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
+      .nullable()
+      .optional(),
     EXTENSION: z
       .string()
       .min(0)

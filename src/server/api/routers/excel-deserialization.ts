@@ -330,7 +330,7 @@ async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
     }
 
     const health_insurance = await db.query.healthInsurances.findFirst({
-      where: eq(schema.healthInsurances.name, row.os!),
+      where: eq(schema.healthInsurances.identificationNumber, row.os!),
     });
 
     if (!health_insurance) {
@@ -342,7 +342,10 @@ async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
 
     if (row["originating os"]) {
       const originating_os = await db.query.healthInsurances.findFirst({
-        where: eq(schema.healthInsurances.name, row["originating os"]!),
+        where: eq(
+          schema.healthInsurances.identificationNumber,
+          row["originating os"]!
+        ),
       });
       if (!originating_os) {
         errors.push(`OBRA SOCIAL DE ORIGEN no valida en (fila:${rowNum})`);

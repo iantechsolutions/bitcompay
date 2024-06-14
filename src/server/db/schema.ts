@@ -792,9 +792,6 @@ export const family_groups = pgTable("family_groups", {
   validity: timestamp("validity", { mode: "date" }),
   plan: varchar("plan").references(() => plans.id),
   modo: varchar("modo").references(() => modos.id),
-  // healthInsurances: varchar("healthInsurances")
-  //   .references(() => healthInsurances.id)
-  //   .notNull(),
   receipt: varchar("receipt", { length: 255 }),
   bonus: varchar("bonus", { length: 255 }),
   procedureId: varchar("procedureId", { length: 255 }).references(
