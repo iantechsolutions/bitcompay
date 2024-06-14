@@ -201,7 +201,6 @@ export default function GenerateChannelOutputPage(props: {
                       </Label>
                       <Input
                         id="fileName"
-                        value={fileName}
                         onChange={handleName}
                         className="col-span-3"
                       />
