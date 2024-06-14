@@ -11,7 +11,7 @@ import { type RouterOutputs } from "~/trpc/shared";
 dayjs.extend(utc);
 dayjs.locale("es");
 export default function TransactionsPage(props: {
-  transactions: RouterOutputs["transactions"]["list"];
+  affiliates: RouterOutputs["family_groups"]["list"];
 }) {
   const [height, setHeight] = useState(600);
 
@@ -29,19 +29,14 @@ export default function TransactionsPage(props: {
     };
   }, []);
 
-  const tableRows = props.transactions.map((transaction) => {
-    return {
-      ...transaction,
-      period: dayjs.utc(transaction.period).format("MMMM YYYY").toUpperCase(),
-    };
-  });
-
   return (
     <div>
-      <LargeTable height={height} headers={recHeaders} rows={tableRows} />
-      <div className="fixed right-20 top-4 z-10">
-        {/* <TransactionsFiltersDialog filters={0} onChange={() => {}} /> */}
-      </div>
+      <LargeTable
+        height={height}
+        headers={recHeaders}
+        rows={props.affiliates}
+      />
+      <div className="fixed right-20 top-4 z-10"></div>
     </div>
   );
 }
