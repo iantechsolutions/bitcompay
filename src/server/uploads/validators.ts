@@ -107,6 +107,7 @@ export const recDocumentValidator = z
       .nullable()
       .optional(),
     "Nro. Tarjeta": z.string().length(16).nullable().optional(),
+    "Tipo de Tarjeta": z.string().min(1).max(140).nullable().optional(),
     // NOT OPTIONAL!!!
     "Nro Factura": stringToValidIntegerZodTransformer.optional(),
     //
@@ -154,6 +155,7 @@ export const recDocumentValidator = z
       card_brand: value["TC Marca"] ?? null,
       is_new: value["Alta Nueva"] ?? null,
       card_number: value["Nro. Tarjeta"] ?? null,
+      card_type: value["Tipo de Tarjeta"] ?? null,
       invoice_number: value["Nro Factura"] ?? null,
       period: value.Período ?? null,
       first_due_amount: value["Importe 1er Vto."] ?? null,
@@ -187,6 +189,7 @@ export const recDocumentValidatorWithoutProduct = z
     "TC Marca": z.any().nullable().optional(),
     "Alta Nueva": z.any().nullable().optional(),
     "Nro. Tarjeta": z.any().nullable().optional(),
+    "Tipo de Tarjeta": z.any().nullable().optional(),
     // NOT OPTIONAL!!!
     "Nro Factura": z.any().optional(),
     //
@@ -216,6 +219,7 @@ export const recDocumentValidatorWithoutProduct = z
       card_brand: value["TC Marca"] ?? null,
       is_new: value["Alta Nueva"] ?? null,
       card_number: value["Nro. Tarjeta"] ?? null,
+      card_type: value["Tipo de Tarjeta"] ?? null,
       invoice_number: value["Nro Factura"] ?? null,
       period: value.Período ?? null,
       first_due_amount: value["Importe 1er Vto."] ?? null,
@@ -249,6 +253,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
       card_brand: string | null;
       is_new: boolean | null;
       card_number: string | null;
+      card_type: string | null;
       invoice_number: number | null;
       period: Date | null;
       first_due_amount: number | null;
@@ -277,6 +282,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     card_brand: string | null;
     is_new: boolean | null;
     card_number: string | null;
+    card_type: string | null;
     invoice_number: number | null;
     period: Date | null;
     first_due_amount: number | null;
@@ -302,6 +308,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     card_brand: null,
     is_new: null,
     card_number: null,
+    card_type: null,
     invoice_number: null,
     period: null,
     first_due_amount: null,
@@ -339,6 +346,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
               card_brand: parsedRow.at(0)?.card_brand,
               is_new: parsedRow.at(0)?.is_new,
               card_number: parsedRow.at(0)?.card_number,
+              card_type: parsedRow.at(0)?.card_type,
               invoice_number: parsedRow.at(0)?.invoice_number,
               period: parsedRow.at(0)?.period,
               first_due_amount: parsedRow.at(0)?.first_due_amount,

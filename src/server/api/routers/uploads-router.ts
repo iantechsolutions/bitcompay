@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
 import * as xlsx from "xlsx";
-import { z } from "zod";
+import { record, z } from "zod";
 import { createId } from "~/lib/utils";
 import { type DBTX, db } from "~/server/db";
 import * as schema from "~/server/db/schema";
@@ -571,6 +571,16 @@ async function readUploadContents(
     const rowNum = i + 2;
     // verificar producto
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+
+    if (row.card_number) {
+      const response = await fetch(
+        `https://data.handyapi.com/bin/${row.card_number.slice(0, 8)}`
+      );
+      const json = await response.json();
+      row.card_type = json.Type;
+      row.card_brand = json.Scheme;
+    }
+
     let product: any = undefined;
     if (row.product_number) {
       if (row.product_number in productsMap) {
@@ -672,6 +682,7 @@ async function readUploadContents(
       header.key === "g_c" ||
       header.key === "product_number"
   );
+  // autocompletar card_type y card_brand
 
   if (errors.length > 0) {
     throw new TRPCError({ code: "BAD_REQUEST", message: errors.join("\n") });

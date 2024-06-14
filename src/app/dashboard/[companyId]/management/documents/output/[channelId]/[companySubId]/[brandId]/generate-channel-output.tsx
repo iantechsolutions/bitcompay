@@ -27,6 +27,8 @@ import {
 } from "~/components/ui/table";
 import { api } from "~/trpc/react";
 import type { RouterOutputs } from "~/trpc/shared";
+import { SelectItem, SelectTrigger } from "@radix-ui/react-select";
+import { Select, SelectContent } from "~/components/ui/select";
 export default function GenerateChannelOutputPage(props: {
   channel: { id: string; name: string };
   company: NonNullable<RouterOutputs["companies"]["get"]>;
@@ -47,6 +49,8 @@ export default function GenerateChannelOutputPage(props: {
   });
 
   const [fileName, setFileName] = useState("");
+  const [cardType, setCardType] = useState<string | null>(null);
+  const [cardBrand, setCardBrand] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [disabled, setDisabled] = useState(false);
   async function handleGenerate() {
@@ -147,15 +151,38 @@ export default function GenerateChannelOutputPage(props: {
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="fileName" className="text-right">
-                    Nombre del archivo
-                  </Label>
-                  <Input
-                    id="fileName"
-                    value={fileName}
-                    onChange={handleName}
-                    className="col-span-3"
-                  />
+                  {props.channel.name === "DEBITO AUTOMATICO" ? (
+                    <>
+                      <Label htmlFor="fileName" className="text-right">
+                        Nombre del archivo
+                      </Label>
+                      <Input
+                        id="fileName"
+                        value={fileName}
+                        onChange={handleName}
+                        className="col-span-3"
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <Label htmlFor="card_type"> Tipo de Tarjeta</Label>
+                      <Select onValueChange={(value) => setCardType(value)}>
+                        <SelectTrigger></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="debito">Debito</SelectItem>
+                          <SelectItem value="credito">Credito</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Label htmlFor="card_brand">Marca de Tarjeta</Label>
+                      <Select onValueChange={(value) => setCardBrand(value)}>
+                        <SelectTrigger></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="visa">Visa</SelectItem>
+                          <SelectItem value="mastercard">MasterCard</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </>
+                  )}
                   {error && (
                     <span className="w-full text-red-600 text-xs">{error}</span>
                   )}
@@ -170,10 +197,6 @@ export default function GenerateChannelOutputPage(props: {
               </DialogFooter>
             </DialogContent>
           </Dialog>
-
-          <div className="mt-3">
-            <h3>No hay transacciones para generar archivo</h3>
-          </div>
 
           {data !== undefined && (
             <div className="mt-5">
