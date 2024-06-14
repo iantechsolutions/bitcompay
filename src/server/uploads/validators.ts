@@ -9,9 +9,27 @@ export type DOCRowsValidatorAndTransformer = (
 const stringToValidIntegerZodTransformer = z
   .string()
   .or(z.number())
-  .transform((v) => Number.parseInt(v.toString()))
+  .transform((v) => Number.parseInt(v.toString().replace(/\s/g, "")))
   .refine(Number.isInteger);
 
+const stringAsBoolean = z
+  .union([z.string(), z.boolean()])
+  .nullable()
+  .optional()
+  .transform((value) => {
+    if (typeof value === "string" && value.toLowerCase() === "verdadero") {
+      return true;
+    }
+    if (typeof value === "string" && value.toLowerCase() === "falso") {
+      return false;
+    }
+    if (typeof value === "boolean") {
+      return value;
+    }
+  })
+  .refine((value) => typeof value === "boolean", {
+    message: "Caracteres incorrectos en columna:",
+  });
 const nullableStringToValidIntegerZodTransformer = z
   .string()
   .or(z.number())
@@ -101,12 +119,8 @@ export const recDocumentValidator = z
       .optional(),
     "Nro CBU": cbuSchema.nullable().optional(),
     "TC Marca": z.string().min(1).max(140).nullable().optional(),
-    "Alta Nueva": z
-      .string()
-      .transform((value) => value.toLowerCase() === "si")
-      .nullable()
-      .optional(),
-    "Nro. Tarjeta": z.string().length(16).nullable().optional(),
+    "Alta Nueva": stringAsBoolean.nullable().optional(),
+    "Nro. Tarjeta": stringToValidIntegerZodTransformer.nullable().optional(),
     "Tipo de Tarjeta": z.string().min(1).max(140).nullable().optional(),
     // NOT OPTIONAL!!!
     "Nro Factura": stringToValidIntegerZodTransformer.optional(),
@@ -252,7 +266,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
       cbu: string | null;
       card_brand: string | null;
       is_new: boolean | null;
-      card_number: string | null;
+      card_number: number | null;
       card_type: string | null;
       invoice_number: number | null;
       period: Date | null;
@@ -281,7 +295,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     cbu: string | null;
     card_brand: string | null;
     is_new: boolean | null;
-    card_number: string | null;
+    card_number: number | null;
     card_type: string | null;
     invoice_number: number | null;
     period: Date | null;

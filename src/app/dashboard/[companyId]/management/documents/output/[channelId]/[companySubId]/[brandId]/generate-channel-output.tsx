@@ -1,5 +1,8 @@
 "use client";
 import { z } from "zod";
+import dayjs from "dayjs";
+import "dayjs/locale/es";
+import utc from "dayjs/plugin/utc";
 import {
   Dialog,
   DialogContent,
@@ -8,13 +11,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
+import { Calendar } from "~/components/ui/calendar";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-
+import { Calendar as CalendarIcon } from "lucide-react";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { DownloadIcon, Loader2Icon } from "lucide-react";
 import { ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Title } from "~/components/title";
 import { Button } from "~/components/ui/button";
 import {
@@ -27,8 +31,31 @@ import {
 } from "~/components/ui/table";
 import { api } from "~/trpc/react";
 import type { RouterOutputs } from "~/trpc/shared";
-import { SelectItem, SelectTrigger } from "@radix-ui/react-select";
-import { Select, SelectContent } from "~/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectTrigger,
+  SelectValue,
+  SelectItem,
+} from "~/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import { cn } from "~/lib/utils";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "~/components/ui/form";
+import { useForm, type SubmitHandler } from "react-hook-form";
+dayjs.extend(utc);
+dayjs.locale("es");
 export default function GenerateChannelOutputPage(props: {
   channel: { id: string; name: string };
   company: NonNullable<RouterOutputs["companies"]["get"]>;
@@ -37,7 +64,7 @@ export default function GenerateChannelOutputPage(props: {
   outputFiles: RouterOutputs["iofiles"]["list"];
 }) {
   const {
-    mutateAsync: generateInputFile,
+    mutateAsync: generateOutputFile,
     isLoading,
     // isSuccess,
     // error,
@@ -48,21 +75,37 @@ export default function GenerateChannelOutputPage(props: {
     texto: z.string().max(12),
   });
 
-  const [fileName, setFileName] = useState("");
+  const [fileName, setFileName] = useState<string | null>(null);
   const [cardType, setCardType] = useState<string | null>(null);
   const [cardBrand, setCardBrand] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [disabled, setDisabled] = useState(false);
+
+  const FileNameMap: Record<string, string> = {
+    "Visa Credito": "DEBLIQC_",
+    "Visa Debito": "DEBLIQD_",
+    "Mastercard Credito": "DEBLIMC_",
+  };
+  let fileNameCard;
+  const form = useForm();
+  useEffect(() => {
+    const key = `${cardBrand} ${cardType}` as keyof typeof FileNameMap;
+    fileNameCard = FileNameMap[key];
+  }, [cardBrand, cardType]);
+
   async function handleGenerate() {
     try {
       schema.parse({ texto: fileName });
       const { company } = props;
-      await generateInputFile({
+      await generateOutputFile({
         channelId: props.channel.id,
         companyId: company.id,
         brandId: props.brand.id,
         fileName: fileName,
         concept: company.concept,
+        card_type: cardType ?? null,
+        card_brand: cardBrand ?? null,
+        presentation_date: form.watch().presentation_date ?? null,
       });
 
       // Limpiar los errores
@@ -150,8 +193,8 @@ export default function GenerateChannelOutputPage(props: {
                 <DialogTitle>Ingresar nombre para el archivo</DialogTitle>
               </DialogHeader>
               <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  {props.channel.name === "DEBITO AUTOMATICO" ? (
+                <div className=" items-center gap-4">
+                  {props.channel.name !== "DEBITO AUTOMATICO" ? (
                     <>
                       <Label htmlFor="fileName" className="text-right">
                         Nombre del archivo
@@ -164,24 +207,90 @@ export default function GenerateChannelOutputPage(props: {
                       />
                     </>
                   ) : (
-                    <>
-                      <Label htmlFor="card_type"> Tipo de Tarjeta</Label>
-                      <Select onValueChange={(value) => setCardType(value)}>
-                        <SelectTrigger></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="debito">Debito</SelectItem>
-                          <SelectItem value="credito">Credito</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    <div className="flex flex-col gap-3">
                       <Label htmlFor="card_brand">Marca de Tarjeta</Label>
                       <Select onValueChange={(value) => setCardBrand(value)}>
-                        <SelectTrigger></SelectTrigger>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Marca Tarjeta" />
+                        </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="visa">Visa</SelectItem>
-                          <SelectItem value="mastercard">MasterCard</SelectItem>
+                          <SelectItem value="Visa">Visa</SelectItem>
+                          <SelectItem value="Mastercard">MasterCard</SelectItem>
                         </SelectContent>
                       </Select>
-                    </>
+                      <Label htmlFor="card_type"> Tipo de Tarjeta</Label>
+                      <Select onValueChange={(value) => setCardType(value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Tipo tarjeta" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {cardBrand === "Visa" ? (
+                            <SelectItem value="Debito">Debito</SelectItem>
+                          ) : null}
+                          <SelectItem value="Credito">Credito</SelectItem>
+                        </SelectContent>
+                      </Select>
+
+                      <Form {...form}>
+                        <form>
+                          <FormField
+                            control={form.control}
+                            name="presentation_date"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel htmlFor="presentation_date">
+                                  Fecha de presentacion
+                                </FormLabel>
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <FormControl>
+                                      <Button
+                                        variant={"outline"}
+                                        className={cn(
+                                          "w-[240px] pl-3 text-left font-normal",
+                                          !field.value &&
+                                            "text-muted-foreground"
+                                        )}
+                                      >
+                                        <p>
+                                          {field.value ? (
+                                            dayjs
+                                              .utc(field.value)
+                                              .format("D [de] MMMM [de] YYYY")
+                                          ) : (
+                                            <span>Escoga una fecha</span>
+                                          )}
+                                        </p>
+                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                      </Button>
+                                    </FormControl>
+                                  </PopoverTrigger>
+                                  <PopoverContent
+                                    className="w-auto p-0"
+                                    align="start"
+                                  >
+                                    <Calendar
+                                      mode="single"
+                                      selected={
+                                        field.value
+                                          ? new Date(field.value)
+                                          : undefined
+                                      }
+                                      onSelect={field.onChange}
+                                      disabled={(date: Date) =>
+                                        date < new Date("1900-01-01")
+                                      }
+                                      initialFocus
+                                    />
+                                  </PopoverContent>
+                                </Popover>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </form>
+                      </Form>
+                    </div>
                   )}
                   {error && (
                     <span className="w-full text-red-600 text-xs">{error}</span>
@@ -202,7 +311,10 @@ export default function GenerateChannelOutputPage(props: {
             <div className="mt-5">
               <Title>Resultado</Title>
               {dataDataURL && (
-                <a href={dataDataURL} download={`${fileName}.txt`}>
+                <a
+                  href={dataDataURL}
+                  download={`${fileName ?? fileNameCard ?? " "}.txt`}
+                >
                   <Button size="lg">
                     <DownloadIcon className="mr-2" />
                     Descargar archivo

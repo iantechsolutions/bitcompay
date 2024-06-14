@@ -119,6 +119,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     card_brand: string | null;
     is_new: boolean | null;
     card_number: string | null;
+    card_type: string | null;
   }[] = [];
   let errors: z.ZodError<
     {
@@ -179,6 +180,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
       "TC MARCA"?: string | null | undefined;
       "ALTA NUEVA"?: string | boolean | null | undefined;
       "NRO. TARJETA"?: string | number | null | undefined;
+      "TIPO DE TARJETA"?: string | null | undefined;
     }[]
   >[] = [];
   rows.map((row) => {
@@ -335,6 +337,7 @@ export const recDocumentValidator = z
       .optional(),
     "ALTA NUEVA": stringAsBoolean.nullable().optional(),
     "NRO. TARJETA": numberAsString.nullable().optional(),
+    "TIPO DE TARJETA": z.string().nullable().optional(),
   })
   .transform((value) => {
     // Translated to english
@@ -384,6 +387,7 @@ export const recDocumentValidator = z
       card_brand: value["TC MARCA"] ?? null,
       is_new: value["ALTA NUEVA"] ?? null,
       card_number: value["NRO. TARJETA"] ?? null,
+      card_type: value["TIPO DE TARJETA"] ?? null,
     };
   });
 
@@ -432,6 +436,7 @@ export const recHeaders: TableHeaders = [
   { key: "cbu_number", label: "NRO CBU", width: 140 },
   { key: "card_brand", label: "TC MARCA", width: 140 },
   { key: "is_new", label: "ALTA NUEVA", width: 140 },
+  { key: "card_type", label: "TIPO DE TARJETA", width: 140 },
   { key: "card_number", label: "Nro. TARJETA", width: 140 },
 ];
 

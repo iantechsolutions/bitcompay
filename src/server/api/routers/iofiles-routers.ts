@@ -12,7 +12,7 @@ import utc from "dayjs/plugin/utc";
 import { createId } from "~/lib/utils";
 import { utapi } from "~/server/uploadthing";
 import type { RouterOutputs } from "~/trpc/shared";
-import { Payment } from "~/server/db/schema";
+import { Payment, establishments } from "~/server/db/schema";
 import { Factura } from "~/app/dashboard/[companyId]/billing/manual_issuance/facturaGenerada";
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -25,7 +25,10 @@ export const iofilesRouter = createTRPCRouter({
         channelId: z.string(),
         companyId: z.string(),
         brandId: z.string(),
-        fileName: z.string().max(12),
+        fileName: z.string().max(12).nullable().optional(),
+        card_brand: z.string().nullable().optional(),
+        card_type: z.string().nullable().optional(),
+        presentation_date: z.date().nullable().optional(),
         concept: z.string(),
       })
     )
@@ -52,23 +55,74 @@ export const iofilesRouter = createTRPCRouter({
           (p) => p.genChannels.includes(channel.id) === false
         );
 
-        const generateInput = {
-          channelId: channel.id,
-          companyId: input.companyId,
-          fileName: input.fileName,
-          concept: input.concept,
-          redescription: brand.redescription,
-        };
-
         // Generamos el archivo de salida segun el canal
         if (channel.name.includes("DEBITO DIRECTO")) {
+          const generateInput = {
+            channelId: channel.id,
+            companyId: input.companyId,
+            fileName: input.fileName!,
+            concept: input.concept,
+            redescription: brand.redescription,
+          };
           text = generateDebitoDirecto(generateInput, payments);
         } else if (channel.name.includes("PAGOMISCUENTAS")) {
+          const generateInput = {
+            channelId: channel.id,
+            companyId: input.companyId,
+            fileName: input.fileName!,
+            concept: input.concept,
+            redescription: brand.redescription,
+          };
           text = generatePagomiscuentas(generateInput, payments);
         } else if (channel.name.includes("PAGO FACIL")) {
+          const generateInput = {
+            channelId: channel.id,
+            companyId: input.companyId,
+            fileName: input.fileName!,
+            concept: input.concept,
+            redescription: brand.redescription,
+          };
           text = await generatePagoFacil(generateInput, payments);
         } else if (channel.name.includes("RAPIPAGO")) {
+          const generateInput = {
+            channelId: channel.id,
+            companyId: input.companyId,
+            fileName: input.fileName!,
+            concept: input.concept,
+            redescription: brand.redescription,
+          };
           text = generateRapiPago(generateInput, payments);
+        } else if (channel.name.includes("DEBITO AUTOMATICO")) {
+          if (
+            !input.card_brand ||
+            !input.card_type ||
+            !input.presentation_date
+          ) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: `card_brand, card_type and presentation_date are required for DEBITO AUTOMATICO`,
+            });
+          }
+
+          const establishment = await db.query.establishments.findFirst({
+            where: and(
+              eq(schema.establishments.brandId, input.brandId),
+              eq(schema.establishments.flag, input.card_brand)
+            ),
+          });
+          if (!establishment) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: `establishment not found`,
+            });
+          }
+          text = generateDebitoAutomatico({
+            payments,
+            EstablishmentNumber: establishment.establishment_number,
+            cardType: input.card_type,
+            flag: input.card_brand,
+            presentationDate: input.presentation_date,
+          });
         } else {
           throw new TRPCError({
             code: "BAD_REQUEST",
@@ -587,7 +641,7 @@ export async function getBrandAndChannel(
 type generateDAprops = {
   payments: Payment[];
   presentationDate: Date;
-  EstablishmentNumber: string;
+  EstablishmentNumber: number;
   cardType: string;
   flag: string;
 };
@@ -610,7 +664,7 @@ function generateDebitoAutomatico(props: generateDAprops) {
     const importe = payment.collected_amount ?? payment.first_due_amount;
     const importeString = formatString("0", importe!.toString(), 15, false);
     const registrationCode = payment.is_new ? "E" : " ";
-    body += `1NroTarjeta   ${
+    body += `1${payment.card_number!}   ${
       payment.invoice_number
     }${presentationDate}0005${importeString}00000${
       payment.fiscal_id_number
