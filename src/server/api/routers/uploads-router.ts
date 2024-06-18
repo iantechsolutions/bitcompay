@@ -502,8 +502,8 @@ async function readUploadContents(
 
   // const transformedRows = recRowsTransformer(trimmedRows);
   const temp = recRowsTransformer(trimmedRows);
-  console.log(temp);
   const transformedRows = temp.transformedRows;
+  console.log("transformedRows", transformedRows);
   const cellsToEdit = temp.cellsToEdit;
   const productsMap = Object.fromEntries(
     products.map((product) => [product.number, product])
@@ -574,37 +574,6 @@ async function readUploadContents(
     const rowNum = i + 2;
     // verificar producto
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    console.log(row.card_number);
-    console.log(
-      `https://data.handyapi.com/bin/${row.card_number
-        ?.toString()
-        .replace(/\s/g, "")
-        .slice(0, 8)}`
-    );
-    const response = await fetch(
-      `https://data.handyapi.com/bin/${row.card_number
-        ?.toString()
-        .replace(/\s/g, "")
-        .slice(0, 8)}`
-    );
-
-    const json = await response?.json();
-    console.log(json);
-    let row_card_type = row.card_type ?? json?.Type;
-    let row_card_brand = row.card_brand ?? json?.Scheme;
-    if (!row_card_brand || !row_card_type) {
-      errors.push(
-        `No se pudo obtener (${!row_card_brand ? "Marca" : ""}, ${
-          !row_card_type ? "Tipo" : ""
-        }) de la tarjeta en fila: ${rowNum} \n`
-      );
-    }
-    if (!row_card_brand) {
-      row_card_brand = json?.Scheme;
-    }
-    if (!row_card_type) {
-      row_card_type = json?.Type;
-    }
 
     let product: any = undefined;
     if (row.product_number) {
@@ -657,17 +626,39 @@ async function readUploadContents(
       }
 
       for (const column of product.requiredColumns) {
+        console.log("column", column);
         const value = (row as Record<string, unknown>)[column];
         if (!value) {
           const columnName = columnLabelByKey[column] ?? column;
-          // cellsToEdit.push({
-          //   row: row,
-          //   column: columnName,
-          //   reason: "Empty cell",
-          // });
           errors.push(
             `La columna ${columnName} es obligatoria y no esta en el archivo(fila:${rowNum})`
           );
+        }
+        if (column === "card_number") {
+          const response = await fetch(
+            `https://data.handyapi.com/bin/${row.card_number
+              ?.toString()
+              .replace(/\s/g, "")
+              .slice(0, 8)}`
+          );
+
+          const json = await response?.json();
+
+          let row_card_type = row.card_type ?? json?.Type;
+          let row_card_brand = row.card_brand ?? json?.Scheme;
+          if (!row_card_brand || !row_card_type) {
+            errors.push(
+              `No se pudo obtener (${!row_card_brand ? "Marca" : ""}, ${
+                !row_card_type ? "Tipo" : ""
+              }) de la tarjeta en fila: ${rowNum} \n`
+            );
+          }
+          if (!row_card_brand) {
+            row_card_brand = json?.Scheme;
+          }
+          if (!row_card_type) {
+            row_card_type = json?.Type;
+          }
         }
       }
     }

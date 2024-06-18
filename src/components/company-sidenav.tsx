@@ -43,6 +43,7 @@ import {
   Folder,
   Globe,
   Heart,
+  UserRound,
 } from "lucide-react";
 import {
   Accordion,
@@ -252,18 +253,34 @@ export default function CompanySidenav(props: { companyId: string }) {
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
-            <SidenavItem
-              href={`/dashboard/${props.companyId}/management/client`}
-              icon={<Users />}
-            >
-              Clientes
-            </SidenavItem>
-            {/* <SidenavItem
-              href={`/dashboard/${props.companyId}/management/suppliers`}
-              icon={<Truck />}
-            >
-              Proveedores
-            </SidenavItem> */}
+            <Accordion type="single" collapsible className="pl-3">
+              <AccordionItem value="item-1" className="border-none">
+                <AccordionTrigger
+                  className={
+                    isActive("Clientes")
+                      ? "rounded-lg bg-[#9ef4e3] px-1 py-1.5 hover:no-underline"
+                      : "rounded-lg px-1 py-1.5 hover:no-underline"
+                  }
+                >
+                  <SidenavSeparator>Clientes</SidenavSeparator>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <SidenavItem
+                    icon={<UserRound />}
+                    href={`/dashboard/${props.companyId}/management/client/affiliates`}
+                  >
+                    Afiliados
+                  </SidenavItem>
+                  <SidenavItem
+                    icon={<Users />}
+                    href={`/dashboard/${props.companyId}/management/client/health_insurances`}
+                  >
+                    Obras sociales
+                  </SidenavItem>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+
             <Accordion type="single" collapsible className="pl-3">
               <AccordionItem value="item-1" className="border-none">
                 <AccordionTrigger

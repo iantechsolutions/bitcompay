@@ -9,6 +9,8 @@ import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { FileSpreadsheetIcon } from "lucide-react";
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import "dayjs/locale/es";
 import { useRouter } from "next/navigation";
 import { api } from "~/trpc/react";
 import { LargeTable } from "~/components/table";
@@ -25,7 +27,8 @@ import {
   TableRow,
 } from "~/components/ui/table";
 // import { useReceiveData } from "./upload-provider";
-
+dayjs.locale("es");
+dayjs.extend(utc);
 export type UploadedPageProps = {
   upload: NonNullable<RouterOutputs["uploads"]["upload"]>;
 };
@@ -182,7 +185,7 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
         let formattedPeriod: string | undefined;
 
         if (row.period && row.period instanceof Date) {
-          formattedPeriod = dayjs(row.period).format("MM-YYYY");
+          formattedPeriod = dayjs.utc(row.period).format("MM-YYYY");
         }
 
         return { ...row, period: formattedPeriod };
@@ -273,19 +276,7 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
                 </TableBody>
               </Table>
             )}
-            {/* <div className="mt-5">
-              <h3>Filas con errores a arreglar</h3>
 
-              {data && (
-                <LargeEditableTable
-                  rows={editableTableRows}
-                  headers={data.headers}
-                  height={100}
-                  columns={colsOnly}
-                  onRowChange={handleRowChange}
-                />
-              )}
-            </div> */}
             <div className="flex gap-2">
               <Button variant="destructive" onClick={handleDelete}>
                 Cancelar y eliminar

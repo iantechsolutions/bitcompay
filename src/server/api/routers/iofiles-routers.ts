@@ -5,7 +5,6 @@ import { and, eq, inArray, isNull, desc, not } from "drizzle-orm";
 import { z } from "zod";
 import { type DBTX, db, schema } from "~/server/db";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-dayjs.locale("es");
 import dayOfYear from "dayjs/plugin/dayOfYear";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
@@ -17,6 +16,7 @@ import { Factura } from "~/app/dashboard/[companyId]/billing/manual_issuance/fac
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(dayOfYear);
+dayjs.locale("es");
 
 export const iofilesRouter = createTRPCRouter({
   generate: protectedProcedure
@@ -55,6 +55,7 @@ export const iofilesRouter = createTRPCRouter({
           (p) => p.genChannels.includes(channel.id) === false
         );
 
+        const regexPagoFacil = /pago\s*f[aá]cil/i;
         // Generamos el archivo de salida segun el canal
         if (channel.name.includes("DEBITO DIRECTO")) {
           const generateInput = {
@@ -73,8 +74,8 @@ export const iofilesRouter = createTRPCRouter({
             concept: input.concept,
             redescription: brand.redescription,
           };
-          text = generatePagomiscuentas(generateInput, payments);
-        } else if (channel.name.includes("PAGO FACIL")) {
+          text = generatePagomiscuentas(generateInput, brand.name, payments);
+        } else if (channel.name.match(regexPagoFacil)) {
           const generateInput = {
             channelId: channel.id,
             companyId: input.companyId,
@@ -351,20 +352,32 @@ function generateDebitoDirecto(
 }
 
 function generatePagomiscuentas(
-  _input: {
+  input: {
     channelId: string;
     companyId: string;
     fileName: string;
     concept: string;
     redescription: string;
   },
+  brandName: string,
   transactions: RouterOutputs["transactions"]["list"]
 ) {
-  const dateAAAAMMDD = dayjs().format("AAAAMMDD");
-  const companyCode = "1234";
+  const codeCompanyMap: Record<string, string> = {
+    "red argentina de sanatorios": "REDA",
+    "cristal salud": "AL6N",
+  };
+  const dateAAAAMMDD = dayjs().locale("es").format("YYYYMMDD");
+  const companyCode =
+    codeCompanyMap[brandName.toLowerCase() as keyof typeof codeCompanyMap];
+
+  if (!companyCode) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: `company code not found in this brand`,
+    });
+  }
   //header
-  let text = `0400${companyCode}${dateAAAAMMDD}${"0".repeat(84)}\n`;
-  let total_records = 0;
+  let text = `0400${companyCode}${dateAAAAMMDD}${"0".repeat(264)}\n`;
   let total_collected = 0;
   for (const transaction of transactions) {
     // registro
@@ -389,30 +402,56 @@ function generatePagomiscuentas(
       9,
       false
     );
-    const controlNumber = "1292";
-    // const concept = formatString(" ", input.concept, 40, true);
-    // const displayMessage = formatString(" ", input.concept, 15, true);
-    text += `5${fiscal_id_number}${invoice_number}${first_due_date}0${first_due_date}${first_due_amount}00`;
-    text += `2${dateAAAAMMDD}PC${controlNumber}   ${"0".repeat(14)}\n`;
-    total_records++;
+    const second_due_date = dayjs(transaction.second_due_date).format(
+      "YYYYMMDD"
+    );
+    const second_due_amount = formatString(
+      "0",
+      transaction.second_due_amount
+        ? transaction.second_due_amount?.toString()
+        : "",
+      9,
+      false
+    );
+    const ticketMessage = formatString(
+      " ",
+      transaction.additional_info ?? "",
+      40,
+      true
+    );
+    const displayMessage = formatString(
+      " ",
+      `${input.concept}-${dayjs
+        .utc(transaction.period)
+        .locale("es")
+        .format("MM-YYYY")}`,
+      15,
+      true
+    );
+    text += `5${fiscal_id_number}${invoice_number}0${first_due_date}${first_due_amount}00${second_due_date}${second_due_amount}00${"0".repeat(
+      38
+    )}${fiscal_id_number}${ticketMessage}${displayMessage}${" ".repeat(
+      60
+    )}${"0".repeat(29)}\n`;
+
     total_collected += transaction.first_due_amount!;
   }
   // trailer
   const total_collected_string = formatString(
     "0",
     total_collected.toString(),
-    9,
+    14,
     false
   );
   const total_records_string = formatString(
     "0",
-    total_records.toString(),
+    transactions.length.toString(),
     7,
     false
   );
   text += `9400${companyCode}${dateAAAAMMDD}${total_records_string}${"0".repeat(
     7
-  )}${total_collected_string}00${"0".repeat(11)}${"0".repeat(48)}\n`;
+  )}${total_collected_string}00${"0".repeat(234)}\n`;
 
   return text;
 }
@@ -433,7 +472,14 @@ async function generatePagoFacil(
   const hours = dayjs().format("HHmmss");
   const companyName = formatString(" ", "BITCOM SRL", 40, true);
   const originName = formatString(" ", "PAGO FACIL", 10, true);
-  text += `1${date}90063509${companyName}${originName}${"0".repeat(123)}\r\n`;
+  const records_number = formatString(
+    " ",
+    transactions.length.toString(),
+    9,
+    true
+  );
+  const utility = "";
+  text += `01${records_number}A\r\n`;
   let total_records = 0;
   let total_collected = 0;
   for (const transaction of transactions) {
@@ -525,18 +571,19 @@ function generateRapiPago(
   let text = `081400${currentDate}${"0".repeat(76)}\n`;
   let total_records = 0;
   let total_collected = 0;
+
   for (const transaction of transactions) {
     const fiscal_id_number = formatString(
-      " ",
+      "0",
       transaction.fiscal_id_number!.toString(),
       19,
-      true
+      false
     );
     const invoice_number = formatString(
-      " ",
+      "0",
       transaction.invoice_number.toString(),
       20,
-      true
+      false
     );
     const first_due_date = dayjs(transaction.first_due_date).format("YYYYMMDD");
     const first_due_amount = formatString(
@@ -560,7 +607,7 @@ function generateRapiPago(
       9,
       false
     );
-    text += `5${fiscal_id_number}${invoice_number}0${first_due_date}0${first_due_amount}00${second_due_date}${second_due_amount}00${"0".repeat(
+    text += `5${fiscal_id_number}${invoice_number}0${first_due_date}${first_due_amount}00${second_due_date}${second_due_amount}00${"0".repeat(
       11
     )}\n`;
     total_records++;
@@ -590,6 +637,9 @@ function formatString(
   limit: number,
   final: boolean
 ) {
+  if (string.length > limit) {
+    string = string.substring(0, limit);
+  }
   if (final) {
     return string.concat(char.repeat(limit - string.length));
   }
