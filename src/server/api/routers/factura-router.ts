@@ -243,12 +243,25 @@ async function preparateFactura(
     const billResponsible = grupo.integrants.find(
       (integrant) => integrant.isBillResponsible
     );
+    const abono = await getGroupAmount(grupo);
+    // const bonificacion = Number(
+    //   grupo.bonus?.find((x) => x.from <= Date() && x.to >= Date())?.amount ??
+    //     "0"
+    // );
+    const bonificacion = 0;
+    const differential_amount = 0;
+    const contribution = 0;
+    const interest = 0;
+    const previous_bill = 0;
     const items = await db
       .insert(schema.items)
       .values({
-        abono: 0,
-        bonificacion: 0,
-        differential_amount: 0,
+        abono,
+        bonificacion,
+        differential_amount,
+        contribution,
+        interest,
+        previous_bill,
       })
       .returning();
     const tipoDocumento = idDictionary[billResponsible?.fiscal_id_type ?? ""];
@@ -264,7 +277,6 @@ async function preparateFactura(
         nroFactura: 0,
         tipoFactura: grupo.businessUnitData?.brand?.bill_type,
         concepto: parseInt(grupo.businessUnitData?.brand?.concept ?? "0"),
-        // concepto: 1,
 
         tipoDocumento: tipoDocumento ?? 0,
         // tipoDocumento: 80,
@@ -292,13 +304,17 @@ async function preparateFactura(
 }
 
 async function getGroupAmount(grupo: grupoCompleto) {
-  let importeBase = 0;
+  let importe = 0;
   grupo.integrants?.forEach((integrant) => {
     if (integrant.birth_date != null) {
       const age = calcularEdad(integrant.birth_date);
-      // const precioBase = grupo.plan?.pricesPerAge.find();
+      const precioIntegrante =
+        grupo.plan?.pricesPerAge.find((x) => x.age === age)?.amount ?? 0;
+
+      importe += precioIntegrante;
     }
   });
+  return importe;
 }
 
 function calcularEdad(fechaNacimiento: Date): number {

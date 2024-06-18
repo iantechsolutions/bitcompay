@@ -815,10 +815,7 @@ export const family_groupsRelations = relations(
       fields: [family_groups.modo],
       references: [modos.id],
     }),
-    bonus: one(bonuses, {
-      fields: [family_groups.bonus],
-      references: [bonuses.id],
-    }),
+    bonus: many(bonuses),
     integrants: many(integrants),
     abonos: many(abonos),
     facturas: many(facturas),
@@ -837,7 +834,6 @@ export const family_groupsSchemaDB = insertfamily_groupsSchema.pick({
   healthInsurances: true,
   employerContribution: true,
   receipt: true,
-  bonus: true,
 });
 export type FamilyGroup = z.infer<typeof selectfamily_groupsSchema>;
 
@@ -851,7 +847,15 @@ export const bonuses = pgTable("bonuses", {
   to: timestamp("to", { mode: "date" }),
   amount: varchar("mount", { length: 255 }).notNull(),
   reason: varchar("reason", { length: 255 }).notNull(),
+  family_group_id: varchar("family_group_id", { length: 255 }),
 });
+
+export const bonusesRelations = relations(bonuses, ({ one }) => ({
+  family_group: one(family_groups, {
+    fields: [bonuses.family_group_id],
+    references: [family_groups.id],
+  }),
+}));
 
 export const insertBonusesSchema = createInsertSchema(bonuses);
 export const selectBonusesSchema = createSelectSchema(bonuses);
@@ -864,6 +868,7 @@ export const bonusesSchemaDB = insertBonusesSchema.pick({
   reason: true,
   from: true,
   to: true,
+  family_group_id: true,
 });
 export type Bonuses = z.infer<typeof selectBonusesSchema>;
 

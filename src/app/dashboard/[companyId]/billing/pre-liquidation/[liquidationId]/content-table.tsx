@@ -225,7 +225,7 @@ function ContentTable({ factura, period }: propsContentTable) {
 export default ContentTable;
 
 function computeIva(field: number, iva: number) {
-  return field * iva;
+  return (field * iva) / 100;
 }
 function computeTotal(field: number, iva: number) {
   return field + computeIva(field, iva);

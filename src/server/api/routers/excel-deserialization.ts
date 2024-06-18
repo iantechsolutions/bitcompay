@@ -82,19 +82,6 @@ export const excelDeserializationRouter = createTRPCRouter({
           const existGroup = isKeyPresent(row.holder_id_number, familyGroupMap);
           if (!existGroup) {
             console.log("creando bono");
-            const bonus = await db
-              .insert(schema.bonuses)
-              .values({
-                amount: row.bonus,
-                appliedUser: " ", //a rellenar
-                approverUser: " ", //a rellenar
-                duration: "",
-                from: row["from bonus"],
-                to: row["to bonus"],
-                reason: "", //a rellenar
-              })
-              .returning();
-
             console.log("creando tramite");
             const procedure = await db
               .insert(schema.procedure)
@@ -112,13 +99,25 @@ export const excelDeserializationRouter = createTRPCRouter({
                 plan: plan?.id,
                 modo: mode?.id,
                 receipt: " ",
-                bonus: bonus[0]!.id,
                 state: "ACTIVO",
                 procedureId: procedure[0]!.id,
               })
               .returning();
             familyGroupMap.set(row.holder_id_number, familygroup[0]!.id);
             familyGroupId = familygroup[0]!.id;
+            const bonus = await db
+              .insert(schema.bonuses)
+              .values({
+                amount: row.bonus,
+                appliedUser: " ", //a rellenar
+                approverUser: " ", //a rellenar
+                duration: "",
+                from: row["from bonus"],
+                to: row["to bonus"],
+                reason: "", //a rellenar
+                family_group_id: familyGroupId,
+              })
+              .returning();
           } else {
             familyGroupId = familyGroupMap.get(row.holder_id_number) ?? "";
           }
@@ -317,11 +316,12 @@ async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
   for (let i = 0; i < transformedRows.length; i++) {
     const row = transformedRows[i]!;
     const rowNum = i + 2;
-    // autocompletar info de tarjeta o tirar error si no encuntra
-    const response = await fetch(
-      `https://data.handyapi.com/bin/${row.card_number?.slice(0, 8)}`
-    );
 
+    console.log("tarjeta", row.card_number);
+    const response = await fetch(
+      `https://data.handyapi.com/bin/${row.card_number}`
+    );
+    console.log("response", response);
     const json = await response?.json();
     let row_card_type = row.card_type ?? json?.card_type;
     let row_card_brand = row.card_brand ?? json?.card_brand;
