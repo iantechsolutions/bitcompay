@@ -10,6 +10,7 @@ import { Integrant } from "./integrant-router";
 import { currentUser } from "@clerk/nextjs/server";
 import { Brand } from "./brands-router";
 import { RouterOutputs } from "~/trpc/shared";
+import { calcularEdad } from "~/lib/utils";
 
 function formatDateAFIP(date: Date | undefined) {
   if (date) {
@@ -170,6 +171,11 @@ async function approbateFactura(liquidationId: string) {
                 },
               },
               plan: true,
+              cc: {
+                with: {
+                  events: true,
+                },
+              },
             },
           },
         },
@@ -243,16 +249,35 @@ async function preparateFactura(
     const billResponsible = grupo.integrants.find(
       (integrant) => integrant.isBillResponsible
     );
+    const ivaFloat =
+      (100 + parseFloat(grupo.businessUnitData?.brand?.iva ?? "0")) / 100;
     const abono = await getGroupAmount(grupo);
-    // const bonificacion = Number(
-    //   grupo.bonus?.find((x) => x.from <= Date() && x.to >= Date())?.amount ??
-    //     "0"
-    // );
-    const bonificacion = 0;
-    const differential_amount = 0;
-    const contribution = 0;
+    const bonificacion =
+      (parseFloat(
+        grupo.bonus?.find((x) => x.from! <= new Date() && x.to! >= new Date())
+          ?.amount ?? "0"
+      ) *
+        abono) /
+      100;
     const interest = 0;
-    const previous_bill = 0;
+    const contribution = await getGroupContribution(grupo);
+
+    const differential_amount = await getDifferentialAmount(grupo);
+
+    const mostRecentEvent = grupo.cc?.events.reduce((prev, current) => {
+      return new Date(prev.createdAt) > new Date(current.createdAt)
+        ? prev
+        : current;
+    });
+
+    const previous_bill = mostRecentEvent?.current_amount ?? 0;
+    const importe =
+      (abono -
+        bonificacion +
+        differential_amount -
+        contribution -
+        previous_bill) *
+      ivaFloat;
     const items = await db
       .insert(schema.items)
       .values({
@@ -273,17 +298,14 @@ async function preparateFactura(
       .values({
         items_id: items[0]!.id ?? "",
         ptoVenta: parseInt(pv),
-
         nroFactura: 0,
         tipoFactura: grupo.businessUnitData?.brand?.bill_type,
         concepto: parseInt(grupo.businessUnitData?.brand?.concept ?? "0"),
-
         tipoDocumento: tipoDocumento ?? 0,
         // tipoDocumento: 80,
-
         nroDocumento: parseInt(billResponsible?.fiscal_id_number ?? "0"),
         // nroDocumento: 0,
-        importe: 0,
+        importe,
         fromPeriod: dateDesde,
         toPeriod: dateHasta,
         due_date: dateVencimiento,
@@ -309,7 +331,13 @@ async function getGroupAmount(grupo: grupoCompleto) {
     if (integrant.birth_date != null) {
       const age = calcularEdad(integrant.birth_date);
       const precioIntegrante =
-        grupo.plan?.pricesPerAge.find((x) => x.age === age)?.amount ?? 0;
+        grupo.plan?.pricesPerAge.find((x) => {
+          if (integrant.relationship) {
+            return x.condition == integrant.relationship;
+          } else {
+            return x.age == age;
+          }
+        })?.amount ?? 0;
 
       importe += precioIntegrante;
     }
@@ -317,16 +345,34 @@ async function getGroupAmount(grupo: grupoCompleto) {
   return importe;
 }
 
-function calcularEdad(fechaNacimiento: Date): number {
-  const hoy = new Date();
-  let edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
-  const mes = hoy.getMonth() - fechaNacimiento.getMonth();
+async function getGroupContribution(grupo: grupoCompleto) {
+  let importe = 0;
+  grupo.integrants?.forEach((integrant) => {
+    const contributionIntegrante = integrant?.contribution?.amount ?? 0;
+    importe += contributionIntegrante;
+  });
+  return importe;
+}
 
-  if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNacimiento.getDate())) {
-    edad--;
-  }
-
-  return edad;
+async function getDifferentialAmount(grupo: grupoCompleto) {
+  let importe = 0;
+  grupo.integrants?.forEach((integrant) => {
+    if (integrant.birth_date == null) return;
+    const age = calcularEdad(integrant.birth_date);
+    const precioIntegrante =
+      grupo.plan?.pricesPerAge.find((x) => {
+        if (integrant.relationship) {
+          return x.condition == integrant.relationship;
+        } else {
+          return x.age == age;
+        }
+      })?.amount ?? 0;
+    integrant?.differentialsValues.forEach((differential) => {
+      const differentialIntegrante = differential.amount * precioIntegrante;
+      importe += differentialIntegrante;
+    });
+  });
+  return importe;
 }
 
 async function getGruposByBrandId(brandId: string) {
@@ -341,9 +387,14 @@ async function getGruposByBrandId(brandId: string) {
       abonos: true,
       integrants: {
         with: {
-          contributions: true,
+          contribution: true,
           differentialsValues: true,
           pa: true,
+        },
+      },
+      cc: {
+        with: {
+          events: true,
         },
       },
       bonus: true,

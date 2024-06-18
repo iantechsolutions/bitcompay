@@ -8,25 +8,32 @@ import { Router } from "next/router";
 import { TableCell, TableRow } from "~/components/ui/tablePreliq";
 import { Facturas } from "~/server/db/schema";
 import { RouterOutputs } from "~/trpc/shared";
+import { computeBase, computeIva } from "~/lib/utils";
 
 interface TriggerTableProps {
   setActive: (value: boolean) => void;
   active: boolean;
   factura: RouterOutputs["facturas"]["list"][number];
+  bonificationValue: number;
+  contributionValue: number;
+  interestValue: number;
+  cuotaValue: number;
+  previousBillValue: number;
+  total: number;
 }
 
-export default function TriggerTable({
-  setActive,
-  active,
-  factura,
-}: TriggerTableProps) {
-  const subTotal =
-    (factura?.items?.bonificacion ?? 0) * (factura?.items?.abono ?? 0) +
-    (factura?.items?.differential_amount ?? 0) * (factura?.items?.abono ?? 0) +
-    (factura?.items?.contribution ?? 0) * (factura?.items?.abono ?? 0) +
-    (factura?.items?.interest ?? 0) * (factura?.items?.abono ?? 0);
-  const total = subTotal + subTotal * Number(factura?.iva ?? 0);
-  const iva = Number(factura?.iva ?? 0) * subTotal;
+export default function TriggerTable(props: TriggerTableProps) {
+  const {
+    cuotaValue,
+    setActive,
+    active,
+    factura,
+    bonificationValue,
+    contributionValue,
+    interestValue,
+    previousBillValue,
+    total,
+  } = props;
 
   const billResponsible = factura?.family_group?.integrants[0];
   return (
@@ -62,30 +69,32 @@ export default function TriggerTable({
       <TableCell className="border border-[#6cebd1] p-2 py-4"> 0</TableCell>
       <TableCell className="border border-[#6cebd1] p-2 py-4">
         {" "}
-        {factura?.items?.abono}
+        {cuotaValue}
       </TableCell>
       <TableCell className="border border-[#6cebd1] p-2 py-4">
         {" "}
-        {(factura.items?.bonificacion ?? 0) * (factura?.items?.abono ?? 0)}
+        {bonificationValue}
       </TableCell>
       <TableCell className="border border-[#6cebd1] p-2 py-4">
         {" "}
-        {(factura.items?.differential_amount ?? 0) *
-          (factura?.items?.abono ?? 0)}
+        {factura.items?.differential_amount ?? 0}
       </TableCell>
       <TableCell className="border border-[#6cebd1] p-2 py-4">
         {" "}
-        {(factura.items?.contribution ?? 0) * (factura?.items?.abono ?? 0)}
+        {contributionValue}
       </TableCell>
       <TableCell className="border border-[#6cebd1] p-2 py-4">
         {" "}
-        {(factura.items?.interest ?? 0) * (factura?.items?.abono ?? 0)}
+        {interestValue}
       </TableCell>
       <TableCell className="border border-[#6cebd1] p-2 py-4">
         {" "}
-        {subTotal}
+        {computeBase(total, Number(factura?.iva) ?? 0)}
       </TableCell>
-      <TableCell className="border border-[#6cebd1] p-2 py-4"> {iva}</TableCell>
+      <TableCell className="border border-[#6cebd1] p-2 py-4">
+        {" "}
+        {computeIva(total, Number(factura?.iva) ?? 0)}
+      </TableCell>
       <TableCell className="rounded-r-md border border-[#6cebd1]">
         {" "}
         {total}

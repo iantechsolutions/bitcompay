@@ -11,6 +11,7 @@ import {
   keysArray,
 } from "~/server/excel/validator";
 import { error } from "console";
+import { calcularEdad } from "~/lib/utils";
 
 export const excelDeserializationRouter = createTRPCRouter({
   upload: protectedProcedure
@@ -64,6 +65,9 @@ export const excelDeserializationRouter = createTRPCRouter({
 
           const plan = await db.query.plans.findFirst({
             where: eq(schema.plans.plan_code, row.plan!),
+            with: {
+              pricesPerAge: true,
+            },
           });
 
           const health_insurance = await db.query.healthInsurances.findFirst({
@@ -206,11 +210,25 @@ export const excelDeserializationRouter = createTRPCRouter({
             })
             .returning();
           console.log("creando valores diferencial valor");
-          await db.insert(schema.differentialsValues).values({
-            amount: parseFloat(row.differential_value!),
-            differentialId: differentialId,
-            integrant_id: new_integrant[0]!.id,
-          });
+
+          const ageN = calcularEdad(row.birth_date ?? new Date());
+          const precioIntegrante =
+            plan?.pricesPerAge.find((p) => {
+              if (row.relationship) {
+                return p.condition == row.relationship;
+              } else {
+                return p.age == ageN;
+              }
+            })?.amount ?? 0;
+          const precioDiferencial =
+            parseFloat(row.differential_value!) / precioIntegrante;
+          const differentialValue = await db
+            .insert(schema.differentialsValues)
+            .values({
+              amount: precioDiferencial,
+              differentialId: differentialId,
+              integrant_id: new_integrant[0]!.id,
+            });
 
           if (row.isPaymentResponsible) {
             const product = await db.query.products.findFirst({

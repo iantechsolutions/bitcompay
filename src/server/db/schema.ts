@@ -604,7 +604,7 @@ export const integrantsRelations = relations(integrants, ({ one, many }) => ({
     references: [healthInsurances.id],
   }),
   pa: many(pa),
-  contributions: many(contributions),
+  contribution: one(contributions),
   differentialsValues: many(differentialsValues),
 }));
 
@@ -715,7 +715,7 @@ export const facturas = pgTable("facturas", {
   concepto: integer("concept").notNull(),
   tipoDocumento: integer("tipoDocumento").notNull(),
   nroDocumento: integer("nroDocumento").notNull(),
-  importe: integer("importe").notNull(),
+  importe: real("importe").notNull(),
   fromPeriod: timestamp("fromperiod", { mode: "date" }),
   toPeriod: timestamp("toperiod", { mode: "date" }),
   due_date: timestamp("due_date", { mode: "date" }),
@@ -819,7 +819,7 @@ export const family_groupsRelations = relations(
     integrants: many(integrants),
     abonos: many(abonos),
     facturas: many(facturas),
-    cc: many(currentAccount),
+    cc: one(currentAccount),
   })
 );
 
