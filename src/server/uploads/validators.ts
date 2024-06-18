@@ -138,7 +138,7 @@ export const recDocumentValidator = z
     "Info. Adicional": z
       .string()
       .min(1)
-      .max(140)
+      .max(20, { message: "Info. Adicional demasiado larga" })
       .catch("")
       .nullable()
       .optional(),
