@@ -189,7 +189,7 @@ export default function DetailsPage(props: {
               openExterior={openAdd}
               setOpenExterior={setOpenAdd}
               planId={props.plan?.id}
-              initialPrices={groupByAge.filter((x) => !x.isConditional)}
+              initialPrices={groupByAge}
             ></AddPlanDialog>
           </div>
           <div className="flex items-center">
@@ -240,7 +240,7 @@ export default function DetailsPage(props: {
             <LargeTable
               // height={height}
               headers={ageHeaders}
-              rows={groupByAge}
+              rows={groupByAge.filter((x) => !x.isConditional)}
             />
           </TabsContent>
         </Tabs>
