@@ -34,6 +34,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
+import AddPlanDialog from "../../add-plan-dialog";
 
 dayjs.extend(utc);
 dayjs.locale("es");
@@ -52,6 +53,8 @@ type GroupedPlans = {
   from_age: number;
   to_age: number;
   amount: number;
+  condition: string | null;
+  isConditional: boolean;
 };
 
 export default function DetailsPage(props: {
@@ -71,6 +74,7 @@ export default function DetailsPage(props: {
     }
   }
   const [open, setOpen] = useState(false);
+  const [openAdd, setOpenAdd] = useState(false);
   const [percent, setPercent] = useState("");
   const [validity_date, setValidity_date] = useState<Date>();
   useEffect(() => {
@@ -85,6 +89,8 @@ export default function DetailsPage(props: {
             from_age: price.age ?? 0,
             to_age: price.age ?? 0,
             amount: price.amount,
+            condition: price.condition,
+            isConditional: !price.isAmountByAge,
           });
           savedPrice = price.amount;
         } else if (groupByAge.length > 0) {
@@ -169,6 +175,14 @@ export default function DetailsPage(props: {
               </DialogContent>
             </Dialog>
           </div>
+          <div>
+            <AddPlanDialog
+              openExterior={openAdd}
+              setOpenExterior={setOpenAdd}
+              planId={props.plan?.id}
+              initialPrices={groupByAge}
+            ></AddPlanDialog>
+          </div>
           <div className="flex items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -188,7 +202,9 @@ export default function DetailsPage(props: {
                 <DropdownMenuItem
                 // value="edit"
                 >
-                  Actualizar a otra cantidad
+                  <Button onClick={() => setOpenAdd(true)}>
+                    Editar precio
+                  </Button>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
