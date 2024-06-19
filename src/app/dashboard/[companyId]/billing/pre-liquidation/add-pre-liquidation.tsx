@@ -157,7 +157,7 @@ export default function AddPreLiquidation(props: { companyId: string }) {
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
-                  selected={fechaVencimiento1 ? fechaVencimiento2 : undefined}
+                  selected={fechaVencimiento2 ? fechaVencimiento2 : undefined}
                   onSelect={(e) => setFechaVencimiento2(e)}
                   disabled={(date: Date) => date < new Date()}
                   initialFocus

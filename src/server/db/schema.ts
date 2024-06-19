@@ -608,7 +608,7 @@ export const integrantsRelations = relations(integrants, ({ one, many }) => ({
     references: [healthInsurances.id],
   }),
   pa: many(pa),
-  contributions: many(contributions),
+  contribution: one(contributions),
   differentialsValues: many(differentialsValues),
 }));
 
@@ -719,7 +719,7 @@ export const facturas = pgTable("facturas", {
   concepto: integer("concept").notNull(),
   tipoDocumento: integer("tipoDocumento").notNull(),
   nroDocumento: integer("nroDocumento").notNull(),
-  importe: integer("importe").notNull(),
+  importe: real("importe").notNull(),
   fromPeriod: timestamp("fromperiod", { mode: "date" }),
   toPeriod: timestamp("toperiod", { mode: "date" }),
   due_date: timestamp("due_date", { mode: "date" }),
@@ -819,14 +819,11 @@ export const family_groupsRelations = relations(
       fields: [family_groups.modo],
       references: [modos.id],
     }),
-    bonus: one(bonuses, {
-      fields: [family_groups.bonus],
-      references: [bonuses.id],
-    }),
+    bonus: many(bonuses),
     integrants: many(integrants),
     abonos: many(abonos),
     facturas: many(facturas),
-    cc: many(currentAccount),
+    cc: one(currentAccount),
   })
 );
 
@@ -841,7 +838,6 @@ export const family_groupsSchemaDB = insertfamily_groupsSchema.pick({
   healthInsurances: true,
   employerContribution: true,
   receipt: true,
-  bonus: true,
 });
 export type FamilyGroup = z.infer<typeof selectfamily_groupsSchema>;
 
@@ -855,7 +851,15 @@ export const bonuses = pgTable("bonuses", {
   to: timestamp("to", { mode: "date" }),
   amount: varchar("mount", { length: 255 }).notNull(),
   reason: varchar("reason", { length: 255 }).notNull(),
+  family_group_id: varchar("family_group_id", { length: 255 }),
 });
+
+export const bonusesRelations = relations(bonuses, ({ one }) => ({
+  family_group: one(family_groups, {
+    fields: [bonuses.family_group_id],
+    references: [family_groups.id],
+  }),
+}));
 
 export const insertBonusesSchema = createInsertSchema(bonuses);
 export const selectBonusesSchema = createSelectSchema(bonuses);
@@ -868,6 +872,7 @@ export const bonusesSchemaDB = insertBonusesSchema.pick({
   reason: true,
   from: true,
   to: true,
+  family_group_id: true,
 });
 export type Bonuses = z.infer<typeof selectBonusesSchema>;
 

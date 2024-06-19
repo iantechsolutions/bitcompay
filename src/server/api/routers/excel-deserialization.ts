@@ -11,6 +11,7 @@ import {
   keysArray,
 } from "~/server/excel/validator";
 import { error } from "console";
+import { calcularEdad } from "~/lib/utils";
 
 export const excelDeserializationRouter = createTRPCRouter({
   upload: protectedProcedure
@@ -64,6 +65,9 @@ export const excelDeserializationRouter = createTRPCRouter({
 
           const plan = await db.query.plans.findFirst({
             where: eq(schema.plans.plan_code, row.plan!),
+            with: {
+              pricesPerAge: true,
+            },
           });
 
           const health_insurance = await db.query.healthInsurances.findFirst({
@@ -82,19 +86,6 @@ export const excelDeserializationRouter = createTRPCRouter({
           const existGroup = isKeyPresent(row.holder_id_number, familyGroupMap);
           if (!existGroup) {
             console.log("creando bono");
-            const bonus = await db
-              .insert(schema.bonuses)
-              .values({
-                amount: row.bonus,
-                appliedUser: " ", //a rellenar
-                approverUser: " ", //a rellenar
-                duration: "",
-                from: row["from bonus"],
-                to: row["to bonus"],
-                reason: "", //a rellenar
-              })
-              .returning();
-
             console.log("creando tramite");
             const procedure = await db
               .insert(schema.procedure)
@@ -112,13 +103,25 @@ export const excelDeserializationRouter = createTRPCRouter({
                 plan: plan?.id,
                 modo: mode?.id,
                 receipt: " ",
-                bonus: bonus[0]!.id,
                 state: "ACTIVO",
                 procedureId: procedure[0]!.id,
               })
               .returning();
             familyGroupMap.set(row.holder_id_number, familygroup[0]!.id);
             familyGroupId = familygroup[0]!.id;
+            const bonus = await db
+              .insert(schema.bonuses)
+              .values({
+                amount: row.bonus,
+                appliedUser: " ", //a rellenar
+                approverUser: " ", //a rellenar
+                duration: "",
+                from: row["from bonus"],
+                to: row["to bonus"],
+                reason: "", //a rellenar
+                family_group_id: familyGroupId,
+              })
+              .returning();
           } else {
             familyGroupId = familyGroupMap.get(row.holder_id_number) ?? "";
           }
@@ -207,11 +210,28 @@ export const excelDeserializationRouter = createTRPCRouter({
             })
             .returning();
           console.log("creando valores diferencial valor");
-          await db.insert(schema.differentialsValues).values({
-            amount: parseFloat(row.differential_value!),
-            differentialId: differentialId,
-            integrant_id: new_integrant[0]!.id,
+
+          const cc = await db.insert(schema.currentAccount).values({
+            family_group: new_integrant[0]!.family_group_id,
           });
+          const ageN = calcularEdad(row.birth_date ?? new Date());
+          const precioIntegrante =
+            plan?.pricesPerAge.find((p) => {
+              if (row.relationship) {
+                return p.condition == row.relationship;
+              } else {
+                return p.age == ageN;
+              }
+            })?.amount ?? 0;
+          const precioDiferencial =
+            parseFloat(row.differential_value!) / precioIntegrante;
+          const differentialValue = await db
+            .insert(schema.differentialsValues)
+            .values({
+              amount: precioDiferencial,
+              differentialId: differentialId,
+              integrant_id: new_integrant[0]!.id,
+            });
 
           if (row.isPaymentResponsible) {
             const product = await db.query.products.findFirst({
@@ -317,11 +337,12 @@ async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
   for (let i = 0; i < transformedRows.length; i++) {
     const row = transformedRows[i]!;
     const rowNum = i + 2;
-    // autocompletar info de tarjeta o tirar error si no encuntra
+
+    console.log("tarjeta", row.card_number);
     const response = await fetch(
       `https://data.handyapi.com/bin/${row.card_number?.toString().slice(0, 8)}`
     );
-
+    console.log("response", response);
     const json = await response?.json();
     let row_card_type = row.card_type ?? json?.card_type;
     let row_card_brand = row.card_brand ?? json?.card_brand;

@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import Afip from "@afipsdk/afip.js";
 import { z } from "zod";
 import { db, schema } from "~/server/db";
@@ -10,6 +10,7 @@ import { Integrant } from "./integrant-router";
 import { currentUser } from "@clerk/nextjs/server";
 import { Brand } from "./brands-router";
 import { RouterOutputs } from "~/trpc/shared";
+import { calcularEdad } from "~/lib/utils";
 
 function formatDateAFIP(date: Date | undefined) {
   if (date) {
@@ -170,6 +171,11 @@ async function approbateFactura(liquidationId: string) {
                 },
               },
               plan: true,
+              cc: {
+                with: {
+                  events: true,
+                },
+              },
             },
           },
         },
@@ -191,6 +197,12 @@ async function approbateFactura(liquidationId: string) {
       );
       const producto = await db.query.products.findFirst({
         where: eq(schema.products.id, billResponsible?.pa[0]?.product_id ?? ""),
+      });
+      const cc = await db.query.currentAccount.findFirst({
+        where: eq(
+          schema.currentAccount.family_group,
+          factura.family_group?.id ?? ""
+        ),
       });
       const status = await db.query.paymentStatus.findFirst({
         where: eq(schema.paymentStatus.code, "91"),
@@ -219,6 +231,18 @@ async function approbateFactura(liquidationId: string) {
           // address: billResponsible?.address,
         })
         .returning();
+
+      const lastEvent = await db.query.events.findFirst({
+        where: eq(schema.events.currentAccount_id, cc?.id ?? ""),
+        orderBy: [desc(schema.events.createdAt)],
+      });
+      const event = await db.insert(schema.events).values({
+        currentAccount_id: cc?.id,
+        event_amount: factura.importe * -1,
+        current_amount: lastEvent?.current_amount! - factura.importe,
+        description: "Factura aprobada",
+        type: "FC",
+      });
     }
     return "OK";
   } else {
@@ -243,12 +267,44 @@ async function preparateFactura(
     const billResponsible = grupo.integrants.find(
       (integrant) => integrant.isBillResponsible
     );
+    const ivaFloat =
+      (100 + parseFloat(grupo.businessUnitData?.brand?.iva ?? "0")) / 100;
+    const abono = await getGroupAmount(grupo);
+    const bonificacion =
+      (parseFloat(
+        grupo.bonus?.find((x) => x.from! <= new Date() && x.to! >= new Date())
+          ?.amount ?? "0"
+      ) *
+        abono) /
+      100;
+    const interest = 0;
+    const contribution = await getGroupContribution(grupo);
+
+    const differential_amount = await getDifferentialAmount(grupo);
+
+    const mostRecentEvent = grupo.cc?.events.reduce((prev, current) => {
+      return new Date(prev.createdAt) > new Date(current.createdAt)
+        ? prev
+        : current;
+    });
+
+    const previous_bill = mostRecentEvent?.current_amount ?? 0;
+    const importe =
+      (abono -
+        bonificacion +
+        differential_amount -
+        contribution -
+        previous_bill) *
+      ivaFloat;
     const items = await db
       .insert(schema.items)
       .values({
-        abono: 0,
-        bonificacion: 0,
-        differential_amount: 0,
+        abono,
+        bonificacion,
+        differential_amount,
+        contribution,
+        interest,
+        previous_bill,
       })
       .returning();
     const tipoDocumento = idDictionary[billResponsible?.fiscal_id_type ?? ""];
@@ -260,18 +316,14 @@ async function preparateFactura(
       .values({
         items_id: items[0]!.id ?? "",
         ptoVenta: parseInt(pv),
-
         nroFactura: 0,
         tipoFactura: grupo.businessUnitData?.brand?.bill_type,
         concepto: parseInt(grupo.businessUnitData?.brand?.concept ?? "0"),
-        // concepto: 1,
-
         tipoDocumento: tipoDocumento ?? 0,
         // tipoDocumento: 80,
-
         nroDocumento: parseInt(billResponsible?.fiscal_id_number ?? "0"),
         // nroDocumento: 0,
-        importe: 0,
+        importe,
         fromPeriod: dateDesde,
         toPeriod: dateHasta,
         due_date: dateVencimiento,
@@ -292,25 +344,53 @@ async function preparateFactura(
 }
 
 async function getGroupAmount(grupo: grupoCompleto) {
-  let importeBase = 0;
+  let importe = 0;
   grupo.integrants?.forEach((integrant) => {
     if (integrant.birth_date != null) {
       const age = calcularEdad(integrant.birth_date);
-      // const precioBase = grupo.plan?.pricesPerAge.find();
+      const precioIntegrante =
+        grupo.plan?.pricesPerAge.find((x) => {
+          if (integrant.relationship) {
+            return x.condition == integrant.relationship;
+          } else {
+            return x.age == age;
+          }
+        })?.amount ?? 0;
+
+      importe += precioIntegrante;
     }
   });
+  return importe;
 }
 
-function calcularEdad(fechaNacimiento: Date): number {
-  const hoy = new Date();
-  let edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
-  const mes = hoy.getMonth() - fechaNacimiento.getMonth();
+async function getGroupContribution(grupo: grupoCompleto) {
+  let importe = 0;
+  grupo.integrants?.forEach((integrant) => {
+    const contributionIntegrante = integrant?.contribution?.amount ?? 0;
+    importe += contributionIntegrante;
+  });
+  return importe;
+}
 
-  if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNacimiento.getDate())) {
-    edad--;
-  }
-
-  return edad;
+async function getDifferentialAmount(grupo: grupoCompleto) {
+  let importe = 0;
+  grupo.integrants?.forEach((integrant) => {
+    if (integrant.birth_date == null) return;
+    const age = calcularEdad(integrant.birth_date);
+    const precioIntegrante =
+      grupo.plan?.pricesPerAge.find((x) => {
+        if (integrant.relationship) {
+          return x.condition == integrant.relationship;
+        } else {
+          return x.age == age;
+        }
+      })?.amount ?? 0;
+    integrant?.differentialsValues.forEach((differential) => {
+      const differentialIntegrante = differential.amount * precioIntegrante;
+      importe += differentialIntegrante;
+    });
+  });
+  return importe;
 }
 
 async function getGruposByBrandId(brandId: string) {
@@ -325,9 +405,14 @@ async function getGruposByBrandId(brandId: string) {
       abonos: true,
       integrants: {
         with: {
-          contributions: true,
+          contribution: true,
           differentialsValues: true,
           pa: true,
+        },
+      },
+      cc: {
+        with: {
+          events: true,
         },
       },
       bonus: true,
