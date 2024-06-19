@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import Afip from "@afipsdk/afip.js";
 import { z } from "zod";
 import { db, schema } from "~/server/db";
@@ -198,6 +198,12 @@ async function approbateFactura(liquidationId: string) {
       const producto = await db.query.products.findFirst({
         where: eq(schema.products.id, billResponsible?.pa[0]?.product_id ?? ""),
       });
+      const cc = await db.query.currentAccount.findFirst({
+        where: eq(
+          schema.currentAccount.family_group,
+          factura.family_group?.id ?? ""
+        ),
+      });
       const status = await db.query.paymentStatus.findFirst({
         where: eq(schema.paymentStatus.code, "91"),
       });
@@ -225,6 +231,18 @@ async function approbateFactura(liquidationId: string) {
           // address: billResponsible?.address,
         })
         .returning();
+
+      const lastEvent = await db.query.events.findFirst({
+        where: eq(schema.events.currentAccount_id, cc?.id ?? ""),
+        orderBy: [desc(schema.events.createdAt)],
+      });
+      const event = await db.insert(schema.events).values({
+        currentAccount_id: cc?.id,
+        event_amount: factura.importe * -1,
+        current_amount: lastEvent?.current_amount! - factura.importe,
+        description: "Factura aprobada",
+        type: "FC",
+      });
     }
     return "OK";
   } else {

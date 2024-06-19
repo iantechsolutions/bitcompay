@@ -9,7 +9,7 @@ export const integrantsRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({}) => {
     const integrants = await db.query.integrants.findMany({
       with: {
-        contributions: true,
+        contribution: true,
         differentialsValues: true,
       },
     });
