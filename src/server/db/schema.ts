@@ -125,7 +125,7 @@ export const payments = pgTable(
     additional_info: varchar("additional_info", { length: 255 }),
     payment_channel: varchar("payment_channel", { length: 255 }),
     payment_date: timestamp("payment_date", { mode: "date" }),
-    collected_amount: bigint("collected_amount", { mode: "number" }),
+    collected_amount: real("collected_amount"),
     cbu: varchar("cbu", { length: 22 }).default(" "),
     card_brand: varchar("card_brand", { length: 255 }),
     card_number: varchar("card_number", { length: 255 }),

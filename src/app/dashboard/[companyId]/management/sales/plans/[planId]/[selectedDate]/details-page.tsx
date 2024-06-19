@@ -81,10 +81,23 @@ export default function DetailsPage(props: {
     const groupByAge: GroupedPlans[] = [];
     let savedPrice = -1;
     props.plan?.pricesPerAge
-      ?.filter((precio) => precio.isAmountByAge === true)
       .sort((a, b) => (a.age ?? 0) - (b.age ?? 0))
       .forEach((price) => {
-        if (price.amount !== savedPrice) {
+        if (price.isAmountByAge === true) {
+          if (price.amount !== savedPrice) {
+            groupByAge.push({
+              from_age: price.age ?? 0,
+              to_age: price.age ?? 0,
+              amount: price.amount,
+              condition: price.condition,
+              isConditional: !price.isAmountByAge,
+            });
+            savedPrice = price.amount;
+          } else if (groupByAge.length > 0) {
+            const last = groupByAge[groupByAge.length - 1];
+            last!.to_age = price.age ?? 0;
+          }
+        } else {
           groupByAge.push({
             from_age: price.age ?? 0,
             to_age: price.age ?? 0,
@@ -92,10 +105,6 @@ export default function DetailsPage(props: {
             condition: price.condition,
             isConditional: !price.isAmountByAge,
           });
-          savedPrice = price.amount;
-        } else if (groupByAge.length > 0) {
-          const last = groupByAge[groupByAge.length - 1];
-          last!.to_age = price.age ?? 0;
         }
       });
     setGroupByAge(groupByAge);
@@ -180,7 +189,7 @@ export default function DetailsPage(props: {
               openExterior={openAdd}
               setOpenExterior={setOpenAdd}
               planId={props.plan?.id}
-              initialPrices={groupByAge}
+              initialPrices={groupByAge.filter((x) => !x.isConditional)}
             ></AddPlanDialog>
           </div>
           <div className="flex items-center">
