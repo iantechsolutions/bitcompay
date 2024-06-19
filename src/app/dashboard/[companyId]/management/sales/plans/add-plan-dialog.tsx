@@ -99,20 +99,7 @@ export default function AddPlanDialog({
     validy_date: "",
     plan_code: "",
     description: "",
-    conditional_prices:
-      initialPrices?.map((item) => {
-        // Log the item for debugging purposes
-        console.log(item);
-
-        // Return the transformed object
-        return {
-          condition: item.condition ?? "",
-          age_from: item.from_age?.toString() ?? "",
-          age_to: item.to_age?.toString() ?? "",
-          price: item.amount?.toString() ?? "",
-          isConditional: item.isConditional,
-        };
-      }) ?? [],
+    conditional_prices: [],
   };
   const [formInitialValues, setFormInitialValues] =
     useState<Inputs>(initValues);
@@ -132,7 +119,20 @@ export default function AddPlanDialog({
         validy_date: dayjs.utc(planData.validy_date).toISOString(),
         plan_code: planData.plan_code,
         description: planData.description,
-        conditional_prices: [],
+        conditional_prices:
+          initialPrices?.map((item) => {
+            // Log the item for debugging purposes
+            console.log(item);
+
+            // Return the transformed object
+            return {
+              condition: item.condition ?? "",
+              age_from: item.from_age?.toString() ?? "",
+              age_to: item.to_age?.toString() ?? "",
+              price: item.amount?.toString() ?? "",
+              isConditional: item.isConditional,
+            };
+          }) ?? [],
       };
 
       setFormInitialValues(updatedInitialValues);
@@ -359,79 +359,192 @@ export default function AddPlanDialog({
                     <PlusCircle className="mr-2" size={20} />
                     Agregar Precio por Edad
                   </Button>
-                  {fields.map((field, index) => (
-                    <div key={field.id} className="grid gap-4 sm:grid-cols-4">
-                      <FormField
-                        control={form.control}
-                        name={`conditional_prices.${index}.condition`}
-                        render={({ field }) => (
-                          <FormItem className="col-span-1">
-                            <FormLabel htmlFor={`condition_${index}`}>
-                              Condición
-                            </FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
+                  {fields.map((item, index) => (
+                      <div
+                        key={item.id}
+                        className="flex space-x-4 items-center"
+                      >
+                        <div className="w-[300px]">
+                          <FormField
+                            control={form.control}
+                            name={`conditional_prices.${index}.isConditional`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel
+                                  htmlFor={`conditional_prices.${index}.isConditional`}
+                                >
+                                  Condicion
+                                </FormLabel>
+                                <br />
+                                <FormControl>
+                                  <Select
+                                    onValueChange={(value) => {
+                                      const updatedValues = [
+                                        ...formInitialValues.conditional_prices,
+                                      ];
+                                      updatedValues[index] = {
+                                        ...updatedValues[index],
+                                        isConditional: value === "true",
+                                        condition:
+                                          updatedValues[index]?.condition ?? "",
+                                        age_from:
+                                          updatedValues[index]?.age_from ?? "",
+                                        age_to:
+                                          updatedValues[index]?.age_to ?? "",
+                                        price:
+                                          updatedValues[index]?.price ?? "",
+                                      };
+                                      setFormInitialValues({
+                                        ...formInitialValues,
+                                        conditional_prices: updatedValues,
+                                      });
+                                      field.onChange(value === "true");
+                                    }}
+                                    value={field.value ? "true" : "false"}
+                                  >
+                                    <SelectTrigger className="w-[180px] font-bold">
+                                      <SelectValue placeholder="Seleccione una opción" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem
+                                        value="false"
+                                        className="rounded-none border-b border-gray-600"
+                                      >
+                                        Rango de edad
+                                      </SelectItem>
+                                      <SelectItem
+                                        value="true"
+                                        className="rounded-none border-b border-gray-600"
+                                      >
+                                        Parentesco
+                                      </SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        {formInitialValues?.conditional_prices[index]
+                          ?.isConditional && (
+                          <FormField
+                            control={form.control}
+                            name={`conditional_prices.${index}.condition`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel
+                                  htmlFor={`conditional_prices.${index}.condition`}
+                                >
+                                  Relacion
+                                </FormLabel>
+                                <FormControl>
+                                  <Select
+                                    onValueChange={(value) =>
+                                      setCondition(value)
+                                    }
+                                  >
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Seleccione una opción" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {relatives?.map((relative) => (
+                                        <SelectItem
+                                          key={relative.relation}
+                                          value={relative.relation ?? ""}
+                                        >
+                                          {relative.relation}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
                         )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name={`conditional_prices.${index}.age_from`}
-                        render={({ field }) => (
-                          <FormItem className="col-span-1">
-                            <FormLabel htmlFor={`age_from_${index}`}>
-                              Edad desde
-                            </FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
+                        {!formInitialValues?.conditional_prices[index]
+                          ?.isConditional && (
+                          <>
+                            <FormField
+                              control={form.control}
+                              name={`conditional_prices.${index}.age_from`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel
+                                    htmlFor={`conditional_prices.${index}.age_from`}
+                                  >
+                                    Edad Desde
+                                  </FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      className="border-green-300 focus-visible:ring-green-400"
+                                      id={`conditional_prices.${index}.age_from`}
+                                      type="text"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name={`conditional_prices.${index}.age_to`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel
+                                    htmlFor={`conditional_prices.${index}.age_to`}
+                                  >
+                                    Edad Hasta
+                                  </FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      className="border-green-300 focus-visible:ring-green-400"
+                                      id={`conditional_prices.${index}.age_to`}
+                                      type="text"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </>
                         )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name={`conditional_prices.${index}.age_to`}
-                        render={({ field }) => (
-                          <FormItem className="col-span-1">
-                            <FormLabel htmlFor={`age_to_${index}`}>
-                              Edad hasta
-                            </FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name={`conditional_prices.${index}.price`}
-                        render={({ field }) => (
-                          <FormItem className="col-span-1">
-                            <FormLabel htmlFor={`price_${index}`}>
-                              Precio
-                            </FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <div className="flex items-end">
+                        <FormField
+                          control={form.control}
+                          name={`conditional_prices.${index}.price`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel
+                                htmlFor={`conditional_prices.${index}.price`}
+                              >
+                                Precio
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  className="border-green-300 focus-visible:ring-green-400"
+                                  id={`conditional_prices.${index}.price`}
+                                  type="text"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                         <Button
+                          variant="ghost"
                           type="button"
+                          className="relative top-3"
                           onClick={() => remove(index)}
-                          variant="destructive"
                         >
-                          <CircleX size={20} />
+                          <CircleX className="text-red-500" size={20} />
                         </Button>
                       </div>
-                    </div>
-                  ))}
+                    ))}
                 </TabsContent>
               </Tabs>
               <Button type="submit">{planId ? "Actualizar" : "Guardar"}</Button>
