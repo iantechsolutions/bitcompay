@@ -10,7 +10,9 @@ import {
 
 export const family_groupsRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({}) => {
-    const family_groups = await db.query.family_groups.findMany();
+    const family_groups = await db.query.family_groups.findMany({
+      with: { integrants: true, cc: true },
+    });
     return family_groups;
   }),
   get: protectedProcedure
