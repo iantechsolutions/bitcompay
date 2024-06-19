@@ -188,7 +188,6 @@ async function approbateFactura(liquidationId: string) {
       .update(schema.liquidations)
       .set({ estado: "aprobada", userApproved: user?.id })
       .where(eq(schema.liquidations.id, liquidationId));
-
     for (let factura of liquidation?.facturas) {
       const randomNumber =
         Math.floor(Math.random() * (100000 - 1000 + 1)) + 1000;
@@ -235,7 +234,7 @@ async function approbateFactura(liquidationId: string) {
       const historicEvents = await db.query.events.findMany({
         where: eq(schema.events.currentAccount_id, cc?.id ?? ""),
       });
-      if(historicEvents && historicEvents.length>0){
+      if (historicEvents && historicEvents.length > 0) {
         const lastEvent = historicEvents.reduce((prev, current) => {
           return new Date(prev.createdAt) > new Date(current.createdAt)
             ? prev
@@ -248,8 +247,7 @@ async function approbateFactura(liquidationId: string) {
           description: "Factura aprobada",
           type: "FC",
         });
-      }
-      else{
+      } else {
         const event = await db.insert(schema.events).values({
           currentAccount_id: cc?.id,
           event_amount: factura.importe * -1,
@@ -258,7 +256,6 @@ async function approbateFactura(liquidationId: string) {
           type: "FC",
         });
       }
-      
     }
     return "OK";
   } else {
@@ -299,14 +296,13 @@ async function preparateFactura(
     const differential_amount = await getDifferentialAmount(grupo);
 
     let mostRecentEvent;
-    if(grupo.cc && grupo.cc?.events.length>0){
+    if (grupo.cc && grupo.cc?.events.length > 0) {
       mostRecentEvent = grupo.cc?.events.reduce((prev, current) => {
         return new Date(prev.createdAt) > new Date(current.createdAt)
           ? prev
           : current;
       });
-    }
-    else{
+    } else {
       mostRecentEvent = null;
     }
 

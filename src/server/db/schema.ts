@@ -118,9 +118,9 @@ export const payments = pgTable(
     invoice_number: bigint("invoice_number", { mode: "number" }).notNull(),
     //
     period: timestamp("period", { mode: "date" }),
-    first_due_amount: bigint("first_due_amount", { mode: "number" }),
+    first_due_amount: real("first_due_amount"),
     first_due_date: timestamp("first_due_date", { mode: "date" }),
-    second_due_amount: bigint("second_due_amount", { mode: "number" }),
+    second_due_amount: real("second_due_amount"),
     second_due_date: timestamp("second_due_date", { mode: "date" }),
     additional_info: varchar("additional_info", { length: 255 }),
     payment_channel: varchar("payment_channel", { length: 255 }),
