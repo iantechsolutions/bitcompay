@@ -17,7 +17,7 @@ export const family_groupsRouter = createTRPCRouter({
     .input(
       z.object({
         family_groupsId: z.string(),
-      }),
+      })
     )
     .query(async ({ input }) => {
       const family_groups = await db.query.family_groups.findFirst({
@@ -30,7 +30,7 @@ export const family_groupsRouter = createTRPCRouter({
     .input(
       z.object({
         procedureId: z.string(),
-      }),
+      })
     )
     .query(async ({ input }) => {
       const family_group = await db.query.family_groups.findFirst({
@@ -42,18 +42,18 @@ export const family_groupsRouter = createTRPCRouter({
     .input(
       z.object({
         brandId: z.string(),
-      }),
+      })
     )
     .query(async ({ input }) => {
       const family_group = await db.query.family_groups.findMany({
-        with:{
+        with: {
           businessUnitData: true,
           abonos: true,
           integrants: {
-            with:{
-              contributions: true,
+            with: {
+              contribution: true,
               differentialsValues: true,
-            }
+            },
           },
           bonus: true,
           plan: true,
@@ -61,8 +61,8 @@ export const family_groupsRouter = createTRPCRouter({
         },
       });
       const family_group_reduced = family_group.filter((family_group) => {
-        return family_group.businessUnitData?.brandId  === input.brandId;
-      })
+        return family_group.businessUnitData?.brandId === input.brandId;
+      });
       return family_group_reduced;
     }),
   create: protectedProcedure
@@ -77,7 +77,7 @@ export const family_groupsRouter = createTRPCRouter({
         procedureId: z.string().optional(),
         state: z.string().optional(),
         payment_status: z.string().optional(),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       const new_family_group = await db
@@ -102,7 +102,7 @@ export const family_groupsRouter = createTRPCRouter({
         procedureId: z.string().nullable().optional(),
         state: z.string().nullable().optional(),
         payment_status: z.string().nullable().optional(),
-      }),
+      })
     )
     .mutation(async ({ input: { id, ...input } }) => {
       console.log("Function called");
@@ -119,7 +119,7 @@ export const family_groupsRouter = createTRPCRouter({
     .input(
       z.object({
         family_groupsId: z.string(),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       await db
