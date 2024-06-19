@@ -211,6 +211,9 @@ export const excelDeserializationRouter = createTRPCRouter({
             .returning();
           console.log("creando valores diferencial valor");
 
+          const cc = await db.insert(schema.currentAccount).values({
+            family_group: new_integrant[0]!.family_group_id,
+          });
           const ageN = calcularEdad(row.birth_date ?? new Date());
           const precioIntegrante =
             plan?.pricesPerAge.find((p) => {
