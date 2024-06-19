@@ -186,6 +186,10 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
     fields: [payments.factura_id],
     references: [facturas.id],
   }),
+  channel: one(channels, {
+    fields: [payments.payment_channel],
+    references: [channels.id],
+  }),
 }));
 
 export const channels = pgTable(

@@ -18,6 +18,7 @@ import type { RouterOutputs } from "~/trpc/shared";
 
 export type UploadedPageProps = {
   upload: NonNullable<RouterOutputs["uploads"]["responseUpload"]>;
+  channel: NonNullable<RouterOutputs["channels"]["get"]>;
 };
 
 export default function ResponseUnconfirmedPage(props: UploadedPageProps) {
@@ -67,7 +68,7 @@ export default function ResponseUnconfirmedPage(props: UploadedPageProps) {
         uploadId: upload.id,
         // companyId: "",
         // brandId: 0,
-        // channelId: "",
+        channelName: props.channel!.name,
       });
       toast.success("Documento cargado correctamente");
       router.refresh();

@@ -135,13 +135,7 @@ export const recDocumentValidator = z
       .nullable()
       .optional(),
     "Fecha 2do. Vto.": stringAsDate.nullable().optional(),
-    "Info. Adicional": z
-      .string()
-      .min(1)
-      .max(20, { message: "Info. Adicional demasiado larga" })
-      .catch("")
-      .nullable()
-      .optional(),
+    "Info. Adicional": z.string().min(1).catch("").nullable().optional(),
     "Canal de Cobro": z
       .string()
       .min(0)
