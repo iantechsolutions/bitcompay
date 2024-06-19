@@ -81,7 +81,7 @@ export default function DetailsPage(props: {
     const groupByAge: GroupedPlans[] = [];
     let savedPrice = -1;
     props.plan?.pricesPerAge
-      .sort((a, b) => (a.age ?? 0) - (b.age ?? 0))
+      .sort((a, b) => (a.age ?? 1000) - (b.age ?? 1000))
       .forEach((price) => {
         if (price.isAmountByAge === true) {
           if (price.amount !== savedPrice) {

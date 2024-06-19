@@ -104,7 +104,17 @@ export default function AddPlanDialog({
   const [formInitialValues, setFormInitialValues] =
     useState<Inputs>(initValues);
 
-  const { data: planData } = api.plans.get.useQuery({ planId: planId ?? "" });
+  const [hasQueried, setHasQueried] = useState(false);
+
+  const { data: planData } = api.plans.get.useQuery(
+    { planId: planId ?? "" },
+    {
+      enabled: !!planId && !hasQueried,
+      onSuccess: () => {
+        setHasQueried(true);
+      },
+    }
+  );
 
   const form = useForm<Inputs>({
     resolver: zodResolver(PlanSchema),
@@ -134,14 +144,14 @@ export default function AddPlanDialog({
             };
           }) ?? [],
       };
-
+      console.log(updatedInitialValues);
       setFormInitialValues(updatedInitialValues);
       setBrand(planData.brand_id ?? "");
 
       // Reset form values
       reset(updatedInitialValues);
     }
-  }, [planData, reset]);
+  }, [planData]);
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -360,191 +370,185 @@ export default function AddPlanDialog({
                     Agregar Precio por Edad
                   </Button>
                   {fields.map((item, index) => (
-                      <div
-                        key={item.id}
-                        className="flex space-x-4 items-center"
-                      >
-                        <div className="w-[300px]">
-                          <FormField
-                            control={form.control}
-                            name={`conditional_prices.${index}.isConditional`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel
-                                  htmlFor={`conditional_prices.${index}.isConditional`}
-                                >
-                                  Condicion
-                                </FormLabel>
-                                <br />
-                                <FormControl>
-                                  <Select
-                                    onValueChange={(value) => {
-                                      const updatedValues = [
-                                        ...formInitialValues.conditional_prices,
-                                      ];
-                                      updatedValues[index] = {
-                                        ...updatedValues[index],
-                                        isConditional: value === "true",
-                                        condition:
-                                          updatedValues[index]?.condition ?? "",
-                                        age_from:
-                                          updatedValues[index]?.age_from ?? "",
-                                        age_to:
-                                          updatedValues[index]?.age_to ?? "",
-                                        price:
-                                          updatedValues[index]?.price ?? "",
-                                      };
-                                      setFormInitialValues({
-                                        ...formInitialValues,
-                                        conditional_prices: updatedValues,
-                                      });
-                                      field.onChange(value === "true");
-                                    }}
-                                    value={field.value ? "true" : "false"}
-                                  >
-                                    <SelectTrigger className="w-[180px] font-bold">
-                                      <SelectValue placeholder="Seleccione una opción" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem
-                                        value="false"
-                                        className="rounded-none border-b border-gray-600"
-                                      >
-                                        Rango de edad
-                                      </SelectItem>
-                                      <SelectItem
-                                        value="true"
-                                        className="rounded-none border-b border-gray-600"
-                                      >
-                                        Parentesco
-                                      </SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        {formInitialValues?.conditional_prices[index]
-                          ?.isConditional && (
-                          <FormField
-                            control={form.control}
-                            name={`conditional_prices.${index}.condition`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel
-                                  htmlFor={`conditional_prices.${index}.condition`}
-                                >
-                                  Relacion
-                                </FormLabel>
-                                <FormControl>
-                                  <Select
-                                    onValueChange={(value) =>
-                                      setCondition(value)
-                                    }
-                                  >
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Seleccione una opción" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {relatives?.map((relative) => (
-                                        <SelectItem
-                                          key={relative.relation}
-                                          value={relative.relation ?? ""}
-                                        >
-                                          {relative.relation}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        )}
-                        {!formInitialValues?.conditional_prices[index]
-                          ?.isConditional && (
-                          <>
-                            <FormField
-                              control={form.control}
-                              name={`conditional_prices.${index}.age_from`}
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel
-                                    htmlFor={`conditional_prices.${index}.age_from`}
-                                  >
-                                    Edad Desde
-                                  </FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      className="border-green-300 focus-visible:ring-green-400"
-                                      id={`conditional_prices.${index}.age_from`}
-                                      type="text"
-                                      {...field}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                            <FormField
-                              control={form.control}
-                              name={`conditional_prices.${index}.age_to`}
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel
-                                    htmlFor={`conditional_prices.${index}.age_to`}
-                                  >
-                                    Edad Hasta
-                                  </FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      className="border-green-300 focus-visible:ring-green-400"
-                                      id={`conditional_prices.${index}.age_to`}
-                                      type="text"
-                                      {...field}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </>
-                        )}
+                    <div key={item.id} className="flex space-x-4 items-center">
+                      <div className="w-[300px]">
                         <FormField
                           control={form.control}
-                          name={`conditional_prices.${index}.price`}
+                          name={`conditional_prices.${index}.isConditional`}
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel
-                                htmlFor={`conditional_prices.${index}.price`}
+                                htmlFor={`conditional_prices.${index}.isConditional`}
                               >
-                                Precio
+                                Condicion
                               </FormLabel>
+                              <br />
                               <FormControl>
-                                <Input
-                                  className="border-green-300 focus-visible:ring-green-400"
-                                  id={`conditional_prices.${index}.price`}
-                                  type="text"
-                                  {...field}
-                                />
+                                <Select
+                                  onValueChange={(value) => {
+                                    const updatedValues = [
+                                      ...formInitialValues.conditional_prices,
+                                    ];
+                                    updatedValues[index] = {
+                                      ...updatedValues[index],
+                                      isConditional: value === "true",
+                                      condition:
+                                        updatedValues[index]?.condition ?? "",
+                                      age_from:
+                                        updatedValues[index]?.age_from ?? "",
+                                      age_to:
+                                        updatedValues[index]?.age_to ?? "",
+                                      price: updatedValues[index]?.price ?? "",
+                                    };
+                                    setFormInitialValues({
+                                      ...formInitialValues,
+                                      conditional_prices: updatedValues,
+                                    });
+                                    field.onChange(value === "true");
+                                  }}
+                                  value={field.value ? "true" : "false"}
+                                >
+                                  <SelectTrigger className="w-[180px] font-bold">
+                                    <SelectValue placeholder="Seleccione una opción" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem
+                                      value="false"
+                                      className="rounded-none border-b border-gray-600"
+                                    >
+                                      Rango de edad
+                                    </SelectItem>
+                                    <SelectItem
+                                      value="true"
+                                      className="rounded-none border-b border-gray-600"
+                                    >
+                                      Parentesco
+                                    </SelectItem>
+                                  </SelectContent>
+                                </Select>
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
-                        <Button
-                          variant="ghost"
-                          type="button"
-                          className="relative top-3"
-                          onClick={() => remove(index)}
-                        >
-                          <CircleX className="text-red-500" size={20} />
-                        </Button>
                       </div>
-                    ))}
+                      {formInitialValues?.conditional_prices[index]
+                        ?.isConditional && (
+                        <FormField
+                          control={form.control}
+                          name={`conditional_prices.${index}.condition`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel
+                                htmlFor={`conditional_prices.${index}.condition`}
+                              >
+                                Relacion
+                              </FormLabel>
+                              <FormControl>
+                                <Select
+                                  onValueChange={(value) => setCondition(value)}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Seleccione una opción" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {relatives?.map((relative) => (
+                                      <SelectItem
+                                        key={relative.relation}
+                                        value={relative.relation ?? ""}
+                                      >
+                                        {relative.relation}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
+                      {!formInitialValues?.conditional_prices[index]
+                        ?.isConditional && (
+                        <>
+                          <FormField
+                            control={form.control}
+                            name={`conditional_prices.${index}.age_from`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel
+                                  htmlFor={`conditional_prices.${index}.age_from`}
+                                >
+                                  Edad Desde
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    className="border-green-300 focus-visible:ring-green-400"
+                                    id={`conditional_prices.${index}.age_from`}
+                                    type="text"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`conditional_prices.${index}.age_to`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel
+                                  htmlFor={`conditional_prices.${index}.age_to`}
+                                >
+                                  Edad Hasta
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    className="border-green-300 focus-visible:ring-green-400"
+                                    id={`conditional_prices.${index}.age_to`}
+                                    type="text"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </>
+                      )}
+                      <FormField
+                        control={form.control}
+                        name={`conditional_prices.${index}.price`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel
+                              htmlFor={`conditional_prices.${index}.price`}
+                            >
+                              Precio
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                className="border-green-300 focus-visible:ring-green-400"
+                                id={`conditional_prices.${index}.price`}
+                                type="text"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button
+                        variant="ghost"
+                        type="button"
+                        className="relative top-3"
+                        onClick={() => remove(index)}
+                      >
+                        <CircleX className="text-red-500" size={20} />
+                      </Button>
+                    </div>
+                  ))}
                 </TabsContent>
               </Tabs>
               <Button type="submit">{planId ? "Actualizar" : "Guardar"}</Button>
