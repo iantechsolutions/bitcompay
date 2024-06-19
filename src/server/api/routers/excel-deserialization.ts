@@ -196,7 +196,7 @@ export const excelDeserializationRouter = createTRPCRouter({
               isBillResponsible: row.isPaymentResponsible == true,
               age: age,
               family_group_id: familyGroupId,
-              affiliate_number: row.affiliate_number,
+              affiliate_number: row.affiliate_number?.toString(),
               extention: " ",
               postal_codeId: postal_code_schema?.id,
               health_insuranceId: health_insurance?.id,
@@ -219,7 +219,7 @@ export const excelDeserializationRouter = createTRPCRouter({
             });
 
             await db.insert(schema.pa).values({
-              card_number: row.card_number!,
+              card_number: row.card_number!.toString(),
               CBU: row.cbu!,
               new_registration: row.is_new!,
               integrant_id: new_integrant[0]!.id,
@@ -319,7 +319,7 @@ async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
     const rowNum = i + 2;
     // autocompletar info de tarjeta o tirar error si no encuntra
     const response = await fetch(
-      `https://data.handyapi.com/bin/${row.card_number?.slice(0, 8)}`
+      `https://data.handyapi.com/bin/${row.card_number?.toString().slice(0, 8)}`
     );
 
     const json = await response?.json();

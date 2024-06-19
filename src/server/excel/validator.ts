@@ -6,8 +6,9 @@ import type { TableHeaders } from "~/components/table";
 const stringAsDate = z
   .union([z.string(), z.number()])
   .transform((value) => {
-    const date = excelDateToJSDate({ exceldate: Number(value) });
     console.log(value);
+    const date = excelDateToJSDate({ exceldate: Number(value) });
+    console.log(date);
 
     return date;
   })
@@ -61,6 +62,12 @@ const numberAsString = z
     message: "Caracteres incorrectos en columna:",
   });
 
+const cardNumber = z
+  .string()
+  .or(z.number())
+  .transform((v) => Number.parseInt(v.toString().replace(/\s/g, "")))
+  .refine(Number.isInteger);
+
 export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
   let finishedArray: {
     business_unit: string | null;
@@ -74,7 +81,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     state: "ACTIVO" | "INACTIVO" | null;
     holder_id_number: string | null;
     name: string | null;
-    affiliate_number: string | null;
+    affiliate_number: string | number | null;
     extension: string | null;
     own_id_type: "DNI" | "PASAPORTE" | null;
     du_number: string | null;
@@ -112,7 +119,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     cbu: string | null;
     card_brand: string | null;
     is_new: boolean | null;
-    card_number: string | null;
+    card_number: number | null;
     card_type: string | null;
   }[] = [];
   let errors: z.ZodError<
@@ -173,7 +180,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
       "NRO CBU"?: string | number | null | undefined;
       "TC MARCA"?: string | null | undefined;
       "ALTA NUEVA"?: string | boolean | null | undefined;
-      "NRO. TARJETA"?: string | number | null | undefined;
+      "NRO. TARJETA"?: number | null | undefined;
       "TIPO DE TARJETA"?: string | null | undefined;
     }[]
   >[] = [];
@@ -235,12 +242,7 @@ export const recDocumentValidator = z
       .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
       .nullable()
       .optional(),
-    "NRO AFILIADO": z
-      .string()
-      .min(0)
-      .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
-      .nullable()
-      .optional(),
+    "NRO AFILIADO": numberAsString.nullable().optional(),
     EXTENSION: z
       .string()
       .min(0)
@@ -330,7 +332,7 @@ export const recDocumentValidator = z
       .nullable()
       .optional(),
     "ALTA NUEVA": stringAsBoolean.nullable().optional(),
-    "NRO. TARJETA": numberAsString.nullable().optional(),
+    "NRO. TARJETA": cardNumber.nullable().optional(),
     "TIPO DE TARJETA": z.string().nullable().optional(),
   })
   .transform((value) => {
