@@ -30,8 +30,7 @@ export default function AddProcedure() {
   const { mutateAsync: createProcedure } = api.procedure.create.useMutation();
   const { mutateAsync: createfamily_group } =
     api.family_groups.create.useMutation();
-  const { mutateAsync: createPaymentInfo } =
-    api.payment_info.create.useMutation();
+  const { mutateAsync: createPaymentInfo } = api.pa.create.useMutation();
   const [membersData, setMembersData] = useState<InputsMembers[]>([]);
 
   const generalInfoForm = useForm<InputsGeneralInfo>();
@@ -93,6 +92,7 @@ export default function AddProcedure() {
         fiscal_id_type: member.fiscal_id_type,
         fiscal_id_number: member.fiscal_id_number,
         address: member.address,
+        address_number: member.address_number,
         phone_number: member.phone_number,
         cellphone_number: member.cellphone_number,
         email: member.mail,
@@ -140,6 +140,8 @@ export default function AddProcedure() {
         expire_date: billingFormValues.card_expiration_date ?? null,
         CCV: billingFormValues.card_security_code,
         CBU: billingFormValues.cbu,
+        card_type: billingFormValues.card_type ?? null,
+        card_brand: billingFormValues.card_brand ?? null,
       });
     } catch (e) {
       const error = asTRPCError(e)!;

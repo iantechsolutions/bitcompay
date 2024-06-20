@@ -50,7 +50,6 @@ export default function AddBonusDialog() {
   const form = useForm<Inputs>();
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
-      console.log(data);
       await createBonus({
         appliedUser: data.appliedUser,
         approverUser: data.aprovedUser,
@@ -71,12 +70,12 @@ export default function AddBonusDialog() {
     <>
       <Button onClick={() => setOpen(true)}>
         <PlusCircleIcon className="mr-2" size={20} />
-        Crear Bono
+        Crear bonificacion
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Crear un Bonus</DialogTitle>
+            <DialogTitle>Crear bonificacion</DialogTitle>
           </DialogHeader>
           <div>
             <Form {...form}>
@@ -186,7 +185,7 @@ export default function AddBonusDialog() {
                   )}
                 />
                 <Button className="mt-2" type="submit" disabled={isLoading}>
-                  Crear Bono
+                  Crear bonificacion
                 </Button>
               </form>
             </Form>

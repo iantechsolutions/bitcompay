@@ -1,14 +1,10 @@
 "use client";
 import { CheckIcon, Loader2 } from "lucide-react";
-import { type MouseEventHandler, useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import LayoutContainer from "~/components/layout-container";
-import { List, ListTile } from "~/components/list";
 import { Title } from "~/components/title";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
-import { Switch } from "~/components/ui/switch";
 import { asTRPCError } from "~/lib/errors";
 import { type RouterOutputs } from "~/trpc/shared";
 import {
@@ -18,17 +14,6 @@ import {
   AccordionTrigger,
 } from "~/components/ui/accordion";
 import { Card } from "~/components/ui/card";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "~/components/ui/alert-dialog";
 import {
   PaymentInfo,
   type Procedure,
@@ -45,12 +30,14 @@ import { useForm } from "react-hook-form";
 import { type InputsGeneralInfo } from "~/components/procedures/general-info-form";
 import { type InputsBilling } from "~/components/procedures/billing-info";
 import { type InputsMembers } from "~/components/procedures/members-info";
+
 interface ProcedurePageProps {
   procedure: Procedure;
   family_group: FamilyGroup;
   integrants: Integrant[];
-  payment_info: PaymentInfo;
+  pa: PaymentInfo;
 }
+
 export default function ProcedurePage(props: ProcedurePageProps) {
   const [membersData, setMembersData] = useState<InputsMembers[]>([]);
   const initialValuesGeneralInfo: InputsGeneralInfo = {
@@ -65,39 +52,227 @@ export default function ProcedurePage(props: ProcedurePageProps) {
     receipt: props.family_group.receipt!,
     bonus: props.family_group.bonus!,
   };
-  const generalInfoForm = useForm<InputsGeneralInfo>();
+  const generalInfoForm = useForm<InputsGeneralInfo>({
+    defaultValues: initialValuesGeneralInfo,
+  });
   const membersForm = useForm<InputsMembers>();
   const billingForm = useForm<InputsBilling>();
 
-  const [family_groupData, setfamily_groupData] = useState();
-  const { mutateAsync: updateProcedure, isLoading } =
+  const { mutateAsync: updateProcedure, isLoading: isLoadingProcedure } =
     api.procedure.change.useMutation();
   const { mutateAsync: updateFamilyGroup, isLoading: isLoadingFamilyGroup } =
     api.family_groups.change.useMutation();
-  const { mutateAsync: updateIntegrants, isLoading: isLoadingIntegrants } =
+  const { mutateAsync: updateIntegrant, isLoading: isLoadingIntegrants } =
     api.integrants.change.useMutation();
-  const { mutateAsync: paymenteInfo, isLoading: isLoadingPaymentInfo } =
-    api.payment_info.change.useMutation();
+  const { mutateAsync: createIntegrant, isLoading: isCreatingIntegrants } =
+    api.integrants.create.useMutation();
+  const { mutateAsync: updatePaymentInfo, isLoading: isLoadingPaymentInfo } =
+    api.pa.change.useMutation();
+
   const handleChange = async () => {
     try {
-      // await updateFamilyGroup(props.family_group);
-      // await updateIntegrants();
-      // await paymenteInfo();
-      // await updateProcedure();
-      toast.success("tramite actualizado correctamente");
+      const generalInfoValues = generalInfoForm.getValues();
+      const billingInfoValues = billingForm.getValues();
+
+      await updateFamilyGroup({
+        id: props.family_group.id,
+        businessUnit: generalInfoValues.bussinessUnit,
+        validity: generalInfoValues.validity,
+        plan: generalInfoValues.plan,
+        modo: generalInfoValues.mode,
+        receipt: generalInfoValues.receipt,
+        bonus: generalInfoValues.bonus,
+      });
+
+      await updateProcedure({
+        id: props.procedure.id,
+        type: props.procedure.type ?? "",
+        estado: "updated",
+      });
+
+      for (const member of membersData) {
+        let status: "SOLTERO" | "CASADO" | "DIVORCIADO" | "VIUDO" = "SOLTERO";
+        switch (member.civil_status) {
+          case "CASADO":
+          case "DIVORCIADO":
+          case "VIUDO":
+            status = member.civil_status;
+            break;
+          default:
+            status = "SOLTERO";
+            break;
+        }
+
+        let gender: "MASCULINO" | "FEMENINO" | "OTRO" = "OTRO";
+        switch (member.gender) {
+          case "MASCULINO":
+          case "FEMENINO":
+            gender = member.gender;
+            break;
+          default:
+            gender = "OTRO";
+            break;
+        }
+        if (member.id) {
+          await updateIntegrant({
+            id: member.id,
+            affiliate_type: member.affiliate_type,
+            relationship: member.relationship,
+            name: member.name,
+            id_type: member.id_type,
+            id_number: member.id_number,
+            birth_date: member.birth_date.toString(),
+            gender: gender ?? null,
+            civil_status: status,
+            nationality: member.nationality,
+            afip_status: member.afip_status,
+            fiscal_id_type: member.fiscal_id_type,
+            fiscal_id_number: member.fiscal_id_number,
+            address: member.address,
+            address_number: member.address_number,
+            phone_number: member.phone_number,
+            cellphone_number: member.cellphone_number,
+            email: member.mail,
+            floor: member.floor,
+            department: member.depto,
+            localidad: member.localidad,
+            partido: member.county,
+            provincia: member.state,
+            cp: member.cp,
+            zona: member.zone,
+            isAffiliate: member.isAffiliate,
+            iva: member.iva,
+            isHolder: member.isHolder,
+            isPaymentHolder: member.isPaymentResponsible,
+            isBillResponsible: member.isBillResponsible,
+            family_group_id: props.family_group.id,
+          });
+        } else {
+          await createIntegrant({
+            postal_codeId: "",
+            affiliate_type: member.affiliate_type,
+            relationship: member.relationship,
+            name: member.name,
+            id_type: member.id_type,
+            id_number: member.id_number,
+            birth_date: member.birth_date,
+            gender: gender ?? null,
+            civil_status: status,
+            nationality: member.nationality,
+            afip_status: member.afip_status,
+            fiscal_id_type: member.fiscal_id_type,
+            fiscal_id_number: member.fiscal_id_number,
+            address: member.address,
+            address_number: member.address_number,
+            phone_number: member.phone_number,
+            cellphone_number: member.cellphone_number,
+            email: member.mail,
+            floor: member.floor,
+            department: member.depto,
+            locality: member.localidad,
+            partido: member.county,
+            state: member.state,
+            cp: member.cp,
+            zone: member.zone,
+            isAffiliate: member.isAffiliate,
+            iva: member.iva,
+            family_group_id: props.family_group.id,
+            isHolder: member.isHolder,
+            isPaymentHolder: member.isPaymentResponsible,
+            isBillResponsiblee: member.isBillResponsible,
+          });
+        }
+      }
+
+      await updatePaymentInfo({
+        paymentInfoId: props.pa.id,
+        card_number: billingInfoValues.card_number,
+        expire_date: billingInfoValues.card_expiration_date ?? null,
+        CCV: billingInfoValues.card_security_code,
+        CBU: billingInfoValues.cbu,
+      });
+
+      toast.success("Tramite actualizado correctamente");
     } catch (e) {
       const error = asTRPCError(e)!;
       toast.error(error.message);
     }
   };
 
+  useEffect(() => {
+    setMembersData(
+      props.integrants.map((integrant) => {
+        let status;
+        switch (integrant.civil_status) {
+          case "CASADO":
+          case "DIVORCIADO":
+          case "VIUDO":
+            status = integrant.civil_status;
+            break;
+          default:
+            status = "SOLTERO";
+            break;
+        }
+
+        let gender;
+        switch (integrant.gender) {
+          case "MASCULINO":
+          case "FEMENINO":
+            gender = integrant.gender;
+            break;
+          default:
+            gender = "OTRO";
+            break;
+        }
+
+        return {
+          id: integrant.id,
+          localidad: integrant.locality ?? "",
+          county: integrant.partido ?? "",
+          depto: integrant.department ?? "",
+          affiliate_type: integrant.affiliate_type ?? "",
+          relationship: integrant.relationship ?? "",
+          name: integrant.name ?? "",
+          id_type: integrant.id_type ?? "",
+          id_number: integrant.id_number ?? "",
+          birth_date: integrant.birth_date ? integrant.birth_date : new Date(),
+          gender: gender,
+          civil_status: status,
+          nationality: integrant.nationality ?? "",
+          afip_status: integrant.afip_status ?? "",
+          fiscal_id_type: integrant.fiscal_id_type ?? "",
+          fiscal_id_number: integrant.fiscal_id_number ?? "",
+          address: integrant.address ?? "",
+          address_number: integrant.address_number ?? "",
+          phone_number: integrant.phone_number ?? "",
+          cellphone_number: integrant.cellphone_number ?? "",
+          email: integrant.email ?? "",
+          floor: integrant.floor ?? "",
+          department: integrant.department ?? "",
+          locality: integrant.locality ?? "",
+          partido: integrant.partido ?? "",
+          state: integrant.state ?? "",
+          cp: integrant.cp ?? "",
+          zone: integrant.zone ?? "",
+          isAffiliate: integrant.isAffiliate ?? "",
+          iva: integrant.iva ?? "",
+          family_group_id: props.family_group.id ?? "",
+          isHolder: integrant.isHolder ?? "",
+          isBillResponsible: integrant.isBillResponsible ?? "",
+          mail: integrant.email ?? "",
+          isPaymentResponsible: integrant.isPaymentHolder ?? "",
+        };
+      })
+    );
+  }, [props.integrants]);
+
   return (
     <LayoutContainer>
       <section className="space-y-2">
         <div className="flex justify-between">
           <Title> {props.procedure.type}</Title>
-          <Button disabled={isLoading} onClick={handleChange}>
-            {isLoading ? (
+          <Button disabled={isLoadingProcedure} onClick={handleChange}>
+            {isLoadingProcedure ? (
               <Loader2 className="mr-2 animate-spin" />
             ) : (
               <CheckIcon className="mr-2" />
@@ -109,7 +284,7 @@ export default function ProcedurePage(props: ProcedurePageProps) {
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="item-2">
             <AccordionTrigger>
-              <h2 className="text-md">Info. de del tramite</h2>
+              <h2 className="text-md">Info. del tramite</h2>
             </AccordionTrigger>
             <AccordionContent>
               <Card className="p-5">
@@ -125,11 +300,7 @@ export default function ProcedurePage(props: ProcedurePageProps) {
                       </TabsTrigger>
                     </TabsList>
                     <TabsContent value="general_info">
-                      <GeneralInfoForm
-                        // setfamily_group={setfamily_groupData}
-                        // setProcedureId={setProcedureData}
-                        form={generalInfoForm}
-                      />
+                      <GeneralInfoForm form={generalInfoForm} />
                     </TabsContent>
                     <TabsContent value="members">
                       <div className="flex w-full flex-col gap-2">
@@ -145,11 +316,7 @@ export default function ProcedurePage(props: ProcedurePageProps) {
                     </TabsContent>
                     <TabsContent value="billing">
                       <div>
-                        <BillingInfo
-                          form={billingForm}
-                          // setBillingData={setBillingData}
-                          data={membersData}
-                        />
+                        <BillingInfo form={billingForm} data={membersData} />
                       </div>
                     </TabsContent>
                   </Tabs>
@@ -170,9 +337,3 @@ export default function ProcedurePage(props: ProcedurePageProps) {
     </LayoutContainer>
   );
 }
-
-//pregunta desde este pagina se puede ver los tramite precargados o cargados?? onda
-// en principio se puede todos los tramits
-// pero:
-// al guardar los cambios hay un cambio de estado?? a cargado por ej. pero en caso de que ya este cargado, no cambia
-// el estado?. Por otra parte, es preferible un acordion o no ?

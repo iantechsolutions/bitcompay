@@ -3,30 +3,18 @@ import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 dayjs.extend(customParseFormat);
 import type { TableHeaders } from "~/components/table";
+import { Value } from "@radix-ui/react-select";
 const stringAsDate = z
   .union([z.string(), z.number()])
   .transform((value) => {
-    if (typeof value === "number") {
-      value = value.toString().padStart(8, "0");
-    }
+    const date = excelDateToJSDate({ exceldate: Number(value) });
+    console.log(value);
 
-    const last4 = parseInt(value.substring(4, 8));
-
-    let day = value.substring(6, 8);
-    let month = value.substring(4, 6);
-    let year = value.substring(0, 4);
-
-    if (last4 > 2000) {
-      day = value.substring(0, 2);
-      month = value.substring(2, 4);
-      year = value.substring(4, 8);
-    }
-
-    return dayjs(`${year}-${month}-${day}`, "YYYY-MM-DD", true).toDate();
+    return date;
   })
   .refine(
     (value) => {
-      if (value.getFullYear() < 2000) return false;
+      if (value.getFullYear() < 1500) return false;
       if (value.getFullYear() > 3000) return false;
 
       return dayjs(value).isValid();
@@ -34,19 +22,34 @@ const stringAsDate = z
     { message: "Caracteres incorrectos en columna:" }
   );
 
+function excelDateToJSDate({ exceldate }: { exceldate: number }) {
+  const excelEpoch = new Date(1899, 11, 30); // December 30, 1899
+  const jsDate = new Date(excelEpoch.getTime() + exceldate * 86400000);
+  return jsDate;
+}
+
 const stringAsBoolean = z
   .union([z.string(), z.boolean()])
   .nullable()
   .optional()
   .transform((value) => {
-    if (typeof value === "string" && value.toLowerCase() === "verdadero") {
+    if (
+      (typeof value === "string" && value.toLowerCase() === "verdadero") ||
+      (typeof value === "string" && value.toLowerCase() === "si")
+    ) {
       return true;
     }
-    if (typeof value === "string" && value.toLowerCase() === "falso") {
+    if (
+      (typeof value === "string" && value.toLowerCase() === "falso") ||
+      (typeof value === "string" && value.toLowerCase() === "no")
+    ) {
       return false;
     }
     if (typeof value === "boolean") {
       return value;
+    }
+    if (!value || value == "") {
+      return false;
     }
   })
   .refine((value) => typeof value === "boolean", {
@@ -56,10 +59,26 @@ const stringAsBoolean = z
 const numberAsString = z
   .union([z.number(), z.string()])
   .transform((value) => {
+    console.log(value);
     if (
       typeof value === "number" ||
       (typeof value === "string" && !isNaN(Number(value)))
     ) {
+      return value.toString();
+    }
+  })
+  .refine((value) => !isNaN(Number(value)), {
+    message: "Caracteres incorrectos en columna:",
+  });
+
+const bonusAsString = z
+  .union([z.number(), z.string()])
+  .transform((value) => {
+    console.log(value);
+    if (typeof value === "number") {
+      if (value < 1) {
+        return (value * 100).toString();
+      }
       return value.toString();
     }
   })
@@ -74,7 +93,8 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     "originating os": string | null;
     validity: Date | null;
     mode: string | null;
-    bonus: string;
+    bonus: string | null;
+    balance: string | null;
     "from bonus": Date | null;
     "to bonus": Date | null;
     state: "ACTIVO" | "INACTIVO" | null;
@@ -83,7 +103,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     affiliate_number: string | null;
     extension: string | null;
     own_id_type: "DNI" | "PASAPORTE" | null;
-    own_id_number: string | null;
+    du_number: string | null;
     relationship: string | null;
     birth_date: Date | null;
     gender: "MASCULINO" | "FEMENINO" | "OTRO" | null;
@@ -115,14 +135,16 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     differential_value: string | null | undefined;
     plan: string | null;
     product: string | null;
-    cbu_number: string | null;
+    cbu: string | null;
     card_brand: string | null;
     is_new: boolean | null;
     card_number: string | null;
+    card_type: string | null;
   }[] = [];
   let errors: z.ZodError<
     {
       "UNIDAD DE NEGOCIO"?: string | null | undefined;
+      "SALDO CUENTA CORRIENTE"?: string | number | null | undefined;
       OS?: string | null | undefined;
       "OS ORIGEN"?: string | null | undefined;
       VIGENCIA?: string | number | null | undefined;
@@ -179,6 +201,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
       "TC MARCA"?: string | null | undefined;
       "ALTA NUEVA"?: string | boolean | null | undefined;
       "NRO. TARJETA"?: string | number | null | undefined;
+      "TIPO DE TARJETA"?: string | null | undefined;
     }[]
   >[] = [];
   rows.map((row) => {
@@ -222,12 +245,7 @@ export const recDocumentValidator = z
       .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
       .nullable()
       .optional(),
-    BONIFICACION: z
-      .string()
-      .min(0)
-      .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
-      .nullable()
-      .optional(),
+    BONIFICACION: bonusAsString.nullable().optional(),
     "DESDE BONIF.": stringAsDate.nullable().optional(),
     "HASTA BONIF.": stringAsDate.nullable().optional(),
     ESTADO: z
@@ -244,7 +262,12 @@ export const recDocumentValidator = z
       .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
       .nullable()
       .optional(),
-    "NRO AFILIADO": numberAsString.nullable().optional(),
+    "NRO AFILIADO": z
+      .string()
+      .min(0)
+      .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
+      .nullable()
+      .optional(),
     EXTENSION: z
       .string()
       .min(0)
@@ -321,6 +344,7 @@ export const recDocumentValidator = z
     "APORTE 3%": numberAsString.nullable().optional(),
     "DIFERENCIAL CODIGO": z.string().min(0).max(140).nullable().optional(),
     "DIFERENCIAL VALOR": numberAsString.optional().nullable(),
+    "SALDO CUENTA CORRIENTE": numberAsString.nullable().optional(),
     PLAN: z.string().min(0).max(140).nullable().optional(),
     "PRODUCTO (MEDIO DE PAGO)": z
       .string()
@@ -335,6 +359,7 @@ export const recDocumentValidator = z
       .optional(),
     "ALTA NUEVA": stringAsBoolean.nullable().optional(),
     "NRO. TARJETA": numberAsString.nullable().optional(),
+    "TIPO DE TARJETA": z.string().nullable().optional(),
   })
   .transform((value) => {
     // Translated to english
@@ -353,7 +378,7 @@ export const recDocumentValidator = z
       affiliate_number: value["NRO AFILIADO"] ?? null,
       extension: value.EXTENSION ?? null,
       own_id_type: value["TIPO DOC PROPIO"] ?? null,
-      own_id_number: value["NRO DOC PROPIO"] ?? null,
+      du_number: value["NRO DOC PROPIO"] ?? null,
       relationship: value.PAR ?? null,
       birth_date: value["FECHA NACIMIENTO"] ?? null,
       gender: value.GENERO ?? null,
@@ -378,12 +403,14 @@ export const recDocumentValidator = z
       contribution: value["APORTE 3%"] ?? null,
       differential_code: value["DIFERENCIAL CODIGO"] ?? null,
       differential_value: value["DIFERENCIAL VALOR"],
+      balance: value["SALDO CUENTA CORRIENTE"] ?? null,
       plan: value.PLAN ?? null,
       product: value["PRODUCTO (MEDIO DE PAGO)"] ?? null,
-      cbu_number: value["NRO CBU"] ?? null,
+      cbu: value["NRO CBU"] ?? null,
       card_brand: value["TC MARCA"] ?? null,
       is_new: value["ALTA NUEVA"] ?? null,
       card_number: value["NRO. TARJETA"] ?? null,
+      card_type: value["TIPO DE TARJETA"] ?? null,
     };
   });
 
@@ -393,16 +420,16 @@ export const recHeaders: TableHeaders = [
   { key: "originating os", label: "OS ORIGEN", width: 140 },
   { key: "validity", label: "VIGENCIA", width: 140 },
   { key: "mode", label: "MODO", width: 140 },
-  { key: "bonus", label: "BONIFICACION", width: 140 },
-  { key: "from bonus", label: "DESDE BONIF.", width: 140 },
-  { key: "to bonus", label: "HASTA BONIF.", width: 140 },
+  { key: "bonus", label: "BONIFICACION" },
+  { key: "from bonus", label: "DESDE BONIF." },
+  { key: "to bonus", label: "HASTA BONIF." },
   { key: "state", label: "ESTADO", width: 140 },
   { key: "holder_id_number", label: "NRO DOC TITULAR", width: 140 },
   { key: "name", label: "NOMBRE", width: 140 },
   { key: "affiliate_number", label: "NRO AFILIADO", width: 140 },
   { key: "extension", label: "EXTENSION", width: 140 },
-  { key: "own_id_type", label: "TIPO DOC PROPIO", width: 140 },
-  { key: "own_id_number", label: "NRO DOC PROPIO", width: 140 },
+  { key: "du_type", label: "TIPO DOC PROPIO", width: 140 },
+  { key: "du_number", label: "NRO DOC PROPIO", width: 140 },
   { key: "relationship", label: "PAR", width: 140 },
   { key: "birth_date", label: "FECHA NACIMIENTO", width: 140 },
   { key: "gender", label: "GENERO", width: 140 },
@@ -411,7 +438,6 @@ export const recHeaders: TableHeaders = [
   { key: "afip status", label: "ESTADO AFIP", width: 140 },
   { key: "fiscal_id_type", label: "TIPO DOC FISCAL", width: 140 },
   { key: "fiscal_id_number", label: "NRO DOC FISCAL", width: 140 },
-  { key: "city", label: "LOCALIDAD", width: 140 },
   { key: "district", label: "PARTIDO", width: 140 },
   { key: "address", label: "DIRECCION", width: 140 },
   { key: "floor", label: "PISO", width: 140 },
@@ -420,37 +446,35 @@ export const recHeaders: TableHeaders = [
   { key: "phone", label: "TELEFONO", width: 140 },
   { key: "cellphone", label: "CELULAR", width: 140 },
   { key: "email", label: "EMAIL", width: 140 },
+  { key: "contribution", label: "APORTE 3%" },
   { key: "isAffiliated", label: "ES AFILIADO", width: 140 },
   { key: "isHolder", label: "ES TITULAR", width: 140 },
   { key: "isPaymentHolder", label: "ES TITULAR DEL PAGO", width: 140 },
   { key: "isPaymentResponsible", label: "ES RESP PAGADOR", width: 140 },
-  { key: "contribution", label: "APORTE 3%", width: 140 },
   { key: "differential_code", label: "DIFERENCIAL CODIGO", width: 140 },
   { key: "differential_value", label: "DIFERENCIAL VALOR", width: 140 },
+  { key: "balance", label: "SALDO CUENTA CORRIENTE", width: 140 },
   { key: "plan", label: "PLAN", width: 140 },
-  { key: "product", label: "PRODUCTO", width: 140 },
-  { key: "cbu_number", label: "NRO CBU", width: 140 },
+  { key: "product_number", label: "PRODUCTO", width: 140 },
+  { key: "cbu", label: "NRO CBU", width: 140 },
   { key: "card_brand", label: "TC MARCA", width: 140 },
   { key: "is_new", label: "ALTA NUEVA", width: 140 },
+  { key: "card_type", label: "TIPO DE TARJETA", width: 140 },
   { key: "card_number", label: "Nro. TARJETA", width: 140 },
 ];
 
 export const requiredColumns = [
   { key: "business_unit", label: "UNIDAD DE NEGOCIO" },
   { key: "os", label: "OS" },
-  { key: "originating os", label: "OS ORIGEN" },
   { key: "validity", label: "VIGENCIA" },
   { key: "mode", label: "MODO" },
-  { key: "bonus", label: "BONIFICACION" },
-  { key: "from bonus", label: "DESDE BONIF." },
-  { key: "to bonus", label: "HASTA BONIF." },
   { key: "state", label: "ESTADO" },
   { key: "holder_id_number", label: "NRO DOC TITULAR" },
   { key: "name", label: "NOMBRE" },
   { key: "affiliate_number", label: "NRO AFILIADO" },
   { key: "extension", label: "EXTENSION" },
   { key: "own_id_type", label: "TIPO DOC PROPIO" },
-  { key: "own_id_number", label: "NRO DOC PROPIO" },
+  { key: "du_number", label: "NRO DOC PROPIO" },
   { key: "relationship", label: "PAR" },
   { key: "birth_date", label: "FECHA NACIMIENTO" },
   { key: "gender", label: "GENERO" },
@@ -459,18 +483,11 @@ export const requiredColumns = [
   { key: "afip status", label: "ESTADO AFIP" },
   { key: "fiscal_id_type", label: "TIPO DOC FISCAL" },
   { key: "fiscal_id_number", label: "NRO DOC FISCAL" },
-  { key: "city", label: "LOCALIDAD" },
   { key: "district", label: "PARTIDO" },
   { key: "address", label: "DIRECCION" },
-  { key: "floor", label: "PISO" },
-  { key: "apartment", label: "DEPTO" },
   { key: "postal code", label: "CP" },
-  { key: "phone", label: "TELEFONO" },
   { key: "cellphone", label: "CELULAR" },
   { key: "email", label: "EMAIL" },
-  { key: "contribution", label: "APORTE 3%" },
-  { key: "differential_code", label: "DIFERENCIAL CODIGO" },
-  { key: "differential_value", label: "DIFERENCIAL VALOR" },
   { key: "plan", label: "PLAN" },
   { key: "product", label: "PRODUCTO" },
 ];

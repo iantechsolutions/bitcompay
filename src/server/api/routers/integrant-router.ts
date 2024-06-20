@@ -9,7 +9,7 @@ export const integrantsRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({}) => {
     const integrants = await db.query.integrants.findMany({
       with: {
-        contributions: true,
+        contribution: true,
         differentialsValues: true,
       },
     });
@@ -59,6 +59,7 @@ export const integrantsRouter = createTRPCRouter({
         fiscal_id_type: z.string().optional(),
         fiscal_id_number: z.string().optional(),
         address: z.string().optional(),
+        address_number: z.string().optional(),
         phone_number: z.string().optional(),
         cellphone_number: z.string().optional(),
         email: z.string().optional(),
@@ -100,6 +101,7 @@ export const integrantsRouter = createTRPCRouter({
         fiscal_id_type: z.string(),
         fiscal_id_number: z.string(),
         address: z.string(),
+        address_number: z.string(),
         phone_number: z.string(),
         cellphone_number: z.string(),
         email: z.string(),

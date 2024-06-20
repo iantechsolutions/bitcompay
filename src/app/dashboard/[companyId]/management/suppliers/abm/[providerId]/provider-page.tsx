@@ -23,7 +23,7 @@ import {
   AccordionTrigger,
 } from "~/components/ui/accordion";
 // import { useCompanyData } from "../../../company-provider";
-import { useCompanyData } from "../../../company-provider";
+import { useCompanyData } from "../../../../company-provider";
 import { asTRPCError } from "~/lib/errors";
 import { RouterOutputs } from "~/trpc/shared";
 import { Card } from "~/components/ui/card";

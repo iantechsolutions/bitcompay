@@ -1,9 +1,9 @@
-import { Building2Icon } from 'lucide-react'
-import { ChevronRight } from 'lucide-react'
-import { List, ListTile } from '~/components/list'
-import { Title } from '~/components/title'
-import { api } from '~/trpc/server'
-import type { RouterOutputs } from '~/trpc/shared'
+import { Building2Icon } from "lucide-react";
+import { ChevronRight } from "lucide-react";
+import { List, ListTile } from "~/components/list";
+import { Title } from "~/components/title";
+import { api } from "~/trpc/server";
+import type { RouterOutputs } from "~/trpc/shared";
 export default async function Page(props: {
   params: { companyId: string; companySubId: string; channelId: string };
 }) {
@@ -27,7 +27,7 @@ export default async function Page(props: {
       </div>
       <Title>Elegir marca:</Title>
       <List>
-        {brands.map((brand) => {
+        {brands?.map((brand) => {
           return (
             <ListTile
               key={brand?.id}

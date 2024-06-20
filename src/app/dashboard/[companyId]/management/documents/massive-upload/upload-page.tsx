@@ -36,7 +36,7 @@ export default function UploadPage() {
           const [file] = res;
 
           if (!file) return;
-
+          // toast.success('Archivo!');
           router.push(`./massive-upload/${file.serverData.uploadId}`);
         }}
         onUploadError={(error: Error) => {

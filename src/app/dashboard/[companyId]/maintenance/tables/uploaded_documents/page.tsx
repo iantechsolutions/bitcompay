@@ -17,7 +17,7 @@ export default async function Home(props: { params: { companyId: string } }) {
             return (
               <ListTile
                 key={documentos.id}
-                href={`/dashboard/faIKDivwt7Z8Gp-B5yFrv/maintenance/tables/uploaded_documents/${documentos.id}`}
+                href={`/dashboard/${props.params.companyId}/maintenance/tables/uploaded_documents/${documentos.id}`}
                 title={documentos.id}
               />
             );

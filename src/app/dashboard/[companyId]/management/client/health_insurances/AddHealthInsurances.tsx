@@ -22,6 +22,7 @@ export function AddHealthInsurances() {
     api.healthInsurances.create.useMutation();
 
   const [description, setDescription] = useState("");
+  const [IdNumber, setIdNumber] = useState("");
 
   const [open, setOpen] = useState(false);
 
@@ -31,6 +32,7 @@ export function AddHealthInsurances() {
     try {
       await createProduct({
         name: description,
+        identificationNumber: IdNumber,
       });
 
       toast.success("Obra social creada correctamente");
@@ -54,7 +56,16 @@ export function AddHealthInsurances() {
             <DialogTitle>Crear una obra social</DialogTitle>
           </DialogHeader>
           <div>
-            <Label htmlFor="description">name</Label>
+            <Label htmlFor="IdNumber">Numero de Identificacion</Label>
+            <Input
+              id="IdNumber"
+              placeholder="..."
+              value={IdNumber}
+              onChange={(e) => setIdNumber(e.target.value)}
+            />
+          </div>
+          <div>
+            <Label htmlFor="description">Nombre</Label>
             <Input
               id="description"
               placeholder="..."

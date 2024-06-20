@@ -1,14 +1,16 @@
-import { eq } from 'drizzle-orm'
-import { z } from 'zod'
-import { db, schema } from '~/server/db'
-import { createTRPCRouter, protectedProcedure } from '../trpc'
+import { eq } from "drizzle-orm";
+import { z } from "zod";
+import { db, schema } from "~/server/db";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const bussinessUnitsRouter = createTRPCRouter({
-    get: protectedProcedure.input(z.object({ bussinessUnitId: z.string() })).query(async ({ input }) => {
-        const bussinessUnit_found = await db.query.bussinessUnits.findFirst({
-            where: eq(schema.bussinessUnits.id, input.bussinessUnitId),
-        })
-        return bussinessUnit_found
+  get: protectedProcedure
+    .input(z.object({ bussinessUnitId: z.string() }))
+    .query(async ({ input }) => {
+      const bussinessUnit_found = await db.query.bussinessUnits.findFirst({
+        where: eq(schema.bussinessUnits.id, input.bussinessUnitId),
+      });
+      return bussinessUnit_found;
     }),
   list: protectedProcedure.query(async () => {
     const bussinessUnits = await db.query.bussinessUnits.findMany();
@@ -20,7 +22,7 @@ export const bussinessUnitsRouter = createTRPCRouter({
         description: z.string(),
         companyId: z.string(),
         brandId: z.string(),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       const new_bussinessUnit = await db.insert(schema.bussinessUnits).values({
@@ -35,12 +37,18 @@ export const bussinessUnitsRouter = createTRPCRouter({
       z.object({
         bussinessUnitId: z.string(),
         description: z.string(),
-      }),
+        companyId: z.string(),
+        brandId: z.string(),
+      })
     )
     .mutation(async ({ input }) => {
       const bussinessUnit_changed = await db
         .update(schema.bussinessUnits)
-        .set({ description: input.description })
+        .set({
+          description: input.description,
+          companyId: input.companyId,
+          brandId: input.brandId,
+        })
         .where(eq(schema.bussinessUnits.id, input.bussinessUnitId));
       return bussinessUnit_changed;
     }),
@@ -52,4 +60,4 @@ export const bussinessUnitsRouter = createTRPCRouter({
         .where(eq(schema.bussinessUnits.id, input.bussinessUnitId));
       return bussinessUnit_deleted;
     }),
-})
+});

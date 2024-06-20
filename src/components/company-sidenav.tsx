@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import {
   LayoutDashboardIcon,
   Contact,
@@ -38,6 +38,12 @@ import {
   Hand,
   Wallet,
   Search,
+  Bell,
+  Archive,
+  Folder,
+  Globe,
+  Heart,
+  UserRound,
 } from "lucide-react";
 import {
   Accordion,
@@ -59,6 +65,7 @@ export default function CompanySidenav(props: { companyId: string }) {
     Tesoreria: "treasury/",
     Facturacion: "billing/",
     Ventas: "management/sales/",
+    Proveedores: "management/suppliers/",
     Documentos: "management/documents/",
   };
   const pathname = usePathname();
@@ -246,18 +253,79 @@ export default function CompanySidenav(props: { companyId: string }) {
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
-            <SidenavItem
-              href={`/dashboard/${props.companyId}/management/client`}
-              icon={<Users />}
-            >
-              Clientes
-            </SidenavItem>
-            <SidenavItem
-              href={`/dashboard/${props.companyId}/management/suppliers`}
-              icon={<Truck />}
-            >
-              Proveedores
-            </SidenavItem>
+            <Accordion type="single" collapsible className="pl-3">
+              <AccordionItem value="item-1" className="border-none">
+                <AccordionTrigger
+                  className={
+                    isActive("Clientes")
+                      ? "rounded-lg bg-[#9ef4e3] px-1 py-1.5 hover:no-underline"
+                      : "rounded-lg px-1 py-1.5 hover:no-underline"
+                  }
+                >
+                  <SidenavSeparator>Clientes</SidenavSeparator>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <SidenavItem
+                    icon={<UserRound />}
+                    href={`/dashboard/${props.companyId}/management/client/affiliates`}
+                  >
+                    Afiliados
+                  </SidenavItem>
+                  <SidenavItem
+                    icon={<Users />}
+                    href={`/dashboard/${props.companyId}/management/client/health_insurances`}
+                  >
+                    Obras sociales
+                  </SidenavItem>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+
+            <Accordion type="single" collapsible className="pl-3">
+              <AccordionItem value="item-1" className="border-none">
+                <AccordionTrigger
+                  className={
+                    isActive("Proveedores")
+                      ? "rounded-lg bg-[#9ef4e3] px-1 py-1.5 hover:no-underline"
+                      : "rounded-lg px-1 py-1.5 hover:no-underline"
+                  }
+                >
+                  <SidenavSeparator>Proveedores</SidenavSeparator>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <SidenavItem
+                    icon={<Bell />}
+                    href={`/dashboard/${props.companyId}/management/suppliers/abm`}
+                  >
+                    ABM Proveedores
+                  </SidenavItem>
+                  <SidenavItem
+                    icon={<Archive />}
+                    href={`/dashboard/${props.companyId}/management/suppliers/comprobants-upload`}
+                  >
+                    Alta Comprobantes
+                  </SidenavItem>
+                  <SidenavItem
+                    icon={<Folder />}
+                    href={`/dashboard/${props.companyId}/management/suppliers/currentAcounts`}
+                  >
+                    Cuentas Corrientes de Proveedores
+                  </SidenavItem>
+                  <SidenavItem
+                    icon={<Globe />}
+                    href={`/dashboard/${props.companyId}/management/suppliers/due_dates`}
+                  >
+                    Agenda de vencimientos
+                  </SidenavItem>
+                  <SidenavItem
+                    icon={<Heart />}
+                    href={`/dashboard/${props.companyId}/management/suppliers/orders`}
+                  >
+                    Ordenes de Pago
+                  </SidenavItem>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
             <Accordion type="single" collapsible className="pl-3">
               <AccordionItem value="item-1" className="border-none">
                 <AccordionTrigger
@@ -328,7 +396,7 @@ export default function CompanySidenav(props: { companyId: string }) {
               href={`/dashboard/${props.companyId}/audit/benefits`}
               icon={<Gift />}
             >
-              Beneficios
+              Beneficios por prestaciones
             </SidenavItem>
             <SidenavItem
               href={`/dashboard/${props.companyId}/audit/fixed_eventual`}
@@ -403,13 +471,13 @@ export default function CompanySidenav(props: { companyId: string }) {
               icon={<Database />}
               href={`/dashboard/${props.companyId}/treasury/current_count`}
             >
-              Cuenta actual
+              Cuenta Corriente
             </SidenavItem>
             <SidenavItem
               icon={<Hand />}
               href={`/dashboard/${props.companyId}/treasury/collection`}
             >
-              Recoleccion
+              Cobranzas
             </SidenavItem>
             <SidenavItem
               icon={<Wallet />}

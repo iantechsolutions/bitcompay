@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 
 export const paymentInfoRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({}) => {
-    const paymentInfo = await db.query.payment_info.findMany({
+    const paymentInfo = await db.query.pa.findMany({
       with: {
         integrant: true,
       },
@@ -16,11 +16,11 @@ export const paymentInfoRouter = createTRPCRouter({
     .input(
       z.object({
         paymentInfoId: z.string(),
-      }),
+      })
     )
     .query(async ({ input }) => {
-      const paymentInfo = await db.query.payment_info.findFirst({
-        where: eq(schema.payment_info.id, input.paymentInfoId),
+      const paymentInfo = await db.query.pa.findFirst({
+        where: eq(schema.pa.id, input.paymentInfoId),
       });
 
       return paymentInfo;
@@ -29,11 +29,11 @@ export const paymentInfoRouter = createTRPCRouter({
     .input(
       z.object({
         integrantId: z.string(),
-      }),
+      })
     )
     .query(async ({ input }) => {
-      const paymentInfo = await db.query.payment_info.findFirst({
-        where: eq(schema.payment_info.integrant_id, input.integrantId),
+      const paymentInfo = await db.query.pa.findFirst({
+        where: eq(schema.pa.integrant_id, input.integrantId),
       });
 
       return paymentInfo;
@@ -42,16 +42,16 @@ export const paymentInfoRouter = createTRPCRouter({
     .input(
       z.object({
         card_number: z.string().nullable().optional(),
+        card_type: z.string().nullable().optional(),
+        card_brand: z.string().nullable().optional(),
         expire_date: z.date().nullable().optional(),
         CCV: z.string().nullable().optional(),
         CBU: z.string().nullable().optional(),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
-      const new_payment_info = await db
-        .insert(schema.payment_info)
-        .values(input);
-      return new_payment_info;
+      const new_pa = await db.insert(schema.pa).values(input);
+      return new_pa;
     }),
 
   change: protectedProcedure
@@ -62,15 +62,15 @@ export const paymentInfoRouter = createTRPCRouter({
         expire_date: z.date().optional().nullable(),
         CCV: z.string().optional().nullable(),
         CBU: z.string().optional().nullable(),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       const updatedPaymentInfo = await db
-        .update(schema.payment_info)
+        .update(schema.pa)
         .set({
           ...input,
         })
-        .where(eq(schema.payment_info.id, input.paymentInfoId));
+        .where(eq(schema.pa.id, input.paymentInfoId));
       return updatedPaymentInfo;
     }),
 
@@ -78,12 +78,12 @@ export const paymentInfoRouter = createTRPCRouter({
     .input(
       z.object({
         paymentInfoId: z.string(),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       const deletedPaymentInfo = await db
-        .delete(schema.payment_info)
-        .where(eq(schema.payment_info.id, input.paymentInfoId));
+        .delete(schema.pa)
+        .where(eq(schema.pa.id, input.paymentInfoId));
       return deletedPaymentInfo;
     }),
 });

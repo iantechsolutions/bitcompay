@@ -9,9 +9,27 @@ export type DOCRowsValidatorAndTransformer = (
 const stringToValidIntegerZodTransformer = z
   .string()
   .or(z.number())
-  .transform((v) => Number.parseInt(v.toString()))
+  .transform((v) => Number.parseInt(v.toString().replace(/\s/g, "")))
   .refine(Number.isInteger);
 
+const stringAsBoolean = z
+  .union([z.string(), z.boolean()])
+  .nullable()
+  .optional()
+  .transform((value) => {
+    if (typeof value === "string" && value.toLowerCase() === "verdadero") {
+      return true;
+    }
+    if (typeof value === "string" && value.toLowerCase() === "falso") {
+      return false;
+    }
+    if (typeof value === "boolean") {
+      return value;
+    }
+  })
+  .refine((value) => typeof value === "boolean", {
+    message: "Caracteres incorrectos en columna:",
+  });
 const nullableStringToValidIntegerZodTransformer = z
   .string()
   .or(z.number())
@@ -61,15 +79,16 @@ const stringAsPeriod = z.string().transform((value) => {
   const first2 = value.substring(0, 2);
   if (Number.parseInt(first2) < 12) {
     const year = value.substring(2, 8);
-    return dayjs(`${year}${first2}`, "MMYYYY").toDate();
+    return dayjs(`${year}${first2}`, "YYYYMM").toDate();
   }
-  return dayjs(value, "MMYYYY").toDate();
+  return dayjs(value, "YYYYMM").toDate();
 });
 
 const cbuSchema = z
   .string()
   .or(z.number())
   .transform((value) => {
+    console.log("cbu", value);
     return value.toString().replaceAll("/", "").padStart(22, "0");
   })
   .refine((value) => value.length === 22);
@@ -101,12 +120,9 @@ export const recDocumentValidator = z
       .optional(),
     "Nro CBU": cbuSchema.nullable().optional(),
     "TC Marca": z.string().min(1).max(140).nullable().optional(),
-    "Alta Nueva": z
-      .string()
-      .transform((value) => value.toLowerCase() === "si")
-      .nullable()
-      .optional(),
-    "Nro. Tarjeta": z.string().length(16).nullable().optional(),
+    "Alta Nueva": stringAsBoolean.nullable().optional(),
+    "Nro. Tarjeta": stringToValidIntegerZodTransformer.nullable().optional(),
+    "Tipo de Tarjeta": z.string().min(1).max(140).nullable().optional(),
     // NOT OPTIONAL!!!
     "Nro Factura": stringToValidIntegerZodTransformer.optional(),
     //
@@ -122,7 +138,7 @@ export const recDocumentValidator = z
     "Info. Adicional": z
       .string()
       .min(1)
-      .max(140)
+      .max(20, { message: "Info. Adicional demasiado larga" })
       .catch("")
       .nullable()
       .optional(),
@@ -154,6 +170,7 @@ export const recDocumentValidator = z
       card_brand: value["TC Marca"] ?? null,
       is_new: value["Alta Nueva"] ?? null,
       card_number: value["Nro. Tarjeta"] ?? null,
+      card_type: value["Tipo de Tarjeta"] ?? null,
       invoice_number: value["Nro Factura"] ?? null,
       period: value.Período ?? null,
       first_due_amount: value["Importe 1er Vto."] ?? null,
@@ -187,6 +204,7 @@ export const recDocumentValidatorWithoutProduct = z
     "TC Marca": z.any().nullable().optional(),
     "Alta Nueva": z.any().nullable().optional(),
     "Nro. Tarjeta": z.any().nullable().optional(),
+    "Tipo de Tarjeta": z.any().nullable().optional(),
     // NOT OPTIONAL!!!
     "Nro Factura": z.any().optional(),
     //
@@ -216,6 +234,7 @@ export const recDocumentValidatorWithoutProduct = z
       card_brand: value["TC Marca"] ?? null,
       is_new: value["Alta Nueva"] ?? null,
       card_number: value["Nro. Tarjeta"] ?? null,
+      card_type: value["Tipo de Tarjeta"] ?? null,
       invoice_number: value["Nro Factura"] ?? null,
       period: value.Período ?? null,
       first_due_amount: value["Importe 1er Vto."] ?? null,
@@ -248,7 +267,8 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
       cbu: string | null;
       card_brand: string | null;
       is_new: boolean | null;
-      card_number: string | null;
+      card_number: number | null;
+      card_type: string | null;
       invoice_number: number | null;
       period: Date | null;
       first_due_amount: number | null;
@@ -276,7 +296,8 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     cbu: string | null;
     card_brand: string | null;
     is_new: boolean | null;
-    card_number: string | null;
+    card_number: number | null;
+    card_type: string | null;
     invoice_number: number | null;
     period: Date | null;
     first_due_amount: number | null;
@@ -302,6 +323,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     card_brand: null,
     is_new: null,
     card_number: null,
+    card_type: null,
     invoice_number: null,
     period: null,
     first_due_amount: null,
@@ -339,6 +361,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
               card_brand: parsedRow.at(0)?.card_brand,
               is_new: parsedRow.at(0)?.is_new,
               card_number: parsedRow.at(0)?.card_number,
+              card_type: parsedRow.at(0)?.card_type,
               invoice_number: parsedRow.at(0)?.invoice_number,
               period: parsedRow.at(0)?.period,
               first_due_amount: parsedRow.at(0)?.first_due_amount,
@@ -372,6 +395,7 @@ export const recHeaders: TableHeaders = [
   { key: "product_number", label: "Producto", width: 80, alwaysRequired: true },
   { key: "cbu", label: "Nro CBU", width: 140 },
   { key: "card_brand", label: "TC Marca", width: 140 },
+  { key: "card_type", label: "Tipo de Tarjeta", width: 140 },
   { key: "is_new", label: "Alta Nueva", width: 140 },
   { key: "card_number", label: "Nro. Tarjeta", width: 140 },
   {

@@ -27,6 +27,7 @@ const items = [
   { es: "IVA", en: "iva" },
   { es: "Condicion IIBB", en: "ingresos_brutos" },
   { es: "Codigos postales", en: "postal_codes" },
+  { es: "Establecimientos", en: "establishments" },
 ];
 
 export default async function Maintenance(props: {
@@ -42,7 +43,7 @@ export default async function Maintenance(props: {
           {items.map(({ es, en }) => (
             <ListTile
               key={en}
-              href={`/dashboard/faIKDivwt7Z8Gp-B5yFrv/maintenance/tables/${en}`}
+              href={`/dashboard/${props.params.companyId}/maintenance/tables/${en}`}
               title={es as React.ReactNode}
             />
           ))}

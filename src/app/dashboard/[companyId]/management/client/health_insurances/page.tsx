@@ -20,10 +20,9 @@ export default async function Home(props: { params: { companyId: string } }) {
             return (
               <ListTile
                 key={obraSocial.id}
-                leading={obraSocial.name}
-                href={`/dashboard/faIKDivwt7Z8Gp-B5yFrv/maintenance/tables/healt_insurances/${obraSocial.id}`}
-
-                title={obraSocial.id}
+                leading={obraSocial.identificationNumber}
+                href={`/dashboard/${props.params.companyId}/maintenance/tables/health_insurances/${obraSocial.id}`}
+                title={obraSocial.name}
               />
             );
           })}

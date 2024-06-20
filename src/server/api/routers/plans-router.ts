@@ -28,10 +28,10 @@ export const plansRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
-        expiration_date: z.date(),
+        validy_date: z.date(),
         plan_code: z.string().max(255),
         description: z.string().max(255),
-        business_units_id: z.string().max(255),
+        brand_id: z.string().max(255),
       })
     )
     .mutation(async ({ input }) => {
@@ -40,10 +40,10 @@ export const plansRouter = createTRPCRouter({
         .insert(schema.plans)
         .values({
           user: user?.id ?? "",
-          expiration_date: input.expiration_date,
+          validy_date: input.validy_date,
           plan_code: input.plan_code,
           description: input.description,
-          business_units_id: input.business_units_id,
+          brand_id: input.brand_id,
         })
         .returning();
       return new_plan;
@@ -53,22 +53,23 @@ export const plansRouter = createTRPCRouter({
     .input(
       z.object({
         planId: z.string(),
-        expiration_date: z.date(),
+        validy_date: z.date(),
         plan_code: z.string().max(255),
         description: z.string().max(255),
-        business_units_id: z.string().max(255),
+        brand_id: z.string().max(255),
       })
     )
     .mutation(async ({ input }) => {
       const modified_plan = await db
         .update(schema.plans)
         .set({
-          expiration_date: input.expiration_date,
+          validy_date: input.validy_date,
           plan_code: input.plan_code,
           description: input.description,
-          business_units_id: input.business_units_id,
+          brand_id: input.brand_id,
         })
-        .where(eq(schema.plans.id, input.planId));
+        .where(eq(schema.plans.id, input.planId))
+        .returning();
       return modified_plan;
     }),
   delete: protectedProcedure

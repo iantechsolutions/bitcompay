@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import Afip from "@afipsdk/afip.js";
 import { z } from "zod";
 import { db, schema } from "~/server/db";
@@ -9,6 +9,8 @@ import { Plans } from "./plans-router";
 import { Integrant } from "./integrant-router";
 import { currentUser } from "@clerk/nextjs/server";
 import { Brand } from "./brands-router";
+import { RouterOutputs } from "~/trpc/shared";
+import { calcularEdad } from "~/lib/utils";
 
 function formatDateAFIP(date: Date | undefined) {
   if (date) {
@@ -47,25 +49,8 @@ type Bonus = {
   reason: string;
 };
 
-type grupoCompleto = {
-  id: string;
-  businessUnitData: null | {
-    company: {
-      puntoVenta: number;
-    };
-    brand: Brand;
-  };
-  validity: string;
-  plan: Plans | null;
-  modo: null | string;
-  receipt: string;
-  bonus: Bonus | null;
-  procedureId: string;
-  state: string;
-  payment_status: string;
-  abonos: any[];
-  integrants: Integrant[];
-};
+type grupoCompleto = RouterOutputs["facturas"]["getGruposByBrandId"][number];
+
 const ivaDictionary = {
   "0%": 3,
   "10.5%": 4,
@@ -102,11 +87,11 @@ const facturaDictionary = {
   "": 0,
 };
 
-const idDictionary = {
-  CUIT: "80",
-  CUIL: "86",
-  DNI: "96",
-  "Consumidor Final": "99",
+const idDictionary: { [key: string]: number } = {
+  CUIT: 80,
+  CUIL: 86,
+  DNI: 96,
+  "Consumidor Final": 99,
 };
 
 // async function generateFactura(
@@ -164,83 +149,272 @@ const idDictionary = {
 //    **/
 //   const res = await afip.ElectronicBilling.createVoucher(data);
 // }
+
+async function approbateFactura(liquidationId: string) {
+  const liquidation = await db.query.liquidations.findFirst({
+    where: eq(schema.liquidations.id, liquidationId),
+    with: {
+      facturas: {
+        with: {
+          items: true,
+          family_group: {
+            with: {
+              integrants: {
+                with: {
+                  pa: true,
+                },
+              },
+              businessUnitData: {
+                with: {
+                  company: true,
+                  brand: true,
+                },
+              },
+              plan: true,
+              cc: {
+                with: {
+                  events: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+  if (liquidation?.estado === "pendiente") {
+    const user = await currentUser();
+    const updatedLiquidation = await db
+      .update(schema.liquidations)
+      .set({ estado: "aprobada", userApproved: user?.id })
+      .where(eq(schema.liquidations.id, liquidationId));
+    for (let factura of liquidation?.facturas) {
+      const randomNumber =
+        Math.floor(Math.random() * (100000 - 1000 + 1)) + 1000;
+      const billResponsible = factura.family_group?.integrants.find(
+        (integrant) => integrant.isBillResponsible
+      );
+      const producto = await db.query.products.findFirst({
+        where: eq(schema.products.id, billResponsible?.pa[0]?.product_id ?? ""),
+      });
+      const cc = await db.query.currentAccount.findFirst({
+        where: eq(
+          schema.currentAccount.family_group,
+          factura.family_group?.id ?? ""
+        ),
+      });
+      const status = await db.query.paymentStatus.findFirst({
+        where: eq(schema.paymentStatus.code, "91"),
+      });
+      const payment = await db
+        .insert(schema.payments)
+        .values({
+          companyId: factura.family_group?.businessUnitData?.company?.id ?? "",
+          invoice_number: randomNumber,
+          userId: user?.id ?? "",
+          g_c: factura.family_group?.businessUnitData?.brand?.number ?? 0,
+          name: billResponsible?.name ?? "",
+          fiscal_id_type: billResponsible?.fiscal_id_type,
+          fiscal_id_number: parseInt(billResponsible?.fiscal_id_number ?? "0"),
+          du_type: billResponsible?.id_type,
+          du_number: parseInt(billResponsible?.id_number ?? "0"),
+          product: producto?.id,
+          period: factura.due_date,
+          first_due_amount: factura?.importe,
+          first_due_date: factura.due_date,
+          cbu: billResponsible?.pa[0]?.CBU,
+          factura_id: factura?.id,
+          documentUploadId: "0AspRyw8g4jgDAuNGAeBX",
+          product_number: producto?.number ?? 0,
+          statusId: status?.id,
+          // address: billResponsible?.address,
+        })
+        .returning();
+
+      const historicEvents = await db.query.events.findMany({
+        where: eq(schema.events.currentAccount_id, cc?.id ?? ""),
+      });
+      if (historicEvents && historicEvents.length > 0) {
+        const lastEvent = historicEvents.reduce((prev, current) => {
+          return new Date(prev.createdAt) > new Date(current.createdAt)
+            ? prev
+            : current;
+        });
+        const event = await db.insert(schema.events).values({
+          currentAccount_id: cc?.id,
+          event_amount: factura.importe * -1,
+          current_amount: lastEvent.current_amount - factura.importe,
+          description: "Factura aprobada",
+          type: "FC",
+        });
+      } else {
+        const event = await db.insert(schema.events).values({
+          currentAccount_id: cc?.id,
+          event_amount: factura.importe * -1,
+          current_amount: 0 - factura.importe,
+          description: "Factura aprobada",
+          type: "FC",
+        });
+      }
+    }
+    return "OK";
+  } else {
+    return "Error";
+  }
+}
+
 async function preparateFactura(
   afip: Afip,
   grupos: grupoCompleto[],
-  dateDesde: Date,
-  dateHasta: Date,
-  dateVencimiento: Date
+  dateDesde: Date | undefined,
+  dateHasta: Date | undefined,
+  dateVencimiento: Date | undefined,
+  pv: string,
+  brandId: string,
+  companyId: string,
+  liquidationId: string
 ) {
   const user = await currentUser();
-  const liquidation = await db
-    .insert(schema.liquidations)
-    .values({
-      estado: "pendiente",
-      userCreated: user?.id ?? "",
-    })
-    .returning();
+
   grupos.forEach(async (grupo) => {
+    const billResponsible = grupo.integrants.find(
+      (integrant) => integrant.isBillResponsible
+    );
+    console.log("variables grupo");
+    const ivaFloat =
+      (100 + parseFloat(grupo.businessUnitData?.brand?.iva ?? "0")) / 100;
+    console.log(ivaFloat);
+    const abono = await getGroupAmount(grupo);
+    console.log(abono);
+    const bonificacion =
+      (parseFloat(
+        grupo.bonus?.find((x) => x.from && x.from <= new Date() && x.to && x.to >= new Date())
+          ?.amount ?? "0"
+      ) *
+        abono) /
+      100;
+    console.log(bonificacion);
+    const interest = 0;
+    const contribution = await getGroupContribution(grupo);
+
+    const differential_amount = await getDifferentialAmount(grupo);
+
+    let mostRecentEvent;
+    if (grupo.cc && grupo.cc?.events.length > 0) {
+      mostRecentEvent = grupo.cc?.events.reduce((prev, current) => {
+        return new Date(prev.createdAt) > new Date(current.createdAt)
+          ? prev
+          : current;
+      });
+    } else {
+      mostRecentEvent = null;
+    }
+
+    const previous_bill = mostRecentEvent?.current_amount ?? 0;
+    const importe =
+      (abono -
+        bonificacion +
+        differential_amount -
+        contribution -
+        previous_bill) *
+      ivaFloat;
     const items = await db
       .insert(schema.items)
       .values({
-        abono: 0,
-        bonificacion: 0,
-        differential_amount: 0,
+        abono,
+        bonificacion,
+        differential_amount,
+        contribution,
+        interest,
+        previous_bill,
       })
       .returning();
-
-    const factura = db.insert(schema.facturas).values({
-      items_id: items[0]!.id,
-      ptoVenta: grupo.businessUnitData?.company?.puntoVenta ?? 0,
-      // ptoVenta: 0,
-      // nroFactura: "",
-      nroFactura: 0,
-      tipoFactura: grupo.businessUnitData?.brand?.bill_type ?? "",
-      // concepto: grupo.businessUnitData?.brand?.concept ?? 0,
-      concepto: 1,
-
-      // tipoDocumento:idDictionary[
-      //   grupo.integrants.find((integrant) => integrant.isBillResponsible)
-      //     ?.fiscal_id_type ?? ""],
-      tipoDocumento: 80,
-
-      // nroDocumento:
-      //   grupo.integrants.find((integrant) => integrant.isBillResponsible)
-      //     ?.fiscal_id_number ?? "",
-      nroDocumento: 0,
-      importe: 0,
-      fromPeriod: dateDesde,
-      toPeriod: dateHasta,
-      due_date: dateVencimiento,
-      prodName: "Servicio",
-      iva: grupo.businessUnitData?.brand?.iva ?? "",
-      billLink: "",
-      liquidation_id: liquidation[0]!.id,
-      family_group_id: grupo.id,
+    const tipoDocumento = idDictionary[billResponsible?.fiscal_id_type ?? ""];
+    const producto = await db.query.products.findFirst({
+      where: eq(schema.products.id, billResponsible?.pa[0]?.product_id ?? ""),
     });
+    const factura = await db
+      .insert(schema.facturas)
+      .values({
+        items_id: items[0]!.id ?? "",
+        ptoVenta: parseInt(pv),
+        nroFactura: 0,
+        tipoFactura: grupo.businessUnitData?.brand?.bill_type,
+        concepto: parseInt(grupo.businessUnitData?.brand?.concept ?? "0"),
+        tipoDocumento: tipoDocumento ?? 0,
+        // tipoDocumento: 80,
+        nroDocumento: parseInt(billResponsible?.fiscal_id_number ?? "0"),
+        // nroDocumento: 0,
+        importe,
+        fromPeriod: dateDesde,
+        toPeriod: dateHasta,
+        due_date: dateVencimiento,
+        prodName: "Servicio",
+        iva: grupo.businessUnitData?.brand?.iva ?? "",
+        billLink: "",
+        liquidation_id: liquidationId,
+        family_group_id: grupo.id,
+      })
+      .returning();
+    const randomNumber = Math.floor(Math.random() * (100000 - 1000 + 1)) + 1000;
+    const status = await db.query.paymentStatus.findFirst({
+      where: eq(schema.paymentStatus.code, "91"),
+    });
+    console.log("numero", producto?.number);
   });
+  return "OK";
 }
 
 async function getGroupAmount(grupo: grupoCompleto) {
-  let importeBase = 0;
+  let importe = 0;
   grupo.integrants?.forEach((integrant) => {
     if (integrant.birth_date != null) {
       const age = calcularEdad(integrant.birth_date);
-      // const precioBase = grupo.plan?.pricesPerAge.find();
+      console.log(age);
+      console.log(integrant.relationship);
+      const precioIntegrante =
+        grupo.plan?.pricesPerAge.find((x) => {
+          if (integrant.relationship && integrant.relationship.toLowerCase()!="titular") {
+            return x.condition == integrant.relationship;
+          } else {
+            return x.age == age;
+          }
+        })?.amount ?? 0;
+      console.log(precioIntegrante);
+      importe += precioIntegrante;
     }
   });
+  return importe;
 }
 
-function calcularEdad(fechaNacimiento: Date): number {
-  const hoy = new Date();
-  let edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
-  const mes = hoy.getMonth() - fechaNacimiento.getMonth();
+async function getGroupContribution(grupo: grupoCompleto) {
+  let importe = 0;
+  grupo.integrants?.forEach((integrant) => {
+    const contributionIntegrante = integrant?.contribution?.amount ?? 0;
+    importe += contributionIntegrante;
+  });
+  return importe;
+}
 
-  if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNacimiento.getDate())) {
-    edad--;
-  }
-
-  return edad;
+async function getDifferentialAmount(grupo: grupoCompleto) {
+  let importe = 0;
+  grupo.integrants?.forEach((integrant) => {
+    if (integrant.birth_date == null) return;
+    const age = calcularEdad(integrant.birth_date);
+    const precioIntegrante =
+      grupo.plan?.pricesPerAge.find((x) => {
+        if (integrant.relationship) {
+          return x.condition == integrant.relationship;
+        } else {
+          return x.age == age;
+        }
+      })?.amount ?? 0;
+    integrant?.differentialsValues.forEach((differential) => {
+      const differentialIntegrante = differential.amount * precioIntegrante;
+      importe += differentialIntegrante;
+    });
+  });
+  return importe;
 }
 
 async function getGruposByBrandId(brandId: string) {
@@ -255,8 +429,14 @@ async function getGruposByBrandId(brandId: string) {
       abonos: true,
       integrants: {
         with: {
-          contributions: true,
+          contribution: true,
           differentialsValues: true,
+          pa: true,
+        },
+      },
+      cc: {
+        with: {
+          events: true,
         },
       },
       bonus: true,
@@ -268,7 +448,6 @@ async function getGruposByBrandId(brandId: string) {
       modo: true,
     },
   });
-  console.log("grupo", family_group.at(11));
   const family_group_reduced = family_group.filter((family_group) => {
     return family_group.businessUnitData?.brandId === brandId;
   });
@@ -278,23 +457,40 @@ async function getGruposByBrandId(brandId: string) {
 
 export const facturasRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({}) => {
-    const facturas = await db.query.facturas.findMany();
+    const facturas = await db.query.facturas.findMany({
+      with: {
+        items: true,
+        family_group: {
+          with: {
+            integrants: {
+              where: eq(schema.integrants.isBillResponsible, true),
+            },
+            plan: true,
+          },
+        },
+      },
+    });
     return facturas;
   }),
   get: protectedProcedure
     .input(
       z.object({
-        providerId: z.string(),
+        facturaId: z.string(),
       })
     )
     .query(async ({ input }) => {
-      const provider = await db.query.facturas.findFirst({
-        where: eq(schema.facturas.id, input.providerId),
+      const factura = await db.query.facturas.findFirst({
+        where: eq(schema.facturas.id, input.facturaId),
       });
 
-      return provider;
+      return factura;
     }),
-
+  getGruposByBrandId: protectedProcedure
+    .input(z.object({ brandId: z.string() }))
+    .query(async ({ input }) => {
+      const grupos = await getGruposByBrandId(input.brandId);
+      return grupos;
+    }),
   create: protectedProcedure
     .input(FacturasSchemaDB)
     .mutation(async ({ input }) => {
@@ -302,9 +498,21 @@ export const facturasRouter = createTRPCRouter({
 
       return newProvider;
     }),
+  approvePreLiquidation: protectedProcedure
+    .input(
+      z.object({
+        liquidationId: z.string(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const response = await approbateFactura(input.liquidationId);
+      // return response;
+    }),
   createPreLiquidation: protectedProcedure
     .input(
       z.object({
+        pv: z.string(),
+        companyId: z.string(),
         brandId: z.string(),
         dateDesde: z.date().optional(),
         dateHasta: z.date().optional(),
@@ -313,11 +521,44 @@ export const facturasRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       const grupos = await getGruposByBrandId(input.brandId);
+      console.log("grupos", grupos);
       const afip = await ingresarAfip();
-      grupos.forEach((grupo) => {
-        // generateFactura(afip, grupo, dateDesde, dateHasta, dateDue);
-        // const billResposible = grupo.integrants.find((integrant) => integrant.isBillResponsible);
+      const user = await currentUser();
+      const brand = await db.query.brands.findFirst({
+        where: eq(schema.brands.id, input.brandId),
       });
+      const company = await db.query.companies.findFirst({
+        where: eq(schema.companies.id, input.companyId),
+      });
+      const randomNumberLiq = Math.floor(Math.random() * (1000 - 10 + 1)) + 10;
+
+      const [liquidation] = await db
+        .insert(schema.liquidations)
+        .values({
+          brandId: input.brandId,
+          createdAt: new Date(),
+          razon_social: brand?.razon_social ?? "",
+          estado: "pendiente",
+          cuit: company?.cuit ?? "",
+          period: input.dateDesde,
+          userCreated: user?.id ?? "",
+          userApproved: "",
+          number: randomNumberLiq,
+          pdv: parseInt(input.pv),
+        })
+        .returning();
+      await preparateFactura(
+        afip,
+        grupos,
+        input.dateDesde,
+        input.dateHasta,
+        input.dateDue,
+        input.pv,
+        input.brandId,
+        input.companyId,
+        liquidation!.id
+      );
+      return liquidation;
     }),
 
   change: protectedProcedure

@@ -1,11 +1,11 @@
-import { and, eq, inArray, isNull } from 'drizzle-orm'
-import { Title } from '~/components/title'
-import { getBrandAndChannel } from '~/server/api/routers/iofiles-routers'
-import { db, schema } from '~/server/db'
-import { api } from '~/trpc/server'
-import GenerateChannelOutputPage from './generate-channel-output'
+import { and, eq, inArray, not } from "drizzle-orm";
+import { Title } from "~/components/title";
+import { getBrandAndChannel } from "~/server/api/routers/iofiles-routers";
+import { db, schema } from "~/server/db";
+import { api } from "~/trpc/server";
+import GenerateChannelOutputPage from "./generate-channel-output";
 export default async function page({
-    params,
+  params,
 }: {
   params: { channelId: string; companySubId: string; brandId: string };
 }) {
@@ -27,14 +27,18 @@ export default async function page({
   const productsNumbers = channel.products.map((p) => p.product.number);
 
   // Pagos que no tienen archivo de salida que corresponden a la marca y los productos del canal
-  const payments = await db.query.payments.findMany({
+  const genFileStatus = await db.query.paymentStatus.findFirst({
+    where: eq(schema.paymentStatus.code, "92"),
+  });
+  let payments = await db.query.payments.findMany({
     where: and(
       eq(schema.payments.companyId, company.id),
       eq(schema.payments.g_c, brand.number),
-      inArray(schema.payments.product_number, productsNumbers), // Solo los productos de la marca y producto -> (los productos salen del canal)
-      isNull(schema.payments.outputFileId), // Si no tiene archivo de salida, es que no le generaron el archivo
+      inArray(schema.payments.product_number, productsNumbers) // Solo los productos de la marca y producto -> (los productos salen del canal)
     ),
   });
+
+  payments = payments.filter((p) => !p.genChannels.includes(params.channelId));
 
   const outputFiles = await api.iofiles.list.query({
     channelId: params.channelId,
@@ -51,6 +55,7 @@ export default async function page({
     status_batch[0]!.amount_collected +=
       transaction?.collected_amount ?? transaction?.first_due_amount ?? 0;
   }
+
   return (
     <>
       {channel ? (
