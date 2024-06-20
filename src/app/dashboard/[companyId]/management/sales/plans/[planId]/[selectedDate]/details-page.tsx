@@ -203,17 +203,15 @@ export default function DetailsPage(props: {
                 <DropdownMenuItem
                 // value="percent"
                 >
-                  <Button onClick={() => setOpen(true)}>
+                  <div onClick={() => setOpen(true)}>
                     Actualizar porcentualmente
-                  </Button>
+                  </div>
                 </DropdownMenuItem>
 
                 <DropdownMenuItem
                 // value="edit"
                 >
-                  <Button onClick={() => setOpenAdd(true)}>
-                    Editar precio
-                  </Button>
+                  <div onClick={() => setOpenAdd(true)}>Editar precio</div>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

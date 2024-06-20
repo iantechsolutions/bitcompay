@@ -243,7 +243,7 @@ async function approbateFactura(liquidationId: string) {
         const event = await db.insert(schema.events).values({
           currentAccount_id: cc?.id,
           event_amount: factura.importe * -1,
-          current_amount: 0 - factura.importe,
+          current_amount: lastEvent.current_amount - factura.importe,
           description: "Factura aprobada",
           type: "FC",
         });
@@ -280,16 +280,20 @@ async function preparateFactura(
     const billResponsible = grupo.integrants.find(
       (integrant) => integrant.isBillResponsible
     );
+    console.log("variables grupo");
     const ivaFloat =
       (100 + parseFloat(grupo.businessUnitData?.brand?.iva ?? "0")) / 100;
+    console.log(ivaFloat);
     const abono = await getGroupAmount(grupo);
+    console.log(abono);
     const bonificacion =
       (parseFloat(
-        grupo.bonus?.find((x) => x.from! <= new Date() && x.to! >= new Date())
+        grupo.bonus?.find((x) => x.from && x.from <= new Date() && x.to && x.to >= new Date())
           ?.amount ?? "0"
       ) *
         abono) /
       100;
+    console.log(bonificacion);
     const interest = 0;
     const contribution = await getGroupContribution(grupo);
 
@@ -366,15 +370,17 @@ async function getGroupAmount(grupo: grupoCompleto) {
   grupo.integrants?.forEach((integrant) => {
     if (integrant.birth_date != null) {
       const age = calcularEdad(integrant.birth_date);
+      console.log(age);
+      console.log(integrant.relationship);
       const precioIntegrante =
         grupo.plan?.pricesPerAge.find((x) => {
-          if (integrant.relationship) {
+          if (integrant.relationship && integrant.relationship.toLowerCase()!="titular") {
             return x.condition == integrant.relationship;
           } else {
             return x.age == age;
           }
         })?.amount ?? 0;
-
+      console.log(precioIntegrante);
       importe += precioIntegrante;
     }
   });

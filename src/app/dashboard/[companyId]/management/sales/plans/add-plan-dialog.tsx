@@ -117,7 +117,7 @@ export default function AddPlanDialog({
   );
 
   const form = useForm<Inputs>({
-    resolver: zodResolver(PlanSchema),
+    // resolver: zodResolver(PlanSchema),
     defaultValues: { ...formInitialValues },
   });
 
@@ -176,6 +176,7 @@ export default function AddPlanDialog({
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
+      console.log("empieza updateo/add de plan");
       const dataWithBrands = { ...data, brand_id: brand };
 
       const parsedData = PlanSchema.parse(dataWithBrands);
@@ -297,7 +298,6 @@ export default function AddPlanDialog({
                                     : undefined
                                 }
                                 onSelect={field.onChange}
-                                disabled={(date: Date) => date < new Date()}
                                 initialFocus
                               />
                             </PopoverContent>
@@ -356,6 +356,7 @@ export default function AddPlanDialog({
                 </TabsContent>
                 <TabsContent value="billing">
                   <Button
+                    type="button"
                     onClick={() =>
                       append({
                         condition: "",

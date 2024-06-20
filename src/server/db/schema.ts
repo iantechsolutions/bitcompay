@@ -714,7 +714,9 @@ export const facturas = pgTable("facturas", {
   tipoFactura: varchar("tipoFactura", { length: 255 }),
   concepto: integer("concept").notNull(),
   tipoDocumento: integer("tipoDocumento").notNull(),
-  nroDocumento: integer("nroDocumento").notNull(),
+  nroDocumento: bigint("nroDocumento", {
+    mode: "number",
+  }).notNull(),
   importe: real("importe").notNull(),
   fromPeriod: timestamp("fromperiod", { mode: "date" }),
   toPeriod: timestamp("toperiod", { mode: "date" }),
@@ -956,7 +958,7 @@ export const pa = pgTable("pa", {
   CBU: varchar("CBU", { length: 255 }),
   card_brand: varchar("card_brand", { length: 255 }),
   card_type: varchar("card_type", { length: 255 }),
-  new_registration: boolean("new_registration").notNull().default(true),
+  new_registration: boolean("new_registration"),
   integrant_id: varchar("integrant_id", { length: 255 }).references(
     () => integrants.id
   ),

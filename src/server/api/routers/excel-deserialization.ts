@@ -112,7 +112,7 @@ export const excelDeserializationRouter = createTRPCRouter({
             const bonus = await db
               .insert(schema.bonuses)
               .values({
-                amount: row.bonus,
+                amount: row.bonus ?? "0",
                 appliedUser: " ", //a rellenar
                 approverUser: " ", //a rellenar
                 duration: "",
@@ -132,20 +132,22 @@ export const excelDeserializationRouter = createTRPCRouter({
           });
 
           let differentialId;
-          const check_differential = await db.query.differentials.findMany({
-            where: eq(schema.differentials.codigo, row.differential_code!),
-          });
-          if (check_differential.length == 0) {
-            console.log("creando diferencial codigo");
-            const new_differential = await db
-              .insert(schema.differentials)
-              .values({
-                codigo: row.differential_code!,
-              })
-              .returning();
-            differentialId = new_differential[0]!.id;
-          } else {
-            differentialId = check_differential[0]!.id;
+          if (row.differential_code) {
+            const check_differential = await db.query.differentials.findMany({
+              where: eq(schema.differentials.codigo, row.differential_code),
+            });
+            if (check_differential.length == 0) {
+              console.log("creando diferencial codigo");
+              const new_differential = await db
+                .insert(schema.differentials)
+                .values({
+                  codigo: row.differential_code!,
+                })
+                .returning();
+              differentialId = new_differential[0]!.id;
+            } else {
+              differentialId = check_differential[0]!.id;
+            }
           }
 
           const birthDate = new Date(row.birth_date!);
@@ -211,28 +213,39 @@ export const excelDeserializationRouter = createTRPCRouter({
             .returning();
           console.log("creando valores diferencial valor");
 
-          const cc = await db.insert(schema.currentAccount).values({
-            family_group: new_integrant[0]!.family_group_id,
-          });
-          const ageN = calcularEdad(row.birth_date ?? new Date());
-          const precioIntegrante =
-            plan?.pricesPerAge.find((p) => {
-              if (row.relationship) {
-                return p.condition == row.relationship;
-              } else {
-                return p.age == ageN;
-              }
-            })?.amount ?? 0;
-          const precioDiferencial =
-            parseFloat(row.differential_value!) / precioIntegrante;
-          const differentialValue = await db
-            .insert(schema.differentialsValues)
+          const cc = await db
+            .insert(schema.currentAccount)
             .values({
-              amount: precioDiferencial,
-              differentialId: differentialId,
-              integrant_id: new_integrant[0]!.id,
-            });
-
+              family_group: new_integrant[0]!.family_group_id,
+            })
+            .returning();
+          const event = await db.insert(schema.events).values({
+            current_amount: parseFloat(row.balance ?? "0"),
+            description: "Apertura",
+            event_amount: parseFloat(row.balance ?? "0"),
+            currentAccount_id: cc[0]!.id,
+            type: "REC",
+          });
+          if (row.differential_value) {
+            const ageN = calcularEdad(row.birth_date ?? new Date());
+            const precioIntegrante =
+              plan?.pricesPerAge.find((p) => {
+                if (row.relationship) {
+                  return p.condition == row.relationship;
+                } else {
+                  return p.age == ageN;
+                }
+              })?.amount ?? 0;
+            const precioDiferencial =
+              parseFloat(row.differential_value!) / precioIntegrante;
+            const differentialValue = await db
+              .insert(schema.differentialsValues)
+              .values({
+                amount: precioDiferencial,
+                differentialId: differentialId,
+                integrant_id: new_integrant[0]!.id,
+              });
+          }
           if (row.isPaymentResponsible) {
             const product = await db.query.products.findFirst({
               where: eq(schema.products.name, row.product!),
@@ -241,7 +254,7 @@ export const excelDeserializationRouter = createTRPCRouter({
             await db.insert(schema.pa).values({
               card_number: row.card_number!,
               CBU: row.cbu!,
-              new_registration: row.is_new!,
+              new_registration: row.is_new ?? false,
               integrant_id: new_integrant[0]!.id,
               product_id: product!.id!,
               // CBU: row.cbu_number!,
@@ -337,31 +350,42 @@ async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
   for (let i = 0; i < transformedRows.length; i++) {
     const row = transformedRows[i]!;
     const rowNum = i + 2;
+    const product = await db.query.products.findFirst({
+      where: eq(schema.products.name, row.product!),
+    });
+    if (product) {
+      const requiredColumns = await getRequiredColums(product.description);
+      if (requiredColumns.has("card_number")) {
+        if (row.card_number?.length ?? 0 < 16) {
+          errors.push(
+            `El numero de tarjeta debe tener 16 digitos (fila:${rowNum})`
+          );
+        } else {
+          const response = await fetch(
+            `https://data.handyapi.com/bin/${row.card_number}`
+          );
+          console.log("response", response);
+          const json = await response?.json();
+          let row_card_type = row.card_type ?? json?.card_type;
+          let row_card_brand = row.card_brand ?? json?.card_brand;
 
-    console.log("tarjeta", row.card_number);
-    const response = await fetch(
-      `https://data.handyapi.com/bin/${row.card_number}`
-    );
-    console.log("response", response);
-    const json = await response?.json();
-    let row_card_type = row.card_type ?? json?.card_type;
-    let row_card_brand = row.card_brand ?? json?.card_brand;
+          if (!row_card_brand || !row_card_type) {
+            errors.push(
+              `No se pudo obtener (${!row_card_brand ? "Marca" : ""}, ${
+                !row_card_type ? "Tipo" : ""
+              }) de la tarjeta en fila: ${rowNum} \n`
+            );
+          }
 
-    if (!row_card_brand || !row_card_type) {
-      errors.push(
-        `No se pudo obtener (${!row_card_brand ? "Marca" : ""}, ${
-          !row_card_type ? "Tipo" : ""
-        }) de la tarjeta en fila: ${rowNum} \n`
-      );
+          if (!row_card_brand) {
+            row_card_brand = json?.Scheme;
+          }
+          if (!row_card_type) {
+            row_card_type = json?.Type;
+          }
+        }
+      }
     }
-
-    if (!row_card_brand) {
-      row_card_brand = json?.Scheme;
-    }
-    if (!row_card_type) {
-      row_card_type = json?.Type;
-    }
-
     for (const column of keysArray) {
       const value = (row as Record<string, unknown>)[column];
 
@@ -381,6 +405,9 @@ async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
       errors.push(`UNIDAD DE NEGOCIO no valida en (fila:${rowNum})`);
     }
 
+    if (row.differential_value && !row.differential_code) {
+      errors.push(`CODIGO DIFERENCIAL requerido en (fila:${rowNum})`);
+    }
     const health_insurance = await db.query.healthInsurances.findFirst({
       where: eq(schema.healthInsurances.identificationNumber, row.os!),
     });
@@ -412,9 +439,6 @@ async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
     if (!plan) {
       errors.push(`PLAN no valido en (fila:${rowNum})`);
     }
-    const product = await db.query.products.findFirst({
-      where: eq(schema.products.name, row.product!),
-    });
 
     const postal_code = row["postal code"];
     const check_postal_code = await db.query.postal_code.findMany({
