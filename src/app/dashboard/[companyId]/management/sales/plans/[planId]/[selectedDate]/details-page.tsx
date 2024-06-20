@@ -28,6 +28,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "~/components/ui/dropdown-menu";
+import { api } from "~/trpc/react";
+
 import {
   Dialog,
   DialogContent,
@@ -38,6 +40,7 @@ import AddPlanDialog from "../../add-plan-dialog";
 
 dayjs.extend(utc);
 dayjs.locale("es");
+const { mutateAsync: createPricePerAge } = api.pricePerAge.create.useMutation();
 
 const ageHeaders: TableHeaders = [
   { key: "from_age", label: "Desde edad", width: 150 },
@@ -68,15 +71,23 @@ export default function DetailsPage(props: {
     month: "long",
     day: "numeric",
   });
-  function handleUpdatePrice(value: string) {
-    if (value === "percent") {
-    } else {
-    }
-  }
+  
   const [open, setOpen] = useState(false);
   const [openAdd, setOpenAdd] = useState(false);
   const [percent, setPercent] = useState("");
   const [validity_date, setValidity_date] = useState<Date>();
+  function handleUpdatePrice(value: string) {
+    props.plan?.pricesPerAge.forEach((price) => {
+      createPricePerAge({
+        plan_id: props.plan?.id ?? "",
+        amount: price.amount * (1 + parseFloat(percent) / 100),
+        age: price.age ?? 0,
+        condition: price.condition ?? "",
+        isAmountByAge: price.isAmountByAge,
+        validy_date: validity_date ?? new Date(),
+      });
+    });
+  }
   useEffect(() => {
     const groupByAge: GroupedPlans[] = [];
     let savedPrice = -1;

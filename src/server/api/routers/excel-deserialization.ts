@@ -230,7 +230,10 @@ export const excelDeserializationRouter = createTRPCRouter({
             const ageN = calcularEdad(row.birth_date ?? new Date());
             const precioIntegrante =
               plan?.pricesPerAge.find((p) => {
-                if (row.relationship) {
+                if (
+                  row.relationship &&
+                  row.relationship.toLowerCase() != "titular"
+                ) {
                   return p.condition == row.relationship;
                 } else {
                   return p.age == ageN;
