@@ -94,7 +94,7 @@ export default function AffiliatePage(props: {
           </div>
 
           <div>
-            <div className="mb-5 mt-5">
+            <div className="mb-5 mt-10">
               <Title>Cuenta corriente</Title>
             </div>
             <Table>
@@ -147,7 +147,7 @@ export default function AffiliatePage(props: {
           </div>
 
           <div>
-            <div className="mb-5 mt-5">
+            <div className="mb-5 mt-10">
               <Title>Ultimos movimientos</Title>
             </div>
             <Table>
@@ -169,15 +169,13 @@ export default function AffiliatePage(props: {
                         N° {factura.nroFactura}
                       </TableCell>
                       <TableCell className="flex-1 text-left">
-                        {factura.generated
-                          ? new Date(factura.generated)
-                              .toLocaleDateString("en-US", {
-                                month: "short",
-                                day: "numeric",
-                                year: "numeric",
-                              })
-                              .toString()
-                          : "Fecha no disponible"}
+                        {new Date(
+                          factura.generated ?? new Date()
+                        ).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
                       </TableCell>
                       <TableCell className="flex-1 text-left">
                         {factura.iva}%
