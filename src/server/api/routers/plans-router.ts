@@ -68,7 +68,8 @@ export const plansRouter = createTRPCRouter({
           description: input.description,
           brand_id: input.brand_id,
         })
-        .where(eq(schema.plans.id, input.planId));
+        .where(eq(schema.plans.id, input.planId))
+        .returning();
       return modified_plan;
     }),
   delete: protectedProcedure

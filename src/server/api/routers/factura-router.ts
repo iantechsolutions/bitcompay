@@ -188,7 +188,6 @@ async function approbateFactura(liquidationId: string) {
       .update(schema.liquidations)
       .set({ estado: "aprobada", userApproved: user?.id })
       .where(eq(schema.liquidations.id, liquidationId));
-
     for (let factura of liquidation?.facturas) {
       const randomNumber =
         Math.floor(Math.random() * (100000 - 1000 + 1)) + 1000;
@@ -232,17 +231,31 @@ async function approbateFactura(liquidationId: string) {
         })
         .returning();
 
-      const lastEvent = await db.query.events.findFirst({
+      const historicEvents = await db.query.events.findMany({
         where: eq(schema.events.currentAccount_id, cc?.id ?? ""),
-        orderBy: [desc(schema.events.createdAt)],
       });
-      const event = await db.insert(schema.events).values({
-        currentAccount_id: cc?.id,
-        event_amount: factura.importe * -1,
-        current_amount: lastEvent?.current_amount! - factura.importe,
-        description: "Factura aprobada",
-        type: "FC",
-      });
+      if (historicEvents && historicEvents.length > 0) {
+        const lastEvent = historicEvents.reduce((prev, current) => {
+          return new Date(prev.createdAt) > new Date(current.createdAt)
+            ? prev
+            : current;
+        });
+        const event = await db.insert(schema.events).values({
+          currentAccount_id: cc?.id,
+          event_amount: factura.importe * -1,
+          current_amount: 0 - factura.importe,
+          description: "Factura aprobada",
+          type: "FC",
+        });
+      } else {
+        const event = await db.insert(schema.events).values({
+          currentAccount_id: cc?.id,
+          event_amount: factura.importe * -1,
+          current_amount: 0 - factura.importe,
+          description: "Factura aprobada",
+          type: "FC",
+        });
+      }
     }
     return "OK";
   } else {
@@ -282,11 +295,16 @@ async function preparateFactura(
 
     const differential_amount = await getDifferentialAmount(grupo);
 
-    const mostRecentEvent = grupo.cc?.events.reduce((prev, current) => {
-      return new Date(prev.createdAt) > new Date(current.createdAt)
-        ? prev
-        : current;
-    });
+    let mostRecentEvent;
+    if (grupo.cc && grupo.cc?.events.length > 0) {
+      mostRecentEvent = grupo.cc?.events.reduce((prev, current) => {
+        return new Date(prev.createdAt) > new Date(current.createdAt)
+          ? prev
+          : current;
+      });
+    } else {
+      mostRecentEvent = null;
+    }
 
     const previous_bill = mostRecentEvent?.current_amount ?? 0;
     const importe =
