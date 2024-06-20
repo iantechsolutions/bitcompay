@@ -603,16 +603,8 @@ export const integrantsRelations = relations(integrants, ({ one, many }) => ({
     fields: [integrants.originating_health_insuranceId],
     references: [healthInsurances.id],
   }),
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-  pa: many(pa),
->>>>>>> 9fb535d3f739dd30c60f68942a54fe6eef7ad2b0
-  contributions: many(contributions),
-=======
   pa: many(pa),
   contribution: one(contributions),
->>>>>>> development
   differentialsValues: many(differentialsValues),
 }));
 
