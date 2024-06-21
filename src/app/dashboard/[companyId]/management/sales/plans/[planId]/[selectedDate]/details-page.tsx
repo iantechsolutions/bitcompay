@@ -40,7 +40,6 @@ import AddPlanDialog from "../../add-plan-dialog";
 
 dayjs.extend(utc);
 dayjs.locale("es");
-const { mutateAsync: createPricePerAge } = api.pricePerAge.create.useMutation();
 
 const ageHeaders: TableHeaders = [
   { key: "from_age", label: "Desde edad", width: 150 },
@@ -64,14 +63,22 @@ export default function DetailsPage(props: {
   plan: RouterOutputs["plans"]["get"];
   date: Date;
 }) {
-  const [groupByAge, setGroupByAge] = useState<GroupedPlans[]>([]);
+  // const [groupByAge, setGroupByAge] = useState<GroupedPlans[]>([]);
   const formatter = new Intl.DateTimeFormat("es-ES", {
     weekday: "long",
     year: "numeric",
     month: "long",
     day: "numeric",
   });
-  
+
+  const { mutateAsync: createPricePerAge } =
+    api.pricePerAge.create.useMutation();
+
+  const groupByAge = api.pricePerAge.getByCreatedAt.useQuery({
+    planId: props.plan?.id,
+    createdAt: props.date,
+  });
+
   const [open, setOpen] = useState(false);
   const [openAdd, setOpenAdd] = useState(false);
   const [percent, setPercent] = useState("");
@@ -88,38 +95,38 @@ export default function DetailsPage(props: {
       });
     });
   }
-  useEffect(() => {
-    const groupByAge: GroupedPlans[] = [];
-    let savedPrice = -1;
-    props.plan?.pricesPerAge
-      .sort((a, b) => (a.age ?? 1000) - (b.age ?? 1000))
-      .forEach((price) => {
-        if (price.isAmountByAge === true) {
-          if (price.amount !== savedPrice) {
-            groupByAge.push({
-              from_age: price.age ?? 0,
-              to_age: price.age ?? 0,
-              amount: price.amount,
-              condition: price.condition,
-              isConditional: !price.isAmountByAge,
-            });
-            savedPrice = price.amount;
-          } else if (groupByAge.length > 0) {
-            const last = groupByAge[groupByAge.length - 1];
-            last!.to_age = price.age ?? 0;
-          }
-        } else {
-          groupByAge.push({
-            from_age: price.age ?? 0,
-            to_age: price.age ?? 0,
-            amount: price.amount,
-            condition: price.condition,
-            isConditional: !price.isAmountByAge,
-          });
-        }
-      });
-    setGroupByAge(groupByAge);
-  }, []);
+  // useEffect(() => {
+  //   const groupByAge: GroupedPlans[] = [];
+  //   let savedPrice = -1;
+  //   props.plan?.pricesPerAge
+  //     .sort((a, b) => (a.age ?? 1000) - (b.age ?? 1000))
+  //     .forEach((price) => {
+  //       if (price.isAmountByAge === true) {
+  //         if (price.amount !== savedPrice) {
+  //           groupByAge.push({
+  //             from_age: price.age ?? 0,
+  //             to_age: price.age ?? 0,
+  //             amount: price.amount,
+  //             condition: price.condition,
+  //             isConditional: !price.isAmountByAge,
+  //           });
+  //           savedPrice = price.amount;
+  //         } else if (groupByAge.length > 0) {
+  //           const last = groupByAge[groupByAge.length - 1];
+  //           last!.to_age = price.age ?? 0;
+  //         }
+  //       } else {
+  //         groupByAge.push({
+  //           from_age: price.age ?? 0,
+  //           to_age: price.age ?? 0,
+  //           amount: price.amount,
+  //           condition: price.condition,
+  //           isConditional: !price.isAmountByAge,
+  //         });
+  //       }
+  //     });
+  //   setGroupByAge(groupByAge);
+  // }, []);
 
   return (
     <LayoutContainer>
@@ -200,13 +207,15 @@ export default function DetailsPage(props: {
               openExterior={openAdd}
               setOpenExterior={setOpenAdd}
               planId={props.plan?.id}
-              initialPrices={groupByAge}
+              // initialPrices={groupByAge}
             ></AddPlanDialog>
           </div>
           <div className="flex items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button>Actualizar precio</Button>
+                <Button onClick={() => handleUpdatePrice("edit")}>
+                  Actualizar precio{" "}
+                </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
               //  onChange={(e)=>handleUpdatePrice(e.toS)}
@@ -249,7 +258,7 @@ export default function DetailsPage(props: {
             <LargeTable
               // height={height}
               headers={ageHeaders}
-              rows={groupByAge.filter((x) => !x.isConditional)}
+              rows={groupByAge.data!.filter((x: any) => !x.isConditional)}
             />
           </TabsContent>
         </Tabs>
