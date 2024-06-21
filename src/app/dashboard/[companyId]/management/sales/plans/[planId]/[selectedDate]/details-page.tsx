@@ -70,6 +70,7 @@ export default function DetailsPage(props: {
     month: "long",
     day: "numeric",
   });
+
   const { mutateAsync: createPricePerAge } =
     api.pricePerAge.create.useMutation();
 
@@ -212,7 +213,9 @@ export default function DetailsPage(props: {
           <div className="flex items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button>Actualizar precio</Button>
+                <Button onClick={() => handleUpdatePrice("edit")}>
+                  Actualizar precio{" "}
+                </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
               //  onChange={(e)=>handleUpdatePrice(e.toS)}
