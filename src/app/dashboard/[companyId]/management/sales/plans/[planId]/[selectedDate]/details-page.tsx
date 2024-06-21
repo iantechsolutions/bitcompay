@@ -70,6 +70,7 @@ export default function DetailsPage(props: {
     month: "long",
     day: "numeric",
   });
+
   const { mutateAsync: createPricePerAge } =
     api.pricePerAge.create.useMutation();
 
@@ -89,38 +90,38 @@ export default function DetailsPage(props: {
       });
     });
   }
-  useEffect(() => {
-    const groupByAge: GroupedPlans[] = [];
-    let savedPrice = -1;
-    props.plan?.pricesPerAge
-      .sort((a, b) => (a.age ?? 1000) - (b.age ?? 1000))
-      .forEach((price) => {
-        if (price.isAmountByAge === true) {
-          if (price.amount !== savedPrice) {
-            groupByAge.push({
-              from_age: price.age ?? 0,
-              to_age: price.age ?? 0,
-              amount: price.amount,
-              condition: price.condition,
-              isConditional: !price.isAmountByAge,
-            });
-            savedPrice = price.amount;
-          } else if (groupByAge.length > 0) {
-            const last = groupByAge[groupByAge.length - 1];
-            last!.to_age = price.age ?? 0;
-          }
-        } else {
-          groupByAge.push({
-            from_age: price.age ?? 0,
-            to_age: price.age ?? 0,
-            amount: price.amount,
-            condition: price.condition,
-            isConditional: !price.isAmountByAge,
-          });
-        }
-      });
-    setGroupByAge(groupByAge);
-  }, []);
+  //useEffect(() => {
+  //   const groupByAge: GroupedPlans[] = [];
+  //   let savedPrice = -1;
+  //   props.plan?.pricesPerAge
+  //     .sort((a, b) => (a.age ?? 1000) - (b.age ?? 1000))
+  //     .forEach((price) => {
+  //       if (price.isAmountByAge === true) {
+  //         if (price.amount !== savedPrice) {
+  //           groupByAge.push({
+  //             from_age: price.age ?? 0,
+  //             to_age: price.age ?? 0,
+  //             amount: price.amount,
+  //             condition: price.condition,
+  //             isConditional: !price.isAmountByAge,
+  //           });
+  //           savedPrice = price.amount;
+  //         } else if (groupByAge.length > 0) {
+  //           const last = groupByAge[groupByAge.length - 1];
+  //           last!.to_age = price.age ?? 0;
+  //         }
+  //       } else {
+  //         groupByAge.push({
+  //           from_age: price.age ?? 0,
+  //           to_age: price.age ?? 0,
+  //           amount: price.amount,
+  //           condition: price.condition,
+  //           isConditional: !price.isAmountByAge,
+  //         });
+  //       }
+  //     });
+  //   setGroupByAge(groupByAge);
+  // }, []);
 
   return (
     <LayoutContainer>
@@ -205,7 +206,9 @@ export default function DetailsPage(props: {
           <div className="flex items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button>Actualizar precio</Button>
+                <Button onClick={() => handleUpdatePrice("edit")}>
+                  Actualizar precio{" "}
+                </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
               //  onChange={(e)=>handleUpdatePrice(e.toS)}
