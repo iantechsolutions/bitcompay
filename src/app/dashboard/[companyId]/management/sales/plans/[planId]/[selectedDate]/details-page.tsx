@@ -40,7 +40,6 @@ import AddPlanDialog from "../../add-plan-dialog";
 
 dayjs.extend(utc);
 dayjs.locale("es");
-const { mutateAsync: createPricePerAge } = api.pricePerAge.create.useMutation();
 
 const ageHeaders: TableHeaders = [
   { key: "from_age", label: "Desde edad", width: 150 },
@@ -71,7 +70,9 @@ export default function DetailsPage(props: {
     month: "long",
     day: "numeric",
   });
-  
+  const { mutateAsync: createPricePerAge } =
+    api.pricePerAge.create.useMutation();
+
   const [open, setOpen] = useState(false);
   const [openAdd, setOpenAdd] = useState(false);
   const [percent, setPercent] = useState("");
@@ -155,8 +156,7 @@ export default function DetailsPage(props: {
                         className={cn(
                           "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
                           !validity_date && "text-muted-foreground"
-                        )}
-                      >
+                        )}>
                         <p>
                           {validity_date ? (
                             dayjs(validity_date).format("D [de] MMMM [de] YYYY")
@@ -200,8 +200,7 @@ export default function DetailsPage(props: {
               openExterior={openAdd}
               setOpenExterior={setOpenAdd}
               planId={props.plan?.id}
-              initialPrices={groupByAge}
-            ></AddPlanDialog>
+              initialPrices={groupByAge}></AddPlanDialog>
           </div>
           <div className="flex items-center">
             <DropdownMenu>
