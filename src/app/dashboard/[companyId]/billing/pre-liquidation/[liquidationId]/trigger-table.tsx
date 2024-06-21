@@ -9,7 +9,6 @@ import { TableCell, TableRow } from "~/components/ui/tablePreliq";
 import { Facturas } from "~/server/db/schema";
 import { RouterOutputs } from "~/trpc/shared";
 import { computeBase, computeIva } from "~/lib/utils";
-
 interface TriggerTableProps {
   setActive: (value: boolean) => void;
   active: boolean;
@@ -20,6 +19,7 @@ interface TriggerTableProps {
   cuotaValue: number;
   previousBillValue: number;
   total: number;
+  currentAccountAmount: number;
 }
 
 export default function TriggerTable(props: TriggerTableProps) {
@@ -33,9 +33,11 @@ export default function TriggerTable(props: TriggerTableProps) {
     interestValue,
     previousBillValue,
     total,
+    currentAccountAmount,
   } = props;
 
   const billResponsible = factura?.family_group?.integrants[0];
+
   return (
     <TableRow
       className="rounded-lg bg-[#f0f0f0]
@@ -66,7 +68,10 @@ export default function TriggerTable(props: TriggerTableProps) {
         {" "}
         {billResponsible?.fiscal_id_number ?? "-"}
       </TableCell>
-      <TableCell className="border border-[#6cebd1] p-2 py-4"> 0</TableCell>
+      <TableCell className="border border-[#6cebd1] p-2 py-4">
+        {" "}
+        {currentAccountAmount}
+      </TableCell>
       <TableCell className="border border-[#6cebd1] p-2 py-4">
         {" "}
         {cuotaValue}

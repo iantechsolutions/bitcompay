@@ -480,12 +480,14 @@ export const facturasRouter = createTRPCRouter({
     const facturas = await db.query.facturas.findMany({
       with: {
         items: true,
+        liquidations: true,
         family_group: {
           with: {
             integrants: {
               where: eq(schema.integrants.isBillResponsible, true),
             },
             plan: true,
+            cc: true,
           },
         },
       },

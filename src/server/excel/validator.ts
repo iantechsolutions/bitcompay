@@ -71,6 +71,20 @@ const numberAsString = z
     message: "Caracteres incorrectos en columna:",
   });
 
+const allToString = z
+  .union([z.number(), z.string()])
+  .transform((value) => {
+    console.log(value);
+    if (typeof value === "number") {
+      return value.toString();
+    } else if (typeof value === "string") {
+      return value;
+    }
+  })
+  .refine((value) => typeof value === "string", {
+    message: "Caracteres incorrectos en columna:",
+  });
+
 const bonusAsString = z
   .union([z.number(), z.string()])
   .transform((value) => {
@@ -345,7 +359,7 @@ export const recDocumentValidator = z
     "DIFERENCIAL CODIGO": z.string().min(0).max(140).nullable().optional(),
     "DIFERENCIAL VALOR": numberAsString.optional().nullable(),
     "SALDO CUENTA CORRIENTE": numberAsString.nullable().optional(),
-    PLAN: z.string().min(0).max(140).nullable().optional(),
+    PLAN: allToString.nullable().optional(),
     "PRODUCTO (MEDIO DE PAGO)": z
       .string()
       .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
