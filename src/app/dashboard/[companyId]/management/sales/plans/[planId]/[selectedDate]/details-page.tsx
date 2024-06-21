@@ -63,7 +63,7 @@ export default function DetailsPage(props: {
   plan: RouterOutputs["plans"]["get"];
   date: Date;
 }) {
-  const [groupByAge, setGroupByAge] = useState<GroupedPlans[]>([]);
+  // const [groupByAge, setGroupByAge] = useState<GroupedPlans[]>([]);
   const formatter = new Intl.DateTimeFormat("es-ES", {
     weekday: "long",
     year: "numeric",
@@ -72,6 +72,11 @@ export default function DetailsPage(props: {
   });
   const { mutateAsync: createPricePerAge } =
     api.pricePerAge.create.useMutation();
+
+  const groupByAge = api.pricePerAge.getByCreatedAt.useQuery({
+    planId: props.plan?.id,
+    createdAt: props.date,
+  });
 
   const [open, setOpen] = useState(false);
   const [openAdd, setOpenAdd] = useState(false);
@@ -89,38 +94,38 @@ export default function DetailsPage(props: {
       });
     });
   }
-  useEffect(() => {
-    const groupByAge: GroupedPlans[] = [];
-    let savedPrice = -1;
-    props.plan?.pricesPerAge
-      .sort((a, b) => (a.age ?? 1000) - (b.age ?? 1000))
-      .forEach((price) => {
-        if (price.isAmountByAge === true) {
-          if (price.amount !== savedPrice) {
-            groupByAge.push({
-              from_age: price.age ?? 0,
-              to_age: price.age ?? 0,
-              amount: price.amount,
-              condition: price.condition,
-              isConditional: !price.isAmountByAge,
-            });
-            savedPrice = price.amount;
-          } else if (groupByAge.length > 0) {
-            const last = groupByAge[groupByAge.length - 1];
-            last!.to_age = price.age ?? 0;
-          }
-        } else {
-          groupByAge.push({
-            from_age: price.age ?? 0,
-            to_age: price.age ?? 0,
-            amount: price.amount,
-            condition: price.condition,
-            isConditional: !price.isAmountByAge,
-          });
-        }
-      });
-    setGroupByAge(groupByAge);
-  }, []);
+  // useEffect(() => {
+  //   const groupByAge: GroupedPlans[] = [];
+  //   let savedPrice = -1;
+  //   props.plan?.pricesPerAge
+  //     .sort((a, b) => (a.age ?? 1000) - (b.age ?? 1000))
+  //     .forEach((price) => {
+  //       if (price.isAmountByAge === true) {
+  //         if (price.amount !== savedPrice) {
+  //           groupByAge.push({
+  //             from_age: price.age ?? 0,
+  //             to_age: price.age ?? 0,
+  //             amount: price.amount,
+  //             condition: price.condition,
+  //             isConditional: !price.isAmountByAge,
+  //           });
+  //           savedPrice = price.amount;
+  //         } else if (groupByAge.length > 0) {
+  //           const last = groupByAge[groupByAge.length - 1];
+  //           last!.to_age = price.age ?? 0;
+  //         }
+  //       } else {
+  //         groupByAge.push({
+  //           from_age: price.age ?? 0,
+  //           to_age: price.age ?? 0,
+  //           amount: price.amount,
+  //           condition: price.condition,
+  //           isConditional: !price.isAmountByAge,
+  //         });
+  //       }
+  //     });
+  //   setGroupByAge(groupByAge);
+  // }, []);
 
   return (
     <LayoutContainer>
@@ -156,7 +161,8 @@ export default function DetailsPage(props: {
                         className={cn(
                           "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
                           !validity_date && "text-muted-foreground"
-                        )}>
+                        )}
+                      >
                         <p>
                           {validity_date ? (
                             dayjs(validity_date).format("D [de] MMMM [de] YYYY")
@@ -200,7 +206,8 @@ export default function DetailsPage(props: {
               openExterior={openAdd}
               setOpenExterior={setOpenAdd}
               planId={props.plan?.id}
-              initialPrices={groupByAge}></AddPlanDialog>
+              // initialPrices={groupByAge}
+            ></AddPlanDialog>
           </div>
           <div className="flex items-center">
             <DropdownMenu>
@@ -248,7 +255,7 @@ export default function DetailsPage(props: {
             <LargeTable
               // height={height}
               headers={ageHeaders}
-              rows={groupByAge.filter((x) => !x.isConditional)}
+              rows={groupByAge.data!.filter((x: any) => !x.isConditional)}
             />
           </TabsContent>
         </Tabs>
