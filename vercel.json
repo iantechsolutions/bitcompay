@@ -1,7 +1,7 @@
 {
     "functions": {
      
-      "api/routers/excel-deserialization.ts": {
+      "src/server/api/routers/excel-deserialization.ts": {
         "maxDuration": 60
       }
     }
