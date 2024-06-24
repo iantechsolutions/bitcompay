@@ -13,7 +13,7 @@ import {
 import { error } from "console";
 import { calcularEdad } from "~/lib/utils";
 
-export const maxDuration = 300;
+export const maxDuration = 60;
 
 export const excelDeserializationRouter = createTRPCRouter({
   upload: protectedProcedure
