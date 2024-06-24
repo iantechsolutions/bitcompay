@@ -200,8 +200,8 @@ export const uploadsRouter = createTRPCRouter({
               },
             });
 
-            if (payment?.factura?.family_group?.cc?.length! > 0) {
-              const currentAccount = payment?.factura?.family_group?.cc[0];
+            if (payment?.factura?.family_group?.cc) {
+              const currentAccount = payment?.factura?.family_group?.cc;
               const lastEvent =
                 currentAccount?.events[currentAccount?.events.length - 1];
               if (!lastEvent) {
@@ -212,7 +212,7 @@ export const uploadsRouter = createTRPCRouter({
                 event_amount:
                   record.first_due_amount ?? record.collected_amount ?? 0,
                 current_amount:
-                  lastEvent?.current_amount! - payment?.factura?.importe!,
+                  lastEvent?.current_amount! + payment?.factura?.importe!,
                 description: "Factura aprobada",
                 type: "FC",
               });

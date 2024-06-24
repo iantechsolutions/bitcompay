@@ -28,6 +28,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "~/components/ui/dropdown-menu";
+import { api } from "~/trpc/react";
+
 import {
   Dialog,
   DialogContent,
@@ -61,54 +63,70 @@ export default function DetailsPage(props: {
   plan: RouterOutputs["plans"]["get"];
   date: Date;
 }) {
-  const [groupByAge, setGroupByAge] = useState<GroupedPlans[]>([]);
+  // const [groupByAge, setGroupByAge] = useState<GroupedPlans[]>([]);
   const formatter = new Intl.DateTimeFormat("es-ES", {
     weekday: "long",
     year: "numeric",
     month: "long",
     day: "numeric",
   });
-  function handleUpdatePrice(value: string) {
-    if (value === "percent") {
-    } else {
-    }
-  }
+
+  const { mutateAsync: createPricePerAge } =
+    api.pricePerAge.create.useMutation();
+
+  const groupByAge = api.pricePerAge.getByCreatedAt.useQuery({
+    planId: props.plan?.id,
+    createdAt: props.date,
+  });
+
   const [open, setOpen] = useState(false);
   const [openAdd, setOpenAdd] = useState(false);
   const [percent, setPercent] = useState("");
   const [validity_date, setValidity_date] = useState<Date>();
-  useEffect(() => {
-    const groupByAge: GroupedPlans[] = [];
-    let savedPrice = -1;
-    props.plan?.pricesPerAge
-      .sort((a, b) => (a.age ?? 0) - (b.age ?? 0))
-      .forEach((price) => {
-        if (price.isAmountByAge === true) {
-          if (price.amount !== savedPrice) {
-            groupByAge.push({
-              from_age: price.age ?? 0,
-              to_age: price.age ?? 0,
-              amount: price.amount,
-              condition: price.condition,
-              isConditional: !price.isAmountByAge,
-            });
-            savedPrice = price.amount;
-          } else if (groupByAge.length > 0) {
-            const last = groupByAge[groupByAge.length - 1];
-            last!.to_age = price.age ?? 0;
-          }
-        } else {
-          groupByAge.push({
-            from_age: price.age ?? 0,
-            to_age: price.age ?? 0,
-            amount: price.amount,
-            condition: price.condition,
-            isConditional: !price.isAmountByAge,
-          });
-        }
+  function handleUpdatePrice(value: string) {
+    props.plan?.pricesPerAge.forEach((price) => {
+      createPricePerAge({
+        plan_id: props.plan?.id ?? "",
+        amount: price.amount * (1 + parseFloat(percent) / 100),
+        age: price.age ?? 0,
+        condition: price.condition ?? "",
+        isAmountByAge: price.isAmountByAge,
+        validy_date: validity_date ?? new Date(),
       });
-    setGroupByAge(groupByAge);
-  }, []);
+    });
+  }
+  // useEffect(() => {
+  //   const groupByAge: GroupedPlans[] = [];
+  //   let savedPrice = -1;
+  //   props.plan?.pricesPerAge
+  //     .sort((a, b) => (a.age ?? 1000) - (b.age ?? 1000))
+  //     .forEach((price) => {
+  //       if (price.isAmountByAge === true) {
+  //         if (price.amount !== savedPrice) {
+  //           groupByAge.push({
+  //             from_age: price.age ?? 0,
+  //             to_age: price.age ?? 0,
+  //             amount: price.amount,
+  //             condition: price.condition,
+  //             isConditional: !price.isAmountByAge,
+  //           });
+  //           savedPrice = price.amount;
+  //         } else if (groupByAge.length > 0) {
+  //           const last = groupByAge[groupByAge.length - 1];
+  //           last!.to_age = price.age ?? 0;
+  //         }
+  //       } else {
+  //         groupByAge.push({
+  //           from_age: price.age ?? 0,
+  //           to_age: price.age ?? 0,
+  //           amount: price.amount,
+  //           condition: price.condition,
+  //           isConditional: !price.isAmountByAge,
+  //         });
+  //       }
+  //     });
+  //   setGroupByAge(groupByAge);
+  // }, []);
 
   return (
     <LayoutContainer>
@@ -189,13 +207,15 @@ export default function DetailsPage(props: {
               openExterior={openAdd}
               setOpenExterior={setOpenAdd}
               planId={props.plan?.id}
-              initialPrices={groupByAge}
+              // initialPrices={groupByAge}
             ></AddPlanDialog>
           </div>
           <div className="flex items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button>Actualizar precio</Button>
+                <Button onClick={() => handleUpdatePrice("edit")}>
+                  Actualizar precio{" "}
+                </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
               //  onChange={(e)=>handleUpdatePrice(e.toS)}
@@ -203,17 +223,15 @@ export default function DetailsPage(props: {
                 <DropdownMenuItem
                 // value="percent"
                 >
-                  <Button onClick={() => setOpen(true)}>
+                  <div onClick={() => setOpen(true)}>
                     Actualizar porcentualmente
-                  </Button>
+                  </div>
                 </DropdownMenuItem>
 
                 <DropdownMenuItem
                 // value="edit"
                 >
-                  <Button onClick={() => setOpenAdd(true)}>
-                    Editar precio
-                  </Button>
+                  <div onClick={() => setOpenAdd(true)}>Editar precio</div>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -240,7 +258,7 @@ export default function DetailsPage(props: {
             <LargeTable
               // height={height}
               headers={ageHeaders}
-              rows={groupByAge.filter((x) => !x.isConditional)}
+              rows={groupByAge.data!.filter((x: any) => !x.isConditional)}
             />
           </TabsContent>
         </Tabs>

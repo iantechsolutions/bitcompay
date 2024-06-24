@@ -243,7 +243,7 @@ async function approbateFactura(liquidationId: string) {
         const event = await db.insert(schema.events).values({
           currentAccount_id: cc?.id,
           event_amount: factura.importe * -1,
-          current_amount: 0 - factura.importe,
+          current_amount: lastEvent.current_amount - factura.importe,
           description: "Factura aprobada",
           type: "FC",
         });
@@ -280,19 +280,26 @@ async function preparateFactura(
     const billResponsible = grupo.integrants.find(
       (integrant) => integrant.isBillResponsible
     );
+    console.log("variables grupo");
     const ivaFloat =
       (100 + parseFloat(grupo.businessUnitData?.brand?.iva ?? "0")) / 100;
+    console.log(ivaFloat);
     const abono = await getGroupAmount(grupo);
+    console.log(abono);
     const bonificacion =
       (parseFloat(
-        grupo.bonus?.find((x) => x.from! <= new Date() && x.to! >= new Date())
-          ?.amount ?? "0"
+        grupo.bonus?.find((x) => {
+          if (x.from == null || x.to == null) return x;
+          return x.from <= new Date() && x.to >= new Date();
+        })?.amount ?? "0"
       ) *
         abono) /
       100;
+    console.log(bonificacion);
     const interest = 0;
     const contribution = await getGroupContribution(grupo);
-
+    console.log("contribution");
+    console.log(contribution);
     const differential_amount = await getDifferentialAmount(grupo);
 
     let mostRecentEvent;
@@ -305,8 +312,10 @@ async function preparateFactura(
     } else {
       mostRecentEvent = null;
     }
-
-    const previous_bill = mostRecentEvent?.current_amount ?? 0;
+    let previous_bill = 0;
+    if (mostRecentEvent && mostRecentEvent.current_amount < 0) {
+      previous_bill = mostRecentEvent?.current_amount ?? 0;
+    }
     const importe =
       (abono -
         bonificacion +
@@ -366,27 +375,41 @@ async function getGroupAmount(grupo: grupoCompleto) {
   grupo.integrants?.forEach((integrant) => {
     if (integrant.birth_date != null) {
       const age = calcularEdad(integrant.birth_date);
+      console.log(age);
+      console.log(integrant.relationship);
       const precioIntegrante =
         grupo.plan?.pricesPerAge.find((x) => {
-          if (integrant.relationship) {
+          if (
+            integrant.relationship &&
+            integrant.relationship.toLowerCase() != "titular"
+          ) {
             return x.condition == integrant.relationship;
           } else {
             return x.age == age;
           }
         })?.amount ?? 0;
-
+      console.log(precioIntegrante);
       importe += precioIntegrante;
     }
   });
+  console.log(importe);
   return importe;
 }
 
 async function getGroupContribution(grupo: grupoCompleto) {
   let importe = 0;
   grupo.integrants?.forEach((integrant) => {
-    const contributionIntegrante = integrant?.contribution?.amount ?? 0;
-    importe += contributionIntegrante;
+    if (integrant?.contribution?.amount) {
+      const contributionIntegrante = integrant?.contribution?.amount ?? 0;
+      console.log("contribution");
+      console.log(contributionIntegrante);
+      importe += contributionIntegrante;
+    } else {
+      importe += 0;
+    }
   });
+  console.log("importe");
+  console.log(importe);
   return importe;
 }
 
@@ -397,7 +420,10 @@ async function getDifferentialAmount(grupo: grupoCompleto) {
     const age = calcularEdad(integrant.birth_date);
     const precioIntegrante =
       grupo.plan?.pricesPerAge.find((x) => {
-        if (integrant.relationship) {
+        if (
+          integrant.relationship &&
+          integrant.relationship.toLowerCase() != "titular"
+        ) {
           return x.condition == integrant.relationship;
         } else {
           return x.age == age;
@@ -454,12 +480,14 @@ export const facturasRouter = createTRPCRouter({
     const facturas = await db.query.facturas.findMany({
       with: {
         items: true,
+        liquidations: true,
         family_group: {
           with: {
             integrants: {
               where: eq(schema.integrants.isBillResponsible, true),
             },
             plan: true,
+            cc: true,
           },
         },
       },

@@ -19,7 +19,7 @@ import {
 import dayjs from "dayjs";
 import "dayjs/locale/es";
 import utc from "dayjs/plugin/utc";
-import { Calendar } from "~/components/ui/calendar";
+import { CalendarByMountAndYear } from "~/components/ui/calendarMonthAndYear";
 import {
   Popover,
   PopoverContent,
@@ -104,10 +104,20 @@ export default function AddPlanDialog({
   const [formInitialValues, setFormInitialValues] =
     useState<Inputs>(initValues);
 
-  const { data: planData } = api.plans.get.useQuery({ planId: planId ?? "" });
+  const [hasQueried, setHasQueried] = useState(false);
+
+  const { data: planData } = api.plans.get.useQuery(
+    { planId: planId ?? "" },
+    {
+      enabled: !!planId && !hasQueried,
+      onSuccess: () => {
+        setHasQueried(true);
+      },
+    }
+  );
 
   const form = useForm<Inputs>({
-    resolver: zodResolver(PlanSchema),
+    // resolver: zodResolver(PlanSchema),
     defaultValues: { ...formInitialValues },
   });
 
@@ -134,14 +144,14 @@ export default function AddPlanDialog({
             };
           }) ?? [],
       };
-
+      console.log(updatedInitialValues);
       setFormInitialValues(updatedInitialValues);
       setBrand(planData.brand_id ?? "");
 
       // Reset form values
       reset(updatedInitialValues);
     }
-  }, [planData, reset]);
+  }, [planData]);
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -166,6 +176,7 @@ export default function AddPlanDialog({
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
+      console.log("empieza updateo/add de plan");
       const dataWithBrands = { ...data, brand_id: brand };
 
       const parsedData = PlanSchema.parse(dataWithBrands);
@@ -208,6 +219,8 @@ export default function AddPlanDialog({
       if (setOpenExterior) {
         setOpenExterior(false);
       }
+
+      router.refresh();
     } catch (error) {
       console.error(error);
     }
@@ -219,14 +232,13 @@ export default function AddPlanDialog({
         <Button
           onClick={() => {
             handleOpens(true);
-          }}
-        >
+          }}>
           <PlusCircleIcon className="mr-2" size={20} />
           Agregar Plan
         </Button>
       )}
       <Dialog open={open || openExterior} onOpenChange={handleOpens}>
-        <DialogContent className="sm:max-w-[600px] overflow-y-scroll">
+        <DialogContent className="md:max-w-[700px] overflow-y-scroll">
           <DialogHeader>
             <DialogTitle>
               {planId ? "Actualizar plan" : "Agregar nuevo plan"}
@@ -235,8 +247,7 @@ export default function AddPlanDialog({
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="flex-col items-center justify-center gap-2 space-y-8"
-            >
+              className="flex-col items-center justify-center gap-2 space-y-8">
               <Tabs>
                 <TabsList>
                   <TabsTrigger value="info">Informacion del plan</TabsTrigger>
@@ -260,13 +271,12 @@ export default function AddPlanDialog({
                                   className={cn(
                                     "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
                                     !field.value && "text-muted-foreground"
-                                  )}
-                                >
+                                  )}>
                                   <p>
                                     {field.value ? (
                                       dayjs
                                         .utc(field.value)
-                                        .format("D [de] MMMM [de] YYYY")
+                                        .format("[1 de] MMMM [de] YYYY")
                                     ) : (
                                       <span>Seleccione una fecha</span>
                                     )}
@@ -277,17 +287,15 @@ export default function AddPlanDialog({
                             </PopoverTrigger>
                             <PopoverContent
                               className="w-auto p-0"
-                              align="start"
-                            >
-                              <Calendar
+                              align="start">
+                              <CalendarByMountAndYear
                                 mode="single"
                                 selected={
                                   field.value
                                     ? new Date(field.value)
-                                    : undefined
+                                    : new Date()
                                 }
                                 onSelect={field.onChange}
-                                disabled={(date: Date) => date < new Date()}
                                 initialFocus
                               />
                             </PopoverContent>
@@ -300,8 +308,7 @@ export default function AddPlanDialog({
                       <Label>Marca</Label>
                       <Select
                         onValueChange={(value: string) => setBrand(value)}
-                        value={brand}
-                      >
+                        value={brand}>
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccione una marca" />
                         </SelectTrigger>
@@ -345,206 +352,195 @@ export default function AddPlanDialog({
                   </div>
                 </TabsContent>
                 <TabsContent value="billing">
-                  <Button
-                    onClick={() =>
-                      append({
-                        condition: "",
-                        age_from: "",
-                        age_to: "",
-                        price: "",
-                        isConditional: false,
-                      })
-                    }
-                  >
-                    <PlusCircle className="mr-2" size={20} />
-                    Agregar Precio por Edad
-                  </Button>
+                  <div className="mb-10">
+                    <Button
+                      type="button"
+                      className="float-right"
+                      onClick={() =>
+                        append({
+                          condition: "",
+                          age_from: "",
+                          age_to: "",
+                          price: "",
+                          isConditional: false,
+                        })
+                      }>
+                      <PlusCircle className="mr-2" size={20} />
+                      Agregar Precio por Edad
+                    </Button>
+                    {fields.length > 0 && (
+                      <h1 className="font-bold text-2xl">Condicion</h1>
+                    )}
+                  </div>
                   {fields.map((item, index) => (
-                      <div
-                        key={item.id}
-                        className="flex space-x-4 items-center"
-                      >
-                        <div className="w-[300px]">
-                          <FormField
-                            control={form.control}
-                            name={`conditional_prices.${index}.isConditional`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel
-                                  htmlFor={`conditional_prices.${index}.isConditional`}
-                                >
-                                  Condicion
-                                </FormLabel>
-                                <br />
-                                <FormControl>
-                                  <Select
-                                    onValueChange={(value) => {
-                                      const updatedValues = [
-                                        ...formInitialValues.conditional_prices,
-                                      ];
-                                      updatedValues[index] = {
-                                        ...updatedValues[index],
-                                        isConditional: value === "true",
-                                        condition:
-                                          updatedValues[index]?.condition ?? "",
-                                        age_from:
-                                          updatedValues[index]?.age_from ?? "",
-                                        age_to:
-                                          updatedValues[index]?.age_to ?? "",
-                                        price:
-                                          updatedValues[index]?.price ?? "",
-                                      };
-                                      setFormInitialValues({
-                                        ...formInitialValues,
-                                        conditional_prices: updatedValues,
-                                      });
-                                      field.onChange(value === "true");
-                                    }}
-                                    value={field.value ? "true" : "false"}
-                                  >
-                                    <SelectTrigger className="w-[180px] font-bold">
-                                      <SelectValue placeholder="Seleccione una opción" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem
-                                        value="false"
-                                        className="rounded-none border-b border-gray-600"
-                                      >
-                                        Rango de edad
-                                      </SelectItem>
-                                      <SelectItem
-                                        value="true"
-                                        className="rounded-none border-b border-gray-600"
-                                      >
-                                        Parentesco
-                                      </SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        {formInitialValues?.conditional_prices[index]
-                          ?.isConditional && (
-                          <FormField
-                            control={form.control}
-                            name={`conditional_prices.${index}.condition`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel
-                                  htmlFor={`conditional_prices.${index}.condition`}
-                                >
-                                  Relacion
-                                </FormLabel>
-                                <FormControl>
-                                  <Select
-                                    onValueChange={(value) =>
-                                      setCondition(value)
-                                    }
-                                  >
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Seleccione una opción" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {relatives?.map((relative) => (
-                                        <SelectItem
-                                          key={relative.relation}
-                                          value={relative.relation ?? ""}
-                                        >
-                                          {relative.relation}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        )}
-                        {!formInitialValues?.conditional_prices[index]
-                          ?.isConditional && (
-                          <>
-                            <FormField
-                              control={form.control}
-                              name={`conditional_prices.${index}.age_from`}
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel
-                                    htmlFor={`conditional_prices.${index}.age_from`}
-                                  >
-                                    Edad Desde
-                                  </FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      className="border-green-300 focus-visible:ring-green-400"
-                                      id={`conditional_prices.${index}.age_from`}
-                                      type="text"
-                                      {...field}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                            <FormField
-                              control={form.control}
-                              name={`conditional_prices.${index}.age_to`}
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel
-                                    htmlFor={`conditional_prices.${index}.age_to`}
-                                  >
-                                    Edad Hasta
-                                  </FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      className="border-green-300 focus-visible:ring-green-400"
-                                      id={`conditional_prices.${index}.age_to`}
-                                      type="text"
-                                      {...field}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </>
-                        )}
+                    <div key={item.id} className="flex space-x-4 items-center">
+                      <div className="w-[300px]">
                         <FormField
                           control={form.control}
-                          name={`conditional_prices.${index}.price`}
+                          name={`conditional_prices.${index}.isConditional`}
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel
-                                htmlFor={`conditional_prices.${index}.price`}
-                              >
-                                Precio
-                              </FormLabel>
+                                htmlFor={`conditional_prices.${index}.isConditional`}></FormLabel>
+                              <br />
                               <FormControl>
-                                <Input
-                                  className="border-green-300 focus-visible:ring-green-400"
-                                  id={`conditional_prices.${index}.price`}
-                                  type="text"
-                                  {...field}
-                                />
+                                <Select
+                                  onValueChange={(value) => {
+                                    const updatedValues = [
+                                      ...formInitialValues.conditional_prices,
+                                    ];
+                                    updatedValues[index] = {
+                                      ...updatedValues[index],
+                                      isConditional: value === "true",
+                                      condition:
+                                        updatedValues[index]?.condition ?? "",
+                                      age_from:
+                                        updatedValues[index]?.age_from ?? "",
+                                      age_to:
+                                        updatedValues[index]?.age_to ?? "",
+                                      price: updatedValues[index]?.price ?? "",
+                                    };
+                                    setFormInitialValues({
+                                      ...formInitialValues,
+                                      conditional_prices: updatedValues,
+                                    });
+                                    field.onChange(value === "true");
+                                  }}
+                                  value={field.value ? "true" : "false"}>
+                                  <SelectTrigger className="w-[150px] font-bold">
+                                    <SelectValue placeholder="Seleccione una opción" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem
+                                      value="false"
+                                      className="rounded-none border-b border-gray-600">
+                                      Rango de edad
+                                    </SelectItem>
+                                    <SelectItem
+                                      value="true"
+                                      className="rounded-none border-b border-gray-600">
+                                      Parentesco
+                                    </SelectItem>
+                                  </SelectContent>
+                                </Select>
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
-                        <Button
-                          variant="ghost"
-                          type="button"
-                          className="relative top-3"
-                          onClick={() => remove(index)}
-                        >
-                          <CircleX className="text-red-500" size={20} />
-                        </Button>
                       </div>
-                    ))}
+                      {formInitialValues?.conditional_prices[index]
+                        ?.isConditional && (
+                        <FormField
+                          control={form.control}
+                          name={`conditional_prices.${index}.condition`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel
+                                htmlFor={`conditional_prices.${index}.condition`}>
+                                Relacion
+                              </FormLabel>
+                              <FormControl>
+                                <Select
+                                  onValueChange={(value) =>
+                                    setCondition(value)
+                                  }>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Seleccione una opción" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {relatives?.map((relative) => (
+                                      <SelectItem
+                                        key={relative.relation}
+                                        value={relative.relation ?? ""}>
+                                        {relative.relation}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
+                      {!formInitialValues?.conditional_prices[index]
+                        ?.isConditional && (
+                        <>
+                          <FormField
+                            control={form.control}
+                            name={`conditional_prices.${index}.age_from`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel
+                                  htmlFor={`conditional_prices.${index}.age_from`}>
+                                  Edad Desde
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    className="border-green-300 focus-visible:ring-green-400"
+                                    id={`conditional_prices.${index}.age_from`}
+                                    type="text"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`conditional_prices.${index}.age_to`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel
+                                  htmlFor={`conditional_prices.${index}.age_to`}>
+                                  Edad Hasta
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    className="border-green-300 focus-visible:ring-green-400"
+                                    id={`conditional_prices.${index}.age_to`}
+                                    type="text"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </>
+                      )}
+                      <FormField
+                        control={form.control}
+                        name={`conditional_prices.${index}.price`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel
+                              htmlFor={`conditional_prices.${index}.price`}>
+                              Precio
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                className="border-green-300 focus-visible:ring-green-400 w-[100px]"
+                                id={`conditional_prices.${index}.price`}
+                                type="text"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button
+                        variant="ghost"
+                        type="button"
+                        className="relative top-3"
+                        onClick={() => remove(index)}>
+                        <CircleX className="text-red-500 left-0" size={20} />
+                      </Button>
+                    </div>
+                  ))}
                 </TabsContent>
               </Tabs>
               <Button type="submit">{planId ? "Actualizar" : "Guardar"}</Button>
