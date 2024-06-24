@@ -9,6 +9,8 @@
 export const config = {
   maxDuration: 300,
 };
+export const dynamic = "force-dynamic";
+
 import { TRPCError, initTRPC } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
