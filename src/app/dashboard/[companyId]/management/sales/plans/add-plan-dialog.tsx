@@ -19,7 +19,7 @@ import {
 import dayjs from "dayjs";
 import "dayjs/locale/es";
 import utc from "dayjs/plugin/utc";
-import { CalendarByMountAndYear } from "~/components/ui/calendarMonthAndYear";
+// import { CalendarByMountAndYear } from "~/components/ui/calendarMonthAndYear";
 import {
   Popover,
   PopoverContent,
@@ -232,7 +232,8 @@ export default function AddPlanDialog({
         <Button
           onClick={() => {
             handleOpens(true);
-          }}>
+          }}
+        >
           <PlusCircleIcon className="mr-2" size={20} />
           Agregar Plan
         </Button>
@@ -247,7 +248,8 @@ export default function AddPlanDialog({
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="flex-col items-center justify-center gap-2 space-y-8">
+              className="flex-col items-center justify-center gap-2 space-y-8"
+            >
               <Tabs>
                 <TabsList>
                   <TabsTrigger value="info">Informacion del plan</TabsTrigger>
@@ -271,7 +273,8 @@ export default function AddPlanDialog({
                                   className={cn(
                                     "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
                                     !field.value && "text-muted-foreground"
-                                  )}>
+                                  )}
+                                >
                                   <p>
                                     {field.value ? (
                                       dayjs
@@ -287,8 +290,9 @@ export default function AddPlanDialog({
                             </PopoverTrigger>
                             <PopoverContent
                               className="w-auto p-0"
-                              align="start">
-                              <CalendarByMountAndYear
+                              align="start"
+                            >
+                              {/* <CalendarByMountAndYear
                                 mode="single"
                                 selected={
                                   field.value
@@ -297,7 +301,7 @@ export default function AddPlanDialog({
                                 }
                                 onSelect={field.onChange}
                                 initialFocus
-                              />
+                              /> */}
                             </PopoverContent>
                           </Popover>
                           <FormMessage />
@@ -308,7 +312,8 @@ export default function AddPlanDialog({
                       <Label>Marca</Label>
                       <Select
                         onValueChange={(value: string) => setBrand(value)}
-                        value={brand}>
+                        value={brand}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccione una marca" />
                         </SelectTrigger>
@@ -364,7 +369,8 @@ export default function AddPlanDialog({
                           price: "",
                           isConditional: false,
                         })
-                      }>
+                      }
+                    >
                       <PlusCircle className="mr-2" size={20} />
                       Agregar Precio por Edad
                     </Button>
@@ -381,7 +387,8 @@ export default function AddPlanDialog({
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel
-                                htmlFor={`conditional_prices.${index}.isConditional`}></FormLabel>
+                                htmlFor={`conditional_prices.${index}.isConditional`}
+                              ></FormLabel>
                               <br />
                               <FormControl>
                                 <Select
@@ -406,19 +413,22 @@ export default function AddPlanDialog({
                                     });
                                     field.onChange(value === "true");
                                   }}
-                                  value={field.value ? "true" : "false"}>
+                                  value={field.value ? "true" : "false"}
+                                >
                                   <SelectTrigger className="w-[150px] font-bold">
                                     <SelectValue placeholder="Seleccione una opción" />
                                   </SelectTrigger>
                                   <SelectContent>
                                     <SelectItem
                                       value="false"
-                                      className="rounded-none border-b border-gray-600">
+                                      className="rounded-none border-b border-gray-600"
+                                    >
                                       Rango de edad
                                     </SelectItem>
                                     <SelectItem
                                       value="true"
-                                      className="rounded-none border-b border-gray-600">
+                                      className="rounded-none border-b border-gray-600"
+                                    >
                                       Parentesco
                                     </SelectItem>
                                   </SelectContent>
@@ -437,14 +447,14 @@ export default function AddPlanDialog({
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel
-                                htmlFor={`conditional_prices.${index}.condition`}>
+                                htmlFor={`conditional_prices.${index}.condition`}
+                              >
                                 Relacion
                               </FormLabel>
                               <FormControl>
                                 <Select
-                                  onValueChange={(value) =>
-                                    setCondition(value)
-                                  }>
+                                  onValueChange={(value) => setCondition(value)}
+                                >
                                   <SelectTrigger>
                                     <SelectValue placeholder="Seleccione una opción" />
                                   </SelectTrigger>
@@ -452,7 +462,8 @@ export default function AddPlanDialog({
                                     {relatives?.map((relative) => (
                                       <SelectItem
                                         key={relative.relation}
-                                        value={relative.relation ?? ""}>
+                                        value={relative.relation ?? ""}
+                                      >
                                         {relative.relation}
                                       </SelectItem>
                                     ))}
@@ -473,7 +484,8 @@ export default function AddPlanDialog({
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel
-                                  htmlFor={`conditional_prices.${index}.age_from`}>
+                                  htmlFor={`conditional_prices.${index}.age_from`}
+                                >
                                   Edad Desde
                                 </FormLabel>
                                 <FormControl>
@@ -494,7 +506,8 @@ export default function AddPlanDialog({
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel
-                                  htmlFor={`conditional_prices.${index}.age_to`}>
+                                  htmlFor={`conditional_prices.${index}.age_to`}
+                                >
                                   Edad Hasta
                                 </FormLabel>
                                 <FormControl>
@@ -517,7 +530,8 @@ export default function AddPlanDialog({
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel
-                              htmlFor={`conditional_prices.${index}.price`}>
+                              htmlFor={`conditional_prices.${index}.price`}
+                            >
                               Precio
                             </FormLabel>
                             <FormControl>
@@ -536,7 +550,8 @@ export default function AddPlanDialog({
                         variant="ghost"
                         type="button"
                         className="relative top-3"
-                        onClick={() => remove(index)}>
+                        onClick={() => remove(index)}
+                      >
                         <CircleX className="text-red-500 left-0" size={20} />
                       </Button>
                     </div>

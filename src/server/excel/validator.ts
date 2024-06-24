@@ -75,8 +75,7 @@ const numberAsString = z
 const cardNumber = z
   .string()
   .or(z.number())
-  .transform((v) => Number.parseInt(v.toString().replace(/\s/g, "")))
-  .refine(Number.isInteger);
+  .transform((v) => v.toString().replace(/\s/g, ""));
 
 const allToString = z
   .union([z.number(), z.string()])
@@ -221,7 +220,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
       "NRO CBU"?: string | number | null | undefined;
       "TC MARCA"?: string | null | undefined;
       "ALTA NUEVA"?: string | boolean | null | undefined;
-      "NRO. TARJETA"?: number | string | null | undefined;
+      "NRO. TARJETA"?: number | null | undefined;
       "TIPO DE TARJETA"?: string | null | undefined;
     }[]
   >[] = [];
