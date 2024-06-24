@@ -17,7 +17,7 @@ interface unconfirmedPageProps {
   upload: RouterOutputs["excelDeserialization"]["upload"];
   companyId: string;
 }
-
+export const maxDuration = 5;
 export default function UnconfirmedPage(props: unconfirmedPageProps) {
   const { upload, companyId } = props;
   const [confirmed, setConfirmed] = useState(upload!.confirmed);
