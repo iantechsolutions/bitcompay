@@ -6,15 +6,14 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
-export const config = {
-  maxDuration: 300,
-};
-export const dynamic = "force-dynamic";
 
 import { TRPCError, initTRPC } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
+import { fromZodError } from "zod-validation-error";
+import { getServerAuthSession } from "~/server/auth";
+import { db } from "~/server/db";
 import { fromZodError } from "zod-validation-error";
 import { getServerAuthSession } from "~/server/auth";
 import { db } from "~/server/db";
@@ -26,14 +25,20 @@ import { db } from "~/server/db";
  *
  * These allow you to access things when processing a request, like the database, the session, etc.
  *
- * This helper generates the "internals" for a tRPC context. The API handler and RSC clients each
+ * This helper generates the "internals" for a tRPC context. The API handler and RSC cl1ients each
  * wrap this and provides the required context.
  *
  * @see https://trpc.io/docs/server/context
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
-  const session = getServerAuthSession();
+  const session = await getServerAuthSession();
 
+  return {
+    db,
+    session,
+    ...opts,
+  };
+};
   return {
     db,
     session,
@@ -52,6 +57,9 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
   transformer: superjson,
   errorFormatter({ shape, error }) {
     let zodErrorMessage: string | null = null;
+  transformer: superjson,
+  errorFormatter({ shape, error }) {
+    let zodErrorMessage: string | null = null;
 
     if (error.cause instanceof ZodError) {
       zodErrorMessage = fromZodError(error.cause)
@@ -61,7 +69,25 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
         .slice(1)
         .join(":");
     }
+    if (error.cause instanceof ZodError) {
+      zodErrorMessage = fromZodError(error.cause)
+        .toString()
+        .replaceAll("; ", "\n")
+        .split(":")
+        .slice(1)
+        .join(":");
+    }
 
+    return {
+      ...shape,
+      data: {
+        ...shape.data,
+        cause: zodErrorMessage ?? error.cause?.message,
+        zodError: error.cause instanceof ZodError ? error.cause : null,
+      },
+    };
+  },
+});
     return {
       ...shape,
       data: {
@@ -86,6 +112,7 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
  * @see https://trpc.io/docs/router
  */
 export const createTRPCRouter = t.router;
+export const createTRPCRouter = t.router;
 
 /**
  * Public (unauthenticated) procedure
@@ -95,9 +122,20 @@ export const createTRPCRouter = t.router;
  * are logged in.
  */
 export const publicProcedure = t.procedure;
+export const publicProcedure = t.procedure;
 
 /** Reusable middleware that enforces users are logged in before running the procedure. */
 const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
+  if (!ctx.session?.user) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+  return next({
+    ctx: {
+      // infers the `session` as non-nullable
+      session: { ...ctx.session, user: ctx.session.user },
+    },
+  });
+});
   if (!ctx.session?.user) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
@@ -117,4 +155,6 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
  *
  * @see https://trpc.io/docs/procedures
  */
+export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
+
 export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
