@@ -274,12 +274,7 @@ export const recDocumentValidator = z
       .nullable()
       .optional(),
     "NRO AFILIADO": allToString.nullable().optional(),
-    EXTENSION: z
-      .string()
-      .min(0)
-      .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
-      .nullable()
-      .optional(),
+    EXTENSION: allToString.nullable().optional(),
     "TIPO DOC PROPIO": z
       .enum(["DNI", "PASAPORTE"])
       .refine((value) => ["DNI", "PASAPORTE"].includes(value), {
