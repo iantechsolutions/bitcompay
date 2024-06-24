@@ -13,9 +13,7 @@ import { recHeaders } from "~/server/excel/validator";
 import { LargeTable } from "~/components/table";
 import { useRouter } from "next/navigation";
 
-export const config = {
-  maxDuration: 5,
-};
+// export const maxDuration = 60;
 
 interface unconfirmedPageProps {
   upload: RouterOutputs["excelDeserialization"]["upload"];
