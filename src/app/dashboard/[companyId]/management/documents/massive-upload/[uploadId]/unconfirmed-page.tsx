@@ -17,6 +17,8 @@ interface unconfirmedPageProps {
   upload: RouterOutputs["excelDeserialization"]["upload"];
   companyId: string;
 }
+export const maxDuration = 60;
+export const dynamic = "force-dynamic";
 
 export default function UnconfirmedPage(props: unconfirmedPageProps) {
   const { upload, companyId } = props;

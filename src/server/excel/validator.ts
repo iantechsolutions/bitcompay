@@ -247,18 +247,8 @@ export const recDocumentValidator = z
       .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
       .nullable()
       .optional(),
-    OS: z
-      .string()
-      .min(0)
-      .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
-      .nullable()
-      .optional(),
-    "OS ORIGEN": z
-      .string()
-      .min(0)
-      .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
-      .nullable()
-      .optional(),
+    OS: allToString.nullable().optional(),
+    "OS ORIGEN": allToString.nullable().optional(),
     VIGENCIA: stringAsDate.nullable().optional(),
     MODO: z
       .string()
@@ -276,20 +266,15 @@ export const recDocumentValidator = z
       })
       .nullable()
       .optional(),
-    "NRO DOC TITULAR": numberAsString.nullable().optional(),
+    "NRO DOC TITULAR": allToString.nullable().optional(),
     NOMBRE: z
       .string()
       .min(0)
       .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
       .nullable()
       .optional(),
-    "NRO AFILIADO": numberAsString.nullable().optional(),
-    EXTENSION: z
-      .string()
-      .min(0)
-      .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
-      .nullable()
-      .optional(),
+    "NRO AFILIADO": allToString.nullable().optional(),
+    EXTENSION: allToString.nullable().optional(),
     "TIPO DOC PROPIO": z
       .enum(["DNI", "PASAPORTE"])
       .refine((value) => ["DNI", "PASAPORTE"].includes(value), {
@@ -339,7 +324,7 @@ export const recDocumentValidator = z
       .nullable()
       .optional(),
     "TIPO DOC FISCAL": z.enum(["CUIT", "CUIL"]).nullable().optional(),
-    "NRO DOC FISCAL": numberAsString.nullable().optional(),
+    "NRO DOC FISCAL": allToString.nullable().optional(),
     LOCALIDAD: z.string().min(0).max(140).nullable().optional(),
     PARTIDO: z.string().min(0).max(140).nullable().optional(),
     DIRECCION: z.string().min(0).max(140).nullable().optional(),
@@ -367,7 +352,7 @@ export const recDocumentValidator = z
       .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
       .optional()
       .nullable(),
-    "NRO CBU": numberAsString.nullable().optional(),
+    "NRO CBU": allToString.nullable().optional(),
     "TC MARCA": z
       .string()
       .max(140, { message: "Ingrese un valor menor a 140 caracteres" })

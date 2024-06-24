@@ -54,3 +54,6 @@ export const env = createEnv({
      */
     emptyStringAsUndefined: true,
 })
+
+
+export const maxDuration = 60;
