@@ -266,7 +266,7 @@ export const recDocumentValidator = z
       })
       .nullable()
       .optional(),
-    "NRO DOC TITULAR": numberAsString.nullable().optional(),
+    "NRO DOC TITULAR": allToString.nullable().optional(),
     NOMBRE: z
       .string()
       .min(0)
