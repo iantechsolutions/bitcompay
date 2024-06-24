@@ -15,7 +15,9 @@ import { calcularEdad } from "~/lib/utils";
 
 export const maxDuration = 300;
 export const dynamic = "force-dynamic";
-
+export const config = {
+  maxDuration: 300,
+};
 export const excelDeserializationRouter = createTRPCRouter({
   upload: protectedProcedure
     .input(
