@@ -2,7 +2,9 @@ import { Title } from "~/components/title";
 import { api } from "~/trpc/server";
 import UnconfirmedPage from "./unconfirmed-page";
 
-export const maxDuration = 60;
+export const config = {
+  maxDuration: 60,
+};
 
 export default async function page(props: {
   params: { uploadId: string; companyId: string };
