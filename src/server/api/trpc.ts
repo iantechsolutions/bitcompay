@@ -6,14 +6,16 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
+export const config = {
+  maxDuration: 300,
+};
+import { TRPCError, initTRPC } from "@trpc/server";
+import superjson from "superjson";
+import { ZodError } from "zod";
 
-import { TRPCError, initTRPC } from '@trpc/server'
-import superjson from 'superjson'
-import { ZodError } from 'zod'
-
-import { fromZodError } from 'zod-validation-error'
-import { getServerAuthSession } from '~/server/auth'
-import { db } from '~/server/db'
+import { fromZodError } from "zod-validation-error";
+import { getServerAuthSession } from "~/server/auth";
+import { db } from "~/server/db";
 
 /**
  * 1. CONTEXT
@@ -28,14 +30,14 @@ import { db } from '~/server/db'
  * @see https://trpc.io/docs/server/context
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
-    const session = await getServerAuthSession()
+  const session = getServerAuthSession();
 
-    return {
-        db,
-        session,
-        ...opts,
-    }
-}
+  return {
+    db,
+    session,
+    ...opts,
+  };
+};
 
 /**
  * 2. INITIALIZATION
@@ -45,24 +47,29 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
  * errors on the backend.
  */
 const t = initTRPC.context<typeof createTRPCContext>().create({
-    transformer: superjson,
-    errorFormatter({ shape, error }) {
-        let zodErrorMessage: string | null = null
+  transformer: superjson,
+  errorFormatter({ shape, error }) {
+    let zodErrorMessage: string | null = null;
 
-        if (error.cause instanceof ZodError) {
-            zodErrorMessage = fromZodError(error.cause).toString().replaceAll('; ', '\n').split(':').slice(1).join(':')
-        }
+    if (error.cause instanceof ZodError) {
+      zodErrorMessage = fromZodError(error.cause)
+        .toString()
+        .replaceAll("; ", "\n")
+        .split(":")
+        .slice(1)
+        .join(":");
+    }
 
-        return {
-            ...shape,
-            data: {
-                ...shape.data,
-                cause: zodErrorMessage ?? error.cause?.message,
-                zodError: error.cause instanceof ZodError ? error.cause : null,
-            },
-        }
-    },
-})
+    return {
+      ...shape,
+      data: {
+        ...shape.data,
+        cause: zodErrorMessage ?? error.cause?.message,
+        zodError: error.cause instanceof ZodError ? error.cause : null,
+      },
+    };
+  },
+});
 
 /**
  * 3. ROUTER & PROCEDURE (THE IMPORTANT BIT)
@@ -76,7 +83,7 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
  *
  * @see https://trpc.io/docs/router
  */
-export const createTRPCRouter = t.router
+export const createTRPCRouter = t.router;
 
 /**
  * Public (unauthenticated) procedure
@@ -85,20 +92,20 @@ export const createTRPCRouter = t.router
  * guarantee that a user querying is authorized, but you can still access user session data if they
  * are logged in.
  */
-export const publicProcedure = t.procedure
+export const publicProcedure = t.procedure;
 
 /** Reusable middleware that enforces users are logged in before running the procedure. */
 const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
-    if (!ctx.session?.user) {
-        throw new TRPCError({ code: 'UNAUTHORIZED' })
-    }
-    return next({
-        ctx: {
-            // infers the `session` as non-nullable
-            session: { ...ctx.session, user: ctx.session.user },
-        },
-    })
-})
+  if (!ctx.session?.user) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+  return next({
+    ctx: {
+      // infers the `session` as non-nullable
+      session: { ...ctx.session, user: ctx.session.user },
+    },
+  });
+});
 
 /**
  * Protected (authenticated) procedure
@@ -108,4 +115,4 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
  *
  * @see https://trpc.io/docs/procedures
  */
-export const protectedProcedure = t.procedure.use(enforceUserIsAuthed)
+export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
