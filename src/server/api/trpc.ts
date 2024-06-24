@@ -14,9 +14,6 @@ import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { getServerAuthSession } from "~/server/auth";
 import { db } from "~/server/db";
-import { fromZodError } from "zod-validation-error";
-import { getServerAuthSession } from "~/server/auth";
-import { db } from "~/server/db";
 
 /**
  * 1. CONTEXT
@@ -39,12 +36,6 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
     ...opts,
   };
 };
-  return {
-    db,
-    session,
-    ...opts,
-  };
-};
 
 /**
  * 2. INITIALIZATION
@@ -57,9 +48,6 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
   transformer: superjson,
   errorFormatter({ shape, error }) {
     let zodErrorMessage: string | null = null;
-  transformer: superjson,
-  errorFormatter({ shape, error }) {
-    let zodErrorMessage: string | null = null;
 
     if (error.cause instanceof ZodError) {
       zodErrorMessage = fromZodError(error.cause)
@@ -78,16 +66,6 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
         .join(":");
     }
 
-    return {
-      ...shape,
-      data: {
-        ...shape.data,
-        cause: zodErrorMessage ?? error.cause?.message,
-        zodError: error.cause instanceof ZodError ? error.cause : null,
-      },
-    };
-  },
-});
     return {
       ...shape,
       data: {
@@ -112,7 +90,6 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
  * @see https://trpc.io/docs/router
  */
 export const createTRPCRouter = t.router;
-export const createTRPCRouter = t.router;
 
 /**
  * Public (unauthenticated) procedure
@@ -122,20 +99,9 @@ export const createTRPCRouter = t.router;
  * are logged in.
  */
 export const publicProcedure = t.procedure;
-export const publicProcedure = t.procedure;
 
 /** Reusable middleware that enforces users are logged in before running the procedure. */
 const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
-  if (!ctx.session?.user) {
-    throw new TRPCError({ code: "UNAUTHORIZED" });
-  }
-  return next({
-    ctx: {
-      // infers the `session` as non-nullable
-      session: { ...ctx.session, user: ctx.session.user },
-    },
-  });
-});
   if (!ctx.session?.user) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
@@ -155,6 +121,4 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
  *
  * @see https://trpc.io/docs/procedures
  */
-export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
-
 export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
