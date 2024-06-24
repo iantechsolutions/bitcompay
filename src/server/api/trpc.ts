@@ -57,6 +57,15 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
         .slice(1)
         .join(":");
     }
+    if (error.cause instanceof ZodError) {
+      zodErrorMessage = fromZodError(error.cause)
+        .toString()
+        .replaceAll("; ", "\n")
+        .split(":")
+        .slice(1)
+        .join(":");
+    }
+
     return {
       ...shape,
       data: {
@@ -112,5 +121,4 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
  *
  * @see https://trpc.io/docs/procedures
  */
-
 export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);

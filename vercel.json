@@ -1,8 +1,0 @@
-{
-    "functions": {
-      "server/api/**/*.ts": {
-        "maxDuration": 10
-      }
-    }
-  }
-  
