@@ -301,7 +301,12 @@ function isKeyPresent(
   return dictionary.has(key ?? "");
 }
 
-async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
+async function readExcelFile(
+  db: DBTX,
+  id: string,
+  type: string | undefined,
+  batchSize = 100
+) {
   const upload = await db.query.excelBilling.findFirst({
     where: eq(schema.excelBilling.id, id),
   }); // aca se cambia por la tabla correcta despues
