@@ -62,12 +62,13 @@ const numberAsString = z
     console.log(value);
     if (
       typeof value === "number" ||
-      (typeof value === "string" && !isNaN(Number(value)))
+      (typeof value === "string" && !isNaN(Number(value))) ||
+      (typeof value === "string" && value == "")
     ) {
       return value.toString();
     }
   })
-  .refine((value) => !isNaN(Number(value)), {
+  .refine((value) => !isNaN(Number(value)) || value == "", {
     message: "Caracteres incorrectos en columna:",
   });
 
