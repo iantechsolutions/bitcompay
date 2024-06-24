@@ -1,6 +1,6 @@
 {
     "functions": {
-      "server/api/**/*.ts": {
+      "server/**/**/*.ts": {
         "maxDuration": 10
       }
     }
