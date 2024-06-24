@@ -1,0 +1,16 @@
+{
+    "functions":{
+        "server/api/routers/**/*":{
+            "maxDuration":60
+        }, 
+        "api/routers/**/*":{
+            "maxDuration":60
+        },
+        "app/server/api/routers/**/*":{
+            "maxDuration":60
+        }, 
+        "api/routers/**/*":{
+            "maxDuration":60
+        },
+    }
+}
