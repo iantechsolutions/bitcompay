@@ -329,7 +329,7 @@ export const recDocumentValidator = z
       .nullable()
       .optional(),
     "TIPO DOC FISCAL": z.enum(["CUIT", "CUIL"]).nullable().optional(),
-    "NRO DOC FISCAL": numberAsString.nullable().optional(),
+    "NRO DOC FISCAL": allToString.nullable().optional(),
     LOCALIDAD: z.string().min(0).max(140).nullable().optional(),
     PARTIDO: z.string().min(0).max(140).nullable().optional(),
     DIRECCION: z.string().min(0).max(140).nullable().optional(),
