@@ -10,7 +10,7 @@ import { Integrant } from "./integrant-router";
 import { currentUser } from "@clerk/nextjs/server";
 import { Brand } from "./brands-router";
 import { RouterOutputs } from "~/trpc/shared";
-import { calcularEdad } from "~/lib/utils";
+import { calcularEdad, formatDate } from "~/lib/utils";
 
 function formatDateAFIP(date: Date | undefined) {
   if (date) {
@@ -230,6 +230,49 @@ async function approbateFactura(liquidationId: string) {
           // address: billResponsible?.address,
         })
         .returning();
+
+      const afip = await ingresarAfip();
+      let last_voucher;
+      try {
+        last_voucher = await afip.ElectronicBilling.getLastVoucher(
+          factura?.ptoVenta,
+          factura?.tipoFactura
+        );
+      } catch {
+        last_voucher = 0;
+      }
+      const fecha = new Date(
+        Date.now() - new Date().getTimezoneOffset() * 60000
+      )
+        .toISOString()
+        .split("T")[0];
+      const data = {
+        CantReg: 1, // Cantidad de facturas a registrar
+        PtoVta: factura?.ptoVenta,
+        CbteTipo: factura?.tipoFactura,
+        Concepto: Number(factura?.concepto),
+        DocTipo: factura?.tipoDocumento,
+        DocNro: factura?.nroDocumento,
+        CbteDesde: last_voucher + 1,
+        CbteHasta: last_voucher + 1,
+        CbteFch: parseInt(fecha?.replace(/-/g, "") ?? ""),
+        FchServDesde: formatDate(factura?.fromPeriod ?? new Date()),
+        FchServHasta: formatDate(factura?.toPeriod ?? new Date()),
+        FchVtoPago: formatDate(factura?.due_date ?? new Date()),
+        ImpTotal: factura?.importe,
+        ImpTotConc: 0, // Importe neto no gravado
+        ImpNeto: (Number(factura?.importe) * 1).toString(),
+        ImpOpEx: 0,
+        ImpIVA: 0,
+        ImpTrib: 0,
+        MonId: "PES",
+        MonCotiz: 1,
+        // Iva: {
+        //   Id: 5,
+        //   BaseImp: importe,
+        //   Importe: (Number(importe) * 0, 21).toString(),
+        // },
+      };
 
       const historicEvents = await db.query.events.findMany({
         where: eq(schema.events.currentAccount_id, cc?.id ?? ""),

@@ -94,9 +94,9 @@ export function FacturaDialog() {
         last_voucher = 0;
       }
 
-            const numero_de_factura = last_voucher + 1
+      const numero_de_factura = last_voucher + 1
 
-            const fecha = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]
+      const fecha = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]
 
       const data = {
         CantReg: 1, // Cantidad de facturas a registrar

@@ -44,5 +44,16 @@ export function calcularEdad(fechaNacimiento: Date): number {
   return edad;
 }
 
+export function formatDate(date: Date | undefined) {
+  if (date) {
+    const year = date.getFullYear();
+    const month = (1 + date.getMonth()).toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
+
+    return year + month + day;
+  }
+  return null;
+}
+
 export const topRightAbsoluteOnDesktopClassName =
   "md:absolute md:top-0 md:right-0 mr-10 mt-10";
