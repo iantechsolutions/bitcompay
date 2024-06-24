@@ -126,7 +126,7 @@ export default function CompanySidenav(props: { companyId: string }) {
               href={`/dashboard/${props.companyId}/administration/companies`}
               icon={<BriefcaseBusiness />}
             >
-              Compañias
+              Entidades
             </SidenavItem>
             <SidenavItem
               href={`/dashboard/${props.companyId}/administration/products`}

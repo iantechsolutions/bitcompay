@@ -1,85 +1,90 @@
-import { and, eq, inArray } from 'drizzle-orm'
-import { z } from 'zod'
-import { createId } from '~/lib/utils'
-import { db, schema } from '~/server/db'
-import { createTRPCRouter, protectedProcedure } from '../trpc'
+import { and, eq, inArray } from "drizzle-orm";
+import { z } from "zod";
+import { createId } from "~/lib/utils";
+import { db, schema } from "~/server/db";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const companiesRouter = createTRPCRouter({
-    list: protectedProcedure.query(async ({}) => {
-        return await db.query.companies.findMany()
+  list: protectedProcedure.query(async ({}) => {
+    return await db.query.companies.findMany();
+  }),
+
+  get: protectedProcedure
+    .input(
+      z.object({
+        companyId: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      const company = await db.query.companies.findFirst({
+        where: eq(schema.companies.id, input.companyId),
+        with: {
+          products: {},
+          brands: {
+            columns: {
+              companyId: false,
+              brandId: false,
+            },
+
+            with: {
+              brand: {
+                columns: {
+                  name: true,
+                  id: true,
+                },
+              },
+            },
+          },
+        },
+      });
+      return company;
     }),
 
-    get: protectedProcedure
-        .input(
-            z.object({
-                companyId: z.string(),
-            }),
-        )
-        .query(async ({ input }) => {
-            const company = await db.query.companies.findFirst({
-                where: eq(schema.companies.id, input.companyId),
-                with: {
-                    products: {},
-                    brands: {
-                        columns: {
-                            companyId: false,
-                            brandId: false,
-                        },
+  getRelated: protectedProcedure
+    .input(
+      z.object({
+        brandId: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      interface Company {
+        id: string;
+        name: string;
+      }
 
-                        with: {
-                            brand: {
-                                columns: {
-                                    name: true,
-                                    id: true,
-                                },
-                            },
-                        },
-                    },
-                },
-            })
-            return company
-        }),
+      const allCompaniesToBrands = await db.query.companiesToBrands.findMany();
 
-    getRelated: protectedProcedure
-        .input(
-            z.object({
-                brandId: z.string(),
-            }),
-        )
-        .query(async ({ input }) => {
-            interface Company {
-                id: string
-                name: string
-            }
+      const relatedCompanies = allCompaniesToBrands.filter(
+        (company) => company.brandId === input.brandId
+      );
 
-            const allCompaniesToBrands = await db.query.companiesToBrands.findMany()
+      const relatedCompaniesId = relatedCompanies.map(
+        (company) => company.companyId
+      );
 
-            const relatedCompanies = allCompaniesToBrands.filter((company) => company.brandId === input.brandId)
+      const companies: (Company | undefined)[] = [];
 
-            const relatedCompaniesId = relatedCompanies.map((company) => company.companyId)
+      for (const companyId of relatedCompaniesId) {
+        const currentCompany = await db.query.companies.findFirst({
+          where: eq(schema.companies.id, companyId),
+          columns: {
+            id: true,
+            name: true,
+          },
+        });
 
-            const companies: (Company | undefined)[] = []
+        if (currentCompany !== undefined) {
+          companies.push(currentCompany);
+        }
+      }
 
-            for (const companyId of relatedCompaniesId) {
-                const currentCompany = await db.query.companies.findFirst({
-                    where: eq(schema.companies.id, companyId),
-                    columns: {
-                        id: true,
-                        name: true,
-                    },
-                })
-
-                if (currentCompany !== undefined) {
-                    companies.push(currentCompany)
-                }
-            }
-
-            return companies
-        }),
+      return companies;
+    }),
 
   create: protectedProcedure
     .input(
       z.object({
+        id: z.string(),
         name: z.string().min(1).max(255),
         description: z.string().min(0).max(1023),
         concept: z.string().min(0).max(1023),
@@ -87,27 +92,27 @@ export const companiesRouter = createTRPCRouter({
         certificate: z.string().min(0).max(255).optional(),
         cuit: z.string().min(0).max(255).optional(),
         razon_social: z.string().min(0).max(255).optional(),
-        
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       // TODO: verificar permisos
 
-            const id = createId()
+      const company = await db
+        .insert(schema.companies)
+        .values({
+          id: input.id,
+          name: input.name,
+          description: input.description,
+          concept: input.concept,
+          afipKey: input.afipKey,
+          certificate: input.certificate,
+          cuit: input.cuit,
+          razon_social: input.razon_social,
+        })
+        .returning();
 
-      await db.insert(schema.companies).values({
-        id,
-        name: input.name,
-        description: input.description,
-        concept: input.concept,
-        afipKey: input.afipKey,
-        certificate: input.certificate,
-        cuit: input.cuit,
-        razon_social: input.razon_social,
-      });
-
-            return { id }
-        }),
+      return company[0]?.id;
+    }),
 
   change: protectedProcedure
     .input(
@@ -120,7 +125,7 @@ export const companiesRouter = createTRPCRouter({
         cuit: z.string().min(0).max(255).optional(),
         razon_social: z.string().min(0).max(255).optional(),
         products: z.array(z.string()).optional(),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       await db.transaction(async (db) => {
@@ -136,72 +141,84 @@ export const companiesRouter = createTRPCRouter({
           })
           .where(eq(schema.companies.id, input.companyId));
 
-                const companyProducts = await db.query.companyProducts.findMany({
-                    where: eq(schema.companyProducts.companyId, input.companyId),
-                })
+        const companyProducts = await db.query.companyProducts.findMany({
+          where: eq(schema.companyProducts.companyId, input.companyId),
+        });
 
-                if (input.products) {
-                    const products = new Set(input.products)
+        if (input.products) {
+          const products = new Set(input.products);
 
-                    const productsToDelete = companyProducts.filter((companyProduct) => {
-                        return !products.has(companyProduct.productId)
-                    })
+          const productsToDelete = companyProducts.filter((companyProduct) => {
+            return !products.has(companyProduct.productId);
+          });
 
-                    const productsToAdd = input.products.filter((productId) => {
-                        return !companyProducts.find((companyProduct) => companyProduct.productId === productId)
-                    })
+          const productsToAdd = input.products.filter((productId) => {
+            return !companyProducts.find(
+              (companyProduct) => companyProduct.productId === productId
+            );
+          });
 
-                    if (productsToDelete.length > 0) {
-                        await db.delete(schema.companyProducts).where(
-                            and(
-                                eq(schema.companyProducts.companyId, input.companyId),
-                                inArray(
-                                    schema.companyProducts.productId,
-                                    productsToDelete.map((companyProduct) => companyProduct.productId),
-                                ),
-                            ),
-                        )
-                    }
+          if (productsToDelete.length > 0) {
+            await db.delete(schema.companyProducts).where(
+              and(
+                eq(schema.companyProducts.companyId, input.companyId),
+                inArray(
+                  schema.companyProducts.productId,
+                  productsToDelete.map(
+                    (companyProduct) => companyProduct.productId
+                  )
+                )
+              )
+            );
+          }
 
-                    if (productsToAdd.length > 0) {
-                        await db.insert(schema.companyProducts).values(
-                            productsToAdd.map((productId) => ({
-                                companyId: input.companyId,
-                                productId,
-                            })),
-                        )
-                    }
-                }
-            })
-        }),
-
-    getByProduct: protectedProcedure.input(z.object({ productId: z.string() })).query(async ({ input }) => {
-        const relations = await db.query.companyProducts.findMany({
-            where: eq(schema.companyProducts.productId, input.productId),
-        })
-        const companies = []
-
-        for (const relation of relations) {
-            const company = await db.query.companies.findFirst({
-                where: eq(schema.companies.id, relation.companyId),
-            })
-            companies.push(company)
+          if (productsToAdd.length > 0) {
+            await db.insert(schema.companyProducts).values(
+              productsToAdd.map((productId) => ({
+                companyId: input.companyId,
+                productId,
+              }))
+            );
+          }
         }
-
-        return companies
+      });
     }),
 
-    delete: protectedProcedure
-        .input(
-            z.object({
-                companyId: z.string(),
-            }),
-        )
-        .mutation(async ({ input }) => {
-            await db.transaction(async (tx) => {
-                await tx.delete(schema.companies).where(eq(schema.companies.id, input.companyId))
-                await tx.delete(schema.companyProducts).where(eq(schema.companyProducts.companyId, input.companyId))
-            })
-            await db.delete(schema.companiesToBrands).where(eq(schema.companiesToBrands.companyId, input.companyId))
-        }),
-})
+  getByProduct: protectedProcedure
+    .input(z.object({ productId: z.string() }))
+    .query(async ({ input }) => {
+      const relations = await db.query.companyProducts.findMany({
+        where: eq(schema.companyProducts.productId, input.productId),
+      });
+      const companies = [];
+
+      for (const relation of relations) {
+        const company = await db.query.companies.findFirst({
+          where: eq(schema.companies.id, relation.companyId),
+        });
+        companies.push(company);
+      }
+
+      return companies;
+    }),
+
+  delete: protectedProcedure
+    .input(
+      z.object({
+        companyId: z.string(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      await db.transaction(async (tx) => {
+        await tx
+          .delete(schema.companies)
+          .where(eq(schema.companies.id, input.companyId));
+        await tx
+          .delete(schema.companyProducts)
+          .where(eq(schema.companyProducts.companyId, input.companyId));
+      });
+      await db
+        .delete(schema.companiesToBrands)
+        .where(eq(schema.companiesToBrands.companyId, input.companyId));
+    }),
+});
