@@ -5,6 +5,9 @@
         },
         "api/trpc/**/*":{
             "maxDuration":60
+        },
+        "api/trpc/*":{
+            "maxDuration":60
         }
     }
 }
