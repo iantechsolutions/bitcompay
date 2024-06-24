@@ -283,7 +283,7 @@ export const recDocumentValidator = z
       .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
       .nullable()
       .optional(),
-    "NRO AFILIADO": numberAsString.nullable().optional(),
+    "NRO AFILIADO": allToString.nullable().optional(),
     EXTENSION: z
       .string()
       .min(0)
