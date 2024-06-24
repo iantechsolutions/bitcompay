@@ -3,7 +3,7 @@
       "app/api/**/route.ts": {
         "maxDuration": 30
       },
-      "server/api/**/route.ts": {
+      "server/api/**/excel-deserialization.ts": {
         "maxDuration": 30
       }
     }
