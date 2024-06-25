@@ -36,7 +36,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import AddPlanDialogPerPrice from "./AddPlanDialog";
+// import AddPlanDialogPerPrice from "./AddPlanDialog";
 
 dayjs.extend(utc);
 dayjs.locale("es");
