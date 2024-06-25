@@ -36,6 +36,7 @@ import { establishmentsRouter } from "./routers/establishments-router";
 import { relativeRouter } from "./routers/relative-router";
 import { currentAccountRouter } from "./routers/currentAccount-router";
 import { eventsRouter } from "./routers/events-router";
+import { clerkRouter } from "./routers/clerk-router";
 /**
  * This is the primary router for your server.
  *
@@ -79,6 +80,7 @@ export const appRouter = createTRPCRouter({
   relative: relativeRouter,
   currentAccount: currentAccountRouter,
   events: eventsRouter,
+  clerk: clerkRouter,
 });
 
 // export type definition of API

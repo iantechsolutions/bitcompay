@@ -69,7 +69,7 @@ export default function AddEstablishment(props: AddEstablishmentProps) {
   return (
     <>
       <Button onClick={() => setOpen(true)}>
-        <PlusCircleIcon />
+        <PlusCircleIcon className="mr-2" />
         Agregar Establecimiento
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
@@ -80,7 +80,7 @@ export default function AddEstablishment(props: AddEstablishmentProps) {
           <Label>Bandera</Label>
           <Select onValueChange={(value) => setFlag(value)}>
             <SelectTrigger>
-              <SelectValue>Bandera</SelectValue>
+              <SelectValue></SelectValue>
             </SelectTrigger>
             <SelectContent>{selectFlagOptions}</SelectContent>
           </Select>

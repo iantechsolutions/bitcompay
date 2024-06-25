@@ -36,7 +36,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import AddPlanDialog from "../../add-plan-dialog";
+import AddPlanDialogPerPrice from "./AddPlanDialog";
 
 dayjs.extend(utc);
 dayjs.locale("es");
@@ -81,10 +81,12 @@ export default function DetailsPage(props: {
     });
   console.log(data);
 
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [openAdd, setOpenAdd] = useState(false);
   const [percent, setPercent] = useState("");
   const [validity_date, setValidity_date] = useState<Date>();
+
   function handleUpdatePrice(value: string) {
     props.plan?.pricesPerCondition.forEach((price) => {
       createPricePerCondition({
@@ -218,7 +220,7 @@ export default function DetailsPage(props: {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button onClick={() => handleUpdatePrice("edit")}>
-                  Actualizar precio{" "}
+                  Actualizar precio 1{" "}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -235,7 +237,7 @@ export default function DetailsPage(props: {
                 <DropdownMenuItem
                 // value="edit"
                 >
-                  <div onClick={() => setOpenAdd(true)}>Editar precio</div>
+                  <div onClick={() => setOpenAdd(true)}>Editar precio 1</div>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
