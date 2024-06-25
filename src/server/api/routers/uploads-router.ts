@@ -292,6 +292,7 @@ export const uploadsRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const companyId = ctx.session.orgId;
       await db.transaction(async (tx) => {
         const channels = await getCompanyProducts(input.companyId);
         const brands = await getCompanyBrands(input.companyId);
@@ -325,7 +326,7 @@ export const uploadsRouter = createTRPCRouter({
               id: createId(),
               userId: ctx.session.user.id,
               documentUploadId: upload.id,
-              companyId: input.companyId,
+              companyId: companyId!,
               g_c: row.g_c,
               name: row.name,
               fiscal_id_type: row.fiscal_id_type,

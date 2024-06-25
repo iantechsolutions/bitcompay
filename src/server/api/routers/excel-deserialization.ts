@@ -37,7 +37,7 @@ export const excelDeserializationRouter = createTRPCRouter({
         companyId: z.string(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const contents = await readExcelFile(db, input.id, input.type);
       //agregar a readExcel verificacion de columnas obligatorias.
 
@@ -52,7 +52,7 @@ export const excelDeserializationRouter = createTRPCRouter({
         companyId: z.string(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const familyGroupMap = new Map<string | null, string>();
       const contents = await readExcelFile(db, input.uploadId, input.type);
       await db.transaction(async (db) => {
@@ -238,7 +238,9 @@ export const excelDeserializationRouter = createTRPCRouter({
                 ) {
                   return p.condition == row.relationship;
                 } else {
-                  return (p.from_age ?? 1000 <= ageN) && (p.to_age ?? 0 >= ageN);
+                  return (
+                    (p.from_age ?? 1000 <= ageN) && (p.to_age ?? 0 >= ageN)
+                  );
                 }
               })?.amount ?? 0;
             const precioDiferencial =
