@@ -467,14 +467,14 @@ export const plans = pgTable("plans", {
   id: columnId,
   user: varchar("user", { length: 255 }).notNull(),
   createdAt,
-  validy_date: timestamp("vigency_date").notNull(),
+  // validy_date: timestamp("vigency_date").notNull(),
   plan_code: varchar("plan_code", { length: 255 }).notNull(),
   description: varchar("description", { length: 255 }).notNull(),
   brand_id: varchar("brand_id", { length: 255 }).references(() => brands.id),
 });
 
 export const plansRelations = relations(plans, ({ many, one }) => ({
-  pricesPerAge: many(pricePerAge),
+  pricesPerCondition: many(pricePerCondition),
   brands: one(brands, {
     fields: [plans.brand_id],
     references: [brands.id],
@@ -1083,10 +1083,11 @@ export const excelBillingSchemaDB = selectExcelBillingSchema.pick({
 });
 export type ExcelBilling = z.infer<typeof selectExcelBillingSchema>;
 
-export const pricePerAge = pgTable("pricePerAge", {
+export const pricePerCondition = pgTable("pricePerCondition", {
   id: columnId,
   validy_date: timestamp("vigency_date").notNull(),
-  age: integer("age"),
+  from_age: integer("from_age"),
+  to_age: integer("to_age"),
   condition: varchar("condition"),
   createdAt,
   isAmountByAge: boolean("isAmountByAge").notNull(),
@@ -1094,17 +1095,23 @@ export const pricePerAge = pgTable("pricePerAge", {
   amount: real("amount").notNull(),
 });
 
-export const pricePerAgeRelations = relations(pricePerAge, ({ one, many }) => ({
-  plans: one(plans, {
-    fields: [pricePerAge.plan_id],
-    references: [plans.id],
-  }),
-}));
+export const pricePerConditionRelations = relations(
+  pricePerCondition,
+  ({ one, many }) => ({
+    plans: one(plans, {
+      fields: [pricePerCondition.plan_id],
+      references: [plans.id],
+    }),
+  })
+);
 
-export const insertpricePerAgeSchema = createInsertSchema(pricePerAge);
-export const selectpricePerAgeSchema = createSelectSchema(pricePerAge);
-export const pricePerAgeSchemaDB = selectpricePerAgeSchema.pick({
-  age: true,
+export const insertpricePerConditionSchema =
+  createInsertSchema(pricePerCondition);
+export const selectpricePerConditionSchema =
+  createSelectSchema(pricePerCondition);
+export const pricePerConditionSchemaDB = selectpricePerConditionSchema.pick({
+  from_age: true,
+  to_age: true,
   condition: true,
   isAmountByAge: true,
   amount: true,
@@ -1112,7 +1119,7 @@ export const pricePerAgeSchemaDB = selectpricePerAgeSchema.pick({
   createdAt: true,
   validy_date: true,
 });
-export type pricePerAge = z.infer<typeof selectpricePerAgeSchema>;
+export type pricePerCondition = z.infer<typeof selectpricePerConditionSchema>;
 
 export const currentAccount = pgTable("currentAccount", {
   id: columnId,

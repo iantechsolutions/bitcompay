@@ -421,14 +421,14 @@ async function getGroupAmount(grupo: grupoCompleto) {
       console.log(age);
       console.log(integrant.relationship);
       const precioIntegrante =
-        grupo.plan?.pricesPerAge.find((x) => {
+        grupo.plan?.pricesPerCondition.find((x) => {
           if (
             integrant.relationship &&
             integrant.relationship.toLowerCase() != "titular"
           ) {
             return x.condition == integrant.relationship;
           } else {
-            return x.age == age;
+            return (x.from_age ?? 1000 <= age) && (x.to_age ?? 0 >= age);
           }
         })?.amount ?? 0;
       console.log(precioIntegrante);
@@ -462,14 +462,14 @@ async function getDifferentialAmount(grupo: grupoCompleto) {
     if (integrant.birth_date == null) return;
     const age = calcularEdad(integrant.birth_date);
     const precioIntegrante =
-      grupo.plan?.pricesPerAge.find((x) => {
+      grupo.plan?.pricesPerCondition.find((x) => {
         if (
           integrant.relationship &&
           integrant.relationship.toLowerCase() != "titular"
         ) {
           return x.condition == integrant.relationship;
         } else {
-          return x.age == age;
+          return (x.from_age ?? 1000 <= age) && (x.to_age ?? 0 >= age);
         }
       })?.amount ?? 0;
     integrant?.differentialsValues.forEach((differential) => {
@@ -505,7 +505,7 @@ async function getGruposByBrandId(brandId: string) {
       bonus: true,
       plan: {
         with: {
-          pricesPerAge: true,
+          pricesPerCondition: true,
         },
       },
       modo: true,

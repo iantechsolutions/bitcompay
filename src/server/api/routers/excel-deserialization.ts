@@ -68,7 +68,7 @@ export const excelDeserializationRouter = createTRPCRouter({
           const plan = await db.query.plans.findFirst({
             where: eq(schema.plans.plan_code, row.plan!),
             with: {
-              pricesPerAge: true,
+              pricesPerCondition: true,
             },
           });
 
@@ -231,14 +231,14 @@ export const excelDeserializationRouter = createTRPCRouter({
           if (row.differential_value) {
             const ageN = calcularEdad(row.birth_date ?? new Date());
             const precioIntegrante =
-              plan?.pricesPerAge.find((p) => {
+              plan?.pricesPerCondition.find((p) => {
                 if (
                   row.relationship &&
                   row.relationship.toLowerCase() != "titular"
                 ) {
                   return p.condition == row.relationship;
                 } else {
-                  return p.age == ageN;
+                  return (p.from_age ?? 1000 <= ageN) && (p.to_age ?? 0 >= ageN);
                 }
               })?.amount ?? 0;
             const precioDiferencial =

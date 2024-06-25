@@ -29,7 +29,7 @@ import { differentialsValuesRouter } from "./routers/differentialValues-router";
 import { itemsRouter } from "./routers/items-router";
 import { liquidationsRouter } from "./routers/liquidations-router";
 import { billingDocumentsRouter } from "./routers/billing-documents-router";
-import { pricePerAgeRouter } from "./routers/price-per-age-router";
+import { pricePerConditionRouter } from "./routers/price-per-condition-router";
 import { postalCodeRouter } from "./routers/postal_codes-router";
 import { excelDeserializationRouter } from "./routers/excel-deserialization";
 import { establishmentsRouter } from "./routers/establishments-router";
@@ -72,7 +72,7 @@ export const appRouter = createTRPCRouter({
   items: itemsRouter,
   liquidations: liquidationsRouter,
   billingDocuments: billingDocumentsRouter,
-  pricePerAge: pricePerAgeRouter,
+  pricePerCondition: pricePerConditionRouter,
   postal_code: postalCodeRouter,
   excelDeserialization: excelDeserializationRouter,
   establishments: establishmentsRouter,

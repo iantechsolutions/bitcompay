@@ -12,7 +12,7 @@ export const plansRouter = createTRPCRouter({
       const plan_found = await db.query.plans.findFirst({
         where: eq(schema.plans.id, input.planId),
         with: {
-          pricesPerAge: true,
+          pricesPerCondition: true,
         },
       });
       return plan_found;
@@ -20,7 +20,7 @@ export const plansRouter = createTRPCRouter({
   list: protectedProcedure.query(async () => {
     const plans = await db.query.plans.findMany({
       with: {
-        pricesPerAge: true,
+        pricesPerCondition: true,
       },
     });
     return plans;
@@ -29,7 +29,6 @@ export const plansRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
-        validy_date: z.date(),
         plan_code: z.string().max(255),
         description: z.string().max(255),
         brand_id: z.string().max(255),
@@ -41,7 +40,6 @@ export const plansRouter = createTRPCRouter({
         .insert(schema.plans)
         .values({
           user: user?.id ?? "",
-          validy_date: input.validy_date,
           plan_code: input.plan_code,
           description: input.description,
           brand_id: input.brand_id,
@@ -54,7 +52,6 @@ export const plansRouter = createTRPCRouter({
     .input(
       z.object({
         planId: z.string(),
-        validy_date: z.date(),
         plan_code: z.string().max(255),
         description: z.string().max(255),
         brand_id: z.string().max(255),
@@ -64,7 +61,6 @@ export const plansRouter = createTRPCRouter({
       const modified_plan = await db
         .update(schema.plans)
         .set({
-          validy_date: input.validy_date,
           plan_code: input.plan_code,
           description: input.description,
           brand_id: input.brand_id,

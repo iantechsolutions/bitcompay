@@ -71,13 +71,14 @@ export default function DetailsPage(props: {
     day: "numeric",
   });
 
-  const { mutateAsync: createPricePerAge } =
-    api.pricePerAge.create.useMutation();
+  const { mutateAsync: createPricePerCondition } =
+    api.pricePerCondition.create.useMutation();
 
-  const { data, error, isLoading } = api.pricePerAge.getByCreatedAt.useQuery({
-    planId: props.plan?.id,
-    createdAt: props.date,
-  });
+  const { data, error, isLoading } =
+    api.pricePerCondition.getByCreatedAt.useQuery({
+      planId: props.plan?.id,
+      createdAt: props.date,
+    });
   console.log(data);
 
   const [open, setOpen] = useState(false);
@@ -85,11 +86,12 @@ export default function DetailsPage(props: {
   const [percent, setPercent] = useState("");
   const [validity_date, setValidity_date] = useState<Date>();
   function handleUpdatePrice(value: string) {
-    props.plan?.pricesPerAge.forEach((price) => {
-      createPricePerAge({
+    props.plan?.pricesPerCondition.forEach((price) => {
+      createPricePerCondition({
         plan_id: props.plan?.id ?? "",
         amount: price.amount * (1 + parseFloat(percent) / 100),
-        age: price.age ?? 0,
+        from_age: price.from_age ?? 0,
+        to_age: price.to_age ?? 0,
         condition: price.condition ?? "",
         isAmountByAge: price.isAmountByAge,
         validy_date: validity_date ?? new Date(),
@@ -99,14 +101,15 @@ export default function DetailsPage(props: {
   useEffect(() => {
     const groupByAge: GroupedPlans[] = [];
     let savedPrice = -1;
-    props.plan?.pricesPerAge
-      .sort((a, b) => (a.age ?? 1000) - (b.age ?? 1000))
+    props.plan?.pricesPerCondition
+      //TODO: CAMBIAR ESTE SORT
+      .sort((a, b) => (a.from_age ?? 1000) - (b.to_age ?? 1000))
       .forEach((price) => {
         if (price.isAmountByAge === true) {
           if (price.amount !== savedPrice) {
             groupByAge.push({
-              from_age: price.age ?? 0,
-              to_age: price.age ?? 0,
+              from_age: price.from_age ?? 0,
+              to_age: price.to_age ?? 0,
               amount: price.amount,
               condition: price.condition,
               isConditional: !price.isAmountByAge,
@@ -114,12 +117,12 @@ export default function DetailsPage(props: {
             savedPrice = price.amount;
           } else if (groupByAge.length > 0) {
             const last = groupByAge[groupByAge.length - 1];
-            last!.to_age = price.age ?? 0;
+            last!.to_age = price.to_age ?? 0;
           }
         } else {
           groupByAge.push({
-            from_age: price.age ?? 0,
-            to_age: price.age ?? 0,
+            from_age: price.from_age ?? 0,
+            to_age: price.to_age ?? 0,
             amount: price.amount,
             condition: price.condition,
             isConditional: !price.isAmountByAge,
@@ -137,11 +140,11 @@ export default function DetailsPage(props: {
             <Title>{props.plan!.description}</Title>
             <h2 className="mb-3 font-semibold text-xl">
               {formatter
-                .format(props.plan!.pricesPerAge.at(0)?.validy_date)
+                .format(props.plan!.pricesPerCondition.at(0)?.validy_date)
                 .charAt(0)
                 .toUpperCase() +
                 formatter
-                  .format(props.plan!.pricesPerAge.at(0)?.validy_date)
+                  .format(props.plan!.pricesPerCondition.at(0)?.validy_date)
                   .slice(1)}
             </h2>
           </div>
@@ -203,14 +206,14 @@ export default function DetailsPage(props: {
               </DialogContent>
             </Dialog>
           </div>
-          <div>
+          {/* <div>
             <AddPlanDialog
               openExterior={openAdd}
               setOpenExterior={setOpenAdd}
               planId={props.plan?.id}
-              // initialPrices={groupByAge}
+              initialPrices={groupByAge}
             ></AddPlanDialog>
-          </div>
+          </div> */}
           <div className="flex items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -238,29 +241,31 @@ export default function DetailsPage(props: {
             </DropdownMenu>
           </div>
         </div>
-        {!isLoading &&(
-        <Tabs>
-          <TabsList>
-            <TabsTrigger value="conditional">Precios por relacion</TabsTrigger>
-            <TabsTrigger value="perAge">Precios Por Edad</TabsTrigger>
-          </TabsList>
-          <TabsContent value="conditional">
-            <LargeTable
-              // height={height}
-              headers={conditionHeaders}
-              rows={
-                data!.filter((precio) => precio.isAmountByAge === false) ?? []
-              }
-            />
-          </TabsContent>
-          <TabsContent value="perAge">
-            <LargeTable
-              // height={height}
-              headers={ageHeaders}
-              rows={groupByAge!.filter((x: any) => !x.isConditional)}
-            />
-          </TabsContent>
-        </Tabs>
+        {!isLoading && (
+          <Tabs>
+            <TabsList>
+              <TabsTrigger value="conditional">
+                Precios por relacion
+              </TabsTrigger>
+              <TabsTrigger value="perAge">Precios Por Edad</TabsTrigger>
+            </TabsList>
+            <TabsContent value="conditional">
+              <LargeTable
+                // height={height}
+                headers={conditionHeaders}
+                rows={
+                  data!.filter((precio) => precio.isAmountByAge === false) ?? []
+                }
+              />
+            </TabsContent>
+            <TabsContent value="perAge">
+              <LargeTable
+                // height={height}
+                headers={ageHeaders}
+                rows={groupByAge!.filter((x: any) => !x.isConditional)}
+              />
+            </TabsContent>
+          </Tabs>
         )}
       </section>
     </LayoutContainer>

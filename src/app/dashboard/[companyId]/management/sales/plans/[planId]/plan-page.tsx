@@ -25,7 +25,7 @@ export default function PlanPage(props: {
   });
   const [arrayFechas, setArrayFechas] = useState<Date[]>([]);
   useEffect(() => {
-    props.plan?.pricesPerAge?.map((precio) => {
+    props.plan?.pricesPerCondition?.map((precio) => {
       const fecha = precio?.validy_date; // Convertir la fecha a cadena
       if (fecha) {
         if (!arrayFechas.find((x) => x.getTime() == fecha.getTime()!)) {

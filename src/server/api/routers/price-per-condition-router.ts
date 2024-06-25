@@ -4,18 +4,19 @@ import { db, schema } from "~/server/db";
 import { createId } from "~/lib/utils";
 import { eq, and } from "drizzle-orm";
 
-export const pricePerAgeRouter = createTRPCRouter({
+export const pricePerConditionRouter = createTRPCRouter({
   get: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
-      const pricePerAge_found = await db.query.pricePerAge.findFirst({
-        where: eq(schema.pricePerAge.id, input.id),
-      });
-      return pricePerAge_found;
+      const pricePerCondition_found =
+        await db.query.pricePerCondition.findFirst({
+          where: eq(schema.pricePerCondition.id, input.id),
+        });
+      return pricePerCondition_found;
     }),
   list: protectedProcedure.query(async () => {
-    const pricePerAges = await db.query.pricePerAge.findMany();
-    return pricePerAges;
+    const pricePerConditions = await db.query.pricePerCondition.findMany();
+    return pricePerConditions;
   }),
   getByCreatedAt: protectedProcedure
     .input(
@@ -26,10 +27,11 @@ export const pricePerAgeRouter = createTRPCRouter({
     )
     .query(async ({ input }) => {
       if (input.planId) {
-        const pricePerAge_found = await db.query.pricePerAge.findMany({
-          where: and(eq(schema.pricePerAge.plan_id, input.planId)),
-        });
-        const filtered = pricePerAge_found.filter((price) => {
+        const pricePerCondition_found =
+          await db.query.pricePerCondition.findMany({
+            where: and(eq(schema.pricePerCondition.plan_id, input.planId)),
+          });
+        const filtered = pricePerCondition_found.filter((price) => {
           return price.validy_date.getTime() == input.createdAt.getTime();
         });
         return filtered;
@@ -39,7 +41,8 @@ export const pricePerAgeRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
-        age: z.number().optional(),
+        from_age: z.number().optional(),
+        to_age: z.number().optional(),
         amount: z.number(),
         plan_id: z.string(),
         isAmountByAge: z.boolean(),
@@ -48,21 +51,25 @@ export const pricePerAgeRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input }) => {
-      const new_pricePerAge = await db.insert(schema.pricePerAge).values({
-        age: input.age,
-        isAmountByAge: input.isAmountByAge,
-        condition: input.condition,
-        amount: input.amount,
-        plan_id: input.plan_id,
-        validy_date: input.validy_date,
-      });
-      return new_pricePerAge;
+      const new_pricePerCondition = await db
+        .insert(schema.pricePerCondition)
+        .values({
+          from_age: input.from_age,
+          to_age: input.to_age,
+          isAmountByAge: input.isAmountByAge,
+          condition: input.condition,
+          amount: input.amount,
+          plan_id: input.plan_id,
+          validy_date: input.validy_date,
+        });
+      return new_pricePerCondition;
     }),
   change: protectedProcedure
     .input(
       z.object({
         id: z.string(),
-        age: z.number().optional(),
+        from_age: z.number().optional(),
+        to_age: z.number().optional(),
         amount: z.number(),
         plan_id: z.string(),
         isAmountByAge: z.boolean(),
@@ -71,25 +78,26 @@ export const pricePerAgeRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input }) => {
-      const pricePerAge_changed = await db
-        .update(schema.pricePerAge)
+      const pricePerCondition_changed = await db
+        .update(schema.pricePerCondition)
         .set({
-          age: input.age,
+          from_age: input.from_age,
+          to_age: input.to_age,
           isAmountByAge: input.isAmountByAge,
           condition: input.condition,
           amount: input.amount,
           plan_id: input.plan_id,
           validy_date: input.validy_date,
         })
-        .where(eq(schema.pricePerAge.id, input.id));
-      return pricePerAge_changed;
+        .where(eq(schema.pricePerCondition.id, input.id));
+      return pricePerCondition_changed;
     }),
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input }) => {
-      const pricePerAge_deleted = await db
-        .delete(schema.pricePerAge)
-        .where(eq(schema.pricePerAge.id, input.id));
-      return pricePerAge_deleted;
+      const pricePerCondition_deleted = await db
+        .delete(schema.pricePerCondition)
+        .where(eq(schema.pricePerCondition.id, input.id));
+      return pricePerCondition_deleted;
     }),
 });
