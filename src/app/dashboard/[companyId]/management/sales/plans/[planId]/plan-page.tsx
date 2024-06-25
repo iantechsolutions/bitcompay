@@ -87,7 +87,7 @@ export default function PlanPage(props: {
 
       if (fechasPasadas.length > 0) {
         fechasPasadas.sort((a, b) => b.getTime() - a.getTime());
-        setVigente(fechasPasadas[0]);
+        setVigente(fechasPasadas[0]!);
       }
     }
   }, [props.plan]);
