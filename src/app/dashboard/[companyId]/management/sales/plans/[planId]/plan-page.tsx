@@ -49,24 +49,24 @@ export default function PlanPage(props: {
   });
   const [arrayFechas, setArrayFechas] = useState<Date[]>([]);
   // const [vigente, setVigente] = useState<Date | null>(null);
-  // const [open, setOpen] = useState<boolean>(false);
+  const [open, setOpen] = useState<boolean>(false);
   // const [validity_date, setValidity_date] = useState<Date | null>(null);
   // const [percent, setPercent] = useState("");
   // const { mutateAsync: createPricePerAge } =
   //   api.pricePerAge.create.useMutation();
 
-  function handleUpdatePrice() {
-    props.plan?.pricesPerAge.forEach((price) => {
-      createPricePerAge({
-        plan_id: props.plan?.id ?? "",
-        amount: price.amount * (1 + parseFloat(percent) / 100),
-        age: price.age ?? 0,
-        condition: price.condition ?? "",
-        isAmountByAge: price.isAmountByAge,
-        validy_date: validity_date ?? new Date(),
-      });
-    });
-  }
+  // function handleUpdatePrice() {
+  //   props.plan?.pricesPerAge.forEach((price) => {
+  //     createPricePerAge({
+  //       plan_id: props.plan?.id ?? "",
+  //       amount: price.amount * (1 + parseFloat(percent) / 100),
+  //       age: price.age ?? 0,
+  //       condition: price.condition ?? "",
+  //       isAmountByAge: price.isAmountByAge,
+  //       validy_date: validity_date ?? new Date(),
+  //     });
+  //   });
+  // }
 
   useEffect(() => {
     props.plan?.pricesPerCondition?.map((precio) => {
@@ -104,7 +104,8 @@ export default function PlanPage(props: {
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <Link
-                      href={`/dashboard/${company.id}/management/sales/plans/${props.plan?.id}/edit`}>
+                      href={`/dashboard/${company.id}/management/sales/plans/${props.plan?.id}/edit`}
+                    >
                       Ir a editar precio
                     </Link>
                   </DropdownMenuItem>
@@ -114,8 +115,8 @@ export default function PlanPage(props: {
           </div>
           <List>
             {arrayFechas.map((fecha) => {
-              const esVigente =
-                vigente && fecha.getTime() === vigente.getTime();
+              const esVigente = false;
+                // vigente && fecha.getTime() === vigente.getTime();
               return (
                 <ListTile
                   leading={
@@ -137,7 +138,7 @@ export default function PlanPage(props: {
           </List>
         </div>
       </section>
-{/* 
+      {/* 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[600px] overflow-y-visible">
           <DialogHeader>
