@@ -11,6 +11,7 @@ import { Title } from "~/components/title";
 import { useCompanyData } from "~/app/dashboard/[companyId]/company-provider";
 import { type RouterOutputs } from "~/trpc/shared";
 import { useEffect, useState } from "react";
+import { datetime } from "drizzle-orm/mysql-core";
 dayjs.extend(utc);
 dayjs.locale("es");
 
@@ -24,6 +25,8 @@ export default function PlanPage(props: {
     day: "numeric",
   });
   const [arrayFechas, setArrayFechas] = useState<Date[]>([]);
+  const [vigente, setVigente] = useState<Date>();
+
   useEffect(() => {
     props.plan?.pricesPerAge?.map((precio) => {
       const fecha = precio?.validy_date; // Convertir la fecha a cadena
@@ -35,8 +38,26 @@ export default function PlanPage(props: {
     });
     const sortedArrayFechas = [...arrayFechas];
     sortedArrayFechas.sort((a, b) => b.getTime() - a.getTime());
+
     setArrayFechas(sortedArrayFechas);
+
+    const fechasPasadas = arrayFechas.filter(
+      (fecha) => fecha.getTime() <= new Date().getTime()
+    );
+
+    fechasPasadas.sort((a, b) => b.getTime() - a.getTime());
+
+    const ultimaFechaPasada =
+      fechasPasadas.length > 0 ? fechasPasadas[0] : null;
+
+    if (ultimaFechaPasada) {
+      setVigente(ultimaFechaPasada);
+    }
+
+    console.log(fechasPasadas);
+    console.log(vigente);
   }, []);
+
   const company = useCompanyData();
   return (
     <LayoutContainer>
@@ -45,7 +66,7 @@ export default function PlanPage(props: {
           <Title>{props.plan!.description}</Title>
           <List>
             {arrayFechas.map((fecha) => {
-              if (arrayFechas.indexOf(fecha) === 0) {
+              if (arrayFechas.indexOf(fecha) === vigente?.getDate()) {
                 return (
                   <ListTile
                     leading={<Badge>Vigente</Badge>}

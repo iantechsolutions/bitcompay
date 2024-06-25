@@ -36,7 +36,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import AddPlanDialog from "../../add-plan-dialog";
+import AddPlanDialogPerPrice from "./AddPlanDialog";
 
 dayjs.extend(utc);
 dayjs.locale("es");
@@ -79,10 +79,12 @@ export default function DetailsPage(props: {
     createdAt: props.date,
   });
 
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [openAdd, setOpenAdd] = useState(false);
   const [percent, setPercent] = useState("");
   const [validity_date, setValidity_date] = useState<Date>();
+
   function handleUpdatePrice(value: string) {
     props.plan?.pricesPerAge.forEach((price) => {
       createPricePerAge({
@@ -95,6 +97,16 @@ export default function DetailsPage(props: {
       });
     });
   }
+
+  useEffect(() => {
+    if (openAdd) {
+      router.refresh();
+    }
+    if (open) {
+      router.refresh();
+    }
+    console.log("test");
+  }, [openAdd]);
   // useEffect(() => {
   //   const groupByAge: GroupedPlans[] = [];
   //   let savedPrice = -1;
@@ -162,8 +174,7 @@ export default function DetailsPage(props: {
                         className={cn(
                           "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
                           !validity_date && "text-muted-foreground"
-                        )}
-                      >
+                        )}>
                         <p>
                           {validity_date ? (
                             dayjs(validity_date).format("D [de] MMMM [de] YYYY")
@@ -203,18 +214,17 @@ export default function DetailsPage(props: {
             </Dialog>
           </div>
           <div>
-            <AddPlanDialog
+            <AddPlanDialogPerPrice
               openExterior={openAdd}
               setOpenExterior={setOpenAdd}
               planId={props.plan?.id}
-              // initialPrices={groupByAge}
-            ></AddPlanDialog>
+            />
           </div>
           <div className="flex items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button onClick={() => handleUpdatePrice("edit")}>
-                  Actualizar precio{" "}
+                  Actualizar precio 1{" "}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -231,7 +241,7 @@ export default function DetailsPage(props: {
                 <DropdownMenuItem
                 // value="edit"
                 >
-                  <div onClick={() => setOpenAdd(true)}>Editar precio</div>
+                  <div onClick={() => setOpenAdd(true)}>Editar precio 1</div>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -248,7 +258,7 @@ export default function DetailsPage(props: {
               // height={height}
               headers={conditionHeaders}
               rows={
-                props.plan?.pricesPerAge.filter(
+                props.plan?.pricesPerAge?.filter(
                   (precio) => precio.isAmountByAge === false
                 ) ?? []
               }
@@ -256,9 +266,8 @@ export default function DetailsPage(props: {
           </TabsContent>
           <TabsContent value="perAge">
             <LargeTable
-              // height={height}
               headers={ageHeaders}
-              rows={groupByAge.data!.filter((x: any) => !x.isConditional)}
+              rows={groupByAge.data?.filter((x) => x.condition) ?? []}
             />
           </TabsContent>
         </Tabs>
