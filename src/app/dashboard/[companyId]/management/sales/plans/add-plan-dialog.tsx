@@ -64,7 +64,6 @@ type ConditionalPrice = {
 };
 
 type Inputs = {
-  validy_date: string;
   plan_code: string;
   description: string;
   conditional_prices: ConditionalPrice[];
@@ -94,9 +93,10 @@ export default function AddPlanDialog({
   const company = useCompanyData();
   const [open, setOpen] = useState(false);
   const [brand, setBrand] = useState("");
+  const [anio, setAnio] = useState(2020);
+  const [mes, setMes] = useState(0);
   const [condition, setCondition] = useState("");
   const initValues: Inputs = {
-    validy_date: "",
     plan_code: "",
     description: "",
     conditional_prices: [],
@@ -177,7 +177,12 @@ export default function AddPlanDialog({
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
       console.log("empieza updateo/add de plan");
-      const dataWithBrands = { ...data, brand_id: brand };
+      const validity_date = new Date(anio, mes, 1); // First day of given month and year
+      const dataWithBrands = {
+        ...data,
+        brand_id: brand,
+        validy_date: validity_date,
+      };
 
       const parsedData = PlanSchema.parse(dataWithBrands);
       let plan: RouterOutputs["plans"]["create"];
@@ -194,7 +199,7 @@ export default function AddPlanDialog({
             amount: parseFloat(item.price),
             plan_id: plan[0]!.id,
             isAmountByAge: false,
-            validy_date: dayjs.utc(data.validy_date).toDate(),
+            validy_date: dayjs.utc(validity_date).toDate(),
           });
         } else {
           for (
@@ -207,7 +212,7 @@ export default function AddPlanDialog({
               amount: parseFloat(item.price),
               plan_id: plan[0]!.id,
               isAmountByAge: true,
-              validy_date: dayjs.utc(data.validy_date).toDate(),
+              validy_date: dayjs.utc(validity_date).toDate(),
             });
           }
         }
@@ -257,57 +262,49 @@ export default function AddPlanDialog({
                 </TabsList>
                 <TabsContent value="info">
                   <div className="">
-                    <FormField
-                      control={form.control}
-                      name="validy_date"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-col ">
-                          <FormLabel htmlFor="validy_date">
-                            Fecha de vigencia
-                          </FormLabel>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant={"outline"}
-                                  className={cn(
-                                    "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
-                                    !field.value && "text-muted-foreground"
-                                  )}
-                                >
-                                  <p>
-                                    {field.value ? (
-                                      dayjs
-                                        .utc(field.value)
-                                        .format("[1 de] MMMM [de] YYYY")
-                                    ) : (
-                                      <span>Seleccione una fecha</span>
-                                    )}
-                                  </p>
-                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent
-                              className="w-auto p-0"
-                              align="start"
-                            >
-                              {/* <CalendarByMountAndYear
-                                mode="single"
-                                selected={
-                                  field.value
-                                    ? new Date(field.value)
-                                    : new Date()
-                                }
-                                onSelect={field.onChange}
-                                initialFocus
-                              /> */}
-                            </PopoverContent>
-                          </Popover>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    <FormItem className="flex flex-col ">
+                      <FormLabel htmlFor="validy_date">
+                        Mes de vigencia
+                      </FormLabel>
+                      <Select
+                        onValueChange={(e) => setMes(Number(e))}
+                        defaultValue={mes.toString()}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccione un mes" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="1">Enero</SelectItem>
+                          <SelectItem value="2">Febrero</SelectItem>
+                          <SelectItem value="3">Marzo</SelectItem>
+                          <SelectItem value="4">Abril</SelectItem>
+                          <SelectItem value="5">Mayo</SelectItem>
+                          <SelectItem value="6">Junio</SelectItem>
+                          <SelectItem value="7">Julio</SelectItem>
+                          <SelectItem value="8">Agosto</SelectItem>
+                          <SelectItem value="9">Septiembre</SelectItem>
+                          <SelectItem value="10">Octubre</SelectItem>
+                          <SelectItem value="11">Noviembre</SelectItem>
+                          <SelectItem value="12">Diciembre</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                    <div>
+                      <FormItem>
+                        <FormLabel>Año de Vigencia</FormLabel>
+                        <FormControl>
+                          <Input
+                            className="border-green-300 focus-visible:ring-green-400 w-[100px]"
+                            type="number"
+                            value={anio}
+                            onChange={(e) => setAnio(Number(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    </div>
                     <div>
                       <Label>Marca</Label>
                       <Select
