@@ -19,6 +19,7 @@ import { asTRPCError } from "~/lib/errors";
 import { api } from "~/trpc/react";
 import { useOrganizationList } from "@clerk/nextjs";
 export function AddCompanyDialog() {
+  const { createOrganization } = useOrganizationList();
   const { mutateAsync: createCompany, isLoading } =
     api.companies.create.useMutation();
 
@@ -36,17 +37,13 @@ export function AddCompanyDialog() {
   const handleCreate: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     try {
-      const { createOrganization } = useOrganizationList();
-      console.log("createOrganization", createOrganization);
       schema.parse({ texto: concept });
       let organization;
       if (createOrganization) {
-        console.log("entro if");
         organization = await createOrganization({ name: organizationName });
       } else {
         console.warn("createOrganization is undefined");
       }
-      console.log("organization", organization?.id);
       if (organization) {
         await createCompany({
           id: organization.id,

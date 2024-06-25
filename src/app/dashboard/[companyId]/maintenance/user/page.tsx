@@ -15,9 +15,9 @@ type UsersType = Awaited<
 export default async function AdminDashboard(params: {
   searchParams: { search?: string };
 }) {
-  if (!checkRole("admin")) {
-    redirect("/");
-  }
+  // if (!checkRole("admin")) {
+  //   redirect("/");
+  // }
 
   const users = (await clerkClient.users.getUserList({})).data;
 

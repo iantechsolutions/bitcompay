@@ -15,7 +15,6 @@ export async function setRole(formData: FormData) {
         publicMetadata: { role: formData.get("role") },
       }
     );
-    console.log(res);
 
     return { message: res.publicMetadata };
   } catch (err) {
