@@ -12,9 +12,10 @@ export default async function Page(props: {
   const plan = await api.plans.get.query({
     planId,
   });
-  const DateNumber = parseInt(props.params.selectedDate, 10);
-  const selectedDate = new Date(DateNumber);
-
+  console.log(props.params.selectedDate);
+  const selectedDate = new Date(Number(props.params.selectedDate));
+  console.log("selectedDate");
+  console.log(selectedDate);
   if (!plan) {
     return <Title>No se encontró el plan</Title>;
   }

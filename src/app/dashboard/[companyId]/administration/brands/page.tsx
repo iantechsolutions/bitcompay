@@ -3,9 +3,12 @@ import { List, ListTile } from "~/components/list";
 import { Title } from "~/components/title";
 import { api } from "~/trpc/server";
 import { AddBrandDialog } from "./add-brand-dialog";
+import { getServerAuthSession } from "~/server/auth";
 
 export default async function Home(props: { params: { companyId: string } }) {
   const brands = await api.brands.list.query();
+  const session = getServerAuthSession();
+  console.log(session);
   return (
     <LayoutContainer>
       <section className="space-y-2">

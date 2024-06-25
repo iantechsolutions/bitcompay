@@ -63,7 +63,7 @@ export default function DetailsPage(props: {
   plan: RouterOutputs["plans"]["get"];
   date: Date;
 }) {
-  // const [groupByAge, setGroupByAge] = useState<GroupedPlans[]>([]);
+  const [groupByAge, setGroupByAge] = useState<GroupedPlans[]>([]);
   const formatter = new Intl.DateTimeFormat("es-ES", {
     weekday: "long",
     year: "numeric",
@@ -74,10 +74,11 @@ export default function DetailsPage(props: {
   const { mutateAsync: createPricePerAge } =
     api.pricePerAge.create.useMutation();
 
-  const groupByAge = api.pricePerAge.getByCreatedAt.useQuery({
+  const { data, error, isLoading } = api.pricePerAge.getByCreatedAt.useQuery({
     planId: props.plan?.id,
     createdAt: props.date,
   });
+  console.log(data);
 
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -97,48 +98,38 @@ export default function DetailsPage(props: {
       });
     });
   }
-
   useEffect(() => {
-    if (openAdd) {
-      router.refresh();
-    }
-    if (open) {
-      router.refresh();
-    }
-    console.log("test");
-  }, [openAdd]);
-  // useEffect(() => {
-  //   const groupByAge: GroupedPlans[] = [];
-  //   let savedPrice = -1;
-  //   props.plan?.pricesPerAge
-  //     .sort((a, b) => (a.age ?? 1000) - (b.age ?? 1000))
-  //     .forEach((price) => {
-  //       if (price.isAmountByAge === true) {
-  //         if (price.amount !== savedPrice) {
-  //           groupByAge.push({
-  //             from_age: price.age ?? 0,
-  //             to_age: price.age ?? 0,
-  //             amount: price.amount,
-  //             condition: price.condition,
-  //             isConditional: !price.isAmountByAge,
-  //           });
-  //           savedPrice = price.amount;
-  //         } else if (groupByAge.length > 0) {
-  //           const last = groupByAge[groupByAge.length - 1];
-  //           last!.to_age = price.age ?? 0;
-  //         }
-  //       } else {
-  //         groupByAge.push({
-  //           from_age: price.age ?? 0,
-  //           to_age: price.age ?? 0,
-  //           amount: price.amount,
-  //           condition: price.condition,
-  //           isConditional: !price.isAmountByAge,
-  //         });
-  //       }
-  //     });
-  //   setGroupByAge(groupByAge);
-  // }, []);
+    const groupByAge: GroupedPlans[] = [];
+    let savedPrice = -1;
+    props.plan?.pricesPerAge
+      .sort((a, b) => (a.age ?? 1000) - (b.age ?? 1000))
+      .forEach((price) => {
+        if (price.isAmountByAge === true) {
+          if (price.amount !== savedPrice) {
+            groupByAge.push({
+              from_age: price.age ?? 0,
+              to_age: price.age ?? 0,
+              amount: price.amount,
+              condition: price.condition,
+              isConditional: !price.isAmountByAge,
+            });
+            savedPrice = price.amount;
+          } else if (groupByAge.length > 0) {
+            const last = groupByAge[groupByAge.length - 1];
+            last!.to_age = price.age ?? 0;
+          }
+        } else {
+          groupByAge.push({
+            from_age: price.age ?? 0,
+            to_age: price.age ?? 0,
+            amount: price.amount,
+            condition: price.condition,
+            isConditional: !price.isAmountByAge,
+          });
+        }
+      });
+    setGroupByAge(groupByAge);
+  }, []);
 
   return (
     <LayoutContainer>
@@ -247,30 +238,32 @@ export default function DetailsPage(props: {
             </DropdownMenu>
           </div>
         </div>
-
-        <Tabs>
-          <TabsList>
-            <TabsTrigger value="conditional">Precios por relacion</TabsTrigger>
-            <TabsTrigger value="perAge">Precios Por Edad</TabsTrigger>
-          </TabsList>
-          <TabsContent value="conditional">
-            <LargeTable
-              // height={height}
-              headers={conditionHeaders}
-              rows={
-                props.plan?.pricesPerAge?.filter(
-                  (precio) => precio.isAmountByAge === false
-                ) ?? []
-              }
-            />
-          </TabsContent>
-          <TabsContent value="perAge">
-            <LargeTable
-              headers={ageHeaders}
-              rows={groupByAge.data?.filter((x) => x.condition) ?? []}
-            />
-          </TabsContent>
-        </Tabs>
+        {!isLoading && (
+          <Tabs>
+            <TabsList>
+              <TabsTrigger value="conditional">
+                Precios por relacion
+              </TabsTrigger>
+              <TabsTrigger value="perAge">Precios Por Edad</TabsTrigger>
+            </TabsList>
+            <TabsContent value="conditional">
+              <LargeTable
+                // height={height}
+                headers={conditionHeaders}
+                rows={
+                  data!.filter((precio) => precio.isAmountByAge === false) ?? []
+                }
+              />
+            </TabsContent>
+            <TabsContent value="perAge">
+              <LargeTable
+                // height={height}
+                headers={ageHeaders}
+                rows={groupByAge!.filter((x: any) => !x.isConditional)}
+              />
+            </TabsContent>
+          </Tabs>
+        )}
       </section>
     </LayoutContainer>
   );

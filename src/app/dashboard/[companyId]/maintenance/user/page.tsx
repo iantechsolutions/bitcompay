@@ -8,6 +8,7 @@ import { Badge } from "~/components/ui/badge";
 import { Title } from "~/components/title";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
+import { useOrganizationList } from "@clerk/nextjs";
 
 type UsersType = Awaited<
   ReturnType<typeof clerkClient.users.getUserList>
@@ -18,9 +19,7 @@ export default async function AdminDashboard(params: {
   // if (!checkRole("admin")) {
   //   redirect("/");
   // }
-
   const users = (await clerkClient.users.getUserList({})).data;
-
   return (
     <>
       <Title>Usuarios</Title>
@@ -30,14 +29,27 @@ export default async function AdminDashboard(params: {
           <List>
             <ListTile
               key={user.id}
-              title={`${user.firstName} ${user.lastName}`}
+              href=""
+              title={
+                <>
+                  {user.firstName} {user.lastName}
+                </>
+              }
               subtitle={
                 user.emailAddresses.find(
                   (email) => email.id === user.primaryEmailAddressId
                 )?.emailAddress
               }
-              leading={<Badge>{user.publicMetadata.role as string}</Badge>}
-              trailing={<FormSetRole user={user} />}
+              leading={
+                <div>
+                  <img
+                    className="h-10 rounded-full"
+                    src={user.imageUrl}
+                    alt="User Profile"
+                  />
+                </div>
+              }
+              // trailing={<Badge>{user.}</Badge>}
             />
           </List>
         );
