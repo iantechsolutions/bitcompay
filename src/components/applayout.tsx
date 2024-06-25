@@ -1,4 +1,4 @@
-import { UserButton } from "@clerk/nextjs";
+import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
 import { MenuIcon } from "lucide-react";
 import { SidenavSheet } from "./sidenav-sheet";
 import { Button } from "./ui/button";
@@ -27,7 +27,10 @@ export default function AppLayout(props: AppLayoutProps) {
           content={props.sidenav}
         />
         <div className="w-full">{props.title}</div>
-        <UserButton />
+        <div className="flex gap-6 px-2">
+          <OrganizationSwitcher hidePersonal={true} />
+          <UserButton />
+        </div>
       </header>
       <aside
         // biome-ignore lint/nursery/useSortedClasses: <explanation>
