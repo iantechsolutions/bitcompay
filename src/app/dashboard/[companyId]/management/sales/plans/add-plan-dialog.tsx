@@ -176,7 +176,6 @@ export default function AddPlanDialog({
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
-      console.log("empieza updateo/add de plan");
       const validity_date = new Date(anio, mes, 1); // First day of given month and year
       const dataWithBrands = {
         ...data,

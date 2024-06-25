@@ -27,12 +27,12 @@ export const pricePerAgeRouter = createTRPCRouter({
     .query(async ({ input }) => {
       if (input.planId) {
         const pricePerAge_found = await db.query.pricePerAge.findMany({
-          where: and(
-            eq(schema.pricePerAge.plan_id, input.planId),
-            eq(schema.pricePerAge.createdAt, input.createdAt)
-          ),
+          where: and(eq(schema.pricePerAge.plan_id, input.planId)),
         });
-        return pricePerAge_found;
+        const filtered = pricePerAge_found.filter((price) => {
+          return price.validy_date.getTime() == input.createdAt.getTime();
+        });
+        return filtered;
       }
       return [];
     }),
