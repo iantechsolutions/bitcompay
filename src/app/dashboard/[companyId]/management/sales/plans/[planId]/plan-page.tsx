@@ -104,8 +104,7 @@ export default function PlanPage(props: {
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <Link
-                      href={`/dashboard/${company.id}/management/sales/plans/${props.plan?.id}/edit`}
-                    >
+                      href={`/dashboard/${company.id}/management/sales/plans/${props.plan?.id}/edit`}>
                       Ir a editar precio
                     </Link>
                   </DropdownMenuItem>
@@ -116,7 +115,7 @@ export default function PlanPage(props: {
           <List>
             {arrayFechas.map((fecha) => {
               const esVigente = false;
-                // vigente && fecha.getTime() === vigente.getTime();
+              // vigente && fecha.getTime() === vigente.getTime();
               return (
                 <ListTile
                   leading={

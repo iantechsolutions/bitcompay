@@ -220,7 +220,7 @@ export default function DetailsPage(props: {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button onClick={() => handleUpdatePrice("edit")}>
-                  Actualizar precio 1{" "}
+                  Actualizar precio{" "}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -237,7 +237,7 @@ export default function DetailsPage(props: {
                 <DropdownMenuItem
                 // value="edit"
                 >
-                  <div onClick={() => setOpenAdd(true)}>Editar precio 1</div>
+                  <div onClick={() => setOpenAdd(true)}>Editar precio</div>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
