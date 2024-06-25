@@ -28,7 +28,7 @@ export const establishmentsRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input }) => {
-      const establishment = db.insert(schema.establishments).values({
+      const establishment = await db.insert(schema.establishments).values({
         establishment_number: Number(input.establishment_number),
         flag: input.flag,
         brandId: input.brandId,
@@ -44,7 +44,8 @@ export const establishmentsRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input }) => {
-      db.update(schema.establishments)
+      await db
+        .update(schema.establishments)
         .set({
           establishment_number: Number(input.establishment_number),
           flag: input.flag,
@@ -54,8 +55,8 @@ export const establishmentsRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(z.object({ establishmentId: z.string() }))
     .mutation(async ({ input }) => {
-      db.delete(schema.establishments).where(
-        eq(schema.establishments.id, input.establishmentId)
-      );
+      await db
+        .delete(schema.establishments)
+        .where(eq(schema.establishments.id, input.establishmentId));
     }),
 });

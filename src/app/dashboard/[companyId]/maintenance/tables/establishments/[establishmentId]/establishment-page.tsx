@@ -41,9 +41,11 @@ import { api } from "~/trpc/react";
 type EstablishmentPageProps = {
   establishment: Establishment;
 };
+
 export default function EstablishmentPage({
   establishment,
 }: EstablishmentPageProps) {
+  const router = useRouter();
   const { data: brand } = api.brands.get.useQuery({
     brandId: establishment.brandId,
   });
@@ -62,13 +64,32 @@ export default function EstablishmentPage({
       {flag.name}
     </SelectItem>
   ));
+  const { mutateAsync: changeEstablishment, isLoading } =
+    api.establishments.change.useMutation();
+  async function handleUpdate() {
+    try {
+      await changeEstablishment({
+        establishmentId: establishment.id,
+        flag: flag,
+        establishment_number: establishmentNumber.toString(),
+      });
+      toast.success("Establecimiento actualizado correctamente");
+      router.refresh();
+    } catch (e) {
+      const error = asTRPCError(e)!;
+      toast.error(error.message);
+    }
+  }
   return (
     <LayoutContainer>
       <section className="space-y-2">
         <div className="flex justify-between">
           <Title>Editar Establecimiento</Title>
-          <Button>
+          <Button onClick={handleUpdate}>
             <CheckIcon className="mr-2" />
+            {isLoading && (
+              <Loader2Icon className="mr-2 animate-spin" size={20} />
+            )}
             Aplicar
           </Button>
         </div>
@@ -133,22 +154,20 @@ export default function EstablishmentPage({
 }
 
 function DeleteEstablishment(props: { establishmentId: string }) {
-  const { mutateAsync: deletebrand, isLoading } =
+  const { mutateAsync: deleteEstablishment, isLoading } =
     api.establishments.delete.useMutation();
-
   const router = useRouter();
-
-  const handleDelete: MouseEventHandler<HTMLButtonElement> = (e) => {
+  const handleDelete: MouseEventHandler<HTMLButtonElement> = async (e) => {
     e.preventDefault();
-    deletebrand({ establishmentId: props.establishmentId })
-      .then(() => {
-        toast.success("Se ha eliminado el establecimiento");
-        router.push("./");
-      })
-      .catch((e) => {
-        const error = asTRPCError(e)!;
-        toast.error(error.message);
-      });
+    try {
+      await deleteEstablishment({ establishmentId: props.establishmentId });
+      toast.success("Se ha eliminado el establecimiento");
+      router.push("./");
+      router.refresh();
+    } catch (e) {
+      const error = asTRPCError(e)!;
+      toast.error(error.message);
+    }
   };
   return (
     <AlertDialog>

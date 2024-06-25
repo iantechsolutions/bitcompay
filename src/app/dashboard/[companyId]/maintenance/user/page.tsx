@@ -10,7 +10,7 @@ import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { useOrganizationList } from "@clerk/nextjs";
 
-type UsersType = Awaited<
+export type UsersType = Awaited<
   ReturnType<typeof clerkClient.users.getUserList>
 >["data"][number];
 export default async function AdminDashboard(params: {
@@ -29,7 +29,7 @@ export default async function AdminDashboard(params: {
           <List>
             <ListTile
               key={user.id}
-              href=""
+              href={`./user/${user.id}`}
               title={
                 <>
                   {user.firstName} {user.lastName}
