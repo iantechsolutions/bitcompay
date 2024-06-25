@@ -48,50 +48,39 @@ export default function PlanPage(props: {
     day: "numeric",
   });
   const [arrayFechas, setArrayFechas] = useState<Date[]>([]);
-  const [vigente, setVigente] = useState<Date | null>(null);
+  // const [vigente, setVigente] = useState<Date | null>(null);
   const [open, setOpen] = useState<boolean>(false);
-  const [validity_date, setValidity_date] = useState<Date | null>(null);
-  const [percent, setPercent] = useState("");
-  const { mutateAsync: createPricePerAge } =
-    api.pricePerAge.create.useMutation();
+  // const [validity_date, setValidity_date] = useState<Date | null>(null);
+  // const [percent, setPercent] = useState("");
+  // const { mutateAsync: createPricePerAge } =
+  //   api.pricePerAge.create.useMutation();
 
-  function handleUpdatePrice() {
-    props.plan?.pricesPerAge.forEach((price) => {
-      createPricePerAge({
-        plan_id: props.plan?.id ?? "",
-        amount: price.amount * (1 + parseFloat(percent) / 100),
-        age: price.age ?? 0,
-        condition: price.condition ?? "",
-        isAmountByAge: price.isAmountByAge,
-        validy_date: validity_date ?? new Date(),
-      });
-    });
-  }
+  // function handleUpdatePrice() {
+  //   props.plan?.pricesPerAge.forEach((price) => {
+  //     createPricePerAge({
+  //       plan_id: props.plan?.id ?? "",
+  //       amount: price.amount * (1 + parseFloat(percent) / 100),
+  //       age: price.age ?? 0,
+  //       condition: price.condition ?? "",
+  //       isAmountByAge: price.isAmountByAge,
+  //       validy_date: validity_date ?? new Date(),
+  //     });
+  //   });
+  // }
 
   useEffect(() => {
-    if (props.plan?.pricesPerAge) {
-      const fechas = props.plan.pricesPerAge
-        .map((precio) => new Date(precio.validy_date))
-        .filter((fecha) => !isNaN(fecha.getTime()));
-
-      const uniqueFechas = Array.from(
-        new Set(fechas.map((fecha) => fecha.getTime()))
-      ).map((time) => new Date(time));
-
-      uniqueFechas.sort((a, b) => b.getTime() - a.getTime());
-
-      setArrayFechas(uniqueFechas);
-
-      const today = new Date();
-      const fechasPasadas = uniqueFechas.filter((fecha) => fecha < today);
-
-      if (fechasPasadas.length > 0) {
-        fechasPasadas.sort((a, b) => b.getTime() - a.getTime());
-        setVigente(fechasPasadas[0]);
+    props.plan?.pricesPerCondition?.map((precio) => {
+      const fecha = precio?.validy_date; // Convertir la fecha a cadena
+      if (fecha) {
+        if (!arrayFechas.find((x) => x.getTime() == fecha.getTime()!)) {
+          arrayFechas.push(fecha);
+        }
       }
-    }
-  }, [props.plan]);
-
+    });
+    const sortedArrayFechas = [...arrayFechas];
+    sortedArrayFechas.sort((a, b) => b.getTime() - a.getTime());
+    setArrayFechas(sortedArrayFechas);
+  }, []);
   const company = useCompanyData();
 
   return (
@@ -125,8 +114,8 @@ export default function PlanPage(props: {
           </div>
           <List>
             {arrayFechas.map((fecha) => {
-              const esVigente =
-                vigente && fecha.getTime() === vigente.getTime();
+              const esVigente = false;
+              // vigente && fecha.getTime() === vigente.getTime();
               return (
                 <ListTile
                   leading={
@@ -148,7 +137,7 @@ export default function PlanPage(props: {
           </List>
         </div>
       </section>
-
+      {/* 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[600px] overflow-y-visible">
           <DialogHeader>
@@ -199,7 +188,7 @@ export default function PlanPage(props: {
             <Button onClick={handleUpdatePrice}>Actualizar precio</Button>
           </div>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
     </LayoutContainer>
   );
 }

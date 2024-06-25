@@ -36,7 +36,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import AddPlanDialogPerPrice from "./AddPlanDialog";
+// import AddPlanDialogPerPrice from "./AddPlanDialog";
 
 dayjs.extend(utc);
 dayjs.locale("es");
@@ -71,13 +71,14 @@ export default function DetailsPage(props: {
     day: "numeric",
   });
 
-  const { mutateAsync: createPricePerAge } =
-    api.pricePerAge.create.useMutation();
+  const { mutateAsync: createPricePerCondition } =
+    api.pricePerCondition.create.useMutation();
 
-  const { data, error, isLoading } = api.pricePerAge.getByCreatedAt.useQuery({
-    planId: props.plan?.id,
-    createdAt: props.date,
-  });
+  const { data, error, isLoading } =
+    api.pricePerCondition.getByCreatedAt.useQuery({
+      planId: props.plan?.id,
+      createdAt: props.date,
+    });
   console.log(data);
 
   const router = useRouter();
@@ -87,11 +88,12 @@ export default function DetailsPage(props: {
   const [validity_date, setValidity_date] = useState<Date>();
 
   function handleUpdatePrice(value: string) {
-    props.plan?.pricesPerAge.forEach((price) => {
-      createPricePerAge({
+    props.plan?.pricesPerCondition.forEach((price) => {
+      createPricePerCondition({
         plan_id: props.plan?.id ?? "",
         amount: price.amount * (1 + parseFloat(percent) / 100),
-        age: price.age ?? 0,
+        from_age: price.from_age ?? 0,
+        to_age: price.to_age ?? 0,
         condition: price.condition ?? "",
         isAmountByAge: price.isAmountByAge,
         validy_date: validity_date ?? new Date(),
@@ -101,14 +103,15 @@ export default function DetailsPage(props: {
   useEffect(() => {
     const groupByAge: GroupedPlans[] = [];
     let savedPrice = -1;
-    props.plan?.pricesPerAge
-      .sort((a, b) => (a.age ?? 1000) - (b.age ?? 1000))
+    props.plan?.pricesPerCondition
+      //TODO: CAMBIAR ESTE SORT
+      .sort((a, b) => (a.from_age ?? 1000) - (b.to_age ?? 1000))
       .forEach((price) => {
         if (price.isAmountByAge === true) {
           if (price.amount !== savedPrice) {
             groupByAge.push({
-              from_age: price.age ?? 0,
-              to_age: price.age ?? 0,
+              from_age: price.from_age ?? 0,
+              to_age: price.to_age ?? 0,
               amount: price.amount,
               condition: price.condition,
               isConditional: !price.isAmountByAge,
@@ -116,12 +119,12 @@ export default function DetailsPage(props: {
             savedPrice = price.amount;
           } else if (groupByAge.length > 0) {
             const last = groupByAge[groupByAge.length - 1];
-            last!.to_age = price.age ?? 0;
+            last!.to_age = price.to_age ?? 0;
           }
         } else {
           groupByAge.push({
-            from_age: price.age ?? 0,
-            to_age: price.age ?? 0,
+            from_age: price.from_age ?? 0,
+            to_age: price.to_age ?? 0,
             amount: price.amount,
             condition: price.condition,
             isConditional: !price.isAmountByAge,
@@ -139,11 +142,11 @@ export default function DetailsPage(props: {
             <Title>{props.plan!.description}</Title>
             <h2 className="mb-3 font-semibold text-xl">
               {formatter
-                .format(props.plan!.pricesPerAge.at(0)?.validy_date)
+                .format(props.plan!.pricesPerCondition.at(0)?.validy_date)
                 .charAt(0)
                 .toUpperCase() +
                 formatter
-                  .format(props.plan!.pricesPerAge.at(0)?.validy_date)
+                  .format(props.plan!.pricesPerCondition.at(0)?.validy_date)
                   .slice(1)}
             </h2>
           </div>
@@ -165,7 +168,8 @@ export default function DetailsPage(props: {
                         className={cn(
                           "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
                           !validity_date && "text-muted-foreground"
-                        )}>
+                        )}
+                      >
                         <p>
                           {validity_date ? (
                             dayjs(validity_date).format("D [de] MMMM [de] YYYY")
@@ -204,18 +208,19 @@ export default function DetailsPage(props: {
               </DialogContent>
             </Dialog>
           </div>
-          <div>
-            <AddPlanDialogPerPrice
+          {/* <div>
+            <AddPlanDialog
               openExterior={openAdd}
               setOpenExterior={setOpenAdd}
               planId={props.plan?.id}
-            />
-          </div>
+              initialPrices={groupByAge}
+            ></AddPlanDialog>
+          </div> */}
           <div className="flex items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button onClick={() => handleUpdatePrice("edit")}>
-                  Actualizar precio 1{" "}
+                  Actualizar precio{" "}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -232,7 +237,7 @@ export default function DetailsPage(props: {
                 <DropdownMenuItem
                 // value="edit"
                 >
-                  <div onClick={() => setOpenAdd(true)}>Editar precio 1</div>
+                  <div onClick={() => setOpenAdd(true)}>Editar precio</div>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
