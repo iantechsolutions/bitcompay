@@ -36,7 +36,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import AddPlanDialog from "../../add-plan-dialog";
+import AddPlanDialogPerPrice from "./AddPlanDialog";
 
 dayjs.extend(utc);
 dayjs.locale("es");
@@ -80,10 +80,12 @@ export default function DetailsPage(props: {
   });
   console.log(data);
 
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [openAdd, setOpenAdd] = useState(false);
   const [percent, setPercent] = useState("");
   const [validity_date, setValidity_date] = useState<Date>();
+
   function handleUpdatePrice(value: string) {
     props.plan?.pricesPerAge.forEach((price) => {
       createPricePerAge({
@@ -163,8 +165,7 @@ export default function DetailsPage(props: {
                         className={cn(
                           "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
                           !validity_date && "text-muted-foreground"
-                        )}
-                      >
+                        )}>
                         <p>
                           {validity_date ? (
                             dayjs(validity_date).format("D [de] MMMM [de] YYYY")
@@ -204,18 +205,17 @@ export default function DetailsPage(props: {
             </Dialog>
           </div>
           <div>
-            <AddPlanDialog
+            <AddPlanDialogPerPrice
               openExterior={openAdd}
               setOpenExterior={setOpenAdd}
               planId={props.plan?.id}
-              // initialPrices={groupByAge}
-            ></AddPlanDialog>
+            />
           </div>
           <div className="flex items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button onClick={() => handleUpdatePrice("edit")}>
-                  Actualizar precio{" "}
+                  Actualizar precio 1{" "}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -232,35 +232,37 @@ export default function DetailsPage(props: {
                 <DropdownMenuItem
                 // value="edit"
                 >
-                  <div onClick={() => setOpenAdd(true)}>Editar precio</div>
+                  <div onClick={() => setOpenAdd(true)}>Editar precio 1</div>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
-        {!isLoading &&(
-        <Tabs>
-          <TabsList>
-            <TabsTrigger value="conditional">Precios por relacion</TabsTrigger>
-            <TabsTrigger value="perAge">Precios Por Edad</TabsTrigger>
-          </TabsList>
-          <TabsContent value="conditional">
-            <LargeTable
-              // height={height}
-              headers={conditionHeaders}
-              rows={
-                data!.filter((precio) => precio.isAmountByAge === false) ?? []
-              }
-            />
-          </TabsContent>
-          <TabsContent value="perAge">
-            <LargeTable
-              // height={height}
-              headers={ageHeaders}
-              rows={groupByAge!.filter((x: any) => !x.isConditional)}
-            />
-          </TabsContent>
-        </Tabs>
+        {!isLoading && (
+          <Tabs>
+            <TabsList>
+              <TabsTrigger value="conditional">
+                Precios por relacion
+              </TabsTrigger>
+              <TabsTrigger value="perAge">Precios Por Edad</TabsTrigger>
+            </TabsList>
+            <TabsContent value="conditional">
+              <LargeTable
+                // height={height}
+                headers={conditionHeaders}
+                rows={
+                  data!.filter((precio) => precio.isAmountByAge === false) ?? []
+                }
+              />
+            </TabsContent>
+            <TabsContent value="perAge">
+              <LargeTable
+                // height={height}
+                headers={ageHeaders}
+                rows={groupByAge!.filter((x: any) => !x.isConditional)}
+              />
+            </TabsContent>
+          </Tabs>
         )}
       </section>
     </LayoutContainer>
