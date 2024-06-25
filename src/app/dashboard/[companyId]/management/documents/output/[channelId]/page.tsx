@@ -50,7 +50,7 @@ export default async function Page(props: { params: { channelId: string } }) {
       <div className="flex items-center font-semibold text-sm opacity-80">
         {channel.name} <ChevronRight />{" "}
       </div>
-      <Title>Elegir Empresa:</Title>
+      <Title>Elegir Entidad:</Title>
       {companiesArray.length > 0 ? (
         <List>
           {companiesArray.map((company) => {
@@ -65,7 +65,7 @@ export default async function Page(props: { params: { channelId: string } }) {
           })}
         </List>
       ) : (
-        <Title>No se encontro ninguna empresa para este canal de pago</Title>
+        <Title>No se encontro ninguna entidad para este canal de pago</Title>
       )}
     </>
   );

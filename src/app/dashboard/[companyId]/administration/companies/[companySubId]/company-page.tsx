@@ -125,7 +125,7 @@ export default function CompanyPage({
           </AccordionItem>
           <AccordionItem value="item-2">
             <AccordionTrigger>
-              <h2 className="text-md">Info. de la empresa</h2>
+              <h2 className="text-md">Info. de la entidad</h2>
             </AccordionTrigger>
             <AccordionContent>
               <Card className="p-5">
@@ -175,7 +175,7 @@ export default function CompanyPage({
           </AccordionItem>
           <AccordionItem value="item-5" className="border-none">
             <AccordionTrigger>
-              <h2 className="text-md">Eliminar empresa</h2>
+              <h2 className="text-md">Eliminar entidad</h2>
             </AccordionTrigger>
             <AccordionContent>
               <div className="flex justify-end">
@@ -211,16 +211,16 @@ function DeleteChannel(props: { companySubId: string }) {
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <Button variant="destructive" className="w-[160px]">
-          Eliminar empresa
+          Eliminar entidad
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            ¿Estás seguro que querés eliminar la empresa?
+            ¿Estás seguro que querés eliminar la entidad?
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Eliminar empresa permanentemente.
+            Eliminar entidad permanentemente.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

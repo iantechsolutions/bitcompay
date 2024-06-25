@@ -152,7 +152,7 @@ export default function BrandPage({
 
           <AccordionItem value="item-3">
             <AccordionTrigger>
-              <h2 className="text-md">Agregar empresa</h2>
+              <h2 className="text-md">Agregar entidad</h2>
             </AccordionTrigger>
             <AccordionContent>
               <List>

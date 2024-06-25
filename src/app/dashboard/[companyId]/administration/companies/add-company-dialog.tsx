@@ -55,7 +55,7 @@ export function AddCompanyDialog() {
       setName("");
       setDescription("");
       setConcept("");
-      toast.success("Empresa creado correctamente");
+      toast.success("Entidad creado correctamente");
       router.refresh();
       setOpen(false);
     } catch (e) {
@@ -73,19 +73,19 @@ export function AddCompanyDialog() {
     <>
       <Button onClick={() => setOpen(true)}>
         <PlusCircleIcon className="mr-2" size={20} />
-        Crear empresa
+        Crear entidad
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Crear nueva empresa</DialogTitle>
+            <DialogTitle>Crear nueva entidad</DialogTitle>
             {/* <DialogDescription>
                     
                 </DialogDescription> */}
           </DialogHeader>
           <form onSubmit={handleCreate}>
             <div>
-              <Label htmlFor="name">Nombre de la empresa</Label>
+              <Label htmlFor="name">Nombre de la entidad</Label>
               <Input
                 id="name"
                 placeholder="ej: bitcompay"
@@ -126,7 +126,7 @@ export function AddCompanyDialog() {
             </div>
             <DialogFooter>
               <Button disabled={isLoading} type="submit">
-                Crear empresa
+                Crear entidad
               </Button>
             </DialogFooter>
           </form>

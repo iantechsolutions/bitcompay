@@ -20,7 +20,7 @@ export default async function Channel(props: {
   const products = await api.products.list.query();
 
   if (!company) {
-    return <Title>No se encontró la empresa</Title>;
+    return <Title>No se encontró la entidad</Title>;
   }
 
   return <CompanyPage company={company} brands={brands} products={products} />;
