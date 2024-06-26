@@ -1,8 +1,8 @@
+import { useUser } from "@clerk/nextjs";
 import { Roles } from "../types/globals";
-import { auth } from "@clerk/nextjs/server";
 
 export const checkRole = (role: Roles) => {
-  const { sessionClaims } = auth();
+  const { user } = useUser();
 
-  return sessionClaims?.metadata.role === role;
+  return user?.publicMetadata.role === role;
 };

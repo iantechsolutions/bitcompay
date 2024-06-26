@@ -54,6 +54,8 @@ import {
 import { usePathname } from "next/navigation";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import Sidenav, { SidenavItem, SidenavSeparator } from "./sidenav";
+import { useUser } from "@clerk/nextjs";
+import { checkRole } from "~/lib/utils/roles";
 
 export default function CompanySidenav() {
   const menu: Record<string, string> = {
@@ -68,6 +70,7 @@ export default function CompanySidenav() {
     Proveedores: "management/suppliers/",
     Documentos: "management/documents/",
   };
+  const isAdmin = checkRole("admin");
   const pathname = usePathname();
   const isActive = (href: keyof typeof menu) => {
     if (href !== undefined) {
@@ -108,55 +111,57 @@ export default function CompanySidenav() {
             </SidenavItem>
           </AccordionContent>
         </AccordionItem>
-        <AccordionItem value="item-3" className="border-none">
-          <AccordionTrigger
-            className={
-              isActive("Administracion")
-                ? "rounded-lg bg-[#1bdfb7] px-1 py-1.5 hover:no-underline"
-                : "rounded-lg px-1 py-1.5 hover:no-underline"
-            }
-          >
-            <SidenavSeparator>Administracion</SidenavSeparator>
-          </AccordionTrigger>
-          <AccordionContent>
-            <SidenavItem
-              href={`/dashboard/administration/companies`}
-              icon={<BriefcaseBusiness />}
+        {isAdmin && (
+          <AccordionItem value="item-3" className="border-none">
+            <AccordionTrigger
+              className={
+                isActive("Administracion")
+                  ? "rounded-lg bg-[#1bdfb7] px-1 py-1.5 hover:no-underline"
+                  : "rounded-lg px-1 py-1.5 hover:no-underline"
+              }
             >
-              Entidades
-            </SidenavItem>
-            <SidenavItem
-              href={`/dashboard/administration/products`}
-              icon={<Package />}
-            >
-              Productos
-            </SidenavItem>
-            <SidenavItem
-              href={`/dashboard/administration/channels`}
-              icon={<Sliders />}
-            >
-              Canales
-            </SidenavItem>
-            <SidenavItem
-              href={`/dashboard/administration/brands`}
-              icon={<Tag />}
-            >
-              Marcas
-            </SidenavItem>
-            <SidenavItem
-              href={`/dashboard/administration/services`}
-              icon={<Wrench />}
-            >
-              Servicios
-            </SidenavItem>
-            <SidenavItem
-              href={`/dashboard/administration/quotes`}
-              icon={<FileText />}
-            >
-              Cotizaciones
-            </SidenavItem>
-          </AccordionContent>
-        </AccordionItem>
+              <SidenavSeparator>Administracion</SidenavSeparator>
+            </AccordionTrigger>
+            <AccordionContent>
+              <SidenavItem
+                href={`/dashboard/administration/companies`}
+                icon={<BriefcaseBusiness />}
+              >
+                Entidades
+              </SidenavItem>
+              <SidenavItem
+                href={`/dashboard/administration/products`}
+                icon={<Package />}
+              >
+                Productos
+              </SidenavItem>
+              <SidenavItem
+                href={`/dashboard/administration/channels`}
+                icon={<Sliders />}
+              >
+                Canales
+              </SidenavItem>
+              <SidenavItem
+                href={`/dashboard/administration/brands`}
+                icon={<Tag />}
+              >
+                Marcas
+              </SidenavItem>
+              <SidenavItem
+                href={`/dashboard/administration/services`}
+                icon={<Wrench />}
+              >
+                Servicios
+              </SidenavItem>
+              <SidenavItem
+                href={`/dashboard/administration/quotes`}
+                icon={<FileText />}
+              >
+                Cotizaciones
+              </SidenavItem>
+            </AccordionContent>
+          </AccordionItem>
+        )}
         <AccordionItem value="item-2" className="border-none">
           <AccordionTrigger
             className={
