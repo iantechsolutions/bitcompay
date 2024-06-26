@@ -32,9 +32,7 @@ export default function AddEstablishment(props: AddEstablishmentProps) {
   const [flag, setFlag] = useState("");
   const [open, setOpen] = useState(false);
   const router = useRouter();
-  const { data: brands } = api.brands.getbyCompany.useQuery({
-    companyId: props.companyId,
-  });
+  const { data: brands } = api.brands.getbyCurrentCompany.useQuery();
 
   const selectBrandOptions = brands?.map((brand) => (
     <SelectItem key={brand!.id} value={brand!.id}>

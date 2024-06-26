@@ -14,9 +14,7 @@ export default async function Page() {
   const liquidationsFull = await api.liquidations.list.query();
   //filter liquidations where companyId is equal to the companyId in the URL and estado: "pendiente"
   const { orgId } = auth();
-  const possibleBrands = await api.brands.getbyCompany.query({
-    companyId: orgId!,
-  });
+  const possibleBrands = await api.brands.getbyCurrentCompany.query();
   const liquidations = liquidationsFull.filter(
     (liquidation) =>
       // possibleBrands.some((brand) => brand?.id === liquidation.brandId) &&

@@ -8,17 +8,11 @@ export const companiesRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({}) => {
     return await db.query.companies.findMany();
   }),
-
-  get: protectedProcedure
-    .input(
-      z.object({
-        companyId: z.string(),
-      })
-    )
-    .query(async ({ input, ctx }) => {
-      const companyId = ctx.session.orgId;
-      const company = await db.query.companies.findFirst({
-        where: eq(schema.companies.id, companyId!),
+  getById: protectedProcedure
+    .input(z.object({ companyId: z.string() }))
+    .query(async ({ input }) => {
+      const company_found = await db.query.companies.findFirst({
+        where: eq(schema.companies.id, input.companyId),
         with: {
           products: {},
           brands: {
@@ -38,8 +32,33 @@ export const companiesRouter = createTRPCRouter({
           },
         },
       });
-      return company;
+      return company_found;
     }),
+  get: protectedProcedure.query(async ({ input, ctx }) => {
+    const companyId = ctx.session.orgId;
+    const company = await db.query.companies.findFirst({
+      where: eq(schema.companies.id, companyId!),
+      with: {
+        products: {},
+        brands: {
+          columns: {
+            companyId: false,
+            brandId: false,
+          },
+
+          with: {
+            brand: {
+              columns: {
+                name: true,
+                id: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    return company;
+  }),
 
   getRelated: protectedProcedure
     .input(

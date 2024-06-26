@@ -17,7 +17,6 @@ import { LargeTable } from "~/components/table";
 import { LargeEditableTable } from "~/components/editable-table";
 import { toast } from "sonner";
 import { asTRPCError } from "~/lib/errors";
-import { useCompanyData } from "../../../../company-provider";
 import {
   Table,
   TableBody,
@@ -66,8 +65,6 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
 
   const [documentType] = useState<"rec">("rec");
 
-  const company = useCompanyData();
-
   let fileSizeLabel: React.ReactNode = null;
 
   if (upload.fileSize < 1000) {
@@ -107,7 +104,7 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
     }
 
     try {
-      await confirmUpload({ id: upload.id, companyId: company.id });
+      await confirmUpload({ id: upload.id });
       toast.success("Documento cargado correctamente");
       setConfirmed(true);
       router.refresh();
@@ -171,7 +168,6 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
         await readUploadContents({
           id: upload.id,
           type: documentType,
-          companyId: company.id,
         });
 
       if (data) {

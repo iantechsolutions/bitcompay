@@ -11,12 +11,12 @@ export default async function Page(props: {
     await api.channels.get.query({
       channelId: props.params.channelId,
     });
-  const company: RouterOutputs["companies"]["get"] =
-    await api.companies.get.query({
+  const company: RouterOutputs["companies"]["getById"] =
+    await api.companies.getById.query({
       companyId: props.params.companySubId,
     });
-  const brands: RouterOutputs["brands"]["getbyCompany"] =
-    await api.brands.getbyCompany.query({
+  const brands: RouterOutputs["brands"]["getBrandsByCompany"] =
+    await api.brands.getBrandsByCompany.query({
       companyId: props.params.companySubId,
     });
 

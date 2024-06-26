@@ -9,16 +9,14 @@ import AccessDenied from "../accessdenied/page";
 export default async function Layout(props: { children?: React.ReactNode }) {
   const { orgId } = auth();
   if (orgId) {
-    const company = await api.companies.get.query({
-      companyId: orgId!,
-    });
+    const company = await api.companies.get.query();
 
     return (
       <>
         <AppLayout
           headerClass="bg-[#e9fcf8]"
           sidenavClass="top-0"
-          sidenav={<CompanySidenav companyId={company!.id!} />}
+          sidenav={<CompanySidenav />}
         >
           <CompanyProvider company={company}>{props.children}</CompanyProvider>
         </AppLayout>

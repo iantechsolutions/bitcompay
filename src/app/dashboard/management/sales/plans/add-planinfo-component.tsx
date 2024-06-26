@@ -70,9 +70,7 @@ export default function AddPlanInfoComponent({ planId }: AddPlanDialogProps) {
     }
   }, [planData]);
 
-  const { data: brands } = api.brands.getbyCompany.useQuery({
-    companyId: company.id,
-  });
+  const { data: brands } = api.brands.getbyCurrentCompany.useQuery();
   const { mutateAsync: createPlan } = api.plans.create.useMutation();
   const { mutateAsync: updatePlan } = api.plans.change.useMutation();
 
@@ -99,7 +97,8 @@ export default function AddPlanInfoComponent({ planId }: AddPlanDialogProps) {
         <Label>Marca</Label>
         <Select
           onValueChange={(value: string) => setBrand(value)}
-          value={brand}>
+          value={brand}
+        >
           <SelectTrigger>
             <SelectValue placeholder="Seleccione una marca" />
           </SelectTrigger>

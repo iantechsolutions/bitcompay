@@ -511,6 +511,7 @@ export const bussinessUnitsRelations = relations(
 
 export const healthInsurances = pgTable("health_insurances", {
   id: columnId,
+  companyId: varchar("companyId", { length: 255 }).references(() => companies.id),
   name: varchar("name", { length: 255 }).notNull(),
   identificationNumber: varchar("identificationNumber", { length: 255 }),
 });

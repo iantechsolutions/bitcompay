@@ -4,7 +4,7 @@ import { Title } from "~/components/title";
 import { api } from "~/trpc/server";
 import { AddProductDialog } from "./add-product-dialog";
 
-export default async function Home(props: { params: { companyId: string } }) {
+export default async function Home() {
   const products = await api.products.list.query();
   return (
     <LayoutContainer>
