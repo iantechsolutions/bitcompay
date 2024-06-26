@@ -23,7 +23,6 @@ export function SetDefaultOrganization() {
       if (setActive) setActive({ organization: firstOrg.id });
     }
   }, [user, userMemberships.data, setActive]);
-  console.log("userMemberships", userMemberships);
   if (userMemberships.isLoading) return <></>;
   if (!userMemberships.isLoading && userMemberships.data?.length == 0)
     return <AccessDenied />;

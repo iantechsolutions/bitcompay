@@ -18,7 +18,7 @@ export default async function Layout(props: { children?: React.ReactNode }) {
         <AppLayout
           headerClass="bg-[#e9fcf8]"
           sidenavClass="top-0"
-          sidenav={<CompanySidenav companyId={company!.id!} />}
+          sidenav={<CompanySidenav />}
         >
           <CompanyProvider company={company}>{props.children}</CompanyProvider>
         </AppLayout>
