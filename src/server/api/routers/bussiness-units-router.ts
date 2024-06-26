@@ -12,8 +12,10 @@ export const bussinessUnitsRouter = createTRPCRouter({
       });
       return bussinessUnit_found;
     }),
-  list: protectedProcedure.query(async () => {
-    const bussinessUnits = await db.query.bussinessUnits.findMany();
+  list: protectedProcedure.query(async ({ ctx }) => {
+    const bussinessUnits = await db.query.bussinessUnits.findMany({
+      where: eq(schema.bussinessUnits.companyId, ctx.session.orgId!),
+    });
     return bussinessUnits;
   }),
   create: protectedProcedure

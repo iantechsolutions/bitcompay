@@ -17,13 +17,10 @@ import { useRouter } from "next/navigation";
 
 interface unconfirmedPageProps {
   upload: RouterOutputs["excelDeserialization"]["upload"];
-  companyId: string;
 }
-export const maxDuration = 60;
-export const dynamic = "force-dynamic";
 
 export default function UnconfirmedPage(props: unconfirmedPageProps) {
-  const { upload, companyId } = props;
+  const { upload } = props;
   const [confirmed, setConfirmed] = useState(upload!.confirmed);
   const [data, setData] = useState<
     RouterOutputs["excelDeserialization"]["deserialization"] | null
@@ -45,7 +42,6 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
     const data = await readData({
       type: "rec",
       id: upload!.id,
-      companyId: companyId,
     });
     setData(data);
   }
@@ -53,7 +49,6 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
     await confirmData({
       type: "rec",
       uploadId: upload!.id,
-      companyId: companyId,
     });
     toast.success("Datos subidos correctamente");
     router.push(`./`);

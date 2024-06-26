@@ -883,6 +883,9 @@ export const procedure = pgTable("procedure", {
   type: varchar("type", { length: 255 }),
   estado: varchar("estado", { length: 255 }).notNull(),
   family_group: varchar("family_group"),
+  companyId: varchar("companyId", { length: 255 })
+    .notNull()
+    .references(() => companies.id),
 });
 
 export const ProcedureRelations = relations(procedure, ({ many }) => ({
