@@ -90,7 +90,6 @@ export default function PlanPage(props: {
       }
     });
   }, []);
-  const company = useCompanyData();
 
   return (
     <LayoutContainer>
@@ -113,7 +112,7 @@ export default function PlanPage(props: {
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <Link
-                      href={`/dashboard/${company.id}/management/sales/plans/${props.plan?.id}/edit`}>
+                      href={`/dashboard/management/sales/plans/${props.plan?.id}/edit`}>
                       Ir a editar precio
                     </Link>
                   </DropdownMenuItem>
@@ -132,7 +131,7 @@ export default function PlanPage(props: {
                     </Badge>
                   }
                   key={fecha.toISOString().split("T")[0]}
-                  href={`/dashboard/${company.id}/management/sales/plans/${
+                  href={`/dashboard/management/sales/plans/${
                     props.plan?.id
                   }/${fecha.getTime()}`}
                   title={`Vigente desde: ${

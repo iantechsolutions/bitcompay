@@ -5,7 +5,7 @@ import { Title } from "~/components/title";
 import { api } from "~/trpc/server";
 import { AddProviderDialog } from "./add-provider-dialog";
 
-export default async function Page(props: { params: { companyId: string } }) {
+export default async function Page() {
   const providers = await api.providers.list.query();
   return (
     <LayoutContainer>
@@ -19,7 +19,7 @@ export default async function Page(props: { params: { companyId: string } }) {
             return (
               <ListTile
                 key={provider.id}
-                href={`/dashboard/${props.params.companyId}/management/suppliers/${provider.id}`}
+                href={`/dashboard/management/suppliers/${provider.id}`}
                 title={provider.name}
                 leading={<CircleUserRound />}
               />

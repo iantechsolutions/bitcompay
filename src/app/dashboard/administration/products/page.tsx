@@ -1,8 +1,8 @@
-import LayoutContainer from '~/components/layout-container'
-import { List, ListTile } from '~/components/list'
-import { Title } from '~/components/title'
-import { api } from '~/trpc/server'
-import { AddProductDialog } from './add-product-dialog'
+import LayoutContainer from "~/components/layout-container";
+import { List, ListTile } from "~/components/list";
+import { Title } from "~/components/title";
+import { api } from "~/trpc/server";
+import { AddProductDialog } from "./add-product-dialog";
 
 export default async function Home(props: { params: { companyId: string } }) {
   const products = await api.products.list.query();
@@ -19,7 +19,7 @@ export default async function Home(props: { params: { companyId: string } }) {
               <ListTile
                 key={product.id}
                 leading={product.number}
-                href={`/dashboard/${props.params.companyId}/administration/products/${product.id}`}
+                href={`/dashboard/administration/products/${product.id}`}
                 title={product.name}
               />
             );

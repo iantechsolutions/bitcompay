@@ -5,7 +5,7 @@ import { api } from "~/trpc/server";
 import { Badge } from "~/components/ui/badge";
 import AddPlanDialog from "./add-plan-dialog";
 
-export default async function Page(props: { params: { companyId: string } }) {
+export default async function Page() {
   // cambiar luego por tramite router
   const planes = await api.plans.list.query();
   return (
@@ -19,7 +19,7 @@ export default async function Page(props: { params: { companyId: string } }) {
           {planes.map((planes) => (
             <ListTile
               key={planes.id}
-              href={`/dashboard/${props.params.companyId}/management/sales/plans/${planes.id}`}
+              href={`/dashboard/management/sales/plans/${planes.id}`}
               leading={<Badge>{planes.description}</Badge>}
               title={planes.plan_code}
             />

@@ -4,7 +4,7 @@ import LayoutContainer from "~/components/layout-container";
 import { AddStatusDialog } from "./add-status-dialog";
 import { api } from "~/trpc/server";
 
-export default async function StatusPage(props: { params: { companyId: string } }) {
+export default async function StatusPage() {
   const statuses = await api.status.list.query();
 
   return (
@@ -20,7 +20,7 @@ export default async function StatusPage(props: { params: { companyId: string } 
               <ListTile
                 leading={status.code}
                 key={status.id}
-                href={`/dashboard/${props.params.companyId}/maintenance/tables/status/${status.id}`}
+                href={`/dashboard/maintenance/tables/status/${status.id}`}
                 title={status.description}
               />
             );

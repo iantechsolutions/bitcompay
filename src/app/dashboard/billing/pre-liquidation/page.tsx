@@ -7,14 +7,16 @@ import AddPreLiquidation from "./add-pre-liquidation";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import "dayjs/locale/es";
+import { auth } from "@clerk/nextjs/server";
 dayjs.extend(utc);
 dayjs.locale("es");
 
-export default async function Page(props: { params: { companyId: string } }) {
+export default async function Page() {
   const liquidationsFull = await api.liquidations.list.query();
   //filter liquidations where companyId is equal to the companyId in the URL and estado: "pendiente"
+  const { orgId } = auth();
   const possibleBrands = await api.brands.getbyCompany.query({
-    companyId: props.params.companyId,
+    companyId: orgId!,
   });
   const liquidations = liquidationsFull.filter(
     (liquidation) =>
@@ -26,14 +28,14 @@ export default async function Page(props: { params: { companyId: string } }) {
       <section className="space-y-2">
         <div className="flex justify-between">
           <Title>Pre-Liquidation</Title>
-          <AddPreLiquidation companyId={props.params.companyId} />
+          <AddPreLiquidation companyId={orgId!} />
         </div>
         <List>
           {liquidations.map((provider) => {
             return (
               <ListTile
                 key={provider.id}
-                href={`/dashboard/${props.params.companyId}/billing/pre-liquidation/${provider.id}`}
+                href={`/dashboard/billing/pre-liquidation/${provider.id}`}
                 title={
                   provider.razon_social +
                   " " +

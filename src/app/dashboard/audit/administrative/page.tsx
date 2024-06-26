@@ -7,7 +7,7 @@ import { CircleUserRound } from "lucide-react";
 export default async function Page(props: { params: { companyId: string } }) {
   const procedure = await api.procedure.list.query();
   const procedureComplete = procedure.filter(
-    (procedure) => procedure.estado === "pendiente",
+    (procedure) => procedure.estado === "pendiente"
   );
 
   return (
@@ -21,7 +21,7 @@ export default async function Page(props: { params: { companyId: string } }) {
             return (
               <ListTile
                 key={procedureComplete.id}
-                href={`/dashboard/${props.params.companyId}/audit/administrative/${procedureComplete.id}`}
+                href={`/dashboard/audit/administrative/${procedureComplete.id}`}
                 leading={procedureComplete.estado}
                 title={procedureComplete.id}
               />

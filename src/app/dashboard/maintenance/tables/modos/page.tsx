@@ -5,7 +5,7 @@ import { api } from "~/trpc/server";
 import { AddModo } from "./add-modo";
 import { modos } from "~/server/db/schema";
 
-export default async function Home(props: { params: { companyId: string } }) {
+export default async function Home() {
   const modo = await api.modos.list.query();
   return (
     <LayoutContainer>
@@ -20,7 +20,7 @@ export default async function Home(props: { params: { companyId: string } }) {
               <ListTile
                 key={modo.id}
                 leading={modo.description}
-                href={`/dashboard/${props.params.companyId}/maintenance/tables/modos/${modo.id}`}
+                href={`/dashboard/maintenance/tables/modos/${modo.id}`}
                 title={modo.id}
               />
             );

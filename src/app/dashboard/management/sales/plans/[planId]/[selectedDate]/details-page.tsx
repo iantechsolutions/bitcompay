@@ -169,7 +169,8 @@ export default function DetailsPage(props: {
                         className={cn(
                           "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
                           !validity_date && "text-muted-foreground"
-                        )}>
+                        )}
+                      >
                         <p>
                           {validity_date ? (
                             dayjs(validity_date).format("D [de] MMMM [de] YYYY")

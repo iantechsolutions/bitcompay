@@ -3,8 +3,7 @@ import { List, ListTile } from "~/components/list";
 import LayoutContainer from "~/components/layout-container";
 import { api } from "~/trpc/server";
 
-
-export default async function Home(props: { params: { companyId: string } }) {
+export default async function Home() {
   const documentos = await api.uploads.list.query();
   return (
     <LayoutContainer>
@@ -17,7 +16,7 @@ export default async function Home(props: { params: { companyId: string } }) {
             return (
               <ListTile
                 key={documentos.id}
-                href={`/dashboard/${props.params.companyId}/maintenance/tables/uploaded_documents/${documentos.id}`}
+                href={`/dashboard/maintenance/tables/uploaded_documents/${documentos.id}`}
                 title={documentos.id}
               />
             );

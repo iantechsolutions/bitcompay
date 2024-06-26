@@ -4,7 +4,7 @@ import { Title } from "~/components/title";
 import { api } from "~/trpc/server";
 import { AddCompanyDialog } from "./add-company-dialog";
 
-export default async function Home(props: { params: { companyId: string } }) {
+export default async function Home() {
   const companies = await api.companies.list.query();
 
   return (
@@ -19,7 +19,7 @@ export default async function Home(props: { params: { companyId: string } }) {
             return (
               <ListTile
                 key={company.id}
-                href={`/dashboard/${props.params.companyId}/administration/companies/${company.id}`}
+                href={`/dashboard/administration/companies/${company.id}`}
                 title={company.name}
               />
             );

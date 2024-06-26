@@ -142,10 +142,11 @@ export const brandsRouter = createTRPCRouter({
 
   addRelation: protectedProcedure
     .input(z.object({ companyId: z.string(), brandId: z.string() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      const companyId = ctx.session.orgId;
       await db
         .insert(schema.companiesToBrands)
-        .values({ brandId: input.brandId, companyId: input.companyId });
+        .values({ brandId: input.brandId, companyId: companyId! });
     }),
 
   deleteRelation: protectedProcedure
