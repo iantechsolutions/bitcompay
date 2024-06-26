@@ -1,5 +1,5 @@
 "use client";
-import { CircleX, PlusCircle, PlusCircleIcon } from "lucide-react";
+import { CircleX, PlusCircle, PlusCircleIcon, Loader2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
@@ -31,6 +31,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Button } from "~/components/ui/button";
+import { toast } from "sonner";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { PlanSchema } from "~/server/forms/plans-schema";
 import { api } from "~/trpc/react";
@@ -44,9 +45,13 @@ dayjs.locale("es");
 
 type AddPlanDialogProps = {
   planId?: string;
+  onPlanIdChange?: (planId: string) => void;
 };
 
-export default function AddPlanInfoComponent({ planId }: AddPlanDialogProps) {
+export default function AddPlanInfoComponent({
+  planId,
+  onPlanIdChange,
+}: AddPlanDialogProps) {
   const company = useCompanyData();
   const [brand, setBrand] = useState("");
   const [codigo, setCodigo] = useState("");
@@ -73,8 +78,10 @@ export default function AddPlanInfoComponent({ planId }: AddPlanDialogProps) {
   const { data: brands } = api.brands.getbyCompany.useQuery({
     companyId: company.id,
   });
-  const { mutateAsync: createPlan } = api.plans.create.useMutation();
-  const { mutateAsync: updatePlan } = api.plans.change.useMutation();
+  const { mutateAsync: createPlan, isLoading: isCreating } =
+    api.plans.create.useMutation();
+  const { mutateAsync: updatePlan, isLoading: isUpdating } =
+    api.plans.change.useMutation();
 
   async function handleSumbit() {
     if (planId) {
@@ -84,12 +91,17 @@ export default function AddPlanInfoComponent({ planId }: AddPlanDialogProps) {
         plan_code: codigo,
         description: descripcion,
       });
+      toast.success("Plan actualizado correctamente");
     } else {
       const plan = await createPlan({
         brand_id: brand,
         plan_code: codigo,
         description: descripcion,
       });
+      if (onPlanIdChange) {
+        onPlanIdChange(plan[0]!.id);
+      }
+      toast.success("Plan creado correctamente");
     }
   }
 
@@ -112,26 +124,34 @@ export default function AddPlanInfoComponent({ planId }: AddPlanDialogProps) {
           </SelectContent>
         </Select>
       </div>
-      <div className="flex justify-between">
-        <div>
-          <Label>Codigo</Label>
-          <Input
-            className="border-green-300 focus-visible:ring-green-400 w-[100px]"
-            type="text"
-            value={codigo}
-            onChange={(e) => setCodigo(e.target.value)}
-          />
-        </div>
-        <div>
-          <Label>Descripcion</Label>
-          <Input
-            className="border-green-300 focus-visible:ring-green-400 w-[100px]"
-            type="text"
-            value={descripcion}
-            onChange={(e) => setDescripcion(e.target.value)}
-          />
-        </div>
+      <div>
+        <Label>Codigo</Label>
+        <Input
+          className="border-green-300 focus-visible:ring-green-400 w-[100px]"
+          type="text"
+          value={codigo}
+          onChange={(e) => setCodigo(e.target.value)}
+        />
       </div>
+      <div>
+        <Label>Descripcion</Label>
+        <Input
+          className="border-green-300 focus-visible:ring-green-400 w-[100px]"
+          type="text"
+          value={descripcion}
+          onChange={(e) => setDescripcion(e.target.value)}
+        />
+      </div>
+
+      <Button
+        onClick={handleSumbit}
+        disabled={isCreating || isUpdating}
+        className="mt-4">
+        {(isCreating || isUpdating) && (
+          <Loader2Icon className="mr-2 animate-spin" size={20} />
+        )}
+        {planId ? "Actualizar plan" : "Agregar Plan"}
+      </Button>
     </>
   );
 }

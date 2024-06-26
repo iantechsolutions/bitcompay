@@ -3,6 +3,13 @@ import { useRouter } from "next/navigation";
 import { cn } from "~/lib/utils";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "~/components/ui/select";
 import { Badge } from "~/components/ui/badge";
 import { List, ListTile } from "~/components/list";
 import utc from "dayjs/plugin/utc";
@@ -41,6 +48,7 @@ dayjs.locale("es");
 export default function PlanPage(props: {
   plan: RouterOutputs["plans"]["get"];
 }) {
+  const router = useRouter();
   const formatter = new Intl.DateTimeFormat("es-ES", {
     weekday: "long",
     year: "numeric",
@@ -48,25 +56,13 @@ export default function PlanPage(props: {
     day: "numeric",
   });
   const [arrayFechas, setArrayFechas] = useState<Date[]>([]);
-  const [vigente, setVigente] = useState<Date | null>(null);
   const [open, setOpen] = useState<boolean>(false);
-  // const [validity_date, setValidity_date] = useState<Date | null>(null);
-  // const [percent, setPercent] = useState("");
-  // const { mutateAsync: createPricePerAge } =
-  //   api.pricePerAge.create.useMutation();
-
-  // function handleUpdatePrice() {
-  //   props.plan?.pricesPerAge.forEach((price) => {
-  //     createPricePerAge({
-  //       plan_id: props.plan?.id ?? "",
-  //       amount: price.amount * (1 + parseFloat(percent) / 100),
-  //       age: price.age ?? 0,
-  //       condition: price.condition ?? "",
-  //       isAmountByAge: price.isAmountByAge,
-  //       validy_date: validity_date ?? new Date(),
-  //     });
-  //   });
-  // }
+  const [anio, setAnio] = useState(2020);
+  const [mes, setMes] = useState(0);
+  const [vigente, setVigente] = useState<Date>();
+  const [percent, setPercent] = useState("");
+  const { mutateAsync: createPricePerAge } =
+    api.pricePerCondition.create.useMutation();
 
   useEffect(() => {
     props.plan?.pricesPerCondition?.map((precio) => {
@@ -75,22 +71,34 @@ export default function PlanPage(props: {
         if (!arrayFechas.find((x) => x.getTime() == fecha.getTime()!)) {
           arrayFechas.push(fecha);
         }
-      }
 
-      const uniqueFechas = [...arrayFechas];
-      uniqueFechas.sort((a, b) => b.getTime() - a.getTime());
-      setArrayFechas(uniqueFechas);
+        const today = new Date();
+        const fechasPasadas = arrayFechas.filter((fecha) => fecha < today);
 
-      const today = new Date();
-      const fechasPasadas = uniqueFechas.filter((fecha) => fecha < today);
-
-      if (fechasPasadas.length > 0) {
-        fechasPasadas.sort((a, b) => b.getTime() - a.getTime());
-        setVigente(fechasPasadas[0]!);
+        if (fechasPasadas.length > 0) {
+          fechasPasadas.sort((a, b) => b.getTime() - a.getTime());
+          setVigente(fechasPasadas[0]!);
+        }
       }
     });
+    const sortedArrayFechas = [...arrayFechas];
+    sortedArrayFechas.sort((a, b) => b.getTime() - a.getTime());
+    setArrayFechas(sortedArrayFechas);
   }, []);
-
+  const company = useCompanyData();
+  function handleUpdatePrice() {
+    props.plan?.pricesPerCondition.forEach((price) => {
+      createPricePerAge({
+        plan_id: props.plan?.id ?? "",
+        amount: price.amount * (1 + parseFloat(percent) / 100),
+        from_age: price.from_age ?? 0,
+        to_age: price.to_age ?? 0,
+        condition: price.condition ?? "",
+        isAmountByAge: price.isAmountByAge,
+        validy_date: new Date(anio, mes, 1),
+      });
+    });
+  }
   return (
     <LayoutContainer>
       <section className="space-y-2">
@@ -98,6 +106,11 @@ export default function PlanPage(props: {
           <div className="flex justify-between">
             <Title>{props.plan!.description}</Title>
             <div className="flex items-center">
+              <Button
+                className="mr-2"
+                onClick={() => router.push(`./${props.plan?.id}/editInfo`)}>
+                Actualizar info{" "}
+              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button onClick={() => setOpen(true)}>
@@ -112,7 +125,7 @@ export default function PlanPage(props: {
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <Link
-                      href={`/dashboard/management/sales/plans/${props.plan?.id}/edit`}>
+                      href={`/dashboard/management/sales/plans/info/${props.plan?.id}/editPrice`}>
                       Ir a editar precio
                     </Link>
                   </DropdownMenuItem>
@@ -122,18 +135,17 @@ export default function PlanPage(props: {
           </div>
           <List>
             {arrayFechas.map((fecha) => {
-              const esVigente = fecha.getTime() === vigente!.getTime();
               return (
                 <ListTile
                   leading={
-                    <Badge variant={esVigente ? "default" : "outline"}>
-                      {esVigente ? "Vigente" : "No Vigente"}
+                    <Badge variant={fecha === vigente ? "default" : "outline"}>
+                      {fecha === vigente ? "Vigente" : "No Vigente"}
                     </Badge>
                   }
                   key={fecha.toISOString().split("T")[0]}
-                  href={`/dashboard/management/sales/plans/${
+                  href={`/dashboard/management/sales/plans/info/${
                     props.plan?.id
-                  }/${fecha.getTime()}`}
+                  }/details/${fecha.getTime()}`}
                   title={`Vigente desde: ${
                     formatter.format(fecha).charAt(0).toUpperCase() +
                     formatter.format(fecha).slice(1)
@@ -144,44 +156,44 @@ export default function PlanPage(props: {
           </List>
         </div>
       </section>
-      {/* 
+
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[600px] overflow-y-visible">
           <DialogHeader>
             <DialogTitle>Actualizar porcentualmente precio de plan</DialogTitle>
           </DialogHeader>
+          <Label htmlFor="validy_date">Mes de vigencia</Label>
+          <Select
+            onValueChange={(e) => setMes(Number(e))}
+            defaultValue={mes.toString()}>
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccione un mes" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="0">Enero</SelectItem>
+              <SelectItem value="1">Febrero</SelectItem>
+              <SelectItem value="2">Marzo</SelectItem>
+              <SelectItem value="3">Abril</SelectItem>
+              <SelectItem value="4">Mayo</SelectItem>
+              <SelectItem value="5">Junio</SelectItem>
+              <SelectItem value="6">Julio</SelectItem>
+              <SelectItem value="7">Agosto</SelectItem>
+              <SelectItem value="8">Septiembre</SelectItem>
+              <SelectItem value="9">Octubre</SelectItem>
+              <SelectItem value="10">Noviembre</SelectItem>
+              <SelectItem value="11">Diciembre</SelectItem>
+            </SelectContent>
+          </Select>
           <div>
-            <Label>Fecha de vigencia</Label>
-            <br />
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={"outline"}
-                  className={cn(
-                    "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
-                    !validity_date && "text-muted-foreground"
-                  )}>
-                  <p>
-                    {validity_date ? (
-                      dayjs(validity_date).format("D [de] MMMM [de] YYYY")
-                    ) : (
-                      <span>Seleccione una fecha</span>
-                    )}
-                  </p>
-                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={validity_date ?? undefined}
-                  onSelect={(e) => setValidity_date(e)}
-                  disabled={(date) => date < new Date()}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+            <Label>Año de Vigencia</Label>
+            <Input
+              className="border-green-300 focus-visible:ring-green-400 w-[100px]"
+              type="number"
+              value={anio}
+              onChange={(e) => setAnio(Number(e.target.value))}
+            />
           </div>
+
           <div>
             <Label htmlFor="number">Porcentaje de aumento</Label>
             <Input
@@ -195,7 +207,7 @@ export default function PlanPage(props: {
             <Button onClick={handleUpdatePrice}>Actualizar precio</Button>
           </div>
         </DialogContent>
-      </Dialog> */}
+      </Dialog>
     </LayoutContainer>
   );
 }

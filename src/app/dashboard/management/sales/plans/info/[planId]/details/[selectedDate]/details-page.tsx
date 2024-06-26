@@ -35,7 +35,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import Link from "next/link";
 // import AddPlanDialogPerPrice from "./AddPlanDialog";
 
 dayjs.extend(utc);
@@ -79,12 +78,11 @@ export default function DetailsPage(props: {
       planId: props.plan?.id,
       createdAt: props.date,
     });
-
-  const fecha = props.date.getTime();
-  const plan = props.plan?.id;
+  console.log(data);
 
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [openAdd, setOpenAdd] = useState(false);
   const [percent, setPercent] = useState("");
   const [validity_date, setValidity_date] = useState<Date>();
 
@@ -209,6 +207,14 @@ export default function DetailsPage(props: {
               </DialogContent>
             </Dialog>
           </div>
+          {/* <div>
+            <AddPlanDialog
+              openExterior={openAdd}
+              setOpenExterior={setOpenAdd}
+              planId={props.plan?.id}
+              initialPrices={groupByAge}
+            ></AddPlanDialog>
+          </div> */}
           <div className="flex items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -230,10 +236,7 @@ export default function DetailsPage(props: {
                 <DropdownMenuItem
                 // value="edit"
                 >
-                  <Link
-                    href={`/dashboard/management/sales/plans/${plan}/${fecha}`}>
-                    Editar precio
-                  </Link>
+                  <div onClick={() => setOpenAdd(true)}>Editar precio</div>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
