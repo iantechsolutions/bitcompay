@@ -34,7 +34,6 @@ export const excelDeserializationRouter = createTRPCRouter({
       z.object({
         type: z.literal("rec"),
         id: z.string(),
-        companyId: z.string(),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -49,7 +48,6 @@ export const excelDeserializationRouter = createTRPCRouter({
       z.object({
         type: z.literal("rec"),
         uploadId: z.string(),
-        companyId: z.string(),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -94,6 +92,7 @@ export const excelDeserializationRouter = createTRPCRouter({
               .values({
                 type: "alta",
                 estado: "finalizado",
+                companyId: ctx.session.orgId!,
               })
               .returning();
             console.log("creando grupo familiar");

@@ -4,7 +4,7 @@ import { Title } from "~/components/title";
 import { api } from "~/trpc/server";
 import { AddChannelDialog } from "./add-channel-dialog";
 
-export default async function Home(props: { params: { companyId: string } }) {
+export default async function Home() {
   const channels = await api.channels.list.query();
   return (
     <LayoutContainer>

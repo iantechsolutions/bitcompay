@@ -38,6 +38,7 @@ export default function ChannelPage({
   channel,
 }: {
   channel: NonNullable<RouterOutputs["channels"]["get"]>;
+  // user: NavUserData;
 }) {
   const [requiredColumns, setRequiredColumns] = useState<Set<string>>(
     new Set(channel.requiredColumns)

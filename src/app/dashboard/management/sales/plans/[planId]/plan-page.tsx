@@ -8,7 +8,6 @@ import { List, ListTile } from "~/components/list";
 import utc from "dayjs/plugin/utc";
 import LayoutContainer from "~/components/layout-container";
 import { Title } from "~/components/title";
-import { useCompanyData } from "~/app/dashboard/[companyId]/company-provider";
 import { type RouterOutputs } from "~/trpc/shared";
 import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
@@ -48,7 +47,7 @@ export default function PlanPage(props: {
     day: "numeric",
   });
   const [arrayFechas, setArrayFechas] = useState<Date[]>([]);
-  // const [vigente, setVigente] = useState<Date | null>(null);
+  const [vigente, setVigente] = useState<Date | null>(null);
   const [open, setOpen] = useState<boolean>(false);
   // const [validity_date, setValidity_date] = useState<Date | null>(null);
   // const [percent, setPercent] = useState("");
@@ -76,12 +75,20 @@ export default function PlanPage(props: {
           arrayFechas.push(fecha);
         }
       }
+
+      const uniqueFechas = [...arrayFechas];
+      uniqueFechas.sort((a, b) => b.getTime() - a.getTime());
+      setArrayFechas(uniqueFechas);
+
+      const today = new Date();
+      const fechasPasadas = uniqueFechas.filter((fecha) => fecha < today);
+
+      if (fechasPasadas.length > 0) {
+        fechasPasadas.sort((a, b) => b.getTime() - a.getTime());
+        setVigente(fechasPasadas[0]!);
+      }
     });
-    const sortedArrayFechas = [...arrayFechas];
-    sortedArrayFechas.sort((a, b) => b.getTime() - a.getTime());
-    setArrayFechas(sortedArrayFechas);
   }, []);
-  const company = useCompanyData();
 
   return (
     <LayoutContainer>
@@ -104,7 +111,8 @@ export default function PlanPage(props: {
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <Link
-                      href={`/dashboard/${company.id}/management/sales/plans/${props.plan?.id}/edit`}>
+                      href={`/dashboard/management/sales/plans/${props.plan?.id}/edit`}
+                    >
                       Ir a editar precio
                     </Link>
                   </DropdownMenuItem>
@@ -114,8 +122,7 @@ export default function PlanPage(props: {
           </div>
           <List>
             {arrayFechas.map((fecha) => {
-              const esVigente = false;
-              // vigente && fecha.getTime() === vigente.getTime();
+              const esVigente = fecha.getTime() === vigente!.getTime();
               return (
                 <ListTile
                   leading={
@@ -124,7 +131,7 @@ export default function PlanPage(props: {
                     </Badge>
                   }
                   key={fecha.toISOString().split("T")[0]}
-                  href={`/dashboard/${company.id}/management/sales/plans/${
+                  href={`/dashboard/management/sales/plans/${
                     props.plan?.id
                   }/${fecha.getTime()}`}
                   title={`Vigente desde: ${

@@ -46,9 +46,7 @@ type AddPlanDialogProps = {
   planId?: string;
 };
 
-export default async function AddPlanInfoComponent({
-  planId,
-}: AddPlanDialogProps) {
+export default function AddPlanInfoComponent({ planId }: AddPlanDialogProps) {
   const company = useCompanyData();
   const [brand, setBrand] = useState("");
   const [codigo, setCodigo] = useState("");
@@ -101,8 +99,7 @@ export default async function AddPlanInfoComponent({
         <Label>Marca</Label>
         <Select
           onValueChange={(value: string) => setBrand(value)}
-          value={brand}
-        >
+          value={brand}>
           <SelectTrigger>
             <SelectValue placeholder="Seleccione una marca" />
           </SelectTrigger>
@@ -115,23 +112,25 @@ export default async function AddPlanInfoComponent({
           </SelectContent>
         </Select>
       </div>
-      <div>
-        <Label>Codigo</Label>
-        <Input
-          className="border-green-300 focus-visible:ring-green-400 w-[100px]"
-          type="text"
-          value={codigo}
-          onChange={(e) => setCodigo(e.target.value)}
-        />
-      </div>
-      <div>
-        <Label>Descripcion</Label>
-        <Input
-          className="border-green-300 focus-visible:ring-green-400 w-[100px]"
-          type="text"
-          value={descripcion}
-          onChange={(e) => setDescripcion(e.target.value)}
-        />
+      <div className="flex justify-between">
+        <div>
+          <Label>Codigo</Label>
+          <Input
+            className="border-green-300 focus-visible:ring-green-400 w-[100px]"
+            type="text"
+            value={codigo}
+            onChange={(e) => setCodigo(e.target.value)}
+          />
+        </div>
+        <div>
+          <Label>Descripcion</Label>
+          <Input
+            className="border-green-300 focus-visible:ring-green-400 w-[100px]"
+            type="text"
+            value={descripcion}
+            onChange={(e) => setDescripcion(e.target.value)}
+          />
+        </div>
       </div>
     </>
   );

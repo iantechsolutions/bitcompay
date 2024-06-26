@@ -12,7 +12,6 @@ import "dayjs/locale/es";
 import utc from "dayjs/plugin/utc";
 import LayoutContainer from "~/components/layout-container";
 import { Title } from "~/components/title";
-import { useCompanyData } from "~/app/dashboard/[companyId]/company-provider";
 import { type RouterOutputs } from "~/trpc/shared";
 import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";

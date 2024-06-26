@@ -22,10 +22,6 @@
 // // import { CalendarByMountAndYear } from "~/components/ui/calendarMonthAndYear";
 // import { Input } from "~/components/ui/input";
 
-import { Dialog, DialogContent } from "~/components/ui/dialog";
-import AddPlanInfoComponent from "./add-planinfo-component";
-import AddPlanPricesComponent from "./add-planprices-component";
-
 // import {
 //   Form,
 //   FormControl,
@@ -551,13 +547,23 @@ import AddPlanPricesComponent from "./add-planprices-component";
 //     </>
 //   );
 // }
+"use client";
+import { Dialog, DialogContent } from "~/components/ui/dialog";
+import AddPlanInfoComponent from "./add-planinfo-component";
+import AddPlanPricesComponent from "./add-planprices-component";
+import { Button } from "~/components/ui/button";
+import { useState } from "react";
+
 export default function AddPlanDialog() {
+  const [open, setOpen] = useState(false);
   return (
-    <Dialog>
-      <DialogContent>
-        <AddPlanPricesComponent></AddPlanPricesComponent>
-        <AddPlanInfoComponent></AddPlanInfoComponent>
-      </DialogContent>
-    </Dialog>
+    <div>
+      <Button onClick={() => setOpen(true)}>Agregar plan</Button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="w-auto h-auto">
+          <AddPlanPricesComponent />
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }
