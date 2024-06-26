@@ -3,7 +3,7 @@ import { z } from "zod";
 import { db, schema } from "~/server/db";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { clerkClient } from "@clerk/nextjs/server";
-import { checkRole } from "~/lib/utils/roles";
+import { checkRole } from "~/lib/utils/server/roles";
 
 export const clerkRouter = createTRPCRouter({
   getUserbyId: protectedProcedure

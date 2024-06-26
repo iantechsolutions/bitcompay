@@ -39,9 +39,7 @@ export default function AddPreLiquidation(props: { companyId: string }) {
   const [fechaDesde, setFechaDesde] = useState<Date>();
   const [fechaHasta, setFechaHasta] = useState<Date>();
   const [puntoVenta, setPuntoVenta] = useState("");
-  const { data: marcas } = api.brands.getbyCompany.useQuery({
-    companyId: props.companyId,
-  });
+  const { data: marcas } = api.brands.getbyCurrentCompany.useQuery();
   const router = useRouter();
 
   const [brandId, setBrandId] = useState("");

@@ -1,14 +1,10 @@
-import { redirect } from "next/navigation";
-import { checkRole } from "~/lib/utils/roles";
 import { clerkClient } from "@clerk/nextjs/server";
 import { setRole } from "~/app/dashboard/_actions";
 import { List, ListTile } from "~/components/list";
 
-import { Badge } from "~/components/ui/badge";
 import { Title } from "~/components/title";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
-import { useOrganizationList } from "@clerk/nextjs";
 
 export type UsersType = Awaited<
   ReturnType<typeof clerkClient.users.getUserList>

@@ -2,6 +2,7 @@ import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
 import { MenuIcon } from "lucide-react";
 import { SidenavSheet } from "./sidenav-sheet";
 import { Button } from "./ui/button";
+import { checkRole } from "~/lib/utils/server/roles";
 
 export type AppLayoutProps = {
   children: React.ReactNode;
@@ -12,6 +13,7 @@ export type AppLayoutProps = {
 };
 
 export default function AppLayout(props: AppLayoutProps) {
+  const isAdmin = checkRole("admin");
   return (
     <>
       <header
@@ -28,7 +30,7 @@ export default function AppLayout(props: AppLayoutProps) {
         />
         <div className="w-full">{props.title}</div>
         <div className="flex gap-6 px-2">
-          <OrganizationSwitcher hidePersonal={true} />
+          {isAdmin && <OrganizationSwitcher hidePersonal={true} />}
           <UserButton />
         </div>
       </header>

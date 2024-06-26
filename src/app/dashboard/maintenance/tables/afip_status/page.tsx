@@ -5,17 +5,13 @@ import { api } from "~/trpc/server";
 
 import { healthInsurances, modos } from "~/server/db/schema";
 
-
-export default async function Home(props: { params: { companyId: string } }) {
-
+export default async function Home() {
   return (
     <LayoutContainer>
       <section className="space-y-2">
         <div className="flex justify-between">
           <Title>Condicion fiscal</Title>
-
         </div>
-       
       </section>
     </LayoutContainer>
   );

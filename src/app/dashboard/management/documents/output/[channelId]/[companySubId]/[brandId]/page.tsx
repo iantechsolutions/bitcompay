@@ -9,7 +9,7 @@ export default async function page({
 }: {
   params: { channelId: string; companySubId: string; brandId: string };
 }) {
-  const company = await api.companies.get.query({
+  const company = await api.companies.getById.query({
     companyId: params.companySubId,
   });
 

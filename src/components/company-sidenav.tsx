@@ -55,7 +55,7 @@ import { usePathname } from "next/navigation";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import Sidenav, { SidenavItem, SidenavSeparator } from "./sidenav";
 import { useUser } from "@clerk/nextjs";
-import { checkRole } from "~/lib/utils/roles";
+import { checkRole } from "~/lib/utils/react/roles";
 
 export default function CompanySidenav() {
   const menu: Record<string, string> = {

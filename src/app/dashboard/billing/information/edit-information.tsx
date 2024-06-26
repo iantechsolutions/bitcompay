@@ -21,14 +21,12 @@ import { Label } from "~/components/ui/label";
 import { api } from "~/trpc/react";
 import { ComboboxDemo } from "~/components/ui/combobox";
 
-export default function EditCompanie(props: { params: { companyId: string } }) {
+export default function EditCompany() {
   const {
     data: company,
     isLoading: isLoadingCompany,
     error: companyError,
-  } = api.companies.get.useQuery({
-    companyId: props.params.companyId,
-  });
+  } = api.companies.get.useQuery();
 
   const [cuit, setCuit] = useState("");
   const [afipKey, setAfipKey] = useState("");
@@ -47,18 +45,16 @@ export default function EditCompanie(props: { params: { companyId: string } }) {
       setRazonSocial(company.razon_social || "");
     }
   }, [company]);
-  const { data: marcas } = api.brands.getbyCompany.useQuery({
-    companyId: props.params.companyId,
-  });
-  const { mutateAsync: Companie, isLoading: isMutating } =
+  const { data: marcas } = api.brands.getbyCurrentCompany.useQuery();
+  const { mutateAsync: updateCompany, isLoading: isMutating } =
     api.companies.change.useMutation();
   const { mutateAsync: editBrand, isLoading: isMutatingBrand } =
     api.brands.change.useMutation();
 
   const handleSubmit = async () => {
     try {
-      await Companie({
-        companyId: props.params.companyId,
+      await updateCompany({
+        companyId: company?.id!,
         cuit,
         afipKey,
         razon_social,

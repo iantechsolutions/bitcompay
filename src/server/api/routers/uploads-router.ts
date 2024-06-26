@@ -71,19 +71,19 @@ export const uploadsRouter = createTRPCRouter({
       z.object({
         type: z.literal("rec"),
         id: z.string(),
-        companyId: z.string(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      const companyId = ctx.session.orgId;
       return await db.transaction(async (db) => {
-        const channels = await getCompanyProducts(input.companyId);
-        const brands = await getCompanyBrands(input.companyId);
+        const channels = await getCompanyProducts(companyId!);
+        const brands = await getCompanyBrands(companyId!);
 
         const contents = await readUploadContents(
           db,
           input.id,
           input.type,
-          input.companyId,
+          companyId!,
           channels,
           brands
         );
@@ -288,19 +288,18 @@ export const uploadsRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string(),
-        companyId: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {
       const companyId = ctx.session.orgId;
       await db.transaction(async (tx) => {
-        const channels = await getCompanyProducts(input.companyId);
-        const brands = await getCompanyBrands(input.companyId);
+        const channels = await getCompanyProducts(companyId!);
+        const brands = await getCompanyBrands(companyId!);
         const result = await readUploadContents(
           tx,
           input.id,
           "rec",
-          input.companyId,
+          companyId!,
           channels,
           brands
         );

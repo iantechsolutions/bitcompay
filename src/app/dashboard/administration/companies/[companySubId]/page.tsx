@@ -1,14 +1,10 @@
 import { Title } from "~/components/title";
 import { api } from "~/trpc/server";
 import CompanyPage from "./company-page";
-import { getServerAuthSession } from "~/server/auth";
-
-export default async function Channel(props: {
+export default async function Page(props: {
   params: { companySubId: string };
 }) {
-  const session = getServerAuthSession();
-  console.log("session", session);
-  const company = await api.companies.get.query({
+  const company = await api.companies.getById.query({
     companyId: props.params.companySubId,
   });
 
