@@ -1,4 +1,4 @@
-export default async function Home() {
+export default function AccessDenied() {
   return (
     <div className="fixed bottom-0 left-0 right-0 top-0 flex items-center justify-center">
       Acceso denegado.
