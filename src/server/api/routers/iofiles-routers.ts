@@ -33,6 +33,7 @@ export const iofilesRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
+      const companyId = ctx.session.orgId;
       let text: string = "";
       await db.transaction(async (db) => {
         // Obtenemos la marca y el canal
@@ -60,7 +61,7 @@ export const iofilesRouter = createTRPCRouter({
         if (channel.name.includes("DEBITO DIRECTO")) {
           const generateInput = {
             channelId: channel.id,
-            companyId: input.companyId,
+            companyId: companyId!,
             fileName: input.fileName!,
             concept: input.concept,
             redescription: brand.redescription,
@@ -69,7 +70,7 @@ export const iofilesRouter = createTRPCRouter({
         } else if (channel.name.includes("PAGOMISCUENTAS")) {
           const generateInput = {
             channelId: channel.id,
-            companyId: input.companyId,
+            companyId: companyId!,
             fileName: input.fileName!,
             concept: input.concept,
             redescription: brand.redescription,
@@ -78,7 +79,7 @@ export const iofilesRouter = createTRPCRouter({
         } else if (channel.name.match(regexPagoFacil)) {
           const generateInput = {
             channelId: channel.id,
-            companyId: input.companyId,
+            companyId: companyId!,
             fileName: input.fileName!,
             concept: input.concept,
             redescription: brand.redescription,
@@ -87,7 +88,7 @@ export const iofilesRouter = createTRPCRouter({
         } else if (channel.name.includes("RAPIPAGO")) {
           const generateInput = {
             channelId: channel.id,
-            companyId: input.companyId,
+            companyId: companyId!,
             fileName: input.fileName!,
             concept: input.concept,
             redescription: brand.redescription,
@@ -658,7 +659,7 @@ export async function getBrandAndChannel(
   if (!brand) {
     throw new TRPCError({
       code: "BAD_REQUEST",
-      message: `brand ${input.brandId} does not exist in company ${input.companyId}`,
+      message: `brand ${input.brandId} does not exist in company`,
     });
   }
 

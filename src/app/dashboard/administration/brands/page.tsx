@@ -5,7 +5,7 @@ import { api } from "~/trpc/server";
 import { AddBrandDialog } from "./add-brand-dialog";
 import { getServerAuthSession } from "~/server/auth";
 
-export default async function Home(props: { params: { companyId: string } }) {
+export default async function Home() {
   const brands = await api.brands.list.query();
   const session = getServerAuthSession();
   console.log(session);
@@ -22,7 +22,7 @@ export default async function Home(props: { params: { companyId: string } }) {
               <ListTile
                 leading={brand.number}
                 key={brand.id}
-                href={`/dashboard/${props.params.companyId}/administration/brands/${brand.id}`}
+                href={`/dashboard/administration/brands/${brand.id}`}
                 title={brand.name}
               />
             );

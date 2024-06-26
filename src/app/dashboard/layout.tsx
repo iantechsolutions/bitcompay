@@ -1,16 +1,28 @@
-import { cookies } from 'next/headers'
+import { ArrowLeftIcon } from "lucide-react";
+import AppLayout from "~/components/applayout";
+import CompanySidenav from "~/components/company-sidenav";
+import Sidenav, { SidenavItem } from "~/components/sidenav";
+import { api } from "~/trpc/server";
+import { CompanyProvider } from "./company-provider";
+import { auth } from "@clerk/nextjs/server";
 
-import dayjs from 'dayjs'
-import 'dayjs/locale/es'
-import { Toaster } from '~/components/ui/sonner'
-import { TRPCReactProvider } from '~/trpc/react'
-dayjs.locale('es')
+export default async function Layout(props: {
+  children?: React.ReactNode;
+}) {
+  const { orgId } = auth();
+  const company = await api.companies.get.query({
+    companyId: orgId!,
+  });
 
-export default function RootLayout(props: { children: React.ReactNode }) {
-    return (
-        <TRPCReactProvider cookies={cookies().toString()}>
-            {props.children}
-            <Toaster />
-        </TRPCReactProvider>
-    )
+  // TODO: chequear acceso a la empresa
+
+  return (
+    <AppLayout
+      headerClass="bg-[#e9fcf8]"
+      sidenavClass="top-0"
+      sidenav={<CompanySidenav companyId={company!.id!} />}
+    >
+      <CompanyProvider company={company}>{props.children}</CompanyProvider>
+    </AppLayout>
+  );
 }

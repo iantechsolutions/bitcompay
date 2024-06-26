@@ -12,8 +12,10 @@ export const bussinessUnitsRouter = createTRPCRouter({
       });
       return bussinessUnit_found;
     }),
-  list: protectedProcedure.query(async () => {
-    const bussinessUnits = await db.query.bussinessUnits.findMany();
+  list: protectedProcedure.query(async ({ ctx }) => {
+    const bussinessUnits = await db.query.bussinessUnits.findMany({
+      where: eq(schema.bussinessUnits.companyId, ctx.session.orgId!),
+    });
     return bussinessUnits;
   }),
   create: protectedProcedure
@@ -24,11 +26,12 @@ export const bussinessUnitsRouter = createTRPCRouter({
         brandId: z.string(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      const companyId = ctx.session.orgId;
       const new_bussinessUnit = await db.insert(schema.bussinessUnits).values({
         brandId: input.brandId,
         description: input.description,
-        companyId: input.companyId,
+        companyId: companyId!,
       });
       return new_bussinessUnit;
     }),
@@ -41,12 +44,13 @@ export const bussinessUnitsRouter = createTRPCRouter({
         brandId: z.string(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      const companyId = ctx.session.orgId;
       const bussinessUnit_changed = await db
         .update(schema.bussinessUnits)
         .set({
           description: input.description,
-          companyId: input.companyId,
+          companyId: companyId!,
           brandId: input.brandId,
         })
         .where(eq(schema.bussinessUnits.id, input.bussinessUnitId));

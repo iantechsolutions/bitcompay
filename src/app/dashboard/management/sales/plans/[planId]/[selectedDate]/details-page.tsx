@@ -36,10 +36,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import AddPlanPricesComponent from "../../add-planprices-component";
-import EditPlanPage from "./edit/edit-plans";
-import Link from "next/link";
-import { plans } from "~/server/db/schema";
+// import AddPlanDialogPerPrice from "./AddPlanDialog";
+
 dayjs.extend(utc);
 dayjs.locale("es");
 
@@ -72,9 +70,7 @@ export default function DetailsPage(props: {
     month: "long",
     day: "numeric",
   });
-  const companyId = useCompanyData().id;
-  const fecha = props.date.getTime();
-  const planId = props.plan?.id;
+
   const { mutateAsync: createPricePerCondition } =
     api.pricePerCondition.create.useMutation();
 
@@ -83,6 +79,7 @@ export default function DetailsPage(props: {
       planId: props.plan?.id,
       createdAt: props.date,
     });
+  console.log(data);
 
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -153,7 +150,71 @@ export default function DetailsPage(props: {
                   .slice(1)}
             </h2>
           </div>
-
+          <div>
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogContent className="sm:max-w-[600px] overflow-y-visible">
+                <DialogHeader>
+                  <DialogTitle>
+                    Actualizar porcentualmente precio de plan
+                  </DialogTitle>
+                </DialogHeader>
+                <div>
+                  <Label>Fecha de vigencia</Label>
+                  <br />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
+                          !validity_date && "text-muted-foreground"
+                        )}>
+                        <p>
+                          {validity_date ? (
+                            dayjs(validity_date).format("D [de] MMMM [de] YYYY")
+                          ) : (
+                            <span>Seleccione una fecha</span>
+                          )}
+                        </p>
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={validity_date ? validity_date : undefined}
+                        onSelect={(e) => setValidity_date(e)}
+                        disabled={(date: Date) => date < new Date()}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div>
+                  <Label htmlFor="number">Porcentaje de aumento</Label>
+                  <Input
+                    id="number"
+                    placeholder="Ej: 30%"
+                    value={percent}
+                    onChange={(e) => setPercent(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Button onClick={() => handleUpdatePrice("percent")}>
+                    Actualizar precio{" "}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+          {/* <div>
+            <AddPlanDialog
+              openExterior={openAdd}
+              setOpenExterior={setOpenAdd}
+              planId={props.plan?.id}
+              initialPrices={groupByAge}
+            ></AddPlanDialog>
+          </div> */}
           <div className="flex items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -161,8 +222,12 @@ export default function DetailsPage(props: {
                   Actualizar precio{" "}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem>
+              <DropdownMenuContent
+              //  onChange={(e)=>handleUpdatePrice(e.toS)}
+              >
+                <DropdownMenuItem
+                // value="percent"
+                >
                   <div onClick={() => setOpen(true)}>
                     Actualizar porcentualmente
                   </div>
@@ -171,12 +236,7 @@ export default function DetailsPage(props: {
                 <DropdownMenuItem
                 // value="edit"
                 >
-                  <div>
-                    <Link
-                      href={`/dashboard/${companyId}/management/sales/plans/${planId}/${fecha}/edit`}>
-                      Editar precio
-                    </Link>
-                  </div>
+                  <div onClick={() => setOpenAdd(true)}>Editar precio</div>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -209,64 +269,6 @@ export default function DetailsPage(props: {
           </Tabs>
         )}
       </section>
-
-      <div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent className="sm:max-w-[600px] overflow-y-visible">
-            <DialogHeader>
-              <DialogTitle>
-                Actualizar porcentualmente precio de plan
-              </DialogTitle>
-            </DialogHeader>
-            <div>
-              <Label>Fecha de vigencia</Label>
-              <br />
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
-                      !validity_date && "text-muted-foreground"
-                    )}>
-                    <p>
-                      {validity_date ? (
-                        dayjs(validity_date).format("D [de] MMMM [de] YYYY")
-                      ) : (
-                        <span>Seleccione una fecha</span>
-                      )}
-                    </p>
-                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={validity_date ? validity_date : undefined}
-                    onSelect={(e) => setValidity_date(e)}
-                    disabled={(date: Date) => date < new Date()}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div>
-              <Label htmlFor="number">Porcentaje de aumento</Label>
-              <Input
-                id="number"
-                placeholder="Ej: 30%"
-                value={percent}
-                onChange={(e) => setPercent(e.target.value)}
-              />
-            </div>
-            <div>
-              <Button onClick={() => handleUpdatePrice("percent")}>
-                Actualizar precio{" "}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
     </LayoutContainer>
   );
 }

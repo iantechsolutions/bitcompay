@@ -45,9 +45,10 @@ export const brandsRouter = createTRPCRouter({
         companyId: z.string(),
       })
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
+      const companyId = ctx.session.orgId;
       const company = await db.query.companies.findFirst({
-        where: eq(schema.companies.id, input.companyId),
+        where: eq(schema.companies.id, companyId!),
         with: {
           brands: {
             with: {

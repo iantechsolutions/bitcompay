@@ -164,7 +164,7 @@
 //   const { mutateAsync: createPlan } = api.plans.create.useMutation();
 //   const { mutateAsync: updatePlan } = api.plans.change.useMutation();
 //   const { mutateAsync: createPricePerAge } =
-//     api.pricePerCondition.create.useMutation();
+//     api.pricePerAge.create.useMutation();
 
 //   function handleOpens(bool: boolean) {
 //     setOpen(bool);
@@ -183,7 +183,6 @@
 //       const parsedData = PlanSchema.parse({
 //         ...dataWithBrands,
 //         validy_date: validyDate,
-//         planCode:
 //       });
 
 //       let plan: RouterOutputs["plans"]["create"];
@@ -210,6 +209,7 @@
 //             i++
 //           ) {
 //             await createPricePerAge({
+//               age: i,
 //               amount: parseFloat(item.price),
 //               plan_id: plan[0]!.id,
 //               isAmountByAge: true,
