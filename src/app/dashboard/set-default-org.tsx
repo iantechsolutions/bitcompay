@@ -1,20 +1,20 @@
 "use client";
 import { useOrganization, useOrganizationList, useUser } from "@clerk/nextjs";
 import { useEffect } from "react";
+import AccessDenied from "../accessdenied/page";
 
 export function SetDefaultOrganization() {
-  const { user, isLoaded } = useUser();
+  const { user, isLoaded: isloadedUser } = useUser();
   const { organization } = useOrganization();
   const { setActive, userMemberships } = useOrganizationList({
     userMemberships: {
       infinite: true,
     },
   });
-
   useEffect(() => {
     if (
       !organization &&
-      isLoaded &&
+      isloadedUser &&
       user &&
       userMemberships.data &&
       userMemberships.data.length > 0
@@ -23,6 +23,9 @@ export function SetDefaultOrganization() {
       if (setActive) setActive({ organization: firstOrg.id });
     }
   }, [user, userMemberships.data, setActive]);
-
-  return null;
+  console.log("userMemberships", userMemberships);
+  if (userMemberships.isLoading) return <></>;
+  if (!userMemberships.isLoading && userMemberships.data?.length == 0)
+    return <AccessDenied />;
+  else return null;
 }

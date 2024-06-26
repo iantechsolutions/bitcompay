@@ -4,6 +4,7 @@ import { api } from "~/trpc/server";
 import { CompanyProvider } from "./company-provider";
 import { auth } from "@clerk/nextjs/server";
 import { SetDefaultOrganization } from "./set-default-org";
+import AccessDenied from "../accessdenied/page";
 
 export default async function Layout(props: { children?: React.ReactNode }) {
   const { orgId } = auth();
@@ -23,7 +24,8 @@ export default async function Layout(props: { children?: React.ReactNode }) {
         </AppLayout>
       </>
     );
-  } else {
+  }
+  if (!orgId) {
     return <SetDefaultOrganization />;
   }
 }
