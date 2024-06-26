@@ -87,6 +87,8 @@ export default function DetailsPage(props: {
   const [percent, setPercent] = useState("");
   const [validity_date, setValidity_date] = useState<Date>();
 
+  console.log("props.plan.pricesPerCondition");
+  console.log(props.plan?.pricesPerCondition);
   function handleUpdatePrice(value: string) {
     props.plan?.pricesPerCondition.forEach((price) => {
       createPricePerCondition({
@@ -100,39 +102,6 @@ export default function DetailsPage(props: {
       });
     });
   }
-  useEffect(() => {
-    const groupByAge: GroupedPlans[] = [];
-    let savedPrice = -1;
-    props.plan?.pricesPerCondition
-      //TODO: CAMBIAR ESTE SORT
-      .sort((a, b) => (a.from_age ?? 1000) - (b.to_age ?? 1000))
-      .forEach((price) => {
-        if (price.isAmountByAge === true) {
-          if (price.amount !== savedPrice) {
-            groupByAge.push({
-              from_age: price.from_age ?? 0,
-              to_age: price.to_age ?? 0,
-              amount: price.amount,
-              condition: price.condition,
-              isConditional: !price.isAmountByAge,
-            });
-            savedPrice = price.amount;
-          } else if (groupByAge.length > 0) {
-            const last = groupByAge[groupByAge.length - 1];
-            last!.to_age = price.to_age ?? 0;
-          }
-        } else {
-          groupByAge.push({
-            from_age: price.from_age ?? 0,
-            to_age: price.to_age ?? 0,
-            amount: price.amount,
-            condition: price.condition,
-            isConditional: !price.isAmountByAge,
-          });
-        }
-      });
-    setGroupByAge(groupByAge);
-  }, []);
 
   return (
     <LayoutContainer>
@@ -168,7 +137,8 @@ export default function DetailsPage(props: {
                         className={cn(
                           "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
                           !validity_date && "text-muted-foreground"
-                        )}>
+                        )}
+                      >
                         <p>
                           {validity_date ? (
                             dayjs(validity_date).format("D [de] MMMM [de] YYYY")
@@ -256,7 +226,7 @@ export default function DetailsPage(props: {
                 headers={conditionHeaders}
                 rows={
                   data
-                    ? data!.filter((precio) => precio.isAmountByAge === false)
+                    ? data!.filter((precio) => precio.isAmountByAge === false && precio.validy_date.getTime() == props.date.getTime())
                     : []
                 }
               />
@@ -265,7 +235,11 @@ export default function DetailsPage(props: {
               <LargeTable
                 headers={ageHeaders}
                 rows={
-                  groupByAge ? groupByAge.filter((x) => !x.isConditional) : []
+                  props.plan?.pricesPerCondition
+                    ? props.plan?.pricesPerCondition.filter(
+                        (x) => x.isAmountByAge && x.validy_date.getTime() == props.date.getTime()
+                      )
+                    : []
                 }
               />
             </TabsContent>

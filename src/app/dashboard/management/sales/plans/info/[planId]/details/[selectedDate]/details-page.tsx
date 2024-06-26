@@ -255,7 +255,9 @@ export default function DetailsPage(props: {
                 // height={height}
                 headers={conditionHeaders}
                 rows={
-                  data!.filter((precio) => precio.isAmountByAge === false) ?? []
+                  data
+                    ? data!.filter((precio) => precio.isAmountByAge === false && precio.validy_date.getTime() == props.date.getTime())
+                    : []
                 }
               />
             </TabsContent>
@@ -263,7 +265,13 @@ export default function DetailsPage(props: {
               <LargeTable
                 // height={height}
                 headers={ageHeaders}
-                rows={groupByAge!.filter((x: any) => !x.isConditional)}
+                rows={
+                  props.plan?.pricesPerCondition
+                    ? props.plan?.pricesPerCondition.filter(
+                        (x) => x.isAmountByAge && x.validy_date.getTime() == props.date.getTime()
+                      )
+                    : []
+                }
               />
             </TabsContent>
           </Tabs>
