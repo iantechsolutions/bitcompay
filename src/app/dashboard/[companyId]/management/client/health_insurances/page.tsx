@@ -6,7 +6,7 @@ import { api } from "~/trpc/server";
 import { healthInsurances, modos } from "~/server/db/schema";
 import { AddHealthInsurances } from "./AddHealthInsurances";
 
-export default async function Home(props: { params: { companyId: string } }) {
+export default async function Home() {
   const obraSocial = await api.healthInsurances.list.query();
   return (
     <LayoutContainer>
@@ -21,7 +21,7 @@ export default async function Home(props: { params: { companyId: string } }) {
               <ListTile
                 key={obraSocial.id}
                 leading={obraSocial.identificationNumber}
-                href={`/dashboard/${props.params.companyId}/management/client/health_insurances/${obraSocial.id}`}
+                href={`/dashboard/management/client/health_insurances/${obraSocial.id}`}
                 title={obraSocial.name}
               />
             );

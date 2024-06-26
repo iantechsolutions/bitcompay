@@ -30,9 +30,7 @@ const items = [
   { es: "Zonas", en: "zone" },
 ];
 
-export default async function Maintenance(props: {
-  params: { companyId: string };
-}) {
+export default async function Maintenance() {
   return (
     <LayoutContainer>
       <section className="space-y-2">
@@ -43,7 +41,7 @@ export default async function Maintenance(props: {
           {items.map(({ es, en }) => (
             <ListTile
               key={en}
-              href={`/dashboard/${props.params.companyId}/maintenance/tables/${en}`}
+              href={`/dashboard/maintenance/tables/${en}`}
               title={es as React.ReactNode}
             />
           ))}

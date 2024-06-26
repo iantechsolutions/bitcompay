@@ -4,13 +4,8 @@ import AddBonusDialog from "./add-bonus-dialog";
 import { Title } from "~/components/title";
 import { List, ListTile } from "~/components/list";
 import { type Bonuses } from "~/server/db/schema";
-interface Props {
-  params: {
-    companyId: string;
-  };
-}
 
-export default async function Home(props: Props) {
+export default async function Home() {
   const bonuses: Bonuses[] = await api.bonuses.list.query();
 
   return (
@@ -26,7 +21,7 @@ export default async function Home(props: Props) {
               <ListTile
                 key={bonus.id}
                 title={bonus.reason}
-                href={`/dashboard/${props.params.companyId}/management/sales/bonuses/${bonus.id}`}
+                href={`/dashboard/management/sales/bonuses/${bonus.id}`}
               />
             );
           })}

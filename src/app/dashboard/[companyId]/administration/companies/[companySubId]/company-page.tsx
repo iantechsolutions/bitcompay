@@ -164,7 +164,7 @@ export default function CompanyPage({
                 {brands?.map((brand) => {
                   return (
                     <ListTile
-                      href={`/dashboard/${company.id}/administration/brands/${brand.id}`}
+                      href={`/dashboard/administration/brands/${brand.id}`}
                       title={brand.name}
                       key={brand.id}
                     />

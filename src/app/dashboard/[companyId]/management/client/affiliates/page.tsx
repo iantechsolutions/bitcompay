@@ -12,8 +12,8 @@ import {
   TableRow,
 } from "~/components/ui/table";
 
-export default function Home(props: { params: { companyId: string } }) {
-  const { data: grupo } = api.family_groups.list.useQuery();
+export default function Home() {
+  const { data: grupo } = api.family_groups.getByOrganization.useQuery();
 
   const linked = (link: string) => {
     window.location.href = link;
@@ -42,9 +42,10 @@ export default function Home(props: { params: { companyId: string } }) {
                   className="hover:cursor-pointer"
                   onClick={() =>
                     linked(
-                      `/dashboard/${props.params.companyId}/management/client/affiliates/${grupo.id}`
+                      `/dashboard/management/client/affiliates/${grupo.id}`
                     )
-                  }>
+                  }
+                >
                   <TableCell>{grupo.numericalId}</TableCell>
                   <TableCell className="text-justify">
                     {grupo.integrants.length}

@@ -67,6 +67,29 @@ export const family_groupsRouter = createTRPCRouter({
       });
       return family_group_reduced;
     }),
+  getByOrganization: protectedProcedure.query(async ({ ctx }) => {
+    const companyId = ctx.session.orgId;
+
+    const family_group = await db.query.family_groups.findMany({
+      with: {
+        businessUnitData: true,
+        abonos: true,
+        integrants: {
+          with: {
+            contribution: true,
+            differentialsValues: true,
+          },
+        },
+        bonus: true,
+        plan: true,
+        modo: true,
+      },
+    });
+    const family_group_reduced = family_group.filter((family_group) => {
+      return family_group.businessUnitData?.companyId === companyId!;
+    });
+    return family_group_reduced;
+  }),
   create: protectedProcedure
     .input(
       z.object({

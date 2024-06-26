@@ -5,7 +5,7 @@ import { Title } from "~/components/title";
 import { api } from "~/trpc/server";
 import type { RouterOutputs } from "~/trpc/shared";
 export default async function Page(props: {
-  params: { companyId: string; companySubId: string; channelId: string };
+  params: { companySubId: string; channelId: string };
 }) {
   const channel: RouterOutputs["channels"]["get"] =
     await api.channels.get.query({
@@ -31,7 +31,7 @@ export default async function Page(props: {
           return (
             <ListTile
               key={brand?.id}
-              href={`/dashboard/${props.params.companyId}/management/documents/output/${props.params.channelId}/${props.params.companySubId}/${brand?.id}`}
+              href={`/dashboard/management/documents/output/${props.params.channelId}/${props.params.companySubId}/${brand?.id}`}
               title={brand?.name}
               leading={<Building2Icon />}
             />
