@@ -39,6 +39,7 @@ import { useCompanyData } from "../../../company-provider";
 import { useFieldArray } from "react-hook-form";
 import { Label } from "~/components/ui/label";
 import { RouterOutputs } from "~/trpc/shared";
+import { GoBackArrow } from "~/components/goback-arrow";
 
 dayjs.extend(utc);
 dayjs.locale("es");
@@ -75,9 +76,7 @@ export default function AddPlanInfoComponent({
     }
   }, [planData]);
 
-  const { data: brands } = api.brands.getbyCompany.useQuery({
-    companyId: company.id,
-  });
+  const { data: brands } = api.brands.getbyCurrentCompany.useQuery(undefined);
   const { mutateAsync: createPlan, isLoading: isCreating } =
     api.plans.create.useMutation();
   const { mutateAsync: updatePlan, isLoading: isUpdating } =
@@ -107,11 +106,13 @@ export default function AddPlanInfoComponent({
 
   return (
     <>
+      <GoBackArrow />
       <div>
         <Label>Marca</Label>
         <Select
           onValueChange={(value: string) => setBrand(value)}
-          value={brand}>
+          value={brand}
+        >
           <SelectTrigger>
             <SelectValue placeholder="Seleccione una marca" />
           </SelectTrigger>
@@ -146,7 +147,8 @@ export default function AddPlanInfoComponent({
       <Button
         onClick={handleSumbit}
         disabled={isCreating || isUpdating}
-        className="mt-4">
+        className="mt-4"
+      >
         {(isCreating || isUpdating) && (
           <Loader2Icon className="mr-2 animate-spin" size={20} />
         )}

@@ -108,7 +108,8 @@ export default function PlanPage(props: {
             <div className="flex items-center">
               <Button
                 className="mr-2"
-                onClick={() => router.push(`./${props.plan?.id}/editInfo`)}>
+                onClick={() => router.push(`./${props.plan?.id}/editInfo`)}
+              >
                 Actualizar info{" "}
               </Button>
               <DropdownMenu>
@@ -125,8 +126,9 @@ export default function PlanPage(props: {
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <Link
-                      href={`/dashboard/management/sales/plans/info/${props.plan?.id}/editPrice`}>
-                      Ir a editar precio
+                      href={`/dashboard/management/sales/plans/info/${props.plan?.id}/editPrice`}
+                    >
+                      Actualizar manualmente
                     </Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -165,7 +167,8 @@ export default function PlanPage(props: {
           <Label htmlFor="validy_date">Mes de vigencia</Label>
           <Select
             onValueChange={(e) => setMes(Number(e))}
-            defaultValue={mes.toString()}>
+            defaultValue={mes.toString()}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Seleccione un mes" />
             </SelectTrigger>

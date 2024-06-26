@@ -87,17 +87,7 @@ export default function DetailsPage(props: {
   const [validity_date, setValidity_date] = useState<Date>();
 
   function handleUpdatePrice(value: string) {
-    props.plan?.pricesPerCondition.forEach((price) => {
-      createPricePerCondition({
-        plan_id: props.plan?.id ?? "",
-        amount: price.amount * (1 + parseFloat(percent) / 100),
-        from_age: price.from_age ?? 0,
-        to_age: price.to_age ?? 0,
-        condition: price.condition ?? "",
-        isAmountByAge: price.isAmountByAge,
-        validy_date: validity_date ?? new Date(),
-      });
-    });
+    router.push(`./${props.date?.getTime()}/editDate`);
   }
   useEffect(() => {
     const groupByAge: GroupedPlans[] = [];
@@ -140,13 +130,8 @@ export default function DetailsPage(props: {
           <div className="flex-col">
             <Title>{props.plan!.description}</Title>
             <h2 className="mb-3 font-semibold text-xl">
-              {formatter
-                .format(props.plan!.pricesPerCondition.at(0)?.validy_date)
-                .charAt(0)
-                .toUpperCase() +
-                formatter
-                  .format(props.plan!.pricesPerCondition.at(0)?.validy_date)
-                  .slice(1)}
+              {formatter.format(props.date).charAt(0).toUpperCase() +
+                formatter.format(props.date).slice(1)}
             </h2>
           </div>
           <div>
@@ -216,30 +201,10 @@ export default function DetailsPage(props: {
             ></AddPlanDialog>
           </div> */}
           <div className="flex items-center">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button onClick={() => handleUpdatePrice("edit")}>
-                  Actualizar precio{" "}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-              //  onChange={(e)=>handleUpdatePrice(e.toS)}
-              >
-                <DropdownMenuItem
-                // value="percent"
-                >
-                  <div onClick={() => setOpen(true)}>
-                    Actualizar porcentualmente
-                  </div>
-                </DropdownMenuItem>
-
-                <DropdownMenuItem
-                // value="edit"
-                >
-                  <div onClick={() => setOpenAdd(true)}>Editar precio</div>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Button onClick={() => handleUpdatePrice("edit")}>
+              {" "}
+              Editar precio de vigencia actual
+            </Button>
           </div>
         </div>
         {!isLoading && (
@@ -256,7 +221,11 @@ export default function DetailsPage(props: {
                 headers={conditionHeaders}
                 rows={
                   data
-                    ? data!.filter((precio) => precio.isAmountByAge === false && precio.validy_date.getTime() == props.date.getTime())
+                    ? data!.filter(
+                        (precio) =>
+                          precio.isAmountByAge === false &&
+                          precio.validy_date.getTime() == props.date.getTime()
+                      )
                     : []
                 }
               />
@@ -268,7 +237,9 @@ export default function DetailsPage(props: {
                 rows={
                   props.plan?.pricesPerCondition
                     ? props.plan?.pricesPerCondition.filter(
-                        (x) => x.isAmountByAge && x.validy_date.getTime() == props.date.getTime()
+                        (x) =>
+                          x.isAmountByAge &&
+                          x.validy_date.getTime() == props.date.getTime()
                       )
                     : []
                 }

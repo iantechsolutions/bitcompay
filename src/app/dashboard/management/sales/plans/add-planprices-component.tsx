@@ -1,5 +1,5 @@
 "use client";
-import { CircleX, Loader2Icon, PlusCircle } from "lucide-react";
+import { CircleX, PlusCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import {
   Select,
@@ -34,6 +34,7 @@ import { useFieldArray } from "react-hook-form";
 import { Label } from "~/components/ui/label";
 import { RouterOutputs } from "~/trpc/shared";
 import { useRouter } from "next/navigation";
+import { GoBackArrow } from "~/components/goback-arrow";
 
 dayjs.extend(utc);
 dayjs.locale("es");
@@ -55,17 +56,19 @@ type FormValues = {
 type AddPlanDialogProps = {
   initialPrices?: RouterOutputs["pricePerCondition"]["list"];
   planId?: string;
+  edit?: boolean;
+  date?: Date;
 };
 
 export default function AddPlanPricesComponent({
   initialPrices,
   planId,
+  edit,
+  date,
 }: AddPlanDialogProps) {
   const company = useCompanyData();
-  const [condition, setCondition] = useState("");
-  const [openAdd, setOpenAdd] = useState(false);
-  const [anio, setAnio] = useState(2020);
-  const [mes, setMes] = useState(0);
+  const [anio, setAnio] = useState(date?.getFullYear() ?? 2020);
+  const [mes, setMes] = useState((date?.getMonth() ?? 0) + 1);
   const router = useRouter();
   const [formInitialValues, setFormInitialValues] = useState<
     FormValues["prices"]
@@ -91,32 +94,65 @@ export default function AddPlanPricesComponent({
       },
     }
   );
-
   const { mutateAsync: createPricePerCondition } =
     api.pricePerCondition.create.useMutation();
+  const { mutateAsync: updatePricePerCondition } =
+    api.pricePerCondition.change.useMutation();
+
+  useEffect(() => {
+    if (initialPrices) {
+      setFormInitialValues(initialPrices);
+    }
+  }, [initialPrices]);
+  useEffect(() => {
+    form.reset({ prices: formInitialValues });
+  }, [formInitialValues]);
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     try {
-      const validity_date = new Date(anio, mes, 1);
-      data.prices.map(async (item) => {
-        if (item.isAmountByAge) {
-          await createPricePerCondition({
-            condition: item.condition || "",
-            amount: Number(item.amount.toString()),
-            plan_id: planId ?? "",
-            isAmountByAge: false,
-            validy_date: dayjs.utc(validity_date).toDate(),
-          });
+      const validity_date = new Date(anio, mes - 1, 1);
+      for (const item of data.prices) {
+        if (edit && item.id !== "") {
+          if (item.isAmountByAge) {
+            await updatePricePerCondition({
+              id: item.id,
+              from_age: Number(item.from_age),
+              to_age: Number(item.to_age),
+              amount: Number(item.amount),
+              plan_id: planId ?? "",
+              isAmountByAge: true,
+              validy_date: dayjs.utc(validity_date).toDate(),
+            });
+          } else {
+            await updatePricePerCondition({
+              id: item.id,
+              condition: item.condition ?? "",
+              amount: Number(item.amount),
+              plan_id: planId ?? "",
+              isAmountByAge: false,
+              validy_date: dayjs.utc(validity_date).toDate(),
+            });
+          }
         } else {
-          await createPricePerCondition({
-            from_age: Number(item.from_age),
-            to_age: Number(item.to_age),
-            amount: Number(item.amount.toString()),
-            plan_id: planId ?? "",
-            isAmountByAge: true,
-            validy_date: dayjs.utc(validity_date).toDate(),
-          });
+          if (item.isAmountByAge) {
+            await createPricePerCondition({
+              from_age: Number(item.from_age),
+              to_age: Number(item.to_age),
+              amount: Number(item.amount),
+              plan_id: planId ?? "",
+              isAmountByAge: true,
+              validy_date: dayjs.utc(validity_date).toDate(),
+            });
+          } else {
+            await createPricePerCondition({
+              condition: item.condition ?? "",
+              amount: Number(item.amount),
+              plan_id: planId ?? "",
+              isAmountByAge: false,
+              validy_date: dayjs.utc(validity_date).toDate(),
+            });
+          }
         }
-      });
+      }
       router.back();
     } catch (error) {
       console.error(error);
@@ -125,15 +161,19 @@ export default function AddPlanPricesComponent({
 
   return (
     <>
+      <GoBackArrow />
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex-col items-center justify-center gap-2 space-y-8">
+          className="flex-col items-center justify-center gap-2 space-y-8"
+        >
           <FormItem className="flex flex-col ">
             <FormLabel htmlFor="validy_date">Mes de vigencia</FormLabel>
             <Select
+              disabled={edit}
               onValueChange={(e) => setMes(Number(e))}
-              defaultValue={mes.toString()}>
+              defaultValue={mes.toString()}
+            >
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccione un mes" />
@@ -160,6 +200,7 @@ export default function AddPlanPricesComponent({
               <FormLabel>Año de Vigencia</FormLabel>
               <FormControl>
                 <Input
+                  disabled={edit}
                   className="border-green-300 focus-visible:ring-green-400 w-[100px]"
                   type="number"
                   value={anio}
@@ -185,7 +226,8 @@ export default function AddPlanPricesComponent({
                   plan_id: "",
                   amount: 0,
                 })
-              }>
+              }
+            >
               <PlusCircle className="mr-2" size={20} />
               Agregar Precio por Edad
             </Button>
@@ -193,165 +235,160 @@ export default function AddPlanPricesComponent({
               <h1 className="font-bold text-2xl">Condicion</h1>
             )}
           </div>
-          {fields.map((item, index) => (
-            <div key={item.id} className="flex space-x-4 items-center">
-              <div className="w-[300px]">
-                <FormField
-                  control={form.control}
-                  name={`prices.${index}.isAmountByAge`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel
-                        htmlFor={`prices.${index}.isAmountByAge`}></FormLabel>
-                      <br />
-                      <FormControl>
+          {fields.map((item, index) => {
+            const isAmountByAge = form.watch(`prices.${index}.isAmountByAge`);
+            return (
+              <div key={item.id} className="flex space-x-4 items-center">
+                <div className="w-[300px]">
+                  <FormField
+                    control={form.control}
+                    name={`prices.${index}.isAmountByAge`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel
+                          htmlFor={`prices.${index}.isAmountByAge`}
+                        ></FormLabel>
+                        <br />
                         <Select
                           onValueChange={(value) => {
-                            const updatedValues = formInitialValues;
-                            updatedValues[index] = {
-                              ...updatedValues[index],
-                              isAmountByAge: value === "true",
-                              id: updatedValues[index]?.id ?? "",
-                              createdAt:
-                                updatedValues[index]?.createdAt ?? new Date(),
-                              validy_date:
-                                updatedValues[index]?.validy_date ?? new Date(),
-                              condition: updatedValues[index]?.condition ?? "",
-                              from_age: updatedValues[index]?.from_age ?? 0,
-                              to_age: updatedValues[index]?.to_age ?? 0,
-                              amount: updatedValues[index]?.amount ?? 0,
-                              plan_id: updatedValues[index]?.plan_id ?? "",
-                            };
-                            setFormInitialValues(updatedValues);
                             field.onChange(value === "true");
                           }}
-                          value={field.value ? "true" : "false"}>
-                          <SelectTrigger className="w-[150px] font-bold">
-                            <SelectValue placeholder="Seleccione una opción" />
-                          </SelectTrigger>
+                          value={field.value ? "true" : "false"}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="w-[150px] font-bold">
+                              <SelectValue placeholder="Seleccione una opción" />
+                            </SelectTrigger>
+                          </FormControl>
                           <SelectContent>
                             <SelectItem
                               value="true"
-                              className="rounded-none border-b border-gray-600">
+                              className="rounded-none border-b border-gray-600"
+                            >
                               Rango de edad
                             </SelectItem>
                             <SelectItem
                               value="false"
-                              className="rounded-none border-b border-gray-600">
+                              className="rounded-none border-b border-gray-600"
+                            >
                               Parentesco
                             </SelectItem>
                           </SelectContent>
                         </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              {!formInitialValues[index]?.isAmountByAge && (
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                {!isAmountByAge ? (
+                  <FormField
+                    control={form.control}
+                    name={`prices.${index}.condition`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel htmlFor={`prices.${index}.condition`}>
+                          Relacion
+                        </FormLabel>
+                        <FormControl>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value ?? ""}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Seleccione una opción" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {relatives?.map((relative) => (
+                                <SelectItem
+                                  key={relative.relation}
+                                  value={relative.relation ?? ""}
+                                >
+                                  {relative.relation}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ) : (
+                  <>
+                    <FormField
+                      control={form.control}
+                      name={`prices.${index}.from_age`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel htmlFor={`prices.${index}.from_age`}>
+                            Edad Desde
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              className="border-green-300 focus-visible:ring-green-400"
+                              type="number"
+                              {...field}
+                              value={field.value ?? ""}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name={`prices.${index}.to_age`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel htmlFor={`prices.${index}.to_age`}>
+                            Edad Hasta
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              className="border-green-300 focus-visible:ring-green-400"
+                              type="number"
+                              {...field}
+                              value={field.value ?? ""}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
                 <FormField
                   control={form.control}
-                  name={`prices.${index}.condition`}
+                  name={`prices.${index}.amount`}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel htmlFor={`prices.${index}.condition`}>
-                        Relacion
+                      <FormLabel htmlFor={`prices.${index}.amount`}>
+                        Precio
                       </FormLabel>
                       <FormControl>
-                        <Select onValueChange={(value) => setCondition(value)}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccione una opción" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {relatives?.map((relative) => (
-                              <SelectItem
-                                key={relative.relation}
-                                value={relative.relation ?? ""}>
-                                {relative.relation}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <Input
+                          className="border-green-300 focus-visible:ring-green-400 w-[100px]"
+                          type="number"
+                          {...field}
+                          value={field.value?.toString()}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              )}
-              {formInitialValues[index]?.isAmountByAge && (
-                <>
-                  <FormField
-                    control={form.control}
-                    name={`prices.${index}.from_age`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel htmlFor={`prices.${index}.from_age`}>
-                          Edad Desde
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            className="border-green-300 focus-visible:ring-green-400"
-                            type="number"
-                            {...field}
-                            value={field.value ?? ""}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`prices.${index}.to_age`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel htmlFor={`prices.${index}.to_age`}>
-                          Edad Hasta
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            className="border-green-300 focus-visible:ring-green-400"
-                            type="number"
-                            {...field}
-                            value={field.value ?? ""}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </>
-              )}
-              <FormField
-                control={form.control}
-                name={`prices.${index}.amount`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel htmlFor={`prices.${index}.amount`}>
-                      Precio
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        className="border-green-300 focus-visible:ring-green-400 w-[100px]"
-                        type="number"
-                        {...field}
-                        value={field.value?.toString()}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button
-                variant="ghost"
-                type="button"
-                className="relative top-3"
-                onClick={() => remove(index)}>
-                <CircleX className="text-red-500 left-0" size={20} />
-              </Button>
-            </div>
-          ))}
-          <Button type="submit">{planId ? "Actualizar" : "Guardar"}</Button>
+                <Button
+                  variant="ghost"
+                  type="button"
+                  className="relative top-3"
+                  onClick={() => remove(index)}
+                >
+                  <CircleX className="text-red-500 left-0" size={20} />
+                </Button>
+              </div>
+            );
+          })}
+          <Button type="submit">{edit ? "Actualizar" : "Guardar"}</Button>
         </form>
       </Form>
     </>
