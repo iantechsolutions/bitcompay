@@ -15,9 +15,10 @@ export const companiesRouter = createTRPCRouter({
         companyId: z.string(),
       })
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
+      const companyId = ctx.session.orgId;
       const company = await db.query.companies.findFirst({
-        where: eq(schema.companies.id, input.companyId),
+        where: eq(schema.companies.id, companyId!),
         with: {
           products: {},
           brands: {
@@ -127,7 +128,8 @@ export const companiesRouter = createTRPCRouter({
         products: z.array(z.string()).optional(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      const companyId = ctx.session.orgId;
       await db.transaction(async (db) => {
         await db
           .update(schema.companies)
@@ -139,7 +141,7 @@ export const companiesRouter = createTRPCRouter({
             cuit: input.cuit,
             razon_social: input.razon_social,
           })
-          .where(eq(schema.companies.id, input.companyId));
+          .where(eq(schema.companies.id, companyId!));
 
         const companyProducts = await db.query.companyProducts.findMany({
           where: eq(schema.companyProducts.companyId, input.companyId),
@@ -175,7 +177,7 @@ export const companiesRouter = createTRPCRouter({
           if (productsToAdd.length > 0) {
             await db.insert(schema.companyProducts).values(
               productsToAdd.map((productId) => ({
-                companyId: input.companyId,
+                companyId: companyId!,
                 productId,
               }))
             );
@@ -208,17 +210,18 @@ export const companiesRouter = createTRPCRouter({
         companyId: z.string(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      const companyId = ctx.session.orgId;
       await db.transaction(async (tx) => {
         await tx
           .delete(schema.companies)
-          .where(eq(schema.companies.id, input.companyId));
+          .where(eq(schema.companies.id, companyId!));
         await tx
           .delete(schema.companyProducts)
-          .where(eq(schema.companyProducts.companyId, input.companyId));
+          .where(eq(schema.companyProducts.companyId, companyId!));
       });
       await db
         .delete(schema.companiesToBrands)
-        .where(eq(schema.companiesToBrands.companyId, input.companyId));
+        .where(eq(schema.companiesToBrands.companyId, companyId!));
     }),
 });

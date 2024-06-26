@@ -36,7 +36,7 @@ export const excelDeserializationRouter = createTRPCRouter({
         id: z.string(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const contents = await readExcelFile(db, input.id, input.type);
       //agregar a readExcel verificacion de columnas obligatorias.
 

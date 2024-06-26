@@ -584,7 +584,8 @@ export const facturasRouter = createTRPCRouter({
         dateDue: z.date().optional(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      const companyId = ctx.session.orgId;
       const grupos = await getGruposByBrandId(input.brandId);
       console.log("grupos", grupos);
       const afip = await ingresarAfip();

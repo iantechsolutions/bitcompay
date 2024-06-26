@@ -85,11 +85,8 @@ export default function EstablishmentPage({
       <section className="space-y-2">
         <div className="flex justify-between">
           <Title>Editar Establecimiento</Title>
-          <Button onClick={handleUpdate}>
+          <Button>
             <CheckIcon className="mr-2" />
-            {isLoading && (
-              <Loader2Icon className="mr-2 animate-spin" size={20} />
-            )}
             Aplicar
           </Button>
         </div>
