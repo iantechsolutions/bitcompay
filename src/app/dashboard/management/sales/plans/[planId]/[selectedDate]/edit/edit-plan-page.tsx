@@ -35,7 +35,6 @@ import { Label } from "~/components/ui/label";
 import { RouterOutputs } from "~/trpc/shared";
 import LayoutContainer from "~/components/layout-container";
 import { Title } from "~/components/title";
-import { useRouter } from "next/router";
 
 dayjs.extend(utc);
 dayjs.locale("es");
@@ -63,8 +62,8 @@ export default function EditPlanPage({
   initialPrices,
   planId,
 }: AddPlanDialogProps) {
-  const router = useRouter();
-  const companyId = useCompanyData().id;
+  const company = useCompanyData();
+  const [openAdd, setOpenAdd] = useState(false);
   const [anio, setAnio] = useState(2020);
   const [mes, setMes] = useState(0);
   const [condition, setCondition] = useState("");
@@ -100,7 +99,7 @@ export default function EditPlanPage({
         if (item.isAmountByAge) {
           await createPricePerCondition({
             condition: condition,
-            amount: Number(item.amount),
+            amount: Number(item.amount), // Conversión a número
             plan_id: planId ?? "",
             isAmountByAge: false,
             validy_date: dayjs.utc(validity_date).toDate(),
@@ -109,14 +108,13 @@ export default function EditPlanPage({
           await createPricePerCondition({
             from_age: Number(item.from_age),
             to_age: Number(item.to_age),
-            amount: Number(item.amount),
+            amount: Number(item.amount), // Conversión a número
             plan_id: planId ?? "",
             isAmountByAge: true,
             validy_date: dayjs.utc(validity_date).toDate(),
           });
         }
       });
-      router.push(`/dashboard/${companyId}/management/sales/plans/${planId}`);
     } catch (error) {
       console.error(error);
     }
@@ -250,12 +248,12 @@ export default function EditPlanPage({
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem
-                                value="true"
+                                value="false"
                                 className="rounded-none border-b border-gray-600">
-                                Rango de edad
+                                Edad
                               </SelectItem>
                               <SelectItem
-                                value="false"
+                                value="true"
                                 className="rounded-none border-b border-gray-600">
                                 Parentesco
                               </SelectItem>
@@ -356,6 +354,9 @@ export default function EditPlanPage({
                           type="number"
                           {...field}
                           value={field.value?.toString()}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />

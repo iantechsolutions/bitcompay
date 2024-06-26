@@ -35,7 +35,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "~/components/ui/accordion";
-import { useCompanyData } from "~/app/dashboard/[companyId]/company-provider";
+import { useCompanyData } from "~/app/dashboard/company-provider";
 import { type RouterOutputs } from "~/trpc/shared";
 import {
   AlertDialog,

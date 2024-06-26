@@ -1,7 +1,7 @@
 import { Title } from "~/components/title";
 import { api } from "~/trpc/server";
 
-import EditPlanPage from "./edit-plans";
+import EditPlanPage from "./edit-plan-page";
 
 export default async function Page(props: {
   params: { planId: string; selectedDate: string };

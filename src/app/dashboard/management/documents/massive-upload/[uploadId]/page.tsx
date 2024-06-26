@@ -5,11 +5,12 @@ import UnconfirmedPage from "./unconfirmed-page";
 export default async function page(props: {
   params: { uploadId: string; companyId: string };
 }) {
+  const companyId = props.params.companyId;
   const upload = await api.excelDeserialization.upload.query({
     uploadId: props.params.uploadId,
   });
   if (!upload) {
     return <Title>El documento no existe.</Title>;
   }
-  return <UnconfirmedPage upload={upload} companyId={props.params.companyId} />;
+  return <UnconfirmedPage upload={upload} />;
 }
