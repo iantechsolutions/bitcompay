@@ -48,7 +48,7 @@ export default function PlanPage(props: {
     day: "numeric",
   });
   const [arrayFechas, setArrayFechas] = useState<Date[]>([]);
-  // const [vigente, setVigente] = useState<Date | null>(null);
+  const [vigente, setVigente] = useState<Date | null>(null);
   const [open, setOpen] = useState<boolean>(false);
   // const [validity_date, setValidity_date] = useState<Date | null>(null);
   // const [percent, setPercent] = useState("");
@@ -76,10 +76,19 @@ export default function PlanPage(props: {
           arrayFechas.push(fecha);
         }
       }
+
+      const uniqueFechas = [...arrayFechas];
+      uniqueFechas.sort((a, b) => b.getTime() - a.getTime());
+      setArrayFechas(uniqueFechas);
+
+      const today = new Date();
+      const fechasPasadas = uniqueFechas.filter((fecha) => fecha < today);
+
+      if (fechasPasadas.length > 0) {
+        fechasPasadas.sort((a, b) => b.getTime() - a.getTime());
+        setVigente(fechasPasadas[0]!);
+      }
     });
-    const sortedArrayFechas = [...arrayFechas];
-    sortedArrayFechas.sort((a, b) => b.getTime() - a.getTime());
-    setArrayFechas(sortedArrayFechas);
   }, []);
   const company = useCompanyData();
 
@@ -114,8 +123,7 @@ export default function PlanPage(props: {
           </div>
           <List>
             {arrayFechas.map((fecha) => {
-              const esVigente = false;
-              // vigente && fecha.getTime() === vigente.getTime();
+              const esVigente = fecha.getTime() === vigente!.getTime();
               return (
                 <ListTile
                   leading={

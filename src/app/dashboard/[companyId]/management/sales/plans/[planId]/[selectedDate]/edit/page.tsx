@@ -1,22 +1,21 @@
 import { Title } from "~/components/title";
 import { api } from "~/trpc/server";
 
-import DetailsPage from "./details-page";
-import EditPlanPage from "./edit/edit-plans";
+import EditPlanPage from "./edit-plans";
 
 export default async function Page(props: {
   params: { planId: string; selectedDate: string };
 }) {
   const { planId } = props.params;
 
-  // Fetch the plan using the companyId and planId
-  const plan = await api.plans.get.query({
-    planId,
-  });
   const selectedDate = new Date(Number(props.params.selectedDate));
-  if (!plan) {
+  const initialPrices = await api.pricePerCondition.getByCreatedAt.query({
+    createdAt: selectedDate,
+    planId: planId,
+  });
+  if (!planId) {
     return <Title>No se encontró el plan</Title>;
   }
 
-  return <DetailsPage plan={plan} date={selectedDate} />;
+  return <EditPlanPage planId={planId} initialPrices={initialPrices} />;
 }
