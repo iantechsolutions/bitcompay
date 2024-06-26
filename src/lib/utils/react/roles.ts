@@ -1,5 +1,5 @@
 import { useUser } from "@clerk/nextjs";
-import { Roles } from "../types/globals";
+import { Roles } from "~/lib/types/globals";
 
 export const checkRole = (role: Roles) => {
   const { user } = useUser();
