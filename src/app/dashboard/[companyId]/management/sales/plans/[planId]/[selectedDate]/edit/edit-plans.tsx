@@ -29,7 +29,7 @@ import {
 import { Button } from "~/components/ui/button";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { api } from "~/trpc/react";
-import { useCompanyData } from "~/app/dashboard/[companyId]/company-provider";
+import { useCompanyData } from "~/app/dashboard/company-provider";
 import { useFieldArray } from "react-hook-form";
 import { Label } from "~/components/ui/label";
 import { RouterOutputs } from "~/trpc/shared";
@@ -64,6 +64,7 @@ export default function EditPlanPage({
   planId,
 }: AddPlanDialogProps) {
   const router = useRouter();
+  const companyId = useCompanyData().id;
   const [anio, setAnio] = useState(2020);
   const [mes, setMes] = useState(0);
   const [condition, setCondition] = useState("");
@@ -115,9 +116,7 @@ export default function EditPlanPage({
           });
         }
       });
-      router.push(
-        `/dashboard/org_2iNMt8y0G85PJ1oU2HIt6zp2yoZ/management/sales/plans/${planId}`
-      );
+      router.push(`/dashboard/${companyId}/management/sales/plans/${planId}`);
     } catch (error) {
       console.error(error);
     }
