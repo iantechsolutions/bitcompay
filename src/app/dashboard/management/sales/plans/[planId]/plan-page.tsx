@@ -91,7 +91,7 @@ export default function PlanPage(props: {
   function handleUpdatePrice() {
     setLoading(true);
     props.plan?.pricesPerCondition
-      .filter((x) => x.validy_date === vigente)
+      .filter((x) => x.validy_date.getTime() === vigente?.getTime())
       .forEach((price) => {
         createPricePerAge({
           plan_id: props.plan?.id ?? "",
@@ -105,6 +105,7 @@ export default function PlanPage(props: {
       });
     setLoading(false);
     setOpen(false);
+    router.refresh();
   }
   return (
     <LayoutContainer>
