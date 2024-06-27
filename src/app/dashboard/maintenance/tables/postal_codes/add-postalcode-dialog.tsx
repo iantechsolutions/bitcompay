@@ -37,7 +37,7 @@ export function AddPostalCode() {
         zone: zone,
       });
 
-      toast.success("Postal code created successfully");
+      toast.success("Codigo postal created successfully");
       router.refresh();
       setOpen(false);
     } catch (e) {
@@ -50,12 +50,12 @@ export function AddPostalCode() {
     <>
       <Button onClick={() => setOpen(true)}>
         <PlusCircleIcon className="mr-2" size={20} />
-        Add Postal Code
+        Add Codigo postal
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Create a Postal Code</DialogTitle>
+            <DialogTitle>Create a Codigo postal</DialogTitle>
           </DialogHeader>
           <div>
             <Label htmlFor="name">Name</Label>
@@ -89,7 +89,7 @@ export function AddPostalCode() {
               {isLoading && (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}
-              Create Postal Code
+              Create Codigo postal
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -54,7 +54,7 @@ export function AddModo() {
             <DialogTitle>Crear un modo</DialogTitle>
           </DialogHeader>
           <div>
-            <Label htmlFor="description">name</Label>
+            <Label htmlFor="description">Nombre</Label>
             <Input
               id="description"
               placeholder="..."

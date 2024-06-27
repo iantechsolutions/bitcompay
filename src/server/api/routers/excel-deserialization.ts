@@ -258,11 +258,11 @@ export const excelDeserializationRouter = createTRPCRouter({
             });
 
             await db.insert(schema.pa).values({
-              card_number: row.card_number!.toString(),
-              CBU: row.cbu!,
+              card_number: row.card_number?.toString() ?? null,
+              CBU: row.cbu,
               new_registration: row.is_new ?? false,
               integrant_id: new_integrant[0]!.id,
-              product_id: product!.id!,
+              product_id: product?.id,
               // CBU: row.cbu_number!,
               card_brand: row.card_brand ?? null,
               card_type: row.card_type ?? null,
