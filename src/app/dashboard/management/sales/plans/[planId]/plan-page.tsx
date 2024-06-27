@@ -37,7 +37,7 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import Link from "next/link";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Loader2Icon } from "lucide-react";
 import { Label } from "~/components/ui/label";
 import { api } from "~/trpc/react";
 import { Calendar } from "~/components/ui/calendar";
@@ -57,6 +57,7 @@ export default function PlanPage(props: {
     day: "numeric",
   });
   const [arrayFechas, setArrayFechas] = useState<Date[]>([]);
+  const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState<boolean>(false);
   const [anio, setAnio] = useState(2020);
   const [mes, setMes] = useState(0);
@@ -88,6 +89,7 @@ export default function PlanPage(props: {
   }, []);
   const company = useCompanyData();
   function handleUpdatePrice() {
+    setLoading(true);
     props.plan?.pricesPerCondition.forEach((price) => {
       createPricePerAge({
         plan_id: props.plan?.id ?? "",
@@ -99,6 +101,8 @@ export default function PlanPage(props: {
         validy_date: new Date(anio, mes, 1),
       });
     });
+    setLoading(false);
+    setOpen(false);
   }
   return (
     <LayoutContainer>
@@ -209,7 +213,12 @@ export default function PlanPage(props: {
             />
           </div>
           <div>
-            <Button onClick={handleUpdatePrice}>Actualizar precio</Button>
+            <Button disabled={loading} onClick={handleUpdatePrice}>
+              {loading && (
+                <Loader2Icon className="mr-2 animate-spin" size={20} />
+              )}
+              Actualizar precio
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
