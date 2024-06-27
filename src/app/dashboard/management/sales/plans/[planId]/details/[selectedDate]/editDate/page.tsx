@@ -10,12 +10,9 @@ export default function AddPlanPage(props: {
   const [planId, setPlanId] = useState<string | undefined>(props.params.planId);
   const { data: planData } = api.plans.get.useQuery({ planId: planId ?? "" });
   const date = new Date(Number(props.params.selectedDate));
-  console.log(date);
-  console.log("priceList");
   const priceList = planData?.pricesPerCondition.filter(
     (x) => x.validy_date.getTime() == date.getTime()
   );
-  console.log(priceList);
   return (
     <div>
       <GoBackArrow />

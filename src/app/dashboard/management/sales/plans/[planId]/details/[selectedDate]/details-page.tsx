@@ -89,6 +89,38 @@ export default function DetailsPage(props: {
   function handleUpdatePrice(value: string) {
     router.push(`./${props.date?.getTime()}/editDate`);
   }
+
+  // const editable = props.plan?.pricesPerCondition?.sort((a, b) => b.validy_date.getTime() - a.validy_date.getTime()).
+  // filter((x) => x.validy_date.getTime() <= new Date().getTime())[0].validy_date.getTime() == props.date.getTime();
+
+  useEffect(() => {
+    const currentDate = new Date();
+    const futurePrices = props.plan?.pricesPerCondition.filter(
+      (price) => new Date(price.validy_date).getTime() > currentDate.getTime()
+    );
+    const pastPrices = props.plan?.pricesPerCondition.filter(
+      (price) => new Date(price.validy_date).getTime() <= currentDate.getTime()
+    );
+
+    const mostRecentPastPrice = pastPrices?.reduce((latest, current) => {
+      const latestDate = latest?.validy_date
+        ? new Date(latest.validy_date).getTime()
+        : 0;
+      const currentDate = new Date(current.validy_date).getTime();
+      return currentDate > latestDate ? current : latest;
+    }, pastPrices[0]);
+
+    const editablePrices = [...(futurePrices ?? [])];
+    if (mostRecentPastPrice) {
+      editablePrices.push(mostRecentPastPrice);
+    }
+    const editable =
+      editablePrices.filter(
+        (x) => x.validy_date.getTime() == props.date.getTime()
+      ).length > 0;
+    // setEditablePrices(editablePrices);
+  }, [props.plan?.pricesPerCondition]);
+
   useEffect(() => {
     const groupByAge: GroupedPlans[] = [];
     let savedPrice = -1;
@@ -208,12 +240,13 @@ export default function DetailsPage(props: {
           </div>
         </div>
         {!isLoading && (
-          <Tabs>
+          <Tabs defaultValue="perAge">
             <TabsList>
+              <TabsTrigger value="perAge">Precios Por Edad</TabsTrigger>
+
               <TabsTrigger value="conditional">
                 Precios por relacion
               </TabsTrigger>
-              <TabsTrigger value="perAge">Precios Por Edad</TabsTrigger>
             </TabsList>
             <TabsContent value="conditional">
               <LargeTable

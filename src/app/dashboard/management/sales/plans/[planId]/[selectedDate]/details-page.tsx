@@ -213,31 +213,37 @@ export default function DetailsPage(props: {
           </div>
         </div>
         {!isLoading && (
-          <Tabs>
+          <Tabs defaultValue="perAge">
             <TabsList>
+              <TabsTrigger value="perAge">Precios Por Edad</TabsTrigger>
               <TabsTrigger value="conditional">
                 Precios por relacion
               </TabsTrigger>
-              <TabsTrigger value="perAge">Precios Por Edad</TabsTrigger>
             </TabsList>
-            <TabsContent value="conditional">
-              <LargeTable
-                // height={height}
-                headers={conditionHeaders}
-                rows={
-                  data
-                    ? data!.filter((precio) => precio.isAmountByAge === false && precio.validy_date.getTime() == props.date.getTime())
-                    : []
-                }
-              />
-            </TabsContent>
             <TabsContent value="perAge">
               <LargeTable
                 headers={ageHeaders}
                 rows={
                   props.plan?.pricesPerCondition
                     ? props.plan?.pricesPerCondition.filter(
-                        (x) => x.isAmountByAge && x.validy_date.getTime() == props.date.getTime()
+                        (x) =>
+                          x.isAmountByAge &&
+                          x.validy_date.getTime() == props.date.getTime()
+                      )
+                    : []
+                }
+              />
+            </TabsContent>
+            <TabsContent value="conditional">
+              <LargeTable
+                // height={height}
+                headers={conditionHeaders}
+                rows={
+                  data
+                    ? data!.filter(
+                        (precio) =>
+                          precio.isAmountByAge === false &&
+                          precio.validy_date.getTime() == props.date.getTime()
                       )
                     : []
                 }

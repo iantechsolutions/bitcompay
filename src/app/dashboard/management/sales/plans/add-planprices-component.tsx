@@ -100,14 +100,17 @@ export default function AddPlanPricesComponent({
     api.pricePerCondition.change.useMutation();
 
   useEffect(() => {
-    if (initialPrices && !hasUpdatedPrices) {
+    console.log("initialPrices");
+    console.log(initialPrices);
+    console.log(hasUpdatedPrices);
+    if (initialPrices != undefined && !hasUpdatedPrices) {
+      console.log("entra");
       setFormInitialValues(initialPrices);
+      form.reset({ prices: formInitialValues });
+      // setHasUpdatedPrices(true);
     }
   }, [initialPrices]);
 
-  useEffect(() => {
-    form.reset({ prices: formInitialValues });
-  }, [formInitialValues]);
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     try {
       const validity_date = new Date(anio, mes - 1, 1);
