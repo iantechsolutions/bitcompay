@@ -232,6 +232,9 @@ export const companies = pgTable(
     certificate: varchar("certificate"),
     cuit: varchar("cuit"),
     razon_social: varchar("razon_social"),
+    address: varchar("address"),
+    afip_condition: varchar("afip_condition"),
+    activity_start_date: timestamp("activity_start_date", { mode: "date" }),
     createdAt,
     updatedAt,
   },
@@ -511,7 +514,9 @@ export const bussinessUnitsRelations = relations(
 
 export const healthInsurances = pgTable("health_insurances", {
   id: columnId,
-  companyId: varchar("companyId", { length: 255 }).references(() => companies.id),
+  companyId: varchar("companyId", { length: 255 }).references(
+    () => companies.id
+  ),
   name: varchar("name", { length: 255 }).notNull(),
   identificationNumber: varchar("identificationNumber", { length: 255 }),
 });

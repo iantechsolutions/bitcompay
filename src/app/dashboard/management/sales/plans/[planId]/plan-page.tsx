@@ -125,8 +125,8 @@ export default function PlanPage(props: {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem>
-                    <div onClick={() => setOpen(true)}>
+                  <DropdownMenuItem onClick={() => setOpen(true)}>
+                    <div>
                       Actualizar porcentualmente
                     </div>
                   </DropdownMenuItem>

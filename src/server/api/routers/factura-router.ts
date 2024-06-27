@@ -542,9 +542,13 @@ export const facturasRouter = createTRPCRouter({
           with: {
             integrants: {
               where: eq(schema.integrants.isBillResponsible, true),
+              with: {
+                postal_code: true,
+              },
             },
             plan: true,
             cc: true,
+            bonus:true,
           },
         },
       },
@@ -667,4 +671,3 @@ export const facturasRouter = createTRPCRouter({
         .where(eq(schema.facturas.id, input.providerId));
     }),
 });
-

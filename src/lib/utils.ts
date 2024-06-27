@@ -2,6 +2,8 @@ import { type ClassValue, clsx } from "clsx";
 import { fi } from "date-fns/locale";
 import { nanoid } from "nanoid";
 import { twMerge } from "tailwind-merge";
+import { api } from "~/trpc/react";
+import { RouterOutputs } from "~/trpc/shared";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -55,10 +57,87 @@ export function formatDate(date: Date | undefined) {
   return null;
 }
 
+export function dateNormalFormat(date: Date | undefined) {
+  if (date) {
+    const yyyy = date.getFullYear();
+    let mm = date.getMonth() + 1; // Months start at 0!
+    let dd = date.getDate();
+    let dia = dd.toString();
+    let mes = mm.toString();
+    if (dd < 10) {
+      const dia = "0" + dd.toString();
+    }
+    if (mm < 10) {
+      const mes = "0" + mm.toString();
+    }
+
+    const formattedDate = dia + "/" + mes + "/" + yyyy;
+    return formattedDate;
+  }
+  return null;
+}
+
 export const topRightAbsoluteOnDesktopClassName =
   "md:absolute md:top-0 md:right-0 mr-10 mt-10";
 
-export function htmlBill() {
+export function htmlBill(
+  factura: RouterOutputs["facturas"]["list"][number],
+  company: RouterOutputs["companies"]["list"][number],
+  producto: RouterOutputs["products"]["get"],
+  madeDate: Date,
+  due_date: Date,
+  fromPeriod: Date,
+  toPeriod: Date
+) {
+  const billResponsible = factura.family_group?.integrants?.find(
+    (x) => x.isBillResponsible
+  );
+  const canales = producto?.channels;
+  function formatNumberAsCurrency(amount: number): string {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+    }).format(amount);
+  }
+  function getImageTagForTipoFactura(tipoFactura: string): string {
+    switch (tipoFactura) {
+      case "6":
+      case "13":
+      case "12":
+        return `<img src="https://utfs.io/f/8ab5059a-71e9-4cb2-8e0c-4743f73c8fe5-kmcofx.png" alt="" />`;
+      case "14":
+      case "15":
+      case "11":
+        return `C`;
+      default:
+        return "X";
+    }
+  }
+  function getTextoForTipoFactura(tipoFactura: string): string {
+    switch (tipoFactura) {
+      case "3":
+      case "6":
+      case "11":
+      case "51":
+      case "19":
+        return "FACTURA";
+      case "8":
+      case "13":
+      case "15":
+      case "52":
+      case "20":
+        return "NOTA DE DEBITO";
+      case "2":
+      case "12":
+      case "14":
+      case "53":
+      case "21":
+        return "NOTA DE CREDITO";
+      default:
+        return "";
+    }
+  }
   const htmlContent = `<!DOCTYPE html>
   <html lang="en">
     <head>
@@ -359,13 +438,14 @@ export function htmlBill() {
             alt=""
           />
           <p>
-            CONSULT-RENT S.R.L<br />
-            BOLIVAR 547 Piso: 1 Dpto: 1, C.A.B.A <br />
-            IVA RESPONSABLE INSCRIPTO
+            ${company.razon_social}<br />
+            ${company.address} <br />
+            ${company.afip_condition}
           </p>
         </div>
   
         <div class="items-2">
+              ${getImageTagForTipoFactura(factura.tipoFactura ?? "")}
           <img
             src="https://utfs.io/f/8ab5059a-71e9-4cb2-8e0c-4743f73c8fe5-kmcofx.png"
             alt=""
@@ -374,14 +454,14 @@ export function htmlBill() {
   
         <div class="items-3">
           <h2>
-            FACTURA <br />
-            N° 0009-00001004
+            ${getTextoForTipoFactura} <br />
+            ${factura.nroFactura}
           </h2>
           <p>
-            Fecha: 26/04/2024 <br />
-            C.U.I.T: 30-71054237-2 <br />
-            Ing. Brutos Conv.Multil: 30-71054237-2 <br />
-            Fecha de Inicio de Actividad: 13/05/2008
+            Fecha: ${dateNormalFormat(madeDate)} <br />
+            C.U.I.T: ${company.cuit} <br />
+            Ing. Brutos Conv.Multil: ${company.cuit} <br />
+            Fecha de Inicio de Actividad: ${company.activity_start_date}
           </p>
         </div>
       </header>
@@ -389,37 +469,37 @@ export function htmlBill() {
       <section class="parte-2">
         <ul class="datos-1">
           <li>
-            <p>Cliente:</p>
+            <p>Cliente: ${billResponsible?.name}</p>
           </li>
           <li>
-            <p>Domicilio:</p>
+            <p>Domicilio: ${billResponsible?.address}</p>
           </li>
           <li>
-            <p>Localidad:</p>
+            <p>Localidad: ${billResponsible?.locality}</p>
           </li>
           <li>
-            <p>Provincia:</p>
+            <p>Provincia: ${billResponsible?.state}</p>
           </li>
           <li>
-            <p>CP:</p>
+            <p>CP: ${billResponsible?.postal_code?.cp}</p>
           </li>
         </ul>
   
         <ul class="datos-2">
           <li>
-            <p>C.U.I.T::</p>
+            <p>C.U.I.T:: ${billResponsible?.fiscal_id_number}</p>
           </li>
           <li>
-            <p>Categoria I.V.A:</p>
+            <p>Categoria I.V.A: ${billResponsible?.afip_status}</p>
           </li>
           <li>
-            <p>Condicion de Venta:</p>
+            <p>Condicion de Venta: ---</p>
           </li>
           <li>
-            <p>Periodo facturado:</p>
+            <p>Periodo facturado:${dateNormalFormat(fromPeriod)}</p>
           </li>
           <li>
-            <p>Fecha de vencimiento:</p>
+            <p>Fecha de vencimiento:${dateNormalFormat(due_date)}</p>
           </li>
         </ul>
       </section>
@@ -431,8 +511,18 @@ export function htmlBill() {
   
       <section class="parte-5">
         <div>
-          <p>Plan de salud Esmeralda -- Periodo 05/2024</p>
-          <p>Bonificacion: 15%</p>
+          <p>Plan de salud ${
+            factura.family_group?.plan?.plan_code
+          } -- Periodo ${
+    (fromPeriod.getMonth() + 1).toString() + "/" + fromPeriod.getFullYear()
+  }</p>
+          <p>Bonificacion: ${
+            factura.family_group?.bonus?.filter(
+              (x) =>
+                (x.from?.getTime() ?? 0) < new Date().getTime() &&
+                new Date().getTime() < (x.to?.getTime() ?? 0)
+            )[0]?.amount ?? "0"
+          }%</p>
           <p>Aportes</p>
           <p>Factura periodo anterior impaga</p>
           <p>Interes por pago fuera de termino</p>
@@ -440,24 +530,26 @@ export function htmlBill() {
         </div>
   
         <div>
-          <p>$ 281,392. 67</p>
-          <p>$ 281,392. 67</p>
-          <p>$ 281,392. 67</p>
-          <p>$ 281,392. 67</p>
-          <p>$ 281,392. 67</p>
-          <p>$ 281,392. 67</p>
+          <p>$ ${formatNumberAsCurrency(factura.items?.abono ?? 0)}</p>
+          <p>$ ${formatNumberAsCurrency(factura.items?.bonificacion ?? 0)}</p>
+          <p>$ ${formatNumberAsCurrency(factura.items?.contribution ?? 0)}</p>
+          <p>$ ${formatNumberAsCurrency(factura.items?.previous_bill ?? 0)}</p>
+          <p>$ ${formatNumberAsCurrency(factura.items?.interest ?? 0)}</p>
+          <p>$ --- </p>
         </div>
       </section>
   
       <section class="parte-4">
         <p>Pesos Doscientos sesenta mil noventa y cuatro con 85/100</p>
-        <p><span>TOTAL: </span> $ 260,094.85</p>
+        <p><span>TOTAL: </span> $ ${formatNumberAsCurrency(
+          factura.importe ?? 0
+        )}</p>
       </section>
   
       <section class="parte-6">
         <h2>Canales de Pago Habilitados</h2>
         <p>Mediante lectura del codigo de barras:</p>
-  
+        
         <div class="logos">
           <img
             class="pago-facil"

@@ -112,6 +112,9 @@ export const companiesRouter = createTRPCRouter({
         certificate: z.string().min(0).max(255).optional(),
         cuit: z.string().min(0).max(255).optional(),
         razon_social: z.string().min(0).max(255).optional(),
+        afip_condition: z.string().min(0).max(255).optional(),
+        activity_start_date: z.date().optional(),
+        address: z.string().min(0).max(255).optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -128,6 +131,9 @@ export const companiesRouter = createTRPCRouter({
           certificate: input.certificate,
           cuit: input.cuit,
           razon_social: input.razon_social,
+          afip_condition: input.afip_condition,
+          activity_start_date: input.activity_start_date,
+          address: input.address,
         })
         .returning();
 
@@ -145,6 +151,9 @@ export const companiesRouter = createTRPCRouter({
         cuit: z.string().min(0).max(255).optional(),
         razon_social: z.string().min(0).max(255).optional(),
         products: z.array(z.string()).optional(),
+        afip_condition: z.string().min(0).max(255).optional(),
+        activity_start_date: z.date().optional(),
+        address: z.string().min(0).max(255).optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -159,6 +168,9 @@ export const companiesRouter = createTRPCRouter({
             certificate: input.certificate,
             cuit: input.cuit,
             razon_social: input.razon_social,
+            afip_condition: input.afip_condition,
+            activity_start_date: input.activity_start_date,
+            address: input.address,
           })
           .where(eq(schema.companies.id, companyId!));
 
