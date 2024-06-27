@@ -64,7 +64,8 @@ export default function EditCompany() {
       setError("error");
     }
   };
-  function handleChangeBrand() {
+  function handleChangeBrand(newValue: string) {
+    setBrandId(newValue);
     const brand = marcas?.find((brand) => brand?.id === brandId);
     if (brand) {
       setBrandId(brand.id);
@@ -116,7 +117,7 @@ export default function EditCompany() {
 
           <div>
             <Label>Marca</Label>
-            <Select onValueChange={handleChangeBrand}>
+            <Select onValueChange={(e) => handleChangeBrand(e)}>
               <SelectTrigger className="w-[180px] font-bold">
                 <SelectValue placeholder="Seleccione una marca" />
               </SelectTrigger>
@@ -134,8 +135,10 @@ export default function EditCompany() {
               </SelectContent>
             </Select>
           </div>
+
           {brandId && (
             <>
+              <h2>Informacion de marca</h2>
               <div>
                 <Label>Razon social en factura de la marca</Label>
                 <Input

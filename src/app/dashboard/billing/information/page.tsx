@@ -20,7 +20,6 @@ export default async function Page() {
             <div className="block p-5">
               <h1>-CUIT: {company.cuit || "No ingresado"} </h1>
               <h1> -Clave fiscal:{company.afipKey || "No ingresado"} </h1>
-              <h1> -Razon Social:{company.razon_social || "No ingresado"} </h1>
             </div>
           </div>
         )}
