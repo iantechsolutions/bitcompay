@@ -3,12 +3,14 @@ import {
   CircleChevronDown,
   CircleChevronRight,
   CircleChevronUp,
+  FileText,
 } from "lucide-react";
 import { Router } from "next/router";
 import { TableCell, TableRow } from "~/components/ui/tablePreliq";
 import { Facturas } from "~/server/db/schema";
 import { RouterOutputs } from "~/trpc/shared";
 import { computeBase, computeIva } from "~/lib/utils";
+import { RedirectButton } from "~/components/redirect-button";
 interface TriggerTableProps {
   setActive: (value: boolean) => void;
   active: boolean;
@@ -100,9 +102,14 @@ export default function TriggerTable(props: TriggerTableProps) {
         {" "}
         {computeIva(total, Number(factura?.iva) ?? 0)}
       </TableCell>
-      <TableCell className="rounded-r-md border border-[#6cebd1]">
+      <TableCell className="border border-[#6cebd1] p-2 py-4">
         {" "}
         {total}
+      </TableCell>
+      <TableCell className="rounded-r-md border border-[#6cebd1]">
+        <RedirectButton url={factura.billLink}>
+          <FileText></FileText>
+        </RedirectButton>
       </TableCell>
     </TableRow>
   );

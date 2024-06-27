@@ -12,6 +12,7 @@ import { Brand } from "./brands-router";
 import { RouterOutputs } from "~/trpc/shared";
 import { calcularEdad, formatDate, htmlBill, ingresarAfip } from "~/lib/utils";
 import { utapi } from "~/server/uploadthing";
+import { id } from "date-fns/locale";
 
 function formatDateAFIP(date: Date | undefined) {
   if (date) {
@@ -191,30 +192,30 @@ async function approbateFactura(liquidationId: string) {
       const status = await db.query.paymentStatus.findFirst({
         where: eq(schema.paymentStatus.code, "91"),
       });
-      const payment = await db
-        .insert(schema.payments)
-        .values({
-          companyId: factura.family_group?.businessUnitData?.company?.id ?? "",
-          invoice_number: randomNumber,
-          userId: user?.id ?? "",
-          g_c: factura.family_group?.businessUnitData?.brand?.number ?? 0,
-          name: billResponsible?.name ?? "",
-          fiscal_id_type: billResponsible?.fiscal_id_type,
-          fiscal_id_number: parseInt(billResponsible?.fiscal_id_number ?? "0"),
-          du_type: billResponsible?.id_type,
-          du_number: parseInt(billResponsible?.id_number ?? "0"),
-          product: producto?.id,
-          period: factura.due_date,
-          first_due_amount: factura?.importe,
-          first_due_date: factura.due_date,
-          cbu: billResponsible?.pa[0]?.CBU,
-          factura_id: factura?.id,
-          documentUploadId: "0AspRyw8g4jgDAuNGAeBX",
-          product_number: producto?.number ?? 0,
-          statusId: status?.id,
-          // address: billResponsible?.address,
-        })
-        .returning();
+      // const payment = await db
+      //   .insert(schema.payments)
+      //   .values({
+      //     companyId: factura.family_group?.businessUnitData?.company?.id ?? "",
+      //     invoice_number: randomNumber,
+      //     userId: user?.id ?? "",
+      //     g_c: factura.family_group?.businessUnitData?.brand?.number ?? 0,
+      //     name: billResponsible?.name ?? "",
+      //     fiscal_id_type: billResponsible?.fiscal_id_type,
+      //     fiscal_id_number: parseInt(billResponsible?.fiscal_id_number ?? "0"),
+      //     du_type: billResponsible?.id_type,
+      //     du_number: parseInt(billResponsible?.id_number ?? "0"),
+      //     product: producto?.id,
+      //     period: factura.due_date,
+      //     first_due_amount: factura?.importe,
+      //     first_due_date: factura.due_date,
+      //     cbu: billResponsible?.pa[0]?.CBU,
+      //     factura_id: factura?.id,
+      //     documentUploadId: "0AspRyw8g4jgDAuNGAeBX",
+      //     product_number: producto?.number ?? 0,
+      //     statusId: status?.id,
+      //     // address: billResponsible?.address,
+      //   })
+      //   .returning();
 
       const afip = await ingresarAfip();
 
@@ -282,6 +283,13 @@ async function approbateFactura(liquidationId: string) {
       });
 
       console.log("resHtml", resHtml);
+      await db
+        .update(schema.facturas)
+        .set({
+          billLink: resHtml.file,
+        })
+        .where(eq(schema.facturas.id, factura.id));
+
       const historicEvents = await db.query.events.findMany({
         where: eq(schema.events.currentAccount_id, cc?.id ?? ""),
       });
