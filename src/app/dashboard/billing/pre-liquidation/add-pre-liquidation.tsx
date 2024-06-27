@@ -58,7 +58,7 @@ export default function AddPreLiquidation(props: { companyId: string }) {
       companyId: props.companyId,
     });
     //TODO CORREGIR ESTO
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 1500));
     if (liquidation) {
       toast.success("Pre-liquidacion creada correctamente");
       router.refresh();
