@@ -11,6 +11,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { Brand } from "./brands-router";
 import { RouterOutputs } from "~/trpc/shared";
 import { calcularEdad, formatDate } from "~/lib/utils";
+import { utapi } from "~/server/uploadthing";
 
 function formatDateAFIP(date: Date | undefined) {
   if (date) {
@@ -666,3 +667,4 @@ export const facturasRouter = createTRPCRouter({
         .where(eq(schema.facturas.id, input.providerId));
     }),
 });
+
