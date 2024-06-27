@@ -1,5 +1,5 @@
 "use client";
-import { CircleX, PlusCircle } from "lucide-react";
+import { CircleX, Loader2Icon, PlusCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import {
   Select,
@@ -71,6 +71,7 @@ export default function AddPlanPricesComponent({
   const [anio, setAnio] = useState(date?.getFullYear() ?? 2020);
   const [mes, setMes] = useState((date?.getMonth() ?? 0) + 1);
   const router = useRouter();
+  const [working, setWorking] = useState(false);
   const [formInitialValues, setFormInitialValues] = useState<
     FormValues["prices"]
   >(initialPrices || []);
@@ -115,6 +116,7 @@ export default function AddPlanPricesComponent({
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     try {
+      setWorking(true);
       const validity_date = new Date(anio, mes - 1, 1);
       for (const item of data.prices) {
         if (edit && item.id !== "") {
@@ -159,9 +161,12 @@ export default function AddPlanPricesComponent({
           }
         }
       }
+      console.log("UpdatePrices");
       if (onPricesChange) {
+        console.log("onPricesChange");
         onPricesChange();
       }
+      setWorking(false);
     } catch (error) {
       console.error(error);
     }
@@ -395,7 +400,13 @@ export default function AddPlanPricesComponent({
               </div>
             );
           })}
-          <Button type="submit">{edit ? "Actualizar" : "Guardar"}</Button>
+          <Button type="submit" disabled={working}>
+            {" "}
+            {working && (
+              <Loader2Icon className="mr-2 animate-spin" size={20} />
+            )}{" "}
+            {edit ? "Actualizar" : "Guardar"}
+          </Button>
         </form>
       </Form>
     </>
