@@ -90,17 +90,19 @@ export default function PlanPage(props: {
   const company = useCompanyData();
   function handleUpdatePrice() {
     setLoading(true);
-    props.plan?.pricesPerCondition.forEach((price) => {
-      createPricePerAge({
-        plan_id: props.plan?.id ?? "",
-        amount: price.amount * (1 + parseFloat(percent) / 100),
-        from_age: price.from_age ?? 0,
-        to_age: price.to_age ?? 0,
-        condition: price.condition ?? "",
-        isAmountByAge: price.isAmountByAge,
-        validy_date: new Date(anio, mes, 1),
+    props.plan?.pricesPerCondition
+      .filter((x) => x.validy_date === vigente)
+      .forEach((price) => {
+        createPricePerAge({
+          plan_id: props.plan?.id ?? "",
+          amount: price.amount * (1 + parseFloat(percent) / 100),
+          from_age: price.from_age ?? 0,
+          to_age: price.to_age ?? 0,
+          condition: price.condition ?? "",
+          isAmountByAge: price.isAmountByAge,
+          validy_date: new Date(anio, mes, 1),
+        });
       });
-    });
     setLoading(false);
     setOpen(false);
   }

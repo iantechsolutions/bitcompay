@@ -35,6 +35,8 @@ export default async function Home(props: {
   const preliquidation = await api.liquidations.get.query({
     id: props.params.liquidationId,
   });
+  console.log("preliquidation");
+  console.log(preliquidation);
   const user = await clerkClient.users.getUser(
     preliquidation?.userCreated ?? ""
   );
