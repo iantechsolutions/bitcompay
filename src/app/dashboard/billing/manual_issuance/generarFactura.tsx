@@ -171,24 +171,7 @@ export function FacturaDialog() {
       //   domicilioComprador: "Calle falsa 123",
       //   nombreComprador: "Homero Simpson",
       // });
-      const html = htmlBill();
-      const name = "PDF de prueba"; // NOMBRE
-      const options = {
-        width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
-        marginLeft: 0.4, // Margen izquierdo en pulgadas. Usar 0.1 para ticket
-        marginRight: 0.4, // Margen derecho en pulgadas. Usar 0.1 para ticket
-        marginTop: 0.4, // Margen superior en pulgadas. Usar 0.1 para ticket
-        marginBottom: 0.4, // Margen inferior en pulgadas. Usar 0.1 para ticket
-      };
 
-      //MANDAMOS PDF A AFIP, hay que agregar el qr al circuito, y levantar resHtml, por que actualmente solo se logea
-      const resHtml = await afip.ElectronicBilling.createPDF({
-        html: html,
-        file_name: name,
-        options: options,
-      });
-
-      console.log("resHtml", resHtml);
       setLoading(false);
       saveFactura(numero_de_factura);
       setOpen(false);
