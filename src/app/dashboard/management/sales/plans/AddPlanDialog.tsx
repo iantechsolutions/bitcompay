@@ -1,33 +1,42 @@
 "use client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import AddPlanPricesComponent from "./add-planprices-component";
 import AddPlanInfoComponent from "./add-planinfo-component";
 import { useState } from "react";
-import { Dialog, DialogContent } from "~/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogHeader,
+} from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
+import { PlusCircleIcon } from "lucide-react";
 
-export default function AddPlanPage(props: { params: { planId: string } }) {
+export default function AddPlanDialog(props: { planId?: string }) {
   const [open, setOpen] = useState<boolean>(false);
-  const [planId, setPlanId] = useState<string | undefined>(undefined);
+  const [planId, setPlanId] = useState<string | undefined>(props.planId);
   return (
     <div>
-      <Button onClick={() => setOpen(true)}>Agregar plan</Button>
+      <Button onClick={() => setOpen(true)} className="mr-3">
+        {planId ? (
+          "Actualizar info"
+        ) : (
+          <>
+            <PlusCircleIcon className="mr-2" size={20} />
+            Agregar plan
+          </>
+        )}
+      </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
-          <Tabs>
-            <TabsList>
-              <TabsTrigger value="info">Informacion del plan</TabsTrigger>
-              {planId && <TabsTrigger value="billing">Precios</TabsTrigger>}
-            </TabsList>
-            <TabsContent value="info">
-              <AddPlanInfoComponent
-                planId={planId}
-                onPlanIdChange={setPlanId}></AddPlanInfoComponent>
-            </TabsContent>
-            <TabsContent value="billing">
-              <AddPlanPricesComponent planId={planId}></AddPlanPricesComponent>
-            </TabsContent>
-          </Tabs>
+          <DialogHeader>
+            <DialogTitle>
+              {planId ? "Actualizar plan" : "Crear un plan"}
+            </DialogTitle>
+          </DialogHeader>
+          <AddPlanInfoComponent
+            planId={planId}
+            onPlanIdChange={setPlanId}
+          ></AddPlanInfoComponent>
         </DialogContent>
       </Dialog>
     </div>

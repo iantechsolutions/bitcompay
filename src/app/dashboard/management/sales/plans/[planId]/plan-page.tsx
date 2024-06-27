@@ -42,6 +42,7 @@ import { Label } from "~/components/ui/label";
 import { api } from "~/trpc/react";
 import { Calendar } from "~/components/ui/calendar";
 import { Input } from "~/components/ui/input";
+import AddPlanDialog from "../AddPlanDialog";
 dayjs.extend(utc);
 dayjs.locale("es");
 
@@ -106,12 +107,13 @@ export default function PlanPage(props: {
           <div className="flex justify-between">
             <Title>{props.plan!.description}</Title>
             <div className="flex items-center">
-              <Button
+              <AddPlanDialog planId={props.plan?.id}></AddPlanDialog>
+              {/* <Button
                 className="mr-2"
                 onClick={() => router.push(`./${props.plan?.id}/editInfo`)}
               >
                 Actualizar info{" "}
-              </Button>
+              </Button> */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button onClick={() => setOpen(true)}>
@@ -126,7 +128,7 @@ export default function PlanPage(props: {
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <Link
-                      href={`/dashboard/management/sales/plans/info/${props.plan?.id}/editPrice`}
+                      href={`/dashboard/management/sales/plans/${props.plan?.id}/editPrice`}
                     >
                       Actualizar manualmente
                     </Link>
@@ -145,7 +147,7 @@ export default function PlanPage(props: {
                     </Badge>
                   }
                   key={fecha.toISOString().split("T")[0]}
-                  href={`/dashboard/management/sales/plans/info/${
+                  href={`/dashboard/management/sales/plans/${
                     props.plan?.id
                   }/details/${fecha.getTime()}`}
                   title={`Vigente desde: ${

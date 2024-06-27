@@ -203,7 +203,7 @@ export default function DetailsPage(props: {
           <div className="flex items-center">
             <Button onClick={() => handleUpdatePrice("edit")}>
               {" "}
-              Editar precio de vigencia actual
+              Editar precio
             </Button>
           </div>
         </div>

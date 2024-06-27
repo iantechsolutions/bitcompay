@@ -34,7 +34,6 @@ import { useFieldArray } from "react-hook-form";
 import { Label } from "~/components/ui/label";
 import { RouterOutputs } from "~/trpc/shared";
 import { useRouter } from "next/navigation";
-import { GoBackArrow } from "~/components/goback-arrow";
 
 dayjs.extend(utc);
 dayjs.locale("es");
@@ -85,6 +84,7 @@ export default function AddPlanPricesComponent({
 
   const { data: relatives } = api.relative.list.useQuery(undefined);
   const [hasQueried, setHasQueried] = useState(false);
+  const [hasUpdatedPrices, setHasUpdatedPrices] = useState(false);
   const { data: planData } = api.plans.get.useQuery(
     { planId: planId ?? "" },
     {
@@ -100,10 +100,11 @@ export default function AddPlanPricesComponent({
     api.pricePerCondition.change.useMutation();
 
   useEffect(() => {
-    if (initialPrices) {
+    if (initialPrices && !hasUpdatedPrices) {
       setFormInitialValues(initialPrices);
     }
   }, [initialPrices]);
+
   useEffect(() => {
     form.reset({ prices: formInitialValues });
   }, [formInitialValues]);
@@ -161,41 +162,40 @@ export default function AddPlanPricesComponent({
 
   return (
     <>
-      <GoBackArrow />
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="flex-col items-center justify-center gap-2 space-y-8"
         >
-          <FormItem className="flex flex-col ">
-            <FormLabel htmlFor="validy_date">Mes de vigencia</FormLabel>
-            <Select
-              disabled={edit}
-              onValueChange={(e) => setMes(Number(e))}
-              defaultValue={mes.toString()}
-            >
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccione un mes" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem value="1">Enero</SelectItem>
-                <SelectItem value="2">Febrero</SelectItem>
-                <SelectItem value="3">Marzo</SelectItem>
-                <SelectItem value="4">Abril</SelectItem>
-                <SelectItem value="5">Mayo</SelectItem>
-                <SelectItem value="6">Junio</SelectItem>
-                <SelectItem value="7">Julio</SelectItem>
-                <SelectItem value="8">Agosto</SelectItem>
-                <SelectItem value="9">Septiembre</SelectItem>
-                <SelectItem value="10">Octubre</SelectItem>
-                <SelectItem value="11">Noviembre</SelectItem>
-                <SelectItem value="12">Diciembre</SelectItem>
-              </SelectContent>
-            </Select>
-          </FormItem>
-          <div>
+          <div className="flex flex-row space-x-24">
+            <FormItem>
+              <FormLabel htmlFor="validy_date">Mes de vigencia</FormLabel>
+              <Select
+                disabled={edit}
+                onValueChange={(e) => setMes(Number(e))}
+                defaultValue={mes.toString()}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccione un mes" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="1">Enero</SelectItem>
+                  <SelectItem value="2">Febrero</SelectItem>
+                  <SelectItem value="3">Marzo</SelectItem>
+                  <SelectItem value="4">Abril</SelectItem>
+                  <SelectItem value="5">Mayo</SelectItem>
+                  <SelectItem value="6">Junio</SelectItem>
+                  <SelectItem value="7">Julio</SelectItem>
+                  <SelectItem value="8">Agosto</SelectItem>
+                  <SelectItem value="9">Septiembre</SelectItem>
+                  <SelectItem value="10">Octubre</SelectItem>
+                  <SelectItem value="11">Noviembre</SelectItem>
+                  <SelectItem value="12">Diciembre</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
             <FormItem>
               <FormLabel>Año de Vigencia</FormLabel>
               <FormControl>
@@ -229,7 +229,7 @@ export default function AddPlanPricesComponent({
               }
             >
               <PlusCircle className="mr-2" size={20} />
-              Agregar Precio por Edad
+              Agregar Precio
             </Button>
             {fields.length > 0 && (
               <h1 className="font-bold text-2xl">Condicion</h1>

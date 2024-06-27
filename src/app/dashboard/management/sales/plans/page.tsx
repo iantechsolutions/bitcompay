@@ -15,21 +15,13 @@ export default async function Page() {
       <section className="space-y-2">
         <div className="flex justify-between">
           <Title>Planes</Title>
-          <RedirectButton url="./plans/add">
-            <PlusCircleIcon className="mr-2" size={20} />
-            Agregar Plan
-          </RedirectButton>
-          {/* <AddPlanDialog
-            params={{
-              planId: "",
-            }}
-          /> */}
+          <AddPlanDialog />
         </div>
         <List>
           {planes.map((planes) => (
             <ListTile
               key={planes.id}
-              href={`/dashboard/management/sales/plans/info/${planes.id}`}
+              href={`/dashboard/management/sales/plans/${planes.id}`}
               leading={<Badge>{planes.description}</Badge>}
               title={planes.plan_code}
             />

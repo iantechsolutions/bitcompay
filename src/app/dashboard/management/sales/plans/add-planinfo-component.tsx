@@ -106,7 +106,6 @@ export default function AddPlanInfoComponent({
 
   return (
     <>
-      <GoBackArrow />
       <div>
         <Label>Marca</Label>
         <Select

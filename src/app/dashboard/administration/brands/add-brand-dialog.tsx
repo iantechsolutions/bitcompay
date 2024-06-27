@@ -36,11 +36,11 @@ export function AddBrandDialog() {
                 number: Number.parseInt(number),
             })
 
-            toast.success('marca creada correctamente')
+            toast.success('Marca creada correctamente')
             router.refresh()
             setOpen(false)
         } catch (e) {
-            setError('no se puede asignar una descripcion reducidad de mas de 10 caracteres')
+            setError('No se puede asignar una descripcion reducidad de mas de 10 caracteres')
             const error = asTRPCError(e)!
             toast.error(error.message)
         }

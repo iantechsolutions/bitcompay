@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
-import AddPlanPricesComponent from "../../../add-planprices-component";
+import AddPlanPricesComponent from "../../add-planprices-component";
 import { api } from "~/trpc/react";
+import { GoBackArrow } from "~/components/goback-arrow";
 
 export default function AddPlanPage(props: { params: { planId: string } }) {
   const [planId, setPlanId] = useState<string | undefined>(props.params.planId);
@@ -14,7 +15,7 @@ export default function AddPlanPage(props: { params: { planId: string } }) {
   );
   return (
     <div>
-      <h1>Bienvenido</h1>
+      <GoBackArrow />
       <AddPlanPricesComponent
         planId={props.params.planId}
         initialPrices={priceList}
