@@ -626,7 +626,6 @@ export const facturasRouter = createTRPCRouter({
       );
       return liquidation;
     }),
-
   change: protectedProcedure
     .input(
       z.object({

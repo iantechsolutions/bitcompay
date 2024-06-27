@@ -54,8 +54,7 @@ export default function EditCompany() {
   const handleSubmit = async () => {
     try {
       const brand = marcas?.find((brand) => brand?.id === brandId);
-      const companiesId =
-      await updateCompany({
+      const companiesId = await updateCompany({
         companyId: company?.id!,
         cuit,
         afipKey,
@@ -75,10 +74,15 @@ export default function EditCompany() {
     }
   };
   function handleChangeBrand(newValue: string) {
+    
     setBrandId(newValue);
-    const brand = marcas?.find((brand) => brand?.id === brandId);
+    
+    const brand = marcas?.find((brand) => brand?.id === newValue);
     if (brand) {
-      setBrandId(brand.id);
+      console.log("newValue", newValue);
+
+      console.log(brand);
+      console.log(marcas);
       setRazonSocial(brand.razon_social || "");
       setTipoFactura(brand.bill_type || "");
       setConcepto(brand.concept || "");
@@ -135,11 +139,11 @@ export default function EditCompany() {
                 {marcas &&
                   marcas.map((marca) => (
                     <SelectItem
-                      key={marca!.id}
-                      value={marca!.id}
+                      key={marca?.id}
+                      value={marca?.id}
                       className="rounded-none border-b border-gray-600"
                     >
-                      {marca!.name}
+                      {marca?.name}
                     </SelectItem>
                   ))}
               </SelectContent>
@@ -162,61 +166,65 @@ export default function EditCompany() {
               <div>
                 <Label htmlFor="factura">Tipo de factura de la marca</Label>
                 <br />
-                <ComboboxDemo
-                  title="Seleccionar factura..."
-                  placeholder="Factura X"
-                  options={[
-                    { value: "3", label: "FACTURA A" },
-                    { value: "6", label: "FACTURA B" },
-                    { value: "11", label: "FACTURA C" },
-                    { value: "51", label: "FACTURA M" },
-                    { value: "19", label: "FACTURA E" },
-                    { value: "8", label: "NOTA DE DEBITO A" },
-                    { value: "13", label: "NOTA DE DEBITO B" },
-                    { value: "15", label: "NOTA DE DEBITO C" },
-                    { value: "52", label: "NOTA DE DEBITO M" },
-                    { value: "20", label: "NOTA DE DEBITO E" },
-                    { value: "2", label: "NOTA DE CREDITO A" },
-                    { value: "12", label: "NOTA DE CREDITO B" },
-                    { value: "14", label: "NOTA DE CREDITO C" },
-                    { value: "53", label: "NOTA DE CREDITO M" },
-                    { value: "21", label: "NOTA DE CREDITO E" },
-                  ]}
-                  onSelectionChange={(e) => {
-                    setTipoFactura(e);
-                  }}
-                />
+                <Select
+                  onValueChange={(e) => setTipoFactura(e)}
+                  value={tipoFactura ?? ""}
+                >
+                  <SelectTrigger className="w-[180px] font-bold">
+                    <SelectValue placeholder="Seleccionar factura..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="3">FACTURA A</SelectItem>
+                    <SelectItem value="6">FACTURA B</SelectItem>
+                    <SelectItem value="11">FACTURA C</SelectItem>
+                    <SelectItem value="51">FACTURA M</SelectItem>
+                    <SelectItem value="19">FACTURA E</SelectItem>
+                    <SelectItem value="8">NOTA DE DEBITO A</SelectItem>
+                    <SelectItem value="13">NOTA DE DEBITO B</SelectItem>
+                    <SelectItem value="15">NOTA DE DEBITO C</SelectItem>
+                    <SelectItem value="52">NOTA DE DEBITO M</SelectItem>
+                    <SelectItem value="20">NOTA DE DEBITO E</SelectItem>
+                    <SelectItem value="2">NOTA DE CREDITO A</SelectItem>
+                    <SelectItem value="12">NOTA DE CREDITO B</SelectItem>
+                    <SelectItem value="14">NOTA DE CREDITO C</SelectItem>
+                    <SelectItem value="53">NOTA DE CREDITO M</SelectItem>
+                    <SelectItem value="21">NOTA DE CREDITO E</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label htmlFor="concepto">Concepto a usar por la marca</Label>
                 <br />
-                <ComboboxDemo
-                  title="Seleccionar concepto..."
-                  placeholder="Concepto"
-                  options={[
-                    { value: "1", label: "Productos" },
-                    { value: "2", label: "Servicios" },
-                    { value: "3", label: "Productos y Servicios" },
-                  ]}
-                  onSelectionChange={(e) => setConcepto(e)}
-                />
+                <Select
+                  onValueChange={(e) => setConcepto(e)}
+                  value={concepto ?? ""}
+                >
+                  <SelectTrigger className="w-[180px] font-bold">
+                    <SelectValue placeholder="Seleccionar concepto..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">Productos</SelectItem>
+                    <SelectItem value="2">Servicios</SelectItem>
+                    <SelectItem value="3">Productos y Servicios</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label htmlFor="iva">IVA a usar por la marca</Label>
                 <br />
-                <ComboboxDemo
-                  title="Seleccionar una opcion"
-                  placeholder="IVA"
-                  options={[
-                    { value: "3", label: "0%" },
-                    { value: "4", label: "10.5%" },
-                    { value: "5", label: "21%" },
-                    { value: "6", label: "27%" },
-                    { value: "8", label: "5%" },
-                    { value: "9", label: "2.5%" },
-                  ]}
-                  onSelectionChange={(e) => setIva(e)}
-                />
+                <Select onValueChange={(e) => setIva(e)} value={iva ?? ""}>
+                  <SelectTrigger className="w-[180px] font-bold">
+                    <SelectValue placeholder="Seleccionar IVA" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="3">0%</SelectItem>
+                    <SelectItem value="4">10.5%</SelectItem>
+                    <SelectItem value="5">21%</SelectItem>
+                    <SelectItem value="6">27%</SelectItem>
+                    <SelectItem value="8">5%</SelectItem>
+                    <SelectItem value="9">2.5%</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </>
           )}

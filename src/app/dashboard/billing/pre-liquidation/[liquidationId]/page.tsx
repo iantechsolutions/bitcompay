@@ -44,7 +44,7 @@ export default async function Home(props: {
   const facturas = preliquidation?.facturas;
   const periodo =
     dayjs.utc(preliquidation?.period).format("MMMM [de] YYYY") ?? "-";
-
+  
   return (
     <LayoutContainer>
       <div className="grid grid-cols-3 gap-x-2 gap-y-2">

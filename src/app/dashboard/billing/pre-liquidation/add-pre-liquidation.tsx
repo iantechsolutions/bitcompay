@@ -1,6 +1,7 @@
 "use client";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
+import { Input } from "~/components/ui/input";
 import utc from "dayjs/plugin/utc";
 import { useState } from "react";
 import { PlusCircleIcon, Loader2Icon } from "lucide-react";
@@ -36,8 +37,10 @@ export default function AddPreLiquidation(props: { companyId: string }) {
   const [open, setOpen] = useState(false);
   const [fechaVencimiento1, setFechaVencimiento1] = useState<Date>();
   const [fechaVencimiento2, setFechaVencimiento2] = useState<Date>();
-  const [fechaDesde, setFechaDesde] = useState<Date>();
-  const [fechaHasta, setFechaHasta] = useState<Date>();
+  // const [fechaDesde, setFechaDesde] = useState<Date>();
+  // const [fechaHasta, setFechaHasta] = useState<Date>();
+  const [mes, setMes] = useState<number>(1);
+  const [anio, setAnio] = useState<number>(2021);
   const [puntoVenta, setPuntoVenta] = useState("");
   const { data: marcas } = api.brands.getbyCurrentCompany.useQuery();
   const router = useRouter();
@@ -48,17 +51,17 @@ export default function AddPreLiquidation(props: { companyId: string }) {
   // const { mutateAsync: createFacturas } = api.family_groups.createPreLiquidation.useMutation();
   async function handleCreate() {
     // const { data:grupos } = api.family_groups.getByBrand.useQuery({brandId: brandId});
-
     const liquidation = await createLiquidation({
       pv: puntoVenta,
       brandId: brandId,
-      dateDesde: fechaDesde,
-      dateHasta: fechaHasta,
+      dateDesde: new Date(anio, mes - 1, 1),
+      dateHasta: new Date(anio, mes, 0),
       dateDue: fechaVencimiento2,
       companyId: props.companyId,
     });
     //TODO CORREGIR ESTO
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    // await new Promise((resolve) => setTimeout(resolve, 500));
+
     if (liquidation) {
       toast.success("Pre-liquidacion creada correctamente");
       router.refresh();
@@ -165,7 +168,7 @@ export default function AddPreLiquidation(props: { companyId: string }) {
               </PopoverContent>
             </Popover>
           </div>
-          <div>
+          {/* <div>
             <Label>Fecha inicio de servicio</Label>
             <br />
             <Popover>
@@ -228,6 +231,42 @@ export default function AddPreLiquidation(props: { companyId: string }) {
                 />
               </PopoverContent>
             </Popover>
+          </div> */}
+          <div className="flex flex-row space-x-24">
+            <div>
+              <Label htmlFor="validy_date">Mes de vigencia</Label>
+              <Select
+                onValueChange={(e) => setMes(Number(e))}
+                defaultValue={mes.toString()}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccione un mes" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">Enero</SelectItem>
+                  <SelectItem value="2">Febrero</SelectItem>
+                  <SelectItem value="3">Marzo</SelectItem>
+                  <SelectItem value="4">Abril</SelectItem>
+                  <SelectItem value="5">Mayo</SelectItem>
+                  <SelectItem value="6">Junio</SelectItem>
+                  <SelectItem value="7">Julio</SelectItem>
+                  <SelectItem value="8">Agosto</SelectItem>
+                  <SelectItem value="9">Septiembre</SelectItem>
+                  <SelectItem value="10">Octubre</SelectItem>
+                  <SelectItem value="11">Noviembre</SelectItem>
+                  <SelectItem value="12">Diciembre</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Año de Vigencia</Label>
+              <Input
+                className="border-green-300 focus-visible:ring-green-400 w-[100px]"
+                type="number"
+                value={anio}
+                onChange={(e) => setAnio(Number(e.target.value))}
+              />
+            </div>
           </div>
           <div>
             <Label htmlFor="name">Punto de venta a utilizar</Label>
