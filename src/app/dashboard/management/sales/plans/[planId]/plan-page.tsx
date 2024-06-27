@@ -114,12 +114,6 @@ export default function PlanPage(props: {
             <Title>{props.plan!.description}</Title>
             <div className="flex items-center">
               <AddPlanDialog planId={props.plan?.id}></AddPlanDialog>
-              {/* <Button
-                className="mr-2"
-                onClick={() => router.push(`./${props.plan?.id}/editInfo`)}
-              >
-                Actualizar info{" "}
-              </Button> */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button onClick={() => setOpen(true)}>

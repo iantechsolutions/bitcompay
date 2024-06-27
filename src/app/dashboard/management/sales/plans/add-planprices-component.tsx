@@ -57,6 +57,7 @@ type AddPlanDialogProps = {
   planId?: string;
   edit?: boolean;
   date?: Date;
+  onPricesChange?: () => void;
 };
 
 export default function AddPlanPricesComponent({
@@ -64,6 +65,7 @@ export default function AddPlanPricesComponent({
   planId,
   edit,
   date,
+  onPricesChange,
 }: AddPlanDialogProps) {
   const company = useCompanyData();
   const [anio, setAnio] = useState(date?.getFullYear() ?? 2020);
@@ -157,7 +159,9 @@ export default function AddPlanPricesComponent({
           }
         }
       }
-      router.back();
+      if (onPricesChange) {
+        onPricesChange();
+      }
     } catch (error) {
       console.error(error);
     }
