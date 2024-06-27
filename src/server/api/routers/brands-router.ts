@@ -107,6 +107,7 @@ export const brandsRouter = createTRPCRouter({
         billType: z.string().optional(),
         companiesId: z.set(z.string()),
         concept: z.string().optional(),
+        razon_social: z.string().optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -119,6 +120,7 @@ export const brandsRouter = createTRPCRouter({
           iva: input.iva,
           bill_type: input.billType,
           concept: input.concept,
+          razon_social: input.razon_social,
         })
         .where(eq(schema.brands.id, input.brandId));
 
@@ -130,6 +132,34 @@ export const brandsRouter = createTRPCRouter({
           .insert(schema.companiesToBrands)
           .values({ brandId: input.brandId, companyId: companyId });
       }
+    }),
+
+  changeKeepCompany: protectedProcedure
+    .input(
+      z.object({
+        brandId: z.string(),
+        name: z.string().min(1).max(255),
+        description: z.string().min(0).max(1023).optional(),
+        reducedDescription: z.string().min(0).max(10).optional(),
+        iva: z.string().optional(),
+        billType: z.string().optional(),
+        concept: z.string().optional(),
+        razon_social: z.string().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      await db
+        .update(schema.brands)
+        .set({
+          name: input.name,
+          description: input.description,
+          redescription: input.reducedDescription,
+          iva: input.iva,
+          bill_type: input.billType,
+          concept: input.concept,
+          razon_social: input.razon_social,
+        })
+        .where(eq(schema.brands.id, input.brandId));
     }),
 
   delete: protectedProcedure

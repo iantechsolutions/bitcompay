@@ -49,15 +49,25 @@ export default function EditCompany() {
   const { mutateAsync: updateCompany, isLoading: isMutating } =
     api.companies.change.useMutation();
   const { mutateAsync: editBrand, isLoading: isMutatingBrand } =
-    api.brands.change.useMutation();
+    api.brands.changeKeepCompany.useMutation();
 
   const handleSubmit = async () => {
     try {
+      const brand = marcas?.find((brand) => brand?.id === brandId);
+      const companiesId =
       await updateCompany({
         companyId: company?.id!,
         cuit,
         afipKey,
         razon_social,
+      });
+      await editBrand({
+        brandId: brandId!,
+        razon_social,
+        billType: tipoFactura ?? "11",
+        concept: concepto ?? "1",
+        iva: iva ?? "5",
+        name: brand?.name ?? "",
       });
       setOpen(false); // Close the dialog on success
     } catch (error) {
