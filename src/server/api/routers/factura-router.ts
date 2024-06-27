@@ -415,26 +415,39 @@ async function preparateFactura(
 
 async function getGroupAmount(grupo: grupoCompleto) {
   let importe = 0;
-  grupo.integrants?.forEach((integrant) => {
-    if (integrant.birth_date != null) {
-      const age = calcularEdad(integrant.birth_date);
-      console.log(age);
-      console.log(integrant.relationship);
-      const precioIntegrante =
-        grupo.plan?.pricesPerCondition.find((x) => {
-          if (
-            integrant.relationship &&
-            integrant.relationship.toLowerCase() != "titular"
-          ) {
-            return x.condition == integrant.relationship;
-          } else {
-            return (x.from_age ?? 1000 <= age) && (x.to_age ?? 0 >= age);
-          }
-        })?.amount ?? 0;
-      console.log(precioIntegrante);
-      importe += precioIntegrante;
-    }
-  });
+  const preciosPasados = grupo.plan?.pricesPerCondition.filter(
+    (price) => price.validy_date.getTime() <= new Date().getTime()
+  );
+  preciosPasados?.sort(
+    (a, b) => b.validy_date.getTime() - a.validy_date.getTime()
+  );
+  if (preciosPasados) {
+    const vigente = preciosPasados[0]?.validy_date;
+
+    const precios = grupo.plan?.pricesPerCondition.filter(
+      (x) => x.validy_date.getTime() === vigente?.getTime()
+    );
+    grupo.integrants?.forEach((integrant) => {
+      if (integrant.birth_date != null) {
+        const age = calcularEdad(integrant.birth_date);
+        console.log(age);
+        console.log(integrant.relationship);
+        const precioIntegrante =
+          precios?.find((x) => {
+            if (
+              integrant.relationship &&
+              integrant.relationship.toLowerCase() != "titular"
+            ) {
+              return x.condition == integrant.relationship;
+            } else {
+              return (x.from_age ?? 1000 <= age) && (x.to_age ?? 0 >= age);
+            }
+          })?.amount ?? 0;
+        console.log(precioIntegrante);
+        importe += precioIntegrante;
+      }
+    });
+  }
   console.log(importe);
   return importe;
 }

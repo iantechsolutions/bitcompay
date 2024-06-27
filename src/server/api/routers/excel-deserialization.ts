@@ -229,19 +229,31 @@ export const excelDeserializationRouter = createTRPCRouter({
           });
           if (row.differential_value) {
             const ageN = calcularEdad(row.birth_date ?? new Date());
-            const precioIntegrante =
-              plan?.pricesPerCondition.find((p) => {
-                if (
-                  row.relationship &&
-                  row.relationship.toLowerCase() != "titular"
-                ) {
-                  return p.condition == row.relationship;
-                } else {
-                  return (
-                    (p.from_age ?? 1000 <= ageN) && (p.to_age ?? 0 >= ageN)
-                  );
-                }
-              })?.amount ?? 0;
+            const preciosPasados = plan?.pricesPerCondition.filter(
+              (price) => price.validy_date.getTime() <= new Date().getTime()
+            );
+            preciosPasados?.sort(
+              (a, b) => b.validy_date.getTime() - a.validy_date.getTime()
+            );
+            let precioIntegrante = 0;
+            if (preciosPasados) {
+              const vigente = preciosPasados[0]?.validy_date;
+              precioIntegrante =
+                plan?.pricesPerCondition
+                  .filter((x) => x.validy_date.getTime() === vigente?.getTime())
+                  .find((p) => {
+                    if (
+                      row.relationship &&
+                      row.relationship.toLowerCase() != "titular"
+                    ) {
+                      return p.condition == row.relationship;
+                    } else {
+                      return (
+                        (p.from_age ?? 1000 <= ageN) && (p.to_age ?? 0 >= ageN)
+                      );
+                    }
+                  })?.amount ?? 0;
+            }
             const precioDiferencial =
               parseFloat(row.differential_value!) / precioIntegrante;
             const differentialValue = await db
