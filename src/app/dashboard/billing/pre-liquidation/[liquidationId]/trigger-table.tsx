@@ -11,6 +11,8 @@ import { Facturas } from "~/server/db/schema";
 import { RouterOutputs } from "~/trpc/shared";
 import { computeBase, computeIva } from "~/lib/utils";
 import { RedirectButton } from "~/components/redirect-button";
+import Link from "next/link";
+import { Button } from "~/components/ui/button";
 interface TriggerTableProps {
   setActive: (value: boolean) => void;
   active: boolean;
@@ -107,9 +109,19 @@ export default function TriggerTable(props: TriggerTableProps) {
         {total}
       </TableCell>
       <TableCell className="rounded-r-md border border-[#6cebd1]">
-        <RedirectButton url={factura.billLink}>
-          <FileText></FileText>
-        </RedirectButton>
+        {factura.billLink && factura.billLink !== "" ? (
+          <div className="items-center justify-center">
+            <Link href={factura.billLink}>
+              <FileText></FileText>
+            </Link>
+          </div>
+        ) : (
+          <div className="items-center justify-center">
+            <Button disabled={true} variant="link">
+              <FileText></FileText>
+            </Button>
+          </div>
+        )}
       </TableCell>
     </TableRow>
   );
