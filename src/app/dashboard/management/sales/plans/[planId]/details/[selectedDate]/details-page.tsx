@@ -82,6 +82,7 @@ export default function DetailsPage(props: {
 
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [editable, setEditable] = useState(false);
   const [openAdd, setOpenAdd] = useState(false);
   const [percent, setPercent] = useState("");
   const [validity_date, setValidity_date] = useState<Date>();
@@ -114,10 +115,11 @@ export default function DetailsPage(props: {
     if (mostRecentPastPrice) {
       editablePrices.push(mostRecentPastPrice);
     }
-    const editable =
+    setEditable(
       editablePrices.filter(
         (x) => x.validy_date.getTime() == props.date.getTime()
-      ).length > 0;
+      ).length > 0
+    );
     // setEditablePrices(editablePrices);
   }, [props.plan?.pricesPerCondition]);
 
@@ -232,12 +234,14 @@ export default function DetailsPage(props: {
               initialPrices={groupByAge}
             ></AddPlanDialog>
           </div> */}
-          <div className="flex items-center">
-            <Button onClick={() => handleUpdatePrice("edit")}>
-              {" "}
-              Editar precio
-            </Button>
-          </div>
+          {editable && (
+            <div className="flex items-center">
+              <Button onClick={() => handleUpdatePrice("edit")}>
+                {" "}
+                Editar precio
+              </Button>
+            </div>
+          )}
         </div>
         {!isLoading && (
           <Tabs defaultValue="perAge">
