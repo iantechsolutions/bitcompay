@@ -88,13 +88,15 @@ export default function PlanPage(props: {
     setArrayFechas(sortedArrayFechas);
   }, []);
   const company = useCompanyData();
-  function handleUpdatePrice() {
+  async function handleUpdatePrice() {
     setLoading(true);
-    props.plan?.pricesPerCondition
-      .filter((x) => x.validy_date.getTime() === vigente?.getTime())
-      .forEach(async (price) => {
+    if (props.plan?.pricesPerCondition) {
+      const validPrices = props.plan.pricesPerCondition.filter(
+        (x) => x.validy_date.getTime() === vigente?.getTime()
+      );
+      for (const price of validPrices) {
         await createPricePerAge({
-          plan_id: props.plan?.id ?? "",
+          plan_id: props.plan.id ?? "",
           amount: price.amount * (1 + parseFloat(percent) / 100),
           from_age: price.from_age ?? 0,
           to_age: price.to_age ?? 0,
@@ -102,7 +104,8 @@ export default function PlanPage(props: {
           isAmountByAge: price.isAmountByAge,
           validy_date: new Date(anio, mes, 1),
         });
-      });
+      }
+    }
     setLoading(false);
     setOpen(false);
     router.refresh();
