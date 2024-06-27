@@ -92,8 +92,8 @@ export default function PlanPage(props: {
     setLoading(true);
     props.plan?.pricesPerCondition
       .filter((x) => x.validy_date.getTime() === vigente?.getTime())
-      .forEach((price) => {
-        createPricePerAge({
+      .forEach(async (price) => {
+        await createPricePerAge({
           plan_id: props.plan?.id ?? "",
           amount: price.amount * (1 + parseFloat(percent) / 100),
           from_age: price.from_age ?? 0,

@@ -1,6 +1,12 @@
 "use client";
-import { CircleX, Loader2Icon, PlusCircle } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useForm, useFieldArray, type SubmitHandler } from "react-hook-form";
+import { api } from "~/trpc/react";
+import { useCompanyData } from "../../../company-provider";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import "dayjs/locale/es";
+import { useRouter } from "next/navigation";
 import {
   Select,
   SelectTrigger,
@@ -14,9 +20,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import dayjs from "dayjs";
-import "dayjs/locale/es";
-import utc from "dayjs/plugin/utc";
 import { Input } from "~/components/ui/input";
 import {
   Form,
@@ -27,13 +30,9 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Button } from "~/components/ui/button";
-import { useForm, type SubmitHandler } from "react-hook-form";
-import { api } from "~/trpc/react";
-import { useCompanyData } from "../../../company-provider";
-import { useFieldArray } from "react-hook-form";
 import { Label } from "~/components/ui/label";
 import { RouterOutputs } from "~/trpc/shared";
-import { useRouter } from "next/navigation";
+import { CircleX, Loader2Icon, PlusCircle } from "lucide-react";
 
 dayjs.extend(utc);
 dayjs.locale("es");
@@ -72,12 +71,9 @@ export default function AddPlanPricesComponent({
   const [mes, setMes] = useState((date?.getMonth() ?? 0) + 1);
   const router = useRouter();
   const [working, setWorking] = useState(false);
-  const [formInitialValues, setFormInitialValues] = useState<
-    FormValues["prices"]
-  >(initialPrices || []);
 
   const form = useForm<FormValues>({
-    defaultValues: { prices: formInitialValues },
+    defaultValues: { prices: initialPrices || [] },
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -87,7 +83,6 @@ export default function AddPlanPricesComponent({
 
   const { data: relatives } = api.relative.list.useQuery(undefined);
   const [hasQueried, setHasQueried] = useState(false);
-  const [hasUpdatedPrices, setHasUpdatedPrices] = useState(false);
   const { data: planData } = api.plans.get.useQuery(
     { planId: planId ?? "" },
     {
@@ -97,20 +92,21 @@ export default function AddPlanPricesComponent({
       },
     }
   );
+
   const { mutateAsync: createPricePerCondition } =
     api.pricePerCondition.create.useMutation();
   const { mutateAsync: updatePricePerCondition } =
     api.pricePerCondition.change.useMutation();
 
+  // Add logging to check for re-renders
   useEffect(() => {
-    console.log("initialPrices");
-    console.log(initialPrices);
-    console.log(hasUpdatedPrices);
-    if (initialPrices != undefined && !hasUpdatedPrices) {
-      console.log("entra");
-      setFormInitialValues(initialPrices);
-      form.reset({ prices: formInitialValues });
-      // setHasUpdatedPrices(true);
+    console.log("Component mounted or updated");
+  });
+
+  useEffect(() => {
+    if (initialPrices) {
+      console.log("Setting initial prices");
+      form.reset({ prices: initialPrices });
     }
   }, [initialPrices]);
 
@@ -161,14 +157,13 @@ export default function AddPlanPricesComponent({
           }
         }
       }
-      console.log("UpdatePrices");
       if (onPricesChange) {
-        console.log("onPricesChange");
         onPricesChange();
       }
       setWorking(false);
     } catch (error) {
       console.error(error);
+      setWorking(false);
     }
   };
 
@@ -185,7 +180,7 @@ export default function AddPlanPricesComponent({
               <Select
                 disabled={edit}
                 onValueChange={(e) => setMes(Number(e))}
-                defaultValue={mes.toString()}
+                value={mes.toString()}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -259,13 +254,29 @@ export default function AddPlanPricesComponent({
                       <FormItem>
                         <FormLabel
                           htmlFor={`prices.${index}.isAmountByAge`}
-                        ></FormLabel>
-                        <br />
+                          className="font-bold"
+                        >
+                          Tipo
+                        </FormLabel>
                         <Select
-                          onValueChange={(value) => {
-                            field.onChange(value === "true");
+                          onValueChange={(value: "true" | "false") => {
+                            const boolValue = value === "true";
+                            form.setValue(
+                              `prices.${index}.isAmountByAge`,
+                              boolValue
+                            );
+                            if (boolValue) {
+                              form.setValue(`prices.${index}.condition`, null);
+                            } else {
+                              form.setValue(`prices.${index}.from_age`, null);
+                              form.setValue(`prices.${index}.to_age`, null);
+                            }
                           }}
-                          value={field.value ? "true" : "false"}
+                          value={
+                            form.getValues(`prices.${index}.isAmountByAge`)
+                              ? "true"
+                              : "false"
+                          }
                         >
                           <FormControl>
                             <SelectTrigger className="w-[150px] font-bold">
@@ -304,7 +315,7 @@ export default function AddPlanPricesComponent({
                         <FormControl>
                           <Select
                             onValueChange={field.onChange}
-                            defaultValue={field.value ?? ""}
+                            value={field.value ?? ""}
                           >
                             <SelectTrigger>
                               <SelectValue placeholder="Seleccione una opción" />
