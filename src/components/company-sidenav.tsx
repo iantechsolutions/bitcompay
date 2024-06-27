@@ -87,7 +87,7 @@ export default function CompanySidenav() {
     <Sidenav className="h-full bg-[#e9fcf8]">
       <img
         className="bg-[#e9fcf8] pb-5 pl-5 pr-5 pt-8"
-        src="bitcom-03.png"
+        src="/bitcom-03.png"
         alt="logo"
       ></img>
       <Accordion
