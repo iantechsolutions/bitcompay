@@ -173,15 +173,13 @@ export default async function Home(props: {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {facturas?.map(
-              (factura: RouterOutputs["facturas"]["list"][number]) => (
-                <TableRowContainer
-                  key={factura.id}
-                  factura={factura}
-                  periodo={periodo}
-                />
-              )
-            )}
+            {facturas?.map((factura: any) => (
+              <TableRowContainer
+                key={factura.id}
+                factura={factura}
+                periodo={periodo}
+              />
+            ))}
           </TableBody>
         </Table>
         <br />

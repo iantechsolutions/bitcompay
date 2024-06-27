@@ -14,7 +14,7 @@ import { api } from "~/trpc/react";
 // subTotal: number;
 
 export default function TableRowContainer(props: {
-  factura: RouterOutputs["facturas"]["list"][number];
+  factura: any;
   periodo: string;
 }) {
   const [active, setActive] = useState(false);
