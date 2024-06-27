@@ -27,6 +27,7 @@ export default function AddPlanPage(props: { params: { planId: string } }) {
         initialPrices={priceList}
         edit={false}
         date={firstCorrectPrice?.validy_date}
+        onPricesChange={() => handleChange()}
       ></AddPlanPricesComponent>
     </div>
   );
