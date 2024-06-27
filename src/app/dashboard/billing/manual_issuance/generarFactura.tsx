@@ -45,22 +45,22 @@ export async function ingresarAfip() {
   //   production: true,
   // });
 
-  const afipCuit = new Afip({
-    CUIT: taxId,
-  });
+  // const afipCuit = new Afip({
+  //   CUIT: taxId,
+  // });
 
-  const res = await afipCuit.CreateCert(_username, _password, alias);
-  console.log("Certificado creado");
-  console.log(res);
-  // const wsid = "wsfe";
+  // const res = await afipCuit.CreateCert(_username, _password, alias);
+  // console.log("Certificado creado");
+  // console.log(res);
+  const wsid = "wsfe";
 
   // // //ESTO CREA LA AUTORIZACION
-  const cert = res.cert;
-  const key = res.key;
-  // const cert =
-  //     '-----BEGIN CERTIFICATE-----\nMIIDQzCCAiugAwIBAgIIBDcBTy1RV9IwDQYJKoZIhvcNAQENBQAwMzEVMBMGA1UEAwwMQ29tcHV0\nYWRvcmVzMQ0wCwYDVQQKDARBRklQMQswCQYDVQQGEwJBUjAeFw0yNDA1MTQxMjQ1NTZaFw0yNjA1\nMTQxMjQ1NTZaMC4xETAPBgNVBAMMCGFmaXBzZGsyMRkwFwYDVQQFExBDVUlUIDIzNDM5MjE0NjE5\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAv2gtWDrfV7m9Lz1dYFimDivBff/UCrBB\nQHUuREfIcwL3cs0TDQ075Nk6GyPIIclvVBAUrIXHNDAEgLM3uxY/eSNO/kL9OpjTbleSNUxPyfZz\nwbFsS93ZZb37iA72J2ffgS8TRT9q0tiDnx5dUBv+lVIBliwbxGR6qgEGvgLwZHy7oSKfiYXV8vuc\n+Dt5kNbBVEZTyYyhSMYrM80TcStVrMYuFAz4GJiJRR3g258tJAVARB2KU6tNdaeZ/dmkFzQF/kL8\n9SsIVXEj/8HuLK1qNPoY/qIyD35xqlBW5VYeQMlqRC87V/eKWXUCQM/O+wett6QzB4OGYwBwZYsE\nMNFqWQIDAQABo2AwXjAMBgNVHRMBAf8EAjAAMB8GA1UdIwQYMBaAFCsNL8jfYf0IyU4R0DWTBG2O\nW9BuMB0GA1UdDgQWBBSqnCsGiIw8kqJgF80pSpuLASPB/zAOBgNVHQ8BAf8EBAMCBeAwDQYJKoZI\nhvcNAQENBQADggEBAJQMwlkuNIan9Em48HBUG03glquZsyF74uWLwBAXJ5KAoWHJDU8k1nsRLmw4\n4qw0jWpDPBX1kTvdYVq2412lndnXCdoBiOCjBibwApylqV3pZGyHDTfhWEYBBF+0TOLB/w2FVhSk\n7mbtmWTZ8twqJtORuBbolkM1QTWVuFCWRHX2wSINnjP23NxnLIf6CTJKdMUsAZ7YxAubuWIw3IYd\nGASuLrUCpAlyrA1jpGa3k1vBgTawt/9vWMrbX9uumefFRTM38xB+JPlIY5pN1vEOTreVfAyK7MGR\n1IH2RXkvV3n+YJkj+pcQZG5xOuYuLdeuki4jPy7Q/i3DlAhRYDONgDI=\n-----END CERTIFICATE-----'
-  // const key =
-  //     '-----BEGIN RSA PRIVATE KEY-----\r\nMIIEpQIBAAKCAQEAv2gtWDrfV7m9Lz1dYFimDivBff/UCrBBQHUuREfIcwL3cs0T\r\nDQ075Nk6GyPIIclvVBAUrIXHNDAEgLM3uxY/eSNO/kL9OpjTbleSNUxPyfZzwbFs\r\nS93ZZb37iA72J2ffgS8TRT9q0tiDnx5dUBv+lVIBliwbxGR6qgEGvgLwZHy7oSKf\r\niYXV8vuc+Dt5kNbBVEZTyYyhSMYrM80TcStVrMYuFAz4GJiJRR3g258tJAVARB2K\r\nU6tNdaeZ/dmkFzQF/kL89SsIVXEj/8HuLK1qNPoY/qIyD35xqlBW5VYeQMlqRC87\r\nV/eKWXUCQM/O+wett6QzB4OGYwBwZYsEMNFqWQIDAQABAoIBAQCQFCct5wL/0fyq\r\ndpK3V4OH30ADTHOcqBg2IP72vuIQUQdbDytsA642EZ4/l6uqYyq+KGyngPv2OL7q\r\n8fzdg128Hev0URC07x0YTirsm8jjyfRQtPFEGnbusxeHz1tTRkljwL/MvHP4yqop\r\nOH4dMzVryRMQq5srNkdveN5OYX/64uxGM2uM+ZVXtMb7ve4KX5GZKCt2fyEC5ZTJ\r\n/B2i/by7NJtm3+VtiVrifi3U2oxjQ0Es1j9COBEWY8JtpIZw9PoP93Hb/zliipJW\r\nXRC6UGd7aF4KOi2vIt619dTD/jsRSweidNGluGdVfHkwQ2BIuLzepA4IU1Z6UKX2\r\nmu2NPXCRAoGBAN7zoRJmNeLf/i0xWHSkyhC3kKgV0wvICbXYVAFBCBEnM2p7Kx7v\r\nyIzQCg+qFtdqSh8Xv1hgo5hFP5QbiavCRbJa+Jb8ZPsqrmEhrE5HYoPamjRuSRi+\r\nzcH43O21fAX/eMhFl5g60i0svMP4hqhcVqli26Lt8iwvyKb83squ6c6XAoGBANvH\r\nhD2dVrRRcBC5+JOrJ2JKgGIqcX8TD9JKQqsHX6bytVUL4aOebgJqXHIBZPU8cRCx\r\nB+1dX5O8fjqkUNIWzq1IqAZtwZopjp1AGoctSzj9J3zYyjoK7AWaeDuyu2ZIzCef\r\nVat8k9Q1RdCovfhfQHZlV84+zJ7l8WWx0SFdpZyPAoGBAI5Mh2C79ebBOnTTyvZf\r\n+0xiLSTrERGy8merFCrcu+5ey9VJmcMcHi+p1NIcqImDIJ3pxUn+HExi3mqEjQEg\r\ndOWaZJHRtA4PNs9t85DexQUNMGEIhwUROzhzw2bA79DQNuH0cQZLfLwykqSt6hxp\r\nGzLvkunR30DOms3iFbzdmQMvAoGBAL/wP9JbnYQ+9yL0d13nhK63p+WTcalr6U5b\r\nIlwhRW0U3D5Y8Qcm7qZXY0MBar0tuwS7xtOKz1TDsm3eYOMJnhgBsxRiOEk9b9pv\r\nSHuzl9U+aYUEA6CrNzMxkz13u2f5vaoA4h2w353dpIo1RCssbKy5lvR9LdC7upV4\r\ntM5x7ZeLAoGAYs2nPABoUPrqKTOZmZg2ob0LKFnSxzFYNrxnIxyJN4CPbg5WJNFK\r\nUwOzB1oOezdIKBJ2eO7tidTa3DJ4HuMqvyChlnmQfL/98jCnnkwnVXldEfWwrKs/\r\npPiKvjFCOZROnwm3PhTfZtEi3Lpn6GNIy7rjl7eFOxgGGNCMkx34ehY=\r\n-----END RSA PRIVATE KEY-----\r\n'
+  // const cert = res.cert;
+  // const key = res.key;
+  const cert =
+    "-----BEGIN CERTIFICATE-----\nMIIDSDCCAjCgAwIBAgIINW8P8tjDO30wDQYJKoZIhvcNAQENBQAwODEaMBgGA1UEAwwRQ29tcHV0\nYWRvcmVzIFRlc3QxDTALBgNVBAoMBEFGSVAxCzAJBgNVBAYTAkFSMB4XDTI0MDYyNzE3MDM1MloX\nDTI2MDYyNzE3MDM1MlowLjERMA8GA1UEAwwIYWZpcHNkazIxGTAXBgNVBAUTEENVSVQgMjM0Mzky\nMTQ2MTkwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC/E7NK4NM5k/KCl7Miuu2BAEby\n1D6aSyqL8IRKBA7kWgu+fDXW2RoCJocqzVUimooze0xXnLGcoBwd39ynBH/tANgxrJIie5Ej1YFB\nPNJdMKvV/UdmTjMD0hg/H+e0OsK7cffmQEDvBY1a+HADGbp/j3RnhU0aDD0ZO2lXQxCD6FEPkq/z\nVSKDxDty8GlDwRslgzljaT92upFeoMokgD0vA5tsr3+L2kpqqSDMh8utaY4Sfdyo2qNQhPMgimQA\nZZAsBUzsAuOhSKgs7Z3kNdlMAdqFJUy7qqOOIdqEdALsXxFIGxs2vYss1yLXF8rYUqg0Eab77UTT\nDHYco8drtDSpAgMBAAGjYDBeMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUs7LT//3put7eja8R\nIZzWIH3yT28wHQYDVR0OBBYEFCNehzQ1I5CvmOsqpKzrcTdY+MrxMA4GA1UdDwEB/wQEAwIF4DAN\nBgkqhkiG9w0BAQ0FAAOCAQEAoldnbMx/KTn0i/kHMUrG/+fTcjb428O1ofxv19qHPf2IHGTzUXRw\n+/fnei15xzLGMNAu5rKgdJ4OwmopVCUkMW+nw4hV3wG7sO2OSuduSNNmMZsVJUBnMobc+BIhpPPW\n2Xswuy2vD0NWgMdkoPtV9b0lGX3Z6jWexxKpf8d0OFkt8eQY7f5EWsCQQONfq25z8phzS6Bsj4/Z\nWCgnJUzyIeg1D1Lq3kGbTjgCAe2QP+zctw3tpWFLBQQHmGnJOxrdTI9xl+IcLqAg2z39a8FtRNhl\nr8R2o293M+zkM0eKbEGhJcnyXNF3aNAjACborQdDQGxDcrjDg1lX07r44SlTaA==\n-----END CERTIFICATE-----";
+  const key =
+    "-----BEGIN RSA PRIVATE KEY-----\r\nMIIEpAIBAAKCAQEAvxOzSuDTOZPygpezIrrtgQBG8tQ+mksqi/CESgQO5FoLvnw1\r\n1tkaAiaHKs1VIpqKM3tMV5yxnKAcHd/cpwR/7QDYMaySInuRI9WBQTzSXTCr1f1H\r\nZk4zA9IYPx/ntDrCu3H35kBA7wWNWvhwAxm6f490Z4VNGgw9GTtpV0MQg+hRD5Kv\r\n81Uig8Q7cvBpQ8EbJYM5Y2k/drqRXqDKJIA9LwObbK9/i9pKaqkgzIfLrWmOEn3c\r\nqNqjUITzIIpkAGWQLAVM7ALjoUioLO2d5DXZTAHahSVMu6qjjiHahHQC7F8RSBsb\r\nNr2LLNci1xfK2FKoNBGm++1E0wx2HKPHa7Q0qQIDAQABAoIBAATXvfqO2iuiaUoQ\r\nCDVAIZbcZ+/tmyyT7R8g2Gl70tjMw3FvennYhMU7Lr/R9m9rFUeav2OVEBdVI4FK\r\nVDBTd96M3+3aXtXK5fHPjngVz4sXGbPRuIaKQta882peJ6Q0vQy9JbhLNpoYPO3q\r\nUAR0GXr0KtIY2cxoNQA3tkLE6108ceMC+UqcGH/XrFTdKx0DqeBQA9PoXhfNGAML\r\nl1tMIMHDIsOrnB6MM2TAZT8ZtrwlBmmgLgKf2mlbYUlljMm+9xjg3StjJklZ8l9/\r\nnxZfSyeUxJFDXNeVVTYtknyAUOzUQJIBeyEdrn5gn4q2H9pmzgXvdhl5MKWt9gyk\r\n6SmBc7UCgYEA4TxTWzRZgTowWgAPaoSa1bY//X/Y6MNDJ/9ILJuUgmy33T5jWw3P\r\nDyP9+TKnVXTI5K6Fbwxi8bRqqNUsjoP7+EvVg1frMtqQt5m1PNQ1aMwRqoLEwX76\r\nTLc1TBnFShjnDIIhfZqjxjpyuMiI4uU996lbJEhA6laoAR0ynmrOB1MCgYEA2Sz4\r\nFDt0mb6vcSnms4GIxfpMnScxtNhF93QPWDI6eoGUj/k4mekcWS73StGtAn7x9ApV\r\nRFYNzhcgM6wufUgMX1YY+D1FhADJjWeanraNEs/JU0yFhHbEQLiYTV11UncfBwuh\r\nlwtoR1OgYYdJ7PRd1UNu1ma4grt9UBGignxCAJMCgYBTXMB9QSLfcWnz5ZHPGsUz\r\n1ABbErZ1b8+rPhC4cdzFaPekKzMawEGimO+nC9hjCJZSDUXVlAAK9XuEgWG8XZ0k\r\niOy9cAzdBYgKbBloKiKaZu0i7sNj2ltJiYVwZRlgE1dwiblbg6CZ/Yf4XEBNugr1\r\nXvkctKFSGkCUKPpTJ7SZgQKBgQCsc+oW3tOLVoEoQlagykaat1RpInt1GJwOkImy\r\nxkfricQ3w3YvuY06QHI8Zl2U8ssct6vX1OGnenOmtJ5B+5lfhxXS4Yy28o0aDWAZ\r\nkepaOseqrsQDWPAkWLEQFhuYvWDVDmZlc7h9kyly6KRKVg3A0IhOFkmD/m/Wyfoa\r\n1aLvowKBgQCBe/ukvw2xiS81LAIkKZPogUwKiYY/tGVtjVGrwvuEiSu0k3TN/7FL\r\njlsOJeyLqmx2GIwuXnQXGFjn06GAbzHprlG5+pW7q48xuEkuM7gAAY0BYYJSurPE\r\naazPGk3fFPEaYX1HtGN5CTbdBLEA45fXxxuA+Ea3rsQQ7Uhs03aRVg==\r\n-----END RSA PRIVATE KEY-----\r\n";
   const afip = new Afip({
     // access_token: 'sjqzE9JPiq9EtrWQR0MSYjehQHlYGPLn7vdAEun9ucUQQiZ6gWV9xMJVwJd5aaSy',
     CUIT: taxId,
@@ -68,8 +68,8 @@ export async function ingresarAfip() {
     key: key,
     // production: true,
   });
-  // const serSer = await afip.CreateWSAuth(username, password, alias, wsid);
-  // console.log(serSer);
+  const serSer = await afip.CreateWSAuth(_username, _password, alias, wsid);
+  console.log(serSer);
   // const salesPoints = await afip.ElectronicBilling.getSalesPoints();
   // console.log(salesPoints);
   // const serSer = await afip.CreateWSAuth(username, password, alias, wsid);
@@ -95,9 +95,9 @@ export function FacturaDialog() {
     (async () => {
       setLoading(true);
       const afip = await ingresarAfip();
-      const ivas = await afip.ElectronicBilling.getAliquotTypes();
+      // const ivas = await afip.ElectronicBilling.getAliquotTypes();
 
-      const serverStatus = await afip.ElectronicBilling.getServerStatus();
+      // const serverStatus = await afip.ElectronicBilling.getServerStatus();
 
       let last_voucher;
       try {
