@@ -14,6 +14,7 @@ export default function Home() {
       <section className="space-y-2">
         <div className="flex justify-between">
           <Title>Codigo postal</Title>
+          <AddPostalCode />
         </div>
       </section>
       <List>
@@ -30,7 +31,6 @@ export default function Home() {
           <Title>No hay códigos postales subidos</Title>
         )}
       </List>
-      <AddPostalCode />
     </LayoutContainer>
   );
 }

@@ -1173,8 +1173,8 @@ export const eventsRelations = relations(events, ({ one }) => ({
 export const postal_code = pgTable("postalcodes", {
   id: columnId,
   name: varchar("name", { length: 255 }).notNull(),
-  cp: varchar("cp", { length: 255 }),
-  zone: varchar("zone", { length: 255 }),
+  cp: varchar("cp", { length: 255 }).notNull(),
+  zone: varchar("zone", { length: 255 }).notNull(),
 });
 
 export const postal_codeRelations = relations(postal_code, ({ many }) => ({
