@@ -328,7 +328,8 @@ async function preparateFactura(
   dateHasta: Date | undefined,
   dateVencimiento: Date | undefined,
   pv: string,
-  liquidationId: string
+  liquidationId: string,
+  interes: number
 ) {
   const user = await currentUser();
 
@@ -352,7 +353,7 @@ async function preparateFactura(
         abono) /
       100;
     console.log(bonificacion);
-    const interest = 0;
+
     const contribution = await getGroupContribution(grupo);
     console.log("contribution");
     console.log(contribution);
@@ -372,12 +373,11 @@ async function preparateFactura(
     if (mostRecentEvent && mostRecentEvent.current_amount < 0) {
       previous_bill = mostRecentEvent?.current_amount ?? 0;
     }
+    const interest = (interes / 100) * previous_bill;
     const importe =
-      (abono -
-        bonificacion +
-        differential_amount -
-        contribution ) *
-      ivaFloat - previous_bill;
+      (abono - bonificacion + differential_amount - contribution) * ivaFloat -
+      previous_bill -
+      interest;
     const items = await db
       .insert(schema.items)
       .values({
@@ -651,7 +651,8 @@ export const facturasRouter = createTRPCRouter({
         input.dateHasta,
         input.dateDue,
         input.pv,
-        liquidation!.id
+        liquidation!.id,
+        input.interest!
       );
       return liquidation;
     }),
