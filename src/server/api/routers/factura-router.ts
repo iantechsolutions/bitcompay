@@ -376,9 +376,8 @@ async function preparateFactura(
       (abono -
         bonificacion +
         differential_amount -
-        contribution -
-        previous_bill) *
-      ivaFloat;
+        contribution ) *
+      ivaFloat - previous_bill;
     const items = await db
       .insert(schema.items)
       .values({
