@@ -17,6 +17,7 @@ interface TriggerTableProps {
   setActive: (value: boolean) => void;
   active: boolean;
   factura: RouterOutputs["facturas"]["list"][number];
+  preliquidation: RouterOutputs["liquidations"]["get"];
   bonificationValue: number;
   contributionValue: number;
   interestValue: number;
@@ -108,21 +109,23 @@ export default function TriggerTable(props: TriggerTableProps) {
         {" "}
         {total}
       </TableCell>
-      <TableCell className="rounded-r-md border border-[#6cebd1]">
-        {factura.billLink && factura.billLink !== "" ? (
-          <div className="items-center justify-center">
-            <Link href={factura.billLink}>
-              <FileText></FileText>
-            </Link>
-          </div>
-        ) : (
-          <div className="items-center justify-center">
-            <Button disabled={true} variant="link">
-              <FileText></FileText>
-            </Button>
-          </div>
-        )}
-      </TableCell>
+      {props.preliquidation!.estado !== "pendiente" && (
+        <TableCell className="rounded-r-md border border-[#6cebd1]">
+          {factura.billLink && factura.billLink !== "" ? (
+            <div className="items-center justify-center">
+              <Link href={factura.billLink}>
+                <FileText></FileText>
+              </Link>
+            </div>
+          ) : (
+            <div className="items-center justify-center">
+              <Button disabled={true} variant="link">
+                <FileText></FileText>
+              </Button>
+            </div>
+          )}
+        </TableCell>
+      )}
     </TableRow>
   );
 }
