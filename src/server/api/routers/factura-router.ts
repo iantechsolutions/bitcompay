@@ -499,7 +499,8 @@ async function getDifferentialAmount(grupo: grupoCompleto) {
         )?.amount ?? 0;
     }
     integrant?.differentialsValues.forEach((differential) => {
-      const differentialIntegrante = differential.amount * precioIntegrante;
+      const differentialIntegrante =
+        differential.amount * (precioIntegrante ?? 0);
       importe += differentialIntegrante;
     });
   });
