@@ -612,6 +612,7 @@ export const facturasRouter = createTRPCRouter({
         dateDesde: z.date().optional(),
         dateHasta: z.date().optional(),
         dateDue: z.date().optional(),
+        interest: z.number().optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -641,6 +642,7 @@ export const facturasRouter = createTRPCRouter({
           userApproved: "",
           number: randomNumberLiq,
           pdv: parseInt(input.pv),
+          interest: input.interest,
         })
         .returning();
       await preparateFactura(

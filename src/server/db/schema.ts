@@ -1005,6 +1005,7 @@ export const liquidations = pgTable("liquidations", {
   pdv: integer("pdv").notNull(),
   period: timestamp("period", { mode: "date" }),
   number: integer("number").notNull(),
+  interest: real("interest"),
   bussinessUnits_id: varchar("bussinessUnits_id", { length: 255 }).references(
     () => bussinessUnits.id
   ),

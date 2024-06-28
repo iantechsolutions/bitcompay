@@ -42,6 +42,7 @@ export default function AddPreLiquidation(props: { companyId: string }) {
   const [mes, setMes] = useState<number>(1);
   const [anio, setAnio] = useState<number>(2021);
   const [puntoVenta, setPuntoVenta] = useState("");
+  const [interest, setInterest] = useState<number | null>(null);
   const { data: marcas } = api.brands.getbyCurrentCompany.useQuery();
   const router = useRouter();
 
@@ -58,6 +59,7 @@ export default function AddPreLiquidation(props: { companyId: string }) {
       dateHasta: new Date(anio, mes, 0),
       dateDue: fechaVencimiento2,
       companyId: props.companyId,
+      interest: interest ?? undefined,
     });
     //TODO CORREGIR ESTO
     // await new Promise((resolve) => setTimeout(resolve, 500));
@@ -280,6 +282,19 @@ export default function AddPreLiquidation(props: { companyId: string }) {
               ]}
               onSelectionChange={(e) => {
                 setPuntoVenta(e);
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="interest"> Interes (%) </label>
+            <Input
+              className="border-green-300 focus-visible:ring-green-400 w-[100px]"
+              type="number"
+              value={interest ?? 0}
+              onChange={(e) => {
+                Number(e.target.value) === 0
+                  ? setInterest(null)
+                  : setInterest(Number(e.target.value));
               }}
             />
           </div>
