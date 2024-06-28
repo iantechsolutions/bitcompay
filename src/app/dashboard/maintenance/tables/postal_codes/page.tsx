@@ -1,12 +1,14 @@
+"use client";
 import { Title } from "~/components/title";
 import { List, ListTile } from "~/components/list";
 import LayoutContainer from "~/components/layout-container";
-import { api } from "~/trpc/server";
+import { api } from "~/trpc/react";
 
-import { healthInsurances, modos } from "~/server/db/schema";
 import { AddPostalCode } from "./add-postalcode-dialog";
 
-export default async function Home(props: { params: { companyId: string } }) {
+export default function Home() {
+  const postalCodes = api.postal_code.list.useQuery();
+
   return (
     <LayoutContainer>
       <section className="space-y-2">
@@ -14,7 +16,21 @@ export default async function Home(props: { params: { companyId: string } }) {
           <Title>Codigo postal</Title>
         </div>
       </section>
-      <AddPostalCode/>
+      <List>
+        {postalCodes.data && postalCodes.data.length > 0 ? (
+          postalCodes.data.map((postalCode) => (
+            <ListTile
+              key={postalCode.id}
+              title={postalCode.zone}
+              href={`/dashboard/maintenance/tables/postal_codes/${postalCode.id}`}
+              leading={postalCode.cp}
+            />
+          ))
+        ) : (
+          <Title>No hay códigos postales subidos</Title>
+        )}
+      </List>
+      <AddPostalCode />
     </LayoutContainer>
   );
 }
