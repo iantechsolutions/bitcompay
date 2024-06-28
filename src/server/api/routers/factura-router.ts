@@ -445,18 +445,17 @@ async function getGroupAmount(grupo: grupoCompleto, date: Date) {
         const age = calcularEdad(integrant.birth_date);
         console.log(age);
         console.log(integrant.relationship);
-        const precioIntegrante =
-          precios?.find((x) => {
-            if (
-              integrant.relationship &&
-              // integrant.relationship.toLowerCase() != "titular"
-              x.condition == integrant.relationship
-            ) {
-              return true;
-            } else {
-              return (x.from_age ?? 1000) <= age && (x.to_age ?? 0) >= age;
-            }
-          })?.amount ?? 0;
+        let precioIntegrante = precios?.find(
+          (x) => integrant.relationship && x.condition == integrant.relationship
+        )?.amount;
+
+        if (precioIntegrante === undefined) {
+          precioIntegrante =
+            precios?.find(
+              (x) => (x.from_age ?? 1000) <= age && (x.to_age ?? 0) >= age
+            )?.amount ?? 0;
+        }
+
         console.log(precioIntegrante);
         importe += precioIntegrante;
       }
@@ -488,18 +487,17 @@ async function getDifferentialAmount(grupo: grupoCompleto) {
   grupo.integrants?.forEach((integrant) => {
     if (integrant.birth_date == null) return;
     const age = calcularEdad(integrant.birth_date);
-    const precioIntegrante =
-      grupo.plan?.pricesPerCondition.find((x) => {
-        if (
-          integrant.relationship &&
-          // integrant.relationship.toLowerCase() != "titular"
-          x.condition == integrant.relationship
-        ) {
-          return true;
-        } else {
-          return (x.from_age ?? 1000) <= age && (x.to_age ?? 0) >= age;
-        }
-      })?.amount ?? 0;
+
+    let precioIntegrante = grupo.plan?.pricesPerCondition?.find(
+      (x) => integrant.relationship && x.condition == integrant.relationship
+    )?.amount;
+
+    if (precioIntegrante === undefined) {
+      precioIntegrante =
+        grupo.plan?.pricesPerCondition?.find(
+          (x) => (x.from_age ?? 1000) <= age && (x.to_age ?? 0) >= age
+        )?.amount ?? 0;
+    }
     integrant?.differentialsValues.forEach((differential) => {
       const differentialIntegrante = differential.amount * precioIntegrante;
       importe += differentialIntegrante;

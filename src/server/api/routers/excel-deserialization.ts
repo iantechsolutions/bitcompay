@@ -238,22 +238,11 @@ export const excelDeserializationRouter = createTRPCRouter({
             let precioIntegrante = 0;
             if (preciosPasados) {
               const vigente = preciosPasados[0]?.validy_date;
-              precioIntegrante =
-                plan?.pricesPerCondition
-                  .filter((x) => x.validy_date.getTime() === vigente?.getTime())
-                  .find((p) => {
-                    if (
-                      row.relationship &&
-                      // row.relationship.toLowerCase() != "titular" &&
-                      p.condition == row.relationship
-                    ) {
-                      return true;
-                    } else {
-                      return (
-                        (p.from_age ?? 1000) <= ageN && (p.to_age ?? 0) >= ageN
-                      );
-                    }
-                  })?.amount ?? 0;
+              let precioIntegrante = plan?.pricesPerCondition?.find((x) => row.relationship && x.condition == row.relationship)?.amount;
+
+    if (precioIntegrante === undefined) {
+      precioIntegrante = plan?.pricesPerCondition?.find((x) => (x.from_age ?? 1000) <= age && (x.to_age ?? 0) >= age)?.amount ?? 0;
+    }
             }
             const precioDiferencial =
               parseFloat(row.differential_value!) / precioIntegrante;
