@@ -99,11 +99,11 @@ export default function TriggerTable(props: TriggerTableProps) {
       </TableCell>
       <TableCell className="border border-[#6cebd1] p-2 py-4">
         {" "}
-        {computeBase(total, Number(factura?.iva) ?? 0)}
+        {computeBase(total, parseFloat(factura?.iva) ?? 0)}
       </TableCell>
       <TableCell className="border border-[#6cebd1] p-2 py-4">
         {" "}
-        {computeIva(total, Number(factura?.iva) ?? 0)}
+        {computeIva(total, parseFloat(factura?.iva) ?? 0)}
       </TableCell>
       <TableCell className="border border-[#6cebd1] p-2 py-4">
         {" "}

@@ -112,9 +112,9 @@ export default function DetailsPage(props: {
     }, pastPrices[0]);
 
     const editablePrices = [...(futurePrices ?? [])];
-    if (mostRecentPastPrice) {
-      editablePrices.push(mostRecentPastPrice);
-    }
+    // if (mostRecentPastPrice) {
+    //   editablePrices.push(mostRecentPastPrice);
+    // }
     setEditable(
       editablePrices.filter(
         (x) => x.validy_date.getTime() == props.date.getTime()
