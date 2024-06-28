@@ -249,7 +249,7 @@ export const excelDeserializationRouter = createTRPCRouter({
                       return p.condition == row.relationship;
                     } else {
                       return (
-                        (p.from_age ?? 1000 <= ageN) && (p.to_age ?? 0 >= ageN)
+                        (p.from_age ?? 1000) <= ageN && (p.to_age ?? 0) >= ageN
                       );
                     }
                   })?.amount ?? 0;

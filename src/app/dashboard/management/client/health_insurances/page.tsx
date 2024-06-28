@@ -1,13 +1,13 @@
+"use client";
 import { Title } from "~/components/title";
 import { List, ListTile } from "~/components/list";
 import LayoutContainer from "~/components/layout-container";
-import { api } from "~/trpc/server";
+import { api } from "~/trpc/react";
 
-import { healthInsurances, modos } from "~/server/db/schema";
 import { AddHealthInsurances } from "./AddHealthInsurances";
 
-export default async function Home() {
-  const obraSocial = await api.healthInsurances.list.query();
+export default function Home() {
+  const obraSocial = api.healthInsurances.list.useQuery().data;
   return (
     <LayoutContainer>
       <section className="space-y-2">
@@ -16,16 +16,20 @@ export default async function Home() {
           <AddHealthInsurances />
         </div>
         <List>
-          {obraSocial.map((obraSocial) => {
-            return (
-              <ListTile
-                key={obraSocial.id}
-                leading={obraSocial.identificationNumber}
-                href={`/dashboard/management/client/health_insurances/${obraSocial.id}`}
-                title={obraSocial.name}
-              />
-            );
-          })}
+          {obraSocial ? (
+            obraSocial.map((obraSocial) => {
+              return (
+                <ListTile
+                  key={obraSocial.id}
+                  leading={obraSocial.identificationNumber}
+                  href={`/dashboard/management/client/health_insurances/${obraSocial.id}`}
+                  title={obraSocial.name}
+                />
+              );
+            })
+          ) : (
+            <Title>No existe ninguna obra social</Title>
+          )}
         </List>
       </section>
     </LayoutContainer>

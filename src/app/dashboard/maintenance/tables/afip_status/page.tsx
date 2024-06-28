@@ -3,8 +3,6 @@ import { List, ListTile } from "~/components/list";
 import LayoutContainer from "~/components/layout-container";
 import { api } from "~/trpc/server";
 
-import { healthInsurances, modos } from "~/server/db/schema";
-
 export default async function Home() {
   return (
     <LayoutContainer>

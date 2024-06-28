@@ -21,6 +21,7 @@ export default async function Home() {
                 key={establishment.id}
                 title={establishment.establishment_number}
                 href={`/dashboard/maintenance/tables/establishments/${establishment.id}`}
+                leading={establishment.flag}
               />
             );
           })}

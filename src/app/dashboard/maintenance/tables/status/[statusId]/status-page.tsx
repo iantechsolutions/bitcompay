@@ -125,7 +125,7 @@ function DeleteStatus(props: { statusId: string }) {
     DeleteStatus({ statusId: props.statusId })
       .then(() => {
         toast.success("Se ha eliminado el estado");
-        router.push("../statuses");
+        router.push("../status");
         router.refresh();
       })
       .catch((e) => {
@@ -136,7 +136,7 @@ function DeleteStatus(props: { statusId: string }) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive" disabled={true} className="w-[160px]">
+        <Button variant="destructive" className="w-[160px]">
           Eliminar estado
         </Button>
       </AlertDialogTrigger>
@@ -154,8 +154,7 @@ function DeleteStatus(props: { statusId: string }) {
           <AlertDialogAction
             className="bg-red-500 hover:bg-red-600 active:bg-red-700"
             onClick={handleDelete}
-            disabled={isLoading}
-          >
+            disabled={isLoading}>
             Eliminar
           </AlertDialogAction>
         </AlertDialogFooter>
