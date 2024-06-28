@@ -495,7 +495,7 @@ async function getDifferentialAmount(grupo: grupoCompleto) {
         ) {
           return x.condition == integrant.relationship;
         } else {
-          return (x.from_age ?? 1000 <= age) && (x.to_age ?? 0 >= age);
+          return (x.from_age ?? 1000) <= age && (x.to_age ?? 0) >= age;
         }
       })?.amount ?? 0;
     integrant?.differentialsValues.forEach((differential) => {
