@@ -111,7 +111,9 @@ function ContentTable(props: propsContentTable) {
               {factura?.tipoFactura ?? "FC"}
             </TableCell>
             <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              {`Bonificacion ${(factura?.items?.bonificacion ?? 0)/cuotaValue *100}%`}
+              {`Bonificacion ${
+                ((factura?.items?.bonificacion ?? 0) / cuotaValue) * 100
+              }%`}
             </TableCell>
             <TableCell className="border border-gray-400 bg-[#b7f3e6]">
               -${bonificationValue}
@@ -188,6 +190,9 @@ function ContentTable(props: propsContentTable) {
             </TableCell>
             <TableCell className="border border-gray-400 bg-[#ccfbf1] border-t-black">
               ${total}
+            </TableCell>
+            <TableCell className="border border-gray-400 bg-[#ccfbf1] border-t-black">
+              ${factura.billLink}
             </TableCell>
           </TableRow>
         </Table>

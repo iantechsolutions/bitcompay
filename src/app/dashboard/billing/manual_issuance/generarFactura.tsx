@@ -1,76 +1,91 @@
-'use client'
-import Afip from '@afipsdk/afip.js'
-import { format } from 'date-fns'
-import { Loader2Icon, PlusCircleIcon } from 'lucide-react'
-import { Calendar as CalendarIcon } from 'lucide-react'
-import { useState } from 'react'
-import * as React from 'react'
-import { Button } from '~/components/ui/button'
-import { Calendar } from '~/components/ui/calendar'
-import { ComboboxDemo } from '~/components/ui/combobox'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '~/components/ui/dialog'
-import { Input } from '~/components/ui/input'
-import { Label } from '~/components/ui/label'
-import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover'
-import { cn } from '~/lib/utils'
-import { api } from '~/trpc/react'
-import { Factura } from './facturaGenerada'
+"use client";
+import Afip from "@afipsdk/afip.js";
+import { format } from "date-fns";
+import { Loader2Icon, PlusCircleIcon } from "lucide-react";
+import { Calendar as CalendarIcon } from "lucide-react";
+import { useState } from "react";
+import * as React from "react";
+import { Button } from "~/components/ui/button";
+import { Calendar } from "~/components/ui/calendar";
+import { ComboboxDemo } from "~/components/ui/combobox";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "~/components/ui/dialog";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import { cn, htmlBill } from "~/lib/utils";
+import { api } from "~/trpc/react";
+import { Factura } from "./facturaGenerada";
 
 export async function ingresarAfip() {
-    //CUIT QUE QUEREMOS QUE COBRE
-    const taxId = 23439214619
+  //CUIT QUE QUEREMOS QUE COBRE
+  const taxId = 23439214619;
 
-  //   //USUARIO PARA ENTRAR A AFIP
-  //   const _username = '23439214619'
+  //USUARIO PARA ENTRAR A AFIP
+  const _username = "23439214619";
 
-  //   //CONTRASEÑA PARA ENTRAR A AFIPs 
-  //   const _password = 'TBzQ.,i5JhZbAg2'
+  //CONTRASEÑA PARA ENTRAR A AFIPs
+  const _password = "TBzQ.,i5JhZbAg2";
 
   // //ALIAS PARA EL CERTIFICADO
-  // const alias = "afipsdk2";
+  const alias = "afipsdk2";
   // const afipCuit = new Afip({
   //   CUIT: taxId,
   //   access_token:
   //     "sjqzE9JPiq9EtrWQR0MSYjehQHlYGPLn7vdAEun9ucUQQiZ6gWV9xMJVwJd5aaSy",
   //   production: true,
   // });
-  // const res = await afipCuit.CreateCert(username, password, alias);
+
+  // const afipCuit = new Afip({
+  //   CUIT: taxId,
+  // });
+
+  // const res = await afipCuit.CreateCert(_username, _password, alias);
   // console.log("Certificado creado");
   // console.log(res);
-  // const wsid = "wsfe";
+  const wsid = "wsfe";
 
-    // // //ESTO CREA LA AUTORIZACION
-    // const cert = res.cert;
-    // const key = res.key;
-    const cert =
-        '-----BEGIN CERTIFICATE-----\nMIIDQzCCAiugAwIBAgIIBDcBTy1RV9IwDQYJKoZIhvcNAQENBQAwMzEVMBMGA1UEAwwMQ29tcHV0\nYWRvcmVzMQ0wCwYDVQQKDARBRklQMQswCQYDVQQGEwJBUjAeFw0yNDA1MTQxMjQ1NTZaFw0yNjA1\nMTQxMjQ1NTZaMC4xETAPBgNVBAMMCGFmaXBzZGsyMRkwFwYDVQQFExBDVUlUIDIzNDM5MjE0NjE5\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAv2gtWDrfV7m9Lz1dYFimDivBff/UCrBB\nQHUuREfIcwL3cs0TDQ075Nk6GyPIIclvVBAUrIXHNDAEgLM3uxY/eSNO/kL9OpjTbleSNUxPyfZz\nwbFsS93ZZb37iA72J2ffgS8TRT9q0tiDnx5dUBv+lVIBliwbxGR6qgEGvgLwZHy7oSKfiYXV8vuc\n+Dt5kNbBVEZTyYyhSMYrM80TcStVrMYuFAz4GJiJRR3g258tJAVARB2KU6tNdaeZ/dmkFzQF/kL8\n9SsIVXEj/8HuLK1qNPoY/qIyD35xqlBW5VYeQMlqRC87V/eKWXUCQM/O+wett6QzB4OGYwBwZYsE\nMNFqWQIDAQABo2AwXjAMBgNVHRMBAf8EAjAAMB8GA1UdIwQYMBaAFCsNL8jfYf0IyU4R0DWTBG2O\nW9BuMB0GA1UdDgQWBBSqnCsGiIw8kqJgF80pSpuLASPB/zAOBgNVHQ8BAf8EBAMCBeAwDQYJKoZI\nhvcNAQENBQADggEBAJQMwlkuNIan9Em48HBUG03glquZsyF74uWLwBAXJ5KAoWHJDU8k1nsRLmw4\n4qw0jWpDPBX1kTvdYVq2412lndnXCdoBiOCjBibwApylqV3pZGyHDTfhWEYBBF+0TOLB/w2FVhSk\n7mbtmWTZ8twqJtORuBbolkM1QTWVuFCWRHX2wSINnjP23NxnLIf6CTJKdMUsAZ7YxAubuWIw3IYd\nGASuLrUCpAlyrA1jpGa3k1vBgTawt/9vWMrbX9uumefFRTM38xB+JPlIY5pN1vEOTreVfAyK7MGR\n1IH2RXkvV3n+YJkj+pcQZG5xOuYuLdeuki4jPy7Q/i3DlAhRYDONgDI=\n-----END CERTIFICATE-----'
-    const key =
-        '-----BEGIN RSA PRIVATE KEY-----\r\nMIIEpQIBAAKCAQEAv2gtWDrfV7m9Lz1dYFimDivBff/UCrBBQHUuREfIcwL3cs0T\r\nDQ075Nk6GyPIIclvVBAUrIXHNDAEgLM3uxY/eSNO/kL9OpjTbleSNUxPyfZzwbFs\r\nS93ZZb37iA72J2ffgS8TRT9q0tiDnx5dUBv+lVIBliwbxGR6qgEGvgLwZHy7oSKf\r\niYXV8vuc+Dt5kNbBVEZTyYyhSMYrM80TcStVrMYuFAz4GJiJRR3g258tJAVARB2K\r\nU6tNdaeZ/dmkFzQF/kL89SsIVXEj/8HuLK1qNPoY/qIyD35xqlBW5VYeQMlqRC87\r\nV/eKWXUCQM/O+wett6QzB4OGYwBwZYsEMNFqWQIDAQABAoIBAQCQFCct5wL/0fyq\r\ndpK3V4OH30ADTHOcqBg2IP72vuIQUQdbDytsA642EZ4/l6uqYyq+KGyngPv2OL7q\r\n8fzdg128Hev0URC07x0YTirsm8jjyfRQtPFEGnbusxeHz1tTRkljwL/MvHP4yqop\r\nOH4dMzVryRMQq5srNkdveN5OYX/64uxGM2uM+ZVXtMb7ve4KX5GZKCt2fyEC5ZTJ\r\n/B2i/by7NJtm3+VtiVrifi3U2oxjQ0Es1j9COBEWY8JtpIZw9PoP93Hb/zliipJW\r\nXRC6UGd7aF4KOi2vIt619dTD/jsRSweidNGluGdVfHkwQ2BIuLzepA4IU1Z6UKX2\r\nmu2NPXCRAoGBAN7zoRJmNeLf/i0xWHSkyhC3kKgV0wvICbXYVAFBCBEnM2p7Kx7v\r\nyIzQCg+qFtdqSh8Xv1hgo5hFP5QbiavCRbJa+Jb8ZPsqrmEhrE5HYoPamjRuSRi+\r\nzcH43O21fAX/eMhFl5g60i0svMP4hqhcVqli26Lt8iwvyKb83squ6c6XAoGBANvH\r\nhD2dVrRRcBC5+JOrJ2JKgGIqcX8TD9JKQqsHX6bytVUL4aOebgJqXHIBZPU8cRCx\r\nB+1dX5O8fjqkUNIWzq1IqAZtwZopjp1AGoctSzj9J3zYyjoK7AWaeDuyu2ZIzCef\r\nVat8k9Q1RdCovfhfQHZlV84+zJ7l8WWx0SFdpZyPAoGBAI5Mh2C79ebBOnTTyvZf\r\n+0xiLSTrERGy8merFCrcu+5ey9VJmcMcHi+p1NIcqImDIJ3pxUn+HExi3mqEjQEg\r\ndOWaZJHRtA4PNs9t85DexQUNMGEIhwUROzhzw2bA79DQNuH0cQZLfLwykqSt6hxp\r\nGzLvkunR30DOms3iFbzdmQMvAoGBAL/wP9JbnYQ+9yL0d13nhK63p+WTcalr6U5b\r\nIlwhRW0U3D5Y8Qcm7qZXY0MBar0tuwS7xtOKz1TDsm3eYOMJnhgBsxRiOEk9b9pv\r\nSHuzl9U+aYUEA6CrNzMxkz13u2f5vaoA4h2w353dpIo1RCssbKy5lvR9LdC7upV4\r\ntM5x7ZeLAoGAYs2nPABoUPrqKTOZmZg2ob0LKFnSxzFYNrxnIxyJN4CPbg5WJNFK\r\nUwOzB1oOezdIKBJ2eO7tidTa3DJ4HuMqvyChlnmQfL/98jCnnkwnVXldEfWwrKs/\r\npPiKvjFCOZROnwm3PhTfZtEi3Lpn6GNIy7rjl7eFOxgGGNCMkx34ehY=\r\n-----END RSA PRIVATE KEY-----\r\n'
-    const afip = new Afip({
-        access_token: 'sjqzE9JPiq9EtrWQR0MSYjehQHlYGPLn7vdAEun9ucUQQiZ6gWV9xMJVwJd5aaSy',
-        CUIT: taxId,
-        cert: cert,
-        key: key,
-        production: true,
-    })
-    // const serSer = await afip.CreateWSAuth(username, password, alias, wsid);
-    // console.log(serSer);
-    // const salesPoints = await afip.ElectronicBilling.getSalesPoints();
-    // console.log(salesPoints);
-    // const serSer = await afip.CreateWSAuth(username, password, alias, wsid);
+  // // //ESTO CREA LA AUTORIZACION
+  // const cert = res.cert;
+  // const key = res.key;
+  const cert =
+    "-----BEGIN CERTIFICATE-----\nMIIDSDCCAjCgAwIBAgIINW8P8tjDO30wDQYJKoZIhvcNAQENBQAwODEaMBgGA1UEAwwRQ29tcHV0\nYWRvcmVzIFRlc3QxDTALBgNVBAoMBEFGSVAxCzAJBgNVBAYTAkFSMB4XDTI0MDYyNzE3MDM1MloX\nDTI2MDYyNzE3MDM1MlowLjERMA8GA1UEAwwIYWZpcHNkazIxGTAXBgNVBAUTEENVSVQgMjM0Mzky\nMTQ2MTkwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC/E7NK4NM5k/KCl7Miuu2BAEby\n1D6aSyqL8IRKBA7kWgu+fDXW2RoCJocqzVUimooze0xXnLGcoBwd39ynBH/tANgxrJIie5Ej1YFB\nPNJdMKvV/UdmTjMD0hg/H+e0OsK7cffmQEDvBY1a+HADGbp/j3RnhU0aDD0ZO2lXQxCD6FEPkq/z\nVSKDxDty8GlDwRslgzljaT92upFeoMokgD0vA5tsr3+L2kpqqSDMh8utaY4Sfdyo2qNQhPMgimQA\nZZAsBUzsAuOhSKgs7Z3kNdlMAdqFJUy7qqOOIdqEdALsXxFIGxs2vYss1yLXF8rYUqg0Eab77UTT\nDHYco8drtDSpAgMBAAGjYDBeMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUs7LT//3put7eja8R\nIZzWIH3yT28wHQYDVR0OBBYEFCNehzQ1I5CvmOsqpKzrcTdY+MrxMA4GA1UdDwEB/wQEAwIF4DAN\nBgkqhkiG9w0BAQ0FAAOCAQEAoldnbMx/KTn0i/kHMUrG/+fTcjb428O1ofxv19qHPf2IHGTzUXRw\n+/fnei15xzLGMNAu5rKgdJ4OwmopVCUkMW+nw4hV3wG7sO2OSuduSNNmMZsVJUBnMobc+BIhpPPW\n2Xswuy2vD0NWgMdkoPtV9b0lGX3Z6jWexxKpf8d0OFkt8eQY7f5EWsCQQONfq25z8phzS6Bsj4/Z\nWCgnJUzyIeg1D1Lq3kGbTjgCAe2QP+zctw3tpWFLBQQHmGnJOxrdTI9xl+IcLqAg2z39a8FtRNhl\nr8R2o293M+zkM0eKbEGhJcnyXNF3aNAjACborQdDQGxDcrjDg1lX07r44SlTaA==\n-----END CERTIFICATE-----";
+  const key =
+    "-----BEGIN RSA PRIVATE KEY-----\r\nMIIEpAIBAAKCAQEAvxOzSuDTOZPygpezIrrtgQBG8tQ+mksqi/CESgQO5FoLvnw1\r\n1tkaAiaHKs1VIpqKM3tMV5yxnKAcHd/cpwR/7QDYMaySInuRI9WBQTzSXTCr1f1H\r\nZk4zA9IYPx/ntDrCu3H35kBA7wWNWvhwAxm6f490Z4VNGgw9GTtpV0MQg+hRD5Kv\r\n81Uig8Q7cvBpQ8EbJYM5Y2k/drqRXqDKJIA9LwObbK9/i9pKaqkgzIfLrWmOEn3c\r\nqNqjUITzIIpkAGWQLAVM7ALjoUioLO2d5DXZTAHahSVMu6qjjiHahHQC7F8RSBsb\r\nNr2LLNci1xfK2FKoNBGm++1E0wx2HKPHa7Q0qQIDAQABAoIBAATXvfqO2iuiaUoQ\r\nCDVAIZbcZ+/tmyyT7R8g2Gl70tjMw3FvennYhMU7Lr/R9m9rFUeav2OVEBdVI4FK\r\nVDBTd96M3+3aXtXK5fHPjngVz4sXGbPRuIaKQta882peJ6Q0vQy9JbhLNpoYPO3q\r\nUAR0GXr0KtIY2cxoNQA3tkLE6108ceMC+UqcGH/XrFTdKx0DqeBQA9PoXhfNGAML\r\nl1tMIMHDIsOrnB6MM2TAZT8ZtrwlBmmgLgKf2mlbYUlljMm+9xjg3StjJklZ8l9/\r\nnxZfSyeUxJFDXNeVVTYtknyAUOzUQJIBeyEdrn5gn4q2H9pmzgXvdhl5MKWt9gyk\r\n6SmBc7UCgYEA4TxTWzRZgTowWgAPaoSa1bY//X/Y6MNDJ/9ILJuUgmy33T5jWw3P\r\nDyP9+TKnVXTI5K6Fbwxi8bRqqNUsjoP7+EvVg1frMtqQt5m1PNQ1aMwRqoLEwX76\r\nTLc1TBnFShjnDIIhfZqjxjpyuMiI4uU996lbJEhA6laoAR0ynmrOB1MCgYEA2Sz4\r\nFDt0mb6vcSnms4GIxfpMnScxtNhF93QPWDI6eoGUj/k4mekcWS73StGtAn7x9ApV\r\nRFYNzhcgM6wufUgMX1YY+D1FhADJjWeanraNEs/JU0yFhHbEQLiYTV11UncfBwuh\r\nlwtoR1OgYYdJ7PRd1UNu1ma4grt9UBGignxCAJMCgYBTXMB9QSLfcWnz5ZHPGsUz\r\n1ABbErZ1b8+rPhC4cdzFaPekKzMawEGimO+nC9hjCJZSDUXVlAAK9XuEgWG8XZ0k\r\niOy9cAzdBYgKbBloKiKaZu0i7sNj2ltJiYVwZRlgE1dwiblbg6CZ/Yf4XEBNugr1\r\nXvkctKFSGkCUKPpTJ7SZgQKBgQCsc+oW3tOLVoEoQlagykaat1RpInt1GJwOkImy\r\nxkfricQ3w3YvuY06QHI8Zl2U8ssct6vX1OGnenOmtJ5B+5lfhxXS4Yy28o0aDWAZ\r\nkepaOseqrsQDWPAkWLEQFhuYvWDVDmZlc7h9kyly6KRKVg3A0IhOFkmD/m/Wyfoa\r\n1aLvowKBgQCBe/ukvw2xiS81LAIkKZPogUwKiYY/tGVtjVGrwvuEiSu0k3TN/7FL\r\njlsOJeyLqmx2GIwuXnQXGFjn06GAbzHprlG5+pW7q48xuEkuM7gAAY0BYYJSurPE\r\naazPGk3fFPEaYX1HtGN5CTbdBLEA45fXxxuA+Ea3rsQQ7Uhs03aRVg==\r\n-----END RSA PRIVATE KEY-----\r\n";
+  const afip = new Afip({
+    // access_token: 'sjqzE9JPiq9EtrWQR0MSYjehQHlYGPLn7vdAEun9ucUQQiZ6gWV9xMJVwJd5aaSy',
+    CUIT: taxId,
+    cert: cert,
+    key: key,
+    // production: true,
+  });
+  const serSer = await afip.CreateWSAuth(_username, _password, alias, wsid);
+  console.log(serSer);
+  // const salesPoints = await afip.ElectronicBilling.getSalesPoints();
+  // console.log(salesPoints);
+  // const serSer = await afip.CreateWSAuth(username, password, alias, wsid);
 
-    return afip
+  return afip;
 }
 
 function formatDate(date: Date | undefined) {
-    if (date) {
-        const year = date.getFullYear()
-        const month = (1 + date.getMonth()).toString().padStart(2, '0')
-        const day = date.getDate().toString().padStart(2, '0')
+  if (date) {
+    const year = date.getFullYear();
+    const month = (1 + date.getMonth()).toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
 
-        return year + month + day
-    }
-    return null
+    return year + month + day;
+  }
+  return null;
 }
 
 export function FacturaDialog() {
@@ -78,25 +93,31 @@ export function FacturaDialog() {
 
   async function generateFactura() {
     (async () => {
+      console.log("1");
+
       setLoading(true);
       const afip = await ingresarAfip();
-      const ivas = await afip.ElectronicBilling.getAliquotTypes();
+      // const ivas = await afip.ElectronicBilling.getAliquotTypes();
 
-      const serverStatus = await afip.ElectronicBilling.getServerStatus();
+      // const serverStatus = await afip.ElectronicBilling.getServerStatus();
 
       let last_voucher;
       try {
         last_voucher = await afip.ElectronicBilling.getLastVoucher(
           puntoVenta,
-          tipoFactura,
+          tipoFactura
         );
       } catch {
         last_voucher = 0;
       }
 
-      const numero_de_factura = last_voucher + 1
+      const numero_de_factura = last_voucher + 1;
 
-      const fecha = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]
+      const fecha = new Date(
+        Date.now() - new Date().getTimezoneOffset() * 60000
+      )
+        .toISOString()
+        .split("T")[0];
 
       const data = {
         CantReg: 1, // Cantidad de facturas a registrar
@@ -128,44 +149,30 @@ export function FacturaDialog() {
       /**
        * Creamos la Factura
        **/
+
       const res = await afip.ElectronicBilling.createVoucher(data);
 
-      /**
-       * Mostramos por pantalla los datos de la nueva Factura
-       **/
-      const html = Factura({
-        puntoDeVenta: puntoVenta,
-        tipoFactura: tipoFactura,
-        concepto: concepto,
-        documentoComprador: tipoDocumento,
-        nroDocumento: nroDocumento,
-        total: Number(importe),
-        facturadoDesde: formatDate(dateDesde),
-        facturadoHasta: formatDate(dateHasta),
-        vtoPago: formatDate(dateVencimiento),
-        cantidad: 1,
-        nroComprobante: numero_de_factura,
-        nroCae: res.CAE,
-        vtoCae: res.CAEFchVto,
-        nombreServicio: "Servicio de prueba",
-        domicilioComprador: "Calle falsa 123",
-        nombreComprador: "Homero Simpson",
-      });
-      const name = "PDF de prueba";
-      const options = {
-        width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
-        marginLeft: 0.4, // Margen izquierdo en pulgadas. Usar 0.1 para ticket
-        marginRight: 0.4, // Margen derecho en pulgadas. Usar 0.1 para ticket
-        marginTop: 0.4, // Margen superior en pulgadas. Usar 0.1 para ticket
-        marginBottom: 0.4, // Margen inferior en pulgadas. Usar 0.1 para ticket
-      };
-      const resHtml = await afip.ElectronicBilling.createPDF({
-        html: html,
-        file_name: name,
-        options: options,
-      });
-      setLoading(false);
+      // CREAMOS HTML DE LA FACTURA
+      // const html = Factura({
+      //   puntoDeVenta: puntoVenta,
+      //   tipoFactura: tipoFactura,
+      //   concepto: concepto,
+      //   documentoComprador: tipoDocumento,
+      //   nroDocumento: nroDocumento,
+      //   total: Number(importe),
+      //   facturadoDesde: formatDate(dateDesde),
+      //   facturadoHasta: formatDate(dateHasta),
+      //   vtoPago: formatDate(dateVencimiento),
+      //   cantidad: 1,
+      //   nroComprobante: numero_de_factura,
+      //   nroCae: res.CAE,
+      //   vtoCae: res.CAEFchVto,
+      //   nombreServicio: "Servicio de prueba",
+      //   domicilioComprador: "Calle falsa 123",
+      //   nombreComprador: "Homero Simpson",
+      // });
 
+      setLoading(false);
       saveFactura(numero_de_factura);
       setOpen(false);
     })();
@@ -302,133 +309,175 @@ export function FacturaDialog() {
               />
             </div>
 
-                        {/* Importe de la Factura */}
-                        <div className='relative right-20'>
-                            <Label htmlFor='importe'>Importe total de la factura</Label>
-                            <Input id='importe' placeholder='...' value={importe} onChange={(e) => setImporte(e.target.value)} />
-                        </div>
-                    </div>
-                    {(concepto === '2' || concepto === '3') && (
-                        <div>
-                            <div className='flex flex-row justify-between'>
-                                {/* Los siguientes campos solo son obligatorios para los conceptos 2 y 3 */}
+            {/* Importe de la Factura */}
+            <div className="relative right-20">
+              <Label htmlFor="importe">Importe total de la factura</Label>
+              <Input
+                id="importe"
+                placeholder="..."
+                value={importe}
+                onChange={(e) => setImporte(e.target.value)}
+              />
+            </div>
+          </div>
+          {(concepto === "2" || concepto === "3") && (
+            <div>
+              <div className="flex flex-row justify-between">
+                {/* Los siguientes campos solo son obligatorios para los conceptos 2 y 3 */}
 
-                                <div>
-                                    <Label htmlFor='importe'>Fecha de inicio de servicio</Label>
-                                    <Popover>
-                                        <PopoverTrigger asChild={true}>
-                                            <Button
-                                                variant={'outline'}
-                                                className={cn(
-                                                    'w-[220px] justify-start text-left font-normal',
-                                                    !dateDesde && 'text-muted-foreground',
-                                                )}
-                                            >
-                                                <CalendarIcon className='mr-2 h-4 w-4' />
-                                                {dateDesde ? format(dateDesde, 'PPP') : <span>Selecciona una fecha</span>}
-                                            </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className='w-auto p-0'>
-                                            <Calendar mode='single' selected={dateDesde} onSelect={setDateDesde} initialFocus={true} />
-                                        </PopoverContent>
-                                    </Popover>
-                                </div>
+                <div>
+                  <Label htmlFor="importe">Fecha de inicio de servicio</Label>
+                  <Popover>
+                    <PopoverTrigger asChild={true}>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-[220px] justify-start text-left font-normal",
+                          !dateDesde && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dateDesde ? (
+                          format(dateDesde, "PPP")
+                        ) : (
+                          <span>Selecciona una fecha</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={dateDesde}
+                        onSelect={setDateDesde}
+                        initialFocus={true}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
 
-                                <div className='relative left-2'>
-                                    <Label htmlFor='importe'>Fecha de fin de servicio</Label>
-                                    <Popover>
-                                        <PopoverTrigger asChild={true}>
-                                            <Button
-                                                variant={'outline'}
-                                                className={cn(
-                                                    'w-[220px] justify-start text-left font-normal',
-                                                    !dateHasta && 'text-muted-foreground',
-                                                )}
-                                            >
-                                                <CalendarIcon className='mr-2 h-4 w-4' />
-                                                {dateHasta ? format(dateHasta, 'PPP') : <span>Selecciona una fecha</span>}
-                                            </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className='w-auto p-0'>
-                                            <Calendar mode='single' selected={dateHasta} onSelect={setDateHasta} initialFocus={true} />
-                                        </PopoverContent>
-                                    </Popover>
-                                </div>
-                            </div>
-                            <div className='flex flex-row justify-between'>
-                                <div>
-                                    <Label htmlFor='importe'>Fecha de vencimiento</Label>
-                                    <br />
-                                    <Popover>
-                                        <PopoverTrigger asChild={true}>
-                                            <Button
-                                                variant={'outline'}
-                                                className={cn(
-                                                    'w-[220px] justify-start text-left font-normal',
-                                                    !dateVencimiento && 'text-muted-foreground',
-                                                )}
-                                            >
-                                                <CalendarIcon className='mr-2 h-4 w-4' />
-                                                {dateVencimiento ? format(dateVencimiento, 'PPP') : <span>Selecciona una fecha</span>}
-                                            </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className='w-auto p-0'>
-                                            <Calendar
-                                                mode='single'
-                                                selected={dateVencimiento}
-                                                onSelect={setDateVencimiento}
-                                                initialFocus={true}
-                                            />
-                                        </PopoverContent>
-                                    </Popover>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                    {tipoFactura !== '11' && tipoFactura !== '14' && tipoFactura !== '15' && tipoFactura !== '' && (
-                        <div className='flex flex-row justify-between'>
-                            <div>
-                                <Label htmlFor='iva'>IVA</Label>
-                                <br />
-                                <ComboboxDemo
-                                    title='Seleccionar una opcion'
-                                    placeholder='IVA'
-                                    options={[
-                                        { value: '3', label: '0%' },
-                                        { value: '4', label: '10.5%' },
-                                        { value: '5', label: '21%' },
-                                        { value: '6', label: '27%' },
-                                        { value: '8', label: '5%' },
-                                        { value: '9', label: '2.5%' },
-                                    ]}
-                                    onSelectionChange={(e) => setIva(e)}
-                                />
-                            </div>
-                        </div>
-                    )}
-                    <div className='flex flex-row justify-between'>
-                        <div>
-                            <Label htmlFor='nombreprod'>{concepto === '1' ? 'Nombre del producto' : 'Nombre del servicio'} </Label>
-                            <Input
-                                id='nombrepro'
-                                placeholder='...'
-                                value={servicioprod}
-                                onChange={(e) => setservicioprod(e.target.value)}
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor='afiliado'>Afiliado</Label>
-                            <ComboboxDemo title='Afiliado' placeholder='Afiliado' options={[]} onSelectionChange={(e) => setIva(e)} />
-                        </div>
-                    </div>
-                    <DialogFooter>
-                        <Button disabled={loading} onClick={generateFactura}>
-                            {loading && <Loader2Icon className='mr-2 animate-spin' size={20} />}
-                            Generar nueva Factura
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-        </>
-    )
+                <div className="relative left-2">
+                  <Label htmlFor="importe">Fecha de fin de servicio</Label>
+                  <Popover>
+                    <PopoverTrigger asChild={true}>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-[220px] justify-start text-left font-normal",
+                          !dateHasta && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dateHasta ? (
+                          format(dateHasta, "PPP")
+                        ) : (
+                          <span>Selecciona una fecha</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={dateHasta}
+                        onSelect={setDateHasta}
+                        initialFocus={true}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+              <div className="flex flex-row justify-between">
+                <div>
+                  <Label htmlFor="importe">Fecha de vencimiento</Label>
+                  <br />
+                  <Popover>
+                    <PopoverTrigger asChild={true}>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-[220px] justify-start text-left font-normal",
+                          !dateVencimiento && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dateVencimiento ? (
+                          format(dateVencimiento, "PPP")
+                        ) : (
+                          <span>Selecciona una fecha</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={dateVencimiento}
+                        onSelect={setDateVencimiento}
+                        initialFocus={true}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+            </div>
+          )}
+          {tipoFactura !== "11" &&
+            tipoFactura !== "14" &&
+            tipoFactura !== "15" &&
+            tipoFactura !== "" && (
+              <div className="flex flex-row justify-between">
+                <div>
+                  <Label htmlFor="iva">IVA</Label>
+                  <br />
+                  <ComboboxDemo
+                    title="Seleccionar una opcion"
+                    placeholder="IVA"
+                    options={[
+                      { value: "3", label: "0%" },
+                      { value: "4", label: "10.5%" },
+                      { value: "5", label: "21%" },
+                      { value: "6", label: "27%" },
+                      { value: "8", label: "5%" },
+                      { value: "9", label: "2.5%" },
+                    ]}
+                    onSelectionChange={(e) => setIva(e)}
+                  />
+                </div>
+              </div>
+            )}
+          <div className="flex flex-row justify-between">
+            <div>
+              <Label htmlFor="nombreprod">
+                {concepto === "1"
+                  ? "Nombre del producto"
+                  : "Nombre del servicio"}{" "}
+              </Label>
+              <Input
+                id="nombrepro"
+                placeholder="..."
+                value={servicioprod}
+                onChange={(e) => setservicioprod(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="afiliado">Afiliado</Label>
+              <br />
+              <ComboboxDemo
+                title="Afiliado"
+                placeholder="Afiliado"
+                options={[]}
+                onSelectionChange={(e) => setIva(e)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button disabled={loading} onClick={generateFactura}>
+              {loading && (
+                <Loader2Icon className="mr-2 animate-spin" size={20} />
+              )}
+              Generar nueva Factura
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
 }

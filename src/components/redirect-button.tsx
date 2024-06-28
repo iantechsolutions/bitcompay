@@ -8,7 +8,11 @@ export function RedirectButton(props: {
 }) {
   const router = useRouter();
   return (
-    <Button className="mr-2" onClick={() => router.push(props.url)}>
+    <Button
+      className="mr-2"
+      variant="link"
+      onClick={() => router.push(props.url)}
+    >
       {props.children}
     </Button>
   );

@@ -10,7 +10,9 @@ import { Integrant } from "./integrant-router";
 import { currentUser } from "@clerk/nextjs/server";
 import { Brand } from "./brands-router";
 import { RouterOutputs } from "~/trpc/shared";
-import { calcularEdad, formatDate } from "~/lib/utils";
+import { calcularEdad, formatDate, htmlBill, ingresarAfip } from "~/lib/utils";
+import { utapi } from "~/server/uploadthing";
+import { id } from "date-fns/locale";
 
 function formatDateAFIP(date: Date | undefined) {
   if (date) {
@@ -23,22 +25,6 @@ function formatDateAFIP(date: Date | undefined) {
   return null;
 }
 
-export async function ingresarAfip() {
-  const taxId = 23439214619;
-  const cert =
-    "-----BEGIN CERTIFICATE-----\nMIIDQzCCAiugAwIBAgIIBDcBTy1RV9IwDQYJKoZIhvcNAQENBQAwMzEVMBMGA1UEAwwMQ29tcHV0\nYWRvcmVzMQ0wCwYDVQQKDARBRklQMQswCQYDVQQGEwJBUjAeFw0yNDA1MTQxMjQ1NTZaFw0yNjA1\nMTQxMjQ1NTZaMC4xETAPBgNVBAMMCGFmaXBzZGsyMRkwFwYDVQQFExBDVUlUIDIzNDM5MjE0NjE5\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAv2gtWDrfV7m9Lz1dYFimDivBff/UCrBB\nQHUuREfIcwL3cs0TDQ075Nk6GyPIIclvVBAUrIXHNDAEgLM3uxY/eSNO/kL9OpjTbleSNUxPyfZz\nwbFsS93ZZb37iA72J2ffgS8TRT9q0tiDnx5dUBv+lVIBliwbxGR6qgEGvgLwZHy7oSKfiYXV8vuc\n+Dt5kNbBVEZTyYyhSMYrM80TcStVrMYuFAz4GJiJRR3g258tJAVARB2KU6tNdaeZ/dmkFzQF/kL8\n9SsIVXEj/8HuLK1qNPoY/qIyD35xqlBW5VYeQMlqRC87V/eKWXUCQM/O+wett6QzB4OGYwBwZYsE\nMNFqWQIDAQABo2AwXjAMBgNVHRMBAf8EAjAAMB8GA1UdIwQYMBaAFCsNL8jfYf0IyU4R0DWTBG2O\nW9BuMB0GA1UdDgQWBBSqnCsGiIw8kqJgF80pSpuLASPB/zAOBgNVHQ8BAf8EBAMCBeAwDQYJKoZI\nhvcNAQENBQADggEBAJQMwlkuNIan9Em48HBUG03glquZsyF74uWLwBAXJ5KAoWHJDU8k1nsRLmw4\n4qw0jWpDPBX1kTvdYVq2412lndnXCdoBiOCjBibwApylqV3pZGyHDTfhWEYBBF+0TOLB/w2FVhSk\n7mbtmWTZ8twqJtORuBbolkM1QTWVuFCWRHX2wSINnjP23NxnLIf6CTJKdMUsAZ7YxAubuWIw3IYd\nGASuLrUCpAlyrA1jpGa3k1vBgTawt/9vWMrbX9uumefFRTM38xB+JPlIY5pN1vEOTreVfAyK7MGR\n1IH2RXkvV3n+YJkj+pcQZG5xOuYuLdeuki4jPy7Q/i3DlAhRYDONgDI=\n-----END CERTIFICATE-----";
-  const key =
-    "-----BEGIN RSA PRIVATE KEY-----\r\nMIIEpQIBAAKCAQEAv2gtWDrfV7m9Lz1dYFimDivBff/UCrBBQHUuREfIcwL3cs0T\r\nDQ075Nk6GyPIIclvVBAUrIXHNDAEgLM3uxY/eSNO/kL9OpjTbleSNUxPyfZzwbFs\r\nS93ZZb37iA72J2ffgS8TRT9q0tiDnx5dUBv+lVIBliwbxGR6qgEGvgLwZHy7oSKf\r\niYXV8vuc+Dt5kNbBVEZTyYyhSMYrM80TcStVrMYuFAz4GJiJRR3g258tJAVARB2K\r\nU6tNdaeZ/dmkFzQF/kL89SsIVXEj/8HuLK1qNPoY/qIyD35xqlBW5VYeQMlqRC87\r\nV/eKWXUCQM/O+wett6QzB4OGYwBwZYsEMNFqWQIDAQABAoIBAQCQFCct5wL/0fyq\r\ndpK3V4OH30ADTHOcqBg2IP72vuIQUQdbDytsA642EZ4/l6uqYyq+KGyngPv2OL7q\r\n8fzdg128Hev0URC07x0YTirsm8jjyfRQtPFEGnbusxeHz1tTRkljwL/MvHP4yqop\r\nOH4dMzVryRMQq5srNkdveN5OYX/64uxGM2uM+ZVXtMb7ve4KX5GZKCt2fyEC5ZTJ\r\n/B2i/by7NJtm3+VtiVrifi3U2oxjQ0Es1j9COBEWY8JtpIZw9PoP93Hb/zliipJW\r\nXRC6UGd7aF4KOi2vIt619dTD/jsRSweidNGluGdVfHkwQ2BIuLzepA4IU1Z6UKX2\r\nmu2NPXCRAoGBAN7zoRJmNeLf/i0xWHSkyhC3kKgV0wvICbXYVAFBCBEnM2p7Kx7v\r\nyIzQCg+qFtdqSh8Xv1hgo5hFP5QbiavCRbJa+Jb8ZPsqrmEhrE5HYoPamjRuSRi+\r\nzcH43O21fAX/eMhFl5g60i0svMP4hqhcVqli26Lt8iwvyKb83squ6c6XAoGBANvH\r\nhD2dVrRRcBC5+JOrJ2JKgGIqcX8TD9JKQqsHX6bytVUL4aOebgJqXHIBZPU8cRCx\r\nB+1dX5O8fjqkUNIWzq1IqAZtwZopjp1AGoctSzj9J3zYyjoK7AWaeDuyu2ZIzCef\r\nVat8k9Q1RdCovfhfQHZlV84+zJ7l8WWx0SFdpZyPAoGBAI5Mh2C79ebBOnTTyvZf\r\n+0xiLSTrERGy8merFCrcu+5ey9VJmcMcHi+p1NIcqImDIJ3pxUn+HExi3mqEjQEg\r\ndOWaZJHRtA4PNs9t85DexQUNMGEIhwUROzhzw2bA79DQNuH0cQZLfLwykqSt6hxp\r\nGzLvkunR30DOms3iFbzdmQMvAoGBAL/wP9JbnYQ+9yL0d13nhK63p+WTcalr6U5b\r\nIlwhRW0U3D5Y8Qcm7qZXY0MBar0tuwS7xtOKz1TDsm3eYOMJnhgBsxRiOEk9b9pv\r\nSHuzl9U+aYUEA6CrNzMxkz13u2f5vaoA4h2w353dpIo1RCssbKy5lvR9LdC7upV4\r\ntM5x7ZeLAoGAYs2nPABoUPrqKTOZmZg2ob0LKFnSxzFYNrxnIxyJN4CPbg5WJNFK\r\nUwOzB1oOezdIKBJ2eO7tidTa3DJ4HuMqvyChlnmQfL/98jCnnkwnVXldEfWwrKs/\r\npPiKvjFCOZROnwm3PhTfZtEi3Lpn6GNIy7rjl7eFOxgGGNCMkx34ehY=\r\n-----END RSA PRIVATE KEY-----\r\n";
-  const afip = new Afip({
-    access_token:
-      "sjqzE9JPiq9EtrWQR0MSYjehQHlYGPLn7vdAEun9ucUQQiZ6gWV9xMJVwJd5aaSy",
-    CUIT: taxId,
-    cert: cert,
-    key: key,
-    production: true,
-  });
-  return afip;
-}
 type Bonus = {
   id: string;
   appliedUser: string;
@@ -232,6 +218,7 @@ async function approbateFactura(liquidationId: string) {
         .returning();
 
       const afip = await ingresarAfip();
+
       let last_voucher;
       try {
         last_voucher = await afip.ElectronicBilling.getLastVoucher(
@@ -273,6 +260,35 @@ async function approbateFactura(liquidationId: string) {
         //   Importe: (Number(importe) * 0, 21).toString(),
         // },
       };
+      const html = htmlBill(
+        factura,
+        factura.family_group?.businessUnitData!.company,
+        producto,
+        last_voucher + 1
+      );
+      const name = `FAC${factura.nroFactura}.pdf`; // NOMBRE
+      const options = {
+        width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
+        marginLeft: 0.8, // Margen izquierdo en pulgadas. Usar 0.1 para ticket
+        marginRight: 0.8, // Margen derecho en pulgadas. Usar 0.1 para ticket
+        marginTop: 0.4, // Margen superior en pulgadas. Usar 0.1 para ticket
+        marginBottom: 0.4, // Margen inferior en pulgadas. Usar 0.1 para ticket
+      };
+
+      //MANDAMOS PDF A AFIP, hay que agregar el qr al circuito, y levantar resHtml, por que actualmente solo se logea
+      const resHtml = await afip.ElectronicBilling.createPDF({
+        html: html,
+        file_name: name,
+        options: options,
+      });
+
+      console.log("resHtml", resHtml);
+      await db
+        .update(schema.facturas)
+        .set({
+          billLink: resHtml.file,
+        })
+        .where(eq(schema.facturas.id, factura.id));
 
       const historicEvents = await db.query.events.findMany({
         where: eq(schema.events.currentAccount_id, cc?.id ?? ""),
@@ -307,14 +323,11 @@ async function approbateFactura(liquidationId: string) {
 }
 
 async function preparateFactura(
-  afip: Afip,
   grupos: grupoCompleto[],
   dateDesde: Date | undefined,
   dateHasta: Date | undefined,
   dateVencimiento: Date | undefined,
   pv: string,
-  brandId: string,
-  companyId: string,
   liquidationId: string
 ) {
   const user = await currentUser();
@@ -415,26 +428,39 @@ async function preparateFactura(
 
 async function getGroupAmount(grupo: grupoCompleto) {
   let importe = 0;
-  grupo.integrants?.forEach((integrant) => {
-    if (integrant.birth_date != null) {
-      const age = calcularEdad(integrant.birth_date);
-      console.log(age);
-      console.log(integrant.relationship);
-      const precioIntegrante =
-        grupo.plan?.pricesPerCondition.find((x) => {
-          if (
-            integrant.relationship &&
-            integrant.relationship.toLowerCase() != "titular"
-          ) {
-            return x.condition == integrant.relationship;
-          } else {
-            return (x.from_age ?? 1000 <= age) && (x.to_age ?? 0 >= age);
-          }
-        })?.amount ?? 0;
-      console.log(precioIntegrante);
-      importe += precioIntegrante;
-    }
-  });
+  const preciosPasados = grupo.plan?.pricesPerCondition.filter(
+    (price) => price.validy_date.getTime() <= new Date().getTime()
+  );
+  preciosPasados?.sort(
+    (a, b) => b.validy_date.getTime() - a.validy_date.getTime()
+  );
+  if (preciosPasados) {
+    const vigente = preciosPasados[0]?.validy_date;
+
+    const precios = grupo.plan?.pricesPerCondition.filter(
+      (x) => x.validy_date.getTime() === vigente?.getTime()
+    );
+    grupo.integrants?.forEach((integrant) => {
+      if (integrant.birth_date != null) {
+        const age = calcularEdad(integrant.birth_date);
+        console.log(age);
+        console.log(integrant.relationship);
+        const precioIntegrante =
+          precios?.find((x) => {
+            if (
+              integrant.relationship &&
+              integrant.relationship.toLowerCase() != "titular"
+            ) {
+              return x.condition == integrant.relationship;
+            } else {
+              return (x.from_age ?? 1000 <= age) && (x.to_age ?? 0 >= age);
+            }
+          })?.amount ?? 0;
+        console.log(precioIntegrante);
+        importe += precioIntegrante;
+      }
+    });
+  }
   console.log(importe);
   return importe;
 }
@@ -528,9 +554,13 @@ export const facturasRouter = createTRPCRouter({
           with: {
             integrants: {
               where: eq(schema.integrants.isBillResponsible, true),
+              with: {
+                postal_code: true,
+              },
             },
             plan: true,
             cc: true,
+            bonus: true,
           },
         },
       },
@@ -588,7 +618,6 @@ export const facturasRouter = createTRPCRouter({
       const companyId = ctx.session.orgId;
       const grupos = await getGruposByBrandId(input.brandId);
       console.log("grupos", grupos);
-      const afip = await ingresarAfip();
       const user = await currentUser();
       const brand = await db.query.brands.findFirst({
         where: eq(schema.brands.id, input.brandId),
@@ -614,14 +643,11 @@ export const facturasRouter = createTRPCRouter({
         })
         .returning();
       await preparateFactura(
-        afip,
         grupos,
         input.dateDesde,
         input.dateHasta,
         input.dateDue,
         input.pv,
-        input.brandId,
-        input.companyId,
         liquidation!.id
       );
       return liquidation;
