@@ -4,70 +4,63 @@ import { db, schema } from "~/server/db";
 import { eq } from "drizzle-orm";
 import { postal_code } from "~/server/db/schema";
 
-
-
-
-
 export const postalCodeRouter = createTRPCRouter({
-    list: protectedProcedure.query(async ({}) => {
+  list: protectedProcedure.query(async ({}) => {
     const postalCode = await db.query.postal_code.findMany();
     return postalCode;
-    }),
-    get: protectedProcedure
+  }),
+  get: protectedProcedure
     .input(
-        z.object({
+      z.object({
         postalCodeId: z.string(),
-        }),
+      })
     )
     .query(async ({ input }) => {
-        const postalCode = await db.query.postal_code.findFirst({
-            where: eq(schema.postal_code.id, input.postalCodeId),
-        });
+      const postalCode = await db.query.postal_code.findFirst({
+        where: eq(schema.postal_code.id, input.postalCodeId),
+      });
 
-    return postalCode;
+      return postalCode;
     }),
 
-    create: protectedProcedure
-    .input(z.object({ 
+  create: protectedProcedure
+    .input(
+      z.object({
         name: z.string(),
         cp: z.string(),
-        zone: z.string()
-    
-    }))
+        zone: z.string(),
+      })
+    )
     .mutation(async ({ input }) => {
-
-    await db.insert(postal_code).values(input);
-    
-
-    }), 
-    change: protectedProcedure
+      await db.insert(postal_code).values(input);
+    }),
+  change: protectedProcedure
     .input(
-        z.object({
+      z.object({
         id: z.string(),
         name: z.string(),
         cp: z.string(),
-        zone: z.string()
-        }),
+        zone: z.string(),
+      })
     )
     .mutation(async ({ input: { id, ...input } }) => {
-        console.log("Function called");
+      console.log("Function called");
 
-    const updatedpostalCode = await db
+      const updatedpostalCode = await db
         .update(schema.postal_code)
         .set(input)
         .where(eq(schema.postal_code.id, id));
-    console.log(updatedpostalCode);
-    return updatedpostalCode;
+      return updatedpostalCode;
     }),
 
-delete: protectedProcedure
+  delete: protectedProcedure
     .input(
-    z.object({
+      z.object({
         postalCodeId: z.string(),
-    }),
+      })
     )
     .mutation(async ({ input }) => {
-    await db
+      await db
         .delete(schema.postal_code)
         .where(eq(schema.postal_code.id, input.postalCodeId));
     }),

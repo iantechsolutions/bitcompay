@@ -46,9 +46,9 @@ export default function EditBusinessUnit(props: {
   async function handleUpdate() {
     try {
       await updateBusinessUnit({
-        bussinessUnitId: props.params.unitId,
+        bussinessUnitId: props.businessUnit!.id,
         description: description,
-        companyId: props.params.companyId,
+        companyId: props.businessUnit!.companyId,
         brandId: brand,
       });
 
@@ -78,8 +78,7 @@ export default function EditBusinessUnit(props: {
           value={brand}
           onValueChange={(value) => {
             setBrand(value);
-          }}
-        >
+          }}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Seleccione una marca" />
           </SelectTrigger>
