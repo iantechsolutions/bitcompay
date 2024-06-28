@@ -284,14 +284,12 @@ export const excelDeserializationRouter = createTRPCRouter({
               // product: product?.id,
             });
           }
-          const employeeContribution = parseFloat(row.contribution!);
-          const employerContribution =
-            (parseFloat(row.contribution!) / 3) * 7.038;
+          const contribution = parseFloat(row.contribution!);
           console.log("creando aportes");
           await db.insert(schema.contributions).values({
-            employeeContribution: employeeContribution,
-            employerContribution: employerContribution,
-            amount: employeeContribution + employerContribution,
+            employeeContribution: 0,
+            employerContribution: contribution,
+            amount: contribution,
             integrant_id: new_integrant[0]!.id,
             cuitEmployer: " ", //a rellenar
           });
