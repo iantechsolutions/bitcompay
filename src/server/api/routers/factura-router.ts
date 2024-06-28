@@ -340,7 +340,7 @@ async function preparateFactura(
     const ivaFloat =
       (100 + parseFloat(grupo.businessUnitData?.brand?.iva ?? "0")) / 100;
     console.log(ivaFloat);
-    const abono = await getGroupAmount(grupo);
+    const abono = await getGroupAmount(grupo, dateDesde!);
     console.log(abono);
     const bonificacion =
       (parseFloat(
@@ -426,10 +426,10 @@ async function preparateFactura(
   return "OK";
 }
 
-async function getGroupAmount(grupo: grupoCompleto) {
+async function getGroupAmount(grupo: grupoCompleto, date: Date) {
   let importe = 0;
   const preciosPasados = grupo.plan?.pricesPerCondition.filter(
-    (price) => price.validy_date.getTime() <= new Date().getTime()
+    (price) => price.validy_date.getTime() <= date.getTime()
   );
   preciosPasados?.sort(
     (a, b) => b.validy_date.getTime() - a.validy_date.getTime()
@@ -615,6 +615,7 @@ export const facturasRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
+      console.log("DATE DESDE",input.dateDesde)
       const companyId = ctx.session.orgId;
       const grupos = await getGruposByBrandId(input.brandId);
       console.log("grupos", grupos);
