@@ -37,14 +37,14 @@ type Bonus = {
 
 type grupoCompleto = RouterOutputs["facturas"]["getGruposByBrandId"][number];
 
-const ivaDictionary = {
-  "0%": 3,
-  "10.5%": 4,
-  "21%": 5,
-  "27%": 6,
-  "5%": 8,
-  "2.5%": 9,
-  "": 0,
+const ivaDictionary: { [key: number]: string } = {
+  3: "0",
+  4: "10.5",
+  5: "21",
+  6: "27",
+  8: "5",
+  9: "2.5",
+  0: "",
 };
 
 const conceptDictionary = {
@@ -337,8 +337,8 @@ async function preparateFactura(
       (integrant) => integrant.isBillResponsible
     );
     console.log("variables grupo");
-    const ivaFloat =
-      (100 + parseFloat(grupo.businessUnitData?.brand?.iva ?? "0")) / 100;
+    const iva = ivaDictionary[Number(grupo.businessUnitData?.brand?.iva) ?? 3];
+    const ivaFloat = (100 + parseFloat(iva ?? "0")) / 100;
     console.log(ivaFloat);
     const abono = await getGroupAmount(grupo, dateDesde!);
     console.log(abono);
@@ -411,7 +411,7 @@ async function preparateFactura(
         toPeriod: dateHasta,
         due_date: dateVencimiento,
         prodName: "Servicio",
-        iva: grupo.businessUnitData?.brand?.iva ?? "",
+        iva: iva ?? "",
         billLink: "",
         liquidation_id: liquidationId,
         family_group_id: grupo.id,
