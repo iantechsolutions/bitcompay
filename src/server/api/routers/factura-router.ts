@@ -453,7 +453,7 @@ async function getGroupAmount(grupo: grupoCompleto, date: Date) {
             ) {
               return x.condition == integrant.relationship;
             } else {
-              return (x.from_age ?? 1000 <= age) && (x.to_age ?? 0 >= age);
+              return (x.from_age ?? 1000) <= age && (x.to_age ?? 0) >= age;
             }
           })?.amount ?? 0;
         console.log(precioIntegrante);
@@ -615,7 +615,7 @@ export const facturasRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      console.log("DATE DESDE",input.dateDesde)
+      console.log("DATE DESDE", input.dateDesde);
       const companyId = ctx.session.orgId;
       const grupos = await getGruposByBrandId(input.brandId);
       console.log("grupos", grupos);
