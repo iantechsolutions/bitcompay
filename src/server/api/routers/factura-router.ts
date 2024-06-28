@@ -449,9 +449,10 @@ async function getGroupAmount(grupo: grupoCompleto, date: Date) {
           precios?.find((x) => {
             if (
               integrant.relationship &&
-              integrant.relationship.toLowerCase() != "titular"
+              // integrant.relationship.toLowerCase() != "titular"
+              x.condition == integrant.relationship
             ) {
-              return x.condition == integrant.relationship;
+              return true;
             } else {
               return (x.from_age ?? 1000) <= age && (x.to_age ?? 0) >= age;
             }
@@ -491,9 +492,10 @@ async function getDifferentialAmount(grupo: grupoCompleto) {
       grupo.plan?.pricesPerCondition.find((x) => {
         if (
           integrant.relationship &&
-          integrant.relationship.toLowerCase() != "titular"
+          // integrant.relationship.toLowerCase() != "titular"
+          x.condition == integrant.relationship
         ) {
-          return x.condition == integrant.relationship;
+          return true;
         } else {
           return (x.from_age ?? 1000) <= age && (x.to_age ?? 0) >= age;
         }

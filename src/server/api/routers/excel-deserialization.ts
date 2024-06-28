@@ -244,9 +244,10 @@ export const excelDeserializationRouter = createTRPCRouter({
                   .find((p) => {
                     if (
                       row.relationship &&
-                      row.relationship.toLowerCase() != "titular"
+                      // row.relationship.toLowerCase() != "titular" &&
+                      p.condition == row.relationship
                     ) {
-                      return p.condition == row.relationship;
+                      return true;
                     } else {
                       return (
                         (p.from_age ?? 1000) <= ageN && (p.to_age ?? 0) >= ageN
