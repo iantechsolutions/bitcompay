@@ -164,12 +164,14 @@ export default async function Home(props: {
               >
                 Total
               </TableHead>
-              <TableHead
-                className="text-gray-800
+              {preliquidation?.estado !== "pendiente" && (
+                <TableHead
+                  className="text-gray-800
                rounded-r-md overflow-hidden"
-              >
-                Factura
-              </TableHead>
+                >
+                  Factura
+                </TableHead>
+              )}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -177,6 +179,7 @@ export default async function Home(props: {
               <TableRowContainer
                 key={factura.id}
                 factura={factura}
+                preliquidation={preliquidation}
                 periodo={periodo}
               />
             ))}

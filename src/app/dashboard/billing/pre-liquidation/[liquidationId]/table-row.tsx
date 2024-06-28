@@ -14,6 +14,7 @@ import { api } from "~/trpc/react";
 // subTotal: number;
 
 export default function TableRowContainer(props: {
+  preliquidation: RouterOutputs["liquidations"]["get"];
   factura: any;
   periodo: string;
 }) {
@@ -31,6 +32,7 @@ export default function TableRowContainer(props: {
         setActive={setActive}
         active={active}
         factura={props.factura}
+        preliquidation={props.preliquidation}
         total={total}
         interestValue={props.factura.items?.interest ?? 0}
         contributionValue={props.factura.items?.contribution ?? 0}
