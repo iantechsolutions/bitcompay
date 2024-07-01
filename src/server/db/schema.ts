@@ -145,6 +145,7 @@ export const payments = pgTable(
     factura_id: varchar("factura_id", { length: 255 }).references(
       () => facturas.id
     ),
+    recollected_amount: real("recollected_amount"),
   },
   (payments) => ({
     userIdIdx: index("payment_userId_idx").on(payments.userId),
@@ -718,6 +719,7 @@ export const differentialsValuesRelations = relations(
 
 export const facturas = pgTable("facturas", {
   id: columnId,
+  createdAt,
   generated: timestamp("generated", { mode: "date" }),
   ptoVenta: integer("ptoVenta").notNull(),
   nroFactura: integer("nroFactura").notNull(),
@@ -790,6 +792,7 @@ export const items = pgTable("items", {
   id: columnId,
   abono: real("abono"),
   differential_amount: real("differential_amount"),
+  account_payment: real("account_payment"),
   bonificacion: real("bonificacion"),
   interest: real("interest"),
   contribution: real("contribution"),

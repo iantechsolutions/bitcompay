@@ -174,6 +174,16 @@ async function approbateFactura(liquidationId: string) {
       .update(schema.liquidations)
       .set({ estado: "aprobada", userApproved: user?.id })
       .where(eq(schema.liquidations.id, liquidationId));
+    const afip = await ingresarAfip();
+    let last_voucher;
+    try {
+      last_voucher = await afip.ElectronicBilling.getLastVoucher(
+        liquidation.facturas[0]?.ptoVenta,
+        liquidation.facturas[0]?.tipoFactura
+      );
+    } catch {
+      last_voucher = 0;
+    }
     for (let factura of liquidation?.facturas) {
       const randomNumber =
         Math.floor(Math.random() * (100000 - 1000 + 1)) + 1000;
@@ -217,17 +227,6 @@ async function approbateFactura(liquidationId: string) {
         })
         .returning();
 
-      const afip = await ingresarAfip();
-
-      let last_voucher;
-      try {
-        last_voucher = await afip.ElectronicBilling.getLastVoucher(
-          factura?.ptoVenta,
-          factura?.tipoFactura
-        );
-      } catch {
-        last_voucher = 0;
-      }
       const fecha = new Date(
         Date.now() - new Date().getTimezoneOffset() * 60000
       )
@@ -266,6 +265,7 @@ async function approbateFactura(liquidationId: string) {
         producto,
         last_voucher + 1
       );
+      last_voucher += 1;
       const name = `FAC${factura.nroFactura}.pdf`; // NOMBRE
       const options = {
         width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
@@ -333,7 +333,9 @@ async function preparateFactura(
 ) {
   const user = await currentUser();
 
-  grupos.forEach(async (grupo) => {
+  for (let i = 0; i < grupos.length; i++) {
+    const grupo = grupos[i];
+    if (grupo){
     const billResponsible = grupo.integrants.find(
       (integrant) => integrant.isBillResponsible
     );
@@ -359,25 +361,35 @@ async function preparateFactura(
     console.log(contribution);
     const differential_amount = await getDifferentialAmount(grupo);
 
-    let mostRecentEvent;
-    if (grupo.cc && grupo.cc?.events.length > 0) {
-      mostRecentEvent = grupo.cc?.events.reduce((prev, current) => {
-        return new Date(prev.createdAt) > new Date(current.createdAt)
+    let mostRecentFactura;
+    let previous_bill = 0;
+    let account_payment = 0;
+    if (grupo?.facturas.length > 0) {
+      mostRecentFactura = grupo.facturas?.reduce((prev, current) => {
+        return prev.createdAt.getTime() > current.createdAt.getTime()
           ? prev
           : current;
       });
     } else {
-      mostRecentEvent = null;
+      mostRecentFactura = null;
     }
-    let previous_bill = 0;
-    if (mostRecentEvent && mostRecentEvent.current_amount < 0) {
-      previous_bill = mostRecentEvent?.current_amount ?? 0;
+    if (mostRecentFactura) {
+      previous_bill = mostRecentFactura.importe;
+      if (mostRecentFactura.payments.length > 0) {
+        mostRecentFactura.payments.forEach((payment) => {
+          account_payment += payment.recollected_amount ?? 0;
+        });
+      }
+    }
+
+    if (mostRecentFactura && mostRecentFactura?.payments.length > 0) {
     }
     const interest = (interes / 100) * previous_bill;
     const importe =
       (abono - bonificacion + differential_amount - contribution) * ivaFloat -
       previous_bill -
-      interest;
+      interest -
+      account_payment;
     const items = await db
       .insert(schema.items)
       .values({
@@ -387,6 +399,7 @@ async function preparateFactura(
         contribution,
         interest,
         previous_bill,
+        account_payment,
       })
       .returning();
     const tipoDocumento = idDictionary[billResponsible?.fiscal_id_type ?? ""];
@@ -421,7 +434,9 @@ async function preparateFactura(
       where: eq(schema.paymentStatus.code, "91"),
     });
     console.log("numero", producto?.number);
-  });
+  }
+}
+
   return "OK";
 }
 
@@ -526,6 +541,11 @@ async function getGruposByBrandId(brandId: string) {
       cc: {
         with: {
           events: true,
+        },
+      },
+      facturas: {
+        with: {
+          payments: true,
         },
       },
       bonus: true,
