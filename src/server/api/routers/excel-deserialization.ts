@@ -236,21 +236,38 @@ export const excelDeserializationRouter = createTRPCRouter({
               (a, b) => b.validy_date.getTime() - a.validy_date.getTime()
             );
             let precioIntegrante = 0;
+            console.log("precios pasados");
             if (preciosPasados) {
               const vigente = preciosPasados[0]?.validy_date;
-              let precioIntegrante = plan?.pricesPerCondition?.find(
-                (x) => row.relationship && x.condition == row.relationship
-              )?.amount;
-
-              if (precioIntegrante === undefined) {
-                precioIntegrante =
-                  plan?.pricesPerCondition?.find(
-                    (x) => (x.from_age ?? 1000) <= age && (x.to_age ?? 0) >= age
+              console.log("vigente", vigente);
+              precioIntegrante =
+                plan?.pricesPerCondition
+                  ?.filter(
+                    (x) => x.validy_date.getTime() === vigente?.getTime()
+                  )
+                  .find(
+                    (x) => row.relationship && x.condition == row.relationship
                   )?.amount ?? 0;
+              console.log("precioIntegrante", precioIntegrante);
+              if (precioIntegrante === 0) {
+                precioIntegrante =
+                  plan?.pricesPerCondition
+                    ?.filter(
+                      (x) => x.validy_date.getTime() === vigente?.getTime()
+                    )
+                    .find(
+                      (x) =>
+                        (x.from_age ?? 1000) <= ageN && (x.to_age ?? 0) >= ageN
+                    )?.amount ?? 0;
               }
+              console.log("precioIntegrante", precioIntegrante);
             }
+            console.log("row");
+            console.log(row.differential_value);
+            console.log(precioIntegrante);
             const precioDiferencial =
               parseFloat(row.differential_value!) / precioIntegrante;
+            console.log("precioDiferencial", precioDiferencial);
             const differentialValue = await db
               .insert(schema.differentialsValues)
               .values({

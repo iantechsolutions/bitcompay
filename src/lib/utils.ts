@@ -554,7 +554,7 @@ span {
             factura.items?.previous_bill * -1 ?? 0
           )}</p>
           <p> ${formatNumberAsCurrency(factura.items?.interest ?? 0)}</p>
-          <p> --- </p>
+          <p> ${formatNumberAsCurrency(factura.items?.account_payment ?? 0)}</p>
         </div>
       </section>
   
