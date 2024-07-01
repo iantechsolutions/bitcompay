@@ -1,16 +1,29 @@
-import { cookies } from 'next/headers'
+import AppLayout from "~/components/applayout";
+import CompanySidenav from "~/components/company-sidenav";
+import { api } from "~/trpc/server";
+import { CompanyProvider } from "./company-provider";
+import { auth } from "@clerk/nextjs/server";
+import { SetDefaultOrganization } from "./set-default-org";
+import AccessDenied from "../accessdenied/page";
 
-import dayjs from 'dayjs'
-import 'dayjs/locale/es'
-import { Toaster } from '~/components/ui/sonner'
-import { TRPCReactProvider } from '~/trpc/react'
-dayjs.locale('es')
+export default async function Layout(props: { children?: React.ReactNode }) {
+  const { orgId } = auth();
+  if (orgId) {
+    const company = await api.companies.get.query();
 
-export default function RootLayout(props: { children: React.ReactNode }) {
     return (
-        <TRPCReactProvider cookies={cookies().toString()}>
-            {props.children}
-            <Toaster />
-        </TRPCReactProvider>
-    )
+      <>
+        <AppLayout
+          headerClass="bg-[#e9fcf8]"
+          sidenavClass="top-0"
+          sidenav={<CompanySidenav />}
+        >
+          <CompanyProvider company={company}>{props.children}</CompanyProvider>
+        </AppLayout>
+      </>
+    );
+  }
+  if (!orgId) {
+    return <SetDefaultOrganization />;
+  }
 }

@@ -7,8 +7,9 @@ import { Value } from "@radix-ui/react-select";
 const stringAsDate = z
   .union([z.string(), z.number()])
   .transform((value) => {
-    const date = excelDateToJSDate({ exceldate: Number(value) });
     console.log(value);
+    const date = excelDateToJSDate({ exceldate: Number(value) });
+    console.log(date);
 
     return date;
   })
@@ -62,12 +63,32 @@ const numberAsString = z
     console.log(value);
     if (
       typeof value === "number" ||
-      (typeof value === "string" && !isNaN(Number(value)))
+      (typeof value === "string" && !isNaN(Number(value))) ||
+      (typeof value === "string" && value == "")
     ) {
       return value.toString();
     }
   })
-  .refine((value) => !isNaN(Number(value)), {
+  .refine((value) => !isNaN(Number(value)) || value == "", {
+    message: "Caracteres incorrectos en columna:",
+  });
+
+const cardNumber = z
+  .string()
+  .or(z.number())
+  .transform((v) => v.toString().replace(/\s/g, ""));
+
+const allToString = z
+  .union([z.number(), z.string()])
+  .transform((value) => {
+    console.log(value);
+    if (typeof value === "number") {
+      return value.toString();
+    } else if (typeof value === "string") {
+      return value;
+    }
+  })
+  .refine((value) => typeof value === "string", {
     message: "Caracteres incorrectos en columna:",
   });
 
@@ -100,7 +121,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     state: "ACTIVO" | "INACTIVO" | null;
     holder_id_number: string | null;
     name: string | null;
-    affiliate_number: string | null;
+    affiliate_number: string | number | null;
     extension: string | null;
     own_id_type: "DNI" | "PASAPORTE" | null;
     du_number: string | null;
@@ -200,7 +221,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
       "NRO CBU"?: string | number | null | undefined;
       "TC MARCA"?: string | null | undefined;
       "ALTA NUEVA"?: string | boolean | null | undefined;
-      "NRO. TARJETA"?: string | number | null | undefined;
+      "NRO. TARJETA"?: number | null | undefined;
       "TIPO DE TARJETA"?: string | null | undefined;
     }[]
   >[] = [];
@@ -226,18 +247,8 @@ export const recDocumentValidator = z
       .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
       .nullable()
       .optional(),
-    OS: z
-      .string()
-      .min(0)
-      .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
-      .nullable()
-      .optional(),
-    "OS ORIGEN": z
-      .string()
-      .min(0)
-      .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
-      .nullable()
-      .optional(),
+    OS: allToString.nullable().optional(),
+    "OS ORIGEN": allToString.nullable().optional(),
     VIGENCIA: stringAsDate.nullable().optional(),
     MODO: z
       .string()
@@ -255,25 +266,15 @@ export const recDocumentValidator = z
       })
       .nullable()
       .optional(),
-    "NRO DOC TITULAR": numberAsString.nullable().optional(),
+    "NRO DOC TITULAR": allToString.nullable().optional(),
     NOMBRE: z
       .string()
       .min(0)
       .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
       .nullable()
       .optional(),
-    "NRO AFILIADO": z
-      .string()
-      .min(0)
-      .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
-      .nullable()
-      .optional(),
-    EXTENSION: z
-      .string()
-      .min(0)
-      .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
-      .nullable()
-      .optional(),
+    "NRO AFILIADO": allToString.nullable().optional(),
+    EXTENSION: allToString.nullable().optional(),
     "TIPO DOC PROPIO": z
       .enum(["DNI", "PASAPORTE"])
       .refine((value) => ["DNI", "PASAPORTE"].includes(value), {
@@ -323,7 +324,7 @@ export const recDocumentValidator = z
       .nullable()
       .optional(),
     "TIPO DOC FISCAL": z.enum(["CUIT", "CUIL"]).nullable().optional(),
-    "NRO DOC FISCAL": numberAsString.nullable().optional(),
+    "NRO DOC FISCAL": allToString.nullable().optional(),
     LOCALIDAD: z.string().min(0).max(140).nullable().optional(),
     PARTIDO: z.string().min(0).max(140).nullable().optional(),
     DIRECCION: z.string().min(0).max(140).nullable().optional(),
@@ -345,20 +346,20 @@ export const recDocumentValidator = z
     "DIFERENCIAL CODIGO": z.string().min(0).max(140).nullable().optional(),
     "DIFERENCIAL VALOR": numberAsString.optional().nullable(),
     "SALDO CUENTA CORRIENTE": numberAsString.nullable().optional(),
-    PLAN: z.string().min(0).max(140).nullable().optional(),
+    PLAN: allToString.nullable().optional(),
     "PRODUCTO (MEDIO DE PAGO)": z
       .string()
       .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
       .optional()
       .nullable(),
-    "NRO CBU": numberAsString.nullable().optional(),
+    "NRO CBU": allToString.nullable().optional(),
     "TC MARCA": z
       .string()
       .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
       .nullable()
       .optional(),
     "ALTA NUEVA": stringAsBoolean.nullable().optional(),
-    "NRO. TARJETA": numberAsString.nullable().optional(),
+    "NRO. TARJETA": cardNumber.nullable().optional(),
     "TIPO DE TARJETA": z.string().nullable().optional(),
   })
   .transform((value) => {

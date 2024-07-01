@@ -54,8 +54,10 @@ import {
 import { usePathname } from "next/navigation";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import Sidenav, { SidenavItem, SidenavSeparator } from "./sidenav";
+import { useUser } from "@clerk/nextjs";
+import { checkRole } from "~/lib/utils/react/roles";
 
-export default function CompanySidenav(props: { companyId: string }) {
+export default function CompanySidenav() {
   const menu: Record<string, string> = {
     Administracion: "administration/",
     Gestion: "management/",
@@ -68,6 +70,7 @@ export default function CompanySidenav(props: { companyId: string }) {
     Proveedores: "management/suppliers/",
     Documentos: "management/documents/",
   };
+  const isAdmin = checkRole("admin");
   const pathname = usePathname();
   const isActive = (href: keyof typeof menu) => {
     if (href !== undefined) {
@@ -84,7 +87,7 @@ export default function CompanySidenav(props: { companyId: string }) {
     <Sidenav className="h-full bg-[#e9fcf8]">
       <img
         className="bg-[#e9fcf8] pb-5 pl-5 pr-5 pt-8"
-        src="https://utfs.io/f/2241aac5-d6d9-4310-bc31-db91cf5565cb-j8i4q3.png"
+        src="/bitcom-03.png"
         alt="logo"
       ></img>
       <Accordion
@@ -103,63 +106,62 @@ export default function CompanySidenav(props: { companyId: string }) {
             <SidenavSeparator>General </SidenavSeparator>
           </AccordionTrigger>
           <AccordionContent>
-            <SidenavItem
-              icon={<LayoutDashboardIcon />}
-              href={`/dashboard/${props.companyId}/general`}
-            >
+            <SidenavItem icon={<LayoutDashboardIcon />} href={`/dashboard`}>
               Dashboard
             </SidenavItem>
           </AccordionContent>
         </AccordionItem>
-        <AccordionItem value="item-3" className="border-none">
-          <AccordionTrigger
-            className={
-              isActive("Administracion")
-                ? "rounded-lg bg-[#1bdfb7] px-1 py-1.5 hover:no-underline"
-                : "rounded-lg px-1 py-1.5 hover:no-underline"
-            }
-          >
-            <SidenavSeparator>Administracion</SidenavSeparator>
-          </AccordionTrigger>
-          <AccordionContent>
-            <SidenavItem
-              href={`/dashboard/${props.companyId}/administration/companies`}
-              icon={<BriefcaseBusiness />}
+        {isAdmin && (
+          <AccordionItem value="item-3" className="border-none">
+            <AccordionTrigger
+              className={
+                isActive("Administracion")
+                  ? "rounded-lg bg-[#1bdfb7] px-1 py-1.5 hover:no-underline"
+                  : "rounded-lg px-1 py-1.5 hover:no-underline"
+              }
             >
-              Compañias
-            </SidenavItem>
-            <SidenavItem
-              href={`/dashboard/${props.companyId}/administration/products`}
-              icon={<Package />}
-            >
-              Productos
-            </SidenavItem>
-            <SidenavItem
-              href={`/dashboard/${props.companyId}/administration/channels`}
-              icon={<Sliders />}
-            >
-              Canales
-            </SidenavItem>
-            <SidenavItem
-              href={`/dashboard/${props.companyId}/administration/brands`}
-              icon={<Tag />}
-            >
-              Marcas
-            </SidenavItem>
-            <SidenavItem
-              href={`/dashboard/${props.companyId}/administration/services`}
-              icon={<Wrench />}
-            >
-              Servicios
-            </SidenavItem>
-            <SidenavItem
-              href={`/dashboard/${props.companyId}/administration/quotes`}
-              icon={<FileText />}
-            >
-              Cotizaciones
-            </SidenavItem>
-          </AccordionContent>
-        </AccordionItem>
+              <SidenavSeparator>Administracion</SidenavSeparator>
+            </AccordionTrigger>
+            <AccordionContent>
+              <SidenavItem
+                href={`/dashboard/administration/companies`}
+                icon={<BriefcaseBusiness />}
+              >
+                Entidades
+              </SidenavItem>
+              <SidenavItem
+                href={`/dashboard/administration/products`}
+                icon={<Package />}
+              >
+                Productos
+              </SidenavItem>
+              <SidenavItem
+                href={`/dashboard/administration/channels`}
+                icon={<Sliders />}
+              >
+                Canales
+              </SidenavItem>
+              <SidenavItem
+                href={`/dashboard/administration/brands`}
+                icon={<Tag />}
+              >
+                Marcas
+              </SidenavItem>
+              <SidenavItem
+                href={`/dashboard/administration/services`}
+                icon={<Wrench />}
+              >
+                Servicios
+              </SidenavItem>
+              <SidenavItem
+                href={`/dashboard/administration/quotes`}
+                icon={<FileText />}
+              >
+                Cotizaciones
+              </SidenavItem>
+            </AccordionContent>
+          </AccordionItem>
+        )}
         <AccordionItem value="item-2" className="border-none">
           <AccordionTrigger
             className={
@@ -171,22 +173,16 @@ export default function CompanySidenav(props: { companyId: string }) {
             <SidenavSeparator>Mantenimiento</SidenavSeparator>
           </AccordionTrigger>
           <AccordionContent>
-            <SidenavItem
-              icon={<User />}
-              href={`/dashboard/${props.companyId}/maintenance/user`}
-            >
+            <SidenavItem icon={<User />} href={`/dashboard/maintenance/user`}>
               Usuarios
             </SidenavItem>
             <SidenavItem
               icon={<Shield />}
-              href={`/dashboard/${props.companyId}/maintenance/roles`}
+              href={`/dashboard/maintenance/roles`}
             >
               Roles
             </SidenavItem>
-            <SidenavItem
-              icon={<Grid />}
-              href={`/dashboard/${props.companyId}/maintenance/tables`}
-            >
+            <SidenavItem icon={<Grid />} href={`/dashboard/maintenance/tables`}>
               Tablas
             </SidenavItem>
           </AccordionContent>
@@ -216,37 +212,37 @@ export default function CompanySidenav(props: { companyId: string }) {
                 <AccordionContent>
                   <SidenavItem
                     icon={<UserPlus />}
-                    href={`/dashboard/${props.companyId}/management/sales/advisors`}
+                    href={`/dashboard/management/sales/advisors`}
                   >
                     Asesores
                   </SidenavItem>
                   <SidenavItem
                     icon={<FilePlus />}
-                    href={`/dashboard/${props.companyId}/management/sales/procedures`}
+                    href={`/dashboard/management/sales/procedures`}
                   >
                     Tramites
                   </SidenavItem>
                   <SidenavItem
                     icon={<MapPin />}
-                    href={`/dashboard/${props.companyId}/management/sales/plans`}
+                    href={`/dashboard/management/sales/plans`}
                   >
                     Planes
                   </SidenavItem>
                   <SidenavItem
                     icon={<BarChart2 />}
-                    href={`/dashboard/${props.companyId}/management/sales/differentials`}
+                    href={`/dashboard/management/sales/differentials`}
                   >
                     Diferenciales
                   </SidenavItem>
                   <SidenavItem
                     icon={<DollarSign />}
-                    href={`/dashboard/${props.companyId}/management/sales/comissions`}
+                    href={`/dashboard/management/sales/comissions`}
                   >
                     Comisiones
                   </SidenavItem>
                   <SidenavItem
                     icon={<Percent />}
-                    href={`/dashboard/${props.companyId}/management/sales/bonuses`}
+                    href={`/dashboard/management/sales/bonuses`}
                   >
                     Bonificaciones
                   </SidenavItem>
@@ -267,13 +263,13 @@ export default function CompanySidenav(props: { companyId: string }) {
                 <AccordionContent>
                   <SidenavItem
                     icon={<UserRound />}
-                    href={`/dashboard/${props.companyId}/management/client/affiliates`}
+                    href={`/dashboard/management/client/affiliates`}
                   >
                     Afiliados
                   </SidenavItem>
                   <SidenavItem
                     icon={<Users />}
-                    href={`/dashboard/${props.companyId}/management/client/health_insurances`}
+                    href={`/dashboard/management/client/health_insurances`}
                   >
                     Obras sociales
                   </SidenavItem>
@@ -295,31 +291,31 @@ export default function CompanySidenav(props: { companyId: string }) {
                 <AccordionContent>
                   <SidenavItem
                     icon={<Bell />}
-                    href={`/dashboard/${props.companyId}/management/suppliers/abm`}
+                    href={`/dashboard/management/suppliers/abm`}
                   >
                     ABM Proveedores
                   </SidenavItem>
                   <SidenavItem
                     icon={<Archive />}
-                    href={`/dashboard/${props.companyId}/management/suppliers/comprobants-upload`}
+                    href={`/dashboard/management/suppliers/comprobants-upload`}
                   >
                     Alta Comprobantes
                   </SidenavItem>
                   <SidenavItem
                     icon={<Folder />}
-                    href={`/dashboard/${props.companyId}/management/suppliers/currentAcounts`}
+                    href={`/dashboard/management/suppliers/currentAcounts`}
                   >
                     Cuentas Corrientes de Proveedores
                   </SidenavItem>
                   <SidenavItem
                     icon={<Globe />}
-                    href={`/dashboard/${props.companyId}/management/suppliers/due_dates`}
+                    href={`/dashboard/management/suppliers/due_dates`}
                   >
                     Agenda de vencimientos
                   </SidenavItem>
                   <SidenavItem
                     icon={<Heart />}
-                    href={`/dashboard/${props.companyId}/management/suppliers/orders`}
+                    href={`/dashboard/management/suppliers/orders`}
                   >
                     Ordenes de Pago
                   </SidenavItem>
@@ -340,25 +336,25 @@ export default function CompanySidenav(props: { companyId: string }) {
                 <AccordionContent>
                   <SidenavItem
                     icon={<CloudUpload />}
-                    href={`/dashboard/${props.companyId}/management/documents/massive-upload`}
+                    href={`/dashboard/management/documents/massive-upload`}
                   >
                     Carga Masiva
                   </SidenavItem>
                   <SidenavItem
                     icon={<Cloud />}
-                    href={`/dashboard/${props.companyId}/management/documents/rec-upload`}
+                    href={`/dashboard/management/documents/rec-upload`}
                   >
                     Carga REC
                   </SidenavItem>
                   <SidenavItem
                     icon={<CloudDownload />}
-                    href={`/dashboard/${props.companyId}/management/documents/output`}
+                    href={`/dashboard/management/documents/output`}
                   >
                     Archivos de salida
                   </SidenavItem>
                   <SidenavItem
                     icon={<MessageCircle />}
-                    href={`/dashboard/${props.companyId}/management/documents/response`}
+                    href={`/dashboard/management/documents/response`}
                   >
                     Respuesta
                   </SidenavItem>
@@ -380,32 +376,26 @@ export default function CompanySidenav(props: { companyId: string }) {
           </AccordionTrigger>
           <AccordionContent>
             <SidenavItem
-              href={`/dashboard/${props.companyId}/audit/administrative`}
+              href={`/dashboard/audit/administrative`}
               icon={<Clipboard />}
             >
               Administrativo
             </SidenavItem>
-            <SidenavItem
-              href={`/dashboard/${props.companyId}/audit/medical`}
-              icon={<Activity />}
-            >
+            <SidenavItem href={`/dashboard/audit/medical`} icon={<Activity />}>
               Medico
             </SidenavItem>
 
-            <SidenavItem
-              href={`/dashboard/${props.companyId}/audit/benefits`}
-              icon={<Gift />}
-            >
+            <SidenavItem href={`/dashboard/audit/benefits`} icon={<Gift />}>
               Beneficios por prestaciones
             </SidenavItem>
             <SidenavItem
-              href={`/dashboard/${props.companyId}/audit/fixed_eventual`}
+              href={`/dashboard/audit/fixed_eventual`}
               icon={<Calendar />}
             >
               Eventuales/Fijos
             </SidenavItem>
             <SidenavItem
-              href={`/dashboard/${props.companyId}/audit/operations`}
+              href={`/dashboard/audit/operations`}
               icon={<Settings />}
             >
               Operaciones
@@ -426,32 +416,29 @@ export default function CompanySidenav(props: { companyId: string }) {
           <AccordionContent>
             <SidenavItem
               icon={<FilePlus />}
-              href={`/dashboard/${props.companyId}/billing/manual_issuance`}
+              href={`/dashboard/billing/manual_issuance`}
             >
               Generar manual
             </SidenavItem>
             <SidenavItem
               icon={<Clock />}
-              href={`/dashboard/${props.companyId}/billing/pre-liquidation`}
+              href={`/dashboard/billing/pre-liquidation`}
             >
               Pre-Liquidacion
             </SidenavItem>
             <SidenavItem
               icon={<CreditCard />}
-              href={`/dashboard/${props.companyId}/billing/liquidation`}
+              href={`/dashboard/billing/liquidation`}
             >
               Liquidacion
             </SidenavItem>
             <SidenavItem
               icon={<HelpCircle />}
-              href={`/dashboard/${props.companyId}/billing/information`}
+              href={`/dashboard/billing/information`}
             >
               Informacion
             </SidenavItem>
-            <SidenavItem
-              icon={<Search />}
-              href={`/dashboard/${props.companyId}/billing/consults`}
-            >
+            <SidenavItem icon={<Search />} href={`/dashboard/billing/consults`}>
               Consultas
             </SidenavItem>
           </AccordionContent>
@@ -469,19 +456,19 @@ export default function CompanySidenav(props: { companyId: string }) {
           <AccordionContent>
             <SidenavItem
               icon={<Database />}
-              href={`/dashboard/${props.companyId}/treasury/current_count`}
+              href={`/dashboard/treasury/current_count`}
             >
               Cuenta Corriente
             </SidenavItem>
             <SidenavItem
               icon={<Hand />}
-              href={`/dashboard/${props.companyId}/treasury/collection`}
+              href={`/dashboard/treasury/collection`}
             >
               Cobranzas
             </SidenavItem>
             <SidenavItem
               icon={<Wallet />}
-              href={`/dashboard/${props.companyId}/treasury/payments`}
+              href={`/dashboard/treasury/payments`}
             >
               Pagos
             </SidenavItem>

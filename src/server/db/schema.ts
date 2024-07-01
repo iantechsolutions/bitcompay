@@ -145,6 +145,7 @@ export const payments = pgTable(
     factura_id: varchar("factura_id", { length: 255 }).references(
       () => facturas.id
     ),
+    recollected_amount: real("recollected_amount"),
   },
   (payments) => ({
     userIdIdx: index("payment_userId_idx").on(payments.userId),
@@ -185,6 +186,10 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
   factura: one(facturas, {
     fields: [payments.factura_id],
     references: [facturas.id],
+  }),
+  channel: one(channels, {
+    fields: [payments.payment_channel],
+    references: [channels.id],
   }),
 }));
 
@@ -228,6 +233,9 @@ export const companies = pgTable(
     certificate: varchar("certificate"),
     cuit: varchar("cuit"),
     razon_social: varchar("razon_social"),
+    address: varchar("address"),
+    afip_condition: varchar("afip_condition"),
+    activity_start_date: timestamp("activity_start_date", { mode: "date" }),
     createdAt,
     updatedAt,
   },
@@ -463,14 +471,14 @@ export const plans = pgTable("plans", {
   id: columnId,
   user: varchar("user", { length: 255 }).notNull(),
   createdAt,
-  validy_date: timestamp("vigency_date").notNull(),
+  // validy_date: timestamp("vigency_date").notNull(),
   plan_code: varchar("plan_code", { length: 255 }).notNull(),
   description: varchar("description", { length: 255 }).notNull(),
   brand_id: varchar("brand_id", { length: 255 }).references(() => brands.id),
 });
 
 export const plansRelations = relations(plans, ({ many, one }) => ({
-  pricesPerAge: many(pricePerAge),
+  pricesPerCondition: many(pricePerCondition),
   brands: one(brands, {
     fields: [plans.brand_id],
     references: [brands.id],
@@ -507,6 +515,9 @@ export const bussinessUnitsRelations = relations(
 
 export const healthInsurances = pgTable("health_insurances", {
   id: columnId,
+  companyId: varchar("companyId", { length: 255 }).references(
+    () => companies.id
+  ),
   name: varchar("name", { length: 255 }).notNull(),
   identificationNumber: varchar("identificationNumber", { length: 255 }),
 });
@@ -708,6 +719,7 @@ export const differentialsValuesRelations = relations(
 
 export const facturas = pgTable("facturas", {
   id: columnId,
+  createdAt,
   generated: timestamp("generated", { mode: "date" }),
   ptoVenta: integer("ptoVenta").notNull(),
   nroFactura: integer("nroFactura").notNull(),
@@ -780,6 +792,7 @@ export const items = pgTable("items", {
   id: columnId,
   abono: real("abono"),
   differential_amount: real("differential_amount"),
+  account_payment: real("account_payment"),
   bonificacion: real("bonificacion"),
   interest: real("interest"),
   contribution: real("contribution"),
@@ -879,6 +892,9 @@ export const procedure = pgTable("procedure", {
   type: varchar("type", { length: 255 }),
   estado: varchar("estado", { length: 255 }).notNull(),
   family_group: varchar("family_group"),
+  companyId: varchar("companyId", { length: 255 })
+    .notNull()
+    .references(() => companies.id),
 });
 
 export const ProcedureRelations = relations(procedure, ({ many }) => ({
@@ -992,6 +1008,7 @@ export const liquidations = pgTable("liquidations", {
   pdv: integer("pdv").notNull(),
   period: timestamp("period", { mode: "date" }),
   number: integer("number").notNull(),
+  interest: real("interest"),
   bussinessUnits_id: varchar("bussinessUnits_id", { length: 255 }).references(
     () => bussinessUnits.id
   ),
@@ -1079,10 +1096,11 @@ export const excelBillingSchemaDB = selectExcelBillingSchema.pick({
 });
 export type ExcelBilling = z.infer<typeof selectExcelBillingSchema>;
 
-export const pricePerAge = pgTable("pricePerAge", {
+export const pricePerCondition = pgTable("pricePerCondition", {
   id: columnId,
   validy_date: timestamp("vigency_date").notNull(),
-  age: integer("age"),
+  from_age: integer("from_age"),
+  to_age: integer("to_age"),
   condition: varchar("condition"),
   createdAt,
   isAmountByAge: boolean("isAmountByAge").notNull(),
@@ -1090,17 +1108,23 @@ export const pricePerAge = pgTable("pricePerAge", {
   amount: real("amount").notNull(),
 });
 
-export const pricePerAgeRelations = relations(pricePerAge, ({ one, many }) => ({
-  plans: one(plans, {
-    fields: [pricePerAge.plan_id],
-    references: [plans.id],
-  }),
-}));
+export const pricePerConditionRelations = relations(
+  pricePerCondition,
+  ({ one, many }) => ({
+    plans: one(plans, {
+      fields: [pricePerCondition.plan_id],
+      references: [plans.id],
+    }),
+  })
+);
 
-export const insertpricePerAgeSchema = createInsertSchema(pricePerAge);
-export const selectpricePerAgeSchema = createSelectSchema(pricePerAge);
-export const pricePerAgeSchemaDB = selectpricePerAgeSchema.pick({
-  age: true,
+export const insertpricePerConditionSchema =
+  createInsertSchema(pricePerCondition);
+export const selectpricePerConditionSchema =
+  createSelectSchema(pricePerCondition);
+export const pricePerConditionSchemaDB = selectpricePerConditionSchema.pick({
+  from_age: true,
+  to_age: true,
   condition: true,
   isAmountByAge: true,
   amount: true,
@@ -1108,7 +1132,7 @@ export const pricePerAgeSchemaDB = selectpricePerAgeSchema.pick({
   createdAt: true,
   validy_date: true,
 });
-export type pricePerAge = z.infer<typeof selectpricePerAgeSchema>;
+export type pricePerCondition = z.infer<typeof selectpricePerConditionSchema>;
 
 export const currentAccount = pgTable("currentAccount", {
   id: columnId,
@@ -1153,8 +1177,8 @@ export const eventsRelations = relations(events, ({ one }) => ({
 export const postal_code = pgTable("postalcodes", {
   id: columnId,
   name: varchar("name", { length: 255 }).notNull(),
-  cp: varchar("cp", { length: 255 }),
-  zone: varchar("zone", { length: 255 }),
+  cp: varchar("cp", { length: 255 }).notNull(),
+  zone: varchar("zone", { length: 255 }).notNull(),
 });
 
 export const postal_codeRelations = relations(postal_code, ({ many }) => ({

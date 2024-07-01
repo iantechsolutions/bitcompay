@@ -20,8 +20,10 @@ export const liquidationsRouter = createTRPCRouter({
                     where: eq(schema.integrants.isBillResponsible, true),
                   },
                   plan: true,
+                  cc: true,
                 },
               },
+              liquidations: true,
             },
           },
           bussinessUnits: true,
@@ -45,6 +47,7 @@ export const liquidationsRouter = createTRPCRouter({
         periodo: z.date(),
         cuit: z.string(),
         pdv: z.number(),
+        interest: z.number().optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -57,6 +60,7 @@ export const liquidationsRouter = createTRPCRouter({
         cuit: input.cuit,
         pdv: input.pdv,
         number: 1,
+        interest: input.interest ?? 0,
       });
       return new_liquidation;
     }),

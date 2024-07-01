@@ -13,6 +13,8 @@ import {
 import { error } from "console";
 import { calcularEdad } from "~/lib/utils";
 
+export const maxDuration = 300;
+export const dynamic = "force-dynamic";
 export const excelDeserializationRouter = createTRPCRouter({
   upload: protectedProcedure
     .input(
@@ -32,10 +34,9 @@ export const excelDeserializationRouter = createTRPCRouter({
       z.object({
         type: z.literal("rec"),
         id: z.string(),
-        companyId: z.string(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const contents = await readExcelFile(db, input.id, input.type);
       //agregar a readExcel verificacion de columnas obligatorias.
 
@@ -47,10 +48,9 @@ export const excelDeserializationRouter = createTRPCRouter({
       z.object({
         type: z.literal("rec"),
         uploadId: z.string(),
-        companyId: z.string(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const familyGroupMap = new Map<string | null, string>();
       const contents = await readExcelFile(db, input.uploadId, input.type);
       await db.transaction(async (db) => {
@@ -66,7 +66,7 @@ export const excelDeserializationRouter = createTRPCRouter({
           const plan = await db.query.plans.findFirst({
             where: eq(schema.plans.plan_code, row.plan!),
             with: {
-              pricesPerAge: true,
+              pricesPerCondition: true,
             },
           });
 
@@ -92,6 +92,7 @@ export const excelDeserializationRouter = createTRPCRouter({
               .values({
                 type: "alta",
                 estado: "finalizado",
+                companyId: ctx.session.orgId!,
               })
               .returning();
             console.log("creando grupo familiar");
@@ -201,7 +202,7 @@ export const excelDeserializationRouter = createTRPCRouter({
               isBillResponsible: row.isPaymentResponsible == true,
               age: age,
               family_group_id: familyGroupId,
-              affiliate_number: row.affiliate_number,
+              affiliate_number: row.affiliate_number?.toString(),
               extention: " ",
               postal_codeId: postal_code_schema?.id,
               health_insuranceId: health_insurance?.id,
@@ -228,16 +229,45 @@ export const excelDeserializationRouter = createTRPCRouter({
           });
           if (row.differential_value) {
             const ageN = calcularEdad(row.birth_date ?? new Date());
-            const precioIntegrante =
-              plan?.pricesPerAge.find((p) => {
-                if (row.relationship) {
-                  return p.condition == row.relationship;
-                } else {
-                  return p.age == ageN;
-                }
-              })?.amount ?? 0;
+            const preciosPasados = plan?.pricesPerCondition.filter(
+              (price) => price.validy_date.getTime() <= new Date().getTime()
+            );
+            preciosPasados?.sort(
+              (a, b) => b.validy_date.getTime() - a.validy_date.getTime()
+            );
+            let precioIntegrante = 0;
+            console.log("precios pasados");
+            if (preciosPasados) {
+              const vigente = preciosPasados[0]?.validy_date;
+              console.log("vigente", vigente);
+              precioIntegrante =
+                plan?.pricesPerCondition
+                  ?.filter(
+                    (x) => x.validy_date.getTime() === vigente?.getTime()
+                  )
+                  .find(
+                    (x) => row.relationship && x.condition == row.relationship
+                  )?.amount ?? 0;
+              console.log("precioIntegrante", precioIntegrante);
+              if (precioIntegrante === 0) {
+                precioIntegrante =
+                  plan?.pricesPerCondition
+                    ?.filter(
+                      (x) => x.validy_date.getTime() === vigente?.getTime()
+                    )
+                    .find(
+                      (x) =>
+                        (x.from_age ?? 1000) <= ageN && (x.to_age ?? 0) >= ageN
+                    )?.amount ?? 0;
+              }
+              console.log("precioIntegrante", precioIntegrante);
+            }
+            console.log("row")
+            console.log(row.differential_value);
+            console.log(precioIntegrante);
             const precioDiferencial =
               parseFloat(row.differential_value!) / precioIntegrante;
+            console.log("precioDiferencial", precioDiferencial);
             const differentialValue = await db
               .insert(schema.differentialsValues)
               .values({
@@ -252,11 +282,11 @@ export const excelDeserializationRouter = createTRPCRouter({
             });
 
             await db.insert(schema.pa).values({
-              card_number: row.card_number!,
-              CBU: row.cbu!,
+              card_number: row.card_number?.toString() ?? null,
+              CBU: row.cbu,
               new_registration: row.is_new ?? false,
               integrant_id: new_integrant[0]!.id,
-              product_id: product!.id!,
+              product_id: product?.id,
               // CBU: row.cbu_number!,
               card_brand: row.card_brand ?? null,
               card_type: row.card_type ?? null,
@@ -265,14 +295,12 @@ export const excelDeserializationRouter = createTRPCRouter({
               // product: product?.id,
             });
           }
-          const employeeContribution = parseFloat(row.contribution!);
-          const employerContribution =
-            (parseFloat(row.contribution!) / 3) * 7.038;
+          const contribution = parseFloat(row.contribution!);
           console.log("creando aportes");
           await db.insert(schema.contributions).values({
-            employeeContribution: employeeContribution,
-            employerContribution: employerContribution,
-            amount: employeeContribution + employerContribution,
+            employeeContribution: 0,
+            employerContribution: contribution,
+            amount: contribution,
             integrant_id: new_integrant[0]!.id,
             cuitEmployer: " ", //a rellenar
           });
@@ -296,7 +324,12 @@ function isKeyPresent(
   return dictionary.has(key ?? "");
 }
 
-async function readExcelFile(db: DBTX, id: string, type: string | undefined) {
+async function readExcelFile(
+  db: DBTX,
+  id: string,
+  type: string | undefined,
+  batchSize = 100
+) {
   const upload = await db.query.excelBilling.findFirst({
     where: eq(schema.excelBilling.id, id),
   }); // aca se cambia por la tabla correcta despues

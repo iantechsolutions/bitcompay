@@ -5,7 +5,6 @@ export const PlanSchema = z.object({
   id: z.string().max(255).optional(),
   user: z.string().max(255).optional(),
   // createdAt: stringAsDate,
-  validy_date: stringAsDate,
   plan_code: z
     .string()
     .max(255, { message: "ingrese un código de plan válido" }),

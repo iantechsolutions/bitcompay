@@ -10,7 +10,9 @@ import { Integrant } from "./integrant-router";
 import { currentUser } from "@clerk/nextjs/server";
 import { Brand } from "./brands-router";
 import { RouterOutputs } from "~/trpc/shared";
-import { calcularEdad } from "~/lib/utils";
+import { calcularEdad, formatDate, htmlBill, ingresarAfip } from "~/lib/utils";
+import { utapi } from "~/server/uploadthing";
+import { id } from "date-fns/locale";
 
 function formatDateAFIP(date: Date | undefined) {
   if (date) {
@@ -23,22 +25,6 @@ function formatDateAFIP(date: Date | undefined) {
   return null;
 }
 
-export async function ingresarAfip() {
-  const taxId = 23439214619;
-  const cert =
-    "-----BEGIN CERTIFICATE-----\nMIIDQzCCAiugAwIBAgIIBDcBTy1RV9IwDQYJKoZIhvcNAQENBQAwMzEVMBMGA1UEAwwMQ29tcHV0\nYWRvcmVzMQ0wCwYDVQQKDARBRklQMQswCQYDVQQGEwJBUjAeFw0yNDA1MTQxMjQ1NTZaFw0yNjA1\nMTQxMjQ1NTZaMC4xETAPBgNVBAMMCGFmaXBzZGsyMRkwFwYDVQQFExBDVUlUIDIzNDM5MjE0NjE5\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAv2gtWDrfV7m9Lz1dYFimDivBff/UCrBB\nQHUuREfIcwL3cs0TDQ075Nk6GyPIIclvVBAUrIXHNDAEgLM3uxY/eSNO/kL9OpjTbleSNUxPyfZz\nwbFsS93ZZb37iA72J2ffgS8TRT9q0tiDnx5dUBv+lVIBliwbxGR6qgEGvgLwZHy7oSKfiYXV8vuc\n+Dt5kNbBVEZTyYyhSMYrM80TcStVrMYuFAz4GJiJRR3g258tJAVARB2KU6tNdaeZ/dmkFzQF/kL8\n9SsIVXEj/8HuLK1qNPoY/qIyD35xqlBW5VYeQMlqRC87V/eKWXUCQM/O+wett6QzB4OGYwBwZYsE\nMNFqWQIDAQABo2AwXjAMBgNVHRMBAf8EAjAAMB8GA1UdIwQYMBaAFCsNL8jfYf0IyU4R0DWTBG2O\nW9BuMB0GA1UdDgQWBBSqnCsGiIw8kqJgF80pSpuLASPB/zAOBgNVHQ8BAf8EBAMCBeAwDQYJKoZI\nhvcNAQENBQADggEBAJQMwlkuNIan9Em48HBUG03glquZsyF74uWLwBAXJ5KAoWHJDU8k1nsRLmw4\n4qw0jWpDPBX1kTvdYVq2412lndnXCdoBiOCjBibwApylqV3pZGyHDTfhWEYBBF+0TOLB/w2FVhSk\n7mbtmWTZ8twqJtORuBbolkM1QTWVuFCWRHX2wSINnjP23NxnLIf6CTJKdMUsAZ7YxAubuWIw3IYd\nGASuLrUCpAlyrA1jpGa3k1vBgTawt/9vWMrbX9uumefFRTM38xB+JPlIY5pN1vEOTreVfAyK7MGR\n1IH2RXkvV3n+YJkj+pcQZG5xOuYuLdeuki4jPy7Q/i3DlAhRYDONgDI=\n-----END CERTIFICATE-----";
-  const key =
-    "-----BEGIN RSA PRIVATE KEY-----\r\nMIIEpQIBAAKCAQEAv2gtWDrfV7m9Lz1dYFimDivBff/UCrBBQHUuREfIcwL3cs0T\r\nDQ075Nk6GyPIIclvVBAUrIXHNDAEgLM3uxY/eSNO/kL9OpjTbleSNUxPyfZzwbFs\r\nS93ZZb37iA72J2ffgS8TRT9q0tiDnx5dUBv+lVIBliwbxGR6qgEGvgLwZHy7oSKf\r\niYXV8vuc+Dt5kNbBVEZTyYyhSMYrM80TcStVrMYuFAz4GJiJRR3g258tJAVARB2K\r\nU6tNdaeZ/dmkFzQF/kL89SsIVXEj/8HuLK1qNPoY/qIyD35xqlBW5VYeQMlqRC87\r\nV/eKWXUCQM/O+wett6QzB4OGYwBwZYsEMNFqWQIDAQABAoIBAQCQFCct5wL/0fyq\r\ndpK3V4OH30ADTHOcqBg2IP72vuIQUQdbDytsA642EZ4/l6uqYyq+KGyngPv2OL7q\r\n8fzdg128Hev0URC07x0YTirsm8jjyfRQtPFEGnbusxeHz1tTRkljwL/MvHP4yqop\r\nOH4dMzVryRMQq5srNkdveN5OYX/64uxGM2uM+ZVXtMb7ve4KX5GZKCt2fyEC5ZTJ\r\n/B2i/by7NJtm3+VtiVrifi3U2oxjQ0Es1j9COBEWY8JtpIZw9PoP93Hb/zliipJW\r\nXRC6UGd7aF4KOi2vIt619dTD/jsRSweidNGluGdVfHkwQ2BIuLzepA4IU1Z6UKX2\r\nmu2NPXCRAoGBAN7zoRJmNeLf/i0xWHSkyhC3kKgV0wvICbXYVAFBCBEnM2p7Kx7v\r\nyIzQCg+qFtdqSh8Xv1hgo5hFP5QbiavCRbJa+Jb8ZPsqrmEhrE5HYoPamjRuSRi+\r\nzcH43O21fAX/eMhFl5g60i0svMP4hqhcVqli26Lt8iwvyKb83squ6c6XAoGBANvH\r\nhD2dVrRRcBC5+JOrJ2JKgGIqcX8TD9JKQqsHX6bytVUL4aOebgJqXHIBZPU8cRCx\r\nB+1dX5O8fjqkUNIWzq1IqAZtwZopjp1AGoctSzj9J3zYyjoK7AWaeDuyu2ZIzCef\r\nVat8k9Q1RdCovfhfQHZlV84+zJ7l8WWx0SFdpZyPAoGBAI5Mh2C79ebBOnTTyvZf\r\n+0xiLSTrERGy8merFCrcu+5ey9VJmcMcHi+p1NIcqImDIJ3pxUn+HExi3mqEjQEg\r\ndOWaZJHRtA4PNs9t85DexQUNMGEIhwUROzhzw2bA79DQNuH0cQZLfLwykqSt6hxp\r\nGzLvkunR30DOms3iFbzdmQMvAoGBAL/wP9JbnYQ+9yL0d13nhK63p+WTcalr6U5b\r\nIlwhRW0U3D5Y8Qcm7qZXY0MBar0tuwS7xtOKz1TDsm3eYOMJnhgBsxRiOEk9b9pv\r\nSHuzl9U+aYUEA6CrNzMxkz13u2f5vaoA4h2w353dpIo1RCssbKy5lvR9LdC7upV4\r\ntM5x7ZeLAoGAYs2nPABoUPrqKTOZmZg2ob0LKFnSxzFYNrxnIxyJN4CPbg5WJNFK\r\nUwOzB1oOezdIKBJ2eO7tidTa3DJ4HuMqvyChlnmQfL/98jCnnkwnVXldEfWwrKs/\r\npPiKvjFCOZROnwm3PhTfZtEi3Lpn6GNIy7rjl7eFOxgGGNCMkx34ehY=\r\n-----END RSA PRIVATE KEY-----\r\n";
-  const afip = new Afip({
-    access_token:
-      "sjqzE9JPiq9EtrWQR0MSYjehQHlYGPLn7vdAEun9ucUQQiZ6gWV9xMJVwJd5aaSy",
-    CUIT: taxId,
-    cert: cert,
-    key: key,
-    production: true,
-  });
-  return afip;
-}
 type Bonus = {
   id: string;
   appliedUser: string;
@@ -51,14 +37,14 @@ type Bonus = {
 
 type grupoCompleto = RouterOutputs["facturas"]["getGruposByBrandId"][number];
 
-const ivaDictionary = {
-  "0%": 3,
-  "10.5%": 4,
-  "21%": 5,
-  "27%": 6,
-  "5%": 8,
-  "2.5%": 9,
-  "": 0,
+const ivaDictionary: { [key: number]: string } = {
+  3: "0",
+  4: "10.5",
+  5: "21",
+  6: "27",
+  8: "5",
+  9: "2.5",
+  0: "",
 };
 
 const conceptDictionary = {
@@ -188,6 +174,16 @@ async function approbateFactura(liquidationId: string) {
       .update(schema.liquidations)
       .set({ estado: "aprobada", userApproved: user?.id })
       .where(eq(schema.liquidations.id, liquidationId));
+    const afip = await ingresarAfip();
+    let last_voucher;
+    try {
+      last_voucher = await afip.ElectronicBilling.getLastVoucher(
+        liquidation.facturas[0]?.ptoVenta,
+        liquidation.facturas[0]?.tipoFactura
+      );
+    } catch {
+      last_voucher = 0;
+    }
     for (let factura of liquidation?.facturas) {
       const randomNumber =
         Math.floor(Math.random() * (100000 - 1000 + 1)) + 1000;
@@ -231,6 +227,69 @@ async function approbateFactura(liquidationId: string) {
         })
         .returning();
 
+      const fecha = new Date(
+        Date.now() - new Date().getTimezoneOffset() * 60000
+      )
+        .toISOString()
+        .split("T")[0];
+      const data = {
+        CantReg: 1, // Cantidad de facturas a registrar
+        PtoVta: factura?.ptoVenta,
+        CbteTipo: factura?.tipoFactura,
+        Concepto: Number(factura?.concepto),
+        DocTipo: factura?.tipoDocumento,
+        DocNro: factura?.nroDocumento,
+        CbteDesde: last_voucher + 1,
+        CbteHasta: last_voucher + 1,
+        CbteFch: parseInt(fecha?.replace(/-/g, "") ?? ""),
+        FchServDesde: formatDate(factura?.fromPeriod ?? new Date()),
+        FchServHasta: formatDate(factura?.toPeriod ?? new Date()),
+        FchVtoPago: formatDate(factura?.due_date ?? new Date()),
+        ImpTotal: factura?.importe,
+        ImpTotConc: 0, // Importe neto no gravado
+        ImpNeto: (Number(factura?.importe) * 1).toString(),
+        ImpOpEx: 0,
+        ImpIVA: 0,
+        ImpTrib: 0,
+        MonId: "PES",
+        MonCotiz: 1,
+        // Iva: {
+        //   Id: 5,
+        //   BaseImp: importe,
+        //   Importe: (Number(importe) * 0, 21).toString(),
+        // },
+      };
+      const html = htmlBill(
+        factura,
+        factura.family_group?.businessUnitData!.company,
+        producto,
+        last_voucher + 1
+      );
+      last_voucher += 1;
+      const name = `FAC${factura.nroFactura}.pdf`; // NOMBRE
+      const options = {
+        width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
+        marginLeft: 0.8, // Margen izquierdo en pulgadas. Usar 0.1 para ticket
+        marginRight: 0.8, // Margen derecho en pulgadas. Usar 0.1 para ticket
+        marginTop: 0.4, // Margen superior en pulgadas. Usar 0.1 para ticket
+        marginBottom: 0.4, // Margen inferior en pulgadas. Usar 0.1 para ticket
+      };
+
+      //MANDAMOS PDF A AFIP, hay que agregar el qr al circuito, y levantar resHtml, por que actualmente solo se logea
+      const resHtml = await afip.ElectronicBilling.createPDF({
+        html: html,
+        file_name: name,
+        options: options,
+      });
+
+      console.log("resHtml", resHtml);
+      await db
+        .update(schema.facturas)
+        .set({
+          billLink: resHtml.file,
+        })
+        .where(eq(schema.facturas.id, factura.id));
+
       const historicEvents = await db.query.events.findMany({
         where: eq(schema.events.currentAccount_id, cc?.id ?? ""),
       });
@@ -264,60 +323,73 @@ async function approbateFactura(liquidationId: string) {
 }
 
 async function preparateFactura(
-  afip: Afip,
   grupos: grupoCompleto[],
   dateDesde: Date | undefined,
   dateHasta: Date | undefined,
   dateVencimiento: Date | undefined,
   pv: string,
-  brandId: string,
-  companyId: string,
-  liquidationId: string
+  liquidationId: string,
+  interes: number
 ) {
   const user = await currentUser();
 
-  grupos.forEach(async (grupo) => {
+  for (let i = 0; i < grupos.length; i++) {
+    const grupo = grupos[i];
+    if (grupo){
     const billResponsible = grupo.integrants.find(
       (integrant) => integrant.isBillResponsible
     );
     console.log("variables grupo");
-    const ivaFloat =
-      (100 + parseFloat(grupo.businessUnitData?.brand?.iva ?? "0")) / 100;
+    const iva = ivaDictionary[Number(grupo.businessUnitData?.brand?.iva) ?? 3];
+    const ivaFloat = (100 + parseFloat(iva ?? "0")) / 100;
     console.log(ivaFloat);
-    const abono = await getGroupAmount(grupo);
+    const abono = await getGroupAmount(grupo, dateDesde!);
     console.log(abono);
     const bonificacion =
       (parseFloat(
-        grupo.bonus?.find((x) => x.from && x.from <= new Date() && x.to && x.to >= new Date())
-          ?.amount ?? "0"
+        grupo.bonus?.find((x) => {
+          if (x.from == null || x.to == null) return x;
+          return x.from <= new Date() && x.to >= new Date();
+        })?.amount ?? "0"
       ) *
         abono) /
       100;
     console.log(bonificacion);
-    const interest = 0;
-    const contribution = await getGroupContribution(grupo);
 
+    const contribution = await getGroupContribution(grupo);
+    console.log("contribution");
+    console.log(contribution);
     const differential_amount = await getDifferentialAmount(grupo);
 
-    let mostRecentEvent;
-    if (grupo.cc && grupo.cc?.events.length > 0) {
-      mostRecentEvent = grupo.cc?.events.reduce((prev, current) => {
-        return new Date(prev.createdAt) > new Date(current.createdAt)
+    let mostRecentFactura;
+    let previous_bill = 0;
+    let account_payment = 0;
+    if (grupo?.facturas.length > 0) {
+      mostRecentFactura = grupo.facturas?.reduce((prev, current) => {
+        return prev.createdAt.getTime() > current.createdAt.getTime()
           ? prev
           : current;
       });
     } else {
-      mostRecentEvent = null;
+      mostRecentFactura = null;
+    }
+    if (mostRecentFactura) {
+      previous_bill = mostRecentFactura.importe;
+      if (mostRecentFactura.payments.length > 0) {
+        mostRecentFactura.payments.forEach((payment) => {
+          account_payment += payment.recollected_amount ?? 0;
+        });
+      }
     }
 
-    const previous_bill = mostRecentEvent?.current_amount ?? 0;
+    if (mostRecentFactura && mostRecentFactura?.payments.length > 0) {
+    }
+    const interest = (interes / 100) * previous_bill;
     const importe =
-      (abono -
-        bonificacion +
-        differential_amount -
-        contribution -
-        previous_bill) *
-      ivaFloat;
+      (abono - bonificacion + differential_amount - contribution) * ivaFloat -
+      previous_bill -
+      interest -
+      account_payment;
     const items = await db
       .insert(schema.items)
       .values({
@@ -327,6 +399,7 @@ async function preparateFactura(
         contribution,
         interest,
         previous_bill,
+        account_payment,
       })
       .returning();
     const tipoDocumento = idDictionary[billResponsible?.fiscal_id_type ?? ""];
@@ -350,7 +423,7 @@ async function preparateFactura(
         toPeriod: dateHasta,
         due_date: dateVencimiento,
         prodName: "Servicio",
-        iva: grupo.businessUnitData?.brand?.iva ?? "",
+        iva: iva ?? "",
         billLink: "",
         liquidation_id: liquidationId,
         family_group_id: grupo.id,
@@ -361,38 +434,65 @@ async function preparateFactura(
       where: eq(schema.paymentStatus.code, "91"),
     });
     console.log("numero", producto?.number);
-  });
+  }
+}
+
   return "OK";
 }
 
-async function getGroupAmount(grupo: grupoCompleto) {
+async function getGroupAmount(grupo: grupoCompleto, date: Date) {
   let importe = 0;
-  grupo.integrants?.forEach((integrant) => {
-    if (integrant.birth_date != null) {
-      const age = calcularEdad(integrant.birth_date);
-      console.log(age);
-      console.log(integrant.relationship);
-      const precioIntegrante =
-        grupo.plan?.pricesPerAge.find((x) => {
-          if (integrant.relationship && integrant.relationship.toLowerCase()!="titular") {
-            return x.condition == integrant.relationship;
-          } else {
-            return x.age == age;
-          }
-        })?.amount ?? 0;
-      console.log(precioIntegrante);
-      importe += precioIntegrante;
-    }
-  });
+  const preciosPasados = grupo.plan?.pricesPerCondition.filter(
+    (price) => price.validy_date.getTime() <= date.getTime()
+  );
+  preciosPasados?.sort(
+    (a, b) => b.validy_date.getTime() - a.validy_date.getTime()
+  );
+  if (preciosPasados) {
+    const vigente = preciosPasados[0]?.validy_date;
+
+    const precios = grupo.plan?.pricesPerCondition.filter(
+      (x) => x.validy_date.getTime() === vigente?.getTime()
+    );
+    grupo.integrants?.forEach((integrant) => {
+      if (integrant.birth_date != null) {
+        const age = calcularEdad(integrant.birth_date);
+        console.log(age);
+        console.log(integrant.relationship);
+        let precioIntegrante = precios?.find(
+          (x) => integrant.relationship && x.condition == integrant.relationship
+        )?.amount;
+
+        if (precioIntegrante === undefined) {
+          precioIntegrante =
+            precios?.find(
+              (x) => (x.from_age ?? 1000) <= age && (x.to_age ?? 0) >= age
+            )?.amount ?? 0;
+        }
+
+        console.log(precioIntegrante);
+        importe += precioIntegrante;
+      }
+    });
+  }
+  console.log(importe);
   return importe;
 }
 
 async function getGroupContribution(grupo: grupoCompleto) {
   let importe = 0;
   grupo.integrants?.forEach((integrant) => {
-    const contributionIntegrante = integrant?.contribution?.amount ?? 0;
-    importe += contributionIntegrante;
+    if (integrant?.contribution?.amount) {
+      const contributionIntegrante = integrant?.contribution?.amount ?? 0;
+      console.log("contribution");
+      console.log(contributionIntegrante);
+      importe += contributionIntegrante;
+    } else {
+      importe += 0;
+    }
   });
+  console.log("importe");
+  console.log(importe);
   return importe;
 }
 
@@ -401,16 +501,20 @@ async function getDifferentialAmount(grupo: grupoCompleto) {
   grupo.integrants?.forEach((integrant) => {
     if (integrant.birth_date == null) return;
     const age = calcularEdad(integrant.birth_date);
-    const precioIntegrante =
-      grupo.plan?.pricesPerAge.find((x) => {
-        if (integrant.relationship) {
-          return x.condition == integrant.relationship;
-        } else {
-          return x.age == age;
-        }
-      })?.amount ?? 0;
+
+    let precioIntegrante = grupo.plan?.pricesPerCondition?.find(
+      (x) => integrant.relationship && x.condition == integrant.relationship
+    )?.amount;
+
+    if (precioIntegrante === undefined) {
+      precioIntegrante =
+        grupo.plan?.pricesPerCondition?.find(
+          (x) => (x.from_age ?? 1000) <= age && (x.to_age ?? 0) >= age
+        )?.amount ?? 0;
+    }
     integrant?.differentialsValues.forEach((differential) => {
-      const differentialIntegrante = differential.amount * precioIntegrante;
+      const differentialIntegrante =
+        differential.amount * (precioIntegrante ?? 0);
       importe += differentialIntegrante;
     });
   });
@@ -439,10 +543,15 @@ async function getGruposByBrandId(brandId: string) {
           events: true,
         },
       },
+      facturas: {
+        with: {
+          payments: true,
+        },
+      },
       bonus: true,
       plan: {
         with: {
-          pricesPerAge: true,
+          pricesPerCondition: true,
         },
       },
       modo: true,
@@ -460,12 +569,18 @@ export const facturasRouter = createTRPCRouter({
     const facturas = await db.query.facturas.findMany({
       with: {
         items: true,
+        liquidations: true,
         family_group: {
           with: {
             integrants: {
               where: eq(schema.integrants.isBillResponsible, true),
+              with: {
+                postal_code: true,
+              },
             },
             plan: true,
+            cc: true,
+            bonus: true,
           },
         },
       },
@@ -517,12 +632,14 @@ export const facturasRouter = createTRPCRouter({
         dateDesde: z.date().optional(),
         dateHasta: z.date().optional(),
         dateDue: z.date().optional(),
+        interest: z.number().optional(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      console.log("DATE DESDE", input.dateDesde);
+      const companyId = ctx.session.orgId;
       const grupos = await getGruposByBrandId(input.brandId);
       console.log("grupos", grupos);
-      const afip = await ingresarAfip();
       const user = await currentUser();
       const brand = await db.query.brands.findFirst({
         where: eq(schema.brands.id, input.brandId),
@@ -545,22 +662,20 @@ export const facturasRouter = createTRPCRouter({
           userApproved: "",
           number: randomNumberLiq,
           pdv: parseInt(input.pv),
+          interest: input.interest,
         })
         .returning();
       await preparateFactura(
-        afip,
         grupos,
         input.dateDesde,
         input.dateHasta,
         input.dateDue,
         input.pv,
-        input.brandId,
-        input.companyId,
-        liquidation!.id
+        liquidation!.id,
+        input.interest!
       );
       return liquidation;
     }),
-
   change: protectedProcedure
     .input(
       z.object({

@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { and, eq } from "drizzle-orm";
+import { and, eq, or, desc } from "drizzle-orm";
 import * as xlsx from "xlsx";
 import { record, z } from "zod";
 import { createId } from "~/lib/utils";
@@ -71,19 +71,19 @@ export const uploadsRouter = createTRPCRouter({
       z.object({
         type: z.literal("rec"),
         id: z.string(),
-        companyId: z.string(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      const companyId = ctx.session.orgId;
       return await db.transaction(async (db) => {
-        const channels = await getCompanyProducts(input.companyId);
-        const brands = await getCompanyBrands(input.companyId);
+        const channels = await getCompanyProducts(companyId!);
+        const brands = await getCompanyBrands(companyId!);
 
         const contents = await readUploadContents(
           db,
           input.id,
           input.type,
-          input.companyId,
+          companyId!,
           channels,
           brands
         );
@@ -138,7 +138,7 @@ export const uploadsRouter = createTRPCRouter({
       z.object({
         uploadId: z.string(),
         // brandId: z.number(),
-        // channelId: z.string(),
+        channelName: z.string(),
         // companyId: z.string(),
       })
     )
@@ -161,11 +161,62 @@ export const uploadsRouter = createTRPCRouter({
         await Promise.all(
           records.map(async (record) => {
             const invoiceNumber = record.invoice_number || 0;
-
+            const fiscal_id_number = record.fiscal_id_number || 0;
+            let subquery = tx
+              .select({ id: schema.payments.id })
+              .from(schema.payments)
+              .where(eq(schema.payments.fiscal_id_number, fiscal_id_number))
+              .orderBy(desc(schema.payments.createdAt))
+              .limit(1);
+            console.log("subquery", subquery, typeof subquery);
             await tx
               .update(schema.payments)
-              .set({ statusId: record.statusId })
-              .where(eq(schema.payments.invoice_number, invoiceNumber));
+              .set({
+                statusId: record.statusId,
+                payment_channel: input.channelName,
+              })
+              .where(
+                or(
+                  eq(schema.payments.invoice_number, invoiceNumber),
+                  eq(schema.payments.fiscal_id_number, fiscal_id_number)
+                )
+              );
+            const payment = await tx.query.payments.findFirst({
+              where: eq(schema.payments.invoice_number, invoiceNumber),
+              with: {
+                factura: {
+                  with: {
+                    family_group: {
+                      with: {
+                        cc: {
+                          with: {
+                            events: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            });
+
+            if (payment?.factura?.family_group?.cc) {
+              const currentAccount = payment?.factura?.family_group?.cc;
+              const lastEvent =
+                currentAccount?.events[currentAccount?.events.length - 1];
+              if (!lastEvent) {
+                throw new Error("No hay eventos en la cuenta corriente");
+              }
+              const event = await tx.insert(schema.events).values({
+                currentAccount_id: currentAccount?.id,
+                event_amount:
+                  record.first_due_amount ?? record.collected_amount ?? 0,
+                current_amount:
+                  lastEvent?.current_amount! + payment?.factura?.importe!,
+                description: "Factura aprobada",
+                type: "FC",
+              });
+            }
 
             // const payment = await tx.query.payments.findFirst({
             //   where: and(
@@ -237,18 +288,18 @@ export const uploadsRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string(),
-        companyId: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const companyId = ctx.session.orgId;
       await db.transaction(async (tx) => {
-        const channels = await getCompanyProducts(input.companyId);
-        const brands = await getCompanyBrands(input.companyId);
+        const channels = await getCompanyProducts(companyId!);
+        const brands = await getCompanyBrands(companyId!);
         const result = await readUploadContents(
           tx,
           input.id,
           "rec",
-          input.companyId,
+          companyId!,
           channels,
           brands
         );
@@ -274,7 +325,7 @@ export const uploadsRouter = createTRPCRouter({
               id: createId(),
               userId: ctx.session.user.id,
               documentUploadId: upload.id,
-              companyId: input.companyId,
+              companyId: companyId!,
               g_c: row.g_c,
               name: row.name,
               fiscal_id_type: row.fiscal_id_type,
@@ -626,10 +677,20 @@ async function readUploadContents(
       }
 
       for (const column of product.requiredColumns) {
-        console.log("column", column);
-        const value = (row as Record<string, unknown>)[column];
+        const value = (row as (typeof transformedRows)[number])[
+          column as keyof (typeof transformedRows)[number]
+        ];
+        const columnName = columnLabelByKey[column] ?? column;
+        if (
+          typeof value === "string" &&
+          value?.length > 20 &&
+          column === "additional_info"
+        ) {
+          errors.push(
+            `La columna ${columnName} no puede tener mas de 20 caracteres(fila:${rowNum})`
+          );
+        }
         if (!value) {
-          const columnName = columnLabelByKey[column] ?? column;
           errors.push(
             `La columna ${columnName} es obligatoria y no esta en el archivo(fila:${rowNum})`
           );

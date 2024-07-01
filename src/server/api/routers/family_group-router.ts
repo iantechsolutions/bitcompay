@@ -9,11 +9,14 @@ import {
 } from "~/server/db/schema";
 
 export const family_groupsRouter = createTRPCRouter({
-  list: protectedProcedure.query(async ({}) => {
+  list: protectedProcedure.query(async ({ ctx }) => {
     const family_groups = await db.query.family_groups.findMany({
-      with: { integrants: true, cc: true },
+      with: { integrants: true, cc: true, businessUnitData: true },
     });
-    return family_groups;
+    const family_group_reduced = family_groups.filter((family_groups) => {
+      return family_groups.businessUnitData?.companyId === ctx.session.orgId!;
+    });
+    return family_group_reduced;
   }),
   get: protectedProcedure
     .input(
@@ -67,6 +70,29 @@ export const family_groupsRouter = createTRPCRouter({
       });
       return family_group_reduced;
     }),
+  getByOrganization: protectedProcedure.query(async ({ ctx }) => {
+    const companyId = ctx.session.orgId;
+
+    const family_group = await db.query.family_groups.findMany({
+      with: {
+        businessUnitData: true,
+        abonos: true,
+        integrants: {
+          with: {
+            contribution: true,
+            differentialsValues: true,
+          },
+        },
+        bonus: true,
+        plan: true,
+        modo: true,
+      },
+    });
+    const family_group_reduced = family_group.filter((family_group) => {
+      return family_group.businessUnitData?.companyId === companyId!;
+    });
+    return family_group_reduced;
+  }),
   create: protectedProcedure
     .input(
       z.object({
