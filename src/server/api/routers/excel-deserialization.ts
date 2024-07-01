@@ -238,11 +238,16 @@ export const excelDeserializationRouter = createTRPCRouter({
             let precioIntegrante = 0;
             if (preciosPasados) {
               const vigente = preciosPasados[0]?.validy_date;
-              let precioIntegrante = plan?.pricesPerCondition?.find((x) => row.relationship && x.condition == row.relationship)?.amount;
+              let precioIntegrante = plan?.pricesPerCondition?.find(
+                (x) => row.relationship && x.condition == row.relationship
+              )?.amount;
 
-    if (precioIntegrante === undefined) {
-      precioIntegrante = plan?.pricesPerCondition?.find((x) => (x.from_age ?? 1000) <= age && (x.to_age ?? 0) >= age)?.amount ?? 0;
-    }
+              if (precioIntegrante === undefined) {
+                precioIntegrante =
+                  plan?.pricesPerCondition?.find(
+                    (x) => (x.from_age ?? 1000) <= age && (x.to_age ?? 0) >= age
+                  )?.amount ?? 0;
+              }
             }
             const precioDiferencial =
               parseFloat(row.differential_value!) / precioIntegrante;
@@ -367,18 +372,19 @@ async function readExcelFile(
     if (product) {
       const requiredColumns = await getRequiredColums(product.description);
       if (requiredColumns.has("card_number")) {
-        if (row.card_number?.length ?? 0 < 16) {
+        if ((row.card_number?.length ?? 0) < 16) {
           errors.push(
             `El numero de tarjeta debe tener 16 digitos (fila:${rowNum})`
           );
         } else {
+          console.log(row.card_number?.slice(0, 8));
           const response = await fetch(
-            `https://data.handyapi.com/bin/${row.card_number}`
+            `https://data.handyapi.com/bin/${row.card_number?.slice(0, 8)}`
           );
-          console.log("response", response);
           const json = await response?.json();
-          let row_card_type = row.card_type ?? json?.card_type;
-          let row_card_brand = row.card_brand ?? json?.card_brand;
+          console.log(json);
+          let row_card_type = row.card_type ?? json?.Type;
+          let row_card_brand = row.card_brand ?? json?.Scheme;
 
           if (!row_card_brand || !row_card_type) {
             errors.push(
@@ -393,6 +399,13 @@ async function readExcelFile(
           }
           if (!row_card_type) {
             row_card_type = json?.Type;
+          }
+          if (json?.CardTier && json.CardTier == "PREPAID MASTERCARD CARD") {
+            row_card_type = "DEBIT";
+          }
+          if (row_card_brand && row_card_type) {
+            row.card_brand = row_card_brand;
+            row.card_type = row_card_type;
           }
         }
       }
@@ -464,14 +477,10 @@ async function readExcelFile(
     }
     if (product) {
       const requiredColumns = await getRequiredColums(product.description);
-      console.log("required", requiredColumns);
       console.log("row", row);
       for (const column of requiredColumns) {
-        console.log(column);
         const columnName = columnLabelByKey[column];
-        console.log(columnName);
         const value = row[column as keyof typeof row];
-        console.log(value);
         if (
           (column in row && !value) ||
           (column in row && value?.toString() === "")
