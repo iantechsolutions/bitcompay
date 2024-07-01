@@ -74,8 +74,7 @@ const numberAsString = z
   });
 
 const cardNumber = z
-  .string()
-  .or(z.number())
+  .union([z.string(), z.number()])
   .transform((v) => v.toString().replace(/\s/g, ""));
 
 const allToString = z
