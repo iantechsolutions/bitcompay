@@ -2,7 +2,6 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db, schema } from "~/server/db";
 import { eq } from "drizzle-orm";
-import { getServerAuthSession } from "~/server/auth";
 import {medical_audit } from "~/server/db/schema";
 import { medical_auditSchemaDB } from "~/server/db/schema";
 
@@ -30,11 +29,6 @@ export const medical_auditRouter = createTRPCRouter({
   create: protectedProcedure
     .input(medical_auditSchemaDB)
     .mutation(async ({ input }) => {
-      const session = await getServerAuthSession();
-      if (!session || !session.user) {
-        throw new Error("User not found");
-      }
-      const user = session?.user.id;
       const newmedical_audit = await db
         .insert(schema.medical_audit)
         .values({ ...input});

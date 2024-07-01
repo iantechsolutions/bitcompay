@@ -1,9 +1,8 @@
 "use client";
 
-import * as React from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
+import * as React from "react";
 
-import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import {
   Command,
@@ -17,8 +16,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
+import { cn } from "~/lib/utils";
 
-const frameworks = [
+const _frameworks = [
   {
     value: "next.js",
     label: "Next.js",
@@ -46,6 +46,7 @@ export interface ComboboxProps {
   placeholder: string;
   options: { value: string; label: string }[];
   onSelectionChange?: (value: string) => void;
+  value?: string;
 }
 
 export function ComboboxDemo({
@@ -53,23 +54,28 @@ export function ComboboxDemo({
   placeholder,
   options = [],
   onSelectionChange,
+  value,
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState("");
-  const [label, setLabel] = React.useState("");
+  const initialOption = options.find((option) => option.value === value);
+  console.log("value");
+  console.log(value);
+  console.log(initialOption);
+  const [_value, _setValue] = React.useState(value ?? "");
+  const [label, setLabel] = React.useState(initialOption?.label ?? "");
   const handleSelectionChange = (currentLabel: string) => {
     const newLabel = currentLabel === label.toLowerCase() ? "" : currentLabel;
     if (onSelectionChange) {
       onSelectionChange(
         options.find((option) => option.label.toLowerCase() === newLabel)
-          ?.value ?? "",
+          ?.value ?? ""
       );
     }
   };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
+      <PopoverTrigger asChild={true}>
         <Button
           variant="outline"
           role="combobox"
@@ -98,7 +104,7 @@ export function ComboboxDemo({
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",
-                    label === option.label ? "opacity-100" : "opacity-0",
+                    label === option.label ? "opacity-100" : "opacity-0"
                   )}
                 />
                 {option.label}

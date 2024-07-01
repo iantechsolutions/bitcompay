@@ -7,13 +7,13 @@
  * need to use are documented accordingly near the end.
  */
 
-import { initTRPC, TRPCError } from "@trpc/server";
+import { TRPCError, initTRPC } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
+import { fromZodError } from "zod-validation-error";
 import { getServerAuthSession } from "~/server/auth";
 import { db } from "~/server/db";
-import { fromZodError } from "zod-validation-error";
 
 /**
  * 1. CONTEXT
@@ -22,7 +22,7 @@ import { fromZodError } from "zod-validation-error";
  *
  * These allow you to access things when processing a request, like the database, the session, etc.
  *
- * This helper generates the "internals" for a tRPC context. The API handler and RSC clients each
+ * This helper generates the "internals" for a tRPC context. The API handler and RSC cl1ients each
  * wrap this and provides the required context.
  *
  * @see https://trpc.io/docs/server/context
@@ -49,6 +49,14 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
   errorFormatter({ shape, error }) {
     let zodErrorMessage: string | null = null;
 
+    if (error.cause instanceof ZodError) {
+      zodErrorMessage = fromZodError(error.cause)
+        .toString()
+        .replaceAll("; ", "\n")
+        .split(":")
+        .slice(1)
+        .join(":");
+    }
     if (error.cause instanceof ZodError) {
       zodErrorMessage = fromZodError(error.cause)
         .toString()
@@ -94,7 +102,7 @@ export const publicProcedure = t.procedure;
 
 /** Reusable middleware that enforces users are logged in before running the procedure. */
 const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
-  if (!ctx.session || !ctx.session.user) {
+  if (!ctx.session?.user) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
   return next({

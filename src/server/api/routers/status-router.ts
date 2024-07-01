@@ -1,7 +1,7 @@
-import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { db, schema } from "~/server/db";
 import { eq } from "drizzle-orm";
+import { z } from "zod";
+import { db, schema } from "~/server/db";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 // a partir de ahora
 export const statusRouter = createTRPCRouter({
   list: protectedProcedure.query(async () => {
@@ -12,7 +12,15 @@ export const statusRouter = createTRPCRouter({
     .input(z.object({ statusId: z.string() }))
     .query(async ({ input }) => {
       const status_found = await db.query.paymentStatus.findFirst({
-        where: eq(schema.paymentStatus.code, input.statusId),
+        where: eq(schema.paymentStatus.id, input.statusId),
+      });
+      return status_found;
+    }),
+  getByDescripcion: protectedProcedure
+    .input(z.object({ statusDes: z.string() }))
+    .query(async ({ input }) => {
+      const status_found = await db.query.paymentStatus.findFirst({
+        where: eq(schema.paymentStatus.description, input.statusDes),
       });
       return status_found;
     }),
@@ -30,7 +38,7 @@ export const statusRouter = createTRPCRouter({
         description: z.string(),
         code: z.string(),
         statusId: z.string(),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       const modified_status = await db

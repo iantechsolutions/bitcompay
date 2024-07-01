@@ -1,22 +1,17 @@
-import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { db, schema } from "~/server/db";
-import { createId } from "~/lib/utils";
 import { and, eq, inArray } from "drizzle-orm";
+import { z } from "zod";
+import { createId } from "~/lib/utils";
+import { db, schema } from "~/server/db";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const companiesRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({}) => {
     return await db.query.companies.findMany();
   }),
-
-  get: protectedProcedure
-    .input(
-      z.object({
-        companyId: z.string(),
-      }),
-    )
+  getById: protectedProcedure
+    .input(z.object({ companyId: z.string() }))
     .query(async ({ input }) => {
-      const company = await db.query.companies.findFirst({
+      const company_found = await db.query.companies.findFirst({
         where: eq(schema.companies.id, input.companyId),
         with: {
           products: {},
@@ -37,14 +32,39 @@ export const companiesRouter = createTRPCRouter({
           },
         },
       });
-      return company;
+      return company_found;
     }),
+  get: protectedProcedure.query(async ({ input, ctx }) => {
+    const companyId = ctx.session.orgId;
+    const company = await db.query.companies.findFirst({
+      where: eq(schema.companies.id, companyId!),
+      with: {
+        products: {},
+        brands: {
+          columns: {
+            companyId: false,
+            brandId: false,
+          },
+
+          with: {
+            brand: {
+              columns: {
+                name: true,
+                id: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    return company;
+  }),
 
   getRelated: protectedProcedure
     .input(
       z.object({
         brandId: z.string(),
-      }),
+      })
     )
     .query(async ({ input }) => {
       interface Company {
@@ -55,11 +75,11 @@ export const companiesRouter = createTRPCRouter({
       const allCompaniesToBrands = await db.query.companiesToBrands.findMany();
 
       const relatedCompanies = allCompaniesToBrands.filter(
-        (company) => company.brandId == input.brandId,
+        (company) => company.brandId === input.brandId
       );
 
       const relatedCompaniesId = relatedCompanies.map(
-        (company) => company.companyId,
+        (company) => company.companyId
       );
 
       const companies: (Company | undefined)[] = [];
@@ -84,6 +104,7 @@ export const companiesRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
+        id: z.string(),
         name: z.string().min(1).max(255),
         description: z.string().min(0).max(1023),
         concept: z.string().min(0).max(1023),
@@ -91,26 +112,32 @@ export const companiesRouter = createTRPCRouter({
         certificate: z.string().min(0).max(255).optional(),
         cuit: z.string().min(0).max(255).optional(),
         razon_social: z.string().min(0).max(255).optional(),
-        
-      }),
+        afip_condition: z.string().min(0).max(255).optional(),
+        activity_start_date: z.date().optional(),
+        address: z.string().min(0).max(255).optional(),
+      })
     )
     .mutation(async ({ input }) => {
       // TODO: verificar permisos
 
-      const id = createId();
+      const company = await db
+        .insert(schema.companies)
+        .values({
+          id: input.id,
+          name: input.name,
+          description: input.description,
+          concept: input.concept,
+          afipKey: input.afipKey,
+          certificate: input.certificate,
+          cuit: input.cuit,
+          razon_social: input.razon_social,
+          afip_condition: input.afip_condition,
+          activity_start_date: input.activity_start_date,
+          address: input.address,
+        })
+        .returning();
 
-      await db.insert(schema.companies).values({
-        id,
-        name: input.name,
-        description: input.description,
-        concept: input.concept,
-        afipKey: input.afipKey,
-        certificate: input.certificate,
-        cuit: input.cuit,
-        razon_social: input.razon_social,
-      });
-
-      return { id };
+      return company[0]?.id;
     }),
 
   change: protectedProcedure
@@ -124,9 +151,13 @@ export const companiesRouter = createTRPCRouter({
         cuit: z.string().min(0).max(255).optional(),
         razon_social: z.string().min(0).max(255).optional(),
         products: z.array(z.string()).optional(),
-      }),
+        afip_condition: z.string().min(0).max(255).optional(),
+        activity_start_date: z.date().optional(),
+        address: z.string().min(0).max(255).optional(),
+      })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      const companyId = ctx.session.orgId;
       await db.transaction(async (db) => {
         await db
           .update(schema.companies)
@@ -137,8 +168,11 @@ export const companiesRouter = createTRPCRouter({
             certificate: input.certificate,
             cuit: input.cuit,
             razon_social: input.razon_social,
+            afip_condition: input.afip_condition,
+            activity_start_date: input.activity_start_date,
+            address: input.address,
           })
-          .where(eq(schema.companies.id, input.companyId));
+          .where(eq(schema.companies.id, companyId!));
 
         const companyProducts = await db.query.companyProducts.findMany({
           where: eq(schema.companyProducts.companyId, input.companyId),
@@ -153,7 +187,7 @@ export const companiesRouter = createTRPCRouter({
 
           const productsToAdd = input.products.filter((productId) => {
             return !companyProducts.find(
-              (companyProduct) => companyProduct.productId === productId,
+              (companyProduct) => companyProduct.productId === productId
             );
           });
 
@@ -164,19 +198,19 @@ export const companiesRouter = createTRPCRouter({
                 inArray(
                   schema.companyProducts.productId,
                   productsToDelete.map(
-                    (companyProduct) => companyProduct.productId,
-                  ),
-                ),
-              ),
+                    (companyProduct) => companyProduct.productId
+                  )
+                )
+              )
             );
           }
 
           if (productsToAdd.length > 0) {
             await db.insert(schema.companyProducts).values(
               productsToAdd.map((productId) => ({
-                companyId: input.companyId,
+                companyId: companyId!,
                 productId,
-              })),
+              }))
             );
           }
         }
@@ -205,19 +239,20 @@ export const companiesRouter = createTRPCRouter({
     .input(
       z.object({
         companyId: z.string(),
-      }),
+      })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      const companyId = ctx.session.orgId;
       await db.transaction(async (tx) => {
         await tx
           .delete(schema.companies)
-          .where(eq(schema.companies.id, input.companyId));
+          .where(eq(schema.companies.id, companyId!));
         await tx
           .delete(schema.companyProducts)
-          .where(eq(schema.companyProducts.companyId, input.companyId));
+          .where(eq(schema.companyProducts.companyId, companyId!));
       });
       await db
         .delete(schema.companiesToBrands)
-        .where(eq(schema.companiesToBrands.companyId, input.companyId));
+        .where(eq(schema.companiesToBrands.companyId, companyId!));
     }),
 });

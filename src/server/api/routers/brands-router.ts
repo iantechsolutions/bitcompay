@@ -1,15 +1,16 @@
+import { and, eq } from "drizzle-orm";
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { db, schema } from "~/server/db";
 import { createId } from "~/lib/utils";
-import { eq, and } from "drizzle-orm";
+import { db, schema } from "~/server/db";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { RouterOutputs } from "~/trpc/shared";
 
 export const brandsRouter = createTRPCRouter({
   get: protectedProcedure
     .input(
       z.object({
         brandId: z.string(),
-      }),
+      })
     )
     .query(async ({ input }) => {
       const brand = await db.query.brands.findFirst({
@@ -38,24 +39,30 @@ export const brandsRouter = createTRPCRouter({
   list: protectedProcedure.query(async () => {
     return await db.query.brands.findMany();
   }),
-  getbyCompany: protectedProcedure
-    .input(
-      z.object({
-        companyId: z.string(),
-      }),
-    )
+  getbyCurrentCompany: protectedProcedure.query(async ({ ctx }) => {
+    const companyId = ctx.session.orgId;
+    const company = await db.query.companies.findFirst({
+      where: eq(schema.companies.id, companyId!),
+      with: {
+        brands: {
+          with: {
+            brand: true,
+          },
+        },
+      },
+    });
+    return company?.brands.map((b) => b.brand);
+  }),
+  getBrandsByCompany: protectedProcedure
+    .input(z.object({ companyId: z.string() }))
     .query(async ({ input }) => {
-      const relations = await db.query.companiesToBrands.findMany({
+      const brands = await db.query.companiesToBrands.findMany({
         where: eq(schema.companiesToBrands.companyId, input.companyId),
+        with: {
+          brand: true,
+        },
       });
-      const brands = [];
-      for (const relation of relations) {
-        const brand = await db.query.brands.findFirst({
-          where: eq(schema.brands.id, relation.brandId),
-        });
-        brands.push(brand);
-      }
-      return brands;
+      return brands.map((b) => b.brand);
     }),
   create: protectedProcedure
     .input(
@@ -64,7 +71,10 @@ export const brandsRouter = createTRPCRouter({
         number: z.number().min(1).max(255),
         description: z.string().min(0).max(1023),
         redescription: z.string().min(0).max(10),
-      }),
+        iva: z.string().optional(),
+        billType: z.string().optional(),
+        concept: z.string().optional(),
+      })
     )
     .mutation(async ({ input }) => {
       // TODO: verificar permisos
@@ -78,6 +88,9 @@ export const brandsRouter = createTRPCRouter({
         redescription: input.redescription,
         companyId: null,
         number: input.number,
+        iva: input.iva,
+        bill_type: input.billType,
+        concept: input.concept,
       });
 
       return { id };
@@ -90,8 +103,12 @@ export const brandsRouter = createTRPCRouter({
         name: z.string().min(1).max(255),
         description: z.string().min(0).max(1023).optional(),
         reducedDescription: z.string().min(0).max(10).optional(),
+        iva: z.string().optional(),
+        billType: z.string().optional(),
         companiesId: z.set(z.string()),
-      }),
+        concept: z.string().optional(),
+        razon_social: z.string().optional(),
+      })
     )
     .mutation(async ({ input }) => {
       await db
@@ -100,6 +117,10 @@ export const brandsRouter = createTRPCRouter({
           name: input.name,
           description: input.description,
           redescription: input.reducedDescription,
+          iva: input.iva,
+          bill_type: input.billType,
+          concept: input.concept,
+          razon_social: input.razon_social,
         })
         .where(eq(schema.brands.id, input.brandId));
 
@@ -113,11 +134,39 @@ export const brandsRouter = createTRPCRouter({
       }
     }),
 
+  changeKeepCompany: protectedProcedure
+    .input(
+      z.object({
+        brandId: z.string(),
+        name: z.string().min(1).max(255),
+        description: z.string().min(0).max(1023).optional(),
+        reducedDescription: z.string().min(0).max(10).optional(),
+        iva: z.string().optional(),
+        billType: z.string().optional(),
+        concept: z.string().optional(),
+        razon_social: z.string().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      await db
+        .update(schema.brands)
+        .set({
+          name: input.name,
+          description: input.description,
+          redescription: input.reducedDescription,
+          iva: input.iva,
+          bill_type: input.billType,
+          concept: input.concept,
+          razon_social: input.razon_social,
+        })
+        .where(eq(schema.brands.id, input.brandId));
+    }),
+
   delete: protectedProcedure
     .input(
       z.object({
         brandId: z.string(),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       await db.delete(schema.brands).where(eq(schema.brands.id, input.brandId));
@@ -128,10 +177,11 @@ export const brandsRouter = createTRPCRouter({
 
   addRelation: protectedProcedure
     .input(z.object({ companyId: z.string(), brandId: z.string() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      const companyId = ctx.session.orgId;
       await db
         .insert(schema.companiesToBrands)
-        .values({ brandId: input.brandId, companyId: input.companyId });
+        .values({ brandId: input.brandId, companyId: companyId! });
     }),
 
   deleteRelation: protectedProcedure
@@ -142,8 +192,10 @@ export const brandsRouter = createTRPCRouter({
         .where(
           and(
             eq(schema.companiesToBrands.companyId, input.companyId),
-            eq(schema.companiesToBrands.brandId, input.brandId),
-          ),
+            eq(schema.companiesToBrands.brandId, input.brandId)
+          )
         );
     }),
 });
+
+export type Brand = RouterOutputs["brands"]["list"][number];

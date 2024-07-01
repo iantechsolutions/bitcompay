@@ -12,9 +12,9 @@ export const abonosRouter = createTRPCRouter({
     .input(
       z.object({
         abonoId: z.string(),
-      }),
+      })
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
       const abono = await db.query.abonos.findFirst({
         where: eq(schema.abonos.id, input.abonoId),
       });
@@ -27,7 +27,7 @@ export const abonosRouter = createTRPCRouter({
       z.object({
         valor: z.number(),
         family_group: z.string().nullable(),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       const abono = await db.insert(schema.abonos).values({
@@ -42,7 +42,7 @@ export const abonosRouter = createTRPCRouter({
     .input(
       z.object({
         valor: z.number(),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       const abono = await db.update(schema.abonos).set({
@@ -56,7 +56,7 @@ export const abonosRouter = createTRPCRouter({
     .input(
       z.object({
         abonoId: z.string(),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       const abono = await db

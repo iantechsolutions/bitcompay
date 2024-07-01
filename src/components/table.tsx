@@ -1,3 +1,5 @@
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 import {
   createContext,
   useContext,
@@ -6,8 +8,6 @@ import {
   useMemo,
 } from "react";
 import { FixedSizeList as List } from "react-window";
-import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
 export type TableHeaders = {
   key: string;
@@ -78,7 +78,7 @@ export function LargeTable(props: {
             return (
               <div
                 key={header.key}
-                className="flex items-center overflow-hidden text-ellipsis whitespace-nowrap px-1 text-xs font-semibold"
+                className="flex items-center overflow-hidden text-ellipsis whitespace-nowrap px-1 font-semibold text-xs"
                 style={{
                   width: w,
                   maxWidth: w,
@@ -97,16 +97,18 @@ export function LargeTable(props: {
           itemCount={props.rows.length}
           itemSize={35}
           width={"100%"}
-          children={Row}
-        />
+        >
+          {Row}
+        </List>
       </div>
     </tableContext.Provider>
   );
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 function useTableHeaders(
   headers: TableHeaders | undefined,
-  data: Record<string, any>[],
+  data: Record<string, any>[]
 ): TableHeaders {
   return useMemo(() => {
     if (headers) {
@@ -142,10 +144,15 @@ function Row(props: { style?: React.CSSProperties; index: number }) {
       className="flex border-b last:border-none"
     >
       {ctx.headers.map((header) => {
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
         let value: any = row[header.key];
 
         if (value instanceof Date) {
           value = dayjs.utc(value).format("DD-MM-YYYY");
+        }
+
+        if (typeof value === "boolean") {
+          value = value ? "Sí" : "No";
         }
 
         const w = header.width ?? 160;

@@ -9,15 +9,20 @@ import {
 } from "~/server/db/schema";
 
 export const family_groupsRouter = createTRPCRouter({
-  list: protectedProcedure.query(async ({}) => {
-    const family_groups = await db.query.family_groups.findMany();
-    return family_groups;
+  list: protectedProcedure.query(async ({ ctx }) => {
+    const family_groups = await db.query.family_groups.findMany({
+      with: { integrants: true, cc: true, businessUnitData: true },
+    });
+    const family_group_reduced = family_groups.filter((family_groups) => {
+      return family_groups.businessUnitData?.companyId === ctx.session.orgId!;
+    });
+    return family_group_reduced;
   }),
   get: protectedProcedure
     .input(
       z.object({
         family_groupsId: z.string(),
-      }),
+      })
     )
     .query(async ({ input }) => {
       const family_groups = await db.query.family_groups.findFirst({
@@ -30,7 +35,7 @@ export const family_groupsRouter = createTRPCRouter({
     .input(
       z.object({
         procedureId: z.string(),
-      }),
+      })
     )
     .query(async ({ input }) => {
       const family_group = await db.query.family_groups.findFirst({
@@ -38,6 +43,56 @@ export const family_groupsRouter = createTRPCRouter({
       });
       return family_group;
     }),
+  getByBrand: protectedProcedure
+    .input(
+      z.object({
+        brandId: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      const family_group = await db.query.family_groups.findMany({
+        with: {
+          businessUnitData: true,
+          abonos: true,
+          integrants: {
+            with: {
+              contribution: true,
+              differentialsValues: true,
+            },
+          },
+          bonus: true,
+          plan: true,
+          modo: true,
+        },
+      });
+      const family_group_reduced = family_group.filter((family_group) => {
+        return family_group.businessUnitData?.brandId === input.brandId;
+      });
+      return family_group_reduced;
+    }),
+  getByOrganization: protectedProcedure.query(async ({ ctx }) => {
+    const companyId = ctx.session.orgId;
+
+    const family_group = await db.query.family_groups.findMany({
+      with: {
+        businessUnitData: true,
+        abonos: true,
+        integrants: {
+          with: {
+            contribution: true,
+            differentialsValues: true,
+          },
+        },
+        bonus: true,
+        plan: true,
+        modo: true,
+      },
+    });
+    const family_group_reduced = family_group.filter((family_group) => {
+      return family_group.businessUnitData?.companyId === companyId!;
+    });
+    return family_group_reduced;
+  }),
   create: protectedProcedure
     .input(
       z.object({
@@ -50,7 +105,7 @@ export const family_groupsRouter = createTRPCRouter({
         procedureId: z.string().optional(),
         state: z.string().optional(),
         payment_status: z.string().optional(),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       const new_family_group = await db
@@ -75,7 +130,7 @@ export const family_groupsRouter = createTRPCRouter({
         procedureId: z.string().nullable().optional(),
         state: z.string().nullable().optional(),
         payment_status: z.string().nullable().optional(),
-      }),
+      })
     )
     .mutation(async ({ input: { id, ...input } }) => {
       console.log("Function called");
@@ -92,7 +147,7 @@ export const family_groupsRouter = createTRPCRouter({
     .input(
       z.object({
         family_groupsId: z.string(),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       await db

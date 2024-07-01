@@ -1,9 +1,9 @@
-import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { db, schema } from "~/server/db";
 import { eq } from "drizzle-orm";
-import { getServerAuthSession } from "~/server/auth";
-
+import { z } from "zod";
+import { db, schema } from "~/server/db";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { currentUser } from "@clerk/nextjs/server";
+import { RouterOutputs } from "~/trpc/shared";
 
 export const plansRouter = createTRPCRouter({
   get: protectedProcedure
@@ -11,36 +11,40 @@ export const plansRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const plan_found = await db.query.plans.findFirst({
         where: eq(schema.plans.id, input.planId),
+        with: {
+          pricesPerCondition: true,
+        },
       });
       return plan_found;
     }),
   list: protectedProcedure.query(async () => {
-    const plans = await db.query.plans.findMany();
+    const plans = await db.query.plans.findMany({
+      with: {
+        pricesPerCondition: true,
+      },
+    });
     return plans;
   }),
+
   create: protectedProcedure
     .input(
       z.object({
-        expiration_date: z.date(),
         plan_code: z.string().max(255),
         description: z.string().max(255),
-        business_units_id: z.string().max(255),
-      }),
+        brand_id: z.string().max(255),
+      })
     )
     .mutation(async ({ input }) => {
-      const session = await getServerAuthSession();
-      if (!session || !session.user) {
-        throw new Error("User not found");
-      }
-      const user = session?.user.id;
-      const new_plan = await db.insert(schema.plans).values({
-        user: user,
-        expiration_date: input.expiration_date,
-        plan_code: input.plan_code,
-        description: input.description,
-        business_units_id: input.business_units_id,
-        
-      });
+      const user = await currentUser();
+      const new_plan = await db
+        .insert(schema.plans)
+        .values({
+          user: user?.id ?? "",
+          plan_code: input.plan_code,
+          description: input.description,
+          brand_id: input.brand_id,
+        })
+        .returning();
       return new_plan;
     }),
 
@@ -48,22 +52,21 @@ export const plansRouter = createTRPCRouter({
     .input(
       z.object({
         planId: z.string(),
-        expiration_date: z.date(),
         plan_code: z.string().max(255),
         description: z.string().max(255),
-        business_units_id: z.string().max(255),
-      }),
+        brand_id: z.string().max(255),
+      })
     )
     .mutation(async ({ input }) => {
       const modified_plan = await db
         .update(schema.plans)
         .set({
-          expiration_date: input.expiration_date,
           plan_code: input.plan_code,
           description: input.description,
-          business_units_id: input.business_units_id,
+          brand_id: input.brand_id,
         })
-        .where(eq(schema.plans.id, input.planId));
+        .where(eq(schema.plans.id, input.planId))
+        .returning();
       return modified_plan;
     }),
   delete: protectedProcedure
@@ -75,3 +78,5 @@ export const plansRouter = createTRPCRouter({
       return deleted_plan;
     }),
 });
+
+export type Plans = RouterOutputs["plans"]["list"][number];

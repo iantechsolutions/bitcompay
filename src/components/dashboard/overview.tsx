@@ -1,86 +1,78 @@
-"use client";
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+'use client'
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 
 const data = [
-  {
-    name: "ene",
-    total: 3124,
-    pv: 2400,
-    amt: 2400,
-  },
-  {
-    name: "feb",
-    total: 8734,
-    pv: 2400,
-    amt: 2400,
-  },
-  {
-    name: "mar",
-    total: 6734,
-    pv: 2400,
-    amt: 2400,
-  },
-  {
-    name: "abr",
-    total: 4534,
-    pv: 2400,
-    amt: 2400,
-  },
-  {
-    name: "may",
-    total: 9934,
-  },
-  {
-    name: "jun",
-    total: 6734,
-    pv: 2400,
-    amt: 2400,
-  },
-  {
-    name: "jul",
-    total: 3344,
-    pv: 2400,
-    amt: 2400,
-  },
-  {
-    name: "ago",
-    total: 3664,
-    pv: 2400,
-    amt: 2400,
-  },
-  {
-    name: "sep",
-    total: 6534,
-    pv: 2400,
-    amt: 2400,
-  },
-  {
-    name: "oct",
-    total: 3646,
-    pv: 2400,
-    amt: 2400,
-  },
-  {
-    name: "nov",
-    total: 3456,
-    pv: 2400,
-    amt: 2400,
-  },
-  {
-    name: "dic",
-    total: 5634,
-    pv: 2400,
-    amt: 2400,
-  },
-];
+    {
+        name: 'ene',
+        total: 3124,
+        pv: 2400,
+        amt: 2400,
+    },
+    {
+        name: 'feb',
+        total: 8734,
+        pv: 2400,
+        amt: 2400,
+    },
+    {
+        name: 'mar',
+        total: 6734,
+        pv: 2400,
+        amt: 2400,
+    },
+    {
+        name: 'abr',
+        total: 4534,
+        pv: 2400,
+        amt: 2400,
+    },
+    {
+        name: 'may',
+        total: 9934,
+    },
+    {
+        name: 'jun',
+        total: 6734,
+        pv: 2400,
+        amt: 2400,
+    },
+    {
+        name: 'jul',
+        total: 3344,
+        pv: 2400,
+        amt: 2400,
+    },
+    {
+        name: 'ago',
+        total: 3664,
+        pv: 2400,
+        amt: 2400,
+    },
+    {
+        name: 'sep',
+        total: 6534,
+        pv: 2400,
+        amt: 2400,
+    },
+    {
+        name: 'oct',
+        total: 3646,
+        pv: 2400,
+        amt: 2400,
+    },
+    {
+        name: 'nov',
+        total: 3456,
+        pv: 2400,
+        amt: 2400,
+    },
+    {
+        name: 'dic',
+        total: 5634,
+        pv: 2400,
+        amt: 2400,
+    },
+]
 
 export function Overview() {
   return (

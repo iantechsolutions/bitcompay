@@ -1,8 +1,7 @@
+import { eq } from "drizzle-orm";
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db, schema } from "~/server/db";
-import { createId } from "~/lib/utils";
-import { eq, and } from "drizzle-orm";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const healthInsurancesRouter = createTRPCRouter({
   get: protectedProcedure
@@ -13,29 +12,41 @@ export const healthInsurancesRouter = createTRPCRouter({
       });
       return healthInsurance_found;
     }),
-  list: protectedProcedure.query(async () => {
-    const healthInsurances = await db.query.healthInsurances.findMany();
+  list: protectedProcedure.query(async ({ input, ctx }) => {
+    const companyId = ctx.session.orgId;
+    const healthInsurances = await db.query.healthInsurances.findMany({
+      where: eq(schema.healthInsurances.companyId, companyId!),
+    });
     return healthInsurances;
   }),
   create: protectedProcedure
-    .input(z.object({ name: z.string() }))
-    .mutation(async ({ input }) => {
+    .input(z.object({ name: z.string(), identificationNumber: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      const companyId = ctx.session.orgId;
       const new_healthInsurance = await db
         .insert(schema.healthInsurances)
-        .values({ name: input.name });
+        .values({
+          companyId,
+          name: input.name,
+          identificationNumber: input.identificationNumber,
+        });
       return new_healthInsurance;
     }),
   change: protectedProcedure
     .input(
       z.object({
         name: z.string(),
+        identificationNumber: z.string(),
         healthInsuranceId: z.string(),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       const healthInsurance_changed = await db
         .update(schema.healthInsurances)
-        .set({ name: input.name })
+        .set({
+          name: input.name,
+          identificationNumber: input.identificationNumber,
+        })
         .where(eq(schema.healthInsurances.id, input.healthInsuranceId));
       return healthInsurance_changed;
     }),

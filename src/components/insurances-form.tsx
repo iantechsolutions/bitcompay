@@ -1,7 +1,8 @@
-import { useForm, type SubmitHandler } from "react-hook-form";
-import { Button } from "./ui/button";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { type SubmitHandler, useForm } from "react-hook-form";
+import { z } from "zod";
 import { api } from "~/trpc/react";
-import { Input } from "./ui/input";
+import { Button } from "./ui/button";
 import {
   Form,
   FormControl,
@@ -10,13 +11,12 @@ import {
   FormLabel,
   FormMessage,
 } from "./ui/form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { Input } from "./ui/input";
 ("");
-import { type RouterOutputs } from "~/trpc/shared";
-import { asTRPCError } from "~/lib/errors";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { asTRPCError } from "~/lib/errors";
+import type { RouterOutputs } from "~/trpc/shared";
 type Inputs = {
   name: string;
 };
@@ -43,7 +43,10 @@ export default function InsurancesForm({
   const OnSubmit: SubmitHandler<Inputs> = async (data) => {
     const parsedData = UnitSchema.parse(data);
 
-    await createInsurance({ ...parsedData });
+    await createInsurance({
+      ...parsedData,
+      identificationNumber: "",
+    });
 
     if (setOpen) {
       setOpen(false);
@@ -55,6 +58,7 @@ export default function InsurancesForm({
       await updateInsurance({
         ...parsedData,
         healthInsuranceId: insurance!.id!,
+        identificationNumber: "",
       });
       router.refresh();
     } catch (e) {

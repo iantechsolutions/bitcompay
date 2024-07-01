@@ -2,19 +2,24 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db, schema } from "~/server/db";
 import { eq } from "drizzle-orm";
-import { getServerAuthSession } from "~/server/auth";
 import { integrants } from "~/server/db/schema";
+import { RouterOutputs } from "~/trpc/shared";
 
 export const integrantsRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({}) => {
-    const integrants = await db.query.integrants.findMany();
+    const integrants = await db.query.integrants.findMany({
+      with: {
+        contribution: true,
+        differentialsValues: true,
+      },
+    });
     return integrants;
   }),
   get: protectedProcedure
     .input(
       z.object({
         integrantsId: z.string(),
-      }),
+      })
     )
     .query(async ({ input }) => {
       const integrants = await db.query.integrants.findFirst({
@@ -27,7 +32,7 @@ export const integrantsRouter = createTRPCRouter({
     .input(
       z.object({
         family_group_id: z.string(),
-      }),
+      })
     )
     .query(async ({ input }) => {
       const integrants = await db.query.integrants.findMany({
@@ -45,21 +50,22 @@ export const integrantsRouter = createTRPCRouter({
         id_type: z.string().optional(),
         id_number: z.string().optional(),
         birth_date: z.date().optional(),
-        gender: z.enum(["female", "male", "other"]).optional(),
+        gender: z.enum(["MASCULINO", "FEMENINO", "OTRO"]).optional(),
         civil_status: z
-          .enum(["soltero", "casado", "divorciado", "viudo"])
+          .enum(["SOLTERO", "CASADO", "DIVORCIADO", "VIUDO"])
           .optional(),
         nationality: z.string().optional(),
         afip_status: z.string().optional(),
         fiscal_id_type: z.string().optional(),
         fiscal_id_number: z.string().optional(),
         address: z.string().optional(),
+        address_number: z.string().optional(),
         phone_number: z.string().optional(),
         cellphone_number: z.string().optional(),
         email: z.string().optional(),
         floor: z.string().optional(),
         department: z.string().optional(),
-        lacality: z.string().optional(),
+        locality: z.string().optional(),
         partido: z.string().optional(),
         state: z.string().optional(),
         cp: z.string().optional(),
@@ -70,7 +76,7 @@ export const integrantsRouter = createTRPCRouter({
         isBillResponsiblee: z.boolean().optional(),
         family_group_id: z.string().optional(),
         postal_codeId: z.string(),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       const integrant = await db.insert(integrants).values(input).returning();
@@ -88,13 +94,14 @@ export const integrantsRouter = createTRPCRouter({
         id_type: z.string(),
         id_number: z.string(),
         birth_date: z.string().transform((value) => new Date(value)),
-        gender: z.enum(["female", "male", "other"]),
-        civil_status: z.enum(["soltero", "casado", "divorciado", "viudo"]),
+        gender: z.enum(["MASCULINO", "FEMENINO", "OTRO"]),
+        civil_status: z.enum(["SOLTERO", "CASADO", "DIVORCIADO", "VIUDO"]),
         nationality: z.string(),
         afip_status: z.string(),
         fiscal_id_type: z.string(),
         fiscal_id_number: z.string(),
         address: z.string(),
+        address_number: z.string(),
         phone_number: z.string(),
         cellphone_number: z.string(),
         email: z.string(),
@@ -110,7 +117,7 @@ export const integrantsRouter = createTRPCRouter({
         isAffiliate: z.boolean(),
         isBillResponsible: z.boolean(),
         family_group_id: z.string(),
-      }),
+      })
     )
     .mutation(async ({ input: { id, ...input } }) => {
       console.log("Function called");
@@ -127,7 +134,7 @@ export const integrantsRouter = createTRPCRouter({
     .input(
       z.object({
         integrantsId: z.string(),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       await db
@@ -135,3 +142,5 @@ export const integrantsRouter = createTRPCRouter({
         .where(eq(schema.integrants.id, input.integrantsId));
     }),
 });
+
+export type Integrant = RouterOutputs["integrants"]["list"][number];

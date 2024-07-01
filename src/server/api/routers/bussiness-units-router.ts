@@ -1,8 +1,7 @@
+import { eq } from "drizzle-orm";
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db, schema } from "~/server/db";
-import { createId } from "~/lib/utils";
-import { eq, and } from "drizzle-orm";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const bussinessUnitsRouter = createTRPCRouter({
   get: protectedProcedure
@@ -13,8 +12,10 @@ export const bussinessUnitsRouter = createTRPCRouter({
       });
       return bussinessUnit_found;
     }),
-  list: protectedProcedure.query(async () => {
-    const bussinessUnits = await db.query.bussinessUnits.findMany();
+  list: protectedProcedure.query(async ({ ctx }) => {
+    const bussinessUnits = await db.query.bussinessUnits.findMany({
+      where: eq(schema.bussinessUnits.companyId, ctx.session.orgId!),
+    });
     return bussinessUnits;
   }),
   create: protectedProcedure
@@ -23,13 +24,14 @@ export const bussinessUnitsRouter = createTRPCRouter({
         description: z.string(),
         companyId: z.string(),
         brandId: z.string(),
-      }),
+      })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      const companyId = ctx.session.orgId;
       const new_bussinessUnit = await db.insert(schema.bussinessUnits).values({
         brandId: input.brandId,
         description: input.description,
-        companyId: input.companyId,
+        companyId: companyId!,
       });
       return new_bussinessUnit;
     }),
@@ -38,12 +40,19 @@ export const bussinessUnitsRouter = createTRPCRouter({
       z.object({
         bussinessUnitId: z.string(),
         description: z.string(),
-      }),
+        companyId: z.string(),
+        brandId: z.string(),
+      })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      const companyId = ctx.session.orgId;
       const bussinessUnit_changed = await db
         .update(schema.bussinessUnits)
-        .set({ description: input.description })
+        .set({
+          description: input.description,
+          companyId: companyId!,
+          brandId: input.brandId,
+        })
         .where(eq(schema.bussinessUnits.id, input.bussinessUnitId));
       return bussinessUnit_changed;
     }),
