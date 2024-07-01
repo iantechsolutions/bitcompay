@@ -158,18 +158,28 @@ export default async function Home(props: {
               >
                 IVA
               </TableHead>
-              <TableHead
-                className="text-gray-800
+              {preliquidation?.estado !== "pendiente" ? (
+                <>
+                  <TableHead
+                    className="text-gray-800
                rounded-r-md overflow-hidden"
-              >
-                Total
-              </TableHead>
-              {preliquidation?.estado !== "pendiente" && (
+                  >
+                    Total
+                  </TableHead>
+
+                  <TableHead
+                    className="text-gray-800
+               border-r-[1.5px] border-[#4af0d4]"
+                  >
+                    Factura
+                  </TableHead>
+                </>
+              ) : (
                 <TableHead
                   className="text-gray-800
                rounded-r-md overflow-hidden"
                 >
-                  Factura
+                  Total
                 </TableHead>
               )}
             </TableRow>

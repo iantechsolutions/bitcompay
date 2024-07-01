@@ -79,12 +79,12 @@ function ContentTable(props: propsContentTable) {
             <TableCell className="border border-gray-400 bg-[#b7f3e6]">
               $
               {computeIva(
-                computeTotal(previousBillValue, parseFloat(factura?.iva)?? 0),
-                parseFloat(factura?.iva)?? 0
+                computeTotal(previousBillValue, parseFloat(factura?.iva) ?? 0),
+                parseFloat(factura?.iva) ?? 0
               )}
             </TableCell>
             <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              ${computeTotal(previousBillValue, parseFloat(factura?.iva)?? 0)}
+              ${computeTotal(previousBillValue, parseFloat(factura?.iva) ?? 0)}
             </TableCell>
           </TableRow>
           <TableRow>
@@ -98,12 +98,12 @@ function ContentTable(props: propsContentTable) {
             <TableCell className="border border-gray-400 bg-[#b7f3e6]">
               $
               {computeIva(
-                computeTotal(cuotaValue, parseFloat(factura?.iva)?? 0),
-                parseFloat(factura?.iva)?? 0
+                computeTotal(cuotaValue, parseFloat(factura?.iva) ?? 0),
+                parseFloat(factura?.iva) ?? 0
               )}
             </TableCell>
             <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              ${computeTotal(cuotaValue, parseFloat(factura?.iva)?? 0)}
+              ${computeTotal(cuotaValue, parseFloat(factura?.iva) ?? 0)}
             </TableCell>
           </TableRow>
           <TableRow>
@@ -121,13 +121,13 @@ function ContentTable(props: propsContentTable) {
             <TableCell className="border border-gray-400 bg-[#b7f3e6]">
               -$
               {computeIva(
-                computeTotal(bonificationValue, parseFloat(factura?.iva)?? 0),
-                parseFloat(factura?.iva)?? 0
+                computeTotal(bonificationValue, parseFloat(factura?.iva) ?? 0),
+                parseFloat(factura?.iva) ?? 0
               )}
             </TableCell>
             <TableCell className="border border-gray-400 bg-[#b7f3e6]">
               -$
-              {computeTotal(bonificationValue, parseFloat(factura?.iva)?? 0)}
+              {computeTotal(bonificationValue, parseFloat(factura?.iva) ?? 0)}
             </TableCell>
           </TableRow>
           <TableRow>
@@ -145,12 +145,12 @@ function ContentTable(props: propsContentTable) {
             <TableCell className="border border-gray-400 bg-[#b7f3e6]">
               $
               {computeIva(
-                computeTotal(contributionValue, parseFloat(factura?.iva)?? 0),
-                parseFloat(factura?.iva)?? 0
+                computeTotal(contributionValue, parseFloat(factura?.iva) ?? 0),
+                parseFloat(factura?.iva) ?? 0
               )}
             </TableCell>
             <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              ${computeTotal(contributionValue, parseFloat(factura?.iva)?? 0)}
+              ${computeTotal(contributionValue, parseFloat(factura?.iva) ?? 0)}
             </TableCell>
           </TableRow>
 
@@ -167,12 +167,12 @@ function ContentTable(props: propsContentTable) {
             <TableCell className="border border-gray-400 bg-[#b7f3e6]">
               $
               {computeIva(
-                computeTotal(interestValue, parseFloat(factura?.iva)?? 0),
-                parseFloat(factura?.iva)?? 0
+                computeTotal(interestValue, parseFloat(factura?.iva) ?? 0),
+                parseFloat(factura?.iva) ?? 0
               )}
             </TableCell>
             <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              ${computeTotal(interestValue, parseFloat(factura?.iva)?? 0)}
+              ${computeTotal(interestValue, parseFloat(factura?.iva) ?? 0)}
             </TableCell>
           </TableRow>
           <TableRow>
@@ -183,16 +183,13 @@ function ContentTable(props: propsContentTable) {
               {" "}
             </Table>
             <TableCell className="border border-gray-400 bg-[#ccfbf1] border-t-black">
-              ${computeBase(total, parseFloat(factura?.iva)?? 0)}
+              ${computeBase(total, parseFloat(factura?.iva) ?? 0)}
             </TableCell>
             <TableCell className="border border-gray-400 bg-[#ccfbf1] border-t-black">
-              ${computeIva(total, parseFloat(factura?.iva)?? 0)}
+              ${computeIva(total, parseFloat(factura?.iva) ?? 0)}
             </TableCell>
             <TableCell className="border border-gray-400 bg-[#ccfbf1] border-t-black">
               ${total}
-            </TableCell>
-            <TableCell className="border border-gray-400 bg-[#ccfbf1] border-t-black">
-              ${factura.billLink}
             </TableCell>
           </TableRow>
         </Table>
