@@ -54,6 +54,7 @@
         "drizzle-zod": "^0.5.1",
         "eslint-import-resolver-typescript": "3.5.0",
         "eslint-plugin-jest": "26.8.7",
+        "file-saver": "^2.0.5",
         "fs": "0.0.1-security",
         "html2canvas": "^1.4.1",
         "jspdf": "^2.5.1",
@@ -82,10 +83,12 @@
         "zod-validation-error": "^3.0.3"
     },
     "devDependencies": {
+        "@types/file-saver": "^2.0.7",
         "@types/node": "^18.19.3",
         "@types/react": "^18.2.45",
         "@types/react-dom": "^18.2.18",
         "@types/validator": "^13.11.9",
+        "@types/xlsx": "^0.0.36",
         "autoprefixer": "^10.4.16",
         "dotenv-cli": "^7.3.0",
         "drizzle-kit": "^0.21.2",

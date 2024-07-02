@@ -133,6 +133,7 @@ export const payments = pgTable(
     is_new: boolean("is_new").notNull().default(false),
     // end Rec fields
 
+    recollected_amount: real("recollected_amount"),
     companyId: varchar("companyId", { length: 255 })
       .notNull()
       .references(() => companies.id),
@@ -145,7 +146,6 @@ export const payments = pgTable(
     factura_id: varchar("factura_id", { length: 255 }).references(
       () => facturas.id
     ),
-    recollected_amount: real("recollected_amount"),
   },
   (payments) => ({
     userIdIdx: index("payment_userId_idx").on(payments.userId),
@@ -786,7 +786,7 @@ export const FacturasSchemaDB = insertFacturasSchema.pick({
   liquidation_id: true,
   family_group_id: true,
 });
-export type Facturas = z.infer<typeof selectFacturasSchema>;
+export type Factura = z.infer<typeof selectFacturasSchema>;
 
 export const items = pgTable("items", {
   id: columnId,

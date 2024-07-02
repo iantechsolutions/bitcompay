@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { and, eq, or, desc } from "drizzle-orm";
+import { and, eq, or, desc, ConsoleLogWriter } from "drizzle-orm";
 import * as xlsx from "xlsx";
 import { record, z } from "zod";
 import { createId } from "~/lib/utils";
@@ -174,6 +174,7 @@ export const uploadsRouter = createTRPCRouter({
               .set({
                 statusId: record.statusId,
                 payment_channel: input.channelName,
+                recollected_amount: record.recollected_amount,
               })
               .where(
                 or(
@@ -465,7 +466,15 @@ async function readResponseUploadContents(
       console.log("recordValues", recordValues);
       //trato el ultimo elemento que esta junto nro de factura y estado de pago
       const largeNumber = recordValues[2];
+      console.log(largeNumber);
       const status_code = largeNumber?.slice(-2);
+      const importe = largeNumber?.slice(22, 39);
+      console.log("length", importe?.length);
+      const importe_int = importe?.slice(0, importe.length - 2);
+      const importe_dec = importe?.slice(importe.length - 2);
+      const parte_entera = parseInt(importe_int!);
+      const parte_dec = parseInt(importe_dec!);
+      const importe_final = parte_entera + parte_dec / 100;
       // extract invoice_number
       const stringInvoiceNumber = recordValues[recordValues.length - 1] ?? null;
       console.log("stringInvoiceNumber", stringInvoiceNumber);
@@ -485,8 +494,13 @@ async function readResponseUploadContents(
         if (original_transaction) {
           original_transaction.statusId =
             statusCodeMap.get(status_code) ?? "91";
+          original_transaction.recollected_amount = importe_final;
           console.log("statusCode", status_code);
           console.log("status", original_transaction.statusId);
+          console.log("importeString", importe_int, importe_dec);
+          console.log("parte_entera", parte_entera);
+          console.log("parte_dec", parte_dec);
+          console.log("importe", importe_final);
           records.push(original_transaction);
         }
       } else {

@@ -169,7 +169,7 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
           id: upload.id,
           type: documentType,
         });
-
+      console.log("datos en el front",data)
       if (data) {
         setData(data);
       }

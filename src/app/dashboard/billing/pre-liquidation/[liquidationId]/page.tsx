@@ -1,6 +1,8 @@
 // falta formatear fecha y hora, usuario
+"use server";
 import { currentUser } from "@clerk/nextjs/server";
 import LayoutContainer from "~/components/layout-container";
+
 // import {
 //   Table,
 //   TableRow,
@@ -20,6 +22,7 @@ import {
 import { Title } from "~/components/title";
 import { api } from "~/trpc/server";
 import dayjs from "dayjs";
+import xlsx from "xlsx";
 import utc from "dayjs/plugin/utc";
 import "dayjs/locale/es";
 dayjs.extend(utc);
@@ -27,6 +30,8 @@ dayjs.locale("es");
 import { RouterOutputs } from "~/trpc/shared";
 import { clerkClient } from "@clerk/nextjs/server";
 import UpdateLiquidationEstadoDialog from "./approve-liquidation-dialog";
+import { computeBase, computeIva } from "~/lib/utils";
+import DownloadExcelButton from "./downloadExcelButton";
 
 export default async function Home(props: {
   params: { liquidationId: string };
@@ -44,7 +49,55 @@ export default async function Home(props: {
   const facturas = preliquidation?.facturas;
   const periodo =
     dayjs.utc(preliquidation?.period).format("MMMM [de] YYYY") ?? "-";
+  const headers = [
+    "Id. GF",
+    "Nombre (Resp. Pago)",
+    "DNI",
+    "CUIL/CUIT (Resp. Pago)",
+    "Saldo Cta. Cte.",
+    "Cuota",
+    "Bonificacion",
+    "Diferencial",
+    "Aportes",
+    "Interes",
+    "SubTotal",
+    "IVA",
+    "Total",
+  ];
+  const rowsPromise =
+    facturas?.map(async (factura) => {
+      if (!factura) return [];
+      const billResponsible = factura?.family_group?.integrants[0];
 
+      const lastEvent = await api.events.getLastByDateAndCC.query({
+        ccId: factura?.family_group?.cc?.id!,
+        date: factura?.liquidations?.createdAt ?? new Date(),
+      });
+
+      const total = parseFloat(factura?.importe.toFixed(2));
+      return [
+        factura?.family_group?.numericalId ?? "",
+        billResponsible?.name ?? "",
+        billResponsible?.id_number ?? "",
+        billResponsible?.fiscal_id_number ?? "",
+        isNaN(factura.items?.abono!) ? " " : factura.items?.abono,
+        isNaN(factura.items?.bonificacion!) ? " " : factura.items?.bonificacion,
+        isNaN(factura.items?.differential_amount!)
+          ? " "
+          : factura.items?.differential_amount,
+        isNaN(factura.items?.contribution!) ? " " : factura.items?.contribution,
+        isNaN(factura.items?.interest!) ? " " : factura.items?.interest,
+        isNaN(computeBase(total, parseFloat(factura?.iva)))
+          ? " "
+          : computeBase(total, parseFloat(factura?.iva)),
+        isNaN(computeIva(total, parseFloat(factura?.iva)))
+          ? " "
+          : computeIva(total, parseFloat(factura?.iva)),
+        isNaN(total) ? " " : total,
+      ];
+    }) || [];
+  const rows = await Promise.all(rowsPromise);
+  rows.unshift(headers);
   return (
     <LayoutContainer>
       <div className="grid grid-cols-3 gap-x-2 gap-y-2">
@@ -192,6 +245,8 @@ export default async function Home(props: {
             userId={userActual?.id ? userActual?.id : ""}
           />
         )}
+        <br />
+        <DownloadExcelButton rows={rows} period={preliquidation?.period} />
       </div>
     </LayoutContainer>
   );
