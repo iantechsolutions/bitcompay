@@ -112,7 +112,7 @@ export default function TriggerTable(props: TriggerTableProps) {
       {props.preliquidation!.estado !== "pendiente" && (
         <TableCell className="rounded-r-md border border-[#6cebd1]">
           {factura.billLink && factura.billLink !== "" ? (
-            <div className="items-center justify-center">
+            <div className="flex items-center justify-center">
               <Link href={factura.billLink}>
                 <FileText></FileText>
               </Link>

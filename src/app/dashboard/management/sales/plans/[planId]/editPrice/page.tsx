@@ -35,6 +35,7 @@ export default function AddPlanPage(props: { params: { planId: string } }) {
 
   async function handleChange() {
     router.push("./");
+    router.refresh();
   }
   return (
     <div>
