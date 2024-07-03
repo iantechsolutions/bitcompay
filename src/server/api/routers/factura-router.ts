@@ -377,14 +377,22 @@ async function preparateFactura(
       let mostRecentFactura;
       let previous_bill = 0;
       let account_payment = 0;
+      console.log("empieza a buscar factura");
       if (grupo?.facturas.length > 0) {
-        mostRecentFactura = grupo.facturas
-          ?.filter((x) => x.billLink && x.billLink != "")
-          .reduce((prev, current) => {
+        const listadoFac = grupo.facturas?.filter(
+          (x) => x.billLink && x.billLink != ""
+        );
+        console.log("listadoFac", listadoFac);
+        if (listadoFac.length > 0) {
+          mostRecentFactura = listadoFac.reduce((prev, current) => {
             return prev.createdAt.getTime() > current.createdAt.getTime()
               ? prev
               : current;
           });
+        }
+        console.log("mostRecentFactura", mostRecentFactura);
+        console.log("previous_bill", previous_bill);
+        console.log("account_payment", account_payment);
       } else {
         mostRecentFactura = null;
       }
@@ -396,10 +404,11 @@ async function preparateFactura(
           });
         }
       }
-
-      if (mostRecentFactura && mostRecentFactura?.payments.length > 0) {
-      }
+      console.log("previous_bill", previous_bill);
+      console.log("account_payment", account_payment);
+      console.log("interes",interes)
       const interest = (interes / 100) * previous_bill;
+      console.log("interest", interest);
       const importe =
         (abono - bonificacion + differential_amount - contribution) * ivaFloat +
         previous_bill +
@@ -692,7 +701,7 @@ export const facturasRouter = createTRPCRouter({
         input.dateDue,
         input.pv,
         liquidation!.id,
-        input.interest!
+        input.interest ?? 0
       );
       return liquidation;
     }),
