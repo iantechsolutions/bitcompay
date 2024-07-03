@@ -232,6 +232,12 @@ async function approbateFactura(liquidationId: string) {
       )
         .toISOString()
         .split("T")[0];
+
+      const listado = Object.entries(ivaDictionary).find(
+        ([_, value]) => value === factura?.iva
+      );
+      const iva = listado ? listado[0] : "0";
+      const ivaFloat = parseFloat(factura?.iva ?? "0") / 100;
       const data = {
         CantReg: 1, // Cantidad de facturas a registrar
         PtoVta: factura?.ptoVenta,
@@ -245,19 +251,19 @@ async function approbateFactura(liquidationId: string) {
         FchServDesde: formatDate(factura?.fromPeriod ?? new Date()),
         FchServHasta: formatDate(factura?.toPeriod ?? new Date()),
         FchVtoPago: formatDate(factura?.due_date ?? new Date()),
-        ImpTotal: factura?.importe,
-        ImpTotConc: 0, // Importe neto no gravado
-        ImpNeto: (Number(factura?.importe) * 1).toString(),
+        ImpTotal: factura?.importeAFIP,
+        ImpTotConc: 0,
+        ImpNeto: (Number(factura?.importeAFIP) / (1 + ivaFloat)).toString(),
         ImpOpEx: 0,
-        ImpIVA: 0,
+        ImpIVA: (Number(factura?.importeAFIP) * ivaFloat).toString(),
         ImpTrib: 0,
         MonId: "PES",
         MonCotiz: 1,
-        // Iva: {
-        //   Id: 5,
-        //   BaseImp: importe,
-        //   Importe: (Number(importe) * 0, 21).toString(),
-        // },
+        Iva: {
+          Id: iva,
+          BaseImp: 0,
+          Importe: (Number(factura?.importeAFIP) * ivaFloat).toString(),
+        },
       };
       const html = htmlBill(
         factura,
@@ -372,11 +378,13 @@ async function preparateFactura(
       let previous_bill = 0;
       let account_payment = 0;
       if (grupo?.facturas.length > 0) {
-        mostRecentFactura = grupo.facturas?.reduce((prev, current) => {
-          return prev.createdAt.getTime() > current.createdAt.getTime()
-            ? prev
-            : current;
-        });
+        mostRecentFactura = grupo.facturas
+          ?.filter((x) => x.billLink && x.billLink != "")
+          .reduce((prev, current) => {
+            return prev.createdAt.getTime() > current.createdAt.getTime()
+              ? prev
+              : current;
+          });
       } else {
         mostRecentFactura = null;
       }
@@ -393,10 +401,14 @@ async function preparateFactura(
       }
       const interest = (interes / 100) * previous_bill;
       const importe =
-        (abono - bonificacion + differential_amount - contribution) * ivaFloat -
-        previous_bill -
+        (abono - bonificacion + differential_amount - contribution) * ivaFloat +
+        previous_bill +
         interest -
         account_payment;
+      const importeAFIP =
+        (abono - bonificacion + differential_amount - contribution) * ivaFloat +
+        previous_bill +
+        interest;
       const items = await db
         .insert(schema.items)
         .values({
