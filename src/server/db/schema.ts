@@ -267,7 +267,6 @@ export const brands = pgTable(
     bill_type: varchar("bill_type"),
     concept: varchar("concept"),
     companyId: varchar("companyId", { length: 255 }),
-
     enabled: boolean("enabled").notNull().default(true),
     createdAt,
     updatedAt,
