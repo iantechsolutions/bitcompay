@@ -34,8 +34,7 @@ export default function DownloadExcelButton({
       onClick={async () => {
         alert("Descargando Excel Pre liquidación");
         await handleGenerate(rows);
-      }}
-    >
+      }}>
       Descargar Excel Pre liquidación
     </Button>
   );

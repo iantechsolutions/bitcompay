@@ -51,6 +51,7 @@ import {
   PopoverTrigger,
 } from "~/components/ui/popover";
 import { cn } from "~/lib/utils";
+import { date, datetime } from "drizzle-orm/mysql-core";
 dayjs.extend(utc);
 dayjs.locale("es");
 
@@ -72,17 +73,30 @@ export default function BonusPage(props: BonusPageProps) {
   const form = useForm<Inputs>({ defaultValues: initialValues });
   const { mutateAsync: changeBonus, isLoading } =
     api.bonuses.change.useMutation();
+
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [fechaValidacion, setFechaValidacion] = useState<Date>(
+    props.bonus.validationDate || new Date()
+  );
+
+  async function FechasCreate(e: any) {
+    setFechaValidacion(e);
+    setPopoverOpen(false);
+    console.log(e);
+  }
+
   async function handleChange() {
     try {
       await changeBonus({
         id: props.bonus.id,
         appliedUser: bonusData?.appliedUser ?? "",
         approverUser: bonusData?.aprovedUser ?? " ",
-        validationDate: bonusData?.validationDate,
+        validationDate: fechaValidacion,
         duration: bonusData?.duration ?? " ",
         amount: bonusData?.amount ?? "",
         reason: bonusData?.reason ?? " ",
       });
+      console.log(bonusData);
       toast.success("Se ha actualizado la informacion del bono");
       router.refresh();
     } catch (e) {
@@ -90,6 +104,7 @@ export default function BonusPage(props: BonusPageProps) {
       toast.error(error.message);
     }
   }
+
   return (
     <LayoutContainer>
       <section className="space-y-2">
@@ -147,20 +162,22 @@ export default function BonusPage(props: BonusPageProps) {
                           <FormItem>
                             <FormLabel>Fecha de validacion</FormLabel>
                             <br />
-                            <Popover>
+                            <Popover
+                              open={popoverOpen}
+                              onOpenChange={setPopoverOpen}>
                               <PopoverTrigger asChild>
                                 <FormControl>
                                   <Button
                                     variant={"outline"}
                                     className={cn(
                                       "w-[240px] pl-3 text-left font-normal",
-                                      !field.value && "text-muted-foreground"
-                                    )}
-                                  >
+                                      !fechaValidacion &&
+                                        "text-muted-foreground"
+                                    )}>
                                     <p>
-                                      {field.value ? (
+                                      {fechaValidacion ? (
                                         dayjs
-                                          .utc(field.value)
+                                          .utc(fechaValidacion)
                                           .format("D [de] MMMM [de] YYYY")
                                       ) : (
                                         <span>Escoga una fecha</span>
@@ -172,16 +189,15 @@ export default function BonusPage(props: BonusPageProps) {
                               </PopoverTrigger>
                               <PopoverContent
                                 className="w-auto p-0"
-                                align="start"
-                              >
+                                align="start">
                                 <Calendar
                                   mode="single"
                                   selected={
-                                    field.value
-                                      ? new Date(field.value)
+                                    fechaValidacion
+                                      ? new Date(fechaValidacion)
                                       : undefined
                                   }
-                                  onSelect={field.onChange}
+                                  onSelect={(e) => FechasCreate(e)}
                                   disabled={(date: Date) =>
                                     date < new Date("1900-01-01")
                                   }
@@ -285,8 +301,7 @@ function DeleteBonus(props: { bonusesId: string }) {
           <AlertDialogAction
             className="bg-red-500 hover:bg-red-600 active:bg-red-700"
             onClick={handleDelete}
-            disabled={isLoading}
-          >
+            disabled={isLoading}>
             Eliminar
           </AlertDialogAction>
         </AlertDialogFooter>

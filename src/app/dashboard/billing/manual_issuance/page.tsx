@@ -15,64 +15,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import { cn, htmlBill } from "~/lib/utils";
+import { cn, htmlBill, ingresarAfip } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
 import { Factura } from "./facturaGenerada";
 import LayoutContainer from "~/components/layout-container";
 import { Title } from "~/components/title";
 import { useRouter } from "next/router";
-
-export async function ingresarAfip() {
-  //CUIT QUE QUEREMOS QUE COBRE
-  const taxId = 23439214619;
-
-  //USUARIO PARA ENTRAR A AFIP
-  const _username = "23439214619";
-
-  //CONTRASEÑA PARA ENTRAR A AFIPs
-  const _password = "TBzQ.,i5JhZbAg2";
-
-  // //ALIAS PARA EL CERTIFICADO
-  const alias = "afipsdk2";
-  // const afipCuit = new Afip({
-  //   CUIT: taxId,
-  //   access_token:
-  //     "sjqzE9JPiq9EtrWQR0MSYjehQHlYGPLn7vdAEun9ucUQQiZ6gWV9xMJVwJd5aaSy",
-  //   production: true,
-  // });
-
-  // const afipCuit = new Afip({
-  //   CUIT: taxId,
-  // });
-
-  // const res = await afipCuit.CreateCert(_username, _password, alias);
-  // console.log("Certificado creado");
-  // console.log(res);
-  const wsid = "wsfe";
-
-  // // //ESTO CREA LA AUTORIZACION
-  // const cert = res.cert;
-  // const key = res.key;
-  const cert =
-    "-----BEGIN CERTIFICATE-----\nMIIDSDCCAjCgAwIBAgIINW8P8tjDO30wDQYJKoZIhvcNAQENBQAwODEaMBgGA1UEAwwRQ29tcHV0\nYWRvcmVzIFRlc3QxDTALBgNVBAoMBEFGSVAxCzAJBgNVBAYTAkFSMB4XDTI0MDYyNzE3MDM1MloX\nDTI2MDYyNzE3MDM1MlowLjERMA8GA1UEAwwIYWZpcHNkazIxGTAXBgNVBAUTEENVSVQgMjM0Mzky\nMTQ2MTkwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC/E7NK4NM5k/KCl7Miuu2BAEby\n1D6aSyqL8IRKBA7kWgu+fDXW2RoCJocqzVUimooze0xXnLGcoBwd39ynBH/tANgxrJIie5Ej1YFB\nPNJdMKvV/UdmTjMD0hg/H+e0OsK7cffmQEDvBY1a+HADGbp/j3RnhU0aDD0ZO2lXQxCD6FEPkq/z\nVSKDxDty8GlDwRslgzljaT92upFeoMokgD0vA5tsr3+L2kpqqSDMh8utaY4Sfdyo2qNQhPMgimQA\nZZAsBUzsAuOhSKgs7Z3kNdlMAdqFJUy7qqOOIdqEdALsXxFIGxs2vYss1yLXF8rYUqg0Eab77UTT\nDHYco8drtDSpAgMBAAGjYDBeMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUs7LT//3put7eja8R\nIZzWIH3yT28wHQYDVR0OBBYEFCNehzQ1I5CvmOsqpKzrcTdY+MrxMA4GA1UdDwEB/wQEAwIF4DAN\nBgkqhkiG9w0BAQ0FAAOCAQEAoldnbMx/KTn0i/kHMUrG/+fTcjb428O1ofxv19qHPf2IHGTzUXRw\n+/fnei15xzLGMNAu5rKgdJ4OwmopVCUkMW+nw4hV3wG7sO2OSuduSNNmMZsVJUBnMobc+BIhpPPW\n2Xswuy2vD0NWgMdkoPtV9b0lGX3Z6jWexxKpf8d0OFkt8eQY7f5EWsCQQONfq25z8phzS6Bsj4/Z\nWCgnJUzyIeg1D1Lq3kGbTjgCAe2QP+zctw3tpWFLBQQHmGnJOxrdTI9xl+IcLqAg2z39a8FtRNhl\nr8R2o293M+zkM0eKbEGhJcnyXNF3aNAjACborQdDQGxDcrjDg1lX07r44SlTaA==\n-----END CERTIFICATE-----";
-  const key =
-    "-----BEGIN RSA PRIVATE KEY-----\r\nMIIEpAIBAAKCAQEAvxOzSuDTOZPygpezIrrtgQBG8tQ+mksqi/CESgQO5FoLvnw1\r\n1tkaAiaHKs1VIpqKM3tMV5yxnKAcHd/cpwR/7QDYMaySInuRI9WBQTzSXTCr1f1H\r\nZk4zA9IYPx/ntDrCu3H35kBA7wWNWvhwAxm6f490Z4VNGgw9GTtpV0MQg+hRD5Kv\r\n81Uig8Q7cvBpQ8EbJYM5Y2k/drqRXqDKJIA9LwObbK9/i9pKaqkgzIfLrWmOEn3c\r\nqNqjUITzIIpkAGWQLAVM7ALjoUioLO2d5DXZTAHahSVMu6qjjiHahHQC7F8RSBsb\r\nNr2LLNci1xfK2FKoNBGm++1E0wx2HKPHa7Q0qQIDAQABAoIBAATXvfqO2iuiaUoQ\r\nCDVAIZbcZ+/tmyyT7R8g2Gl70tjMw3FvennYhMU7Lr/R9m9rFUeav2OVEBdVI4FK\r\nVDBTd96M3+3aXtXK5fHPjngVz4sXGbPRuIaKQta882peJ6Q0vQy9JbhLNpoYPO3q\r\nUAR0GXr0KtIY2cxoNQA3tkLE6108ceMC+UqcGH/XrFTdKx0DqeBQA9PoXhfNGAML\r\nl1tMIMHDIsOrnB6MM2TAZT8ZtrwlBmmgLgKf2mlbYUlljMm+9xjg3StjJklZ8l9/\r\nnxZfSyeUxJFDXNeVVTYtknyAUOzUQJIBeyEdrn5gn4q2H9pmzgXvdhl5MKWt9gyk\r\n6SmBc7UCgYEA4TxTWzRZgTowWgAPaoSa1bY//X/Y6MNDJ/9ILJuUgmy33T5jWw3P\r\nDyP9+TKnVXTI5K6Fbwxi8bRqqNUsjoP7+EvVg1frMtqQt5m1PNQ1aMwRqoLEwX76\r\nTLc1TBnFShjnDIIhfZqjxjpyuMiI4uU996lbJEhA6laoAR0ynmrOB1MCgYEA2Sz4\r\nFDt0mb6vcSnms4GIxfpMnScxtNhF93QPWDI6eoGUj/k4mekcWS73StGtAn7x9ApV\r\nRFYNzhcgM6wufUgMX1YY+D1FhADJjWeanraNEs/JU0yFhHbEQLiYTV11UncfBwuh\r\nlwtoR1OgYYdJ7PRd1UNu1ma4grt9UBGignxCAJMCgYBTXMB9QSLfcWnz5ZHPGsUz\r\n1ABbErZ1b8+rPhC4cdzFaPekKzMawEGimO+nC9hjCJZSDUXVlAAK9XuEgWG8XZ0k\r\niOy9cAzdBYgKbBloKiKaZu0i7sNj2ltJiYVwZRlgE1dwiblbg6CZ/Yf4XEBNugr1\r\nXvkctKFSGkCUKPpTJ7SZgQKBgQCsc+oW3tOLVoEoQlagykaat1RpInt1GJwOkImy\r\nxkfricQ3w3YvuY06QHI8Zl2U8ssct6vX1OGnenOmtJ5B+5lfhxXS4Yy28o0aDWAZ\r\nkepaOseqrsQDWPAkWLEQFhuYvWDVDmZlc7h9kyly6KRKVg3A0IhOFkmD/m/Wyfoa\r\n1aLvowKBgQCBe/ukvw2xiS81LAIkKZPogUwKiYY/tGVtjVGrwvuEiSu0k3TN/7FL\r\njlsOJeyLqmx2GIwuXnQXGFjn06GAbzHprlG5+pW7q48xuEkuM7gAAY0BYYJSurPE\r\naazPGk3fFPEaYX1HtGN5CTbdBLEA45fXxxuA+Ea3rsQQ7Uhs03aRVg==\r\n-----END RSA PRIVATE KEY-----\r\n";
-  const afip = new Afip({
-    // access_token: 'sjqzE9JPiq9EtrWQR0MSYjehQHlYGPLn7vdAEun9ucUQQiZ6gWV9xMJVwJd5aaSy',
-    CUIT: taxId,
-    cert: cert,
-    key: key,
-    // production: true,
-  });
-  const serSer = await afip.CreateWSAuth(_username, _password, alias, wsid);
-  console.log(serSer);
-  // const salesPoints = await afip.ElectronicBilling.getSalesPoints();
-  // console.log(salesPoints);
-  // const serSer = await afip.CreateWSAuth(username, password, alias, wsid);
-
-  return afip;
-}
 
 function formatDate(date: Date | undefined) {
   if (date) {
@@ -216,6 +165,23 @@ export default function Page() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
+
+  const [popoverDesdeOpen, setPopoverDesdeOpen] = useState(false);
+  const [popoverFinOpen, setPopoverFinOpen] = useState(false);
+  const [popoverVencimientoOpen, setPopoverVencimientoOpen] = useState(false);
+
+  async function FechasCreateDesde(e: any) {
+    setDateDesde(e);
+    setPopoverDesdeOpen(false);
+  }
+  async function FechasCreateFin(e: any) {
+    setDateHasta(e);
+    setPopoverFinOpen(false);
+  }
+  async function FechasCreateVencimiento(e: any) {
+    setDateVencimiento(e);
+    setPopoverVencimientoOpen(false);
+  }
 
   return (
     <>
@@ -399,7 +365,9 @@ export default function Page() {
                 <div>
                   <Label htmlFor="importe">Fecha de inicio de servicio</Label>
                   <br />
-                  <Popover>
+                  <Popover
+                    open={popoverDesdeOpen}
+                    onOpenChange={setPopoverDesdeOpen}>
                     <PopoverTrigger asChild={true}>
                       <Button
                         variant={"outline"}
@@ -419,7 +387,7 @@ export default function Page() {
                       <Calendar
                         mode="single"
                         selected={dateDesde}
-                        onSelect={setDateDesde}
+                        onSelect={(e) => FechasCreateDesde(e)}
                         initialFocus={true}
                       />
                     </PopoverContent>
@@ -429,7 +397,9 @@ export default function Page() {
                 <div className="relative right-18">
                   <Label htmlFor="importe">Fecha de fin de servicio</Label>
                   <br />
-                  <Popover>
+                  <Popover
+                    open={popoverFinOpen}
+                    onOpenChange={setPopoverFinOpen}>
                     <PopoverTrigger asChild={true}>
                       <Button
                         variant={"outline"}
@@ -449,7 +419,7 @@ export default function Page() {
                       <Calendar
                         mode="single"
                         selected={dateHasta}
-                        onSelect={setDateHasta}
+                        onSelect={(e) => FechasCreateFin(e)}
                         initialFocus={true}
                       />
                     </PopoverContent>
@@ -460,7 +430,9 @@ export default function Page() {
                 <div>
                   <Label htmlFor="importe">Fecha de vencimiento</Label>
                   <br />
-                  <Popover>
+                  <Popover
+                    open={popoverVencimientoOpen}
+                    onOpenChange={setPopoverVencimientoOpen}>
                     <PopoverTrigger asChild={true}>
                       <Button
                         variant={"outline"}
@@ -480,7 +452,7 @@ export default function Page() {
                       <Calendar
                         mode="single"
                         selected={dateVencimiento}
-                        onSelect={setDateVencimiento}
+                        onSelect={(e) => FechasCreateVencimiento(e)}
                         initialFocus={true}
                       />
                     </PopoverContent>
