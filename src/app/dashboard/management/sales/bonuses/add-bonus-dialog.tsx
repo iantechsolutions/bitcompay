@@ -59,12 +59,16 @@ export default function AddBonusDialog() {
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
+      const amountNumber = parseFloat(data!.amount.replace(",", "."));
+      const roundedAmount = amountNumber.toFixed(2);
+
+      console.log(roundedAmount);
       await createBonus({
         appliedUser: data.appliedUser,
         approverUser: data.aprovedUser,
         validationDate: fechaValidacion,
         duration: data.duration,
-        amount: data.amount,
+        amount: roundedAmount,
         reason: data.reason,
       });
       toast.success("Bono creado correctamente");

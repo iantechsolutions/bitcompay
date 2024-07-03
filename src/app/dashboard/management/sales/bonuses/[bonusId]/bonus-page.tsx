@@ -82,21 +82,22 @@ export default function BonusPage(props: BonusPageProps) {
   async function FechasCreate(e: any) {
     setFechaValidacion(e);
     setPopoverOpen(false);
-    console.log(e);
   }
 
   async function handleChange() {
     try {
+      const amountNumber = parseFloat(bonusData!.amount.replace(",", "."));
+      const roundedAmount = amountNumber.toFixed(2);
+
       await changeBonus({
         id: props.bonus.id,
         appliedUser: bonusData?.appliedUser ?? "",
         approverUser: bonusData?.aprovedUser ?? " ",
         validationDate: fechaValidacion,
         duration: bonusData?.duration ?? " ",
-        amount: bonusData?.amount ?? "",
+        amount: roundedAmount ?? "",
         reason: bonusData?.reason ?? " ",
       });
-      console.log(bonusData);
       toast.success("Se ha actualizado la informacion del bono");
       router.refresh();
     } catch (e) {
