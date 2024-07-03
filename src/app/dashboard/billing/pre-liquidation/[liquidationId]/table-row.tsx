@@ -4,7 +4,7 @@ import { CircleChevronDown } from "lucide-react";
 import { useState } from "react";
 import TriggerTable from "./trigger-table";
 import ContentTable from "./content-table";
-import { Facturas } from "~/server/db/schema";
+import { Factura } from "~/server/db/schema";
 import type { RouterOutputs } from "~/trpc/shared";
 import { computeBase } from "~/lib/utils";
 import { api } from "~/trpc/react";

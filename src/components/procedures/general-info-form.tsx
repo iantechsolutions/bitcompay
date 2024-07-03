@@ -126,8 +126,7 @@ export default function GeneralInfoForm(props: GeneralInfoProps) {
                       className={cn(
                         "w-[240px] pl-3 text-left font-normal",
                         !field.value && "text-muted-foreground"
-                      )}
-                    >
+                      )}>
                       <p>
                         {field.value ? (
                           dayjs.utc(field.value).format("D [de] MMMM [de] YYYY")
@@ -164,8 +163,7 @@ export default function GeneralInfoForm(props: GeneralInfoProps) {
                 onValueChange={(value) => {
                   field.onChange(value);
                 }}
-                defaultValue={field.value}
-              >
+                defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccione un modo" />

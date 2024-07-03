@@ -27,12 +27,13 @@ import { Card } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
+import { UploadButton } from "~/components/uploadthing";
 import { asTRPCError } from "~/lib/errors";
 import { api } from "~/trpc/react";
 import type { RouterOutputs } from "~/trpc/shared";
-
 import { useRouter } from "next/navigation";
-
+import { OurFileRouter } from "~/app/api/uploadthing/core";
+import Image from "next/image";
 export default function BrandPage({
   brand,
   companies,
@@ -143,6 +144,40 @@ export default function BrandPage({
                       id="description"
                       value={reducedDescription}
                       onChange={(e) => setReducedDescription(e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <Label> Actualizar Logo Marca</Label>
+                    {brand.logo_url && (
+                      <div className="mt-2">
+                        <Image
+                          src={brand.logo_url!}
+                          alt="logo marca"
+                          width={100}
+                          height={100}
+                        />
+                      </div>
+                    )}
+
+                    <UploadButton
+                      className="mt-2 flex items-start mx-auto ml-0 ut-button:bg-black ut-button:ml-0"
+                      endpoint="brandLogoUpload"
+                      input={{ brandId: brand.id }}
+                      config={{
+                        mode: "manual",
+                        appendOnPaste: true,
+                      }}
+                      content={{
+                        button: "Subir logo",
+                        allowedContent: "Archivos png/jpg",
+                      }}
+                      onClientUploadComplete={(res) => {
+                        const [file] = res;
+
+                        if (!file) return;
+                        toast.success("¡Logo actualizado!");
+                      }}
                     />
                   </div>
                 </div>

@@ -406,11 +406,34 @@ export const recHeaders: TableHeaders = [
   { key: "additional_info", label: "Info. Adicional", width: 250 },
   { key: "payment_channel", label: "Canal de Cobro", width: 140 },
   { key: "payment_date", label: "Fecha de Pago/Débito", width: 140 },
-  { key: "collected_amount", label: "Importe Cobrado", width: 140 },
+  { key: "collected_amount", label: "Importe a cobrar", width: 140 },
+  { key: "recollected_amount", label: "Importe cobrado", width: 140 },
   { key: "comment", label: "Obs.", width: 140 },
   { key: "statusId", label: "Estado de Pago", width: 140 },
 ];
 
+export const FacturasHeaders: TableHeaders = [
+  { key: "id", label: "Id", width: 50 },
+  { key: "createdAt", label: "Created At", width: 100 },
+  { key: "generatedAt", label: "Generated At", width: 110 },
+  { key: "ptoVenta", label: "Pto Venta", width: 80 },
+  { key: "nroFactura", label: "Nro Factura", width: 100 },
+  { key: "tipoFactura", label: "Tipo Factura", width: 110 },
+  { key: "concepto", label: "Concepto", width: 80 },
+  { key: "tipoDocumento", label: "Tipo Documento", width: 130 },
+  { key: "nroDocumento", label: "Nro Documento", width: 130 },
+  { key: "importe", label: "Importe", width: 80 },
+  { key: "fromPeriod", label: "From Period", width: 110 },
+  { key: "toPeriod", label: "To Period", width: 100 },
+  { key: "due_date", label: "Due Date", width: 80 },
+  { key: "payedDate", label: "Payed Date", width: 100 },
+  { key: "prodName", label: "Prod Name", width: 100 },
+  { key: "iva", label: "IVA", width: 50 },
+  { key: "billLink", label: "Bill Link", width: 100 },
+  { key: "items_id", label: "Items ID", width: 90 },
+  { key: "liquidation_id", label: "Liquidation ID", width: 140 },
+  { key: "family_group_id", label: "Family Group ID", width: 150 },
+];
 export const columnLabelByKey = Object.fromEntries(
   recHeaders.map((header) => [header.key, header.label])
 ) as Record<string, string>;

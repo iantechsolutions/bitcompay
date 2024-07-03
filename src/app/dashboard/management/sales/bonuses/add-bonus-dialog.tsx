@@ -48,14 +48,27 @@ export default function AddBonusDialog() {
   const { mutateAsync: createBonus, isLoading } =
     api.bonuses.create.useMutation();
   const form = useForm<Inputs>();
+
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [fechaValidacion, setFechaValidacion] = useState<Date>();
+
+  async function FechasCreate(e: any) {
+    setFechaValidacion(e);
+    setPopoverOpen(false);
+  }
+
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
+      const amountNumber = parseFloat(data!.amount.replace(",", "."));
+      const roundedAmount = amountNumber.toFixed(2);
+
+      console.log(roundedAmount);
       await createBonus({
         appliedUser: data.appliedUser,
         approverUser: data.aprovedUser,
-        validationDate: data.validationDate,
+        validationDate: fechaValidacion,
         duration: data.duration,
-        amount: data.amount,
+        amount: roundedAmount,
         reason: data.reason,
       });
       toast.success("Bono creado correctamente");
@@ -66,6 +79,7 @@ export default function AddBonusDialog() {
       toast.error(error.message);
     }
   };
+
   return (
     <>
       <Button onClick={() => setOpen(true)}>
@@ -114,20 +128,19 @@ export default function AddBonusDialog() {
                     <FormItem>
                       <FormLabel>Fecha de Validación</FormLabel>
                       <br />
-                      <Popover>
+                      <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
                         <PopoverTrigger asChild>
                           <FormControl>
                             <Button
                               variant={"outline"}
                               className={cn(
                                 "w-[240px] pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
+                                !fechaValidacion && "text-muted-foreground"
+                              )}>
                               <p>
-                                {field.value ? (
+                                {fechaValidacion ? (
                                   dayjs
-                                    .utc(field.value)
+                                    .utc(fechaValidacion)
                                     .format("D [de] MMMM [de] YYYY")
                                 ) : (
                                   <span>Escoga una fecha</span>
@@ -141,9 +154,11 @@ export default function AddBonusDialog() {
                           <Calendar
                             mode="single"
                             selected={
-                              field.value ? new Date(field.value) : undefined
+                              fechaValidacion
+                                ? new Date(fechaValidacion)
+                                : undefined
                             }
-                            onSelect={field.onChange}
+                            onSelect={(e) => FechasCreate(e)}
                             disabled={(date: Date) =>
                               date < new Date("1900-01-01")
                             }
