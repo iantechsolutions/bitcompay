@@ -51,6 +51,11 @@ export default function ResponseUnconfirmedPage(props: UploadedPageProps) {
   } = api.uploads.readResponseUploadContents.useMutation();
   const { mutateAsync: confirmResponseUpload, isLoading: isLoadingConfirm } =
     api.uploads.confirmResponseUpload.useMutation();
+  const { data: statuses } = api.status.list.useQuery();
+  const statusMap = new Map();
+  statuses?.forEach((status) => {
+    statusMap.set(status.id, status.description);
+  });
 
   async function handlerConfirm() {
     if (!data) {
@@ -98,6 +103,13 @@ export default function ResponseUnconfirmedPage(props: UploadedPageProps) {
         uploadId: upload.id,
         type: documentType,
       });
+      const TableRows = data.records.map((record) => {
+        return {
+          ...record,
+          statusId: statusMap.get(record.statusId) as string,
+        };
+      });
+      data.records = TableRows;
       if (data) {
         setData(data);
       }

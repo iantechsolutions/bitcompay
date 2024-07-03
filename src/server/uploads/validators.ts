@@ -406,7 +406,8 @@ export const recHeaders: TableHeaders = [
   { key: "additional_info", label: "Info. Adicional", width: 250 },
   { key: "payment_channel", label: "Canal de Cobro", width: 140 },
   { key: "payment_date", label: "Fecha de Pago/Débito", width: 140 },
-  { key: "collected_amount", label: "Importe Cobrado", width: 140 },
+  { key: "collected_amount", label: "Importe a cobrar", width: 140 },
+  { key: "recollected_amount", label: "Importe cobrado", width: 140 },
   { key: "comment", label: "Obs.", width: 140 },
   { key: "statusId", label: "Estado de Pago", width: 140 },
 ];
