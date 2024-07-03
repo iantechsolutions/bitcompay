@@ -1,3 +1,4 @@
+"use server";
 import { clerkClient } from "@clerk/nextjs/server";
 import { setRole } from "~/app/dashboard/_actions";
 import { List, ListTile } from "~/components/list";
@@ -5,26 +6,42 @@ import { List, ListTile } from "~/components/list";
 import { Title } from "~/components/title";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
+import { checkRole } from "~/lib/utils/server/roles";
+import { getServerAuthSession } from "~/server/auth";
+import { useOrganization, useOrganizationList } from "@clerk/nextjs";
 
 export type UsersType = Awaited<
   ReturnType<typeof clerkClient.users.getUserList>
 >["data"][number];
+
 export default async function AdminDashboard(params: {
   searchParams: { search?: string };
 }) {
   // if (!checkRole("admin")) {
   //   redirect("/");
   // }
-  const users = (await clerkClient.users.getUserList({})).data;
+
+  const usersList = (await clerkClient.users.getUserList({})).data;
+  const organizations = (
+    await clerkClient.organizations.getOrganizationList({})
+  ).data;
+
+  const session = await getServerAuthSession();
+
+  const user = usersList.find((users) => users.id === session!.user.id);
+
+  const organization = organizations.find((x) => x.id === session?.orgId);
+
+  // const users = usersList.filter((x) => x.);
+
+  const isAdmin = checkRole("admin");
   return (
     <>
       <Title>Usuarios</Title>
-
-      {users.map((user) => {
-        return (
-          <List>
+      {isAdmin ? (
+        usersList.map((user) => (
+          <List key={user.id}>
             <ListTile
-              key={user.id}
               href={`./user/${user.id}`}
               title={
                 <>
@@ -48,8 +65,35 @@ export default async function AdminDashboard(params: {
               // trailing={<Badge>{user.}</Badge>}
             />
           </List>
-        );
-      })}
+        ))
+      ) : user ? (
+        <List>
+          <ListTile
+            href={`./user/${user.id}`}
+            title={
+              <>
+                {user.firstName} {user.lastName}
+              </>
+            }
+            subtitle={
+              user.emailAddresses.find(
+                (email) => email.id === user.primaryEmailAddressId
+              )?.emailAddress
+            }
+            leading={
+              <div>
+                <img
+                  className="h-10 rounded-full"
+                  src={user.imageUrl}
+                  alt="User Profile"
+                />
+              </div>
+            }
+          />
+        </List>
+      ) : (
+        <h1>No existe</h1>
+      )}
     </>
   );
 }
