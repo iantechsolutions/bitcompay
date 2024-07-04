@@ -370,19 +370,15 @@ async function preparateFactura(
       console.log(bonificacion);
 
       const contribution = await getGroupContribution(grupo);
-      console.log("contribution");
-      console.log(contribution);
       const differential_amount = await getDifferentialAmount(grupo);
 
       let mostRecentFactura;
       let previous_bill = 0;
       let account_payment = 0;
-      console.log("empieza a buscar factura");
       if (grupo?.facturas.length > 0) {
         const listadoFac = grupo.facturas?.filter(
           (x) => x.billLink && x.billLink != ""
         );
-        console.log("listadoFac", listadoFac);
         if (listadoFac.length > 0) {
           mostRecentFactura = listadoFac.reduce((prev, current) => {
             return prev.createdAt.getTime() > current.createdAt.getTime()
@@ -390,12 +386,10 @@ async function preparateFactura(
               : current;
           });
         }
-        console.log("mostRecentFactura", mostRecentFactura);
-        console.log("previous_bill", previous_bill);
-        console.log("account_payment", account_payment);
       } else {
         mostRecentFactura = null;
       }
+
       if (mostRecentFactura) {
         previous_bill = mostRecentFactura.importe;
         if (mostRecentFactura.payments.length > 0) {
@@ -404,11 +398,7 @@ async function preparateFactura(
           });
         }
       }
-      console.log("previous_bill", previous_bill);
-      console.log("account_payment", account_payment);
-      console.log("interes", interes);
       const interest = (interes / 100) * previous_bill;
-      console.log("interest", interest);
       const importe =
         (abono - bonificacion + differential_amount - contribution) * ivaFloat +
         previous_bill +
@@ -462,7 +452,6 @@ async function preparateFactura(
       const status = await db.query.paymentStatus.findFirst({
         where: eq(schema.paymentStatus.code, "91"),
       });
-      console.log("numero", producto?.number);
     }
   }
 
@@ -486,8 +475,6 @@ async function getGroupAmount(grupo: grupoCompleto, date: Date) {
     grupo.integrants?.forEach((integrant) => {
       if (integrant.birth_date != null) {
         const age = calcularEdad(integrant.birth_date);
-        console.log(age);
-        console.log(integrant.relationship);
         let precioIntegrante = precios?.find(
           (x) => integrant.relationship && x.condition == integrant.relationship
         )?.amount;
