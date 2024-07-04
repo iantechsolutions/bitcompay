@@ -188,26 +188,26 @@ export const iofilesRouter = createTRPCRouter({
             console.log("updating gen Channels");
             try {
               if (payment.genChannels.length === channelsList?.length! - 1) {
-                await db
-                  .update(schema.payments)
-                  .set({
-                    genChannels: newGenChannles,
-                    statusId: genFileStatus?.id,
-                  })
-                  .where(eq(schema.payments.id, payment.id));
+                // await db
+                //   .update(schema.payments)
+                //   .set({
+                //     genChannels: newGenChannles,
+                //     statusId: genFileStatus?.id,
+                //   })
+                //   .where(eq(schema.payments.id, payment.id));
               } else {
-                await db
-                  .update(schema.payments)
-                  .set({
-                    genChannels: newGenChannles,
-                  })
-                  .where(eq(schema.payments.id, payment.id));
-                console.log(
-                  "gen channes updated",
-                  // updated_payment,
-                  "old: ",
-                  payment.genChannels
-                );
+                // await db
+                //   .update(schema.payments)
+                //   .set({
+                //     genChannels: newGenChannles,
+                //   })
+                //   .where(eq(schema.payments.id, payment.id));
+                // console.log(
+                //   "gen channes updated",
+                //   // updated_payment,
+                //   "old: ",
+                //   payment.genChannels
+                // );
               }
             } catch (e) {
               console.log(e);
@@ -267,20 +267,26 @@ function generateDebitoDirecto(
     const period = formatString(" ", `${monthName} ${year}`, 22, true);
     const dateYYYYMMDD = date.format("YYYYMMDD");
     let collected_amount;
-    if (transaction.collected_amount) {
-      collected_amount = transaction.collected_amount?.toString();
-    } else if (
-      transaction.first_due_amount ||
-      transaction.first_due_amount === 0
-    ) {
-      collected_amount = transaction.first_due_amount?.toString();
-    } else {
+    collected_amount =
+      transaction.collected_amount ?? transaction.first_due_amount;
+    if (!collected_amount) {
       throw new TRPCError({
         code: "BAD_REQUEST",
         message: ` no hay informacion sobre importe a cobrar (invoice number:${transaction.invoice_number}`,
       });
     }
-    const collectedAmount = formatString("0", collected_amount, 15, false);
+    const parteEntera = Math.floor(collected_amount);
+    const parteDecimal = Math.round((collected_amount - parteEntera) * 100);
+    console.log(collected_amount - parteEntera, parteDecimal);
+    console.log("descom collected amount", parteEntera, parteDecimal);
+    console.log(parteDecimal.toString(), parteDecimal.toString().length);
+    const collectedAmount = formatString(
+      "0",
+      `${parteEntera}${formatString("0", parteDecimal.toString(), 2, false)}`,
+      15,
+      false
+    );
+    console.log(formatString(parteDecimal.toString(), "0", 2, false));
     const fiscalNumber = formatString(
       " ",
       transaction.fiscal_id_number!.toString(),
@@ -300,7 +306,7 @@ function generateDebitoDirecto(
       false
     );
     const CBU = transaction.cbu;
-    text += `421002513  ${fiscalNumber}${CBU}${collectedAmount}00    ${period}${dateYYYYMMDD}  ${invoice_number}${" ".repeat(
+    text += `421002513  ${fiscalNumber}${CBU}${collectedAmount}    ${period}${dateYYYYMMDD}  ${invoice_number}${" ".repeat(
       127
     )}\r\n`;
     let name;
@@ -639,6 +645,9 @@ function formatString(
 ) {
   if (string.length > limit) {
     string = string.substring(0, limit);
+  }
+  if (string.length === limit) {
+    return string;
   }
   if (final) {
     return string.concat(char.repeat(limit - string.length));
