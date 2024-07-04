@@ -9,8 +9,8 @@ export type DOCRowsValidatorAndTransformer = (
 const stringToValidIntegerZodTransformer = z
   .string()
   .or(z.number())
-  .transform((v) => Number.parseInt(v.toString().replace(/\s/g, "")))
-  .refine(Number.isInteger);
+  .transform((v) => Number(v.toString().replace(/\s/g, "")))
+  .refine((value) => !isNaN(value));
 
 const stringAsBoolean = z
   .union([z.string(), z.boolean()])

@@ -739,6 +739,7 @@ export const facturas = pgTable("facturas", {
   estado: varchar("estado"),
   billLink: varchar("billLink", { length: 255 }).notNull(),
   items_id: varchar("items_id", { length: 255 }).references(() => items.id),
+  estado: varchar("estado", { enum: ["pagada", "parcial", "anuladas"] }),
   liquidation_id: varchar("liquidation_id", { length: 255 }).references(
     () => liquidations.id
   ),
@@ -1005,6 +1006,7 @@ export const liquidations = pgTable("liquidations", {
   userApproved: varchar("userApproved", { length: 255 }),
   estado: varchar("estado", { length: 255 }).notNull(),
   razon_social: varchar("razon_social", { length: 255 }),
+  logo_url: varchar("logo_url"),
   cuit: varchar("cuit", { length: 255 }),
   pdv: integer("pdv").notNull(),
   period: timestamp("period", { mode: "date" }),

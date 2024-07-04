@@ -649,6 +649,7 @@ export const facturasRouter = createTRPCRouter({
         dateHasta: z.date().optional(),
         dateDue: z.date().optional(),
         interest: z.number().optional(),
+        logo_url: z.string().optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
