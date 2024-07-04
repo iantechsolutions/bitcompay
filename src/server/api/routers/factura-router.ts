@@ -693,6 +693,7 @@ export const facturasRouter = createTRPCRouter({
           number: randomNumberLiq,
           pdv: parseInt(input.pv),
           interest: input.interest,
+          logo_url: input.logo_url,
         })
         .returning();
       await preparateFactura(
