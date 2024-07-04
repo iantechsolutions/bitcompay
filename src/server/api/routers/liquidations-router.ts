@@ -48,6 +48,7 @@ export const liquidationsRouter = createTRPCRouter({
         cuit: z.string(),
         pdv: z.number(),
         interest: z.number().optional(),
+        logo_url: z.string().optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -61,6 +62,7 @@ export const liquidationsRouter = createTRPCRouter({
         pdv: input.pdv,
         number: 1,
         interest: input.interest ?? 0,
+        logo_url: input.logo_url,
       });
       return new_liquidation;
     }),
@@ -75,6 +77,7 @@ export const liquidationsRouter = createTRPCRouter({
         periodo: z.date(),
         cuit: z.string(),
         pdv: z.number(),
+        logo_url: z.string().optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -89,6 +92,7 @@ export const liquidationsRouter = createTRPCRouter({
           cuit: input.cuit,
           pdv: input.pdv,
           number: 1,
+          logo_url: input.logo_url,
         })
         .where(eq(schema.liquidations.id, input.id));
       return liquidation_changed;

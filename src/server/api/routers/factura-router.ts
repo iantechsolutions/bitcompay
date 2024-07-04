@@ -406,7 +406,7 @@ async function preparateFactura(
       }
       console.log("previous_bill", previous_bill);
       console.log("account_payment", account_payment);
-      console.log("interes",interes)
+      console.log("interes", interes);
       const interest = (interes / 100) * previous_bill;
       console.log("interest", interest);
       const importe =
@@ -662,6 +662,7 @@ export const facturasRouter = createTRPCRouter({
         dateHasta: z.date().optional(),
         dateDue: z.date().optional(),
         interest: z.number().optional(),
+        logo_url: z.string().optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
