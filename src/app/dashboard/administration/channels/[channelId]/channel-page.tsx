@@ -204,7 +204,7 @@ function DeleteChannel(props: { channelId: string }) {
     deleteChannel({ channelId: props.channelId })
       .then(() => {
         toast.success("Se ha eliminado el canal");
-        router.push("../");
+        router.push("./");
       })
       .catch((e) => {
         const error = asTRPCError(e)!;

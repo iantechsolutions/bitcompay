@@ -42,6 +42,8 @@ export default function AddPreLiquidation(props: { companyId: string }) {
   const [mes, setMes] = useState<number>(1);
   const [anio, setAnio] = useState<number>(2021);
   const [puntoVenta, setPuntoVenta] = useState("");
+  const [logo_url, setLogo_url] = useState("");
+
   const [interest, setInterest] = useState<number | null>(null);
   const { data: marcas } = api.brands.getbyCurrentCompany.useQuery();
   const router = useRouter();
@@ -63,6 +65,7 @@ export default function AddPreLiquidation(props: { companyId: string }) {
       dateDue: fechaVencimiento2,
       companyId: props.companyId,
       interest: interest ?? undefined,
+      logo_url: logo_url ?? undefined,
     });
     //TODO CORREGIR ESTO
     // await new Promise((resolve) => setTimeout(resolve, 500));
@@ -75,6 +78,14 @@ export default function AddPreLiquidation(props: { companyId: string }) {
       toast.error("Error al crear la pre-liquidacion");
     }
   }
+
+  const handleBrandChange = (value: string) => {
+    const selectedBrand = marcas?.find((marca) => marca.id === value);
+    if (selectedBrand) {
+      setLogo_url(selectedBrand.logo_url!);
+    }
+    setBrandId(value);
+  };
 
   async function FechasCreate(e: any) {
     setFechaVencimiento1(e);
@@ -96,7 +107,7 @@ export default function AddPreLiquidation(props: { companyId: string }) {
           </DialogHeader>
           <div>
             <Label>Marca</Label>
-            <Select onValueChange={setBrandId}>
+            <Select onValueChange={handleBrandChange}>
               <SelectTrigger className="w-[180px] font-bold">
                 <SelectValue placeholder="Seleccione una marca" />
               </SelectTrigger>

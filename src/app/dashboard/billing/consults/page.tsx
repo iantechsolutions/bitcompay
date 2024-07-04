@@ -40,7 +40,7 @@ export default function Page() {
         <div className="flex justify-between">
           <Title>Consultas</Title>
         </div>
-        <div className="mt-5">
+        <div className="mt-5 flex overflow-x-auto">
           {facturas && (
             <LargeTable
               height={height}

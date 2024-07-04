@@ -3,7 +3,7 @@ import Afip from "@afipsdk/afip.js";
 import { format } from "date-fns";
 import { Loader2Icon, PlusCircleIcon } from "lucide-react";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import * as React from "react";
 import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
@@ -22,6 +22,15 @@ import { Factura } from "./facturaGenerada";
 import LayoutContainer from "~/components/layout-container";
 import { Title } from "~/components/title";
 import { useRouter } from "next/router";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 
 function formatDate(date: Date | undefined) {
   if (date) {
@@ -149,6 +158,16 @@ export default function Page() {
       nroFactura: numero_de_factura,
     });
   }
+  type Channel = {
+    number: number;
+    id: string;
+    name: string;
+    description: string;
+    enabled: boolean;
+    createdAt: Date;
+    updatedAt: Date | null;
+    requiredColumns: string[];
+  };
 
   // function showFactura() {}
   const [puntoVenta, setPuntoVenta] = useState("");
@@ -166,9 +185,30 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
 
+  const products = api.products.list.useQuery().data;
+  const channelList = api.channels.list.useQuery().data;
+  const [selectedProduct, setSelectedProduct] = useState("");
+  const [channelsFiltered, setChannelsFiltered] = useState<
+    Channel[] | undefined
+  >(undefined);
+
+  const [selectedChannel, setSelectedChannel] = useState("");
+
   const [popoverDesdeOpen, setPopoverDesdeOpen] = useState(false);
   const [popoverFinOpen, setPopoverFinOpen] = useState(false);
   const [popoverVencimientoOpen, setPopoverVencimientoOpen] = useState(false);
+
+  useEffect(() => {
+    if (selectedProduct) {
+      const product = products?.find((x) => x.id === selectedProduct);
+
+      const channels = product?.channels.flatMap(
+        (chanel) => channelList?.filter((x) => x.id === chanel.channelId) || []
+      );
+
+      setChannelsFiltered(channels);
+    }
+  }, [selectedProduct, products, channelList]);
 
   async function FechasCreateDesde(e: any) {
     setDateDesde(e);
@@ -188,9 +228,9 @@ export default function Page() {
       <LayoutContainer>
         <section className="space-y-2">
           <div>
-            <Title>Facturacion</Title>
+            <Title>Facturación</Title>
           </div>
-          <div className="flex flex-row justify-between">
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <Label htmlFor="name">Punto de venta a utilizar</Label>
               <br />
@@ -201,12 +241,10 @@ export default function Page() {
                   { value: "1", label: "1" },
                   { value: "2", label: "2" },
                 ]}
-                onSelectionChange={(e) => {
-                  setPuntoVenta(e);
-                }}
+                onSelectionChange={(e) => setPuntoVenta(e)}
               />
             </div>
-            <div className="relative right-20">
+            <div>
               <Label htmlFor="factura">Tipo de factura</Label>
               <br />
               <ComboboxDemo
@@ -229,14 +267,9 @@ export default function Page() {
                   { value: "53", label: "NOTA DE CREDITO M" },
                   { value: "21", label: "NOTA DE CREDITO E" },
                 ]}
-                onSelectionChange={(e) => {
-                  setTipoFactura(e);
-                }}
+                onSelectionChange={(e) => setTipoFactura(e)}
               />
             </div>
-          </div>
-
-          <div className="flex flex-row justify-between">
             <div>
               <Label htmlFor="concepto">Concepto de la factura</Label>
               <br />
@@ -251,8 +284,7 @@ export default function Page() {
                 onSelectionChange={(e) => setConcepto(e)}
               />
             </div>
-            {/* Importe de la Factura */}
-            <div className="relative right-20">
+            <div>
               <Label htmlFor="importe">Importe total de la factura</Label>
               <Input
                 id="importe"
@@ -261,9 +293,6 @@ export default function Page() {
                 onChange={(e) => setImporte(e.target.value)}
               />
             </div>
-          </div>
-
-          <div className="flex flex-row justify-between">
             <div>
               <Label htmlFor="afiliado">Afiliado</Label>
               <br />
@@ -277,12 +306,11 @@ export default function Page() {
                 onSelectionChange={(e) => setName(e)}
               />
             </div>
-
             {tipoFactura !== "11" &&
               tipoFactura !== "14" &&
               tipoFactura !== "15" &&
               tipoFactura !== "" && (
-                <div className="relative right-20">
+                <div>
                   <Label htmlFor="iva">IVA</Label>
                   <br />
                   <ComboboxDemo
@@ -300,9 +328,6 @@ export default function Page() {
                   />
                 </div>
               )}
-          </div>
-
-          <div className="flex flex-row justify-between">
             <div>
               <Label htmlFor="nombreprod">
                 {concepto === "1"
@@ -316,11 +341,44 @@ export default function Page() {
                 onChange={(e) => setservicioprod(e.target.value)}
               />
             </div>
-          </div>
-
-          <div className="flex flex-row justify-between">
             <div>
-              <Label htmlFor="nroDocumento">Numero de documento</Label>
+              <Label htmlFor="nroDocumento">Productos disponibles</Label>
+              <Select
+                onValueChange={(value) => {
+                  setSelectedProduct(value);
+                }}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar un producto..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {products?.map((product) => (
+                      <SelectItem key={product.id} value={product.id}>
+                        {product.name}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+            {selectedProduct && channelsFiltered && (
+              <div>
+                <Label htmlFor="channel">Canal habilitado</Label>
+                <ComboboxDemo
+                  title="Seleccionar canal..."
+                  placeholder="Canal..."
+                  options={
+                    channelsFiltered?.map((channel) => ({
+                      value: channel.id,
+                      label: channel.name,
+                    })) ?? []
+                  }
+                  onSelectionChange={(e) => setSelectedChannel(e)}
+                />
+              </div>
+            )}
+            <div>
+              <Label htmlFor="nroDocumento">Número de documento</Label>
               <Input
                 id="nroDocumento"
                 placeholder="..."
@@ -329,11 +387,11 @@ export default function Page() {
               />
             </div>
             {!name ? (
-              <div className="relative right-20">
+              <div>
                 <Label htmlFor="tipoDocumento">Tipo de documento</Label>
                 <br />
                 <ComboboxDemo
-                  title="Seleccionar una opcion"
+                  title="Seleccionar una opción"
                   placeholder="Tipo de documento"
                   options={[
                     { value: "80", label: "CUIT" },
@@ -345,23 +403,19 @@ export default function Page() {
                 />
               </div>
             ) : (
-              <div className="relative right-20">
+              <div>
                 <Label htmlFor="tipoDocumento">Tipo de documento</Label>
                 <br />
                 <ComboboxDemo
-                  title="Seleccionar una opcion"
+                  title="Seleccionar una opción"
                   placeholder="Tipo de documento"
                   options={[{ value: "99", label: "Consumidor Final" }]}
                   onSelectionChange={(e) => setTipoDocumento(e)}
                 />
               </div>
             )}
-          </div>
-          {(concepto === "2" || concepto === "3") && (
-            <div>
-              <div className="flex flex-row justify-between">
-                {/* Los siguientes campos solo son obligatorios para los conceptos 2 y 3 */}
-
+            {(concepto === "2" || concepto === "3") && (
+              <>
                 <div>
                   <Label htmlFor="importe">Fecha de inicio de servicio</Label>
                   <br />
@@ -393,8 +447,7 @@ export default function Page() {
                     </PopoverContent>
                   </Popover>
                 </div>
-
-                <div className="relative right-18">
+                <div>
                   <Label htmlFor="importe">Fecha de fin de servicio</Label>
                   <br />
                   <Popover
@@ -425,8 +478,6 @@ export default function Page() {
                     </PopoverContent>
                   </Popover>
                 </div>
-              </div>
-              <div className="flex flex-row justify-between">
                 <div>
                   <Label htmlFor="importe">Fecha de vencimiento</Label>
                   <br />
@@ -458,9 +509,9 @@ export default function Page() {
                     </PopoverContent>
                   </Popover>
                 </div>
-              </div>
-            </div>
-          )}
+              </>
+            )}
+          </div>
 
           <Button disabled={loading} onClick={generateFactura}>
             {loading && <Loader2Icon className="mr-2 animate-spin" size={20} />}
