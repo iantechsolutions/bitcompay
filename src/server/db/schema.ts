@@ -133,6 +133,7 @@ export const payments = pgTable(
     is_new: boolean("is_new").notNull().default(false),
     // end Rec fields
 
+    recollected_amount: real("recollected_amount"),
     companyId: varchar("companyId", { length: 255 })
       .notNull()
       .references(() => companies.id),
@@ -145,7 +146,6 @@ export const payments = pgTable(
     factura_id: varchar("factura_id", { length: 255 }).references(
       () => facturas.id
     ),
-    recollected_amount: real("recollected_amount"),
   },
   (payments) => ({
     userIdIdx: index("payment_userId_idx").on(payments.userId),
@@ -267,7 +267,6 @@ export const brands = pgTable(
     bill_type: varchar("bill_type"),
     concept: varchar("concept"),
     companyId: varchar("companyId", { length: 255 }),
-
     enabled: boolean("enabled").notNull().default(true),
     createdAt,
     updatedAt,
@@ -730,12 +729,14 @@ export const facturas = pgTable("facturas", {
     mode: "number",
   }).notNull(),
   importe: real("importe").notNull(),
+  importeAFIP: real("importeAFIP"),
   fromPeriod: timestamp("fromperiod", { mode: "date" }),
   toPeriod: timestamp("toperiod", { mode: "date" }),
   due_date: timestamp("due_date", { mode: "date" }),
   payedDate: timestamp("payedDate", { mode: "date" }),
   prodName: varchar("prodName", { length: 255 }).notNull(),
   iva: varchar("iva", { length: 255 }).notNull(),
+  estado: varchar("estado"),
   billLink: varchar("billLink", { length: 255 }).notNull(),
   items_id: varchar("items_id", { length: 255 }).references(() => items.id),
   liquidation_id: varchar("liquidation_id", { length: 255 }).references(
@@ -786,7 +787,7 @@ export const FacturasSchemaDB = insertFacturasSchema.pick({
   liquidation_id: true,
   family_group_id: true,
 });
-export type Facturas = z.infer<typeof selectFacturasSchema>;
+export type Factura = z.infer<typeof selectFacturasSchema>;
 
 export const items = pgTable("items", {
   id: columnId,
@@ -1004,6 +1005,7 @@ export const liquidations = pgTable("liquidations", {
   userApproved: varchar("userApproved", { length: 255 }),
   estado: varchar("estado", { length: 255 }).notNull(),
   razon_social: varchar("razon_social", { length: 255 }),
+  logo_url: varchar("logo_url"),
   cuit: varchar("cuit", { length: 255 }),
   pdv: integer("pdv").notNull(),
   period: timestamp("period", { mode: "date" }),

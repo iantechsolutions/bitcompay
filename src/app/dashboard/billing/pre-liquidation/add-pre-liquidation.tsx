@@ -42,9 +42,14 @@ export default function AddPreLiquidation(props: { companyId: string }) {
   const [mes, setMes] = useState<number>(1);
   const [anio, setAnio] = useState<number>(2021);
   const [puntoVenta, setPuntoVenta] = useState("");
+  const [logo_url, setLogo_url] = useState("");
+
   const [interest, setInterest] = useState<number | null>(null);
   const { data: marcas } = api.brands.getbyCurrentCompany.useQuery();
   const router = useRouter();
+
+  const [popover1Open, setPopover1Open] = useState(false);
+  const [popover2Open, setPopover2Open] = useState(false);
 
   const [brandId, setBrandId] = useState("");
   const { mutateAsync: createLiquidation, isLoading } =
@@ -60,6 +65,7 @@ export default function AddPreLiquidation(props: { companyId: string }) {
       dateDue: fechaVencimiento2,
       companyId: props.companyId,
       interest: interest ?? undefined,
+      logo_url: logo_url ?? undefined,
     });
     //TODO CORREGIR ESTO
     // await new Promise((resolve) => setTimeout(resolve, 500));
@@ -71,6 +77,23 @@ export default function AddPreLiquidation(props: { companyId: string }) {
     } else {
       toast.error("Error al crear la pre-liquidacion");
     }
+  }
+
+  const handleBrandChange = (value: string) => {
+    const selectedBrand = marcas?.find((marca) => marca.id === value);
+    if (selectedBrand) {
+      setLogo_url(selectedBrand.logo_url!);
+    }
+    setBrandId(value);
+  };
+
+  async function FechasCreate(e: any) {
+    setFechaVencimiento1(e);
+    setPopover1Open(false);
+  }
+  async function FechasCreate2(e: any) {
+    setFechaVencimiento2(e);
+    setPopover2Open(false);
   }
   return (
     <>
@@ -84,7 +107,7 @@ export default function AddPreLiquidation(props: { companyId: string }) {
           </DialogHeader>
           <div>
             <Label>Marca</Label>
-            <Select onValueChange={setBrandId}>
+            <Select onValueChange={handleBrandChange}>
               <SelectTrigger className="w-[180px] font-bold">
                 <SelectValue placeholder="Seleccione una marca" />
               </SelectTrigger>
@@ -94,8 +117,7 @@ export default function AddPreLiquidation(props: { companyId: string }) {
                     <SelectItem
                       key={marca!.id}
                       value={marca!.id}
-                      className="rounded-none border-b border-gray-600"
-                    >
+                      className="rounded-none border-b border-gray-600">
                       {marca!.name}
                     </SelectItem>
                   ))}
@@ -105,15 +127,14 @@ export default function AddPreLiquidation(props: { companyId: string }) {
           <div>
             <Label>1er Fecha de vencimiento</Label>
             <br />
-            <Popover>
+            <Popover open={popover1Open} onOpenChange={setPopover1Open}>
               <PopoverTrigger asChild>
                 <Button
                   variant={"outline"}
                   className={cn(
                     "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
                     !fechaVencimiento1 && "text-muted-foreground"
-                  )}
-                >
+                  )}>
                   <p>
                     {fechaVencimiento1 ? (
                       dayjs(fechaVencimiento1).format("D [de] MMMM [de] YYYY")
@@ -130,7 +151,7 @@ export default function AddPreLiquidation(props: { companyId: string }) {
                   selected={
                     fechaVencimiento1 ? new Date(fechaVencimiento1) : undefined
                   }
-                  onSelect={(e) => setFechaVencimiento1(e)}
+                  onSelect={(e) => FechasCreate(e)}
                   disabled={(date: Date) => date < new Date()}
                   initialFocus
                 />
@@ -140,15 +161,14 @@ export default function AddPreLiquidation(props: { companyId: string }) {
           <div>
             <Label>2da Fecha de vencimiento</Label>
             <br />
-            <Popover>
+            <Popover open={popover2Open} onOpenChange={setPopover2Open}>
               <PopoverTrigger asChild>
                 <Button
                   variant={"outline"}
                   className={cn(
                     "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
                     !fechaVencimiento2 && "text-muted-foreground"
-                  )}
-                >
+                  )}>
                   <p>
                     {fechaVencimiento2 ? (
                       dayjs(fechaVencimiento2).format("D [de] MMMM [de] YYYY")
@@ -163,7 +183,7 @@ export default function AddPreLiquidation(props: { companyId: string }) {
                 <Calendar
                   mode="single"
                   selected={fechaVencimiento2 ? fechaVencimiento2 : undefined}
-                  onSelect={(e) => setFechaVencimiento2(e)}
+                  onSelect={(e) => FechasCreate2(e)}
                   disabled={(date: Date) => date < new Date()}
                   initialFocus
                 />
@@ -239,8 +259,7 @@ export default function AddPreLiquidation(props: { companyId: string }) {
               <Label htmlFor="validy_date">Mes de vigencia</Label>
               <Select
                 onValueChange={(e) => setMes(Number(e))}
-                defaultValue={mes.toString()}
-              >
+                defaultValue={mes.toString()}>
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccione un mes" />
                 </SelectTrigger>
@@ -302,8 +321,7 @@ export default function AddPreLiquidation(props: { companyId: string }) {
             className="mt-2"
             type="submit"
             disabled={isLoading}
-            onClick={handleCreate}
-          >
+            onClick={handleCreate}>
             {isLoading && (
               <Loader2Icon className="mr-2 animate-spin" size={20} />
             )}

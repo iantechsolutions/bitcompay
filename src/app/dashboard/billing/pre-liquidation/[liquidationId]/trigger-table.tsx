@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { Router } from "next/router";
 import { TableCell, TableRow } from "~/components/ui/tablePreliq";
-import { Facturas } from "~/server/db/schema";
+import { Factura } from "~/server/db/schema";
 import { RouterOutputs } from "~/trpc/shared";
 import { computeBase, computeIva } from "~/lib/utils";
 import { RedirectButton } from "~/components/redirect-button";
@@ -112,7 +112,7 @@ export default function TriggerTable(props: TriggerTableProps) {
       {props.preliquidation!.estado !== "pendiente" && (
         <TableCell className="rounded-r-md border border-[#6cebd1]">
           {factura.billLink && factura.billLink !== "" ? (
-            <div className="items-center justify-center">
+            <div className="flex items-center justify-center">
               <Link href={factura.billLink}>
                 <FileText></FileText>
               </Link>
