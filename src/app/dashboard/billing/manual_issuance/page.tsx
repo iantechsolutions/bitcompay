@@ -47,7 +47,13 @@ function formatDate(date: Date | undefined) {
 export default function Page() {
   const { mutateAsync: createFactura } = api.facturas.create.useMutation();
   const { data: company } = api.companies.get.useQuery();
+  const { data: brand } = api.brands.getbyCurrentCompany.useQuery();
+  const [logo, setLogo] = useState("");
+
   function generateFactura() {
+    if (brand) {
+      setLogo(brand[0]!.logo_url!);
+    }
     try {
       (async () => {
         console.log("1");
@@ -107,10 +113,10 @@ export default function Page() {
         /**
          * Creamos la Factura
          **/
-        const fac = saveFactura(numero_de_factura);
 
         const res = await afip.ElectronicBilling.createVoucher(data);
 
+        const fac = saveFactura(numero_de_factura);
         const html = htmlBill(fac, company, undefined, 2);
 
         // CREAMOS HTML DE LA FACTURA
@@ -131,11 +137,12 @@ export default function Page() {
           nombreServicio: "Servicio de prueba",
           domicilioComprador: "Calle falsa 123",
           nombreComprador: "Homero Simpson",
+          logo_url: logo,
         });
         console.log("resultadHTML", resHtml);
+        console.log(html);
 
         setLoading(false);
-
         toast.success("La factura se creo correctamente");
       })();
     } catch {
@@ -159,6 +166,7 @@ export default function Page() {
       generated: new Date(),
       prodName: servicioprod,
       nroFactura: numero_de_factura,
+      origin: "",
     });
     return factura;
   }
@@ -350,8 +358,7 @@ export default function Page() {
               <Select
                 onValueChange={(value) => {
                   setSelectedProduct(value);
-                }}
-              >
+                }}>
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar un producto..." />
                 </SelectTrigger>
@@ -426,16 +433,14 @@ export default function Page() {
                   <br />
                   <Popover
                     open={popoverDesdeOpen}
-                    onOpenChange={setPopoverDesdeOpen}
-                  >
+                    onOpenChange={setPopoverDesdeOpen}>
                     <PopoverTrigger asChild={true}>
                       <Button
                         variant={"outline"}
                         className={cn(
                           "w-[220px] justify-start text-left font-normal",
                           !dateDesde && "text-muted-foreground"
-                        )}
-                      >
+                        )}>
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {dateDesde ? (
                           format(dateDesde, "PPP")
@@ -459,16 +464,14 @@ export default function Page() {
                   <br />
                   <Popover
                     open={popoverFinOpen}
-                    onOpenChange={setPopoverFinOpen}
-                  >
+                    onOpenChange={setPopoverFinOpen}>
                     <PopoverTrigger asChild={true}>
                       <Button
                         variant={"outline"}
                         className={cn(
                           "w-[220px] justify-start text-left font-normal",
                           !dateHasta && "text-muted-foreground"
-                        )}
-                      >
+                        )}>
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {dateHasta ? (
                           format(dateHasta, "PPP")
@@ -492,16 +495,14 @@ export default function Page() {
                   <br />
                   <Popover
                     open={popoverVencimientoOpen}
-                    onOpenChange={setPopoverVencimientoOpen}
-                  >
+                    onOpenChange={setPopoverVencimientoOpen}>
                     <PopoverTrigger asChild={true}>
                       <Button
                         variant={"outline"}
                         className={cn(
                           "w-[220px] justify-start text-left font-normal",
                           !dateVencimiento && "text-muted-foreground"
-                        )}
-                      >
+                        )}>
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {dateVencimiento ? (
                           format(dateVencimiento, "PPP")

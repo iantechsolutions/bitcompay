@@ -782,6 +782,7 @@ export const FacturasSchemaDB = insertFacturasSchema.pick({
   items_id: true,
   liquidation_id: true,
   family_group_id: true,
+  origin: true,
 });
 export type Factura = z.infer<typeof selectFacturasSchema>;
 

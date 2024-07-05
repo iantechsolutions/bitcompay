@@ -1,43 +1,45 @@
-import dayjs from 'dayjs'
+import dayjs from "dayjs";
 
 interface FacturaProps {
-    puntoDeVenta: string
-    concepto: string
-    tipoFactura: string
-    nroComprobante: string
-    facturadoDesde: string | null
-    facturadoHasta: string | null
-    vtoPago: string | null
-    documentoComprador: string
-    nroDocumento: string
-    nombreComprador: string
-    domicilioComprador: string
-    nombreServicio: string
-    cantidad: number
-    nroCae: string
-    vtoCae: string
-    total: number
+  puntoDeVenta: string;
+  concepto: string;
+  tipoFactura: string;
+  nroComprobante: string;
+  facturadoDesde: string | null;
+  facturadoHasta: string | null;
+  vtoPago: string | null;
+  documentoComprador: string;
+  nroDocumento: string;
+  nombreComprador: string;
+  domicilioComprador: string;
+  nombreServicio: string;
+  cantidad: number;
+  nroCae: string;
+  vtoCae: string;
+  total: number;
+  logo_url: string | null;
 }
 
 export function Factura({
-    puntoDeVenta,
-    concepto: _concepto,
-    tipoFactura,
-    nroComprobante,
-    facturadoDesde,
-    facturadoHasta,
-    vtoPago,
-    documentoComprador,
-    nroDocumento,
-    nombreComprador,
-    domicilioComprador,
-    nombreServicio,
-    cantidad,
-    nroCae,
-    vtoCae,
-    total,
+  puntoDeVenta,
+  concepto: _concepto,
+  tipoFactura,
+  nroComprobante,
+  facturadoDesde,
+  facturadoHasta,
+  vtoPago,
+  documentoComprador,
+  nroDocumento,
+  nombreComprador,
+  domicilioComprador,
+  nombreServicio,
+  cantidad,
+  nroCae,
+  vtoCae,
+  total,
+  logo_url,
 }: FacturaProps) {
-    const htmlString = `<!DOCTYPE html>
+  const htmlString = `<!DOCTYPE html>
 <html>
 <head>
 	<title>Factura</title>
@@ -196,7 +198,7 @@ export function Factura({
     <tr className="bill-emitter-row">
       <td>
         <div className="bill-type">
-          ${tipoFactura.charAt(tipoFactura.length - 1)}
+          <img class="logo" src=${logo_url}/>
         </div>
         <div className="text-center text-lg">Empresa imaginaria S.A.</div>
         <p>
@@ -221,8 +223,8 @@ export function Factura({
             </p>
           </div>
           <p>
-            <strong>Fecha de Emisión:</strong>${' '}
-            ${dayjs(new Date()).format('DD/MM/YYYY')}
+            <strong>Fecha de Emisión:</strong>${" "}
+            ${dayjs(new Date()).format("DD/MM/YYYY")}
           </p>
           <p>
             <strong>${documentoComprador}:</strong> ${nroDocumento}
@@ -365,7 +367,7 @@ export function Factura({
     </tr>
   </table>
 </body>
-</html>`
+</html>`;
 
-    return htmlString
+  return htmlString;
 }
