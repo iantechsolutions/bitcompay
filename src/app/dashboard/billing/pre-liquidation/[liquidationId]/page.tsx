@@ -45,10 +45,9 @@ export default async function Home(props: {
     preliquidation?.userCreated ?? ""
   );
   // if (!preliquidation) return <Title>Preliquidacion no encotrada</Title>;
-  const familyGroups = await api.family_groups.geyByLiquidation.query({
+  const familyGroups = await api.family_groups.getByLiquidation.query({
     liquidationId: props.params.liquidationId,
   });
-
   const periodo =
     dayjs.utc(preliquidation?.period).format("MMMM [de] YYYY") ?? "-";
   const headers = [
@@ -245,7 +244,7 @@ export default async function Home(props: {
             {familyGroups?.map((familyGroup) => (
               <TableRowContainer
                 key={familyGroup?.id}
-                factura={familyGroup?.facturas}
+                family_group={familyGroup}
                 preliquidation={preliquidation}
                 periodo={periodo}
               />

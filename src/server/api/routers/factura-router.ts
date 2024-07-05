@@ -623,6 +623,17 @@ export const facturasRouter = createTRPCRouter({
       const grupos = await getGruposByBrandId(input.brandId);
       return grupos;
     }),
+  getByLiquidation: protectedProcedure
+    .input(z.object({ liquidationId: z.string() }))
+    .query(async ({ input }) => {
+      const facturas = await db.query.facturas.findMany({
+        where: eq(schema.facturas.liquidation_id, input.liquidationId),
+        with: {
+          items: true,
+        },
+      });
+      return facturas;
+    }),
   create: protectedProcedure
     .input(FacturasSchemaDB)
     .mutation(async ({ input }) => {

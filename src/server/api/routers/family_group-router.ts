@@ -7,6 +7,9 @@ import {
   medical_audit,
   family_groups,
 } from "~/server/db/schema";
+import { RouterOutputs } from "~/trpc/shared";
+export type FamilyListLiquidationId =
+  RouterOutputs["family_groups"]["getByLiquidation"][number];
 
 export const family_groupsRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({ ctx }) => {
@@ -45,7 +48,7 @@ export const family_groupsRouter = createTRPCRouter({
 
       return family_groups;
     }),
-  geyByLiquidation: protectedProcedure
+  getByLiquidation: protectedProcedure
     .input(z.object({ liquidationId: z.string() }))
     .query(async ({ input }) => {
       const liquidation = await db.query.liquidations.findFirst({
@@ -61,11 +64,6 @@ export const family_groupsRouter = createTRPCRouter({
                   facturas: {
                     with: {
                       items: true,
-                      family_group: {
-                        with: {
-                          integrants: true,
-                        },
-                      },
                     },
                   },
                 },
@@ -74,9 +72,10 @@ export const family_groupsRouter = createTRPCRouter({
           },
         },
       });
-      const family_groups = liquidation?.facturas.map(
-        (factura) => factura.family_group
-      );
+      const family_groups =
+        liquidation?.facturas.map((factura) => factura.family_group) || [];
+      // fitro 1: no repetidos
+      // filtro 2: solo que pertenezcan a esta
       return family_groups;
     }),
   getbyProcedure: protectedProcedure

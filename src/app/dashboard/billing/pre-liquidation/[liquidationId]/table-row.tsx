@@ -4,7 +4,7 @@ import { CircleChevronDown } from "lucide-react";
 import { useState } from "react";
 import TriggerTable from "./trigger-table";
 import ContentTable from "./content-table";
-import { Factura } from "~/server/db/schema";
+import { Factura, family_groups } from "~/server/db/schema";
 import type { RouterOutputs } from "~/trpc/shared";
 import { computeBase } from "~/lib/utils";
 import { api } from "~/trpc/react";
@@ -15,44 +15,44 @@ import { api } from "~/trpc/react";
 
 export default function TableRowContainer(props: {
   preliquidation: RouterOutputs["liquidations"]["get"];
-  factura: any;
+  family_group: RouterOutputs["family_groups"]["getByLiquidation"][number];
   periodo: string;
 }) {
   const [active, setActive] = useState(false);
-  console.log("facturasTT", props.factura);
+  const facturas = props.family_group?.facturas;
 
-  const total = parseFloat(props.factura[0].importe.toFixed(2));
+  console.log("facturasTT", facturas);
+
+  const original_factura = facturas?.find(
+    (factura) => factura?.origin?.toLowerCase() === "original"
+  );
+  if (!original_factura) {
+    return <div>No existe factura original</div>;
+  }
+  const total = parseFloat(original_factura.importe.toFixed(2));
   const { data: lastEvent } = api.events.getLastByDateAndCC.useQuery({
-    ccId: props.factura[0].family_group?.cc?.id!,
-    date: props.factura[0].liquidations?.createdAt ?? new Date(),
+    ccId: props.family_group?.cc?.id!,
+    date: props.preliquidation?.createdAt ?? new Date(),
   });
-  const subTotal = computeBase(total, Number(props.factura[0].iva!));
+
+  const subTotal = computeBase(total, Number(original_factura.iva!));
   return (
     <>
       <TriggerTable
         setActive={setActive}
         active={active}
-        factura={props.factura[0]}
+        factura={original_factura}
         preliquidation={props.preliquidation}
         total={total}
-        interestValue={props.factura[0].items?.interest ?? 0}
-        contributionValue={props.factura[0].items?.contribution ?? 0}
-        bonificationValue={props.factura[0].items?.bonificacion ?? 0}
-        previousBillValue={props.factura[0].items?.previous_bill ?? 0}
+        family_group={props.family_group}
         currentAccountAmount={lastEvent?.current_amount ?? 0}
-        cuotaValue={props.factura[0].items?.abono ?? 0}
       />
       {active &&
-        props.factura.map((factura: any) => {
+        facturas?.map((factura) => {
           return (
             <ContentTable
               factura={factura}
               period={props.periodo}
-              interestValue={factura.items?.interest ?? 0}
-              contributionValue={factura.items?.contribution ?? 0}
-              bonificationValue={factura.items?.bonificacion ?? 0}
-              previousBillValue={factura.items?.previous_bill ?? 0}
-              cuotaValue={factura.items?.abono ?? 0}
               total={total}
             />
           );
