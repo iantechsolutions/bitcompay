@@ -41,9 +41,11 @@ import {
   fiscalIdType,
 } from "~/server/forms/providers-schema";
 import { toast } from "sonner";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon, Loader2Icon } from "lucide-react";
 import { type RouterOutputs } from "~/trpc/shared";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { date } from "drizzle-orm/mysql-core";
 dayjs.extend(utc);
 dayjs.locale("es");
 
@@ -57,7 +59,7 @@ type Inputs = {
   fiscal_id_type: string;
   fiscal_id_number: string;
   gender: string;
-  birth_date: string;
+  birth_date: Date;
   civil_status: string;
   nationality: string;
   address: string;
@@ -89,7 +91,7 @@ export default function ProviderForm({
     fiscal_id_type: provider ? provider.fiscal_id_type! : "",
     fiscal_id_number: provider ? provider.fiscal_id_number!.toString() : "",
     gender: provider ? provider.gender! : "",
-    birth_date: provider ? provider.birth_date!.toString() : "",
+    birth_date: provider ? provider.birth_date! : new Date(),
     civil_status: provider ? provider.civil_status! : "",
     nationality: provider ? provider.nationality! : "",
     address: provider ? provider.address! : "",
@@ -125,7 +127,7 @@ export default function ProviderForm({
       <SelectItem key={key} value={value}>
         {value}
       </SelectItem>
-    ),
+    )
   );
   const idTypeOptions = Object.entries(IdType).map(([key, value]) => (
     <SelectItem key={key} value={value}>
@@ -137,20 +139,29 @@ export default function ProviderForm({
       <SelectItem key={key} value={key}>
         {value}
       </SelectItem>
-    ),
+    )
   );
-  const { mutateAsync: createProvider } = api.providers.create.useMutation();
+
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [fechaValidacion, setFechaValidacion] = useState<Date>();
+  const [isPending, setIsPending] = useState(false);
+  const { mutateAsync: createProvider, isLoading } =
+    api.providers.create.useMutation();
   const { mutateAsync: updateProvider } = api.providers.change.useMutation();
   const { errors } = form.formState;
   const { watch } = form;
   console.log(JSON.stringify(watch(), null, 2));
+
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     //aca manda al backend
+    if (fechaValidacion) {
+      data.birth_date = fechaValidacion;
+    }
     try {
-      console.log("handleSubmit");
-      console.log(data);
       const parsedData = ProviderSchema.parse(data);
+
       await createProvider(parsedData);
+      router.refresh();
       if (setOpen) {
         setOpen(false);
       }
@@ -161,24 +172,37 @@ export default function ProviderForm({
   };
   const onChange: SubmitHandler<Inputs> = async (data) => {
     //aca manda al backend
+    setIsPending(true);
+    if (fechaValidacion) {
+      data.birth_date = fechaValidacion;
+    }
     try {
-      console.log("handleChange");
-      console.log(data);
       const parsedData = ProviderSchema.parse(data);
+      if (fechaValidacion) {
+        parsedData.birth_date = fechaValidacion;
+      }
+
       await updateProvider({ ...parsedData, id: provider!.id! });
+      setIsPending(false);
       router.refresh();
     } catch (e) {
       const error = asTRPCError(e)!;
       toast.error(error.message);
     }
   };
+
+  async function FechasCreate(e: any) {
+    setFechaValidacion(e);
+
+    setPopoverOpen(false);
+  }
+
   return (
     <>
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(provider ? onChange : onSubmit)}
-          className="flex-col items-center justify-center gap-2 space-y-8"
-        >
+          className="flex-col items-center justify-center gap-2 space-y-8">
           <FormField
             control={form.control}
             name="provider_type"
@@ -187,8 +211,7 @@ export default function ProviderForm({
                 <FormLabel htmlFor="provider_type">Tipo de proveedor</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                  defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="seleccione un tipo de proveedor" />
@@ -224,8 +247,7 @@ export default function ProviderForm({
                 <FormLabel htmlFor="id_type">Tipo de identificación</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                  defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccione un tipo de identificación" />
@@ -289,8 +311,7 @@ export default function ProviderForm({
                 </FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                  defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccione un tipo de identificación fiscal" />
@@ -325,8 +346,7 @@ export default function ProviderForm({
                 <FormLabel htmlFor="gender">Género</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                  defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccione un género" />
@@ -345,20 +365,19 @@ export default function ProviderForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel htmlFor="birth_date">Fecha de nacimiento</FormLabel>
-                <Popover>
+                <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
                         variant={"outline"}
                         className={cn(
                           "w-[240px] pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground",
-                        )}
-                      >
+                          !fechaValidacion && "text-muted-foreground"
+                        )}>
                         <p>
-                          {field.value ? (
+                          {fechaValidacion ? (
                             dayjs
-                              .utc(field.value)
+                              .utc(fechaValidacion)
                               .format("D [de] MMMM [de] YYYY")
                           ) : (
                             <span>Escoga una fecha</span>
@@ -371,9 +390,8 @@ export default function ProviderForm({
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
-                      selected={field.value ? new Date(field.value) : undefined}
-                      onSelect={field.onChange}
-                      disabled={(date: Date) => date < new Date("1900-01-01")}
+                      selected={fechaValidacion}
+                      onSelect={(e) => FechasCreate(e)}
                       initialFocus
                     />
                   </PopoverContent>
@@ -390,8 +408,7 @@ export default function ProviderForm({
                 <FormLabel htmlFor="civil_status">Estado civil</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                  defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccione un estado civil" />
@@ -532,12 +549,18 @@ export default function ProviderForm({
               />
             </>
           )}
-          <Button type="submit">
+          <Button disabled={isLoading} type="submit">
+            {isLoading && (
+              <Loader2Icon className="mr-2 animate-spin" size={20} />
+            )}
+            {isPending && (
+              <Loader2Icon className="mr-2 animate-spin" size={20} />
+            )}
             {provider ? "Actualizar Información" : "Agregar Proveedor"}
           </Button>
+          ;
         </form>
       </Form>
     </>
   );
 }
-
