@@ -106,11 +106,11 @@ export default function Page() {
           // },
         };
 
-        const fac = saveFactura(numero_de_factura);
+        const fac = await saveFactura(numero_de_factura);
 
         const res = await afip.ElectronicBilling.createVoucher(data);
 
-        const html = htmlBill(fac, company, undefined, 2);
+        const html = htmlBill(fac[0]?.id, company, undefined, 2);
 
         // CREAMOS HTML DE LA FACTURA
         const resHtml = Factura({
@@ -167,6 +167,7 @@ export default function Page() {
       abono: 0,
       comprobante_id: factura[0]?.id ?? "",
     });
+    return factura;
   }
   type Channel = {
     number: number;

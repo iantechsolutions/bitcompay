@@ -19,7 +19,7 @@ const UserButtonAndMenu = () => {
         <button className="flex flex-row rounded-xl border border-gray-200 bg-white px-4 py-3 text-black drop-shadow-md">
           <Image
             alt={user?.primaryEmailAddress?.emailAddress!}
-            src={user?.imageUrl}
+            src={user?.imageUrl ?? ""}
             width={30}
             height={30}
             className="mr-2 rounded-full border border-gray-200 drop-shadow-sm"
