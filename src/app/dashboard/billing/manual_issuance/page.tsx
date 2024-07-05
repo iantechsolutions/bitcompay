@@ -118,30 +118,22 @@ export default function Page() {
         const res = await afip.ElectronicBilling.createVoucher(data);
         if (fac) {
           const html = htmlBill(fac, company, undefined, 2);
+          const options = {
+            width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
+            marginLeft: 0.8, // Margen izquierdo en pulgadas. Usar 0.1 para ticket
+            marginRight: 0.8, // Margen derecho en pulgadas. Usar 0.1 para ticket
+            marginTop: 0.4, // Margen superior en pulgadas. Usar 0.1 para ticket
+            marginBottom: 0.4, // Margen inferior en pulgadas. Usar 0.1 para ticket
+          };
+          const resHtml = await afip.ElectronicBilling.createPDF({
+            html: html,
+            file_name: name,
+            options: options,
+          });
 
-        // CREAMOS HTML DE LA FACTURA
-        const resHtml = Factura({
-          puntoDeVenta: puntoVenta,
-          tipoFactura: tipoFactura,
-          concepto: concepto,
-          documentoComprador: tipoDocumento,
-          nroDocumento: nroDocumento,
-          total: Number(importe),
-          facturadoDesde: formatDate(dateDesde),
-          facturadoHasta: formatDate(dateHasta),
-          vtoPago: formatDate(dateVencimiento),
-          cantidad: 1,
-          nroComprobante: numero_de_factura,
-          nroCae: res.CAE,
-          vtoCae: res.CAEFchVto,
-          nombreServicio: "Servicio de prueba",
-          domicilioComprador: "Calle falsa 123",
-          nombreComprador: "Homero Simpson",
-          logo_url: logo,
-        });
-        console.log("resultadHTML", resHtml);
-        console.log(html);
-
+          console.log("resultadHTML", resHtml);
+          console.log(html);
+        }
         setLoading(false);
         toast.success("La factura se creo correctamente");
       })();
@@ -365,7 +357,8 @@ export default function Page() {
               <Select
                 onValueChange={(value) => {
                   setSelectedProduct(value);
-                }}>
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar un producto..." />
                 </SelectTrigger>
@@ -440,14 +433,16 @@ export default function Page() {
                   <br />
                   <Popover
                     open={popoverDesdeOpen}
-                    onOpenChange={setPopoverDesdeOpen}>
+                    onOpenChange={setPopoverDesdeOpen}
+                  >
                     <PopoverTrigger asChild={true}>
                       <Button
                         variant={"outline"}
                         className={cn(
                           "w-[220px] justify-start text-left font-normal",
                           !dateDesde && "text-muted-foreground"
-                        )}>
+                        )}
+                      >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {dateDesde ? (
                           format(dateDesde, "PPP")
@@ -471,14 +466,16 @@ export default function Page() {
                   <br />
                   <Popover
                     open={popoverFinOpen}
-                    onOpenChange={setPopoverFinOpen}>
+                    onOpenChange={setPopoverFinOpen}
+                  >
                     <PopoverTrigger asChild={true}>
                       <Button
                         variant={"outline"}
                         className={cn(
                           "w-[220px] justify-start text-left font-normal",
                           !dateHasta && "text-muted-foreground"
-                        )}>
+                        )}
+                      >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {dateHasta ? (
                           format(dateHasta, "PPP")
@@ -502,14 +499,16 @@ export default function Page() {
                   <br />
                   <Popover
                     open={popoverVencimientoOpen}
-                    onOpenChange={setPopoverVencimientoOpen}>
+                    onOpenChange={setPopoverVencimientoOpen}
+                  >
                     <PopoverTrigger asChild={true}>
                       <Button
                         variant={"outline"}
                         className={cn(
                           "w-[220px] justify-start text-left font-normal",
                           !dateVencimiento && "text-muted-foreground"
-                        )}>
+                        )}
+                      >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {dateVencimiento ? (
                           format(dateVencimiento, "PPP")
