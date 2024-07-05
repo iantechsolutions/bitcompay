@@ -58,7 +58,7 @@ export function formatDate(date: Date | undefined) {
   return null;
 }
 
-export function dateNormalFormat(date: Date | undefined) {
+export function dateNormalFormat(date: Date | undefined | null) {
   if (date) {
     const yyyy = date.getFullYear();
     let mm = date.getMonth() + 1; // Months start at 0!
@@ -75,19 +75,20 @@ export function dateNormalFormat(date: Date | undefined) {
     const formattedDate = dia + "/" + mes + "/" + yyyy;
     return formattedDate;
   }
-  return null;
+  return "Sin Fecha";
 }
 
 export const topRightAbsoluteOnDesktopClassName =
   "md:absolute md:top-0 md:right-0 mr-10 mt-10";
 
 export function htmlBill(
-  factura: any,
+  facturaId: any,
   company: any,
   producto: any,
   voucher: number
 ) {
-  const billResponsible = factura.family_group?.integrants?.find(
+  const { data: factura } = api.facturas.get.useQuery({ facturaId: facturaId });
+  const billResponsible = factura?.family_group?.integrants?.find(
     (x: any) => x.isBillResponsible
   );
   if (producto) {
@@ -123,12 +124,12 @@ export function htmlBill(
     }
   }
   function generateConcepts(
-    items: Array<{ concept: string; total: number }>
+    items: Array<{ concept: string | null; total: number | null }>
   ): string {
     return items.map((item) => `<p>${item.concept}</p>`).join("");
   }
   function generateAmounts(
-    items: Array<{ concept: string; total: number }>
+    items: Array<{ concept: string | null; total: number | null }>
   ): string {
     return items.map((item) => `<p>${item.total}</p>`).join("");
   }
@@ -156,8 +157,8 @@ export function htmlBill(
         return "";
     }
   }
-  const conceptosList = generateConcepts(factura.items);
-  const amountsList = generateAmounts(factura.items);
+  const conceptosList = generateConcepts(factura?.items ?? []);
+  const amountsList = generateAmounts(factura?.items ?? []);
   const htmlContent = `<!DOCTYPE html>
   <html lang="en">
     <head>
@@ -473,7 +474,7 @@ span {
       <header>
         <div class="items-1">
         ${getIimageForLogo(
-          factura.family_group?.businessUnitData?.brand[0]?.logo_url ??
+          factura?.family_group?.businessUnitData?.brand?.logo_url ??
             "https://utfs.io/f/f426d7f1-f9c7-437c-a722-f978ab23830d-neiy4q.png"
         )}
             
@@ -485,14 +486,14 @@ span {
         </div>
   
         <div class="items-2">
-              ${getImageTagForTipoFactura(factura.tipoFactura ?? "")}
+              ${getImageTagForTipoFactura(factura?.tipoFactura ?? "")}
          
         </div>
   
         <div class="items-3">
           <h2>
-            ${getTextoForTipoFactura(factura.tipoFactura ?? "")} <br />
-            N° ${factura.ptoVenta.toString().padStart(4, "0")}-${voucher
+            ${getTextoForTipoFactura(factura?.tipoFactura ?? "")} <br />
+            N° ${factura?.ptoVenta.toString().padStart(4, "0")}-${voucher
     .toString()
     .padStart(8, "0")}
           </h2>
@@ -537,10 +538,10 @@ span {
             <p>Condicion de Venta: ---</p>
           </li>
           <li>
-            <p>Periodo facturado:${dateNormalFormat(factura.fromPeriod)}</p>
+            <p>Periodo facturado:${dateNormalFormat(factura?.fromPeriod)}</p>
           </li>
           <li>
-            <p>Fecha de vencimiento:${dateNormalFormat(factura.due_date)}</p>
+            <p>Fecha de vencimiento:${dateNormalFormat(factura?.due_date)}</p>
           </li>
         </ul>
       </section>
@@ -561,13 +562,13 @@ span {
       </section>
   
       <section class="parte-4">
-        <p>Pesos ${numeroALetras(Math.floor(factura.importe))} ${
-    obtenerDecimales(factura.importe) == "00" || "0"
+        <p>Pesos ${numeroALetras(Math.floor(factura?.importe ?? 0))} ${
+    obtenerDecimales(factura?.importe) == "00" || "0"
       ? ""
-      : `con ${obtenerDecimales(factura.importe)}/100`
+      : `con ${obtenerDecimales(factura?.importe)}/100`
   }</p>
         <p><span>TOTAL: </span>${formatNumberAsCurrency(
-          factura.importe ?? 0
+          factura?.importe ?? 0
         )}</p>
       </section>
   
@@ -729,7 +730,7 @@ export async function ingresarAfip() {
   return afip;
 }
 
-function numeroALetras(numero: number): string {
+function numeroALetras(numero: number | undefined): string {
   const unidades = [
     "",
     "uno",
@@ -777,46 +778,52 @@ function numeroALetras(numero: number): string {
     "dieciocho",
     "diecinueve",
   ];
-  if (numero === 0) return "cero";
-  if (numero < 10) return unidades[numero]!;
-  if (numero >= 11 && numero < 20) return especiales[numero - 11]!;
-  if (numero < 100)
-    return (
-      decenas[Math.floor(numero / 10)] +
-      (numero % 10 !== 0 ? " y " + unidades[numero % 10] : "")
-    );
-  if (numero < 1000) {
-    let centena = Math.floor(numero / 100);
-    let resto = numero % 100;
-    if (resto === 0 && centena === 1) return "cien";
-    return centenas[centena] + (resto !== 0 ? " " + numeroALetras(resto) : "");
+  if (numero) {
+    if (numero === 0) return "cero";
+    if (numero < 10) return unidades[numero]!;
+    if (numero >= 11 && numero < 20) return especiales[numero - 11]!;
+    if (numero < 100)
+      return (
+        decenas[Math.floor(numero / 10)] +
+        (numero % 10 !== 0 ? " y " + unidades[numero % 10] : "")
+      );
+    if (numero < 1000) {
+      let centena = Math.floor(numero / 100);
+      let resto = numero % 100;
+      if (resto === 0 && centena === 1) return "cien";
+      return (
+        centenas[centena] + (resto !== 0 ? " " + numeroALetras(resto) : "")
+      );
+    }
+    if (numero < 1000000) {
+      let miles = Math.floor(numero / 1000);
+      let resto = numero % 1000;
+      if (miles === 1)
+        return "mil" + (resto !== 0 ? " " + numeroALetras(resto) : "");
+      return (
+        numeroALetras(miles) +
+        " mil" +
+        (resto !== 0 ? " " + numeroALetras(resto) : "")
+      );
+    }
+    if (numero < 100000000) {
+      let millones = Math.floor(numero / 1000000);
+      let resto = numero % 1000000;
+      if (millones === 1)
+        return "un millón" + (resto !== 0 ? " " + numeroALetras(resto) : "");
+      return (
+        numeroALetras(millones) +
+        " millones" +
+        (resto !== 0 ? " " + numeroALetras(resto) : "")
+      );
+    }
+    return "Número fuera de rango";
   }
-  if (numero < 1000000) {
-    let miles = Math.floor(numero / 1000);
-    let resto = numero % 1000;
-    if (miles === 1)
-      return "mil" + (resto !== 0 ? " " + numeroALetras(resto) : "");
-    return (
-      numeroALetras(miles) +
-      " mil" +
-      (resto !== 0 ? " " + numeroALetras(resto) : "")
-    );
-  }
-  if (numero < 100000000) {
-    let millones = Math.floor(numero / 1000000);
-    let resto = numero % 1000000;
-    if (millones === 1)
-      return "un millón" + (resto !== 0 ? " " + numeroALetras(resto) : "");
-    return (
-      numeroALetras(millones) +
-      " millones" +
-      (resto !== 0 ? " " + numeroALetras(resto) : "")
-    );
-  }
-  return "Número fuera de rango";
+  return "";
 }
 
-function obtenerDecimales(numero: number) {
+function obtenerDecimales(numero: number | undefined) {
+  if (!numero) return "00";
   let numeroStr = numero.toString();
   let partes = numeroStr.split(".");
   if (partes.length === 2) {

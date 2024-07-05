@@ -275,7 +275,7 @@ async function approbateFactura(liquidationId: string) {
         },
       };
       const html = htmlBill(
-        factura,
+        factura.id,
         factura.family_group?.businessUnitData!.company,
         producto,
         last_voucher + 1
@@ -757,6 +757,25 @@ export const facturasRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const factura = await db.query.facturas.findFirst({
         where: eq(schema.facturas.id, input.facturaId),
+        with: {
+          items: true,
+          family_group: {
+            with: {
+              integrants: {
+                with: {
+                  pa: true,
+                  postal_code: true,
+                },
+              },
+              businessUnitData: {
+                with: {
+                  company: true,
+                  brand: true,
+                },
+              },
+            },
+          },
+        },
       });
 
       return factura;
@@ -774,7 +793,6 @@ export const facturasRouter = createTRPCRouter({
         .insert(schema.facturas)
         .values({ ...input })
         .returning();
-
       return newProvider;
     }),
   approvePreLiquidation: protectedProcedure
