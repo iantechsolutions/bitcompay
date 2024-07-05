@@ -40,8 +40,7 @@ export default async function Home(props: {
   const preliquidation = await api.liquidations.get.query({
     id: props.params.liquidationId,
   });
-  console.log("preliquidation");
-  console.log(preliquidation);
+  const familyGroups = await api.family_groups.list.query();
   const user = await clerkClient.users.getUser(
     preliquidation?.userCreated ?? ""
   );
@@ -64,42 +63,42 @@ export default async function Home(props: {
     "IVA",
     "Total",
   ];
-  const rowsPromise =
-    facturas?.map(async (factura) => {
-      if (!factura) return [];
-      const billResponsible = factura?.family_group?.integrants[0];
+  // const rowsPromise =
+  //   facturas?.map(async (factura) => {
+  //     if (!factura) return [];
+  //     const billResponsible = factura?.family_group?.integrants[0];
 
-      const lastEvent = await api.events.getLastByDateAndCC.query({
-        ccId: factura?.family_group?.cc?.id!,
-        date: factura?.liquidations?.createdAt ?? new Date(),
-      });
+  //     const lastEvent = await api.events.getLastByDateAndCC.query({
+  //       ccId: factura?.family_group?.cc?.id!,
+  //       date: factura?.liquidations?.createdAt ?? new Date(),
+  //     });
 
-      const total = parseFloat(factura?.importe.toFixed(2));
-      return [
-        factura?.family_group?.numericalId ?? "",
-        billResponsible?.name ?? "",
-        billResponsible?.id_number ?? "",
-        billResponsible?.fiscal_id_number ?? "",
-        isNaN(factura.items?.abono!) ? " " : factura.items?.abono,
-        isNaN(factura.items?.bonificacion!)
-          ? " "
-          : factura.items?.bonificacion?.toString(),
-        isNaN(factura.items?.differential_amount!)
-          ? " "
-          : factura.items?.differential_amount,
-        isNaN(factura.items?.contribution!) ? " " : factura.items?.contribution,
-        isNaN(factura.items?.interest!) ? " " : factura.items?.interest,
-        isNaN(computeBase(total, parseFloat(factura?.iva)))
-          ? " "
-          : computeBase(total, parseFloat(factura?.iva)),
-        isNaN(computeIva(total, parseFloat(factura?.iva)))
-          ? " "
-          : computeIva(total, parseFloat(factura?.iva)),
-        isNaN(total) ? " " : total,
-      ];
-    }) || [];
-  const rows = await Promise.all(rowsPromise);
-  rows.unshift(headers);
+  //     const total = parseFloat(factura?.importe.toFixed(2));
+  //     return [
+  //       factura?.family_group?.numericalId ?? "",
+  //       billResponsible?.name ?? "",
+  //       billResponsible?.id_number ?? "",
+  //       billResponsible?.fiscal_id_number ?? "",
+  //       isNaN(factura.items?.abono!) ? " " : factura.items?.abono,
+  //       isNaN(factura.items?.bonificacion!)
+  //         ? " "
+  //         : factura.items?.bonificacion?.toString(),
+  //       isNaN(factura.items?.differential_amount!)
+  //         ? " "
+  //         : factura.items?.differential_amount,
+  //       isNaN(factura.items?.contribution!) ? " " : factura.items?.contribution,
+  //       isNaN(factura.items?.interest!) ? " " : factura.items?.interest,
+  //       isNaN(computeBase(total, parseFloat(factura?.iva)))
+  //         ? " "
+  //         : computeBase(total, parseFloat(factura?.iva)),
+  //       isNaN(computeIva(total, parseFloat(factura?.iva)))
+  //         ? " "
+  //         : computeIva(total, parseFloat(factura?.iva)),
+  //       isNaN(total) ? " " : total,
+  //     ];
+  //   }) || [];
+  // const rows = await Promise.all(rowsPromise);
+  // rows.unshift(headers);
   return (
     <LayoutContainer>
       <div className="grid grid-cols-3 gap-x-2 gap-y-2">
@@ -149,91 +148,113 @@ export default async function Home(props: {
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
+               border-r-[1.5px] border-[#4af0d4]"
+              >
                 Nombre (Resp. Pago){" "}
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
+               border-r-[1.5px] border-[#4af0d4]"
+              >
                 DNI
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
+               border-r-[1.5px] border-[#4af0d4]"
+              >
                 CUIL/CUIT (Resp. Pago){" "}
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
+               border-r-[1.5px] border-[#4af0d4]"
+              >
                 Saldo Cta. Cte.{" "}
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
+               border-r-[1.5px] border-[#4af0d4]"
+              >
                 Cuota
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
+               border-r-[1.5px] border-[#4af0d4]"
+              >
                 Bonificacion
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
+               border-r-[1.5px] border-[#4af0d4]"
+              >
                 Diferencial
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
+               border-r-[1.5px] border-[#4af0d4]"
+              >
                 Aportes
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
+               border-r-[1.5px] border-[#4af0d4]"
+              >
                 Interes
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
+               border-r-[1.5px] border-[#4af0d4]"
+              >
                 Sub total
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
+               border-r-[1.5px] border-[#4af0d4]"
+              >
                 IVA
               </TableHead>
               {preliquidation?.estado !== "pendiente" ? (
                 <>
                   <TableHead
                     className="text-gray-800
-               rounded-r-md overflow-hidden">
+               rounded-r-md overflow-hidden"
+                  >
                     Total
                   </TableHead>
 
                   <TableHead
                     className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
+               border-r-[1.5px] border-[#4af0d4]"
+                  >
                     Factura
                   </TableHead>
                 </>
               ) : (
                 <TableHead
                   className="text-gray-800
-               rounded-r-md overflow-hidden">
+               rounded-r-md overflow-hidden"
+                >
                   Total
                 </TableHead>
               )}
             </TableRow>
           </TableHeader>
           <TableBody>
-            {facturas?.map((factura: any) => (
+            {familyGroups?.map((familyGroup) => (
+              <TableRowContainer
+                key={familyGroup.id}
+                factura={familyGroup?.facturas}
+                preliquidation={preliquidation}
+                periodo={periodo}
+              />
+            ))}
+            {/* {facturas?.map((factura: any) => (
               <TableRowContainer
                 key={factura.id}
                 factura={factura}
                 preliquidation={preliquidation}
                 periodo={periodo}
               />
-            ))}
+            ))} */}
           </TableBody>
         </Table>
         <br />
@@ -244,7 +265,7 @@ export default async function Home(props: {
           />
         )}
         <br />
-        <DownloadExcelButton rows={rows} period={preliquidation?.period} />
+        {/* <DownloadExcelButton rows={rows} period={preliquidation?.period} /> */}
       </div>
     </LayoutContainer>
   );

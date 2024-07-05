@@ -251,18 +251,18 @@ async function approbateFactura(liquidationId: string) {
         FchServDesde: formatDate(factura?.fromPeriod ?? new Date()),
         FchServHasta: formatDate(factura?.toPeriod ?? new Date()),
         FchVtoPago: formatDate(factura?.due_date ?? new Date()),
-        ImpTotal: factura?.importeAFIP,
+        ImpTotal: factura?.importe,
         ImpTotConc: 0,
-        ImpNeto: (Number(factura?.importeAFIP) / (1 + ivaFloat)).toString(),
+        ImpNeto: (Number(factura?.importe) / (1 + ivaFloat)).toString(),
         ImpOpEx: 0,
-        ImpIVA: (Number(factura?.importeAFIP) * ivaFloat).toString(),
+        ImpIVA: (Number(factura?.importe) * ivaFloat).toString(),
         ImpTrib: 0,
         MonId: "PES",
         MonCotiz: 1,
         Iva: {
           Id: iva,
           BaseImp: 0,
-          Importe: (Number(factura?.importeAFIP) * ivaFloat).toString(),
+          Importe: (Number(factura?.importe) * ivaFloat).toString(),
         },
       };
       const html = htmlBill(
@@ -370,19 +370,15 @@ async function preparateFactura(
       console.log(bonificacion);
 
       const contribution = await getGroupContribution(grupo);
-      console.log("contribution");
-      console.log(contribution);
       const differential_amount = await getDifferentialAmount(grupo);
 
       let mostRecentFactura;
       let previous_bill = 0;
       let account_payment = 0;
-      console.log("empieza a buscar factura");
       if (grupo?.facturas.length > 0) {
         const listadoFac = grupo.facturas?.filter(
           (x) => x.billLink && x.billLink != ""
         );
-        console.log("listadoFac", listadoFac);
         if (listadoFac.length > 0) {
           mostRecentFactura = listadoFac.reduce((prev, current) => {
             return prev.createdAt.getTime() > current.createdAt.getTime()
@@ -390,12 +386,10 @@ async function preparateFactura(
               : current;
           });
         }
-        console.log("mostRecentFactura", mostRecentFactura);
-        console.log("previous_bill", previous_bill);
-        console.log("account_payment", account_payment);
       } else {
         mostRecentFactura = null;
       }
+
       if (mostRecentFactura) {
         previous_bill = mostRecentFactura.importe;
         if (mostRecentFactura.payments.length > 0) {
@@ -404,40 +398,17 @@ async function preparateFactura(
           });
         }
       }
-      console.log("previous_bill", previous_bill);
-      console.log("account_payment", account_payment);
-      console.log("interes", interes);
       const interest = (interes / 100) * previous_bill;
-      console.log("interest", interest);
       const importe =
         (abono - bonificacion + differential_amount - contribution) * ivaFloat +
         previous_bill +
         interest -
         account_payment;
-      const importeAFIP =
-        (abono - bonificacion + differential_amount - contribution) * ivaFloat +
-        previous_bill +
-        interest;
-      const items = await db
-        .insert(schema.items)
-        .values({
-          abono,
-          bonificacion,
-          differential_amount,
-          contribution,
-          interest,
-          previous_bill,
-          account_payment,
-        })
-        .returning();
       const tipoDocumento = idDictionary[billResponsible?.fiscal_id_type ?? ""];
-      const producto = await db.query.products.findFirst({
-        where: eq(schema.products.id, billResponsible?.pa[0]?.product_id ?? ""),
-      });
+
       const factura = await db
         .insert(schema.facturas)
         .values({
-          items_id: items[0]!.id ?? "",
           ptoVenta: parseInt(pv),
           nroFactura: 0,
           tipoFactura: grupo.businessUnitData?.brand?.bill_type,
@@ -457,12 +428,31 @@ async function preparateFactura(
           family_group_id: grupo.id,
         })
         .returning();
+      const abonoItem = await db
+        .insert(schema.items)
+        .values({
+          concept: "Abono",
+          amount: abono,
+          iva: abono * ivaFloat - abono,
+          total: abono * ivaFloat,
+          comprobante_id: factura[0]?.id,
+        })
+        .returning();
+      // bonificacion,
+      // differential_amount,
+      // contribution,
+      // interest,
+      // previous_bill,
+      // account_payment,
+      const producto = await db.query.products.findFirst({
+        where: eq(schema.products.id, billResponsible?.pa[0]?.product_id ?? ""),
+      });
+
       const randomNumber =
         Math.floor(Math.random() * (100000 - 1000 + 1)) + 1000;
       const status = await db.query.paymentStatus.findFirst({
         where: eq(schema.paymentStatus.code, "91"),
       });
-      console.log("numero", producto?.number);
     }
   }
 
@@ -486,8 +476,6 @@ async function getGroupAmount(grupo: grupoCompleto, date: Date) {
     grupo.integrants?.forEach((integrant) => {
       if (integrant.birth_date != null) {
         const age = calcularEdad(integrant.birth_date);
-        console.log(age);
-        console.log(integrant.relationship);
         let precioIntegrante = precios?.find(
           (x) => integrant.relationship && x.condition == integrant.relationship
         )?.amount;
@@ -693,6 +681,7 @@ export const facturasRouter = createTRPCRouter({
           number: randomNumberLiq,
           pdv: parseInt(input.pv),
           interest: input.interest,
+          logo_url: input.logo_url,
         })
         .returning();
       await preparateFactura(

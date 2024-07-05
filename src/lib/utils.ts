@@ -112,6 +112,14 @@ export function htmlBill(
         return "X";
     }
   }
+
+  function getIimageForLogo(logo: string) {
+    if (logo) {
+      return `<img class="logo" src=${logo} alt="logo" />`;
+    } else {
+      return `<img class="logo" src="https://utfs.io/f/f426d7f1-f9c7-437c-a722-f978ab23830d-neiy4q.png" alt="logo" />`;
+    }
+  }
   function getTextoForTipoFactura(tipoFactura: string) {
     switch (tipoFactura) {
       case "3":
@@ -450,11 +458,11 @@ span {
     <body>
       <header>
         <div class="items-1">
-          <img
-            class="logo"
-            src="https://utfs.io/f/f426d7f1-f9c7-437c-a722-f978ab23830d-neiy4q.png"
-            alt=""
-          />
+        ${getIimageForLogo(
+          factura.family_group?.businessUnitData?.brand[0]?.logo_url ??
+            "https://utfs.io/f/f426d7f1-f9c7-437c-a722-f978ab23830d-neiy4q.png"
+        )}
+            
           <p>
             ${company.razon_social}<br />
             ${company.address} <br />

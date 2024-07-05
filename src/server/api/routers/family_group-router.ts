@@ -11,7 +11,21 @@ import {
 export const family_groupsRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({ ctx }) => {
     const family_groups = await db.query.family_groups.findMany({
-      with: { integrants: true, cc: true, businessUnitData: true },
+      with: {
+        integrants: true,
+        cc: true,
+        businessUnitData: true,
+        facturas: {
+          with: {
+            items: true,
+            family_group: {
+              with: {
+                integrants: true,
+              },
+            },
+          },
+        },
+      },
     });
     const family_group_reduced = family_groups.filter((family_groups) => {
       return family_groups.businessUnitData?.companyId === ctx.session.orgId!;

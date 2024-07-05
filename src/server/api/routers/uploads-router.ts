@@ -202,8 +202,13 @@ export const uploadsRouter = createTRPCRouter({
 
             if (payment?.factura?.family_group?.cc) {
               const currentAccount = payment?.factura?.family_group?.cc;
-              const lastEvent =
-                currentAccount?.events[currentAccount?.events.length - 1];
+              const lastEvent = currentAccount?.events.reduce(
+                (prev, current) => {
+                  return new Date(prev.createdAt) > new Date(current.createdAt)
+                    ? prev
+                    : current;
+                }
+              );
               if (!lastEvent) {
                 throw new Error("No hay eventos en la cuenta corriente");
               }
@@ -213,8 +218,8 @@ export const uploadsRouter = createTRPCRouter({
                   record.first_due_amount ?? record.collected_amount ?? 0,
                 current_amount:
                   lastEvent?.current_amount! + payment?.factura?.importe!,
-                description: "Factura aprobada",
-                type: "FC",
+                description: "Recaudacion",
+                type: "REC",
               });
             }
           })
