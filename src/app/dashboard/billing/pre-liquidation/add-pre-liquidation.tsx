@@ -81,9 +81,6 @@ export default function AddPreLiquidation(props: { companyId: string }) {
 
   const handleBrandChange = (value: string) => {
     const selectedBrand = marcas?.find((marca) => marca.id === value);
-    if (selectedBrand) {
-      setLogo_url(selectedBrand.logo_url!);
-    }
     setBrandId(value);
   };
 

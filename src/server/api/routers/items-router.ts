@@ -62,6 +62,11 @@ export const itemsRouter = createTRPCRouter({
       });
       const factura = await db.query.facturas.findFirst({
         where: eq(schema.facturas.id, input.comprobante_id),
+        with: {
+          family_group: {
+            with: { businessUnitData: { with: { brand: true } } },
+          },
+        },
       });
       return factura;
     }),
