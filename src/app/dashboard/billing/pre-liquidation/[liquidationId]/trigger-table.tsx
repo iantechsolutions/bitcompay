@@ -13,36 +13,42 @@ import { computeBase, computeIva } from "~/lib/utils";
 import { RedirectButton } from "~/components/redirect-button";
 import Link from "next/link";
 import { Button } from "~/components/ui/button";
+import { FamilyListLiquidationId } from "~/server/api/routers/family_group-router";
 interface TriggerTableProps {
   setActive: (value: boolean) => void;
   active: boolean;
-  factura: RouterOutputs["facturas"]["list"][number];
+  factura: RouterOutputs["facturas"]["getByLiquidation"][number];
   preliquidation: RouterOutputs["liquidations"]["get"];
-  bonificationValue: number;
-  contributionValue: number;
-  interestValue: number;
-  cuotaValue: number;
-  previousBillValue: number;
   total: number;
   currentAccountAmount: number;
+  family_group: RouterOutputs["family_groups"]["getByLiquidation"][number];
 }
 
 export default function TriggerTable(props: TriggerTableProps) {
   const {
-    cuotaValue,
     setActive,
     active,
     factura,
-    bonificationValue,
-    contributionValue,
-    interestValue,
-    previousBillValue,
+    preliquidation,
     total,
     currentAccountAmount,
+    family_group,
   } = props;
 
-  const billResponsible = factura?.family_group?.integrants[0];
-
+  const billResponsible = family_group?.integrants.find(
+    (x) => x.isBillResponsible == true
+  );
+  const bonification = factura.items.find(
+    (item) => item.concept === "bonificacion"
+  );
+  const contribution = factura.items.find(
+    (item) => item.concept === "contribucion"
+  );
+  const interest = factura.items.find((item) => item.concept === "interes");
+  const previousBill = factura.items.find(
+    (item) => item.concept === "factura periodo anterior impaga"
+  );
+  const abono = factura.items.find((item) => item.concept === "abono");
   return (
     <TableRow
       className="rounded-lg bg-[#f0f0f0]
@@ -60,7 +66,7 @@ export default function TriggerTable(props: TriggerTableProps) {
             <CircleChevronRight className="bg-[#6cebd1] h-4 w-4 rounded-full" />
           )}
         </button>
-        {factura?.family_group?.numericalId ?? "N/A"}
+        {family_group?.numericalId ?? "N/A"}
       </TableCell>
 
       <TableCell className="border border-[#6cebd1] p-2 py-4">
@@ -79,23 +85,20 @@ export default function TriggerTable(props: TriggerTableProps) {
       </TableCell>
       <TableCell className="border border-[#6cebd1] p-2 py-4">
         {" "}
-        {cuotaValue}
+        {abono?.amount}
       </TableCell>
       <TableCell className="border border-[#6cebd1] p-2 py-4">
         {" "}
-        {bonificationValue}
+        {bonification?.amount}
+      </TableCell>
+      <TableCell className="border border-[#6cebd1] p-2 py-4"> {0}</TableCell>
+      <TableCell className="border border-[#6cebd1] p-2 py-4">
+        {" "}
+        {contribution?.amount}
       </TableCell>
       <TableCell className="border border-[#6cebd1] p-2 py-4">
         {" "}
-        {factura.items?.differential_amount ?? 0}
-      </TableCell>
-      <TableCell className="border border-[#6cebd1] p-2 py-4">
-        {" "}
-        {contributionValue}
-      </TableCell>
-      <TableCell className="border border-[#6cebd1] p-2 py-4">
-        {" "}
-        {interestValue}
+        {interest?.amount}
       </TableCell>
       <TableCell className="border border-[#6cebd1] p-2 py-4">
         {" "}

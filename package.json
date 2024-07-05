@@ -46,6 +46,7 @@
         "@uploadthing/react": "^6.0.2",
         "binlookup": "^2.0.1",
         "class-variance-authority": "^0.7.0",
+        "clerk-react": "^0.1.9",
         "clsx": "^2.0.0",
         "cmdk": "^0.2.0",
         "date-fns": "^3.6.0",

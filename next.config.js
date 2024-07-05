@@ -12,6 +12,9 @@ const config = {
                 hostname: 'utfs.io',
                 protocol: 'https',
             },
+            {
+                hostname: 'img.clerk.com'
+            }
         ],
     },
 }
