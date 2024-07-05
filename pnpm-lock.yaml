@@ -104,6 +104,9 @@ dependencies:
   class-variance-authority:
     specifier: ^0.7.0
     version: 0.7.0
+  clerk-react:
+    specifier: ^0.1.9
+    version: 0.1.9(react@18.3.1)
   clsx:
     specifier: ^2.0.0
     version: 2.0.0
@@ -2954,6 +2957,15 @@ packages:
       clsx: 2.0.0
     dev: false
 
+  /clerk-react@0.1.9(react@18.3.1):
+    resolution: {integrity: sha512-xM0vRSW+aiUO9CklWTEaFO9SQL+rJs1hOPMvTibJFSFktYSJmUFxdSZTv6eUF10LthpQcitMnoQSX7oHAyQokw==}
+    peerDependencies:
+      react: ^16.8.0
+    dependencies:
+      core-js: 3.37.1
+      react: 18.3.1
+    dev: false
+
   /cli-color@2.0.3:
     resolution: {integrity: sha512-OkoZnxyC4ERN3zLzZaY9Emb7f/MhBOIpePv0Ycok0fJYT+Ouo00UBEIwsVsr0yoow++n5YWlSUgST9GKhNHiRQ==}
     engines: {node: '>=0.10'}
@@ -3047,7 +3059,6 @@ packages:
     resolution: {integrity: sha512-Xn6qmxrQZyB0FFY8E3bgRXei3lWDJHhvI+u0q9TKIYM49G8pAr0FgnnrFRAmsbptZL1yxRADVXn+x5AGsbBfyw==}
     requiresBuild: true
     dev: false
-    optional: true
 
   /core-util-is@1.0.2:
     resolution: {integrity: sha512-3lqz5YjWTYnW6dlDa5TLaTCcShfar1e40rmcJVwCBJC6mWlFuj0eCHIElmG1g5kyuJ/GD+8Wn4FFCcz4gJPfaQ==}
