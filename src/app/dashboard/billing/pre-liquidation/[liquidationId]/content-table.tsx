@@ -62,144 +62,26 @@ function ContentTable(props: propsContentTable) {
               IVA
             </TableHead>
             <TableHead className="text-black bg-[#ccfbf1]">Total</TableHead>
-          </TableRow>
-          <TableRow>
-            <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              {"NC"}
-            </TableCell>
-            <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              Factura periodo anterior impaga
-            </TableCell>
-            <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              ${previousBill?.amount}
-            </TableCell>
-            <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              $
-              {computeIva(
-                computeTotal(
-                  previousBill?.amount ?? 0,
-                  parseFloat(factura?.iva) ?? 0
-                ),
-                parseFloat(factura?.iva) ?? 0
-              )}
-            </TableCell>
-            <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              $
-              {computeTotal(
-                previousBill?.amount ?? 0,
-                parseFloat(factura?.iva) ?? 0
-              )}
-            </TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              {factura?.tipoFactura ?? "FC"}
-            </TableCell>
-            {/* <TableCell className="border border-gray-400 bg-[#b7f3e6]">{`Cuota Plan ${factura?.family_group?.plan?.description} ${period} `}</TableCell> */}
-            <TableCell className="border border-gray-400 bg-[#b7f3e6]"></TableCell>
-            <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              ${abono?.amount}
-            </TableCell>
-            <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              $
-              {computeIva(
-                computeTotal(abono?.amount ?? 0, parseFloat(factura?.iva) ?? 0),
-                parseFloat(factura?.iva) ?? 0
-              )}
-            </TableCell>
-            <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              ${computeTotal(abono?.amount ?? 0, parseFloat(factura?.iva) ?? 0)}
-            </TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              {factura?.tipoFactura ?? "FC"}
-            </TableCell>
-            <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              {/* {`Bonificacion ${Math.round(
-                ((factura?.items?.bonificacion ?? 0) / cuotaValue) * 100
-              )}%`} */}
-            </TableCell>
-            <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              -${bonification?.amount}
-            </TableCell>
-            <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              -$
-              {computeIva(
-                computeTotal(
-                  bonification?.amount ?? 0,
-                  parseFloat(factura?.iva) ?? 0
-                ),
-                parseFloat(factura?.iva) ?? 0
-              )}
-            </TableCell>
-            <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              -$
-              {computeTotal(
-                bonification?.amount ?? 0,
-                parseFloat(factura?.iva) ?? 0
-              )}
-            </TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              {" "}
-              {factura?.tipoFactura ?? "FC"}
-            </TableCell>
-            <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              {" "}
-              Aportes{" "}
-            </TableCell>
-            <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              ${contribution?.amount}
-            </TableCell>
-            <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              $
-              {computeIva(
-                computeTotal(
-                  contribution?.amount ?? 0,
-                  parseFloat(factura?.iva) ?? 0
-                ),
-                parseFloat(factura?.iva) ?? 0
-              )}
-            </TableCell>
-            <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              $
-              {computeTotal(
-                contribution?.amount ?? 0,
-                parseFloat(factura?.iva) ?? 0
-              )}
-            </TableCell>
-          </TableRow>
-
-          <TableRow>
-            <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              {factura?.tipoFactura ?? "FC"}
-            </TableCell>
-            <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              Interes por pago fuera de término
-            </TableCell>
-            <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              ${interest?.amount}
-            </TableCell>
-            <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              $
-              {computeIva(
-                computeTotal(
-                  interest?.amount ?? 0,
-                  parseFloat(factura?.iva) ?? 0
-                ),
-                parseFloat(factura?.iva) ?? 0
-              )}
-            </TableCell>
-            <TableCell className="border border-gray-400 bg-[#b7f3e6]">
-              $
-              {computeTotal(
-                interest?.amount ?? 0,
-                parseFloat(factura?.iva) ?? 0
-              )}
-            </TableCell>
-          </TableRow>
+          </TableRow>{" "}
+          {factura?.items.map((item) => (
+            <TableRow>
+              <TableCell className="border border-gray-400 border-t-black bg-[#ccfbf1]">
+                FC
+              </TableCell>
+              <TableCell className="border border-gray-400 border-t-black bg-[#ccfbf1]">
+                {item.concept}
+              </TableCell>
+              <TableCell className="border border-gray-400 border-t-black bg-[#ccfbf1]">
+                {item.amount}
+              </TableCell>
+              <TableCell className="border border-gray-400 border-t-black bg-[#ccfbf1]">
+                {item.iva}
+              </TableCell>
+              <TableCell className="border border-gray-400 border-t-black bg-[#ccfbf1]">
+                {item.total}
+              </TableCell>
+            </TableRow>
+          ))}
           <TableRow>
             <TableCell className="font-bold border border-gray-400 border-t-black bg-[#ccfbf1]">
               Total FC B
@@ -216,7 +98,7 @@ function ContentTable(props: propsContentTable) {
             <TableCell className="border border-gray-400 bg-[#ccfbf1] border-t-black">
               ${total}
             </TableCell>
-          </TableRow>
+          </TableRow>{" "}
         </Table>
       </OriginalTableCell>
     </OriginalTableRow>
