@@ -737,7 +737,7 @@ export const facturas = pgTable("facturas", {
   iva: varchar("iva", { length: 255 }).notNull(),
   billLink: varchar("billLink", { length: 255 }).notNull(),
   estado: varchar("estado", { enum: ["pagada", "parcial", "anuladas"] }),
-
+  origin: varchar("origin"),
   liquidation_id: varchar("liquidation_id", { length: 255 }).references(
     () => liquidations.id
   ),

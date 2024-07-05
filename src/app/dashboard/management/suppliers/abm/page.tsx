@@ -19,7 +19,7 @@ export default async function Page() {
             return (
               <ListTile
                 key={provider.id}
-                href={`/dashboard/management/suppliers/${provider.id}`}
+                href={`/dashboard/management/suppliers/abm/${provider.id}`}
                 title={provider.name}
                 leading={<CircleUserRound />}
               />

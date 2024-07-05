@@ -90,7 +90,9 @@ export function htmlBill(
   const billResponsible = factura.family_group?.integrants?.find(
     (x: any) => x.isBillResponsible
   );
-  const canales = producto?.channels;
+  if (producto) {
+    const canales = producto?.channels;
+  }
   function formatNumberAsCurrency(amount: number): string {
     return new Intl.NumberFormat("en-US", {
       style: "currency",

@@ -31,6 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { create } from "domain";
 
 function formatDate(date: Date | undefined) {
   if (date) {
@@ -45,7 +46,7 @@ function formatDate(date: Date | undefined) {
 
 export default function Page() {
   const { mutateAsync: createFactura } = api.facturas.create.useMutation();
-
+  const { data: company } = api.companies.get.useQuery();
   function generateFactura() {
     try {
       (async () => {
@@ -53,14 +54,14 @@ export default function Page() {
 
         setLoading(true);
 
-        const afip = ingresarAfip();
+        const afip = await ingresarAfip();
         // const ivas = await afip.ElectronicBilling.getAliquotTypes();
 
         // const serverStatus = await afip.ElectronicBilling.getServerStatus();
 
         let last_voucher;
         try {
-          last_voucher = (await afip).ElectronicBilling.getLastVoucher(
+          last_voucher = await afip.ElectronicBilling.getLastVoucher(
             puntoVenta,
             tipoFactura
           );
@@ -106,32 +107,34 @@ export default function Page() {
         /**
          * Creamos la Factura
          **/
+        const fac = saveFactura(numero_de_factura);
 
-        const res = (await afip).ElectronicBilling.createVoucher(data);
+        const res = await afip.ElectronicBilling.createVoucher(data);
+
+        const html = htmlBill(fac, company, undefined, 2);
 
         // CREAMOS HTML DE LA FACTURA
-        // const html = Factura({
-        //   puntoDeVenta: puntoVenta,
-        //   tipoFactura: tipoFactura,
-        //   concepto: concepto,
-        //   documentoComprador: tipoDocumento,
-        //   nroDocumento: nroDocumento,
-        //   total: Number(importe),
-        //   facturadoDesde: formatDate(dateDesde),
-        //   facturadoHasta: formatDate(dateHasta),
-        //   vtoPago: formatDate(dateVencimiento),
-        //   cantidad: 1,
-        //   nroComprobante: numero_de_factura,
-        //   nroCae: res.CAE,
-        //   vtoCae: res.CAEFchVto,
-        //   nombreServicio: "Servicio de prueba",
-        //   domicilioComprador: "Calle falsa 123",
-        //   nombreComprador: "Homero Simpson",
-        // });
+        const resHtml = Factura({
+          puntoDeVenta: puntoVenta,
+          tipoFactura: tipoFactura,
+          concepto: concepto,
+          documentoComprador: tipoDocumento,
+          nroDocumento: nroDocumento,
+          total: Number(importe),
+          facturadoDesde: formatDate(dateDesde),
+          facturadoHasta: formatDate(dateHasta),
+          vtoPago: formatDate(dateVencimiento),
+          cantidad: 1,
+          nroComprobante: numero_de_factura,
+          nroCae: res.CAE,
+          vtoCae: res.CAEFchVto,
+          nombreServicio: "Servicio de prueba",
+          domicilioComprador: "Calle falsa 123",
+          nombreComprador: "Homero Simpson",
+        });
+        console.log("resultadHTML", resHtml);
 
         setLoading(false);
-
-        saveFactura(numero_de_factura);
 
         toast.success("La factura se creo correctamente");
       })();
@@ -141,7 +144,7 @@ export default function Page() {
   }
 
   function saveFactura(numero_de_factura: number) {
-    createFactura({
+    const factura = createFactura({
       billLink: "",
       concepto: Number(concepto),
       importe: Number(importe),
@@ -157,6 +160,7 @@ export default function Page() {
       prodName: servicioprod,
       nroFactura: numero_de_factura,
     });
+    return factura;
   }
   type Channel = {
     number: number;
@@ -346,7 +350,8 @@ export default function Page() {
               <Select
                 onValueChange={(value) => {
                   setSelectedProduct(value);
-                }}>
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar un producto..." />
                 </SelectTrigger>
@@ -421,14 +426,16 @@ export default function Page() {
                   <br />
                   <Popover
                     open={popoverDesdeOpen}
-                    onOpenChange={setPopoverDesdeOpen}>
+                    onOpenChange={setPopoverDesdeOpen}
+                  >
                     <PopoverTrigger asChild={true}>
                       <Button
                         variant={"outline"}
                         className={cn(
                           "w-[220px] justify-start text-left font-normal",
                           !dateDesde && "text-muted-foreground"
-                        )}>
+                        )}
+                      >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {dateDesde ? (
                           format(dateDesde, "PPP")
@@ -452,14 +459,16 @@ export default function Page() {
                   <br />
                   <Popover
                     open={popoverFinOpen}
-                    onOpenChange={setPopoverFinOpen}>
+                    onOpenChange={setPopoverFinOpen}
+                  >
                     <PopoverTrigger asChild={true}>
                       <Button
                         variant={"outline"}
                         className={cn(
                           "w-[220px] justify-start text-left font-normal",
                           !dateHasta && "text-muted-foreground"
-                        )}>
+                        )}
+                      >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {dateHasta ? (
                           format(dateHasta, "PPP")
@@ -483,14 +492,16 @@ export default function Page() {
                   <br />
                   <Popover
                     open={popoverVencimientoOpen}
-                    onOpenChange={setPopoverVencimientoOpen}>
+                    onOpenChange={setPopoverVencimientoOpen}
+                  >
                     <PopoverTrigger asChild={true}>
                       <Button
                         variant={"outline"}
                         className={cn(
                           "w-[220px] justify-start text-left font-normal",
                           !dateVencimiento && "text-muted-foreground"
-                        )}>
+                        )}
+                      >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {dateVencimiento ? (
                           format(dateVencimiento, "PPP")
