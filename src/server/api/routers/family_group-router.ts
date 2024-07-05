@@ -45,6 +45,40 @@ export const family_groupsRouter = createTRPCRouter({
 
       return family_groups;
     }),
+  geyByLiquidation: protectedProcedure
+    .input(z.object({ liquidationId: z.string() }))
+    .query(async ({ input }) => {
+      const liquidation = await db.query.liquidations.findFirst({
+        where: eq(schema.liquidations.id, input.liquidationId),
+        with: {
+          facturas: {
+            with: {
+              family_group: {
+                with: {
+                  integrants: true,
+                  cc: true,
+                  businessUnitData: true,
+                  facturas: {
+                    with: {
+                      items: true,
+                      family_group: {
+                        with: {
+                          integrants: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+      const family_groups = liquidation?.facturas.map(
+        (factura) => factura.family_group
+      );
+      return family_groups;
+    }),
   getbyProcedure: protectedProcedure
     .input(
       z.object({
