@@ -73,6 +73,14 @@ const facturaDictionary = {
   "": 0,
 };
 
+const NCbytipoFacturaDictionary: { [key: string]: string } = {
+  "3": "8",
+  "6": "13",
+  "11": "15",
+  "51": "52",
+  "19": "20",
+};
+
 const idDictionary: { [key: string]: number } = {
   CUIT: 80,
   CUIL: 86,
@@ -176,15 +184,16 @@ async function approbateFactura(liquidationId: string) {
       .where(eq(schema.liquidations.id, liquidationId));
     const afip = await ingresarAfip();
     let last_voucher;
-    try {
-      last_voucher = await afip.ElectronicBilling.getLastVoucher(
-        liquidation.facturas[0]?.ptoVenta,
-        liquidation.facturas[0]?.tipoFactura
-      );
-    } catch {
-      last_voucher = 0;
-    }
+
     for (let factura of liquidation?.facturas) {
+      try {
+        last_voucher = await afip.ElectronicBilling.getLastVoucher(
+          factura?.ptoVenta,
+          factura?.tipoFactura
+        );
+      } catch {
+        last_voucher = 0;
+      }
       const randomNumber =
         Math.floor(Math.random() * (100000 - 1000 + 1)) + 1000;
       const billResponsible = factura.family_group?.integrants.find(
@@ -306,11 +315,35 @@ async function approbateFactura(liquidationId: string) {
         where: eq(schema.events.currentAccount_id, cc?.id ?? ""),
       });
       if (historicEvents && historicEvents.length > 0) {
-        const lastEvent = historicEvents.reduce((prev, current) => {
-          return new Date(prev.createdAt) > new Date(current.createdAt)
-            ? prev
-            : current;
-        });
+        const lastEvent = historicEvents
+          .filter(
+            (x) => x.createdAt.getTime() < liquidation.createdAt.getTime()
+          )
+          .reduce((prev, current) => {
+            return new Date(prev.createdAt) > new Date(current.createdAt)
+              ? prev
+              : current;
+          });
+        if (factura.origin === "Pago A Cuenta") {
+          const event = await db.insert(schema.events).values({
+            currentAccount_id: cc?.id,
+            event_amount: factura.importe,
+            current_amount: lastEvent.current_amount + factura.importe,
+            description: "Re Balance Pago a cuenta",
+            type: "FC",
+          });
+        }
+        if (factura.origin === "Nota de credito") {
+          const event = await db.insert(schema.events).values({
+            currentAccount_id: cc?.id,
+            event_amount: factura.importe,
+            current_amount: lastEvent.current_amount + factura.importe,
+            description: "Nota de credito factura anterior",
+            type: "NC",
+          });
+        }
+        if (factura.origin === "Original") {
+        }
         const event = await db.insert(schema.events).values({
           currentAccount_id: cc?.id,
           event_amount: factura.importe * -1,
@@ -351,13 +384,10 @@ async function preparateFactura(
       const billResponsible = grupo.integrants.find(
         (integrant) => integrant.isBillResponsible
       );
-      console.log("variables grupo");
       const iva =
         ivaDictionary[Number(grupo.businessUnitData?.brand?.iva) ?? 3];
       const ivaFloat = (100 + parseFloat(iva ?? "0")) / 100;
-      console.log(ivaFloat);
       const abono = await getGroupAmount(grupo, dateDesde!);
-      console.log(abono);
       const bonificacion =
         (parseFloat(
           grupo.bonus?.find((x) => {
@@ -367,7 +397,6 @@ async function preparateFactura(
         ) *
           abono) /
         100;
-      console.log(bonificacion);
 
       const contribution = await getGroupContribution(grupo);
       const differential_amount = await getDifferentialAmount(grupo);
@@ -375,6 +404,17 @@ async function preparateFactura(
       let mostRecentFactura;
       let previous_bill = 0;
       let account_payment = 0;
+      const events = await db.query.events.findMany({
+        where: eq(schema.events.currentAccount_id, grupo.cc?.id ?? ""),
+      });
+      const lastEvent = events
+        ?.filter((x) => x.createdAt.getTime() < new Date().getTime())
+        .reduce((prev, current) => {
+          return new Date(prev.createdAt) > new Date(current.createdAt)
+            ? prev
+            : current;
+        });
+
       if (grupo?.facturas.length > 0) {
         const listadoFac = grupo.facturas?.filter(
           (x) => x.billLink && x.billLink != ""
@@ -398,13 +438,77 @@ async function preparateFactura(
           });
         }
       }
+      const tipoDocumento = idDictionary[billResponsible?.fiscal_id_type ?? ""];
+
+      if (lastEvent.current_amount < 0) {
+        const facturaPayment = await db
+          .insert(schema.facturas)
+          .values({
+            ptoVenta: parseInt(pv),
+            nroFactura: 0,
+            tipoFactura: grupo.businessUnitData?.brand?.bill_type,
+            concepto: parseInt(grupo.businessUnitData?.brand?.concept ?? "0"),
+            tipoDocumento: tipoDocumento ?? 0,
+            // tipoDocumento: 80,
+            nroDocumento: parseInt(billResponsible?.fiscal_id_number ?? "0"),
+            // nroDocumento: 0,
+            importe: account_payment,
+            fromPeriod: dateDesde,
+            toPeriod: dateHasta,
+            due_date: dateVencimiento,
+            prodName: "Servicio",
+            iva: iva ?? "",
+            billLink: "",
+            liquidation_id: liquidationId,
+            family_group_id: grupo.id,
+            origin: "Pago A Cuenta",
+          })
+          .returning();
+        await createFacturaItem(
+          ivaFloat,
+          facturaPayment[0]?.id ?? "",
+          "Pago A Cuenta",
+          account_payment
+        );
+        const tipoFactura = grupo.businessUnitData?.brand?.bill_type ?? 0;
+        const facturaNC = await db
+          .insert(schema.facturas)
+          .values({
+            ptoVenta: parseInt(pv),
+            nroFactura: 0,
+            tipoFactura:
+              NCbytipoFacturaDictionary[
+                grupo.businessUnitData?.brand?.bill_type ?? "0"
+              ],
+            concepto: parseInt(grupo.businessUnitData?.brand?.concept ?? "0"),
+            tipoDocumento: tipoDocumento ?? 0,
+            // tipoDocumento: 80,
+            nroDocumento: parseInt(billResponsible?.fiscal_id_number ?? "0"),
+            // nroDocumento: 0,
+            importe: previous_bill,
+            fromPeriod: dateDesde,
+            toPeriod: dateHasta,
+            due_date: dateVencimiento,
+            prodName: "Servicio",
+            iva: iva ?? "",
+            billLink: "",
+            liquidation_id: liquidationId,
+            family_group_id: grupo.id,
+            origin: "Nota de credito",
+          })
+          .returning();
+        await createFacturaItem(
+          ivaFloat,
+          facturaNC[0]?.id ?? "",
+          "Nota de credito",
+          previous_bill
+        );
+      }
       const interest = (interes / 100) * previous_bill;
       const importe =
         (abono - bonificacion + differential_amount - contribution) * ivaFloat +
-        previous_bill +
         interest -
         account_payment;
-      const tipoDocumento = idDictionary[billResponsible?.fiscal_id_type ?? ""];
 
       const factura = await db
         .insert(schema.facturas)
@@ -426,24 +530,46 @@ async function preparateFactura(
           billLink: "",
           liquidation_id: liquidationId,
           family_group_id: grupo.id,
+          origin: "Original",
         })
         .returning();
-      const abonoItem = await db
-        .insert(schema.items)
-        .values({
-          concept: "Abono",
-          amount: abono,
-          iva: abono * ivaFloat - abono,
-          total: abono * ivaFloat,
-          comprobante_id: factura[0]?.id,
-        })
-        .returning();
-      // bonificacion,
-      // differential_amount,
-      // contribution,
-      // interest,
-      // previous_bill,
-      // account_payment,
+      await createFacturaItem(ivaFloat, factura[0]?.id ?? "", "Abono", abono);
+      await createFacturaItem(
+        ivaFloat,
+        factura[0]?.id ?? "",
+        "Bonificación",
+        -1 * bonificacion
+      );
+      await createFacturaItem(
+        ivaFloat,
+        factura[0]?.id ?? "",
+        "Diferencial",
+        differential_amount
+      );
+      await createFacturaItem(
+        ivaFloat,
+        factura[0]?.id ?? "",
+        "Aporte",
+        -1 * contribution
+      );
+      await createFacturaItem(
+        ivaFloat,
+        factura[0]?.id ?? "",
+        "Interes",
+        interest
+      );
+      await createFacturaItem(
+        ivaFloat,
+        factura[0]?.id ?? "",
+        "Factura Anterior",
+        previous_bill
+      );
+      await createFacturaItem(
+        ivaFloat,
+        factura[0]?.id ?? "",
+        "Pago",
+        -1 * account_payment
+      );
       const producto = await db.query.products.findFirst({
         where: eq(schema.products.id, billResponsible?.pa[0]?.product_id ?? ""),
       });
@@ -457,6 +583,24 @@ async function preparateFactura(
   }
 
   return "OK";
+}
+
+async function createFacturaItem(
+  ivaFloat: number,
+  facturaId: string,
+  concept: string,
+  amount: number
+) {
+  const abonoItem = await db
+    .insert(schema.items)
+    .values({
+      concept: concept,
+      amount: amount,
+      iva: amount * ivaFloat - amount,
+      total: amount * ivaFloat,
+      comprobante_id: facturaId,
+    })
+    .returning();
 }
 
 async function getGroupAmount(grupo: grupoCompleto, date: Date) {
@@ -660,7 +804,6 @@ export const facturasRouter = createTRPCRouter({
       console.log("DATE DESDE", input.dateDesde);
       const companyId = ctx.session.orgId;
       const grupos = await getGruposByBrandId(input.brandId);
-      console.log("grupos", grupos);
       const user = await currentUser();
       const brand = await db.query.brands.findFirst({
         where: eq(schema.brands.id, input.brandId),
