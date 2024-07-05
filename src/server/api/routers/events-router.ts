@@ -16,21 +16,17 @@ export const eventsRouter = createTRPCRouter({
       })
     )
     .query(async ({ input }) => {
-      try {
-        const event = await db.query.events
-          // .orderBy(schema.events.createdAt, "desc")
-          .findFirst({
-            orderBy: [desc(schema.events.createdAt)],
-            where: and(
-              eq(schema.events.currentAccount_id, input.ccId),
-              lt(schema.events.createdAt, input.date)
-            ),
-          });
+      const event = await db.query.events
+        // .orderBy(schema.events.createdAt, "desc")
+        .findFirst({
+          orderBy: [desc(schema.events.createdAt)],
+          where: and(
+            eq(schema.events.currentAccount_id, input.ccId),
+            lt(schema.events.createdAt, input.date)
+          ),
+        });
 
-        return event;
-      } catch {
-        return [];
-      }
+      return event;
     }),
   createByType: protectedProcedure
     .input(

@@ -626,7 +626,10 @@ export const facturasRouter = createTRPCRouter({
   create: protectedProcedure
     .input(FacturasSchemaDB)
     .mutation(async ({ input }) => {
-      const newProvider = await db.insert(schema.facturas).values({ ...input });
+      const newProvider = await db
+        .insert(schema.facturas)
+        .values({ ...input })
+        .returning();
 
       return newProvider;
     }),
