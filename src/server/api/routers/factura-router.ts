@@ -251,18 +251,18 @@ async function approbateFactura(liquidationId: string) {
         FchServDesde: formatDate(factura?.fromPeriod ?? new Date()),
         FchServHasta: formatDate(factura?.toPeriod ?? new Date()),
         FchVtoPago: formatDate(factura?.due_date ?? new Date()),
-        ImpTotal: factura?.importeAFIP,
+        ImpTotal: factura?.importe,
         ImpTotConc: 0,
-        ImpNeto: (Number(factura?.importeAFIP) / (1 + ivaFloat)).toString(),
+        ImpNeto: (Number(factura?.importe) / (1 + ivaFloat)).toString(),
         ImpOpEx: 0,
-        ImpIVA: (Number(factura?.importeAFIP) * ivaFloat).toString(),
+        ImpIVA: (Number(factura?.importe) * ivaFloat).toString(),
         ImpTrib: 0,
         MonId: "PES",
         MonCotiz: 1,
         Iva: {
           Id: iva,
           BaseImp: 0,
-          Importe: (Number(factura?.importeAFIP) * ivaFloat).toString(),
+          Importe: (Number(factura?.importe) * ivaFloat).toString(),
         },
       };
       const html = htmlBill(
@@ -404,30 +404,11 @@ async function preparateFactura(
         previous_bill +
         interest -
         account_payment;
-      const importeAFIP =
-        (abono - bonificacion + differential_amount - contribution) * ivaFloat +
-        previous_bill +
-        interest;
-      const items = await db
-        .insert(schema.items)
-        .values({
-          abono,
-          bonificacion,
-          differential_amount,
-          contribution,
-          interest,
-          previous_bill,
-          account_payment,
-        })
-        .returning();
       const tipoDocumento = idDictionary[billResponsible?.fiscal_id_type ?? ""];
-      const producto = await db.query.products.findFirst({
-        where: eq(schema.products.id, billResponsible?.pa[0]?.product_id ?? ""),
-      });
+
       const factura = await db
         .insert(schema.facturas)
         .values({
-          items_id: items[0]!.id ?? "",
           ptoVenta: parseInt(pv),
           nroFactura: 0,
           tipoFactura: grupo.businessUnitData?.brand?.bill_type,
@@ -447,6 +428,26 @@ async function preparateFactura(
           family_group_id: grupo.id,
         })
         .returning();
+      const abonoItem = await db
+        .insert(schema.items)
+        .values({
+          concept: "Abono",
+          amount: abono,
+          iva: abono * ivaFloat - abono,
+          total: abono * ivaFloat,
+          comprobante_id: factura[0]?.id,
+        })
+        .returning();
+      // bonificacion,
+      // differential_amount,
+      // contribution,
+      // interest,
+      // previous_bill,
+      // account_payment,
+      const producto = await db.query.products.findFirst({
+        where: eq(schema.products.id, billResponsible?.pa[0]?.product_id ?? ""),
+      });
+
       const randomNumber =
         Math.floor(Math.random() * (100000 - 1000 + 1)) + 1000;
       const status = await db.query.paymentStatus.findFirst({

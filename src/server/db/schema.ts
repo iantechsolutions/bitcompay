@@ -729,17 +729,15 @@ export const facturas = pgTable("facturas", {
     mode: "number",
   }).notNull(),
   importe: real("importe").notNull(),
-  importeAFIP: real("importeAFIP"),
   fromPeriod: timestamp("fromperiod", { mode: "date" }),
   toPeriod: timestamp("toperiod", { mode: "date" }),
   due_date: timestamp("due_date", { mode: "date" }),
   payedDate: timestamp("payedDate", { mode: "date" }),
   prodName: varchar("prodName", { length: 255 }).notNull(),
   iva: varchar("iva", { length: 255 }).notNull(),
-  estado: varchar("estado"),
   billLink: varchar("billLink", { length: 255 }).notNull(),
-  items_id: varchar("items_id", { length: 255 }).references(() => items.id),
   estado: varchar("estado", { enum: ["pagada", "parcial", "anuladas"] }),
+
   liquidation_id: varchar("liquidation_id", { length: 255 }).references(
     () => liquidations.id
   ),
@@ -749,10 +747,7 @@ export const facturas = pgTable("facturas", {
 });
 
 export const facturasRelations = relations(facturas, ({ one, many }) => ({
-  items: one(items, {
-    fields: [facturas.items_id],
-    references: [items.id],
-  }),
+  items: many(items),
   liquidations: one(liquidations, {
     fields: [facturas.liquidation_id],
     references: [liquidations.id],
@@ -792,14 +787,28 @@ export type Factura = z.infer<typeof selectFacturasSchema>;
 
 export const items = pgTable("items", {
   id: columnId,
+  concept: varchar("concept", { length: 255 }),
+  amount: real("amount"),
+  iva: real("iva"),
+  total: real("total"),
   abono: real("abono"),
-  differential_amount: real("differential_amount"),
-  account_payment: real("account_payment"),
-  bonificacion: real("bonificacion"),
-  interest: real("interest"),
-  contribution: real("contribution"),
-  previous_bill: real("previous_bill"),
+  comprobante_id: varchar("comprobante_id", { length: 255 }).references(
+    () => facturas.id
+  ),
+  // differential_amount: real("differential_amount"),
+  // account_payment: real("account_payment"),
+  // bonificacion: real("bonificacion"),
+  // interest: real("interest"),
+  // contribution: real("contribution"),
+  // previous_bill: real("previous_bill"),
 });
+
+export const itemsRelations = relations(items, ({ one }) => ({
+  facturas: one(facturas, {
+    fields: [items.comprobante_id],
+    references: [facturas.id],
+  }),
+}));
 
 export const family_groups = pgTable("family_groups", {
   id: columnId,

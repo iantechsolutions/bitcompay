@@ -19,40 +19,44 @@ export default function TableRowContainer(props: {
   periodo: string;
 }) {
   const [active, setActive] = useState(false);
-  const total = parseFloat(props.factura.importe.toFixed(2));
-  console.log("factura", props.factura);
+  console.log("facturasTT", props.factura);
+
+  const total = parseFloat(props.factura[0].importe.toFixed(2));
   const { data: lastEvent } = api.events.getLastByDateAndCC.useQuery({
-    ccId: props.factura.family_group?.cc?.id!,
-    date: props.factura.liquidations?.createdAt ?? new Date(),
+    ccId: props.factura[0].family_group?.cc?.id!,
+    date: props.factura[0].liquidations?.createdAt ?? new Date(),
   });
-  const subTotal = computeBase(total, Number(props.factura.iva!));
+  const subTotal = computeBase(total, Number(props.factura[0].iva!));
   return (
     <>
       <TriggerTable
         setActive={setActive}
         active={active}
-        factura={props.factura}
+        factura={props.factura[0]}
         preliquidation={props.preliquidation}
         total={total}
-        interestValue={props.factura.items?.interest ?? 0}
-        contributionValue={props.factura.items?.contribution ?? 0}
-        bonificationValue={props.factura.items?.bonificacion ?? 0}
-        previousBillValue={props.factura.items?.previous_bill ?? 0}
+        interestValue={props.factura[0].items?.interest ?? 0}
+        contributionValue={props.factura[0].items?.contribution ?? 0}
+        bonificationValue={props.factura[0].items?.bonificacion ?? 0}
+        previousBillValue={props.factura[0].items?.previous_bill ?? 0}
         currentAccountAmount={lastEvent?.current_amount ?? 0}
-        cuotaValue={props.factura.items?.abono ?? 0}
+        cuotaValue={props.factura[0].items?.abono ?? 0}
       />
-      {active && (
-        <ContentTable
-          factura={props.factura}
-          period={props.periodo}
-          interestValue={props.factura.items?.interest ?? 0}
-          contributionValue={props.factura.items?.contribution ?? 0}
-          bonificationValue={props.factura.items?.bonificacion ?? 0}
-          previousBillValue={props.factura.items?.previous_bill ?? 0}
-          cuotaValue={props.factura.items?.abono ?? 0}
-          total={total}
-        />
-      )}
+      {active &&
+        props.factura.map((factura: any) => {
+          return (
+            <ContentTable
+              factura={factura}
+              period={props.periodo}
+              interestValue={factura.items?.interest ?? 0}
+              contributionValue={factura.items?.contribution ?? 0}
+              bonificationValue={factura.items?.bonificacion ?? 0}
+              previousBillValue={factura.items?.previous_bill ?? 0}
+              cuotaValue={factura.items?.abono ?? 0}
+              total={total}
+            />
+          );
+        })}
     </>
   );
 }
