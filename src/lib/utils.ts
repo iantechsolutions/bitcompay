@@ -122,6 +122,16 @@ export function htmlBill(
       return `<img class="logo" src="https://utfs.io/f/f426d7f1-f9c7-437c-a722-f978ab23830d-neiy4q.png" alt="logo" />`;
     }
   }
+  function generateConcepts(
+    items: Array<{ concept: string; total: number }>
+  ): string {
+    return items.map((item) => `<p>${item.concept}</p>`).join("");
+  }
+  function generateAmounts(
+    items: Array<{ concept: string; total: number }>
+  ): string {
+    return items.map((item) => `<p>${item.total}</p>`).join("");
+  }
   function getTextoForTipoFactura(tipoFactura: string) {
     switch (tipoFactura) {
       case "3":
@@ -146,6 +156,8 @@ export function htmlBill(
         return "";
     }
   }
+  const conceptosList = generateConcepts(factura.items);
+  const amountsList = generateAmounts(factura.items);
   const htmlContent = `<!DOCTYPE html>
   <html lang="en">
     <head>
@@ -540,31 +552,11 @@ span {
   
       <section class="parte-5">
         <div>
-          <p>Plan de salud ${
-            factura.family_group?.plan?.plan_code
-          } -- Periodo ${
-    (factura.fromPeriod.getMonth() + 1).toString() +
-    "/" +
-    factura.fromPeriod.getFullYear()
-  }</p>
-          <p>Bonificacion: ${
-            factura?.items?.bonificacion / factura?.items?.abono
-          }%</p>
-          <p>Aportes</p>
-          <p>Factura periodo anterior impaga</p>
-          <p>Interes por pago fuera de termino</p>
-          <p>Pago a cuenta</p>
+          ${conceptosList}
         </div>
   
         <div>
-          <p> ${formatNumberAsCurrency(factura.items?.abono ?? 0)}</p>
-          <p> -${formatNumberAsCurrency(factura.items?.bonificacion ?? 0)}</p>
-          <p> ${formatNumberAsCurrency(factura.items?.contribution ?? 0)}</p>
-          <p> ${formatNumberAsCurrency(
-            factura.items?.previous_bill * -1 ?? 0
-          )}</p>
-          <p> ${formatNumberAsCurrency(factura.items?.interest ?? 0)}</p>
-          <p> ${formatNumberAsCurrency(factura.items?.account_payment ?? 0)}</p>
+          ${amountsList}
         </div>
       </section>
   
