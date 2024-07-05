@@ -793,6 +793,7 @@ export const items = pgTable("items", {
   iva: real("iva"),
   total: real("total"),
   abono: real("abono"),
+  tipoComprobante: varchar("tipoComprobante", { length: 255 }),
   comprobante_id: varchar("comprobante_id", { length: 255 }).references(
     () => facturas.id
   ),

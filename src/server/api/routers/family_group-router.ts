@@ -7,6 +7,9 @@ import {
   medical_audit,
   family_groups,
 } from "~/server/db/schema";
+import { RouterOutputs } from "~/trpc/shared";
+export type FamilyListLiquidationId =
+  RouterOutputs["family_groups"]["getByLiquidation"][number];
 
 export const family_groupsRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({ ctx }) => {
@@ -43,6 +46,50 @@ export const family_groupsRouter = createTRPCRouter({
         where: eq(schema.family_groups.id, input.family_groupsId),
       });
 
+      return family_groups;
+    }),
+  getByLiquidation: protectedProcedure
+    .input(z.object({ liquidationId: z.string() }))
+    .query(async ({ input }) => {
+      const liquidation = await db.query.liquidations.findFirst({
+        where: eq(schema.liquidations.id, input.liquidationId),
+        with: {
+          facturas: {
+            with: {
+              family_group: {
+                with: {
+                  integrants: true,
+                  cc: true,
+                  businessUnitData: true,
+                  facturas: {
+                    with: {
+                      items: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+      let family_groups =
+        liquidation?.facturas.map((factura) => factura.family_group) || [];
+      const family_groups_reduced = [...new Set(family_groups)];
+      family_groups = [];
+      family_groups_reduced.map((family_group) => {
+        console.log("family_group en map", family_group);
+        const facturas = family_group?.facturas.filter(
+          (factura) => factura.liquidation_id === input.liquidationId
+        );
+        if (family_group) {
+          console.log("entra aca", facturas);
+          family_group.facturas = facturas ?? [];
+        }
+        family_groups.push(family_group);
+        console.log("post push", family_groups);
+      });
+      // fitro 1: no repetidos
+      // filtro 2: solo que pertenezcan a esta
       return family_groups;
     }),
   getbyProcedure: protectedProcedure

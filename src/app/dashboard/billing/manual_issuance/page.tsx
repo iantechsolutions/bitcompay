@@ -46,6 +46,7 @@ function formatDate(date: Date | undefined) {
 
 export default function Page() {
   const { mutateAsync: createFactura } = api.facturas.create.useMutation();
+  const { mutateAsync: createItem } = api.items.create.useMutation();
   const { data: company } = api.companies.get.useQuery();
   const { data: brand } = api.brands.getbyCurrentCompany.useQuery();
   const [logo, setLogo] = useState("");
@@ -110,14 +111,12 @@ export default function Page() {
           //   Importe: (Number(importe) * 0, 21).toString(),
           // },
         };
-        /**
-         * Creamos la Factura
-         **/
+
+        const fac = await saveFactura(numero_de_factura);
 
         const res = await afip.ElectronicBilling.createVoucher(data);
 
-        const fac = saveFactura(numero_de_factura);
-        const html = htmlBill(fac, company, undefined, 2);
+        const html = htmlBill(fac[0]?.id, company, undefined, 2);
 
         // CREAMOS HTML DE LA FACTURA
         const resHtml = Factura({
@@ -150,8 +149,8 @@ export default function Page() {
     }
   }
 
-  function saveFactura(numero_de_factura: number) {
-    const factura = createFactura({
+  async function saveFactura(numero_de_factura: number) {
+    const factura = await createFactura({
       billLink: "",
       concepto: Number(concepto),
       importe: Number(importe),
@@ -166,7 +165,14 @@ export default function Page() {
       generated: new Date(),
       prodName: servicioprod,
       nroFactura: numero_de_factura,
-      origin: "",
+    });
+    const item = await createItem({
+      concept: "Factura Manual",
+      amount: Number(importe),
+      iva: 0,
+      total: Number(importe),
+      abono: 0,
+      comprobante_id: factura[0]?.id ?? "",
     });
     return factura;
   }

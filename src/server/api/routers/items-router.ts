@@ -20,37 +20,49 @@ export const itemsRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
+        concept: z.string(),
+        amount: z.number(),
+        iva: z.number(),
+        total: z.number(),
         abono: z.number(),
-        differential_amount: z.number(),
-        bonificacion: z.number(),
-      }),
+        comprobante_id: z.string(),
+      })
     )
     .mutation(async ({ input }) => {
       const new_item = await db.insert(schema.items).values({
+        iva: input.iva,
+        concept: input.concept,
+        amount: input.amount,
+        total: input.total,
         abono: input.abono,
-        differential_amount: input.differential_amount,
-        bonificacion: input.bonificacion,
+        comprobante_id: input.comprobante_id,
       });
       return new_item;
     }),
   change: protectedProcedure
     .input(
       z.object({
-        itemId: z.string(),
+        id: z.string(),
+        concept: z.string(),
+        amount: z.number(),
+        iva: z.number(),
+        total: z.number(),
         abono: z.number(),
-        differential_amount: z.number(),
-        bonificacion: z.number(),
-      }),
+        comprobante_id: z.string(),
+      })
     )
     .mutation(async ({ input }) => {
       const item_changed = await db
         .update(schema.items)
         .set({
+          iva: input.iva,
+          concept: input.concept,
+          amount: input.amount,
+          total: input.total,
           abono: input.abono,
-          differential_amount: input.differential_amount,
-          bonificacion: input.bonificacion,
+          comprobante_id: input.comprobante_id,
         })
-        .where(eq(schema.items.id, input.itemId));
+        .where(eq(schema.items.id, input.id));
       return item_changed;
     }),
   delete: protectedProcedure
