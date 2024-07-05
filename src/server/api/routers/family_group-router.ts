@@ -74,7 +74,9 @@ export const family_groupsRouter = createTRPCRouter({
       });
       let family_groups =
         liquidation?.facturas.map((factura) => factura.family_group) || [];
-      const family_groups_reduced = [...new Set(family_groups)];
+      const family_groups_reduced = family_groups.filter((family_group) => {
+        return family_groups.includes(family_group);
+      });
       family_groups = [];
       family_groups_reduced.map((family_group) => {
         console.log("family_group en map", family_group);
@@ -88,8 +90,6 @@ export const family_groupsRouter = createTRPCRouter({
         family_groups.push(family_group);
         console.log("post push", family_groups);
       });
-      // fitro 1: no repetidos
-      // filtro 2: solo que pertenezcan a esta
       return family_groups;
     }),
   getbyProcedure: protectedProcedure

@@ -23,17 +23,15 @@ type propsContentTable = {
 
 function ContentTable(props: propsContentTable) {
   const { factura, period, total } = props;
-  const contribution = factura.items.find(
-    (item) => item.concept === "contribucion"
-  );
-  const interest = factura.items.find((item) => item.concept === "interes");
+  const contribution = factura.items.find((item) => item.concept === "Aporte");
+  const interest = factura.items.find((item) => item.concept === "Interes");
   const bonification = factura.items.find(
-    (item) => item.concept === "bonificacion"
+    (item) => item.concept === "Bonificación"
   );
   const previousBill = factura.items.find(
-    (item) => item.concept === "factura periodo anterior impaga"
+    (item) => item.concept === "Factura Anterior"
   );
-  const abono = factura.items.find((item) => item.concept === "abono");
+  const abono = factura.items.find((item) => item.concept === "Abono");
   return (
     <OriginalTableRow>
       <OriginalTableCell colSpan={13}>

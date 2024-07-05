@@ -46,7 +46,8 @@ function formatDate(date: Date | undefined) {
 
 export default function Page() {
   const { mutateAsync: createFactura } = api.facturas.create.useMutation();
-  const { mutateAsync: createItem } = api.items.create.useMutation();
+  const { mutateAsync: createItemReturnFactura } =
+    api.items.createReturnFactura.useMutation();
   const { data: company } = api.companies.get.useQuery();
   function generateFactura() {
     try {
@@ -109,29 +110,30 @@ export default function Page() {
         const fac = await saveFactura(numero_de_factura);
 
         const res = await afip.ElectronicBilling.createVoucher(data);
+        if (fac) {
+          const html = htmlBill(fac, company, undefined, 2);
 
-        const html = htmlBill(fac[0]?.id, company, undefined, 2);
-
-        // CREAMOS HTML DE LA FACTURA
-        const resHtml = Factura({
-          puntoDeVenta: puntoVenta,
-          tipoFactura: tipoFactura,
-          concepto: concepto,
-          documentoComprador: tipoDocumento,
-          nroDocumento: nroDocumento,
-          total: Number(importe),
-          facturadoDesde: formatDate(dateDesde),
-          facturadoHasta: formatDate(dateHasta),
-          vtoPago: formatDate(dateVencimiento),
-          cantidad: 1,
-          nroComprobante: numero_de_factura,
-          nroCae: res.CAE,
-          vtoCae: res.CAEFchVto,
-          nombreServicio: "Servicio de prueba",
-          domicilioComprador: "Calle falsa 123",
-          nombreComprador: "Homero Simpson",
-        });
-        console.log("resultadHTML", resHtml);
+          // CREAMOS HTML DE LA FACTURA
+          const resHtml = Factura({
+            puntoDeVenta: puntoVenta,
+            tipoFactura: tipoFactura,
+            concepto: concepto,
+            documentoComprador: tipoDocumento,
+            nroDocumento: nroDocumento,
+            total: Number(importe),
+            facturadoDesde: formatDate(dateDesde),
+            facturadoHasta: formatDate(dateHasta),
+            vtoPago: formatDate(dateVencimiento),
+            cantidad: 1,
+            nroComprobante: numero_de_factura,
+            nroCae: res.CAE,
+            vtoCae: res.CAEFchVto,
+            nombreServicio: "Servicio de prueba",
+            domicilioComprador: "Calle falsa 123",
+            nombreComprador: "Homero Simpson",
+          });
+          console.log("resultadHTML", resHtml);
+        }
 
         setLoading(false);
 
@@ -159,7 +161,7 @@ export default function Page() {
       prodName: servicioprod,
       nroFactura: numero_de_factura,
     });
-    const item = await createItem({
+    const updatedFactura = await createItemReturnFactura({
       concept: "Factura Manual",
       amount: Number(importe),
       iva: 0,
@@ -167,7 +169,7 @@ export default function Page() {
       abono: 0,
       comprobante_id: factura[0]?.id ?? "",
     });
-    return factura;
+    return updatedFactura;
   }
   type Channel = {
     number: number;

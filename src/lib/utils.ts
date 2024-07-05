@@ -82,12 +82,11 @@ export const topRightAbsoluteOnDesktopClassName =
   "md:absolute md:top-0 md:right-0 mr-10 mt-10";
 
 export function htmlBill(
-  facturaId: any,
+  factura: any,
   company: any,
   producto: any,
   voucher: number
 ) {
-  const { data: factura } = api.facturas.get.useQuery({ facturaId: facturaId });
   const billResponsible = factura?.family_group?.integrants?.find(
     (x: any) => x.isBillResponsible
   );
