@@ -4,11 +4,11 @@ import { api } from "~/trpc/server";
 import { CompanyProvider } from "./company-provider";
 import { auth } from "@clerk/nextjs/server";
 import { SetDefaultOrganization } from "./set-default-org";
-import AccessDenied from "../accessdenied/page";
+import { checkRole } from "~/lib/utils/server/roles";
 
 export default async function Layout(props: { children?: React.ReactNode }) {
   const { orgId } = auth();
-  if (orgId) {
+  if (orgId || checkRole("admin")) {
     const company = await api.companies.get.query();
 
     return (
@@ -18,12 +18,15 @@ export default async function Layout(props: { children?: React.ReactNode }) {
           sidenavClass="top-0"
           sidenav={<CompanySidenav />}
         >
-          <CompanyProvider company={company}>{props.children}</CompanyProvider>
+          {company && (
+            <CompanyProvider company={company}>
+              {props.children}
+            </CompanyProvider>
+          )}
+          {!company && checkRole("admin") && props.children}
         </AppLayout>
       </>
     );
   }
-  if (!orgId) {
-    return <SetDefaultOrganization />;
-  }
+  return <SetDefaultOrganization />;
 }

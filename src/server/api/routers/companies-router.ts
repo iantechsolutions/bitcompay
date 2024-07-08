@@ -36,6 +36,7 @@ export const companiesRouter = createTRPCRouter({
     }),
   get: protectedProcedure.query(async ({ input, ctx }) => {
     const companyId = ctx.session.orgId;
+    if (!companyId) return null;
     const company = await db.query.companies.findFirst({
       where: eq(schema.companies.id, companyId!),
       with: {
