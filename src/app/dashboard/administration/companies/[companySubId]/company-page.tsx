@@ -200,7 +200,8 @@ function DeleteChannel(props: { companySubId: string }) {
     deleteChannel({ companyId: props.companySubId })
       .then(() => {
         toast.success("Se ha eliminado la compañía correctamente");
-        router.push("../");
+        router.push("./");
+        router.refresh();
       })
       .catch((e) => {
         const error = asTRPCError(e)!;

@@ -8,7 +8,11 @@ import Link from "next/link";
 import { Button } from "../ui/button";
 import { CircleUserRound } from "lucide-react";
 // Create a new UserButtonandMenu component and move the old return into this
-const UserButtonAndMenu = ({ companyName }: { companyName: string }) => {
+const UserButtonAndMenu = ({
+  companyName,
+}: {
+  companyName: string | undefined;
+}) => {
   const { signOut, openUserProfile } = useClerk();
   const router = useRouter();
   const { user } = useUser();
@@ -17,7 +21,7 @@ const UserButtonAndMenu = ({ companyName }: { companyName: string }) => {
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
         {/* Render a button using the image and email from `user` */}
-        <Button className="flex flex-row rounded-xl border items-center border-gray-200 bg-white px-4 py-3 text-black drop-shadow-md">
+        <Button className="flex flex-row rounded-xl border items-center border-gray-200 bg-white px-4 py-3 hover:bg-white text-black drop-shadow-md">
           <CircleUserRound className="w-6 h-6 mr-2" color="#8140FF" />
           <div className="flex flex-col justify-center h-6">
             <p className="pb-0 mt-0">
@@ -25,6 +29,7 @@ const UserButtonAndMenu = ({ companyName }: { companyName: string }) => {
                 ? user.username
                 : user?.primaryEmailAddress?.emailAddress!}
             </p>
+
             <p className="text-xs text-left color-[#b5b5b5] mt-0">
               {companyName ?? " "}
             </p>
@@ -66,7 +71,11 @@ const UserButtonAndMenu = ({ companyName }: { companyName: string }) => {
 
 // Refactor to show the default <SignInButton /> if the user is logged out
 // Show the UserButtonAndMenu if the user is logged in
-export const UserButton = ({ companyName }: { companyName: string }) => {
+export const UserButton = ({
+  companyName,
+}: {
+  companyName: string | undefined;
+}) => {
   const { isLoaded, user } = useUser();
   const { openSignIn } = useClerk();
 

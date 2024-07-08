@@ -19,7 +19,6 @@ export default async function AppLayout(props: AppLayoutProps) {
   const { orgId } = auth();
   const company = await api.companies.get.query();
   const user = await currentUser();
-  console.log(user?.imageUrl, company!.name);
   return (
     <>
       <header
@@ -37,7 +36,7 @@ export default async function AppLayout(props: AppLayoutProps) {
         <div className="w-full">{props.title}</div>
         <div className="flex gap-6 px-2">
           {isAdmin && <OrganizationSwitcher hidePersonal={true} />}
-          <UserButton companyName={company!.name} />
+          <UserButton companyName={company?.name} />
         </div>
       </header>
       <aside

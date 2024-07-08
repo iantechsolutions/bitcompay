@@ -242,17 +242,37 @@ export const companiesRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const companyId = ctx.session.orgId;
       await db.transaction(async (tx) => {
         await tx
+          .delete(schema.bussinessUnits)
+          .where(eq(schema.bussinessUnits.companyId, input.companyId));
+        await tx
+          .delete(schema.healthInsurances)
+          .where(eq(schema.healthInsurances.companyId, input.companyId));
+        await tx
+          .delete(schema.procedure)
+          .where(eq(schema.procedure.companyId, input.companyId));
+        await tx
+          .delete(schema.excelBilling)
+          .where(eq(schema.excelBilling.companyId, input.companyId));
+        await tx
+          .delete(schema.currentAccount)
+          .where(eq(schema.currentAccount.company_id, input.companyId));
+        await tx
+          .delete(schema.documentUploads)
+          .where(eq(schema.documentUploads.companyId, input.companyId));
+        await tx
+          .delete(schema.payments)
+          .where(eq(schema.payments.companyId, input.companyId));
+        await tx
           .delete(schema.companies)
-          .where(eq(schema.companies.id, companyId!));
+          .where(eq(schema.companies.id, input.companyId));
         await tx
           .delete(schema.companyProducts)
-          .where(eq(schema.companyProducts.companyId, companyId!));
+          .where(eq(schema.companyProducts.companyId, input.companyId!));
+        await db
+          .delete(schema.companiesToBrands)
+          .where(eq(schema.companiesToBrands.companyId, input.companyId!));
       });
-      await db
-        .delete(schema.companiesToBrands)
-        .where(eq(schema.companiesToBrands.companyId, companyId!));
     }),
 });
