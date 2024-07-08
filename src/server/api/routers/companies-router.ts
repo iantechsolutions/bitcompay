@@ -243,15 +243,93 @@ export const companiesRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       await db.transaction(async (tx) => {
-        await tx
+        const deleted_bu = await tx
           .delete(schema.bussinessUnits)
-          .where(eq(schema.bussinessUnits.companyId, input.companyId));
+          .where(eq(schema.bussinessUnits.companyId, input.companyId))
+          .returning();
+        const deleted_ls = await tx
+          .delete(schema.liquidations)
+          .where(
+            inArray(
+              schema.liquidations.bussinessUnits_id,
+              deleted_bu.map((bu) => bu.id)
+            )
+          )
+          .returning();
+        const deleted_facturas = await tx
+          .delete(schema.facturas)
+          .where(
+            inArray(
+              schema.facturas.liquidation_id,
+              deleted_ls.map((ls) => ls.id)
+            )
+          )
+          .returning();
+        await tx
+          .delete(schema.items)
+          .where(
+            inArray(
+              schema.items.comprobante_id,
+              deleted_facturas.map((f) => f.id)
+            )
+          )
+          .returning();
+
         await tx
           .delete(schema.healthInsurances)
           .where(eq(schema.healthInsurances.companyId, input.companyId));
-        await tx
+        const deleted_procedures = await tx
           .delete(schema.procedure)
-          .where(eq(schema.procedure.companyId, input.companyId));
+          .where(eq(schema.procedure.companyId, input.companyId))
+          .returning();
+        const deleted_fg = await tx
+          .delete(schema.family_groups)
+          .where(
+            inArray(
+              schema.family_groups.procedureId,
+              deleted_procedures.map((p) => p.id)
+            )
+          )
+          .returning();
+        await tx.delete(schema.abonos).where(
+          inArray(
+            schema.abonos.family_group,
+            deleted_fg.map((fg) => fg.id)
+          )
+        );
+        const deleted_integrants = await tx
+          .delete(schema.integrants)
+          .where(
+            inArray(
+              schema.integrants.family_group_id,
+              deleted_fg.map((fg) => fg.id)
+            )
+          )
+          .returning();
+        await tx.delete(schema.pa).where(
+          inArray(
+            schema.pa.integrant_id,
+            deleted_integrants.map((i) => i.id)
+          )
+        );
+        await tx.delete(schema.differentialsValues).where(
+          inArray(
+            schema.differentialsValues.integrant_id,
+            deleted_integrants.map((i) => i.id)
+          )
+        );
+        await tx.delete(schema.medical_audit).where(
+          inArray(
+            schema.medical_audit.procedure_id,
+            deleted_procedures.map((p) => p.id)
+          )
+        );
+        await tx.delete(schema.administrative_audit).where(
+          inArray(
+            schema.administrative_audit.procedure_id,
+            deleted_procedures.map((p) => p.id)
+          )
+        );
         await tx
           .delete(schema.excelBilling)
           .where(eq(schema.excelBilling.companyId, input.companyId));
