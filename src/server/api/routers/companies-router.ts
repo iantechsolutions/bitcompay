@@ -248,24 +248,159 @@ export const companiesRouter = createTRPCRouter({
           .delete(schema.bussinessUnits)
           .where(eq(schema.bussinessUnits.companyId, input.companyId))
           .returning();
+
         const deleted_ls = await tx
           .delete(schema.liquidations)
           .where(
             inArray(
               schema.liquidations.bussinessUnits_id,
-              deleted_bu.map((bu) => bu.id)
+              deleted_bu.map((bu) => bu.id).length > 0
+                ? deleted_bu.map((bu) => bu.id)
+                : [createId()]
             )
           )
           .returning();
+
         const deleted_facturas = await tx
           .delete(schema.facturas)
           .where(
             inArray(
               schema.facturas.liquidation_id,
-              deleted_ls.map((ls) => ls.id)
+              deleted_ls.map((ls) => ls.id).length > 0
+                ? deleted_ls.map((ls) => ls.id)
+                : [createId()]
             )
           )
           .returning();
+
+        await tx
+          .delete(schema.items)
+          .where(
+            inArray(
+              schema.items.comprobante_id,
+              deleted_facturas.map((f) => f.id).length > 0
+                ? deleted_facturas.map((f) => f.id)
+                : [createId()]
+            )
+          )
+          .returning();
+
+        await tx
+          .delete(schema.healthInsurances)
+          .where(eq(schema.healthInsurances.companyId, input.companyId));
+
+        const deleted_procedures = await tx
+          .delete(schema.procedure)
+          .where(eq(schema.procedure.companyId, input.companyId))
+          .returning();
+
+        const deleted_fg = await tx
+          .delete(schema.family_groups)
+          .where(
+            inArray(
+              schema.family_groups.procedureId,
+              deleted_procedures.map((p) => p.id).length > 0
+                ? deleted_procedures.map((p) => p.id)
+                : [createId()]
+            )
+          )
+          .returning();
+
+        await tx
+          .delete(schema.abonos)
+          .where(
+            inArray(
+              schema.abonos.family_group,
+              deleted_fg.map((fg) => fg.id).length > 0
+                ? deleted_fg.map((fg) => fg.id)
+                : [createId()]
+            )
+          );
+
+        const deleted_integrants = await tx
+          .delete(schema.integrants)
+          .where(
+            inArray(
+              schema.integrants.family_group_id,
+              deleted_fg.map((fg) => fg.id).length > 0
+                ? deleted_fg.map((fg) => fg.id)
+                : [createId()]
+            )
+          )
+          .returning();
+
+        await tx
+          .delete(schema.pa)
+          .where(
+            inArray(
+              schema.pa.integrant_id,
+              deleted_integrants.map((i) => i.id).length > 0
+                ? deleted_integrants.map((i) => i.id)
+                : [createId()]
+            )
+          );
+
+        await tx
+          .delete(schema.differentialsValues)
+          .where(
+            inArray(
+              schema.differentialsValues.integrant_id,
+              deleted_integrants.map((i) => i.id).length > 0
+                ? deleted_integrants.map((i) => i.id)
+                : [createId()]
+            )
+          );
+
+        await tx
+          .delete(schema.medical_audit)
+          .where(
+            inArray(
+              schema.medical_audit.procedure_id,
+              deleted_procedures.map((p) => p.id).length > 0
+                ? deleted_procedures.map((p) => p.id)
+                : [createId()]
+            )
+          );
+
+        await tx
+          .delete(schema.administrative_audit)
+          .where(
+            inArray(
+              schema.administrative_audit.procedure_id,
+              deleted_procedures.map((p) => p.id).length > 0
+                ? deleted_procedures.map((p) => p.id)
+                : [createId()]
+            )
+          );
+
+        await tx
+          .delete(schema.excelBilling)
+          .where(eq(schema.excelBilling.companyId, input.companyId));
+
+        await tx
+          .delete(schema.currentAccount)
+          .where(eq(schema.currentAccount.company_id, input.companyId));
+
+        await tx
+          .delete(schema.documentUploads)
+          .where(eq(schema.documentUploads.companyId, input.companyId));
+
+        await tx
+          .delete(schema.payments)
+          .where(eq(schema.payments.companyId, input.companyId));
+
+        await tx
+          .delete(schema.companies)
+          .where(eq(schema.companies.id, input.companyId));
+
+        await tx
+          .delete(schema.companyProducts)
+          .where(eq(schema.companyProducts.companyId, input.companyId!));
+
+        await db
+          .delete(schema.companiesToBrands)
+          .where(eq(schema.companiesToBrands.companyId, input.companyId!));
+
         await tx
           .delete(schema.items)
           .where(
@@ -279,34 +414,14 @@ export const companiesRouter = createTRPCRouter({
         await tx
           .delete(schema.healthInsurances)
           .where(eq(schema.healthInsurances.companyId, input.companyId));
-        const deleted_procedures = await tx
-          .delete(schema.procedure)
-          .where(eq(schema.procedure.companyId, input.companyId))
-          .returning();
-        const deleted_fg = await tx
-          .delete(schema.family_groups)
-          .where(
-            inArray(
-              schema.family_groups.procedureId,
-              deleted_procedures.map((p) => p.id)
-            )
-          )
-          .returning();
+
         await tx.delete(schema.abonos).where(
           inArray(
             schema.abonos.family_group,
             deleted_fg.map((fg) => fg.id)
           )
         );
-        const deleted_integrants = await tx
-          .delete(schema.integrants)
-          .where(
-            inArray(
-              schema.integrants.family_group_id,
-              deleted_fg.map((fg) => fg.id)
-            )
-          )
-          .returning();
+
         await tx.delete(schema.pa).where(
           inArray(
             schema.pa.integrant_id,
