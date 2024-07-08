@@ -46,9 +46,16 @@ function formatDate(date: Date | undefined) {
 
 export default function Page() {
   const { mutateAsync: createFactura } = api.facturas.create.useMutation();
-  const { mutateAsync: createItem } = api.items.create.useMutation();
+  const { mutateAsync: createItemReturnFactura } =
+    api.items.createReturnFactura.useMutation();
   const { data: company } = api.companies.get.useQuery();
+  const { data: brand } = api.brands.getbyCurrentCompany.useQuery();
+  const [logo, setLogo] = useState("");
+
   function generateFactura() {
+    if (brand) {
+      setLogo(brand[0]!.logo_url!);
+    }
     try {
       (async () => {
         console.log("1");
@@ -109,32 +116,31 @@ export default function Page() {
         const fac = await saveFactura(numero_de_factura);
 
         const res = await afip.ElectronicBilling.createVoucher(data);
+        if (fac) {
+          const html = htmlBill(
+            fac,
+            company,
+            undefined,
+            2,
+            marcas?.find((x) => x.id === brandId)!
+          );
+          const options = {
+            width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
+            marginLeft: 0.8, // Margen izquierdo en pulgadas. Usar 0.1 para ticket
+            marginRight: 0.8, // Margen derecho en pulgadas. Usar 0.1 para ticket
+            marginTop: 0.4, // Margen superior en pulgadas. Usar 0.1 para ticket
+            marginBottom: 0.4, // Margen inferior en pulgadas. Usar 0.1 para ticket
+          };
+          const resHtml = await afip.ElectronicBilling.createPDF({
+            html: html,
+            file_name: name,
+            options: options,
+          });
 
-        const html = htmlBill(fac[0]?.id, company, undefined, 2);
-
-        // CREAMOS HTML DE LA FACTURA
-        const resHtml = Factura({
-          puntoDeVenta: puntoVenta,
-          tipoFactura: tipoFactura,
-          concepto: concepto,
-          documentoComprador: tipoDocumento,
-          nroDocumento: nroDocumento,
-          total: Number(importe),
-          facturadoDesde: formatDate(dateDesde),
-          facturadoHasta: formatDate(dateHasta),
-          vtoPago: formatDate(dateVencimiento),
-          cantidad: 1,
-          nroComprobante: numero_de_factura,
-          nroCae: res.CAE,
-          vtoCae: res.CAEFchVto,
-          nombreServicio: "Servicio de prueba",
-          domicilioComprador: "Calle falsa 123",
-          nombreComprador: "Homero Simpson",
-        });
-        console.log("resultadHTML", resHtml);
-
+          console.log("resultadHTML", resHtml);
+          console.log(html);
+        }
         setLoading(false);
-
         toast.success("La factura se creo correctamente");
       })();
     } catch {
@@ -159,7 +165,7 @@ export default function Page() {
       prodName: servicioprod,
       nroFactura: numero_de_factura,
     });
-    const item = await createItem({
+    const updatedFactura = await createItemReturnFactura({
       concept: "Factura Manual",
       amount: Number(importe),
       iva: 0,
@@ -167,7 +173,7 @@ export default function Page() {
       abono: 0,
       comprobante_id: factura[0]?.id ?? "",
     });
-    return factura;
+    return updatedFactura;
   }
   type Channel = {
     number: number;
@@ -202,6 +208,9 @@ export default function Page() {
   const [channelsFiltered, setChannelsFiltered] = useState<
     Channel[] | undefined
   >(undefined);
+  const [brandId, setBrandId] = useState("");
+  let selectedBrand;
+  const { data: marcas } = api.brands.getbyCurrentCompany.useQuery();
 
   const [selectedChannel, setSelectedChannel] = useState("");
 
@@ -233,6 +242,11 @@ export default function Page() {
     setDateVencimiento(e);
     setPopoverVencimientoOpen(false);
   }
+
+  const handleBrandChange = (value: string) => {
+    selectedBrand = marcas?.find((marca) => marca.id === value);
+    setBrandId(value);
+  };
 
   return (
     <>
@@ -357,8 +371,7 @@ export default function Page() {
               <Select
                 onValueChange={(value) => {
                   setSelectedProduct(value);
-                }}
-              >
+                }}>
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar un producto..." />
                 </SelectTrigger>
@@ -433,16 +446,14 @@ export default function Page() {
                   <br />
                   <Popover
                     open={popoverDesdeOpen}
-                    onOpenChange={setPopoverDesdeOpen}
-                  >
+                    onOpenChange={setPopoverDesdeOpen}>
                     <PopoverTrigger asChild={true}>
                       <Button
                         variant={"outline"}
                         className={cn(
                           "w-[220px] justify-start text-left font-normal",
                           !dateDesde && "text-muted-foreground"
-                        )}
-                      >
+                        )}>
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {dateDesde ? (
                           format(dateDesde, "PPP")
@@ -466,16 +477,14 @@ export default function Page() {
                   <br />
                   <Popover
                     open={popoverFinOpen}
-                    onOpenChange={setPopoverFinOpen}
-                  >
+                    onOpenChange={setPopoverFinOpen}>
                     <PopoverTrigger asChild={true}>
                       <Button
                         variant={"outline"}
                         className={cn(
                           "w-[220px] justify-start text-left font-normal",
                           !dateHasta && "text-muted-foreground"
-                        )}
-                      >
+                        )}>
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {dateHasta ? (
                           format(dateHasta, "PPP")
@@ -499,16 +508,14 @@ export default function Page() {
                   <br />
                   <Popover
                     open={popoverVencimientoOpen}
-                    onOpenChange={setPopoverVencimientoOpen}
-                  >
+                    onOpenChange={setPopoverVencimientoOpen}>
                     <PopoverTrigger asChild={true}>
                       <Button
                         variant={"outline"}
                         className={cn(
                           "w-[220px] justify-start text-left font-normal",
                           !dateVencimiento && "text-muted-foreground"
-                        )}
-                      >
+                        )}>
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {dateVencimiento ? (
                           format(dateVencimiento, "PPP")
@@ -526,6 +533,25 @@ export default function Page() {
                       />
                     </PopoverContent>
                   </Popover>
+                </div>
+                <div>
+                  <Label>Marca</Label>
+                  <Select onValueChange={handleBrandChange}>
+                    <SelectTrigger className="w-[180px] font-bold">
+                      <SelectValue placeholder="Seleccione una marca" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {marcas &&
+                        marcas.map((marca) => (
+                          <SelectItem
+                            key={marca!.id}
+                            value={marca!.id}
+                            className="rounded-none border-b border-gray-600">
+                            {marca!.name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </>
             )}

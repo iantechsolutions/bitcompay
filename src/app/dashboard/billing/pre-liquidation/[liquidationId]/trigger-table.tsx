@@ -39,16 +39,14 @@ export default function TriggerTable(props: TriggerTableProps) {
     (x) => x.isBillResponsible == true
   );
   const bonification = factura.items.find(
-    (item) => item.concept === "bonificacion"
+    (item) => item.concept === "Bonificación"
   );
-  const contribution = factura.items.find(
-    (item) => item.concept === "contribucion"
-  );
-  const interest = factura.items.find((item) => item.concept === "interes");
+  const contribution = factura.items.find((item) => item.concept === "Aporte");
+  const interest = factura.items.find((item) => item.concept === "Interes");
   const previousBill = factura.items.find(
-    (item) => item.concept === "factura periodo anterior impaga"
+    (item) => item.concept === "Factura Anterior"
   );
-  const abono = factura.items.find((item) => item.concept === "abono");
+  const abono = factura.items.find((item) => item.concept === "Abono");
   return (
     <TableRow
       className="rounded-lg bg-[#f0f0f0]

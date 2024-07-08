@@ -72,10 +72,24 @@ export const family_groupsRouter = createTRPCRouter({
           },
         },
       });
-      const family_groups =
+      let family_groups =
         liquidation?.facturas.map((factura) => factura.family_group) || [];
-      // fitro 1: no repetidos
-      // filtro 2: solo que pertenezcan a esta
+      const family_groups_reduced = family_groups.filter((family_group) => {
+        return family_groups.includes(family_group);
+      });
+      family_groups = [];
+      family_groups_reduced.map((family_group) => {
+        console.log("family_group en map", family_group);
+        const facturas = family_group?.facturas.filter(
+          (factura) => factura.liquidation_id === input.liquidationId
+        );
+        if (family_group) {
+          console.log("entra aca", facturas);
+          family_group.facturas = facturas ?? [];
+        }
+        family_groups.push(family_group);
+        console.log("post push", family_groups);
+      });
       return family_groups;
     }),
   getbyProcedure: protectedProcedure

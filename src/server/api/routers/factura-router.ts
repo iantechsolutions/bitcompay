@@ -278,7 +278,8 @@ async function approbateFactura(liquidationId: string) {
         factura.id,
         factura.family_group?.businessUnitData!.company,
         producto,
-        last_voucher + 1
+        last_voucher + 1,
+        factura.family_group?.businessUnitData!.brand
       );
       const name = `FAC_${last_voucher + 1}.pdf`; // NOMBRE
       last_voucher += 1;

@@ -3,6 +3,7 @@ import { type ClassValue, clsx } from "clsx";
 import { fi } from "date-fns/locale";
 import { nanoid } from "nanoid";
 import { twMerge } from "tailwind-merge";
+import { number } from "zod";
 import { api } from "~/trpc/react";
 import { RouterOutputs } from "~/trpc/shared";
 
@@ -82,12 +83,12 @@ export const topRightAbsoluteOnDesktopClassName =
   "md:absolute md:top-0 md:right-0 mr-10 mt-10";
 
 export function htmlBill(
-  facturaId: any,
+  factura: any,
   company: any,
   producto: any,
-  voucher: number
+  voucher: number,
+  brand: RouterOutputs["brands"]["list"][number] | undefined
 ) {
-  const { data: factura } = api.facturas.get.useQuery({ facturaId: facturaId });
   const billResponsible = factura?.family_group?.integrants?.find(
     (x: any) => x.isBillResponsible
   );
@@ -116,7 +117,11 @@ export function htmlBill(
     }
   }
 
-  function getIimageForLogo(logo: string) {
+  console.log("brand info");
+  console.log(brand?.logo_url);
+  console.log(brand);
+
+  function getIimageForLogo(logo: string | null) {
     if (logo) {
       return `<img class="logo" src=${logo} alt="logo" />`;
     } else {
@@ -473,11 +478,7 @@ span {
     <body>
       <header>
         <div class="items-1">
-        ${getIimageForLogo(
-          factura?.family_group?.businessUnitData?.brand?.logo_url ??
-            "https://utfs.io/f/f426d7f1-f9c7-437c-a722-f978ab23830d-neiy4q.png"
-        )}
-            
+        ${getIimageForLogo(brand?.logo_url ?? null)}
           <p>
             ${company.razon_social}<br />
             ${company.address} <br />
