@@ -5,9 +5,10 @@ import { useUser, useClerk, SignInButton } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-
+import { Button } from "../ui/button";
+import { CircleUserRound } from "lucide-react";
 // Create a new UserButtonandMenu component and move the old return into this
-const UserButtonAndMenu = () => {
+const UserButtonAndMenu = ({ companyName }: { companyName: string }) => {
   const { signOut, openUserProfile } = useClerk();
   const router = useRouter();
   const { user } = useUser();
@@ -16,18 +17,19 @@ const UserButtonAndMenu = () => {
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
         {/* Render a button using the image and email from `user` */}
-        <button className="flex flex-row rounded-xl border border-gray-200 bg-white px-4 py-3 text-black drop-shadow-md">
-          <Image
-            alt={user?.primaryEmailAddress?.emailAddress!}
-            src={user?.imageUrl ?? ""}
-            width={30}
-            height={30}
-            className="mr-2 rounded-full border border-gray-200 drop-shadow-sm"
-          />
-          {user?.username
-            ? user.username
-            : user?.primaryEmailAddress?.emailAddress!}
-        </button>
+        <Button className="flex flex-row rounded-xl border items-center border-gray-200 bg-white px-4 py-3 text-black drop-shadow-md">
+          <CircleUserRound className="w-6 h-6 mr-2" color="#8140FF" />
+          <div className="flex flex-col justify-center h-6">
+            <p className="pb-0 mt-0">
+              {user?.username
+                ? user.username
+                : user?.primaryEmailAddress?.emailAddress!}
+            </p>
+            <p className="text-xs text-left color-[#b5b5b5] mt-0">
+              {companyName ?? " "}
+            </p>
+          </div>
+        </Button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
         <DropdownMenu.Content className="mt-4 w-52 rounded-xl border border-gray-200 bg-white px-6 py-4 text-black drop-shadow-2xl">
@@ -49,12 +51,12 @@ const UserButtonAndMenu = () => {
           <DropdownMenu.Separator className="my-1 h-px bg-gray-500" />
           <DropdownMenu.Item asChild>
             {/* Create a Sign Out button -- signOut() takes a call back where the user is redirected */}
-            <button
+            <Button
               onClick={() => signOut(() => router.push("/"))}
               className="py-3"
             >
               Sign Out{" "}
-            </button>
+            </Button>
           </DropdownMenu.Item>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
@@ -64,12 +66,14 @@ const UserButtonAndMenu = () => {
 
 // Refactor to show the default <SignInButton /> if the user is logged out
 // Show the UserButtonAndMenu if the user is logged in
-export const UserButton = () => {
+export const UserButton = ({ companyName }: { companyName: string }) => {
   const { isLoaded, user } = useUser();
+  const { openSignIn } = useClerk();
 
-  if (!isLoaded) return null;
+  if (!isLoaded || !user?.id) {
+    /* Use the new <Button /> component for the sign-in button */
+    return <Button onClick={() => openSignIn()}>Sign In</Button>;
+  }
 
-  if (!user?.id) return <SignInButton />;
-
-  return <UserButtonAndMenu />;
+  return <UserButtonAndMenu companyName={companyName} />;
 };

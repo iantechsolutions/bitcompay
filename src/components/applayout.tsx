@@ -37,7 +37,7 @@ export default async function AppLayout(props: AppLayoutProps) {
         <div className="w-full">{props.title}</div>
         <div className="flex gap-6 px-2">
           {isAdmin && <OrganizationSwitcher hidePersonal={true} />}
-          <UserButton />
+          <UserButton companyName={company!.name} />
         </div>
       </header>
       <aside
