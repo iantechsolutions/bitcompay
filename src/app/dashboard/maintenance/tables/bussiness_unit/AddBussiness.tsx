@@ -33,7 +33,7 @@ export function AddBussiness(props: { params: { companyId: string } }) {
   const [open, setOpen] = useState(false);
 
   const router = useRouter();
-  const { data: brands } = api.brands.list.useQuery();
+  const { data: brands } = api.brands.getbyCurrentCompany.useQuery();
   const selectBrandOptions = brands?.map((brand) => (
     <SelectItem key={brand.id} value={brand.id}>
       {" "}

@@ -14,7 +14,6 @@ import {
 
 export default function Home() {
   const { data: grupo } = api.family_groups.getByOrganization.useQuery();
-
   const linked = (link: string) => {
     window.location.href = link;
   };

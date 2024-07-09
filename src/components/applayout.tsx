@@ -16,9 +16,7 @@ export type AppLayoutProps = {
 
 export default async function AppLayout(props: AppLayoutProps) {
   const isAdmin = checkRole("admin");
-  const { orgId } = auth();
   const company = await api.companies.get.query();
-  const user = await currentUser();
   return (
     <>
       <header
@@ -35,7 +33,12 @@ export default async function AppLayout(props: AppLayoutProps) {
         />
         <div className="w-full">{props.title}</div>
         <div className="flex gap-6 px-2">
-          {isAdmin && <OrganizationSwitcher hidePersonal={true} />}
+          {isAdmin && (
+            <OrganizationSwitcher
+              hidePersonal={true}
+              afterSelectOrganizationUrl={""}
+            />
+          )}
           <UserButton companyName={company?.name} />
         </div>
       </header>
