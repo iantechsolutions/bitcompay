@@ -42,6 +42,9 @@ export default function TriggerTable(props: TriggerTableProps) {
     (item) => item.concept === "Bonificación"
   );
   const contribution = factura.items.find((item) => item.concept === "Aporte");
+  const diferencial = factura.items.find(
+    (item) => item.concept === "Diferencial"
+  );
   const interest = factura.items.find((item) => item.concept === "Interes");
   const previousBill = factura.items.find(
     (item) => item.concept === "Factura Anterior"
@@ -89,7 +92,10 @@ export default function TriggerTable(props: TriggerTableProps) {
         {" "}
         {bonification?.amount}
       </TableCell>
-      <TableCell className="border border-[#6cebd1] p-2 py-4"> {0}</TableCell>
+      <TableCell className="border border-[#6cebd1] p-2 py-4">
+        {" "}
+        {diferencial?.amount}
+      </TableCell>
       <TableCell className="border border-[#6cebd1] p-2 py-4">
         {" "}
         {contribution?.amount}
