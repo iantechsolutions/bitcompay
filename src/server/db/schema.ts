@@ -14,11 +14,7 @@ import {
 import { columnId, createdAt, pgTable, updatedAt } from "./schema/util";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { literal, number, type z } from "zod";
-import { duration } from "html2canvas/dist/types/css/property-descriptors/duration";
-import { id } from "date-fns/locale";
-import { int } from "drizzle-orm/mysql-core";
-import { text } from "stream/consumers";
-import { channel } from "diagnostics_channel";
+
 export { pgTable } from "./schema/util";
 
 export const documentUploads = pgTable(
@@ -256,7 +252,6 @@ export const brands = pgTable(
   "brand",
   {
     id: columnId,
-    number: integer("number").notNull().unique(),
     name: varchar("name", { length: 255 }).notNull(),
     description: varchar("description", { length: 255 }).notNull(),
     redescription: varchar("redescription", { length: 10 })
@@ -271,6 +266,7 @@ export const brands = pgTable(
     createdAt,
     updatedAt,
     logo_url: varchar("logo_url"),
+    number: serial("number"),
   },
   (brands) => ({
     nameIdx: index("brand_name_idx").on(brands.name),
