@@ -17,13 +17,23 @@ export const plansRouter = createTRPCRouter({
       });
       return plan_found;
     }),
-  list: protectedProcedure.query(async () => {
+  list: protectedProcedure.query(async ({ ctx }) => {
     const plans = await db.query.plans.findMany({
       with: {
         pricesPerCondition: true,
+        brands: {
+          with: {
+            company: true,
+          },
+        },
       },
     });
-    return plans;
+    const plan_reduced = plans.filter((plan) => {
+      return plan.brands?.company.some(
+        (company) => company.companyId == ctx.session.orgId!
+      );
+    });
+    return plan_reduced;
   }),
 
   create: protectedProcedure

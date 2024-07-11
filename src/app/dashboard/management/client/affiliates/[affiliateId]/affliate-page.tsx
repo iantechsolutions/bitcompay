@@ -44,7 +44,7 @@ export default function AffiliatePage(props: {
     <div>
       <Link
         className="w-20 h-auto flex justify-between"
-        href={`/dashboard/${company}/management/client/affiliates`}>
+        href={`/dashboard/management/client/affiliates`}>
         <ArrowLeftIcon /> Volver
       </Link>
       <LayoutContainer>

@@ -4,6 +4,7 @@ import { createId } from "~/lib/utils";
 import { db, schema } from "~/server/db";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { RouterOutputs } from "~/trpc/shared";
+import { brands } from "~/server/db/schema";
 
 export const brandsRouter = createTRPCRouter({
   get: protectedProcedure
@@ -68,7 +69,6 @@ export const brandsRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string().min(1).max(255),
-        number: z.number().min(1).max(255),
         description: z.string().min(0).max(1023),
         redescription: z.string().min(0).max(10),
         iva: z.string().optional(),
@@ -79,21 +79,13 @@ export const brandsRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       // TODO: verificar permisos
 
-      const id = createId();
-
-      await db.insert(schema.brands).values({
-        id,
-        name: input.name,
-        description: input.description,
-        redescription: input.redescription,
-        companyId: null,
-        number: input.number,
-        iva: input.iva,
-        bill_type: input.billType,
-        concept: input.concept,
-      });
-
-      return { id };
+      const newBrand = await db
+        .insert(brands)
+        .values({
+          ...input,
+        })
+        .returning();
+      return newBrand;
     }),
 
   change: protectedProcedure

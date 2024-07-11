@@ -1,8 +1,9 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db, schema } from "~/server/db";
-import { createId } from "~/lib/utils";
 import { eq, and } from "drizzle-orm";
+import { currentUser } from "@clerk/nextjs/server";
+import { getGruposByBrandId, preparateFactura } from "./factura-router";
 
 export const liquidationsRouter = createTRPCRouter({
   get: protectedProcedure
@@ -124,5 +125,59 @@ export const liquidationsRouter = createTRPCRouter({
         .delete(schema.liquidations)
         .where(eq(schema.liquidations.id, input.id));
       return liquidation_deleted;
+    }),
+  createPreLiquidation: protectedProcedure
+    .input(
+      z.object({
+        pv: z.string(),
+        companyId: z.string(),
+        brandId: z.string(),
+        dateDesde: z.date().optional(),
+        dateHasta: z.date().optional(),
+        dateDue: z.date().optional(),
+        interest: z.number().optional(),
+        logo_url: z.string().optional(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      console.log("DATE DESDE", input.dateDesde);
+      const companyId = ctx.session.orgId;
+      const grupos = await getGruposByBrandId(input.brandId);
+      const user = await currentUser();
+      const brand = await db.query.brands.findFirst({
+        where: eq(schema.brands.id, input.brandId),
+      });
+      const company = await db.query.companies.findFirst({
+        where: eq(schema.companies.id, input.companyId),
+      });
+      const randomNumberLiq = Math.floor(Math.random() * (1000 - 10 + 1)) + 10;
+
+      const [liquidation] = await db
+        .insert(schema.liquidations)
+        .values({
+          brandId: input.brandId,
+          createdAt: new Date(),
+          razon_social: brand?.razon_social ?? "",
+          estado: "pendiente",
+          cuit: company?.cuit ?? "",
+          period: input.dateDesde,
+          userCreated: user?.id ?? "",
+          userApproved: "",
+          number: randomNumberLiq,
+          pdv: parseInt(input.pv),
+          interest: input.interest,
+          logo_url: input.logo_url,
+        })
+        .returning();
+      await preparateFactura(
+        grupos,
+        input.dateDesde,
+        input.dateHasta,
+        input.dateDue,
+        input.pv,
+        liquidation!.id,
+        input.interest ?? 0
+      );
+      return liquidation;
     }),
 });

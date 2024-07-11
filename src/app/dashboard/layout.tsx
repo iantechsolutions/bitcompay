@@ -8,6 +8,7 @@ import { checkRole } from "~/lib/utils/server/roles";
 
 export default async function Layout(props: { children?: React.ReactNode }) {
   const { orgId } = auth();
+
   if (orgId || checkRole("admin")) {
     const company = await api.companies.get.query();
 

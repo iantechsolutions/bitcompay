@@ -2,6 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db, schema } from "~/server/db";
 import { eq, lt, and, desc } from "drizzle-orm";
+import { RouterOutputs } from "~/trpc/shared";
 
 export const eventsRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({}) => {
@@ -93,3 +94,4 @@ export const eventsRouter = createTRPCRouter({
       // return new_plan;
     }),
 });
+export type Events = RouterOutputs["events"]["list"][number];
