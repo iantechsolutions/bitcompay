@@ -80,7 +80,6 @@ export default function AddPreLiquidation(props: { companyId: string }) {
   }
 
   const handleBrandChange = (value: string) => {
-    const selectedBrand = marcas?.find((marca) => marca.id === value);
     setBrandId(value);
   };
 
@@ -112,10 +111,11 @@ export default function AddPreLiquidation(props: { companyId: string }) {
                 {marcas &&
                   marcas.map((marca) => (
                     <SelectItem
-                      key={marca!.id}
-                      value={marca!.id}
-                      className="rounded-none border-b border-gray-600">
-                      {marca!.name}
+                      key={marca?.id}
+                      value={marca?.id}
+                      className="rounded-none border-b border-gray-600"
+                    >
+                      {marca?.name}
                     </SelectItem>
                   ))}
               </SelectContent>
@@ -131,7 +131,8 @@ export default function AddPreLiquidation(props: { companyId: string }) {
                   className={cn(
                     "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
                     !fechaVencimiento1 && "text-muted-foreground"
-                  )}>
+                  )}
+                >
                   <p>
                     {fechaVencimiento1 ? (
                       dayjs(fechaVencimiento1).format("D [de] MMMM [de] YYYY")
@@ -165,7 +166,8 @@ export default function AddPreLiquidation(props: { companyId: string }) {
                   className={cn(
                     "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
                     !fechaVencimiento2 && "text-muted-foreground"
-                  )}>
+                  )}
+                >
                   <p>
                     {fechaVencimiento2 ? (
                       dayjs(fechaVencimiento2).format("D [de] MMMM [de] YYYY")
@@ -256,7 +258,8 @@ export default function AddPreLiquidation(props: { companyId: string }) {
               <Label htmlFor="validy_date">Mes de vigencia</Label>
               <Select
                 onValueChange={(e) => setMes(Number(e))}
-                defaultValue={mes.toString()}>
+                defaultValue={mes.toString()}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccione un mes" />
                 </SelectTrigger>
@@ -318,7 +321,8 @@ export default function AddPreLiquidation(props: { companyId: string }) {
             className="mt-2"
             type="submit"
             disabled={isLoading}
-            onClick={handleCreate}>
+            onClick={handleCreate}
+          >
             {isLoading && (
               <Loader2Icon className="mr-2 animate-spin" size={20} />
             )}

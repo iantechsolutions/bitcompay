@@ -1,25 +1,27 @@
 "use client";
-import { TableCell } from "~/components/ui/table";
-import { CircleChevronDown } from "lucide-react";
+import { TableCell, TableRow } from "~/components/ui/tablePreliq";
+import { FileText } from "lucide-react";
 import { useState } from "react";
-import TriggerTable from "./trigger-table";
 import ContentTable from "./content-table";
 import { Factura, family_groups } from "~/server/db/schema";
 import type { RouterOutputs } from "~/trpc/shared";
-import { computeBase } from "~/lib/utils";
 import { api } from "~/trpc/react";
-
-// cuotaValue: number;
-
-// subTotal: number;
-
-export default function TableRowContainer(props: {
+import { computeBase, computeIva } from "~/lib/utils";
+import DetailSheet from "./detail-sheet";
+import { Button } from "~/components/ui/button";
+import Link from "next/link";
+type propsTableRowContainer = {
   preliquidation: RouterOutputs["liquidations"]["get"];
   family_group: RouterOutputs["family_groups"]["getByLiquidation"][number];
   periodo: string;
-}) {
-  const [active, setActive] = useState(false);
-  const facturas = props.family_group?.facturas;
+};
+
+export default function TableRowContainer({
+  preliquidation,
+  family_group,
+  periodo,
+}: propsTableRowContainer) {
+  const facturas = family_group?.facturas;
 
   console.log("facturasTT", facturas);
 
@@ -31,32 +33,97 @@ export default function TableRowContainer(props: {
   }
   const total = parseFloat(original_factura.importe.toFixed(2));
   const { data: lastEvent } = api.events.getLastByDateAndCC.useQuery({
-    ccId: props.family_group?.cc?.id!,
-    date: props.preliquidation?.createdAt ?? new Date(),
+    ccId: family_group?.cc?.id!,
+    date: preliquidation?.createdAt ?? new Date(),
   });
+  const billResponsible = family_group?.integrants.find(
+    (x) => x.isBillResponsible == true
+  );
+  const currentAccountAmount = lastEvent?.current_amount ?? 0;
+  const abono = original_factura.items.find((item) => item.concept === "Abono");
+  const bonification = original_factura.items.find(
+    (item) => item.concept === "Bonificación"
+  );
+  const contribution = original_factura.items.find(
+    (item) => item.concept === "Aporte"
+  );
+  const interest = original_factura.items.find(
+    (item) => item.concept === "Interes"
+  );
+  const previousBill = original_factura.items.find(
+    (item) => item.concept === "Factura Anterior"
+  );
 
   const subTotal = computeBase(total, Number(original_factura.iva!));
   return (
-    <>
-      <TriggerTable
-        setActive={setActive}
-        active={active}
-        factura={original_factura}
-        preliquidation={props.preliquidation}
-        total={total}
-        family_group={props.family_group}
-        currentAccountAmount={lastEvent?.current_amount ?? 0}
-      />
-      {active &&
-        facturas?.map((factura) => {
-          return (
-            <ContentTable
-              factura={factura}
-              period={props.periodo}
-              total={total}
-            />
-          );
-        })}
-    </>
+    <TableRow
+      className="rounded-lg bg-[#f0f0f0]
+    "
+    >
+      <TableCell className=" relative rounded-l-md border border-[#6cebd1]">
+        {family_group?.numericalId ?? "N/A"}
+      </TableCell>
+
+      <TableCell className="border border-[#6cebd1] p-2 py-4">
+        <DetailSheet name={billResponsible?.name ?? ""} facturas={facturas!} />
+      </TableCell>
+      <TableCell className="border border-[#6cebd1] p-2 py-4">
+        {billResponsible?.id_number}
+      </TableCell>
+      <TableCell className="border border-[#6cebd1] p-2 py-4">
+        {" "}
+        {billResponsible?.fiscal_id_number ?? "-"}
+      </TableCell>
+      <TableCell className="border border-[#6cebd1] p-2 py-4">
+        {" "}
+        {currentAccountAmount}
+      </TableCell>
+      <TableCell className="border border-[#6cebd1] p-2 py-4">
+        {" "}
+        {abono?.amount}
+      </TableCell>
+      <TableCell className="border border-[#6cebd1] p-2 py-4">
+        {" "}
+        {bonification?.amount}
+      </TableCell>
+      <TableCell className="border border-[#6cebd1] p-2 py-4"> {0}</TableCell>
+      <TableCell className="border border-[#6cebd1] p-2 py-4">
+        {" "}
+        {contribution?.amount}
+      </TableCell>
+      <TableCell className="border border-[#6cebd1] p-2 py-4">
+        {" "}
+        {interest?.amount}
+      </TableCell>
+      <TableCell className="border border-[#6cebd1] p-2 py-4">
+        {" "}
+        {computeBase(total, parseFloat(original_factura?.iva) ?? 0)}
+      </TableCell>
+      <TableCell className="border border-[#6cebd1] p-2 py-4">
+        {" "}
+        {computeIva(total, parseFloat(original_factura?.iva) ?? 0)}
+      </TableCell>
+      <TableCell className="border border-[#6cebd1] p-2 py-4">
+        {" "}
+        {total}
+      </TableCell>
+      {preliquidation!.estado !== "pendiente" && (
+        <TableCell className="rounded-r-md border border-[#6cebd1]">
+          {original_factura.billLink && original_factura.billLink !== "" ? (
+            <div className="flex items-center justify-center">
+              <Link href={original_factura.billLink}>
+                <FileText></FileText>
+              </Link>
+            </div>
+          ) : (
+            <div className="items-center justify-center">
+              <Button disabled={true} variant="link">
+                <FileText></FileText>
+              </Button>
+            </div>
+          )}
+        </TableCell>
+      )}
+    </TableRow>
   );
 }

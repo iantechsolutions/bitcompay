@@ -1,7 +1,7 @@
 import { and, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { createId } from "~/lib/utils";
-import { db, schema } from "~/server/db";
+import { db, DBTX, schema } from "~/server/db";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const companiesRouter = createTRPCRouter({
@@ -244,229 +244,287 @@ export const companiesRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       await db.transaction(async (tx) => {
-        const deleted_bu = await tx
-          .delete(schema.bussinessUnits)
-          .where(eq(schema.bussinessUnits.companyId, input.companyId))
-          .returning();
+        // borro las mas simples
+        await deleteBasics(tx, input.companyId);
 
-        const deleted_ls = await tx
-          .delete(schema.liquidations)
-          .where(
-            inArray(
-              schema.liquidations.bussinessUnits_id,
-              deleted_bu.map((bu) => bu.id).length > 0
-                ? deleted_bu.map((bu) => bu.id)
-                : [createId()]
-            )
-          )
-          .returning();
-
-        const deleted_facturas = await tx
-          .delete(schema.facturas)
-          .where(
-            inArray(
-              schema.facturas.liquidation_id,
-              deleted_ls.map((ls) => ls.id).length > 0
-                ? deleted_ls.map((ls) => ls.id)
-                : [createId()]
-            )
-          )
-          .returning();
-
-        await tx
-          .delete(schema.items)
-          .where(
-            inArray(
-              schema.items.comprobante_id,
-              deleted_facturas.map((f) => f.id).length > 0
-                ? deleted_facturas.map((f) => f.id)
-                : [createId()]
-            )
-          )
-          .returning();
-
-        await tx
-          .delete(schema.healthInsurances)
-          .where(eq(schema.healthInsurances.companyId, input.companyId));
-
-        const deleted_procedures = await tx
-          .delete(schema.procedure)
-          .where(eq(schema.procedure.companyId, input.companyId))
-          .returning();
-
-        const deleted_fg = await tx
-          .delete(schema.family_groups)
-          .where(
-            inArray(
-              schema.family_groups.procedureId,
-              deleted_procedures.map((p) => p.id).length > 0
-                ? deleted_procedures.map((p) => p.id)
-                : [createId()]
-            )
-          )
-          .returning();
-
-        await tx
-          .delete(schema.abonos)
-          .where(
-            inArray(
-              schema.abonos.family_group,
-              deleted_fg.map((fg) => fg.id).length > 0
-                ? deleted_fg.map((fg) => fg.id)
-                : [createId()]
-            )
-          );
-
-        const deleted_integrants = await tx
-          .delete(schema.integrants)
-          .where(
-            inArray(
-              schema.integrants.family_group_id,
-              deleted_fg.map((fg) => fg.id).length > 0
-                ? deleted_fg.map((fg) => fg.id)
-                : [createId()]
-            )
-          )
-          .returning();
-
-        await tx
-          .delete(schema.pa)
-          .where(
-            inArray(
-              schema.pa.integrant_id,
-              deleted_integrants.map((i) => i.id).length > 0
-                ? deleted_integrants.map((i) => i.id)
-                : [createId()]
-            )
-          );
-
-        await tx
-          .delete(schema.differentialsValues)
-          .where(
-            inArray(
-              schema.differentialsValues.integrant_id,
-              deleted_integrants.map((i) => i.id).length > 0
-                ? deleted_integrants.map((i) => i.id)
-                : [createId()]
-            )
-          );
-
-        await tx
-          .delete(schema.medical_audit)
-          .where(
-            inArray(
-              schema.medical_audit.procedure_id,
-              deleted_procedures.map((p) => p.id).length > 0
-                ? deleted_procedures.map((p) => p.id)
-                : [createId()]
-            )
-          );
-
-        await tx
-          .delete(schema.administrative_audit)
-          .where(
-            inArray(
-              schema.administrative_audit.procedure_id,
-              deleted_procedures.map((p) => p.id).length > 0
-                ? deleted_procedures.map((p) => p.id)
-                : [createId()]
-            )
-          );
-
-        await tx
-          .delete(schema.excelBilling)
-          .where(eq(schema.excelBilling.companyId, input.companyId));
-
-        await tx
-          .delete(schema.currentAccount)
-          .where(eq(schema.currentAccount.company_id, input.companyId));
-
-        await tx
-          .delete(schema.documentUploads)
-          .where(eq(schema.documentUploads.companyId, input.companyId));
-
-        await tx
-          .delete(schema.payments)
-          .where(eq(schema.payments.companyId, input.companyId));
-
-        await tx
-          .delete(schema.companies)
-          .where(eq(schema.companies.id, input.companyId));
+        // borro productos
 
         await tx
           .delete(schema.companyProducts)
-          .where(eq(schema.companyProducts.companyId, input.companyId!));
+          .where(eq(schema.companyProducts.companyId, input.companyId));
 
-        await db
-          .delete(schema.companiesToBrands)
-          .where(eq(schema.companiesToBrands.companyId, input.companyId!));
-
-        await tx
-          .delete(schema.items)
-          .where(
-            inArray(
-              schema.items.comprobante_id,
-              deleted_facturas.map((f) => f.id)
-            )
-          )
-          .returning();
-
-        await tx
-          .delete(schema.healthInsurances)
-          .where(eq(schema.healthInsurances.companyId, input.companyId));
-
-        await tx.delete(schema.abonos).where(
-          inArray(
-            schema.abonos.family_group,
-            deleted_fg.map((fg) => fg.id)
-          )
-        );
-
-        await tx.delete(schema.pa).where(
-          inArray(
-            schema.pa.integrant_id,
-            deleted_integrants.map((i) => i.id)
-          )
-        );
-        await tx.delete(schema.differentialsValues).where(
-          inArray(
-            schema.differentialsValues.integrant_id,
-            deleted_integrants.map((i) => i.id)
-          )
-        );
+        // borro circuito de procedure,medical/admin audit, family_groups, (integrants, bonus, abonos)
+        const procedures = await tx.query.procedure.findMany({
+          where: eq(schema.procedure.companyId, input.companyId),
+        });
+        console.log("procedures", procedures);
+        if (procedures.length === 0) {
+          console.log("no hay procedures");
+          await tx
+            .delete(schema.bussinessUnits)
+            .where(eq(schema.bussinessUnits.companyId, input.companyId));
+          await tx
+            .delete(schema.documentUploads)
+            .where(eq(schema.documentUploads.companyId, input.companyId));
+          await tx
+            .delete(schema.excelBilling)
+            .where(eq(schema.excelBilling.companyId, input.companyId));
+          await tx
+            .delete(schema.healthInsurances)
+            .where(eq(schema.healthInsurances.companyId, input.companyId));
+          await tx
+            .delete(schema.companies)
+            .where(eq(schema.companies.id, input.companyId));
+          return null;
+        }
         await tx.delete(schema.medical_audit).where(
           inArray(
             schema.medical_audit.procedure_id,
-            deleted_procedures.map((p) => p.id)
+            procedures.map((p) => p.id)
           )
         );
         await tx.delete(schema.administrative_audit).where(
           inArray(
             schema.administrative_audit.procedure_id,
-            deleted_procedures.map((p) => p.id)
+            procedures.map((p) => p.id)
+          )
+        );
+
+        const family_groups = await tx.query.family_groups.findMany({
+          where: inArray(
+            schema.family_groups.procedureId,
+            procedures.map((p) => p.id)
+          ),
+        });
+
+        if (family_groups.length === 0) {
+          await tx
+            .delete(schema.procedure)
+            .where(eq(schema.procedure.companyId, input.companyId));
+          await tx
+            .delete(schema.bussinessUnits)
+            .where(eq(schema.bussinessUnits.companyId, input.companyId));
+          await tx
+            .delete(schema.documentUploads)
+            .where(eq(schema.documentUploads.companyId, input.companyId));
+          await tx
+            .delete(schema.excelBilling)
+            .where(eq(schema.excelBilling.companyId, input.companyId));
+          await tx
+            .delete(schema.healthInsurances)
+            .where(eq(schema.healthInsurances.companyId, input.companyId));
+          await tx
+            .delete(schema.companies)
+            .where(eq(schema.companies.id, input.companyId));
+          return null;
+        }
+        const integrants = await tx.query.integrants.findMany({
+          where: inArray(
+            schema.integrants.family_group_id,
+            family_groups.map((fg) => fg.id)
+          ),
+        });
+        if (integrants.length > 0) {
+          await tx.delete(schema.contributions).where(
+            inArray(
+              schema.contributions.integrant_id,
+              integrants.map((i) => i.id)
+            )
+          );
+          await tx.delete(schema.differentialsValues).where(
+            inArray(
+              schema.differentialsValues.integrant_id,
+              integrants.map((i) => i.id)
+            )
+          );
+          await tx.delete(schema.pa).where(
+            inArray(
+              schema.pa.integrant_id,
+              integrants.map((i) => i.id)
+            )
+          );
+        }
+        await tx.delete(schema.integrants).where(
+          inArray(
+            schema.integrants.family_group_id,
+            family_groups.map((fg) => fg.id)
+          )
+        );
+        await tx.delete(schema.bonuses).where(
+          inArray(
+            schema.bonuses.family_group_id,
+            family_groups.map((fg) => fg.id)
+          )
+        );
+        await tx.delete(schema.abonos).where(
+          inArray(
+            schema.abonos.family_group,
+            family_groups.map((fg) => fg.id)
+          )
+        );
+        await deleteFacturasCircuit(tx, input.companyId);
+
+        await tx.delete(schema.family_groups).where(
+          inArray(
+            schema.family_groups.procedureId,
+            procedures.map((p) => p.id)
           )
         );
         await tx
-          .delete(schema.excelBilling)
-          .where(eq(schema.excelBilling.companyId, input.companyId));
+          .delete(schema.procedure)
+          .where(eq(schema.procedure.companyId, input.companyId));
+        //borro las marcas
+        const companiesToBrands = await tx.query.companiesToBrands.findMany({
+          where: eq(schema.companiesToBrands.companyId, input.companyId),
+        });
+        if (companiesToBrands.length > 0) {
+          const brands = await tx.query.brands.findMany({
+            where: inArray(
+              schema.brands.id,
+              companiesToBrands.map((cp) => cp.brandId)
+            ),
+          });
+          const plans = await tx.query.plans.findMany({
+            where: inArray(
+              schema.plans.brand_id,
+              brands.map((brands) => brands.id)
+            ),
+          });
+          if (plans.length > 0) {
+            await tx.delete(schema.pricePerCondition).where(
+              inArray(
+                schema.pricePerCondition.plan_id,
+                plans.map((p) => p.id)
+              )
+            );
+          }
+          await tx.delete(schema.plans).where(
+            inArray(
+              schema.plans.brand_id,
+              brands.map((b) => b.id)
+            )
+          );
+          await tx.delete(schema.brands).where(
+            inArray(
+              schema.brands.id,
+              companiesToBrands.map((cp) => cp.brandId)
+            )
+          );
+          await tx
+            .delete(schema.companiesToBrands)
+            .where(eq(schema.companiesToBrands.companyId, input.companyId));
+        }
+
         await tx
-          .delete(schema.currentAccount)
-          .where(eq(schema.currentAccount.company_id, input.companyId));
+          .delete(schema.healthInsurances)
+          .where(eq(schema.healthInsurances.companyId, input.companyId));
+        // al final de todo si borrar la compañia
         await tx
           .delete(schema.documentUploads)
           .where(eq(schema.documentUploads.companyId, input.companyId));
         await tx
-          .delete(schema.payments)
-          .where(eq(schema.payments.companyId, input.companyId));
-        await tx
           .delete(schema.companies)
           .where(eq(schema.companies.id, input.companyId));
-        await tx
-          .delete(schema.companyProducts)
-          .where(eq(schema.companyProducts.companyId, input.companyId!));
-        await db
-          .delete(schema.companiesToBrands)
-          .where(eq(schema.companiesToBrands.companyId, input.companyId!));
       });
     }),
 });
+
+async function deleteBasics(db: DBTX, companyId: string) {
+  await db.transaction(async (tx) => {
+    const deleted_billing = await tx
+      .delete(schema.excelBilling)
+      .where(eq(schema.excelBilling.companyId, companyId))
+      .returning();
+    console.log("deleted_billing", deleted_billing);
+    await tx
+      .delete(schema.payments)
+      .where(eq(schema.payments.companyId, companyId));
+    await tx
+      .delete(schema.documentUploads)
+      .where(eq(schema.documentUploads.companyId, companyId));
+    const current_accounts = await tx.query.currentAccount.findMany({
+      where: eq(schema.currentAccount.company_id, companyId),
+    });
+    if (current_accounts.length > 0) {
+      await tx.delete(schema.events).where(
+        inArray(
+          schema.events.currentAccount_id,
+          current_accounts.map((ca) => ca.id)
+        )
+      );
+      await tx
+        .delete(schema.currentAccount)
+        .where(eq(schema.currentAccount.company_id, companyId));
+    }
+  });
+}
+
+async function deleteFacturasCircuit(db: DBTX, companyId: string) {
+  console.log("llego aqui 1");
+  await db.transaction(async (tx) => {
+    // borro circuito de bu, liquidaciones, facturas e items
+    console.log("llego aqui 2");
+    const bussinessUnits = await tx.query.bussinessUnits.findMany({
+      where: eq(schema.bussinessUnits.companyId, companyId),
+    });
+    console.log("businessUnits", bussinessUnits);
+    if (bussinessUnits.length === 0) {
+      return null;
+    }
+    const liquidations = await tx.query.liquidations.findMany({
+      where: inArray(
+        schema.liquidations.bussinessUnits_id,
+        bussinessUnits.map((bu) => bu.id)
+      ),
+    });
+    console.log(liquidations);
+    if (liquidations.length === 0) {
+      await tx
+        .delete(schema.bussinessUnits)
+        .where(eq(schema.bussinessUnits.companyId, companyId));
+
+      return null;
+    }
+    const facturas = await tx.query.facturas.findMany({
+      where: inArray(
+        schema.facturas.liquidation_id,
+        liquidations.map((l) => l.id)
+      ),
+    });
+    console.log(facturas);
+    if (facturas.length === 0) {
+      await tx.delete(schema.liquidations).where(
+        inArray(
+          schema.liquidations.bussinessUnits_id,
+          bussinessUnits.map((bu) => bu.id)
+        )
+      );
+      await tx
+        .delete(schema.bussinessUnits)
+        .where(eq(schema.bussinessUnits.companyId, companyId));
+
+      return null;
+    }
+    await tx.delete(schema.items).where(
+      inArray(
+        schema.items.comprobante_id,
+        facturas.map((f) => f.id)
+      )
+    );
+    await tx.delete(schema.facturas).where(
+      inArray(
+        schema.facturas.liquidation_id,
+        liquidations.map((l) => l.id)
+      )
+    );
+    await tx.delete(schema.liquidations).where(
+      inArray(
+        schema.liquidations.bussinessUnits_id,
+        bussinessUnits.map((bu) => bu.id)
+      )
+    );
+    await tx
+      .delete(schema.bussinessUnits)
+      .where(eq(schema.bussinessUnits.companyId, companyId));
+  });
+}
