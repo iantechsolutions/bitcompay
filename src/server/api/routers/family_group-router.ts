@@ -41,13 +41,17 @@ export const family_groupsRouter = createTRPCRouter({
         family_groupsId: z.string(),
       })
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
       const family_groups = await db.query.family_groups.findFirst({
         where: eq(schema.family_groups.id, input.family_groupsId),
+        with: { businessUnitData: true },
       });
 
-      return family_groups;
+      if (family_groups?.businessUnitData?.companyId === ctx.session.orgId) {
+        return family_groups;
+      } else null;
     }),
+
   getByLiquidation: protectedProcedure
     .input(z.object({ liquidationId: z.string() }))
     .query(async ({ input }) => {
@@ -131,29 +135,29 @@ export const family_groupsRouter = createTRPCRouter({
       });
       return family_group_reduced;
     }),
-  getByOrganization: protectedProcedure.query(async ({ ctx }) => {
-    const companyId = ctx.session.orgId;
+  // getByOrganization: protectedProcedure.query(async ({ ctx }) => {
+  //   const companyId = ctx.session.orgId;
 
-    const family_group = await db.query.family_groups.findMany({
-      with: {
-        businessUnitData: true,
-        abonos: true,
-        integrants: {
-          with: {
-            contribution: true,
-            differentialsValues: true,
-          },
-        },
-        bonus: true,
-        plan: true,
-        modo: true,
-      },
-    });
-    const family_group_reduced = family_group.filter((family_group) => {
-      return family_group.businessUnitData?.companyId === companyId!;
-    });
-    return family_group_reduced;
-  }),
+  //   const family_group = await db.query.family_groups.findMany({
+  //     with: {
+  //       businessUnitData: true,
+  //       abonos: true,
+  //       integrants: {
+  //         with: {
+  //           contribution: true,
+  //           differentialsValues: true,
+  //         },
+  //       },
+  //       bonus: true,
+  //       plan: true,
+  //       modo: true,
+  //     },
+  //   });
+  //   const family_group_reduced = family_group.filter((family_group) => {
+  //     return family_group.businessUnitData?.companyId === companyId!;
+  //   });
+  //   return family_group_reduced;
+  // }),
   create: protectedProcedure
     .input(
       z.object({

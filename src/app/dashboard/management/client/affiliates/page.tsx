@@ -13,7 +13,7 @@ import {
 } from "~/components/ui/table";
 
 export default function Home() {
-  const { data: grupo } = api.family_groups.getByOrganization.useQuery();
+  const { data: grupo } = api.family_groups.list.useQuery();
   const linked = (link: string) => {
     window.location.href = link;
   };
@@ -43,8 +43,7 @@ export default function Home() {
                     linked(
                       `/dashboard/management/client/affiliates/${grupo.id}`
                     )
-                  }
-                >
+                  }>
                   <TableCell>{grupo.numericalId}</TableCell>
                   <TableCell className="text-justify">
                     {grupo.integrants.length}

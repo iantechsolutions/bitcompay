@@ -36,35 +36,48 @@ export const brandsRouter = createTRPCRouter({
 
       return brand;
     }),
+  CompleteList: protectedProcedure.query(async ({ ctx }) => {
+    const brands = await db.query.brands.findMany();
 
-  list: protectedProcedure.query(async () => {
-    return await db.query.brands.findMany();
+    return brands;
   }),
-  getbyCurrentCompany: protectedProcedure.query(async ({ ctx }) => {
+
+  list: protectedProcedure.query(async ({ ctx }) => {
     const companyId = ctx.session.orgId;
-    const company = await db.query.companies.findFirst({
-      where: eq(schema.companies.id, companyId!),
-      with: {
-        brands: {
-          with: {
-            brand: true,
-          },
-        },
-      },
+    const brands = await db.query.brands.findMany({
+      with: { company: true },
     });
-    return company?.brands.map((b) => b.brand);
+
+    return brands.filter((x) =>
+      x.company.some((x) => x.companyId === ctx.session.orgId)
+    );
   }),
-  getBrandsByCompany: protectedProcedure
-    .input(z.object({ companyId: z.string() }))
-    .query(async ({ input }) => {
-      const brands = await db.query.companiesToBrands.findMany({
-        where: eq(schema.companiesToBrands.companyId, input.companyId),
-        with: {
-          brand: true,
-        },
-      });
-      return brands.map((b) => b.brand);
-    }),
+
+  // getbyCurrentCompany: protectedProcedure.query(async ({ ctx }) => {
+  //   const companyId = ctx.session.orgId;
+  //   const company = await db.query.companies.findMany({
+  //     where: eq(schema.companies.id, companyId!),
+  //     with: {
+  //       brands: {
+  //         with: {
+  //           brand: true,
+  //         },
+  //       },
+  //     },
+  //   });
+  //   return company?.brands.map((b) => b.brand);
+  // }),
+  // getBrandsByCompany: protectedProcedure
+  //   .input(z.object({ companyId: z.string() }))
+  //   .query(async ({ input }) => {
+  //     const brands = await db.query.companiesToBrands.findMany({
+  //       where: eq(schema.companiesToBrands.companyId, input.companyId),
+  //       with: {
+  //         brand: true,
+  //       },
+  //     });
+  //     return brands.map((b) => b.brand);
+  //   }),
   create: protectedProcedure
     .input(
       z.object({

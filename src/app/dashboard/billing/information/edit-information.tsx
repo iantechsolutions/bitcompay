@@ -45,7 +45,7 @@ export default function EditCompany() {
       setRazonSocial(company.razon_social || "");
     }
   }, [company]);
-  const { data: marcas } = api.brands.getbyCurrentCompany.useQuery();
+  const { data: marcas } = api.brands.list.useQuery();
   const { mutateAsync: updateCompany, isLoading: isMutating } =
     api.companies.change.useMutation();
   const { mutateAsync: editBrand, isLoading: isMutatingBrand } =
@@ -74,9 +74,8 @@ export default function EditCompany() {
     }
   };
   function handleChangeBrand(newValue: string) {
-    
     setBrandId(newValue);
-    
+
     const brand = marcas?.find((brand) => brand?.id === newValue);
     if (brand) {
       console.log("newValue", newValue);
@@ -141,8 +140,7 @@ export default function EditCompany() {
                     <SelectItem
                       key={marca?.id}
                       value={marca?.id}
-                      className="rounded-none border-b border-gray-600"
-                    >
+                      className="rounded-none border-b border-gray-600">
                       {marca?.name}
                     </SelectItem>
                   ))}
@@ -168,8 +166,7 @@ export default function EditCompany() {
                 <br />
                 <Select
                   onValueChange={(e) => setTipoFactura(e)}
-                  value={tipoFactura ?? ""}
-                >
+                  value={tipoFactura ?? ""}>
                   <SelectTrigger className="w-[180px] font-bold">
                     <SelectValue placeholder="Seleccionar factura..." />
                   </SelectTrigger>
@@ -197,8 +194,7 @@ export default function EditCompany() {
                 <br />
                 <Select
                   onValueChange={(e) => setConcepto(e)}
-                  value={concepto ?? ""}
-                >
+                  value={concepto ?? ""}>
                   <SelectTrigger className="w-[180px] font-bold">
                     <SelectValue placeholder="Seleccionar concepto..." />
                   </SelectTrigger>

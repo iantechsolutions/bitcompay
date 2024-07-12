@@ -15,11 +15,9 @@ export default async function Page(props: {
     await api.companies.getById.query({
       companyId: props.params.companySubId,
     });
-  const brands: RouterOutputs["brands"]["getBrandsByCompany"] =
-    await api.brands.getBrandsByCompany.query({
-      companyId: props.params.companySubId,
-    });
+  const brands: RouterOutputs["brands"]["list"] = await api.brands.list.query();
 
+  console.log(brands);
   return (
     <>
       <div className="flex items-center text-sm font-semibold opacity-80">

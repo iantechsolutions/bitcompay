@@ -191,8 +191,7 @@ export default function BillingInfo({ data, form }: propsBillingInfo) {
                     <FormLabel>Producto</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                      defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="elija un producto" />
@@ -231,8 +230,7 @@ export default function BillingInfo({ data, form }: propsBillingInfo) {
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
-                      disabled={isBillingResponsible}
-                    >
+                      disabled={isBillingResponsible}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="elija un tipo de id fiscal " />
@@ -269,8 +267,7 @@ export default function BillingInfo({ data, form }: propsBillingInfo) {
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
-                      disabled={isBillingResponsible}
-                    >
+                      disabled={isBillingResponsible}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="elija un tipo de id " />
@@ -293,8 +290,7 @@ export default function BillingInfo({ data, form }: propsBillingInfo) {
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
-                      disabled={isBillingResponsible}
-                    >
+                      disabled={isBillingResponsible}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccione un estado de AFIP" />
@@ -368,8 +364,7 @@ export default function BillingInfo({ data, form }: propsBillingInfo) {
                         <FormLabel>Marca de Tarjeta</FormLabel>
                         <Select
                           onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
+                          defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Seleccione marca de tarjeta" />
@@ -393,8 +388,7 @@ export default function BillingInfo({ data, form }: propsBillingInfo) {
                         <FormLabel>Tipo de Tarjeta</FormLabel>
                         <Select
                           onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
+                          defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="seleccione tipo de tarjeta" />
@@ -428,8 +422,7 @@ export default function BillingInfo({ data, form }: propsBillingInfo) {
                             className={cn(
                               "w-[240px] pl-3 text-left font-normal",
                               !field.value && "text-muted-foreground"
-                            )}
-                          >
+                            )}>
                             <p>
                               {field.value ? (
                                 dayjs

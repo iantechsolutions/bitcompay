@@ -42,12 +42,17 @@ export default async function Home(props: {
   });
 
   const user = await clerkClient.users.getUser(
-    preliquidation?.userCreated ?? ""
+    preliquidation?.userCreated ?? "user_2iy8lXXdnoa2f5wHjRh5nj3W0fU"
   );
+  console.log("---------------1-----------------3--------------------5");
+  console.log(props.params.liquidationId);
+
   // if (!preliquidation) return <Title>Preliquidacion no encotrada</Title>;
   const familyGroups = await api.family_groups.getByLiquidation.query({
     liquidationId: props.params.liquidationId,
   });
+
+  console.log(familyGroups);
   const periodo =
     dayjs.utc(preliquidation?.period).format("MMMM [de] YYYY") ?? "-";
   const headers = [

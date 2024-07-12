@@ -162,7 +162,7 @@ async function approbateFactura(liquidationId: string) {
               businessUnitData: {
                 with: {
                   company: true,
-                  brand: true,
+                  brand: { with: { company: true } },
                 },
               },
               plan: true,
@@ -599,7 +599,6 @@ export const facturasRouter = createTRPCRouter({
     .input(
       z.object({
         pv: z.string(),
-        companyId: z.string(),
         brandId: z.string(),
         dateDesde: z.date().optional(),
         dateHasta: z.date().optional(),
@@ -616,7 +615,7 @@ export const facturasRouter = createTRPCRouter({
         where: eq(schema.brands.id, input.brandId),
       });
       const company = await db.query.companies.findFirst({
-        where: eq(schema.companies.id, input.companyId),
+        where: eq(schema.companies.id, companyId!),
       });
       const randomNumberLiq = Math.floor(Math.random() * (1000 - 10 + 1)) + 10;
 
