@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { currentUser } from "@clerk/nextjs/server";
+import { CircleCheck } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -36,8 +37,12 @@ function UpdateLiquidationEstadoDialog({
 
   return (
     <>
-      <Button className="btn-primary" onClick={() => setOpen(true)}>
-        Aprobar Liquidacion
+      <Button
+        className=" h-7 bg-[#22d8b3] hover:bg-[#58d9bf] text-[#656464]  text-xs rounded-2xl py-0 px-6"
+        onClick={() => setOpen(true)}
+      >
+        Aprobar
+        <CircleCheck className="h-4 w-auto ml-2" />
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[425px] p-4">

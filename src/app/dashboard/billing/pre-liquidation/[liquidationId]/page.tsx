@@ -32,11 +32,12 @@ import { clerkClient } from "@clerk/nextjs/server";
 import UpdateLiquidationEstadoDialog from "./approve-liquidation-dialog";
 import { computeBase, computeIva } from "~/lib/utils";
 import DownloadExcelButton from "./downloadExcelButton";
-
+import { ChevronLeft, CircleX } from "lucide-react";
 export default async function Home(props: {
   params: { liquidationId: string };
 }) {
   const userActual = await currentUser();
+  const companyData = await api.companies.get.query();
   const preliquidation = await api.liquidations.get.query({
     id: props.params.liquidationId,
   });
@@ -70,6 +71,13 @@ export default async function Home(props: {
     "IVA",
     "Total",
   ];
+  const summary = {
+    "Cuota Planes": 175517.82,
+    Bonificación: 175517.82,
+    Diferencial: 175517.82,
+    Aportes: 175517.82,
+    Interés: 175517.82,
+  };
   // const rowsPromise =
   //   facturas?.map(async (factura) => {
   //     if (!factura) return [];
@@ -108,43 +116,64 @@ export default async function Home(props: {
   // rows.unshift(headers);
   return (
     <LayoutContainer>
-      <div className="grid grid-cols-3 gap-x-2 gap-y-2">
-        <p className="opacity-70">
-          <span className="font-bold opacity-100">Razon social: </span>
-          {preliquidation?.razon_social ?? "-"}
-        </p>
-        <p className="opacity-70">
-          <span className="font-bold opacity-100">Periodo: </span>
-          {periodo}
-        </p>
-        <p className="opacity-70">
-          <span className="font-bold opacity-100">Hora: </span>
-          {dayjs.utc(new Date()).format("HH:mm") ?? "-"}
-        </p>
-        <p className="opacity-70">
-          <span className="font-bold opacity-100">CUIT: </span>
-          {preliquidation?.cuit ?? "-"}
-        </p>
-        <p className="opacity-70">
-          <span className="font-bold opacity-100">Nro. Pre-liq: </span>
-          {preliquidation?.number ?? "-"}
-        </p>
-        <p className="opacity-70">
-          <span className="font-bold opacity-100">Unidad de negocio: </span>
-          {preliquidation?.bussinessUnits?.description ?? "-"}
-        </p>
-        <p className="opacity-70">
-          <span className="font-bold opacity-100">PDV: </span>
-          {preliquidation?.pdv?.toString() ?? "-"}
-        </p>
-        <p className="opacity-70">
-          <span className="font-bold opacity-100">Fecha: </span>
-          {dayjs.utc(preliquidation?.createdAt).format("DD/MM/YYYY") ?? "-"}
-        </p>
-        <p className="opacity-70">
-          <span className="font-bold opacity-100">Usuario: </span>
-          {user?.emailAddresses.at(0)?.emailAddress ?? "-"}
-        </p>
+      <div className="flex flex-row justify-between w-full">
+        {preliquidation?.estado === "pendiente" && (
+          <>
+            <div className="opacity-50 flex flex-row items-center">
+              {" "}
+              <ChevronLeft className="mr-1 h-4 w-auto" />
+              <p className="font-medium ">VOLVER</p>
+            </div>
+            <div className="flex flex-row gap-1">
+              <UpdateLiquidationEstadoDialog
+                liquidationId={props.params.liquidationId}
+                userId={userActual?.id ? userActual?.id : ""}
+              />
+              <Button className=" h-7 bg-[#c2c0c0] hover:bg-[#7e7c7c] text-[#686767]  text-xs rounded-2xl py-0 px-6">
+                Rechazar <CircleX className="h-4 w-auto ml-2" />{" "}
+              </Button>
+            </div>
+          </>
+        )}
+      </div>
+      <div className="grid grid-cols-3 gap-x-2 gap-y-2 ml-3 text-base opacity-50">
+        <ul className="list-disc">
+          <li>
+            <span className="font-bold "> CUIT: </span>
+            {companyData?.cuit ?? "-"}
+          </li>
+          <li className="opacity-70">
+            <span className="font-bold ">Razon social: </span>
+            {companyData?.razon_social ?? "-"}
+          </li>
+        </ul>
+        <ul className="list-disc">
+          <li>
+            <span className="font-bold ">Gerenciador</span>{" "}
+          </li>
+          <li>
+            <span className="font-bold ">Periodo: </span>
+            {periodo}
+          </li>
+        </ul>
+        <ul className="list-disc">
+          <li>
+            <span className="font-bold opacity-100">Nro. Pre-liq: </span>
+            {preliquidation?.number ?? "-"}
+          </li>
+          <li>
+            <span className="font-bold opacity-100">Fecha: </span>
+            {dayjs.utc(preliquidation?.createdAt).format("DD/MM/YYYY") ?? "-"}
+          </li>
+        </ul>
+      </div>
+      <div className="bg-[#ecf7f5] flex flex-row justify-evenly gap-2 w-full">
+        {Object.entries(summary).map(([key, value]) => (
+          <div key={key}>
+            <p className="font-medium">{key}</p>
+            <p className="text-[#4af0d4] font-bold text-lg">$ {value}</p>
+          </div>
+        ))}
       </div>
       <div>
         <Table className="border-separate  border-spacing-x-0 border-spacing-y-2">
@@ -155,77 +184,91 @@ export default async function Home(props: {
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
+               border-r-[1.5px] border-[#4af0d4]"
+              >
                 Nombre (Resp. Pago){" "}
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
+               border-r-[1.5px] border-[#4af0d4]"
+              >
                 DNI
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
+               border-r-[1.5px] border-[#4af0d4]"
+              >
                 CUIL/CUIT (Resp. Pago){" "}
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
+               border-r-[1.5px] border-[#4af0d4]"
+              >
                 Saldo Cta. Cte.{" "}
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
+               border-r-[1.5px] border-[#4af0d4]"
+              >
                 Cuota
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
+               border-r-[1.5px] border-[#4af0d4]"
+              >
                 Bonificacion
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
+               border-r-[1.5px] border-[#4af0d4]"
+              >
                 Diferencial
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
+               border-r-[1.5px] border-[#4af0d4]"
+              >
                 Aportes
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
+               border-r-[1.5px] border-[#4af0d4]"
+              >
                 Interes
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
+               border-r-[1.5px] border-[#4af0d4]"
+              >
                 Sub total
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
+               border-r-[1.5px] border-[#4af0d4]"
+              >
                 IVA
               </TableHead>
               {preliquidation?.estado !== "pendiente" ? (
                 <>
                   <TableHead
                     className="text-gray-800
-               rounded-r-md overflow-hidden">
+               rounded-r-md overflow-hidden"
+                  >
                     Total
                   </TableHead>
 
                   <TableHead
                     className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
+               border-r-[1.5px] border-[#4af0d4]"
+                  >
                     Factura
                   </TableHead>
                 </>
               ) : (
                 <TableHead
                   className="text-gray-800
-               rounded-r-md overflow-hidden">
+               rounded-r-md overflow-hidden"
+                >
                   Total
                 </TableHead>
               )}
@@ -240,23 +283,10 @@ export default async function Home(props: {
                 periodo={periodo}
               />
             ))}
-            {/* {facturas?.map((factura: any) => (
-              <TableRowContainer
-                key={factura.id}
-                factura={factura}
-                preliquidation={preliquidation}
-                periodo={periodo}
-              />
-            ))} */}
           </TableBody>
         </Table>
         <br />
-        {preliquidation?.estado === "pendiente" && (
-          <UpdateLiquidationEstadoDialog
-            liquidationId={props.params.liquidationId}
-            userId={userActual?.id ? userActual?.id : ""}
-          />
-        )}
+
         <br />
         {/* <DownloadExcelButton rows={rows} period={preliquidation?.period} /> */}
       </div>

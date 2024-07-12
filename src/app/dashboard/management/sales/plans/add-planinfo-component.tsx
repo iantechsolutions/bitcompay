@@ -116,8 +116,8 @@ export default function AddPlanInfoComponent({
           </SelectTrigger>
           <SelectContent>
             {brands?.map((item) => (
-              <SelectItem key={item.id} value={item.id}>
-                {item.description}
+              <SelectItem key={item?.id} value={item?.id}>
+                {item?.description}
               </SelectItem>
             ))}
           </SelectContent>

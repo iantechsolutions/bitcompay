@@ -17,89 +17,46 @@ import { RouterOutputs } from "~/trpc/shared";
 import { computeIva, computeBase, computeTotal } from "~/lib/utils";
 type propsContentTable = {
   factura: RouterOutputs["facturas"]["getByLiquidation"][number];
-  period: string;
-  total: number;
 };
 
 function ContentTable(props: propsContentTable) {
-  const { factura, period, total } = props;
-  const contribution = factura.items.find((item) => item.concept === "Aporte");
-  const interest = factura.items.find((item) => item.concept === "Interes");
-  const bonification = factura.items.find(
-    (item) => item.concept === "Bonificación"
-  );
-  const previousBill = factura.items.find(
-    (item) => item.concept === "Factura Anterior"
-  );
-  const abono = factura.items.find((item) => item.concept === "Abono");
+  const { factura } = props;
   return (
-    <OriginalTableRow>
-      <OriginalTableCell colSpan={13}>
-        <Table>
-          <TableCell
-            className="text-center font-bold border-r border-gray-400 bg-[#ccfbf1]"
-            rowSpan={8}
-          >
-            Mes Vigencia
+    <Table>
+      <TableRow>
+        <TableHead className="text-black text-sm opacity-70   border-b border-[#4af0d4]">
+          {" "}
+          Concepto{" "}
+        </TableHead>
+        <TableHead className="text-black  text-sm opacity-70  border-b border-[#4af0d4] ">
+          {" "}
+          Importe{" "}
+        </TableHead>
+        <TableHead className="text-black   text-sm opacity-70  border-b border-[#4af0d4]">
+          {" "}
+          IVA
+        </TableHead>
+        <TableHead className="text-black  text-sm opacity-70  border-b border-[#4af0d4]">
+          TOTAL
+        </TableHead>
+      </TableRow>{" "}
+      {factura?.items.map((item) => (
+        <TableRow>
+          <TableCell className=" border-b border-[#4af0d4] py-2 text-[#737171] italic opacity-70 ">
+            {item.concept}
           </TableCell>
-          <TableRow>
-            <TableHead className="text-black border-r border-gray-400 bg-[#ccfbf1]">
-              {" "}
-              Comprobante{" "}
-            </TableHead>
-            <TableHead className="text-black border-r border-gray-400 bg-[#ccfbf1]">
-              {" "}
-              Concepto{" "}
-            </TableHead>
-            <TableHead className="text-black border-r border-gray-400 bg-[#ccfbf1]">
-              {" "}
-              Importe{" "}
-            </TableHead>
-            <TableHead className="text-black border-r border-gray-400 bg-[#ccfbf1]">
-              {" "}
-              IVA
-            </TableHead>
-            <TableHead className="text-black bg-[#ccfbf1]">Total</TableHead>
-          </TableRow>{" "}
-          {factura?.items.map((item) => (
-            <TableRow>
-              <TableCell className="border border-gray-400 border-t-black bg-[#ccfbf1]">
-                FC
-              </TableCell>
-              <TableCell className="border border-gray-400 border-t-black bg-[#ccfbf1]">
-                {item.concept}
-              </TableCell>
-              <TableCell className="border border-gray-400 border-t-black bg-[#ccfbf1]">
-                {item.amount}
-              </TableCell>
-              <TableCell className="border border-gray-400 border-t-black bg-[#ccfbf1]">
-                {item.iva}
-              </TableCell>
-              <TableCell className="border border-gray-400 border-t-black bg-[#ccfbf1]">
-                {item.total}
-              </TableCell>
-            </TableRow>
-          ))}
-          <TableRow>
-            <TableCell className="font-bold border border-gray-400 border-t-black bg-[#ccfbf1]">
-              Total FC B
-            </TableCell>
-            <Table className="border border-gray-400 bg-[#ccfbf1] border-t-black min-h-[22px]">
-              {" "}
-            </Table>
-            <TableCell className="border border-gray-400 bg-[#ccfbf1] border-t-black">
-              ${computeBase(total, parseFloat(factura?.iva) ?? 0)}
-            </TableCell>
-            <TableCell className="border border-gray-400 bg-[#ccfbf1] border-t-black">
-              ${computeIva(total, parseFloat(factura?.iva) ?? 0)}
-            </TableCell>
-            <TableCell className="border border-gray-400 bg-[#ccfbf1] border-t-black">
-              ${total}
-            </TableCell>
-          </TableRow>{" "}
-        </Table>
-      </OriginalTableCell>
-    </OriginalTableRow>
+          <TableCell className=" border-b border-[#4af0d4] py-2 text-[#737171] font-semibold opacity-70 ">
+            {item.amount}
+          </TableCell>
+          <TableCell className=" border-b border-[#4af0d4] py-2 text-[#737171] font-semibold opacity-70">
+            {item.iva}
+          </TableCell>
+          <TableCell className=" border-b border-[#4af0d4] py-2 text-[#737171] font-semibold opacity-70">
+            {item.total}
+          </TableCell>
+        </TableRow>
+      ))}
+    </Table>
   );
 }
 
