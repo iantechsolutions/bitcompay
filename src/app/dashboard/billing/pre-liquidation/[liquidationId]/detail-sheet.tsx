@@ -21,6 +21,12 @@ export default function DetailSheet({ name, facturas }: DetailSheetProps) {
     Aportes: 175517.82,
     Interés: 175517.82,
   };
+  let facturasNC = [];
+  let facturasFC = [];
+  for (const factura of facturas) {
+    if (factura.estado === "anuladas") facturasNC.push(factura);
+    else facturasFC.push(factura);
+  }
   return (
     <Sheet>
       <SheetTrigger>
@@ -51,9 +57,17 @@ export default function DetailSheet({ name, facturas }: DetailSheetProps) {
           ))}
         </div>
         <div className="mt-2">
+          <div className="flex flex-row justify-between py-2 mb-3 bg-[#fffefe]">
+            <p className="text-2xl font-medium opacity-70">FC</p>
+            <p className="text-lg font-semibold text-[#4af0d4]">$ 40,517.24</p>
+          </div>
           {facturas.map((factura) => (
             <ContentTable factura={factura} />
           ))}
+          <div className="flex flex-row justify-between py-2 mb-3 bg-[#fffefe] mt-2">
+            <p className="text-2xl font-medium opacity-70">NC</p>
+            <p className="text-lg font-semibold text-[#4af0d4]">$ 40,517.24</p>
+          </div>
         </div>
         <div className="mt-3">
           {Object.entries({
@@ -62,7 +76,7 @@ export default function DetailSheet({ name, facturas }: DetailSheetProps) {
           }).map(([key, value]) => (
             <div className="bg-[#b7f3e8] flex flex-row justify-between px-1.5 py-2 rounded-md mt-2">
               <p className=" text-sm font-semibold opacity-70">{key}: </p>
-              <p className="text-[#b5b5b5] text-xs">$ {value}</p>
+              <p className="text-[#9b9a9a] text-xs">$ {value}</p>
             </div>
           ))}
         </div>
