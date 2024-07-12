@@ -1,35 +1,27 @@
 "use client";
-
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import LayoutContainer from "~/components/layout-container";
-import { Title } from "~/components/title";
 import { UploadDropzone } from "~/components/uploadthing";
-import type { RouterOutputs } from "~/trpc/shared";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCompanyData } from "~/app/dashboard/company-provider";
 
-export default function UploadResponsePage(props: {
-  channel: NonNullable<RouterOutputs["channels"]["get"]>;
-}) {
+export default function UploadDropzoneV1() {
   const [errorMessage, setErrorMessage] = useState<string | null>();
 
   const router = useRouter();
+  const company = useCompanyData();
 
   return (
-    <LayoutContainer>
-      <Title>Cargar documento</Title>
-
-      {errorMessage && <p className="text-red-500">{errorMessage}</p>}
-
+    <div>
       <UploadDropzone
-        input={{ channel: props.channel.name }}
-        endpoint="responseUpload"
+        input={{ companyId: company.id }}
+        endpoint="massiveGenerationUpload"
         config={{
           mode: "manual",
           appendOnPaste: true,
         }}
         content={{
           button: "Continuar",
-          allowedContent: "Archivos de txt",
+          allowedContent: "Archivos de excel",
           label: "Arrastra y suelta el archivo aquí",
           uploadIcon: (
             <img
@@ -54,16 +46,14 @@ export default function UploadResponsePage(props: {
         onClientUploadComplete={(res) => {
           const [file] = res;
 
-          if (!file) {
-            return;
-          }
-
-          router.push(`./${props.channel.id}/${file.serverData.uploadId}`);
+          if (!file) return;
+          // toast.success('Archivo!');
+          router.push(`./massive-upload/${file.serverData.uploadId}`);
         }}
         onUploadError={(error: Error) => {
           setErrorMessage(error.message);
         }}
       />
-    </LayoutContainer>
+    </div>
   );
 }
