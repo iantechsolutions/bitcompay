@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckIcon, Loader2 } from "lucide-react";
+import { CheckIcon, Loader2, UserCircleIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type MouseEventHandler, useState } from "react";
 import { toast } from "sonner";
@@ -39,6 +39,12 @@ interface Brand {
   id: string;
 }
 
+type User = {
+  id: string;
+  name: string;
+  email: string;
+};
+
 export default function CompanyPage({
   company,
   products,
@@ -48,7 +54,7 @@ export default function CompanyPage({
   company: NonNullable<RouterOutputs["companies"]["get"]>;
   products: RouterOutputs["products"]["list"];
   brands: Brand[] | undefined;
-  userList: UserList;
+  userList: User[];
 }) {
   const [name, setName] = useState(company.name);
   const [description, setDescription] = useState(company.description);
@@ -183,7 +189,14 @@ export default function CompanyPage({
             <AccordionContent>
               <List>
                 {userList.map((user) => {
-                  return <ListTile title={user.fullName} key={user.id} />;
+                  return (
+                    <ListTile
+                      leading={<UserCircleIcon />}
+                      title={user?.name}
+                      key={user?.id}
+                      subtitle={user?.email}
+                    />
+                  );
                 })}
               </List>
             </AccordionContent>
