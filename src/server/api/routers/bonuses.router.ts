@@ -6,15 +6,20 @@ import { eq } from "drizzle-orm";
 import { bonusesSchemaDB } from "~/server/db/schema";
 
 export const bonusesRouter = createTRPCRouter({
-  list: protectedProcedure.query(async ({}) => {
-    const bonuses = await db.query.bonuses.findMany();
-    return bonuses;
+  list: protectedProcedure.query(async ({ ctx }) => {
+    const bonuses = await db.query.bonuses.findMany({
+      with: { family_group: { with: { businessUnitData: true } } },
+    });
+    return bonuses.filter(
+      (bonus) =>
+        bonus.family_group?.businessUnitData?.companyId === ctx.session.orgId
+    );
   }),
   get: protectedProcedure
     .input(
       z.object({
         bonusesId: z.string(),
-      }),
+      })
     )
     .query(async ({ input }) => {
       const bonuses = await db.query.bonuses.findFirst({
@@ -37,7 +42,7 @@ export const bonusesRouter = createTRPCRouter({
       z.object({
         id: z.string(),
         ...bonusesSchemaDB.shape,
-      }),
+      })
     )
     .mutation(async ({ input: { id, ...input } }) => {
       const updatedbonuses = await db
@@ -52,7 +57,7 @@ export const bonusesRouter = createTRPCRouter({
     .input(
       z.object({
         bonusesId: z.string(),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       await db

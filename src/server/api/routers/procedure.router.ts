@@ -12,7 +12,8 @@ export const procedureRouter = createTRPCRouter({
         medical_audits: true,
       },
     });
-    return procedures;
+
+    return procedures.filter((x) => x.companyId == ctx.session.orgId);
   }),
   get: protectedProcedure
     .input(
@@ -27,7 +28,6 @@ export const procedureRouter = createTRPCRouter({
           eq(schema.procedure.companyId, ctx.session.orgId!)
         ),
       });
-
       return procedure;
     }),
 

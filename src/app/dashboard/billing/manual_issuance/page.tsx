@@ -49,12 +49,12 @@ export default function Page() {
   const { mutateAsync: createItemReturnFactura } =
     api.items.createReturnFactura.useMutation();
   const { data: company } = api.companies.get.useQuery();
-  const { data: brand } = api.brands.getbyCurrentCompany.useQuery();
+  const { data: marcas } = api.brands.list.useQuery();
   const [logo, setLogo] = useState("");
 
   function generateFactura() {
-    if (brand) {
-      setLogo(brand[0]!.logo_url!);
+    if (marcas) {
+      setLogo(marcas[0]!.logo_url!);
     }
     try {
       (async () => {
@@ -210,7 +210,6 @@ export default function Page() {
   >(undefined);
   const [brandId, setBrandId] = useState("");
   let selectedBrand;
-  const { data: marcas } = api.brands.getbyCurrentCompany.useQuery();
 
   const [selectedChannel, setSelectedChannel] = useState("");
 

@@ -33,7 +33,7 @@ import { api } from "~/trpc/react";
 import { ComboboxDemo } from "~/components/ui/combobox";
 import { useRouter } from "next/navigation";
 
-export default function AddPreLiquidation(props: { companyId: string }) {
+export default function AddPreLiquidation() {
   const [open, setOpen] = useState(false);
   const [fechaVencimiento1, setFechaVencimiento1] = useState<Date>();
   const [fechaVencimiento2, setFechaVencimiento2] = useState<Date>();
@@ -45,7 +45,7 @@ export default function AddPreLiquidation(props: { companyId: string }) {
   const [logo_url, setLogo_url] = useState("");
 
   const [interest, setInterest] = useState<number | null>(null);
-  const { data: marcas } = api.brands.getbyCurrentCompany.useQuery();
+  const { data: marcas } = api.brands.list.useQuery();
   const router = useRouter();
 
   const [popover1Open, setPopover1Open] = useState(false);
@@ -63,7 +63,6 @@ export default function AddPreLiquidation(props: { companyId: string }) {
       dateDesde: new Date(anio, mes - 1, 1),
       dateHasta: new Date(anio, mes, 0),
       dateDue: fechaVencimiento2,
-      companyId: props.companyId,
       interest: interest ?? undefined,
       logo_url: logo_url ?? undefined,
     });

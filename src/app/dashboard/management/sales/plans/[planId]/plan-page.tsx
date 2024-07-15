@@ -33,6 +33,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
@@ -43,12 +44,16 @@ import { api } from "~/trpc/react";
 import { Calendar } from "~/components/ui/calendar";
 import { Input } from "~/components/ui/input";
 import AddPlanDialog from "../AddPlanDialog";
+import { asTRPCError } from "~/lib/errors";
+import { toast } from "sonner";
+
 dayjs.extend(utc);
 dayjs.locale("es");
 
 export default function PlanPage(props: {
   plan: RouterOutputs["plans"]["get"];
 }) {
+  const plan = props.plan;
   const router = useRouter();
   const formatter = new Intl.DateTimeFormat("es-ES", {
     weekday: "long",
@@ -59,15 +64,20 @@ export default function PlanPage(props: {
   const [arrayFechas, setArrayFechas] = useState<Date[]>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState<boolean>(false);
+  const [openDelete, setOpenDelete] = useState<boolean>(false);
+
   const [anio, setAnio] = useState(2020);
   const [mes, setMes] = useState(0);
   const [vigente, setVigente] = useState<Date>();
   const [percent, setPercent] = useState("");
+
+  const { mutateAsync: deletePlan, isLoading } = api.plans.delete.useMutation();
+
   const { mutateAsync: createPricePerAge } =
     api.pricePerCondition.create.useMutation();
 
   useEffect(() => {
-    props.plan?.pricesPerCondition?.map((precio) => {
+    plan?.pricesPerCondition?.map((precio) => {
       const fecha = precio?.validy_date; // Convertir la fecha a cadena
       if (fecha) {
         if (!arrayFechas.find((x) => x.getTime() == fecha.getTime()!)) {
@@ -90,13 +100,13 @@ export default function PlanPage(props: {
   const company = useCompanyData();
   async function handleUpdatePrice() {
     setLoading(true);
-    if (props.plan?.pricesPerCondition) {
-      const validPrices = props.plan.pricesPerCondition.filter(
+    if (plan?.pricesPerCondition) {
+      const validPrices = plan.pricesPerCondition.filter(
         (x) => x.validy_date.getTime() === vigente?.getTime()
       );
       for (const price of validPrices) {
         await createPricePerAge({
-          plan_id: props.plan.id ?? "",
+          plan_id: plan.id ?? "",
           amount: price.amount * (1 + parseFloat(percent) / 100),
           from_age: price.from_age ?? 0,
           to_age: price.to_age ?? 0,
@@ -110,14 +120,48 @@ export default function PlanPage(props: {
     setOpen(false);
     router.refresh();
   }
+
+  async function handleDelete() {
+    try {
+      deletePlan({
+        planId: plan!.id,
+      });
+
+      toast.success("El plan se eliminado correctamente");
+      router.push("/dashboard/management/sales/plans");
+    } catch (e) {
+      const error = asTRPCError(e)!;
+      toast.error(error.message);
+    }
+  }
+
   return (
     <LayoutContainer>
       <section className="space-y-2">
         <div className="flex-col justify-between mb-5">
           <div className="flex justify-between">
-            <Title>{props.plan!.description}</Title>
-            <div className="flex items-center">
-              <AddPlanDialog planId={props.plan?.id}></AddPlanDialog>
+            <Title>{plan!.description}</Title>
+            <div className="flex items-center space-x-2">
+              <Button onClick={() => setOpenDelete(true)}>Eliminar plan</Button>
+
+              <Dialog open={openDelete} onOpenChange={setOpenDelete}>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Seguro que desea elimnar el plan?</DialogTitle>
+                  </DialogHeader>
+
+                  <DialogFooter>
+                    <Button disabled={isLoading} onClick={handleDelete}>
+                      {isLoading && (
+                        <Loader2Icon className="mr-2 animate-spin" size={20} />
+                      )}
+                      Eliminar plan
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+
+              <AddPlanDialog planId={plan?.id}></AddPlanDialog>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button onClick={() => setOpen(true)}>
@@ -126,14 +170,11 @@ export default function PlanPage(props: {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                   <DropdownMenuItem onClick={() => setOpen(true)}>
-                    <div>
-                      Actualizar porcentualmente
-                    </div>
+                    <div>Actualizar porcentualmente</div>
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <Link
-                      href={`/dashboard/management/sales/plans/${props.plan?.id}/editPrice`}
-                    >
+                      href={`/dashboard/management/sales/plans/${plan?.id}/editPrice`}>
                       Actualizar manualmente
                     </Link>
                   </DropdownMenuItem>
@@ -152,7 +193,7 @@ export default function PlanPage(props: {
                   }
                   key={fecha.toISOString().split("T")[0]}
                   href={`/dashboard/management/sales/plans/${
-                    props.plan?.id
+                    plan?.id
                   }/details/${fecha.getTime()}`}
                   title={`Vigente desde: ${
                     formatter.format(fecha).charAt(0).toUpperCase() +
@@ -173,8 +214,7 @@ export default function PlanPage(props: {
           <Label htmlFor="validy_date">Mes de vigencia</Label>
           <Select
             onValueChange={(e) => setMes(Number(e))}
-            defaultValue={mes.toString()}
-          >
+            defaultValue={mes.toString()}>
             <SelectTrigger>
               <SelectValue placeholder="Seleccione un mes" />
             </SelectTrigger>

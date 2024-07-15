@@ -16,15 +16,21 @@ import { toast } from "sonner";
 import AddMembers from "~/components/procedures/members-info";
 import MembersTable from "~/components/procedures/member-tab";
 import { useState } from "react";
-import { api } from "~/trpc/react";
 import { type InputsMembers } from "~/components/procedures/members-info";
 import BillingInfo from "~/components/procedures/billing-info";
 import { type InputsBilling } from "~/components/procedures/billing-info";
 import { type InputsGeneralInfo } from "~/components/procedures/general-info-form";
 import { useForm } from "react-hook-form";
 import { asTRPCError } from "~/lib/errors";
+import LayoutContainer from "~/components/layout-container";
+import { List, ListTile } from "~/components/list";
+import { Title } from "~/components/title";
+import { ArrowLeftIcon } from "lucide-react";
 
-export default function AddProcedure() {
+import Link from "next/link";
+import { api } from "~/trpc/react";
+
+export default function Page() {
   const { mutateAsync: createIntegrant, isLoading } =
     api.integrants.create.useMutation();
   const { mutateAsync: updateProcedure } = api.procedure.change.useMutation();
@@ -33,8 +39,6 @@ export default function AddProcedure() {
     api.family_groups.create.useMutation();
   const { mutateAsync: createPaymentInfo } = api.pa.create.useMutation();
   const [membersData, setMembersData] = useState<InputsMembers[]>([]);
-
-  const [activeTab, setActiveTab] = useState("general_info");
 
   const generalInfoForm = useForm<InputsGeneralInfo>();
   const membersForm = useForm<InputsMembers>();
@@ -153,58 +157,51 @@ export default function AddProcedure() {
   }
 
   return (
-    <>
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button className="btn btn-primary">
-            <PlusCircle className="mr-2" /> Agregar tramite
-          </Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Agregar tramite</DialogTitle>
-          </DialogHeader>
-          <Tabs
-            value={activeTab}
-            onValueChange={(value) => setActiveTab(value)}>
-            <TabsList>
-              <TabsTrigger value="general_info">
-                Informacion General
-              </TabsTrigger>
-              <TabsTrigger value="members">Integrantes</TabsTrigger>
-              <TabsTrigger value="billing">
-                Informacion de Facturacion
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="general_info">
-              <GeneralInfoForm form={generalInfoForm} />
-            </TabsContent>
-            <TabsContent value="members">
-              <div className="flex w-full flex-col gap-2">
-                <div className="w-full self-end">
-                  <AddMembers
-                    addMember={setMembersData}
-                    membersData={membersData}
-                    form={membersForm}
-                  />
-                </div>
-                <MembersTable data={membersData} />
+    <LayoutContainer>
+      <section className="space-y-2">
+        <Link
+          className="w-20 h-auto flex justify-between"
+          href={`/dashboard/management/sales/procedures`}>
+          <ArrowLeftIcon /> Volver
+        </Link>
+        <div className="flex justify-between">
+          <Title>Agregar un tramites</Title>
+        </div>
+
+        <Tabs>
+          <TabsList>
+            <TabsTrigger value="general_info">Informacion General</TabsTrigger>
+            <TabsTrigger value="members">Integrantes</TabsTrigger>
+            <TabsTrigger value="billing">
+              Informacion de Facturacion
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="general_info">
+            <GeneralInfoForm form={generalInfoForm} />
+          </TabsContent>
+          <TabsContent value="members">
+            <div className="flex w-full flex-col gap-2">
+              <div className="w-full self-end">
+                <AddMembers
+                  addMember={setMembersData}
+                  membersData={membersData}
+                  form={membersForm}
+                />
               </div>
-            </TabsContent>
-            <TabsContent value="billing">
-              <div>
-                <BillingInfo form={billingForm} data={membersData} />
-              </div>
-            </TabsContent>
-          </Tabs>
-          <section className="flex justify-between">
-            <Button onClick={() => handleload("pre cargado")}>
-              Pre carga{" "}
-            </Button>
-            <Button onClick={() => handleload("cargado")}>Cargar</Button>
-          </section>
-        </DialogContent>
-      </Dialog>
-    </>
+              <MembersTable data={membersData} />
+            </div>
+          </TabsContent>
+          <TabsContent value="billing">
+            <div>
+              <BillingInfo form={billingForm} data={membersData} />
+            </div>
+          </TabsContent>
+        </Tabs>
+        <section className="flex justify-between">
+          <Button onClick={() => handleload("pre cargado")}>Pre carga </Button>
+          <Button onClick={() => handleload("cargado")}>Cargar</Button>
+        </section>
+      </section>
+    </LayoutContainer>
   );
 }

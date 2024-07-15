@@ -6,9 +6,11 @@ import { AddBrandDialog } from "./add-brand-dialog";
 import { getServerAuthSession } from "~/server/auth";
 
 export default async function Home() {
-  const brands = await api.brands.list.query();
+  const brands = await api.brands.CompleteList.query();
   const session = getServerAuthSession();
-  console.log(session);
+
+  const orderbrands = brands.sort((a, b) => a.number - b.number);
+
   return (
     <LayoutContainer>
       <section className="space-y-2">
@@ -17,7 +19,7 @@ export default async function Home() {
           <AddBrandDialog />
         </div>
         <List>
-          {brands.map((brand) => {
+          {orderbrands.map((brand) => {
             return (
               <ListTile
                 leading={brand.number}

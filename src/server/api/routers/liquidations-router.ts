@@ -8,7 +8,7 @@ import { getGruposByBrandId, preparateFactura } from "./factura-router";
 export const liquidationsRouter = createTRPCRouter({
   get: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
       const liquidation_found = await db.query.liquidations.findFirst({
         where: eq(schema.liquidations.id, input.id),
         with: {
@@ -28,9 +28,16 @@ export const liquidationsRouter = createTRPCRouter({
             },
           },
           bussinessUnits: true,
+          brand: { with: { company: true } },
         },
       });
-      return liquidation_found;
+      if (
+        liquidation_found?.brand?.company.some(
+          (x) => x.companyId === ctx.session.orgId
+        )
+      ) {
+        return liquidation_found;
+      } else null;
     }),
   getFamilyGroups: protectedProcedure
     .input(z.object({ id: z.string() }))
@@ -52,11 +59,13 @@ export const liquidationsRouter = createTRPCRouter({
       const familyGroups = facturas.map((factura) => factura.family_group);
       return familyGroups;
     }),
-  list: protectedProcedure.query(async () => {
+  list: protectedProcedure.query(async ({ ctx }) => {
     const liquidations = await db.query.liquidations.findMany({
-      with: { bussinessUnits: true },
+      with: { bussinessUnits: true, brand: { with: { company: true } } },
     });
-    return liquidations;
+    return liquidations.filter((x) =>
+      x.brand?.company.some((x) => x.companyId === ctx.session.orgId)
+    );
   }),
   create: protectedProcedure
     .input(

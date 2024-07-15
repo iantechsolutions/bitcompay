@@ -1,12 +1,17 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db, schema } from "~/server/db";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export const abonosRouter = createTRPCRouter({
-  list: protectedProcedure.query(async ({}) => {
-    const abonos = await db.query.abonos.findMany();
-    return abonos;
+  list: protectedProcedure.query(async ({ ctx }) => {
+    const abonos = await db.query.abonos.findMany({
+      with: { family_group: { with: { businessUnitData: true } } },
+    });
+    return abonos.filter(
+      (abono) =>
+        abono.family_group?.businessUnitData?.companyId === ctx.session.orgId
+    );
   }),
   get: protectedProcedure
     .input(
@@ -16,9 +21,15 @@ export const abonosRouter = createTRPCRouter({
     )
     .query(async ({ input, ctx }) => {
       const abono = await db.query.abonos.findFirst({
-        where: eq(schema.abonos.id, input.abonoId),
+        where: and(eq(schema.abonos.id, input.abonoId)),
+        with: {
+          family_group: {
+            with: {
+              businessUnitData: true,
+            },
+          },
+        },
       });
-
       return abono;
     }),
 

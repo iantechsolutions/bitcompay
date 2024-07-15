@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { UploadDropzone } from "~/components/uploadthing";
 import { useCompanyData } from "../../../company-provider";
+import UploadDropzoneV1 from "~/components/upload-dropzone";
 
 export default function UploadPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>();
@@ -20,29 +21,7 @@ export default function UploadPage() {
 
       {errorMessage && <p className="text-red-500">{errorMessage}</p>}
 
-      <UploadDropzone
-        input={{ companyId: company.id }}
-        endpoint="massiveGenerationUpload"
-        config={{
-          mode: "manual",
-          appendOnPaste: true,
-        }}
-        content={{
-          button: "Continuar",
-          allowedContent: "Archivos de excel",
-          label: "Arrastra y suelta el archivo aquí",
-        }}
-        onClientUploadComplete={(res) => {
-          const [file] = res;
-
-          if (!file) return;
-          // toast.success('Archivo!');
-          router.push(`./massive-upload/${file.serverData.uploadId}`);
-        }}
-        onUploadError={(error: Error) => {
-          setErrorMessage(error.message);
-        }}
-      />
+      <UploadDropzoneV1 />
     </LayoutContainer>
   );
 }
