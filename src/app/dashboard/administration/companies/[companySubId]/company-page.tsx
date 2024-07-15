@@ -30,6 +30,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
 import { asTRPCError } from "~/lib/errors";
+import { UserList } from "~/lib/types/clerk";
 import { api } from "~/trpc/react";
 import type { RouterOutputs } from "~/trpc/shared";
 
@@ -42,10 +43,12 @@ export default function CompanyPage({
   company,
   products,
   brands,
+  userList,
 }: {
   company: NonNullable<RouterOutputs["companies"]["get"]>;
   products: RouterOutputs["products"]["list"];
   brands: Brand[] | undefined;
+  userList: UserList;
 }) {
   const [name, setName] = useState(company.name);
   const [description, setDescription] = useState(company.description);
@@ -164,16 +167,28 @@ export default function CompanyPage({
                 {brands?.map((brand) => {
                   return (
                     <ListTile
-                      href={`/dashboard/administration/brands/${brand.id}`}
-                      title={brand.name}
-                      key={brand.id}
+                      href={`/dashboard/administration/brands/${brand?.id}`}
+                      title={brand?.name}
+                      key={brand?.id}
                     />
                   );
                 })}
               </List>
             </AccordionContent>
           </AccordionItem>
-          <AccordionItem value="item-5" className="border-none">
+          <AccordionItem value="item-5">
+            <AccordionTrigger>
+              <h2 className="text-md">Usuarios</h2>
+            </AccordionTrigger>
+            <AccordionContent>
+              <List>
+                {userList.map((user) => {
+                  return <ListTile title={user.fullName} key={user.id} />;
+                })}
+              </List>
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="item-6" className="border-none">
             <AccordionTrigger>
               <h2 className="text-md">Eliminar entidad</h2>
             </AccordionTrigger>

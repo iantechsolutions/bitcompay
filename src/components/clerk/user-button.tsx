@@ -57,28 +57,30 @@ const UserButtonAndMenu = ({
           <DropdownMenu.Label />
           <DropdownMenu.Group>
             <DropdownMenu.Item asChild>
-              {/* Create a button with an onClick to open the User Profile modal */}
-              <Button
-                onClick={() => openUserProfile()}
-                variant={"outline"}
-                className="border-none py-1 w-full mt-0.5"
-              >
-                <CircleUserRound className="mr-2 h-4 w-auto" />
-                Profile
-              </Button>
+              <div>
+                <div>
+                  <p className="text-sm font-bold">{user?.fullName ?? ""}</p>
+                  <p className="text-xs opacity-70">
+                    {user?.primaryEmailAddress?.emailAddress! ?? ""}
+                  </p>
+                </div>
+                <div className="flex flex-row justify-between mb-2 mt-2">
+                  <Button className="w-[48%] h-auto text-[0.6rem] rounded-2xl px-5 bg-slate-300 hover:bg-slate-300  text-black">
+                    Administración
+                  </Button>
+                  <Button className="w-[48%] h-auto text-[0.6rem]  rounded-2xl px-5 bg-slate-300 hover:bg-slate-300  text-black">
+                    I AN TECH
+                  </Button>
+                </div>
+                <Button
+                  onClick={() => signOut(() => router.push("/"))}
+                  className="border-none py-1 w-full bg-[#1bdfb899] hover:bg-[#1bdfb7] rounded-2xl text-white"
+                >
+                  Salir
+                </Button>
+              </div>
             </DropdownMenu.Item>
           </DropdownMenu.Group>
-          <DropdownMenu.Item asChild>
-            {/* Create a Sign Out button -- signOut() takes a call back where the user is redirected */}
-            <Button
-              onClick={() => signOut(() => router.push("/"))}
-              variant={"outline"}
-              className="border-none py-1 w-full"
-            >
-              <LogOut className="mr-2 h-4 w-auto" />
-              Sign Out{" "}
-            </Button>
-          </DropdownMenu.Item>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
     </DropdownMenu.Root>

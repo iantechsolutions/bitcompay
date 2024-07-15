@@ -1,6 +1,9 @@
+"use server";
 import { Title } from "~/components/title";
 import { api } from "~/trpc/server";
 import CompanyPage from "./company-page";
+import { clerkClient } from "@clerk/nextjs/server";
+import { UserList } from "~/lib/types/clerk";
 export default async function Page(props: {
   params: { companySubId: string };
 }) {
@@ -14,10 +17,26 @@ export default async function Page(props: {
     return brand.brand;
   });
   const products = await api.products.list.query();
-
-  if (!company) {
+  const userList: UserList = [];
+  const response =
+    await clerkClient.organizations.getOrganizationMembershipList({
+      organizationId: props.params.companySubId,
+    });
+  if (response.data?.length > 0) {
+    for (const user of response.data) {
+    }
+  }
+  console.log(userList);
+  if (!company || !response) {
     return <Title>No se encontró la entidad</Title>;
   }
 
-  return <CompanyPage company={company} brands={brands} products={products} />;
+  return (
+    <CompanyPage
+      company={company}
+      brands={brands}
+      products={products}
+      userList={[]}
+    />
+  );
 }

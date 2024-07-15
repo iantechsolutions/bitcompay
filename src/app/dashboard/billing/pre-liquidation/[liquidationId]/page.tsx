@@ -3,13 +3,12 @@
 import { currentUser } from "@clerk/nextjs/server";
 import LayoutContainer from "~/components/layout-container";
 
-// import {
-//   Table,
-//   TableRow,
-//   TableBody,
-//   TableHead,
-//   TableHeader,
-// } from "~/components/ui/tablePreliq";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetTrigger,
+} from "~/components/ui/sheet";
 import TableRowContainer from "./table-row";
 import { Button } from "~/components/ui/button";
 import {
@@ -52,12 +51,11 @@ export default async function Home(props: {
   const periodo =
     dayjs.utc(preliquidation?.period).format("MMMM [de] YYYY") ?? "-";
   const headers = [
-    "Id. GF",
-    "Nombre (Resp. Pago)",
-    "DNI",
-    "CUIL/CUIT (Resp. Pago)",
-    "Saldo Cta. Cte.",
-    "Cuota",
+    "NRO. GF",
+    "Nombre",
+    "CUIL/CUIT",
+    "Saldo anterior",
+    "Cuota Pura",
     "Bonificacion",
     "Diferencial",
     "Aportes",
@@ -72,6 +70,9 @@ export default async function Home(props: {
     Diferencial: 175517.82,
     Aportes: 175517.82,
     Interés: 175517.82,
+    "Sub Total": 175517.82,
+    IVA: 175517.82,
+    "Total a facturar": 175517.82,
   };
   // const rowsPromise =
   //   facturas?.map(async (factura) => {
@@ -162,11 +163,18 @@ export default async function Home(props: {
           </li>
         </ul>
       </div>
-      <div className="bg-[#ecf7f5] flex flex-row justify-evenly gap-2 w-full">
-        {Object.entries(summary).map(([key, value]) => (
-          <div key={key}>
-            <p className="font-medium">{key}</p>
-            <p className="text-[#4af0d4] font-bold text-lg">$ {value}</p>
+      <div className="bg-[#ecf7f5] flex flex-row justify-evenly gap-2 w-full py-2">
+        {Object.entries(summary).map(([key, value], index, array) => (
+          <div
+            className={`${
+              index != array.length - 1
+                ? "border-r border-[#4af0d4] border-dashed"
+                : ""
+            } px-3`}
+            key={key}
+          >
+            <p className="font-medium text-sm">{key}</p>
+            <p className="text-[#4af0d4] font-bold text-sm">$ {value}</p>
           </div>
         ))}
       </div>
