@@ -59,6 +59,7 @@ export const family_groupsRouter = createTRPCRouter({
         where: eq(schema.liquidations.id, input.liquidationId),
         with: {
           facturas: {
+            where: eq(schema.facturas.liquidation_id, input.liquidationId),
             with: {
               family_group: {
                 with: {
@@ -76,6 +77,7 @@ export const family_groupsRouter = createTRPCRouter({
           },
         },
       });
+
       let family_groups =
         liquidation?.facturas.map((factura) => factura.family_group) || [];
       const family_groups_reduced = family_groups.filter((family_group) => {
