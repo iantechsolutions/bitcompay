@@ -37,35 +37,37 @@ export default function DetailSheet({
     Aportes: 175517.82,
     Interés: 175517.82,
   };
-  let facturaNCReciente = null;
-  let facturaFCReciente = null;
+  let comprobanteNCReciente = null;
+  let comprobanteFCReciente = null;
 
-  for (const factura of facturas) {
-    if (factura.origin === "Nota de credito") {
+  for (const comprobante of comprobantes) {
+    if (comprobante.origin === "Nota de credito") {
       if (
-        !facturaNCReciente ||
-        new Date(factura.createdAt) > new Date(facturaNCReciente.createdAt)
+        !comprobanteFCReciente ||
+        new Date(comprobante.createdAt) >
+          new Date(comprobanteFCReciente.createdAt)
       ) {
-        facturaNCReciente = factura;
+        comprobanteFCReciente = comprobante;
       }
     } else {
       if (
-        !facturaFCReciente ||
-        new Date(factura.createdAt) > new Date(facturaFCReciente.createdAt)
+        !comprobanteFCReciente ||
+        new Date(comprobante.createdAt) >
+          new Date(comprobanteFCReciente.createdAt)
       ) {
-        facturaFCReciente = factura;
+        comprobanteFCReciente = comprobante;
       }
     }
   }
   let FCTotal = null;
   let NCTotal = null;
-  if (facturaFCReciente) {
-    FCTotal = facturaFCReciente.items.find(
+  if (comprobanteFCReciente) {
+    FCTotal = comprobanteFCReciente.items.find(
       (item) => item.concept == "Total a pagar"
     )?.total;
   }
-  if (facturaNCReciente) {
-    NCTotal = facturaNCReciente.items.find(
+  if (comprobanteFCReciente) {
+    NCTotal = comprobanteFCReciente.items.find(
       (item) => item.concept == "Nota de credito"
     )?.amount;
   }
@@ -117,8 +119,8 @@ export default function DetailSheet({
               {NCTotal ? `$ ${NCTotal}` : "N/A"}
             </p>
           </div>
-          {openNCAccordion && facturaNCReciente && (
-            <ContentTable factura={facturaNCReciente} />
+          {openNCAccordion && comprobanteFCReciente && (
+            <ContentTable comprobante={comprobanteFCReciente} />
           )}
 
           <div
@@ -136,8 +138,8 @@ export default function DetailSheet({
               {FCTotal ? `$ ${FCTotal * -1}` : "N/A"}
             </p>
           </div>
-          {openFCAccordion && facturaFCReciente && (
-            <ContentTable factura={facturaFCReciente} />
+          {openFCAccordion && comprobanteFCReciente && (
+            <ContentTable comprobante={comprobanteFCReciente} />
           )}
         </div>
         <div className="mt-3">
