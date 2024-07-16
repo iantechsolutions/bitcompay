@@ -13,20 +13,30 @@ import {
 } from "~/components/ui/dialog";
 
 export default function HomePage() {
-  const { data: test, refetch } = api.brands.list.useQuery();
   const [open, setOpen] = useState(false);
   const { mutateAsync: createtest, isLoading } =
     api.abonos.create.useMutation();
 
-  console.log(test);
-  const handleCreateTest = async () => {
-    await createtest({
-      family_group: "52GFL7OWx_PDTrkf_9lbK",
-      valor: 10,
-    });
-    setOpen(false);
-    refetch(); // Refetch data after creation
-  };
+  const {
+    data: dev,
+    isLoading: isLoadingDev,
+    error: errorDev,
+  } = api.facturas.getByLiquidation.useQuery({
+    liquidationId: "5gAc2nDtFeYwz4yIMCopz",
+  });
+
+  if (dev && dev != undefined) {
+    console.log(dev);
+    console.log("-----------------------------------------------");
+  }
+
+  if (isLoadingDev) {
+    return <div>Cargando...</div>;
+  }
+
+  if (errorDev) {
+    return <div>Error al cargar los datos</div>;
+  }
 
   return (
     <LayoutContainer>
@@ -40,19 +50,22 @@ export default function HomePage() {
             <DialogHeader>
               <DialogTitle>Crear un test</DialogTitle>
             </DialogHeader>
-            <Button onClick={handleCreateTest} disabled={isLoading}>
-              {isLoading ? "Agregando..." : "Agregar"}
-            </Button>
           </DialogContent>
         </Dialog>
         <List>
-          {test && test.length > 0 ? (
-            test.map((item) => (
-              <ListTile
-                leading={item.id}
-                key={item.id}
-                title={item.description || "Sin grupo familiar"}
-              />
+          {dev ? (
+            dev.map((item) => (
+              <div>
+                <ListTile
+                  leading={item.liquidations?.estado}
+                  key={item.id}
+                  title={
+                    item.liquidations?.razon_social! || "Sin grupo familiar"
+                  }
+                />
+                <h1>{item.due_date?.getDate()}</h1>
+                <h1>{item.id}</h1>
+              </div>
             ))
           ) : (
             <h1>No hay nada más que esto</h1>

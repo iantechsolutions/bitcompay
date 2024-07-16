@@ -174,8 +174,7 @@ export default async function Home(props: {
                 ? "border-r border-[#4af0d4] border-dashed"
                 : ""
             } px-3`}
-            key={key}
-          >
+            key={key}>
             <p className="font-medium text-sm">{key}</p>
             <p className="text-[#4af0d4] font-bold text-sm">$ {value}</p>
           </div>
@@ -190,91 +189,77 @@ export default async function Home(props: {
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]"
-              >
+               border-r-[1.5px] border-[#4af0d4]">
                 Nombre (Resp. Pago){" "}
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]"
-              >
+               border-r-[1.5px] border-[#4af0d4]">
                 DNI
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]"
-              >
+               border-r-[1.5px] border-[#4af0d4]">
                 CUIL/CUIT (Resp. Pago){" "}
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]"
-              >
+               border-r-[1.5px] border-[#4af0d4]">
                 Saldo Cta. Cte.{" "}
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]"
-              >
+               border-r-[1.5px] border-[#4af0d4]">
                 Cuota
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]"
-              >
+               border-r-[1.5px] border-[#4af0d4]">
                 Bonificacion
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]"
-              >
+               border-r-[1.5px] border-[#4af0d4]">
                 Diferencial
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]"
-              >
+               border-r-[1.5px] border-[#4af0d4]">
                 Aportes
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]"
-              >
+               border-r-[1.5px] border-[#4af0d4]">
                 Interes
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]"
-              >
+               border-r-[1.5px] border-[#4af0d4]">
                 Sub total
               </TableHead>
               <TableHead
                 className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]"
-              >
+               border-r-[1.5px] border-[#4af0d4]">
                 IVA
               </TableHead>
               {preliquidation?.estado !== "pendiente" ? (
                 <>
                   <TableHead
                     className="text-gray-800
-               rounded-r-md overflow-hidden"
-                  >
+               rounded-r-md overflow-hidden">
                     Total
                   </TableHead>
 
                   <TableHead
                     className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]"
-                  >
+               border-r-[1.5px] border-[#4af0d4]">
                     Factura
                   </TableHead>
                 </>
               ) : (
                 <TableHead
                   className="text-gray-800
-               rounded-r-md overflow-hidden"
-                >
+               rounded-r-md overflow-hidden">
                   Total
                 </TableHead>
               )}
