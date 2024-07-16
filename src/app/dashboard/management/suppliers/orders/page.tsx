@@ -52,7 +52,7 @@ export default function HomePage() {
             </DialogHeader>
           </DialogContent>
         </Dialog>
-        <List>
+        {/* <List>
           {dev ? (
             dev.map((item) => (
               <div>
@@ -70,7 +70,7 @@ export default function HomePage() {
           ) : (
             <h1>No hay nada más que esto</h1>
           )}
-        </List>
+        </List> */}
       </section>
     </LayoutContainer>
   );
