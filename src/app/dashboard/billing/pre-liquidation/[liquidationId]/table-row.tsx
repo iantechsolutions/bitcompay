@@ -23,9 +23,7 @@ export default function TableRowContainer({
   periodo,
 }: propsTableRowContainer) {
   const [open, setOpen] = useState(false);
-  const comprobantes = family_group?.comprobantes;
-
-  console.log("comprobantesTT", comprobantes);
+  const facturas = family_group?.facturas;
 
   const original_comprobante = comprobantes?.find(
     (comprobante) => comprobante?.origin?.toLowerCase() === "original"
@@ -58,7 +56,23 @@ export default function TableRowContainer({
     (item) => item.concept === "Comprobante Anterior"
   );
 
-  const subTotal = computeBase(total, Number(original_comprobante.iva!));
+  const subTotal = computeBase(total, Number(original_factura.iva!));
+  const iva = computeIva(total, Number(original_factura.iva!));
+
+  const rowValues = [
+    family_group?.numericalId ?? "N/A",
+    billResponsible?.name ?? "",
+    billResponsible?.fiscal_id_number ?? "-",
+    currentAccountAmount,
+    abono?.amount,
+    bonification?.amount,
+    0,
+    contribution?.amount,
+    interest?.amount,
+    subTotal,
+    iva,
+    total,
+  ];
   return (
     <>
       <TableRow
@@ -71,9 +85,6 @@ export default function TableRowContainer({
 
         <TableCell className="border border-[#6cebd1] p-2 py-4">
           {billResponsible?.name ?? ""}
-        </TableCell>
-        <TableCell className="border border-[#6cebd1] p-2 py-4">
-          {billResponsible?.id_number}
         </TableCell>
         <TableCell className="border border-[#6cebd1] p-2 py-4">
           {" "}

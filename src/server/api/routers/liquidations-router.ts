@@ -129,6 +129,17 @@ export const liquidationsRouter = createTRPCRouter({
         .where(eq(schema.liquidations.id, input.id));
       return liquidation_changed;
     }),
+  rejectLiquidation: protectedProcedure
+    .input(z.object({ liquidationId: z.string() }))
+    .mutation(async ({ input }) => {
+      const liquidation_rejected = await db
+        .update(schema.liquidations)
+        .set({
+          estado: "rechazado",
+        })
+        .where(eq(schema.liquidations.id, input.liquidationId));
+      return liquidation_rejected;
+    }),
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input }) => {

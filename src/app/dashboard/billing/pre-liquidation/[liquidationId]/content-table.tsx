@@ -40,22 +40,24 @@ function ContentTable(props: propsContentTable) {
           TOTAL
         </TableHead>
       </TableRow>{" "}
-      {comprobante?.items.map((item) => (
-        <TableRow>
-          <TableCell className=" border-b border-[#4af0d4] py-2 text-[#737171] italic opacity-70 ">
-            {item.concept}
-          </TableCell>
-          <TableCell className=" border-b border-[#4af0d4] py-2 text-[#737171] font-semibold opacity-70 ">
-            {item.amount}
-          </TableCell>
-          <TableCell className=" border-b border-[#4af0d4] py-2 text-[#737171] font-semibold opacity-70">
-            {item.iva}
-          </TableCell>
-          <TableCell className=" border-b border-[#4af0d4] py-2 text-[#737171] font-semibold opacity-70">
-            {item.total}
-          </TableCell>
-        </TableRow>
-      ))}
+      {comprobante?.items
+        .filter((item) => item.concept != "Total a pagar")
+        .map((item) => (
+          <TableRow>
+            <TableCell className=" border-b border-[#4af0d4] py-2 text-[#737171] italic opacity-70 ">
+              {item.concept}
+            </TableCell>
+            <TableCell className=" border-b border-[#4af0d4] py-2 text-[#737171] font-semibold opacity-70 ">
+              {item.amount}
+            </TableCell>
+            <TableCell className=" border-b border-[#4af0d4] py-2 text-[#737171] font-semibold opacity-70">
+              {item.iva}
+            </TableCell>
+            <TableCell className=" border-b border-[#4af0d4] py-2 text-[#737171] font-semibold opacity-70">
+              {item.total}
+            </TableCell>
+          </TableRow>
+        ))}
     </Table>
   );
 }
