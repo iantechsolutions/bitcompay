@@ -31,7 +31,7 @@ export default function DetailSheet({
   let facturasNC = [];
   let facturasFC = [];
   for (const factura of facturas) {
-    if (factura.estado === "anuladas") facturasNC.push(factura);
+    if (factura.estado === "anulada") facturasNC.push(factura);
     else facturasFC.push(factura);
   }
   return (
