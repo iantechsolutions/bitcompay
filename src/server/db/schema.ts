@@ -139,8 +139,8 @@ export const payments = pgTable(
     genChannels: json("gen_channels").$type<string[]>().notNull().default([]),
     createdAt,
     updatedAt,
-    factura_id: varchar("factura_id", { length: 255 }).references(
-      () => facturas.id
+    comprobante_id: varchar("comprobante_id", { length: 255 }).references(
+      () => comprobantes.id
     ),
   },
   (payments) => ({
@@ -179,9 +179,9 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
     fields: [payments.outputFileId],
     references: [uploadedOutputFiles.id],
   }),
-  factura: one(facturas, {
-    fields: [payments.factura_id],
-    references: [facturas.id],
+  comprobantes: one(comprobantes, {
+    fields: [payments.comprobante_id],
+    references: [comprobantes.id],
   }),
   channel: one(channels, {
     fields: [payments.payment_channel],
@@ -712,13 +712,13 @@ export const differentialsValuesRelations = relations(
   })
 );
 
-export const facturas = pgTable("facturas", {
+export const comprobantes = pgTable("comprobantes", {
   id: columnId,
   createdAt,
   generated: timestamp("generated", { mode: "date" }),
   ptoVenta: integer("ptoVenta").notNull(),
-  nroFactura: integer("nroFactura").notNull(),
-  tipoFactura: varchar("tipoFactura", { length: 255 }),
+  nroComprobante: integer("nroComprobante").notNull(),
+  tipoComprobante: varchar("tipoComprobante", { length: 255 }),
   concepto: integer("concept").notNull(),
   tipoDocumento: integer("tipoDocumento").notNull(),
   nroDocumento: bigint("nroDocumento", {
@@ -744,28 +744,31 @@ export const facturas = pgTable("facturas", {
   ),
 });
 
-export const facturasRelations = relations(facturas, ({ one, many }) => ({
-  items: many(items),
-  liquidations: one(liquidations, {
-    fields: [facturas.liquidation_id],
-    references: [liquidations.id],
-  }),
-  payments: many(payments),
-  family_group: one(family_groups, {
-    fields: [facturas.family_group_id],
-    references: [family_groups.id],
-  }),
-}));
+export const comprobantesRelations = relations(
+  comprobantes,
+  ({ one, many }) => ({
+    items: many(items),
+    liquidations: one(liquidations, {
+      fields: [comprobantes.liquidation_id],
+      references: [liquidations.id],
+    }),
+    payments: many(payments),
+    family_group: one(family_groups, {
+      fields: [comprobantes.family_group_id],
+      references: [family_groups.id],
+    }),
+  })
+);
 
-export const insertFacturasSchema = createInsertSchema(facturas);
-export const selectFacturasSchema = createSelectSchema(facturas);
-export const FacturasSchemaDB = insertFacturasSchema.pick({
+export const insertComprobantesSchema = createInsertSchema(comprobantes);
+export const selectComprobantesSchema = createSelectSchema(comprobantes);
+export const ComprobantesSchemaDB = insertComprobantesSchema.pick({
   generated: true,
   payment_date: true,
   link: true,
   billLink: true,
   concepto: true,
-  tipoFactura: true,
+  tipoComprobante: true,
   tipoDocumento: true,
   nroDocumento: true,
   importe: true,
@@ -776,13 +779,13 @@ export const FacturasSchemaDB = insertFacturasSchema.pick({
   prodName: true,
   iva: true,
   ptoVenta: true,
-  nroFactura: true,
+  nroComprobante: true,
   items_id: true,
   liquidation_id: true,
   family_group_id: true,
   origin: true,
 });
-export type Factura = z.infer<typeof selectFacturasSchema>;
+export type Comprobantes = z.infer<typeof selectComprobantesSchema>;
 
 export const items = pgTable("items", {
   id: columnId,
@@ -793,7 +796,7 @@ export const items = pgTable("items", {
   abono: real("abono"),
   tipoComprobante: varchar("tipoComprobante", { length: 255 }),
   comprobante_id: varchar("comprobante_id", { length: 255 }).references(
-    () => facturas.id
+    () => comprobantes.id
   ),
   // differential_amount: real("differential_amount"),
   // account_payment: real("account_payment"),
@@ -804,9 +807,9 @@ export const items = pgTable("items", {
 });
 
 export const itemsRelations = relations(items, ({ one }) => ({
-  facturas: one(facturas, {
+  comprobantes: one(comprobantes, {
     fields: [items.comprobante_id],
-    references: [facturas.id],
+    references: [comprobantes.id],
   }),
 }));
 
@@ -844,7 +847,7 @@ export const family_groupsRelations = relations(
     bonus: many(bonuses),
     integrants: many(integrants),
     abonos: many(abonos),
-    facturas: many(facturas),
+    comprobantes: many(comprobantes),
     cc: one(currentAccount),
   })
 );
@@ -1037,7 +1040,7 @@ export const liquidationsRelations = relations(
       fields: [liquidations.brandId],
       references: [brands.id],
     }),
-    facturas: many(facturas),
+    comprobantes: many(comprobantes),
   })
 );
 
@@ -1060,17 +1063,17 @@ export type liquidations = z.infer<typeof selectliquidationsSchema>;
 export const billingDocuments = pgTable("billingDocuments", {
   id: columnId,
   url: varchar("url", { length: 255 }).notNull(),
-  factura_id: varchar("factura_id", { length: 255 }).references(
-    () => facturas.id
+  comprobante_id: varchar("comprobante_id", { length: 255 }).references(
+    () => comprobantes.id
   ),
 });
 
 export const billingDocumentsRelations = relations(
   billingDocuments,
   ({ one, many }) => ({
-    facturas: one(facturas, {
-      fields: [billingDocuments.factura_id],
-      references: [facturas.id],
+    comprobantes: one(comprobantes, {
+      fields: [billingDocuments.comprobante_id],
+      references: [comprobantes.id],
     }),
   })
 );
@@ -1081,7 +1084,7 @@ export const selectbillingDocumentsSchema =
   createSelectSchema(billingDocuments);
 export const billingDocumentsSchemaDB = selectbillingDocumentsSchema.pick({
   url: true,
-  factura_id: true,
+  comprobante_id: true,
 });
 export type billingDocuments = z.infer<typeof selectbillingDocumentsSchema>;
 

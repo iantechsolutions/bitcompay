@@ -16,11 +16,11 @@ import { Router } from "next/router";
 import { RouterOutputs } from "~/trpc/shared";
 import { computeIva, computeBase, computeTotal } from "~/lib/utils";
 type propsContentTable = {
-  factura: RouterOutputs["facturas"]["getByLiquidation"][number];
+  comprobante: RouterOutputs["comprobantes"]["getByLiquidation"][number];
 };
 
 function ContentTable(props: propsContentTable) {
-  const { factura } = props;
+  const { comprobante } = props;
   return (
     <Table>
       <TableRow>
@@ -40,7 +40,7 @@ function ContentTable(props: propsContentTable) {
           TOTAL
         </TableHead>
       </TableRow>{" "}
-      {factura?.items.map((item) => (
+      {comprobante?.items.map((item) => (
         <TableRow>
           <TableCell className=" border-b border-[#4af0d4] py-2 text-[#737171] italic opacity-70 ">
             {item.concept}

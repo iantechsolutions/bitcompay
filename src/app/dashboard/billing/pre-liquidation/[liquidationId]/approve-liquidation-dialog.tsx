@@ -25,7 +25,7 @@ function UpdateLiquidationEstadoDialog({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const { mutateAsync: updateLiquidation, isLoading } =
-    api.facturas.approvePreLiquidation.useMutation();
+    api.comprobantes.approvePreLiquidation.useMutation();
   const { data } = api.liquidations.get.useQuery({ id: liquidationId });
   const approveLiquidation = async () => {
     await updateLiquidation({
@@ -39,8 +39,7 @@ function UpdateLiquidationEstadoDialog({
     <>
       <Button
         className=" h-7 bg-[#22d8b3] hover:bg-[#58d9bf] text-[#656464]  text-xs rounded-2xl py-0 px-6"
-        onClick={() => setOpen(true)}
-      >
+        onClick={() => setOpen(true)}>
         Aprobar
         <CircleCheck className="h-4 w-auto ml-2" />
       </Button>
@@ -51,25 +50,23 @@ function UpdateLiquidationEstadoDialog({
               ¿Está seguro?
             </DialogTitle>
             <DialogDescription className="text-sm text-gray-600">
-              Las facturas van a ser enviadas a la AFIP, incluyendo todos los
-              detalles de los montos. Asegúrese de que toda la información es
-              correcta antes de proceder.
+              Los comprobantes van a ser enviadas a la AFIP, incluyendo todos
+              los detalles de los montos. Asegúrese de que toda la información
+              es correcta antes de proceder.
             </DialogDescription>
           </DialogHeader>
           {/* Add more dialog content here as needed */}
           <DialogFooter>
             <Button
               className="btn-secondary mr-2"
-              onClick={() => setOpen(false)}
-            >
+              onClick={() => setOpen(false)}>
               Cancelar
             </Button>
             <Button
               className="btn primary"
               type="submit"
               disabled={isLoading}
-              onClick={approveLiquidation}
-            >
+              onClick={approveLiquidation}>
               {isLoading && (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}

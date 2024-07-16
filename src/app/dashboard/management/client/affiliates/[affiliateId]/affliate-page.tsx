@@ -32,10 +32,12 @@ export default function AffiliatePage(props: {
     family_group_id: grupos!,
   });
 
-  const { data: facturasList } = api.facturas.list.useQuery();
+  const { data: comprobantesList } = api.comprobantes.list.useQuery();
 
-  const facturas = facturasList
-    ? facturasList.filter((factura) => factura.family_group_id === grupos)
+  const comprobantes = comprobantesList
+    ? comprobantesList.filter(
+        (comprobante) => comprobante.family_group_id === grupos
+      )
     : [];
 
   const [open, setOpen] = useState(false);
@@ -162,15 +164,15 @@ export default function AffiliatePage(props: {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {facturas ? (
-                  facturas.slice(0, 4).map((factura) => (
-                    <TableRow key={factura.id} className="flex">
+                {comprobantes ? (
+                  comprobantes.slice(0, 4).map((comprobante) => (
+                    <TableRow key={comprobante.id} className="flex">
                       <TableCell className="flex-1 font-medium text-left">
-                        N° {factura.nroFactura}
+                        N° {comprobante.nroComprobante}
                       </TableCell>
                       <TableCell className="flex-1 text-left">
                         {new Date(
-                          factura.generated ?? new Date()
+                          comprobante.generated ?? new Date()
                         ).toLocaleDateString("en-US", {
                           month: "short",
                           day: "numeric",
@@ -178,10 +180,10 @@ export default function AffiliatePage(props: {
                         })}
                       </TableCell>
                       <TableCell className="flex-1 text-left">
-                        {factura.iva}%
+                        {comprobante.iva}%
                       </TableCell>
                       <TableCell className="flex-1 text-left">
-                        {factura.importe}
+                        {comprobante.importe}
                       </TableCell>
                     </TableRow>
                   ))

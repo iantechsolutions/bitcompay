@@ -18,7 +18,7 @@ import {
 import { cn, htmlBill, ingresarAfip } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
-import { Factura } from "./facturaGenerada";
+import { Comprobante } from "./facturaGenerada";
 import LayoutContainer from "~/components/layout-container";
 import { Title } from "~/components/title";
 import { useRouter } from "next/router";
@@ -45,14 +45,15 @@ function formatDate(date: Date | undefined) {
 }
 
 export default function Page() {
-  const { mutateAsync: createFactura } = api.facturas.create.useMutation();
-  const { mutateAsync: createItemReturnFactura } =
-    api.items.createReturnFactura.useMutation();
+  const { mutateAsync: createComprobante } =
+    api.comprobantes.create.useMutation();
+  const { mutateAsync: createItemReturnComprobante } =
+    api.items.createReturnComprobante.useMutation();
   const { data: company } = api.companies.get.useQuery();
   const { data: marcas } = api.brands.list.useQuery();
   const [logo, setLogo] = useState("");
 
-  function generateFactura() {
+  function generateComprobante() {
     if (marcas) {
       setLogo(marcas[0]!.logo_url!);
     }
@@ -71,13 +72,13 @@ export default function Page() {
         try {
           last_voucher = await afip.ElectronicBilling.getLastVoucher(
             puntoVenta,
-            tipoFactura
+            tipoComprobante
           );
         } catch {
           last_voucher = 0;
         }
 
-        const numero_de_factura = (await last_voucher) + 1;
+        const numero_de_comprobante = (await last_voucher) + 1;
 
         const fecha = new Date(
           Date.now() - new Date().getTimezoneOffset() * 60000
@@ -88,12 +89,12 @@ export default function Page() {
         const data = {
           CantReg: 1, // Cantidad de facturas a registrar
           PtoVta: puntoVenta,
-          CbteTipo: tipoFactura,
+          CbteTipo: tipoComprobante,
           Concepto: Number(concepto),
           DocTipo: tipoDocumento,
           DocNro: tipoDocumento !== "99" ? nroDocumento : 0,
-          CbteDesde: numero_de_factura,
-          CbteHasta: numero_de_factura,
+          CbteDesde: numero_de_comprobante,
+          CbteHasta: numero_de_comprobante,
           CbteFch: parseInt(fecha?.replace(/-/g, "") ?? ""),
           FchServDesde: formatDate(dateDesde),
           FchServHasta: formatDate(dateHasta),
@@ -113,7 +114,7 @@ export default function Page() {
           // },
         };
 
-        const fac = await saveFactura(numero_de_factura);
+        const fac = await saveComprobante(numero_de_comprobante);
 
         const res = await afip.ElectronicBilling.createVoucher(data);
         if (fac) {
@@ -148,8 +149,8 @@ export default function Page() {
     }
   }
 
-  async function saveFactura(numero_de_factura: number) {
-    const factura = await createFactura({
+  async function saveComprobante(numero_de_comprobante: number) {
+    const comprobante = await createComprobante({
       billLink: "",
       concepto: Number(concepto),
       importe: Number(importe),
@@ -157,23 +158,23 @@ export default function Page() {
       nroDocumento: Number(nroDocumento),
       ptoVenta: Number(puntoVenta),
       tipoDocumento: Number(tipoDocumento),
-      tipoFactura: tipoFactura,
+      tipoComprobante: tipoComprobante,
       fromPeriod: dateDesde,
       toPeriod: dateHasta,
       due_date: dateVencimiento,
       generated: new Date(),
       prodName: servicioprod,
-      nroFactura: numero_de_factura,
+      nroComprobante: numero_de_comprobante,
     });
-    const updatedFactura = await createItemReturnFactura({
-      concept: "Factura Manual",
+    const updatedComprobante = await createItemReturnComprobante({
+      concept: "Comprobante Manual",
       amount: Number(importe),
       iva: 0,
       total: Number(importe),
       abono: 0,
-      comprobante_id: factura[0]?.id ?? "",
+      comprobante_id: comprobante[0]?.id ?? "",
     });
-    return updatedFactura;
+    return updatedComprobante;
   }
   type Channel = {
     number: number;
@@ -188,7 +189,7 @@ export default function Page() {
 
   // function showFactura() {}
   const [puntoVenta, setPuntoVenta] = useState("");
-  const [tipoFactura, setTipoFactura] = useState("");
+  const [tipoComprobante, setTipoComprobante] = useState("");
   const [concepto, setConcepto] = useState("");
   const [tipoDocumento, setTipoDocumento] = useState("");
   const [nroDocumento, setNroDocumento] = useState("");
@@ -291,7 +292,7 @@ export default function Page() {
                   { value: "53", label: "NOTA DE CREDITO M" },
                   { value: "21", label: "NOTA DE CREDITO E" },
                 ]}
-                onSelectionChange={(e) => setTipoFactura(e)}
+                onSelectionChange={(e) => setTipoComprobante(e)}
               />
             </div>
             <div>
@@ -309,7 +310,7 @@ export default function Page() {
               />
             </div>
             <div>
-              <Label htmlFor="importe">Importe total de la factura</Label>
+              <Label htmlFor="importe">Importe total del comprobante</Label>
               <Input
                 id="importe"
                 placeholder="..."
@@ -330,10 +331,10 @@ export default function Page() {
                 onSelectionChange={(e) => setName(e)}
               />
             </div>
-            {tipoFactura !== "11" &&
-              tipoFactura !== "14" &&
-              tipoFactura !== "15" &&
-              tipoFactura !== "" && (
+            {tipoComprobante !== "11" &&
+              tipoComprobante !== "14" &&
+              tipoComprobante !== "15" &&
+              tipoComprobante !== "" && (
                 <div>
                   <Label htmlFor="iva">IVA</Label>
                   <br />
@@ -556,9 +557,9 @@ export default function Page() {
             )}
           </div>
 
-          <Button disabled={loading} onClick={generateFactura}>
+          <Button disabled={loading} onClick={generateComprobante}>
             {loading && <Loader2Icon className="mr-2 animate-spin" size={20} />}
-            Generar nueva Factura
+            Generar nuevo comprobante
           </Button>
         </section>
       </LayoutContainer>

@@ -3,12 +3,12 @@ import { api } from "~/trpc/react";
 import { Title } from "~/components/title";
 
 import { LargeTable } from "~/components/table";
-import { FacturasHeaders } from "~/server/uploads/validators";
+import { ComprobantesHeaders } from "~/server/uploads/validators";
 
 import { useLayoutEffect, useState } from "react";
 
 export default function Page() {
-  const facturas = api.facturas.list.useQuery().data;
+  const comprobantes = api.comprobantes.list.useQuery().data;
   const [height, setHeight] = useState(1200);
   useLayoutEffect(() => {
     function handleResize() {
@@ -30,11 +30,11 @@ export default function Page() {
         <Title>Consultas</Title>
       </div>
       <div className="mt-5 flex overflow-x-auto overflow-y-auto">
-        {facturas && (
+        {comprobantes && (
           <LargeTable
             height={height}
-            headers={FacturasHeaders}
-            rows={facturas}
+            headers={ComprobantesHeaders}
+            rows={comprobantes}
           />
         )}
       </div>

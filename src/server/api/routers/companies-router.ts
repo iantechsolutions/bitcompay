@@ -362,7 +362,7 @@ export const companiesRouter = createTRPCRouter({
             family_groups.map((fg) => fg.id)
           )
         );
-        await deleteFacturasCircuit(tx, input.companyId);
+        await deleteComprobantesCircuit(tx, input.companyId);
 
         await tx.delete(schema.family_groups).where(
           inArray(
@@ -459,7 +459,7 @@ async function deleteBasics(db: DBTX, companyId: string) {
   });
 }
 
-async function deleteFacturasCircuit(db: DBTX, companyId: string) {
+async function deleteComprobantesCircuit(db: DBTX, companyId: string) {
   console.log("llego aqui 1");
   await db.transaction(async (tx) => {
     // borro circuito de bu, liquidaciones, facturas e items
@@ -485,14 +485,14 @@ async function deleteFacturasCircuit(db: DBTX, companyId: string) {
 
       return null;
     }
-    const facturas = await tx.query.facturas.findMany({
+    const comprobantes = await tx.query.comprobantes.findMany({
       where: inArray(
-        schema.facturas.liquidation_id,
+        schema.comprobantes.liquidation_id,
         liquidations.map((l) => l.id)
       ),
     });
-    console.log(facturas);
-    if (facturas.length === 0) {
+    console.log(comprobantes);
+    if (comprobantes.length === 0) {
       await tx.delete(schema.liquidations).where(
         inArray(
           schema.liquidations.bussinessUnits_id,
@@ -508,12 +508,12 @@ async function deleteFacturasCircuit(db: DBTX, companyId: string) {
     await tx.delete(schema.items).where(
       inArray(
         schema.items.comprobante_id,
-        facturas.map((f) => f.id)
+        comprobantes.map((f) => f.id)
       )
     );
-    await tx.delete(schema.facturas).where(
+    await tx.delete(schema.comprobantes).where(
       inArray(
-        schema.facturas.liquidation_id,
+        schema.comprobantes.liquidation_id,
         liquidations.map((l) => l.id)
       )
     );

@@ -14,7 +14,7 @@ import { bussinessUnitsRouter } from "./routers/bussiness-units-router";
 import { healthInsurancesRouter } from "./routers/health-insurances-router";
 import { clientStatusesRouter } from "./routers/client-statuses-router";
 import { integrantsRouter } from "./routers/integrant-router";
-import { facturasRouter } from "./routers/factura-router";
+import { comprobantesRouter } from "./routers/comprobante-router";
 import { modosRouter } from "./routers/modo.router";
 import { family_groupsRouter } from "./routers/family_group-router";
 import { procedureRouter } from "./routers/procedure.router";
@@ -58,7 +58,7 @@ export const appRouter = createTRPCRouter({
   healthInsurances: healthInsurancesRouter,
   clientStatuses: clientStatusesRouter,
   integrants: integrantsRouter,
-  facturas: facturasRouter,
+  comprobantes: comprobantesRouter,
   modos: modosRouter,
   family_groups: family_groupsRouter,
   procedure: procedureRouter,

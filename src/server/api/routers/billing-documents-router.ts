@@ -21,15 +21,15 @@ export const billingDocumentsRouter = createTRPCRouter({
     .input(
       z.object({
         url: z.string(),
-        factura_id: z.string(),
-      }),
+        comprobante_id: z.string(),
+      })
     )
     .mutation(async ({ input }) => {
       const new_billingDocument = await db
         .insert(schema.billingDocuments)
         .values({
           url: input.url,
-          factura_id: input.factura_id,
+          comprobante_id: input.comprobante_id,
         });
       return new_billingDocument;
     }),
@@ -38,7 +38,7 @@ export const billingDocumentsRouter = createTRPCRouter({
       z.object({
         id: z.string(),
         url: z.string(),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       const billingDocument_changed = await db

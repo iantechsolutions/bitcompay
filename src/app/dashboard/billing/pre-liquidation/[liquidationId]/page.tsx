@@ -253,7 +253,7 @@ export default async function Home(props: {
                   <TableHead
                     className="text-gray-800
                border-r-[1.5px] border-[#4af0d4]">
-                    Factura
+                    Comprobante
                   </TableHead>
                 </>
               ) : (

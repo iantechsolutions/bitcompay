@@ -1,9 +1,9 @@
 import dayjs from "dayjs";
 
-interface FacturaProps {
+interface ComprobanteProps {
   puntoDeVenta: string;
   concepto: string;
-  tipoFactura: string;
+  tipoComprobante: string;
   nroComprobante: string;
   facturadoDesde: string | null;
   facturadoHasta: string | null;
@@ -20,10 +20,10 @@ interface FacturaProps {
   logo_url: string | null;
 }
 
-export function Factura({
+export function Comprobante({
   puntoDeVenta,
   concepto: _concepto,
-  tipoFactura,
+  tipoComprobante,
   nroComprobante,
   facturadoDesde,
   facturadoHasta,
@@ -38,11 +38,11 @@ export function Factura({
   vtoCae,
   total,
   logo_url,
-}: FacturaProps) {
+}: ComprobanteProps) {
   const htmlString = `<!DOCTYPE html>
 <html>
 <head>
-	<title>Factura</title>
+	<title>Comprobante</title>
 	<style type="text/css">
 		*{
 			box-sizing: border-box;
@@ -213,7 +213,7 @@ export function Factura({
       </td>
       <td>
         <div>
-          <div className="text-lg">${tipoFactura.slice(0, -1)}</div>
+          <div className="text-lg">${tipoComprobante.slice(0, -1)}</div>
           <div className="row">
             <p className="col-6 margin-b-0">
               <strong>Punto de Venta: ${puntoDeVenta}</strong>

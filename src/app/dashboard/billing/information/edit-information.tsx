@@ -34,7 +34,7 @@ export default function EditCompany() {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [brandId, setBrandId] = useState<string | null>(null);
-  const [tipoFactura, setTipoFactura] = useState<string | null>(null);
+  const [tipoComprobante, setTipoComprobante] = useState<string | null>(null);
   const [concepto, setConcepto] = useState<string | null>(null);
   const [iva, setIva] = useState<string | null>(null);
 
@@ -63,7 +63,7 @@ export default function EditCompany() {
       await editBrand({
         brandId: brandId!,
         razon_social,
-        billType: tipoFactura ?? "11",
+        billType: tipoComprobante ?? "11",
         concept: concepto ?? "1",
         iva: iva ?? "5",
         name: brand?.name ?? "",
@@ -83,7 +83,7 @@ export default function EditCompany() {
       console.log(brand);
       console.log(marcas);
       setRazonSocial(brand.razon_social || "");
-      setTipoFactura(brand.bill_type || "");
+      setTipoComprobante(brand.bill_type || "");
       setConcepto(brand.concept || "");
       setIva(brand.iva || "");
     }
@@ -162,11 +162,11 @@ export default function EditCompany() {
                 />
               </div>
               <div>
-                <Label htmlFor="factura">Tipo de factura de la marca</Label>
+                <Label htmlFor="comprobante">Tipo de factura de la marca</Label>
                 <br />
                 <Select
-                  onValueChange={(e) => setTipoFactura(e)}
-                  value={tipoFactura ?? ""}>
+                  onValueChange={(e) => setTipoComprobante(e)}
+                  value={tipoComprobante ?? ""}>
                   <SelectTrigger className="w-[180px] font-bold">
                     <SelectValue placeholder="Seleccionar factura..." />
                   </SelectTrigger>

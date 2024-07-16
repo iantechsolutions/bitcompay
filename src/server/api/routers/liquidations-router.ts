@@ -3,7 +3,7 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db, schema } from "~/server/db";
 import { eq, and } from "drizzle-orm";
 import { currentUser } from "@clerk/nextjs/server";
-import { getGruposByBrandId, preparateFactura } from "./factura-router";
+import { getGruposByBrandId, preparateComprobante } from "./comprobante-router";
 
 export const liquidationsRouter = createTRPCRouter({
   get: protectedProcedure
@@ -12,7 +12,7 @@ export const liquidationsRouter = createTRPCRouter({
       const liquidation_found = await db.query.liquidations.findFirst({
         where: eq(schema.liquidations.id, input.id),
         with: {
-          facturas: {
+          comprobantes: {
             with: {
               items: true,
               family_group: {
@@ -42,8 +42,8 @@ export const liquidationsRouter = createTRPCRouter({
   getFamilyGroups: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
-      const facturas = await db.query.facturas.findMany({
-        where: eq(schema.facturas.liquidation_id, input.id),
+      const comprobantes = await db.query.comprobantes.findMany({
+        where: eq(schema.comprobantes.liquidation_id, input.id),
         with: {
           family_group: {
             with: {
@@ -56,7 +56,9 @@ export const liquidationsRouter = createTRPCRouter({
           },
         },
       });
-      const familyGroups = facturas.map((factura) => factura.family_group);
+      const familyGroups = comprobantes.map(
+        (comprobante) => comprobante.family_group
+      );
       return familyGroups;
     }),
   list: protectedProcedure.query(async ({ ctx }) => {
@@ -178,7 +180,7 @@ export const liquidationsRouter = createTRPCRouter({
           logo_url: input.logo_url,
         })
         .returning();
-      await preparateFactura(
+      await preparateComprobante(
         grupos,
         input.dateDesde,
         input.dateHasta,

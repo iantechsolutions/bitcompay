@@ -59,7 +59,7 @@ export const eventsRouter = createTRPCRouter({
         const new_event = await db
           .insert(schema.events)
           .values({
-            description: "Factura Creada",
+            description: "Comprobante Creado",
             currentAccount_id: input.ccId,
             type: input.type,
             event_amount: input.amount * -1,

@@ -124,7 +124,7 @@ export const recDocumentValidator = z
     "Nro. Tarjeta": stringToValidIntegerZodTransformer.nullable().optional(),
     "Tipo de Tarjeta": z.string().min(1).max(140).nullable().optional(),
     // NOT OPTIONAL!!!
-    "Nro Factura": stringToValidIntegerZodTransformer.optional(),
+    "Nro Comprobante": stringToValidIntegerZodTransformer.optional(),
     //
     Período: stringAsPeriod.nullable().optional(),
     "Importe 1er Vto.": stringToValidIntegerZodTransformer
@@ -165,7 +165,7 @@ export const recDocumentValidator = z
       is_new: value["Alta Nueva"] ?? null,
       card_number: value["Nro. Tarjeta"] ?? null,
       card_type: value["Tipo de Tarjeta"] ?? null,
-      invoice_number: value["Nro Factura"] ?? null,
+      invoice_number: value["Nro Comprobante"] ?? null,
       period: value.Período ?? null,
       first_due_amount: value["Importe 1er Vto."] ?? null,
       first_due_date: value["Fecha 1er Vto."] ?? null,
@@ -200,7 +200,7 @@ export const recDocumentValidatorWithoutProduct = z
     "Nro. Tarjeta": z.any().nullable().optional(),
     "Tipo de Tarjeta": z.any().nullable().optional(),
     // NOT OPTIONAL!!!
-    "Nro Factura": z.any().optional(),
+    "Nro Comprobante": z.any().optional(),
     //
     Período: z.any().nullable().optional(),
     "Importe 1er Vto.": z.any().nullable().optional(),
@@ -229,7 +229,7 @@ export const recDocumentValidatorWithoutProduct = z
       is_new: value["Alta Nueva"] ?? null,
       card_number: value["Nro. Tarjeta"] ?? null,
       card_type: value["Tipo de Tarjeta"] ?? null,
-      invoice_number: value["Nro Factura"] ?? null,
+      invoice_number: value["Nro Comprobante"] ?? null,
       period: value.Período ?? null,
       first_due_amount: value["Importe 1er Vto."] ?? null,
       first_due_date: value["Fecha 1er Vto."] ?? null,
@@ -394,7 +394,7 @@ export const recHeaders: TableHeaders = [
   { key: "card_number", label: "Nro. Tarjeta", width: 140 },
   {
     key: "invoice_number",
-    label: "Nro Factura",
+    label: "Nro Comprobante",
     width: 140,
     alwaysRequired: true,
   },
@@ -412,13 +412,13 @@ export const recHeaders: TableHeaders = [
   { key: "statusId", label: "Estado de Pago", width: 140 },
 ];
 
-export const FacturasHeaders: TableHeaders = [
+export const ComprobantesHeaders: TableHeaders = [
   { key: "id", label: "Id", width: 200 },
   { key: "createdAt", label: "Created At", width: 100 },
   { key: "generatedAt", label: "Generated At", width: 110 },
   { key: "ptoVenta", label: "Pto Venta", width: 80 },
-  { key: "nroFactura", label: "Nro Factura", width: 100 },
-  { key: "tipoFactura", label: "Tipo Factura", width: 110 },
+  { key: "nroComprobante", label: "Nro Comprobante", width: 100 },
+  { key: "tipoComprobante", label: "Tipo Comprobante", width: 110 },
   { key: "concepto", label: "Concepto", width: 80 },
   { key: "tipoDocumento", label: "Tipo Documento", width: 130 },
   { key: "nroDocumento", label: "Nro Documento", width: 130 },

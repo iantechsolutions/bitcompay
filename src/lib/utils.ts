@@ -83,13 +83,13 @@ export const topRightAbsoluteOnDesktopClassName =
   "md:absolute md:top-0 md:right-0 mr-10 mt-10";
 
 export function htmlBill(
-  factura: any,
+  comprobante: any,
   company: any,
   producto: any,
   voucher: number,
   brand: RouterOutputs["brands"]["list"][number] | undefined
 ) {
-  const billResponsible = factura?.family_group?.integrants?.find(
+  const billResponsible = comprobante?.family_group?.integrants?.find(
     (x: any) => x.isBillResponsible
   );
   if (producto) {
@@ -102,8 +102,8 @@ export function htmlBill(
       minimumFractionDigits: 2,
     }).format(amount);
   }
-  function getImageTagForTipoFactura(tipoFactura: string): string {
-    switch (tipoFactura) {
+  function getImageTagForTipoComprobante(tipoComprobante: string): string {
+    switch (tipoComprobante) {
       case "6":
       case "13":
       case "12":
@@ -138,8 +138,8 @@ export function htmlBill(
   ): string {
     return items.map((item) => `<p>${item.total}</p>`).join("");
   }
-  function getTextoForTipoFactura(tipoFactura: string) {
-    switch (tipoFactura) {
+  function getTextoForTipoComprobante(tipoComprobante: string) {
+    switch (tipoComprobante) {
       case "3":
       case "6":
       case "11":
@@ -162,8 +162,8 @@ export function htmlBill(
         return "";
     }
   }
-  const conceptosList = generateConcepts(factura?.items ?? []);
-  const amountsList = generateAmounts(factura?.items ?? []);
+  const conceptosList = generateConcepts(comprobante?.items ?? []);
+  const amountsList = generateAmounts(comprobante?.items ?? []);
   const htmlContent = `<!DOCTYPE html>
   <html lang="en">
     <head>
@@ -487,14 +487,18 @@ span {
         </div>
   
         <div class="items-2">
-              ${getImageTagForTipoFactura(factura?.tipoFactura ?? "")}
+              ${getImageTagForTipoComprobante(
+                comprobante?.tipoComprobante ?? ""
+              )}
          
         </div>
   
         <div class="items-3">
           <h2>
-            ${getTextoForTipoFactura(factura?.tipoFactura ?? "")} <br />
-            N° ${factura?.ptoVenta.toString().padStart(4, "0")}-${voucher
+            ${getTextoForTipoComprobante(
+              comprobante?.tipoComprobante ?? ""
+            )} <br />
+            N° ${comprobante?.ptoVenta.toString().padStart(4, "0")}-${voucher
     .toString()
     .padStart(8, "0")}
           </h2>
@@ -539,10 +543,14 @@ span {
             <p>Condicion de Venta: ---</p>
           </li>
           <li>
-            <p>Periodo facturado:${dateNormalFormat(factura?.fromPeriod)}</p>
+            <p>Periodo facturado:${dateNormalFormat(
+              comprobante?.fromPeriod
+            )}</p>
           </li>
           <li>
-            <p>Fecha de vencimiento:${dateNormalFormat(factura?.due_date)}</p>
+            <p>Fecha de vencimiento:${dateNormalFormat(
+              comprobante?.due_date
+            )}</p>
           </li>
         </ul>
       </section>
@@ -563,13 +571,13 @@ span {
       </section>
   
       <section class="parte-4">
-        <p>Pesos ${numeroALetras(Math.floor(factura?.importe ?? 0))} ${
-    obtenerDecimales(factura?.importe) == "00" || "0"
+        <p>Pesos ${numeroALetras(Math.floor(comprobante?.importe ?? 0))} ${
+    obtenerDecimales(comprobante?.importe) == "00" || "0"
       ? ""
-      : `con ${obtenerDecimales(factura?.importe)}/100`
+      : `con ${obtenerDecimales(comprobante?.importe)}/100`
   }</p>
         <p><span>TOTAL: </span>${formatNumberAsCurrency(
-          factura?.importe ?? 0
+          comprobante?.importe ?? 0
         )}</p>
       </section>
   

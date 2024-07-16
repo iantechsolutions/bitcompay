@@ -3,7 +3,7 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db, schema } from "~/server/db";
 import { createId } from "~/lib/utils";
 import { eq, and } from "drizzle-orm";
-import { selectFacturasSchema } from "~/server/db/schema";
+import { selectComprobantesSchema } from "~/server/db/schema";
 
 export const itemsRouter = createTRPCRouter({
   get: protectedProcedure
@@ -40,7 +40,7 @@ export const itemsRouter = createTRPCRouter({
       });
       return new_item;
     }),
-  createReturnFactura: protectedProcedure
+  createReturnComprobante: protectedProcedure
     .input(
       z.object({
         concept: z.string(),
@@ -60,15 +60,15 @@ export const itemsRouter = createTRPCRouter({
         abono: input.abono,
         comprobante_id: input.comprobante_id,
       });
-      const factura = await db.query.facturas.findFirst({
-        where: eq(schema.facturas.id, input.comprobante_id),
+      const comprobante = await db.query.comprobantes.findFirst({
+        where: eq(schema.comprobantes.id, input.comprobante_id),
         with: {
           family_group: {
             with: { businessUnitData: { with: { brand: true } } },
           },
         },
       });
-      return factura;
+      return comprobante;
     }),
   change: protectedProcedure
     .input(

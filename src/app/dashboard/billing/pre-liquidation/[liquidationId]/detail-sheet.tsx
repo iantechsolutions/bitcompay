@@ -10,13 +10,13 @@ import ContentTable from "./content-table";
 import { RouterOutputs } from "~/trpc/shared";
 
 type DetailSheetProps = {
-  facturas: RouterOutputs["facturas"]["getByLiquidation"];
+  comprobantes: RouterOutputs["comprobantes"]["getByLiquidation"];
   name: string;
   open: boolean;
   setOpen: (open: boolean) => void;
 };
 export default function DetailSheet({
-  facturas,
+  comprobantes,
   name,
   open,
   setOpen,
@@ -28,11 +28,11 @@ export default function DetailSheet({
     Aportes: 175517.82,
     Interés: 175517.82,
   };
-  let facturasNC = [];
-  let facturasFC = [];
-  for (const factura of facturas) {
-    if (factura.estado === "anulada") facturasNC.push(factura);
-    else facturasFC.push(factura);
+  let comprobantesNC = [];
+  let comprobantesFC = [];
+  for (const comprobante of comprobantes) {
+    if (comprobante.estado === "anulada") comprobantesNC.push(comprobante);
+    else comprobantesFC.push(comprobante);
   }
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -64,10 +64,10 @@ export default function DetailSheet({
             <p className="text-2xl font-medium opacity-70">FC</p>
             <p className="text-lg font-semibold text-[#4af0d4]">$ 40,517.24</p>
           </div>
-          {facturas
-            .filter((factura) => factura.origin != "Nota de credito")
-            .map((factura) => (
-              <ContentTable factura={factura} />
+          {comprobantes
+            .filter((comprobante) => comprobante.origin != "Nota de credito")
+            .map((comprobante) => (
+              <ContentTable comprobante={comprobante} />
             ))}
           <div className="flex flex-row justify-between py-2 mb-3 bg-[#fffefe] mt-2">
             <p className="text-2xl font-medium opacity-70">NC</p>

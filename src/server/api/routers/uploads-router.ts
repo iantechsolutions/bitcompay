@@ -184,7 +184,7 @@ export const uploadsRouter = createTRPCRouter({
             const payment = await tx.query.payments.findFirst({
               where: eq(schema.payments.invoice_number, invoiceNumber),
               with: {
-                factura: {
+                comprobantes: {
                   with: {
                     family_group: {
                       with: {
@@ -200,8 +200,8 @@ export const uploadsRouter = createTRPCRouter({
               },
             });
 
-            if (payment?.factura?.family_group?.cc) {
-              const currentAccount = payment?.factura?.family_group?.cc;
+            if (payment?.comprobantes?.family_group?.cc) {
+              const currentAccount = payment?.comprobantes?.family_group?.cc;
               const lastEvent = currentAccount?.events.reduce(
                 (prev, current) => {
                   return new Date(prev.createdAt) > new Date(current.createdAt)
@@ -217,7 +217,7 @@ export const uploadsRouter = createTRPCRouter({
                 event_amount:
                   record.first_due_amount ?? record.collected_amount ?? 0,
                 current_amount:
-                  lastEvent?.current_amount! + payment?.factura?.importe!,
+                  lastEvent?.current_amount! + payment?.comprobantes?.importe!,
                 description: "Recaudacion",
                 type: "REC",
               });
@@ -225,24 +225,33 @@ export const uploadsRouter = createTRPCRouter({
           })
         );
 
-        const mapFacturas = new Map<string, number>();
+        const mapComprobantes = new Map<string, number>();
         for (const record of records) {
-          if (record.factura_id && !mapFacturas.has(record.factura_id)) {
-            mapFacturas.set(record.factura_id, record.recollected_amount!);
-          } else if (record.factura_id && mapFacturas.has(record.factura_id)) {
-            let current = mapFacturas.get(record.factura_id);
+          if (
+            record.comprobante_id &&
+            !mapComprobantes.has(record.comprobante_id)
+          ) {
+            mapComprobantes.set(
+              record.comprobante_id,
+              record.recollected_amount!
+            );
+          } else if (
+            record.comprobante_id &&
+            mapComprobantes.has(record.comprobante_id)
+          ) {
+            let current = mapComprobantes.get(record.comprobante_id);
             if (current) {
               current += record.recollected_amount!;
-              mapFacturas.set(record.factura_id, current);
+              mapComprobantes.set(record.comprobante_id, current);
             }
           }
         }
-        console.log("mapFacturas", mapFacturas);
-        for (const [key, value] of mapFacturas) {
+        console.log("mapComprobantes", mapComprobantes);
+        for (const [key, value] of mapComprobantes) {
           console.log(value, key);
           const missing_payments = await tx.query.payments.findMany({
             where: and(
-              eq(schema.payments.factura_id, key),
+              eq(schema.payments.comprobante_id, key),
               not(
                 inArray(
                   schema.payments.id,
@@ -258,26 +267,26 @@ export const uploadsRouter = createTRPCRouter({
               missing_recollected_amount += payment.recollected_amount ?? 0;
             });
             const current_amount = value;
-            mapFacturas.set(
+            mapComprobantes.set(
               key,
               (current_amount ?? 0) + missing_recollected_amount
             );
           }
-          const factura = await tx.query.facturas.findFirst({
-            where: eq(schema.facturas.id, key),
+          const comprobante = await tx.query.comprobantes.findFirst({
+            where: eq(schema.comprobantes.id, key),
           });
-          console.log("factura", factura);
+          console.log("comprobante", comprobante);
 
-          const estado = factura?.importe! > value ? "parcial" : "pagada";
+          const estado = comprobante?.importe! > value ? "parcial" : "pagada";
           console.log("key", key);
-          console.log("MapFacturas", mapFacturas);
+          console.log("mapComprobantes", mapComprobantes);
           console.log("estado", estado);
           await tx
-            .update(schema.facturas)
+            .update(schema.comprobantes)
             .set({
               estado: estado,
             })
-            .where(eq(schema.facturas.id, key));
+            .where(eq(schema.comprobantes.id, key));
         }
       });
     }),

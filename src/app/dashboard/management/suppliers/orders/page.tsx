@@ -21,7 +21,7 @@ export default function HomePage() {
     data: dev,
     isLoading: isLoadingDev,
     error: errorDev,
-  } = api.facturas.getByLiquidation.useQuery({
+  } = api.comprobantes.getByLiquidation.useQuery({
     liquidationId: "5gAc2nDtFeYwz4yIMCopz",
   });
 

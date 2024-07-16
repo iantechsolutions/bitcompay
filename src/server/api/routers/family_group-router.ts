@@ -18,7 +18,7 @@ export const family_groupsRouter = createTRPCRouter({
         integrants: true,
         cc: true,
         businessUnitData: true,
-        facturas: {
+        comprobantes: {
           with: {
             items: true,
             family_group: {
@@ -58,15 +58,15 @@ export const family_groupsRouter = createTRPCRouter({
       const liquidation = await db.query.liquidations.findFirst({
         where: eq(schema.liquidations.id, input.liquidationId),
         with: {
-          facturas: {
-            where: eq(schema.facturas.liquidation_id, input.liquidationId),
+          comprobantes: {
+            where: eq(schema.comprobantes.liquidation_id, input.liquidationId),
             with: {
               family_group: {
                 with: {
                   integrants: true,
                   cc: true,
                   businessUnitData: true,
-                  facturas: {
+                  comprobantes: {
                     with: {
                       items: true,
                     },
@@ -79,19 +79,21 @@ export const family_groupsRouter = createTRPCRouter({
       });
 
       let family_groups =
-        liquidation?.facturas.map((factura) => factura.family_group) || [];
+        liquidation?.comprobantes.map(
+          (comprobante) => comprobante.family_group
+        ) || [];
       const family_groups_reduced = family_groups.filter((family_group) => {
         return family_groups.includes(family_group);
       });
       family_groups = [];
       family_groups_reduced.map((family_group) => {
         console.log("family_group en map", family_group);
-        const facturas = family_group?.facturas.filter(
-          (factura) => factura.liquidation_id === input.liquidationId
+        const comprobantes = family_group?.comprobantes.filter(
+          (comprobante) => comprobante.liquidation_id === input.liquidationId
         );
         if (family_group) {
-          console.log("entra aca", facturas);
-          family_group.facturas = facturas ?? [];
+          console.log("entra aca", comprobantes);
+          family_group.comprobantes = comprobantes ?? [];
         }
         family_groups.push(family_group);
         console.log("post push", family_groups);
