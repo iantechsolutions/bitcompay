@@ -25,8 +25,6 @@ export default function TableRowContainer({
   const [open, setOpen] = useState(false);
   const facturas = family_group?.facturas;
 
-  console.log("facturasTT", facturas);
-
   const original_factura = facturas?.find(
     (factura) => factura?.origin?.toLowerCase() === "original"
   );
@@ -57,6 +55,22 @@ export default function TableRowContainer({
   );
 
   const subTotal = computeBase(total, Number(original_factura.iva!));
+  const iva = computeIva(total, Number(original_factura.iva!));
+
+  const rowValues = [
+    family_group?.numericalId ?? "N/A",
+    billResponsible?.name ?? "",
+    billResponsible?.fiscal_id_number ?? "-",
+    currentAccountAmount,
+    abono?.amount,
+    bonification?.amount,
+    0,
+    contribution?.amount,
+    interest?.amount,
+    subTotal,
+    iva,
+    total,
+  ];
   return (
     <>
       <TableRow
@@ -70,9 +84,6 @@ export default function TableRowContainer({
 
         <TableCell className="border border-[#6cebd1] p-2 py-4">
           {billResponsible?.name ?? ""}
-        </TableCell>
-        <TableCell className="border border-[#6cebd1] p-2 py-4">
-          {billResponsible?.id_number}
         </TableCell>
         <TableCell className="border border-[#6cebd1] p-2 py-4">
           {" "}

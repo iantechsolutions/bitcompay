@@ -26,11 +26,12 @@ import utc from "dayjs/plugin/utc";
 import "dayjs/locale/es";
 dayjs.extend(utc);
 dayjs.locale("es");
-import { RouterOutputs } from "~/trpc/shared";
+
 import { clerkClient } from "@clerk/nextjs/server";
 import UpdateLiquidationEstadoDialog from "./approve-liquidation-dialog";
 import { computeBase, computeIva } from "~/lib/utils";
 import DownloadExcelButton from "./downloadExcelButton";
+import RejectLiquidationDialog from "./reject-liquidation-dialog";
 import { ChevronLeft, CircleX } from "lucide-react";
 export default async function Home(props: {
   params: { liquidationId: string };
@@ -40,7 +41,7 @@ export default async function Home(props: {
   const preliquidation = await api.liquidations.get.query({
     id: props.params.liquidationId,
   });
-
+  const businessUnit = preliquidation?.bussinessUnits;
   const user = await clerkClient.users.getUser(
     preliquidation?.userCreated ?? "user_2iy8lXXdnoa2f5wHjRh5nj3W0fU"
   );
@@ -49,7 +50,6 @@ export default async function Home(props: {
     liquidationId: props.params.liquidationId,
   });
 
-  console.log(familyGroups);
   const periodo =
     dayjs.utc(preliquidation?.period).format("MMMM [de] YYYY") ?? "-";
   const headers = [
@@ -66,6 +66,7 @@ export default async function Home(props: {
     "IVA",
     "Total",
   ];
+  if (preliquidation?.estado !== "pendiente") headers.push("Factura");
   const summary = {
     "Saldo anterior": 175517.82,
     "Cuota Planes": 175517.82,
@@ -77,6 +78,7 @@ export default async function Home(props: {
     IVA: 175517.82,
     "Total a facturar": 175517.82,
   };
+  // const facturas = preliquidation?.facturas;
   // const rowsPromise =
   //   facturas?.map(async (factura) => {
   //     if (!factura) return [];
@@ -128,9 +130,9 @@ export default async function Home(props: {
                 liquidationId={props.params.liquidationId}
                 userId={userActual?.id ? userActual?.id : ""}
               />
-              <Button className=" h-7 bg-[#c2c0c0] hover:bg-[#7e7c7c] text-[#686767]  text-xs rounded-2xl py-0 px-6">
-                Rechazar <CircleX className="h-4 w-auto ml-2" />{" "}
-              </Button>
+              <RejectLiquidationDialog
+                liquidationId={props.params.liquidationId}
+              />
             </div>
           </>
         )}
@@ -148,7 +150,8 @@ export default async function Home(props: {
         </ul>
         <ul className="list-disc">
           <li>
-            <span className="font-bold ">Gerenciador</span>{" "}
+            <span className="font-bold ">Gerenciador: </span>
+            {businessUnit?.description ?? "-"}
           </li>
           <li>
             <span className="font-bold ">Periodo: </span>
@@ -166,7 +169,7 @@ export default async function Home(props: {
           </li>
         </ul>
       </div>
-      <div className="bg-[#ecf7f5] flex flex-row justify-evenly gap-2 w-full py-2">
+      <div className="bg-[#ecf7f5] flex flex-row justify-stretch w-full">
         {Object.entries(summary).map(([key, value], index, array) => (
           <div
             className={`${
@@ -185,99 +188,19 @@ export default async function Home(props: {
         <Table className="border-separate  border-spacing-x-0 border-spacing-y-2">
           <TableHeader className="overflow-hidden">
             <TableRow className="bg-[#79edd6]">
-              <TableHead className="text-gray-800 rounded-l-md border-r-[1.5px] border-[#4af0d4]">
-                Id. GF
-              </TableHead>
-              <TableHead
-                className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]"
-              >
-                Nombre (Resp. Pago){" "}
-              </TableHead>
-              <TableHead
-                className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]"
-              >
-                DNI
-              </TableHead>
-              <TableHead
-                className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]"
-              >
-                CUIL/CUIT (Resp. Pago){" "}
-              </TableHead>
-              <TableHead
-                className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]"
-              >
-                Saldo Cta. Cte.{" "}
-              </TableHead>
-              <TableHead
-                className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]"
-              >
-                Cuota
-              </TableHead>
-              <TableHead
-                className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]"
-              >
-                Bonificacion
-              </TableHead>
-              <TableHead
-                className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]"
-              >
-                Diferencial
-              </TableHead>
-              <TableHead
-                className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]"
-              >
-                Aportes
-              </TableHead>
-              <TableHead
-                className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]"
-              >
-                Interes
-              </TableHead>
-              <TableHead
-                className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]"
-              >
-                Sub total
-              </TableHead>
-              <TableHead
-                className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]"
-              >
-                IVA
-              </TableHead>
-              {preliquidation?.estado !== "pendiente" ? (
-                <>
+              {headers.map((header, index, array) => {
+                const firstHeader = index == 0 ? "rounded-l-md" : "";
+                const lastHeader =
+                  index == array.length - 1 ? "rounded-r-md" : "";
+                return (
                   <TableHead
-                    className="text-gray-800
-               rounded-r-md overflow-hidden"
+                    className={`${firstHeader} ${lastHeader} text-gray-800
+               border-r-[1.5px] border-[#4af0d4]`}
                   >
-                    Total
+                    {header}
                   </TableHead>
-
-                  <TableHead
-                    className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]"
-                  >
-                    Factura
-                  </TableHead>
-                </>
-              ) : (
-                <TableHead
-                  className="text-gray-800
-               rounded-r-md overflow-hidden"
-                >
-                  Total
-                </TableHead>
-              )}
+                );
+              })}
             </TableRow>
           </TableHeader>
           <TableBody>
