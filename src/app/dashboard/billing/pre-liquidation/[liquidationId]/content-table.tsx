@@ -24,7 +24,7 @@ function ContentTable(props: propsContentTable) {
   return (
     <Table>
       <TableRow>
-        <TableHead className="text-black text-sm opacity-70   border-b border-[#4af0d4]">
+        <TableHead className="text-black text-sm opacity-70   border-b border-[#4af0d4] text-left">
           {" "}
           Concepto{" "}
         </TableHead>
@@ -44,7 +44,7 @@ function ContentTable(props: propsContentTable) {
         .filter((item) => item.concept != "Total a pagar")
         .map((item) => (
           <TableRow>
-            <TableCell className=" border-b border-[#4af0d4] py-2 text-[#737171] italic opacity-70 ">
+            <TableCell className=" border-b border-[#4af0d4] py-2 px-4 text-[#737171] text-left italic opacity-70 ">
               {item.concept}
             </TableCell>
             <TableCell className=" border-b border-[#4af0d4] py-2 text-[#737171] font-semibold opacity-70 ">

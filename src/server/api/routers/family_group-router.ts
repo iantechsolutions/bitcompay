@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db, schema } from "~/server/db";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import {
   administrative_audit,
   medical_audit,
@@ -60,6 +60,7 @@ export const family_groupsRouter = createTRPCRouter({
         with: {
           comprobantes: {
             where: eq(schema.comprobantes.liquidation_id, input.liquidationId),
+            orderBy: [desc(schema.comprobantes.createdAt)],
             with: {
               family_group: {
                 with: {
@@ -86,18 +87,18 @@ export const family_groupsRouter = createTRPCRouter({
         return family_groups.includes(family_group);
       });
       family_groups = [];
+
       family_groups_reduced.map((family_group) => {
         console.log("family_group en map", family_group);
         const comprobantes = family_group?.comprobantes.filter(
           (comprobante) => comprobante.liquidation_id === input.liquidationId
         );
         if (family_group) {
-          console.log("entra aca", comprobantes);
           family_group.comprobantes = comprobantes ?? [];
         }
         family_groups.push(family_group);
-        console.log("post push", family_groups);
       });
+      console.log("family_groups", family_groups);
       return family_groups;
     }),
   getbyProcedure: protectedProcedure

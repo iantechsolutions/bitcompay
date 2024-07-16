@@ -24,7 +24,6 @@ export const currentAccountRouter = createTRPCRouter({
 
       return currentAccount;
     }),
-
   create: protectedProcedure
     .input(
       z.object({
