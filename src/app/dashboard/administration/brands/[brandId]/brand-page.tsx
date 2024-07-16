@@ -48,6 +48,8 @@ export default function BrandPage({
 
   const router = useRouter();
   const [name, setName] = useState(brand.name);
+  const [iva, setIva] = useState<number>(parseFloat(brand.iva!));
+
   const [description, setDescription] = useState(brand.description);
   const [reducedDescription, setReducedDescription] = useState(
     brand.redescription
@@ -86,6 +88,7 @@ export default function BrandPage({
 
       await changeBrand({
         name,
+        iva: iva.toString(),
         description,
         reducedDescription,
         companiesId,
@@ -146,7 +149,14 @@ export default function BrandPage({
                       onChange={(e) => setReducedDescription(e.target.value)}
                     />
                   </div>
-
+                  <div className="col-span-2">
+                    <Label htmlFor="iva">IVA</Label>
+                    <Input
+                      id="iva"
+                      value={iva}
+                      onChange={(e) => setIva(Number(e.target.value))}
+                    />
+                  </div>
                   <div>
                     <Label> Actualizar Logo Marca</Label>
                     {brand.logo_url && (
@@ -268,8 +278,7 @@ function Deletebrand(props: { brandId: string }) {
           <AlertDialogAction
             className="bg-red-500 active:bg-red-700 hover:bg-red-600"
             onClick={handleDelete}
-            disabled={isLoading}
-          >
+            disabled={isLoading}>
             Eliminar
           </AlertDialogAction>
         </AlertDialogFooter>

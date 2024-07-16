@@ -22,6 +22,7 @@ export function AddBrandDialog() {
     api.brands.create.useMutation();
   const [reducedDescription, setReducedDescription] = useState("");
   const [description, setDescription] = useState("");
+  const [iva, setIva] = useState<number>(0);
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
   const [open, setOpen] = useState(false);
@@ -37,6 +38,7 @@ export function AddBrandDialog() {
     try {
       schema.parse({ texto: reducedDescription });
       await createBrand({
+        iva: iva.toString(),
         description,
         name,
         redescription: reducedDescription,
@@ -85,7 +87,15 @@ export function AddBrandDialog() {
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
-
+          <div>
+            <Label htmlFor="iva">IVA</Label>
+            <Input
+              id="iva"
+              type="number"
+              value={iva}
+              onChange={(e) => setIva(Number(e.target.value))}
+            />
+          </div>
           <div>
             <Label htmlFor="description_reducida">Descripción Reducida</Label>
             <Input

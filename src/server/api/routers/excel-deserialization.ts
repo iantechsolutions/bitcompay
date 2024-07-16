@@ -2,7 +2,7 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { z } from "zod";
 import * as schema from "~/server/db/schema";
 import { type DBTX, db } from "~/server/db";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import * as xlsx from "xlsx";
 import {
@@ -37,7 +37,7 @@ export const excelDeserializationRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const contents = await readExcelFile(db, input.id, input.type);
+      const contents = await readExcelFile(db, input.id, input.type, ctx);
       //agregar a readExcel verificacion de columnas obligatorias.
 
       return contents;
@@ -52,7 +52,7 @@ export const excelDeserializationRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       const familyGroupMap = new Map<string | null, string>();
-      const contents = await readExcelFile(db, input.uploadId, input.type);
+      const contents = await readExcelFile(db, input.uploadId, input.type, ctx);
       await db.transaction(async (db) => {
         for (const row of contents) {
           const business_unit = await db.query.bussinessUnits.findFirst({
@@ -328,6 +328,7 @@ async function readExcelFile(
   db: DBTX,
   id: string,
   type: string | undefined,
+  ctx: any,
   batchSize = 100
 ) {
   const upload = await db.query.excelBilling.findFirst({
@@ -440,12 +441,16 @@ async function readExcelFile(
     }
 
     const business_unit = await db.query.bussinessUnits.findFirst({
-      where: eq(schema.bussinessUnits.description, row.business_unit!),
+      where: and(eq(schema.bussinessUnits.description, row.business_unit!)),
     });
     if (!business_unit) {
       errors.push(`UNIDAD DE NEGOCIO no valida en (fila:${rowNum})`);
     }
-
+    if (business_unit?.companyId !== ctx.session.orgId) {
+      errors.push(
+        `UNIDAD DE NEGOCIO no pertenece a la organizacion (fila:${rowNum}) `
+      );
+    }
     if (row.differential_value && !row.differential_code) {
       errors.push(`CODIGO DIFERENCIAL requerido en (fila:${rowNum})`);
     }
