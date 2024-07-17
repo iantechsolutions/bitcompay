@@ -326,15 +326,6 @@ async function approbatecomprobante(liquidationId: string) {
               ? prev
               : current;
           });
-        if (comprobante.origin === "Pago A Cuenta") {
-          const event = await db.insert(schema.events).values({
-            currentAccount_id: cc?.id,
-            event_amount: comprobante.importe,
-            current_amount: lastEvent.current_amount + comprobante.importe,
-            description: "Re Balance Pago a cuenta",
-            type: "FC",
-          });
-        }
         if (comprobante.origin === "Nota de credito") {
           const event = await db.insert(schema.events).values({
             currentAccount_id: cc?.id,
@@ -345,20 +336,20 @@ async function approbatecomprobante(liquidationId: string) {
           });
         }
         if (comprobante.origin === "Original") {
+          const event = await db.insert(schema.events).values({
+            currentAccount_id: cc?.id,
+            event_amount: comprobante.importe * -1,
+            current_amount: lastEvent.current_amount - comprobante.importe,
+            description: "Factura aprobada",
+            type: "FC",
+          });
         }
-        const event = await db.insert(schema.events).values({
-          currentAccount_id: cc?.id,
-          event_amount: comprobante.importe * -1,
-          current_amount: lastEvent.current_amount - comprobante.importe,
-          description: "comprobante aprobada",
-          type: "FC",
-        });
       } else {
         const event = await db.insert(schema.events).values({
           currentAccount_id: cc?.id,
           event_amount: comprobante.importe * -1,
           current_amount: 0 - comprobante.importe,
-          description: "comprobante aprobada",
+          description: "Factura aprobada",
           type: "FC",
         });
       }
@@ -747,7 +738,6 @@ export async function preparateComprobante(
         grupo,
         interest,
         ivaFloat,
-        dateDesde!,
         bonificacion,
         contribution,
         abono,
@@ -784,38 +774,44 @@ export async function preparateComprobante(
       );
       const tipoDocumento = idDictionary[billResponsible?.fiscal_id_type ?? ""];
 
-      //creamos una NC virtual anulando la última comprobante
-      const notaCredito = await db
-        .insert(schema.comprobantes)
-        .values({
-          ptoVenta: parseInt(pv),
-          nroComprobante: 0,
-          tipoComprobante:
-            NCbytipocomprobanteDictionary[
-              grupo.businessUnitData?.brand?.bill_type ?? "0"
-            ],
-          concepto: mostRecentcomprobante?.concepto ?? 0,
-          tipoDocumento: tipoDocumento ?? 0,
-          nroDocumento: mostRecentcomprobante?.nroDocumento ?? 0,
-          importe: previous_bill,
-          fromPeriod: dateDesde,
-          toPeriod: dateHasta,
-          due_date: dateVencimiento,
-          prodName: mostRecentcomprobante?.prodName ?? "",
-          iva: mostRecentcomprobante?.iva ?? "",
-          billLink: "",
-          liquidation_id: liquidationId,
-          family_group_id: grupo.id,
-          origin: "Nota de credito",
-        })
-        .returning();
-      //creamos item de NC para visualizacion
-      await createcomprobanteItem(
-        ivaFloat,
-        notaCredito[0]?.id ?? "",
-        "Nota de credito",
-        previous_bill
-      );
+      //creamos una NC virtual anulando la última factura si la ultima factura tiene importe
+      if (
+        previous_bill > 0 &&
+        (mostRecentcomprobante?.estado == "pendiente" ||
+          mostRecentcomprobante?.estado == "parcial")
+      ) {
+        const notaCredito = await db
+          .insert(schema.comprobantes)
+          .values({
+            ptoVenta: parseInt(pv),
+            nroComprobante: 0,
+            tipoComprobante:
+              NCbytipocomprobanteDictionary[
+                grupo.businessUnitData?.brand?.bill_type ?? "0"
+              ],
+            concepto: mostRecentcomprobante?.concepto ?? 0,
+            tipoDocumento: tipoDocumento ?? 0,
+            nroDocumento: mostRecentcomprobante?.nroDocumento ?? 0,
+            importe: previous_bill,
+            fromPeriod: dateDesde,
+            toPeriod: dateHasta,
+            due_date: dateVencimiento,
+            prodName: mostRecentcomprobante?.prodName ?? "",
+            iva: mostRecentcomprobante?.iva ?? "",
+            billLink: "",
+            liquidation_id: liquidationId,
+            family_group_id: grupo.id,
+            origin: "Nota de credito",
+          })
+          .returning();
+        //creamos item de NC para visualizacion
+        await createcomprobanteItem(
+          ivaFloat,
+          notaCredito[0]?.id ?? "",
+          "Nota de credito",
+          previous_bill
+        );
+      }
 
       //creamos FC nueva
 
@@ -838,6 +834,7 @@ export async function preparateComprobante(
           liquidation_id: liquidationId,
           family_group_id: grupo.id,
           origin: "Original",
+          estado: "generada",
         })
         .returning();
       //creamos items de fc para visualizacion
@@ -1026,7 +1023,6 @@ async function calculateAmount(
   grupo: grupoCompleto,
   interest: number,
   iva: number,
-  dateDesde: Date,
   bonificacion: number,
   contribution: number,
   abono: number,
