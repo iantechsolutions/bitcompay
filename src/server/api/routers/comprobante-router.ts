@@ -506,7 +506,7 @@ export async function getGruposByBrandId(brandId: string) {
 }
 
 export const comprobantesRouter = createTRPCRouter({
-  list: protectedProcedure.query(async ({}) => {
+  list: protectedProcedure.query(async ({ ctx }) => {
     const comprobantes = await db.query.comprobantes.findMany({
       with: {
         items: true,
@@ -592,7 +592,7 @@ export const comprobantesRouter = createTRPCRouter({
         liquidationId: z.string(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const response = await approbatecomprobante(input.liquidationId);
       // return response;
     }),
