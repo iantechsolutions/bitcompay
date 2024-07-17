@@ -15,17 +15,6 @@ import { utapi } from "~/server/uploadthing";
 import { id } from "date-fns/locale";
 import { Events } from "./events-router";
 
-function formatDateAFIP(date: Date | undefined) {
-  if (date) {
-    const year = date.getFullYear();
-    const month = (1 + date.getMonth()).toString().padStart(2, "0");
-    const day = date.getDate().toString().padStart(2, "0");
-
-    return year + month + day;
-  }
-  return null;
-}
-
 type Bonus = {
   id: string;
   appliedUser: string;
@@ -188,6 +177,7 @@ async function approbatecomprobante(liquidationId: string) {
     let last_voucher;
 
     for (let comprobante of liquidation?.comprobantes) {
+      console.log("0");
       try {
         last_voucher = await afip.ElectronicBilling.getLastVoucher(
           comprobante?.ptoVenta,
@@ -196,11 +186,13 @@ async function approbatecomprobante(liquidationId: string) {
       } catch {
         last_voucher = 0;
       }
+      console.log("1");
       const randomNumber =
         Math.floor(Math.random() * (100000 - 1000 + 1)) + 1000;
       const billResponsible = comprobante.family_group?.integrants.find(
         (integrant) => integrant.isBillResponsible
       );
+      console.log("2");
       const producto = await db.query.products.findFirst({
         where: eq(schema.products.id, billResponsible?.pa[0]?.product_id ?? ""),
       });
@@ -210,9 +202,11 @@ async function approbatecomprobante(liquidationId: string) {
           comprobante.family_group?.id ?? ""
         ),
       });
+      console.log("3");
       const status = await db.query.paymentStatus.findFirst({
         where: eq(schema.paymentStatus.code, "91"),
       });
+      console.log("4");
       const payment = await db
         .insert(schema.payments)
         .values({
@@ -238,7 +232,7 @@ async function approbatecomprobante(liquidationId: string) {
           // address: billResponsible?.address,
         })
         .returning();
-
+      console.log("5");
       const fecha = new Date(
         Date.now() - new Date().getTimezoneOffset() * 60000
       )
@@ -248,6 +242,7 @@ async function approbatecomprobante(liquidationId: string) {
       const listado = Object.entries(ivaDictionary).find(
         ([_, value]) => value === comprobante?.iva
       );
+      console.log("6");
       const iva = listado ? listado[0] : "0";
       const ivaFloat = parseFloat(comprobante?.iva ?? "0") / 100;
       const data = {
@@ -277,15 +272,18 @@ async function approbatecomprobante(liquidationId: string) {
           Importe: (Number(comprobante?.importe) * ivaFloat).toString(),
         },
       };
+      console.log("7");
       const html = htmlBill(
-        comprobante.id,
+        comprobante,
         comprobante.family_group?.businessUnitData!.company,
         producto,
-        last_voucher + 1,
+        last_voucher + 1 ?? 0,
         comprobante.family_group?.businessUnitData!.brand
       );
+      console.log("8");
       const name = `FAC_${last_voucher + 1}.pdf`; // NOMBRE
       last_voucher += 1;
+      console.log("9");
       const options = {
         width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
         marginLeft: 0.8, // Margen izquierdo en pulgadas. Usar 0.1 para ticket
@@ -301,6 +299,7 @@ async function approbatecomprobante(liquidationId: string) {
         options: options,
       });
 
+      console.log("10");
       const url = resHtml.file;
 
       // const uploaded = await utapi.uploadFiles(
@@ -313,7 +312,7 @@ async function approbatecomprobante(liquidationId: string) {
           billLink: resHtml.file,
         })
         .where(eq(schema.comprobantes.id, comprobante.id));
-
+      console.log("11");
       const historicEvents = await db.query.events.findMany({
         where: eq(schema.events.currentAccount_id, cc?.id ?? ""),
       });
@@ -692,8 +691,10 @@ export async function preparateComprobante(
     const grupo = grupos[i];
     if (grupo) {
       //calculate iva
+
       const iva =
         ivaDictionary[Number(grupo.businessUnitData?.brand?.iva ?? 0) ?? 3];
+
       const ivaFloat = (100 + parseFloat(iva ?? "0")) / 100;
 
       //calculate ppb
