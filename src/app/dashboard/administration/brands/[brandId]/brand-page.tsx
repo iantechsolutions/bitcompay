@@ -55,7 +55,7 @@ export default function BrandPage({
 
   const router = useRouter();
   const [name, setName] = useState(brand.name);
-  const [iva, setIva] = useState<string>(brand.iva! ?? "");
+  const [iva, setIva] = useState<string>(brand.iva!);
 
   const [description, setDescription] = useState(brand.description);
   const [reducedDescription, setReducedDescription] = useState(
@@ -158,17 +158,17 @@ export default function BrandPage({
                   </div>
                   <div className="col-span-2">
                     <Label htmlFor="iva">IVA</Label>
-                    <Select onValueChange={(e) => setIva(e)} value={iva ?? ""}>
+                    <Select value={iva} onValueChange={(e) => setIva(e)}>
                       <SelectTrigger className="w-[180px] font-bold">
                         <SelectValue placeholder="Seleccionar IVA" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="3">0%</SelectItem>
+                        <SelectItem value="9">2.5%</SelectItem>
+                        <SelectItem value="8">5%</SelectItem>
                         <SelectItem value="4">10.5%</SelectItem>
                         <SelectItem value="5">21%</SelectItem>
                         <SelectItem value="6">27%</SelectItem>
-                        <SelectItem value="8">5%</SelectItem>
-                        <SelectItem value="9">2.5%</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -293,8 +293,7 @@ function Deletebrand(props: { brandId: string }) {
           <AlertDialogAction
             className="bg-red-500 active:bg-red-700 hover:bg-red-600"
             onClick={handleDelete}
-            disabled={isLoading}
-          >
+            disabled={isLoading}>
             Eliminar
           </AlertDialogAction>
         </AlertDialogFooter>
