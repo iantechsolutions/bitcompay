@@ -70,8 +70,8 @@ export default function AddPreLiquidation() {
     // await new Promise((resolve) => setTimeout(resolve, 500));
 
     if (liquidation) {
-      toast.success("Pre-liquidacion creada correctamente");
       router.refresh();
+      toast.success("Pre-liquidacion creada correctamente");
       setOpen(false);
     } else {
       toast.error("Error al crear la pre-liquidacion");
@@ -112,7 +112,8 @@ export default function AddPreLiquidation() {
                     <SelectItem
                       key={marca?.id}
                       value={marca?.id}
-                      className="rounded-none border-b border-gray-600">
+                      className="rounded-none border-b border-gray-600"
+                    >
                       {marca?.name}
                     </SelectItem>
                   ))}
@@ -129,7 +130,8 @@ export default function AddPreLiquidation() {
                   className={cn(
                     "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
                     !fechaVencimiento1 && "text-muted-foreground"
-                  )}>
+                  )}
+                >
                   <p>
                     {fechaVencimiento1 ? (
                       dayjs(fechaVencimiento1).format("D [de] MMMM [de] YYYY")
@@ -163,7 +165,8 @@ export default function AddPreLiquidation() {
                   className={cn(
                     "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
                     !fechaVencimiento2 && "text-muted-foreground"
-                  )}>
+                  )}
+                >
                   <p>
                     {fechaVencimiento2 ? (
                       dayjs(fechaVencimiento2).format("D [de] MMMM [de] YYYY")
@@ -254,7 +257,8 @@ export default function AddPreLiquidation() {
               <Label htmlFor="validy_date">Mes de vigencia</Label>
               <Select
                 onValueChange={(e) => setMes(Number(e))}
-                defaultValue={mes.toString()}>
+                defaultValue={mes.toString()}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccione un mes" />
                 </SelectTrigger>
@@ -316,7 +320,8 @@ export default function AddPreLiquidation() {
             className="mt-2"
             type="submit"
             disabled={isLoading}
-            onClick={handleCreate}>
+            onClick={handleCreate}
+          >
             {isLoading && (
               <Loader2Icon className="mr-2 animate-spin" size={20} />
             )}
