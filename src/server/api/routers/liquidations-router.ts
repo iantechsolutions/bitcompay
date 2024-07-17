@@ -180,7 +180,7 @@ export const liquidationsRouter = createTRPCRouter({
           brandId: input.brandId,
           createdAt: new Date(),
           razon_social: brand?.razon_social ?? "",
-          estado: "pendiente",
+          estado: "generada",
           cuit: company?.cuit ?? "",
           period: input.dateDesde,
           userCreated: user?.id ?? "",
