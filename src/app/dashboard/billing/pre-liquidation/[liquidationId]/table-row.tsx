@@ -36,7 +36,7 @@ export default function TableRowContainer({
     ccId: family_group?.cc?.id!,
     date: preliquidation?.createdAt ?? new Date(),
   });
-  const billResponsible = family_group?.integrants.find(
+  const billResponsible = family_group!.integrants!.find(
     (x) => x.isBillResponsible == true
   );
   const currentAccountAmount = lastEvent?.current_amount ?? 0;

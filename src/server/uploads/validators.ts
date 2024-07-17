@@ -136,13 +136,13 @@ export const recDocumentValidator = z
       .optional(),
     "Fecha 2do. Vto.": stringAsDate.nullable().optional(),
     "Info. Adicional": z.string().min(1).catch("").nullable().optional(),
-    "Canal de Cobro": z
-      .string()
-      .min(0)
-      .max(140)
-      .catch("")
-      .nullable()
-      .optional(),
+    // "Canal de Cobro": z
+    //   .string()
+    //   .min(0)
+    //   .max(140)
+    //   .catch("")
+    //   .nullable()
+    //   .optional(),
     "Fecha de Pago/Débito": stringAsDate.nullable().optional(),
     "Importe Cobrado": nullableStringToValidIntegerZodTransformer
       .nullable()
@@ -172,7 +172,7 @@ export const recDocumentValidator = z
       second_due_amount: value["Importe 2do Vto."] ?? null,
       second_due_date: value["Fecha 2do. Vto."] ?? null,
       additional_info: value["Info. Adicional"] ?? null,
-      payment_channel: value["Canal de Cobro"] ?? null,
+      // payment_channel: value["Canal de Cobro"] ?? null,
       payment_date: value["Fecha de Pago/Débito"] ?? null,
       collected_amount: value["Importe Cobrado"] ?? null,
       comment: value["Obs."] ?? null,
@@ -208,7 +208,7 @@ export const recDocumentValidatorWithoutProduct = z
     "Importe 2do Vto.": z.any().nullable().optional(),
     "Fecha 2do. Vto.": z.any().nullable().optional(),
     "Info. Adicional": z.any().catch("").nullable().optional(),
-    "Canal de Cobro": z.any().catch("").nullable().optional(),
+    // "Canal de Cobro": z.any().catch("").nullable().optional(),
     "Fecha de Pago/Débito": z.any().nullable().optional(),
     "Importe Cobrado": z.any().nullable().optional(),
     "Obs.": z.any().catch("").nullable().optional(),
@@ -236,7 +236,7 @@ export const recDocumentValidatorWithoutProduct = z
       second_due_amount: value["Importe 2do Vto."] ?? null,
       second_due_date: value["Fecha 2do. Vto."] ?? null,
       additional_info: value["Info. Adicional"] ?? null,
-      payment_channel: value["Canal de Cobro"] ?? null,
+      // payment_channel: value["Canal de Cobro"] ?? null,
       payment_date: value["Fecha de Pago/Débito"] ?? null,
       collected_amount: value["Importe Cobrado"] ?? null,
       comment: value["Obs."] ?? null,
@@ -270,7 +270,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
       second_due_amount: number | null;
       second_due_date: Date | null;
       additional_info: string | null;
-      payment_channel: string | null;
+      // payment_channel: string | null;
       payment_date: Date | null;
       collected_amount: number | null;
       comment: string | null;
@@ -299,7 +299,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     second_due_amount: number | null;
     second_due_date: Date | null;
     additional_info: string | null;
-    payment_channel: string | null;
+    // payment_channel: string | null;
     payment_date: Date | null;
     collected_amount: number | null;
     comment: string | null;
@@ -325,7 +325,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     second_due_amount: null,
     second_due_date: null,
     additional_info: null,
-    payment_channel: null,
+    // payment_channel: null,
     payment_date: null,
     collected_amount: null,
     comment: null,
@@ -363,7 +363,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
               second_due_amount: parsedRow.at(0)?.second_due_amount,
               second_due_date: parsedRow.at(0)?.second_due_date,
               additional_info: parsedRow.at(0)?.additional_info,
-              payment_channel: parsedRow.at(0)?.payment_channel,
+              // payment_channel: parsedRow.at(0)?.payment_channel,
               payment_date: parsedRow.at(0)?.payment_date,
               collected_amount: parsedRow.at(0)?.collected_amount,
               comment: parsedRow.at(0)?.comment,
@@ -404,7 +404,7 @@ export const recHeaders: TableHeaders = [
   { key: "second_due_amount", label: "Importe 2do Vto.", width: 140 },
   { key: "second_due_date", label: "Fecha 2do. Vto.", width: 140 },
   { key: "additional_info", label: "Info. Adicional", width: 250 },
-  { key: "payment_channel", label: "Canal de Cobro", width: 140 },
+  // { key: "payment_channel", label: "Canal de Cobro", width: 140 },
   { key: "payment_date", label: "Fecha de Pago/Débito", width: 140 },
   { key: "collected_amount", label: "Importe a cobrar", width: 140 },
   { key: "recollected_amount", label: "Importe cobrado", width: 140 },

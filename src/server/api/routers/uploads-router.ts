@@ -172,7 +172,7 @@ export const uploadsRouter = createTRPCRouter({
               .update(schema.payments)
               .set({
                 statusId: record.statusId,
-                payment_channel: input.channelName,
+                // payment_channel: input.channelName,
                 recollected_amount: record.recollected_amount,
               })
               .where(
@@ -347,7 +347,7 @@ export const uploadsRouter = createTRPCRouter({
               second_due_amount: row.second_due_amount ?? null,
               second_due_date: row.second_due_date ?? null,
               additional_info: row.additional_info ?? null,
-              payment_channel: row.payment_channel ?? null,
+              // payment_channel: row.payment_channel ?? null,
               payment_date: row.payment_date ?? null,
               collected_amount: row.collected_amount ?? null,
               cbu: row.cbu ?? null,

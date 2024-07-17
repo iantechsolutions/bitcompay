@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createId } from "~/lib/utils";
 import { db, DBTX, schema } from "~/server/db";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { CarTaxiFront } from "lucide-react";
 
 export const companiesRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({}) => {
@@ -118,7 +119,7 @@ export const companiesRouter = createTRPCRouter({
         address: z.string().min(0).max(255).optional(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       // TODO: verificar permisos
 
       const company = await db
@@ -137,6 +138,11 @@ export const companiesRouter = createTRPCRouter({
           address: input.address,
         })
         .returning();
+
+      await db.insert(schema.currentAccount).values({
+        company_id: company[0]?.id,
+        id: company[0]?.id,
+      });
 
       return company[0]?.id;
     }),
