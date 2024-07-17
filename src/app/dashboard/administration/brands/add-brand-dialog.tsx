@@ -14,6 +14,13 @@ import {
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { asTRPCError } from "~/lib/errors";
 import { api } from "~/trpc/react";
 
@@ -22,7 +29,7 @@ export function AddBrandDialog() {
     api.brands.create.useMutation();
   const [reducedDescription, setReducedDescription] = useState("");
   const [description, setDescription] = useState("");
-  const [iva, setIva] = useState<number>(0);
+  const [iva, setIva] = useState<string>("21%");
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
   const [open, setOpen] = useState(false);
@@ -89,12 +96,19 @@ export function AddBrandDialog() {
           </div>
           <div>
             <Label htmlFor="iva">IVA</Label>
-            <Input
-              id="iva"
-              type="number"
-              value={iva}
-              onChange={(e) => setIva(Number(e.target.value))}
-            />
+            <Select onValueChange={(e) => setIva(e)}>
+              <SelectTrigger className="w-[180px] font-bold">
+                <SelectValue placeholder="Seleccionar IVA" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="3">0%</SelectItem>
+                <SelectItem value="9">2.5%</SelectItem>
+                <SelectItem value="8">5%</SelectItem>
+                <SelectItem value="4">10.5%</SelectItem>
+                <SelectItem value="5">21%</SelectItem>
+                <SelectItem value="6">27%</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <Label htmlFor="description_reducida">Descripción Reducida</Label>
