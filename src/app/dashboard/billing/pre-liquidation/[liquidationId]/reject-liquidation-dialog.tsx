@@ -28,15 +28,14 @@ export default function RejectLiquidationDialog({
       liquidationId: liquidationId,
     });
 
-    router.push("../../pre-liquidation");
+    router.push("../pre-liquidation");
   };
 
   return (
     <>
       <Button
         className="  h-7 bg-[#c2c0c0] hover:bg-[#7e7c7c] text-[#686767]  text-xs rounded-2xl py-0 px-6"
-        onClick={() => setOpen(true)}
-      >
+        onClick={() => setOpen(true)}>
         Anular
         <CircleX className="h-4 w-auto ml-2" />
       </Button>
@@ -55,16 +54,14 @@ export default function RejectLiquidationDialog({
           <DialogFooter>
             <Button
               className="btn-secondary mr-2"
-              onClick={() => setOpen(false)}
-            >
+              onClick={() => setOpen(false)}>
               Cancelar
             </Button>
             <Button
               className="btn primary"
               type="submit"
               disabled={isLoading}
-              onClick={approveLiquidation}
-            >
+              onClick={approveLiquidation}>
               {isLoading && (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}
