@@ -28,7 +28,7 @@ export default function RejectLiquidationDialog({
       liquidationId: liquidationId,
     });
 
-    router.push("../pre-liquidation");
+    router.push("./");
   };
 
   return (
