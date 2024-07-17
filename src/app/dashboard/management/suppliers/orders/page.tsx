@@ -21,9 +21,7 @@ export default function HomePage() {
     data: dev,
     isLoading: isLoadingDev,
     error: errorDev,
-  } = api.comprobantes.getByLiquidation.useQuery({
-    liquidationId: "5gAc2nDtFeYwz4yIMCopz",
-  });
+  } = api.events.list.useQuery();
 
   if (dev && dev != undefined) {
     console.log(dev);

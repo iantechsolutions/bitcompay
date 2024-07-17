@@ -4,7 +4,7 @@ import "dayjs/locale/es";
 import { Input } from "~/components/ui/input";
 import utc from "dayjs/plugin/utc";
 import { useState } from "react";
-import { PlusCircleIcon, Loader2Icon } from "lucide-react";
+import { PlusCircleIcon, Loader2Icon, Loader2 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { toast } from "sonner";
 import {
@@ -32,6 +32,7 @@ import { Label } from "~/components/ui/label";
 import { api } from "~/trpc/react";
 import { ComboboxDemo } from "~/components/ui/combobox";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function AddPreLiquidation() {
   const [open, setOpen] = useState(false);
@@ -47,7 +48,7 @@ export default function AddPreLiquidation() {
   const [interest, setInterest] = useState<number | null>(null);
   const { data: marcas } = api.brands.list.useQuery();
   const router = useRouter();
-
+  const queryClient = useQueryClient();
   const [popover1Open, setPopover1Open] = useState(false);
   const [popover2Open, setPopover2Open] = useState(false);
 
@@ -70,7 +71,7 @@ export default function AddPreLiquidation() {
     // await new Promise((resolve) => setTimeout(resolve, 500));
 
     if (liquidation) {
-      router.refresh();
+      queryClient.invalidateQueries();
       toast.success("Pre-liquidacion creada correctamente");
       setOpen(false);
     } else {
@@ -92,9 +93,18 @@ export default function AddPreLiquidation() {
   }
   return (
     <>
-      <Button onClick={() => setOpen(true)}>
+      {/* <Button onClick={() => setOpen(true)}>
         <PlusCircleIcon className="mr-2" /> Crear Pre liquidacion
+      </Button> */}
+      <Button disabled={isLoading} onClick={() => setOpen(true)}>
+        {isLoading ? (
+          <Loader2 className="mr-2 animate-spin" />
+        ) : (
+          <PlusCircleIcon className="mr-2" />
+        )}
+        Crear Pre liquidacion
       </Button>
+
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>

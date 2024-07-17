@@ -37,7 +37,7 @@ export const eventsRouter = createTRPCRouter({
         amount: z.number().max(255),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const lastEvent = await db.query.events.findFirst({
         orderBy: [desc(schema.events.createdAt)],
         where: eq(schema.events.currentAccount_id, input.ccId),
@@ -53,6 +53,13 @@ export const eventsRouter = createTRPCRouter({
             current_amount: (lastEvent?.current_amount ?? 0) + input.amount,
           })
           .returning();
+        await db.insert(schema.events).values({
+          description: "Recaudacion",
+          currentAccount_id: ctx.session.orgId,
+          type: input.type,
+          event_amount: input.amount,
+          current_amount: (lastEvent?.current_amount ?? 0) + input.amount,
+        });
         return new_event;
       }
       if (input.type == "FC") {
@@ -66,6 +73,13 @@ export const eventsRouter = createTRPCRouter({
             current_amount: (lastEvent?.current_amount ?? 0) - input.amount,
           })
           .returning();
+        await db.insert(schema.events).values({
+          description: "Comprobante Creado",
+          currentAccount_id: ctx.session.orgId,
+          type: input.type,
+          event_amount: input.amount,
+          current_amount: (lastEvent?.current_amount ?? 0) + input.amount,
+        });
         return new_event;
       }
       if (input.type == "NC") {
@@ -79,9 +93,17 @@ export const eventsRouter = createTRPCRouter({
             current_amount: (lastEvent?.current_amount ?? 0) + input.amount,
           })
           .returning();
+
+        await db.insert(schema.events).values({
+          description: "Nota de credito",
+          currentAccount_id: ctx.session.orgId,
+          type: input.type,
+          event_amount: input.amount,
+          current_amount: (lastEvent?.current_amount ?? 0) + input.amount,
+        });
+
         return new_event;
       }
-
       // const new_plan = await db
       //   .insert(schema.plans)
       //   .values({
