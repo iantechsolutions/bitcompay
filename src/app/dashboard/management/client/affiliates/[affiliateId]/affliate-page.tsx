@@ -46,7 +46,8 @@ export default function AffiliatePage(props: {
     <div>
       <Link
         className="w-20 h-auto flex justify-between"
-        href={`/dashboard/management/client/affiliates`}>
+        href={`/dashboard/management/client/affiliates`}
+      >
         <ArrowLeftIcon /> Volver
       </Link>
       <LayoutContainer>
@@ -168,31 +169,39 @@ export default function AffiliatePage(props: {
               </TableHeader>
               <TableBody>
                 {comprobantes ? (
-                  comprobantes.slice(0, 4).map((comprobante) => (
-                    <TableRow key={comprobante.id} className="flex">
-                      <TableCell className="flex-1 font-medium text-left">
-                        N° {comprobante.nroComprobante}
-                      </TableCell>
-                      <TableCell className="flex-1 text-left">
-                        {new Date(
-                          comprobante.generated ?? new Date()
-                        ).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
-                      </TableCell>
-                      <TableCell className="flex-1 text-left">
-                        {comprobante.tipoComprobante}
-                      </TableCell>
-                      <TableCell className="flex-1 text-left">
-                        {comprobante.iva}%
-                      </TableCell>
-                      <TableCell className="flex-1 text-left">
-                        {comprobante.importe}
-                      </TableCell>
-                    </TableRow>
-                  ))
+                  comprobantes
+                    .filter((x) => x.estado != "generada")
+                    .sort(
+                      (a, b) =>
+                        (b.createdAt?.getTime() ?? 0) -
+                        (a.createdAt?.getTime() ?? 0)
+                    )
+                    .slice(0, 4)
+                    .map((comprobante) => (
+                      <TableRow key={comprobante.id} className="flex">
+                        <TableCell className="flex-1 font-medium text-left">
+                          N° {comprobante.nroComprobante}
+                        </TableCell>
+                        <TableCell className="flex-1 text-left">
+                          {new Date(
+                            comprobante.generated ?? new Date()
+                          ).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </TableCell>
+                        <TableCell className="flex-1 text-left">
+                          {comprobante.tipoComprobante}
+                        </TableCell>
+                        <TableCell className="flex-1 text-left">
+                          {comprobante.iva}%
+                        </TableCell>
+                        <TableCell className="flex-1 text-left">
+                          {comprobante.importe}
+                        </TableCell>
+                      </TableRow>
+                    ))
                 ) : (
                   <TableRow>
                     <TableCell colSpan={4} className="text-center">

@@ -98,7 +98,7 @@ export default async function Home(props: {
     excelRow.push(name);
     excelRow.push(cuit);
     const original_comprobante = fg?.comprobantes?.find(
-      (comprobante) => comprobante?.origin?.toLowerCase() === "original"
+      (comprobante) => comprobante?.origin?.toLowerCase() === "factura"
     );
     const saldo_anterior = toNumberOrZero(
       original_comprobante?.items.find(

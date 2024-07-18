@@ -715,7 +715,7 @@ export const differentialsValuesRelations = relations(
 export const comprobantes = pgTable("comprobantes", {
   id: columnId,
   createdAt,
-  generated: timestamp("generated", { mode: "date" }),
+  generated: timestamp("generated", { mode: "date" }).default(new Date()),
   ptoVenta: integer("ptoVenta").notNull(),
   nroComprobante: integer("nroComprobante").notNull(),
   tipoComprobante: varchar("tipoComprobante", { length: 255 }),
@@ -733,9 +733,18 @@ export const comprobantes = pgTable("comprobantes", {
   iva: varchar("iva", { length: 255 }).notNull(),
   billLink: varchar("billLink", { length: 255 }).notNull(),
   estado: varchar("estado", {
-    enum: ["generada", "pendiente", "pagada", "parcial", "anulada"],
+    enum: ["generada", "pendiente", "pagada", "parcial", "anulada", "apertura"],
   }),
-  origin: varchar("origin"),
+  origin: varchar("origin", {
+    enum: [
+      "Factura",
+      "Nota de credito",
+      "Recibo",
+      "Nota de debito",
+      "anulada",
+      "apertura",
+    ],
+  }),
   liquidation_id: varchar("liquidation_id", { length: 255 }).references(
     () => liquidations.id
   ),

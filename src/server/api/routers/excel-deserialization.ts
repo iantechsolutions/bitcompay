@@ -236,8 +236,8 @@ export const excelDeserializationRouter = createTRPCRouter({
 
             const tipoDocumento = idDictionary[new_integrant[0]!.id_type ?? ""];
             const factura = await db.insert(schema.comprobantes).values({
-              origin: "original",
-              importe: parseFloat(row.balance ?? "0"),
+              origin: "Factura",
+              importe: parseFloat(row.balance ?? "0") * -1,
               iva: "0",
               family_group_id: new_integrant[0]!.family_group_id,
               billLink: "",
@@ -246,8 +246,10 @@ export const excelDeserializationRouter = createTRPCRouter({
               nroDocumento: parseInt(new_integrant[0].id_number ?? "0"),
               prodName: "",
               ptoVenta: 0,
+              generated: new Date(),
               tipoDocumento: tipoDocumento ?? 0,
-              estado: "pendiente",
+              tipoComprobante: "Apertura de CC",
+              estado: "apertura",
             });
           }
 
