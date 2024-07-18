@@ -62,7 +62,7 @@ export default async function Home(props: {
     "Cuota Pura",
     "Bonificacion",
     "Diferencial",
-    "Aportes",
+    "Aporte",
     "Interes",
     "SubTotal",
     "IVA",
@@ -74,7 +74,7 @@ export default async function Home(props: {
     "Cuota Planes": 0,
     Bonificación: 0,
     Diferencial: 0,
-    Aportes: 0,
+    Aporte: 0,
     Interés: 0,
     "Sub Total": 0,
     IVA: 0,
@@ -127,14 +127,14 @@ export default async function Home(props: {
     );
     summary["Diferencial"] += diferencial;
     excelRow.push(diferencial);
-    const aportes = toNumberOrZero(
-      original_comprobante?.items.find((item) => item.concept === "Aportes")
+    const Aporte = toNumberOrZero(
+      original_comprobante?.items.find((item) => item.concept === "Aporte")
         ?.amount
     );
-    summary["Aportes"] += aportes;
-    excelRow.push(aportes);
+    summary["Aporte"] += Aporte;
+    excelRow.push(Aporte);
     const interes = toNumberOrZero(
-      original_comprobante?.items.find((item) => item.concept === "Interés")
+      original_comprobante?.items.find((item) => item.concept === "Interes")
         ?.amount
     );
     summary["Interés"] += interes;
@@ -165,7 +165,7 @@ export default async function Home(props: {
       "cuota plan": cuota_planes,
       bonificacion,
       diferencial,
-      aportes,
+      Aporte,
       interes,
       subtotal: subTotal,
       iva,

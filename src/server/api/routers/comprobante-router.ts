@@ -225,7 +225,7 @@ async function approbatecomprobante(liquidationId: string) {
       });
       console.log("3");
       const status = await db.query.paymentStatus.findFirst({
-        where: eq(schema.paymentStatus.code, "91"),
+        where: eq(schema.paymentStatus.code, "00"),
       });
       console.log("4");
       const payment = await db

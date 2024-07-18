@@ -14,7 +14,7 @@ export type TableRecord = {
   "cuota plan": number;
   bonificacion: number;
   diferencial: number;
-  aportes: number;
+  Aporte: number;
   interes: number;
   subtotal: number;
   iva: number;
@@ -122,12 +122,12 @@ export const columns: ColumnDef<TableRecord>[] = [
     },
   },
   {
-    accessorKey: "aportes",
+    accessorKey: "Aporte",
     header: () => (
       <div className="text-center text-black text-medium">Aportes</div>
     ),
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("aportes"));
+      const amount = parseFloat(row.getValue("Aporte"));
       const formatted = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
