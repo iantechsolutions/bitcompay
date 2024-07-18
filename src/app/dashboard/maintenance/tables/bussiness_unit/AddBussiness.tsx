@@ -18,6 +18,7 @@ import {
   SelectContent,
   SelectTrigger,
   SelectValue,
+  SelectGroup,
 } from "~/components/ui/select";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -34,12 +35,6 @@ export function AddBussiness(props: { params: { companyId: string } }) {
 
   const router = useRouter();
   const { data: brands } = api.brands.list.useQuery();
-  const selectBrandOptions = brands?.map((brand) => (
-    <SelectItem key={brand.id} value={brand.id}>
-      {" "}
-      {brand.name}{" "}
-    </SelectItem>
-  ));
 
   async function handleCreate() {
     try {
@@ -83,12 +78,21 @@ export function AddBussiness(props: { params: { companyId: string } }) {
             <Select
               onValueChange={(value) => {
                 setBrand(value);
-              }}
-            >
+              }}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="seleccione una marca" />
               </SelectTrigger>
-              <SelectContent>{selectBrandOptions}</SelectContent>
+              <SelectContent>
+                <SelectGroup>
+                  {brands
+                    ? brands.map((brand) => (
+                        <SelectItem key={brand.id} value={brand.id}>
+                          {brand.name}
+                        </SelectItem>
+                      ))
+                    : null}
+                </SelectGroup>
+              </SelectContent>
             </Select>
           </div>
           <DialogFooter>

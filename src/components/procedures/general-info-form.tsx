@@ -1,3 +1,4 @@
+"use client";
 import { useState } from "react";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
@@ -61,6 +62,12 @@ export default function GeneralInfoForm(props: GeneralInfoProps) {
   const { data: bussinessUnits } = api.bussinessUnits.list.useQuery(undefined);
   const { data: plans } = api.plans.list.useQuery(undefined);
   const { data: modos } = api.modos.list.useQuery(undefined);
+  const [popover1Open, setPopover1Open] = useState(false);
+
+  async function FechasCreate(e: any) {
+    props.form.setValue("validity", e);
+    setPopover1Open(false);
+  }
 
   return (
     <Form {...props.form}>
@@ -118,7 +125,7 @@ export default function GeneralInfoForm(props: GeneralInfoProps) {
             <FormItem>
               <FormLabel htmlFor="birth_date">Fecha de vigencia</FormLabel>
               <br />
-              <Popover>
+              <Popover open={popover1Open} onOpenChange={setPopover1Open}>
                 <PopoverTrigger asChild>
                   <FormControl>
                     <Button
@@ -142,7 +149,7 @@ export default function GeneralInfoForm(props: GeneralInfoProps) {
                   <Calendar
                     mode="single"
                     selected={field.value ? new Date(field.value) : undefined}
-                    onSelect={field.onChange}
+                    onSelect={(e) => FechasCreate(e)}
                     disabled={(date: Date) => date < new Date("1900-01-01")}
                     initialFocus
                   />

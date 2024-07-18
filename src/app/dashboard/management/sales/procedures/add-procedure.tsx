@@ -23,6 +23,7 @@ import { type InputsBilling } from "~/components/procedures/billing-info";
 import { type InputsGeneralInfo } from "~/components/procedures/general-info-form";
 import { useForm } from "react-hook-form";
 import { asTRPCError } from "~/lib/errors";
+
 export default function AddProcedure() {
   const { mutateAsync: createIntegrant, isLoading } =
     api.integrants.create.useMutation();
@@ -32,6 +33,8 @@ export default function AddProcedure() {
     api.family_groups.create.useMutation();
   const { mutateAsync: createPaymentInfo } = api.pa.create.useMutation();
   const [membersData, setMembersData] = useState<InputsMembers[]>([]);
+
+  const [activeTab, setActiveTab] = useState("general_info");
 
   const generalInfoForm = useForm<InputsGeneralInfo>();
   const membersForm = useForm<InputsMembers>();
@@ -161,7 +164,9 @@ export default function AddProcedure() {
           <DialogHeader>
             <DialogTitle>Agregar tramite</DialogTitle>
           </DialogHeader>
-          <Tabs>
+          <Tabs
+            value={activeTab}
+            onValueChange={(value) => setActiveTab(value)}>
             <TabsList>
               <TabsTrigger value="general_info">
                 Informacion General

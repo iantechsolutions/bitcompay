@@ -76,7 +76,7 @@ export default function AddPlanInfoComponent({
     }
   }, [planData]);
 
-  const { data: brands } = api.brands.getbyCurrentCompany.useQuery(undefined);
+  const { data: brands } = api.brands.list.useQuery(undefined);
   const { mutateAsync: createPlan, isLoading: isCreating } =
     api.plans.create.useMutation();
   const { mutateAsync: updatePlan, isLoading: isUpdating } =
@@ -110,15 +110,14 @@ export default function AddPlanInfoComponent({
         <Label>Marca</Label>
         <Select
           onValueChange={(value: string) => setBrand(value)}
-          value={brand}
-        >
+          value={brand}>
           <SelectTrigger>
             <SelectValue placeholder="Seleccione una marca" />
           </SelectTrigger>
           <SelectContent>
             {brands?.map((item) => (
-              <SelectItem key={item.id} value={item.id}>
-                {item.description}
+              <SelectItem key={item?.id} value={item?.id}>
+                {item?.description}
               </SelectItem>
             ))}
           </SelectContent>
@@ -146,8 +145,7 @@ export default function AddPlanInfoComponent({
       <Button
         onClick={handleSumbit}
         disabled={isCreating || isUpdating}
-        className="mt-4"
-      >
+        className="mt-4">
         {(isCreating || isUpdating) && (
           <Loader2Icon className="mr-2 animate-spin" size={20} />
         )}

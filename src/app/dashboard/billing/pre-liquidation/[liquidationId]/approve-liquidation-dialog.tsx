@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { currentUser } from "@clerk/nextjs/server";
+import { CircleCheck, CircleX } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +11,7 @@ import {
   DialogFooter,
 } from "~/components/ui/dialog";
 import { useRouter } from "next/navigation";
-import { Button } from "~/components/ui/button";
+import { Button, buttonVariants } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 import { Loader2Icon } from "lucide-react";
 
@@ -24,7 +25,7 @@ function UpdateLiquidationEstadoDialog({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const { mutateAsync: updateLiquidation, isLoading } =
-    api.facturas.approvePreLiquidation.useMutation();
+    api.comprobantes.approvePreLiquidation.useMutation();
   const { data } = api.liquidations.get.useQuery({ id: liquidationId });
   const approveLiquidation = async () => {
     await updateLiquidation({
@@ -36,8 +37,11 @@ function UpdateLiquidationEstadoDialog({
 
   return (
     <>
-      <Button className="btn-primary" onClick={() => setOpen(true)}>
-        Aprobar Liquidacion
+      <Button
+        className="h-7 bg-[#0DA485] hover:bg-[#0da486e2] text-[#FAFDFD] font-medium-medium text-xs rounded-2xl py-0 px-6"
+        onClick={() => setOpen(true)}>
+        Aprobar
+        <CircleCheck className="h-4 w-auto ml-2" />
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[425px] p-4">
@@ -46,29 +50,27 @@ function UpdateLiquidationEstadoDialog({
               ¿Está seguro?
             </DialogTitle>
             <DialogDescription className="text-sm text-gray-600">
-              Las facturas van a ser enviadas a la AFIP, incluyendo todos los
-              detalles de los montos. Asegúrese de que toda la información es
-              correcta antes de proceder.
+              Los comprobantes van a ser enviadas a la AFIP, incluyendo todos
+              los detalles de los montos. Asegúrese de que toda la información
+              es correcta antes de proceder.
             </DialogDescription>
           </DialogHeader>
           {/* Add more dialog content here as needed */}
           <DialogFooter>
             <Button
-              className="btn-secondary mr-2"
-              onClick={() => setOpen(false)}
-            >
-              Cancelar
+              className="h-7 bg-[#D9D7D8] hover:bg-[#d9d7d8dc] text-[#4B4B4B]  text-xs rounded-2xl py-0 px-6"
+              onClick={() => setOpen(false)}>
+              Cancelar <CircleX className="h-4 w-auto ml-2" />
             </Button>
             <Button
-              className="btn primary"
+              className="h-7 bg-[#0DA485] hover:bg-[#0da486e2] text-[#FAFDFD] font-medium-medium text-xs rounded-2xl py-0 px-6"
               type="submit"
               disabled={isLoading}
-              onClick={approveLiquidation}
-            >
+              onClick={approveLiquidation}>
               {isLoading && (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}
-              Aprobar Liquidación
+              Aprobar Liquidación <CircleCheck className="h-4 w-auto ml-2" />
             </Button>
           </DialogFooter>
         </DialogContent>

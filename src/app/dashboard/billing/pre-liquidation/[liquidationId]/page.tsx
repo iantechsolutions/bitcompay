@@ -3,13 +3,12 @@
 import { currentUser } from "@clerk/nextjs/server";
 import LayoutContainer from "~/components/layout-container";
 
-// import {
-//   Table,
-//   TableRow,
-//   TableBody,
-//   TableHead,
-//   TableHeader,
-// } from "~/components/ui/tablePreliq";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetTrigger,
+} from "~/components/ui/sheet";
 import TableRowContainer from "./table-row";
 import { Button } from "~/components/ui/button";
 import {
@@ -20,6 +19,8 @@ import {
   TableRow,
 } from "~/components/ui/tablePreliq";
 import { Title } from "~/components/title";
+import { type TableRecord, columns } from "./columns";
+import { DataTable } from "./data-table";
 import { api } from "~/trpc/server";
 import dayjs from "dayjs";
 import xlsx from "xlsx";
@@ -27,224 +28,254 @@ import utc from "dayjs/plugin/utc";
 import "dayjs/locale/es";
 dayjs.extend(utc);
 dayjs.locale("es");
-import { RouterOutputs } from "~/trpc/shared";
+
 import { clerkClient } from "@clerk/nextjs/server";
 import UpdateLiquidationEstadoDialog from "./approve-liquidation-dialog";
 import { computeBase, computeIva } from "~/lib/utils";
 import DownloadExcelButton from "./downloadExcelButton";
-
+import RejectLiquidationDialog from "./reject-liquidation-dialog";
+import { ChevronLeft, CircleX } from "lucide-react";
 export default async function Home(props: {
   params: { liquidationId: string };
 }) {
   const userActual = await currentUser();
+  const companyData = await api.companies.get.query();
   const preliquidation = await api.liquidations.get.query({
     id: props.params.liquidationId,
   });
-  console.log("preliquidation");
-  console.log(preliquidation);
+  const businessUnit = preliquidation?.bussinessUnits;
   const user = await clerkClient.users.getUser(
-    preliquidation?.userCreated ?? ""
+    preliquidation?.userCreated ?? "user_2iy8lXXdnoa2f5wHjRh5nj3W0fU"
   );
   // if (!preliquidation) return <Title>Preliquidacion no encotrada</Title>;
-  const facturas = preliquidation?.facturas;
+  const familyGroups = await api.family_groups.getByLiquidation.query({
+    liquidationId: props.params.liquidationId,
+  });
+
   const periodo =
     dayjs.utc(preliquidation?.period).format("MMMM [de] YYYY") ?? "-";
   const headers = [
-    "Id. GF",
-    "Nombre (Resp. Pago)",
-    "DNI",
-    "CUIL/CUIT (Resp. Pago)",
-    "Saldo Cta. Cte.",
-    "Cuota",
+    "NRO. GF",
+    "Nombre",
+    "CUIL/CUIT",
+    "Saldo anterior",
+    "Cuota Pura",
     "Bonificacion",
     "Diferencial",
-    "Aportes",
+    "Aporte",
     "Interes",
     "SubTotal",
     "IVA",
     "Total",
   ];
-  const rowsPromise =
-    facturas?.map(async (factura) => {
-      if (!factura) return [];
-      const billResponsible = factura?.family_group?.integrants[0];
+  if (preliquidation?.estado !== "pendiente") headers.push("Factura");
+  const summary = {
+    "Saldo anterior": 0,
+    "Cuota Planes": 0,
+    Bonificación: 0,
+    Diferencial: 0,
+    Aporte: 0,
+    Interés: 0,
+    "Sub Total": 0,
+    IVA: 0,
+    "Total a facturar": 0,
+  };
 
-      const lastEvent = await api.events.getLastByDateAndCC.query({
-        ccId: factura?.family_group?.cc?.id!,
-        date: factura?.liquidations?.createdAt ?? new Date(),
-      });
-
-      const total = parseFloat(factura?.importe.toFixed(2));
-      return [
-        factura?.family_group?.numericalId ?? "",
-        billResponsible?.name ?? "",
-        billResponsible?.id_number ?? "",
-        billResponsible?.fiscal_id_number ?? "",
-        isNaN(factura.items?.abono!) ? " " : factura.items?.abono,
-        isNaN(factura.items?.bonificacion!)
-          ? " "
-          : factura.items?.bonificacion?.toString(),
-        isNaN(factura.items?.differential_amount!)
-          ? " "
-          : factura.items?.differential_amount,
-        isNaN(factura.items?.contribution!) ? " " : factura.items?.contribution,
-        isNaN(factura.items?.interest!) ? " " : factura.items?.interest,
-        isNaN(computeBase(total, parseFloat(factura?.iva)))
-          ? " "
-          : computeBase(total, parseFloat(factura?.iva)),
-        isNaN(computeIva(total, parseFloat(factura?.iva)))
-          ? " "
-          : computeIva(total, parseFloat(factura?.iva)),
-        isNaN(total) ? " " : total,
-      ];
-    }) || [];
-  const rows = await Promise.all(rowsPromise);
-  rows.unshift(headers);
+  const toNumberOrZero = (value: any) => {
+    const number = Number(value);
+    return isNaN(number) ? 0 : number; // Check if the result is NaN (Not a Number)
+  };
+  const excelRows: (string | number)[][] = [[...headers]];
+  const tableRows: TableRecord[] = [];
+  for (const fg of familyGroups) {
+    const excelRow = [];
+    const billResponsible = fg?.integrants?.find(
+      (integrante) => integrante?.isBillResponsible
+    );
+    const name = billResponsible?.name ?? "";
+    const cuit = billResponsible?.id_number ?? "";
+    excelRow.push(fg?.numericalId ?? "");
+    excelRow.push(name);
+    excelRow.push(cuit);
+    const original_comprobante = fg?.comprobantes?.find(
+      (comprobante) => comprobante?.origin?.toLowerCase() === "factura"
+    );
+    const saldo_anterior = toNumberOrZero(
+      original_comprobante?.items.find(
+        (item) => item.concept === "Saldo anterior"
+      )?.amount
+    );
+    summary["Saldo anterior"] += saldo_anterior;
+    excelRow.push(saldo_anterior);
+    const cuota_planes = toNumberOrZero(
+      original_comprobante?.items.find(
+        (item) => item.concept === "Cuota Planes"
+      )?.amount
+    );
+    summary["Cuota Planes"] += cuota_planes;
+    excelRow.push(cuota_planes);
+    const bonificacion = toNumberOrZero(
+      original_comprobante?.items.find(
+        (item) => item.concept === "Bonificación"
+      )?.amount
+    );
+    summary["Bonificación"] += bonificacion;
+    excelRow.push(bonificacion);
+    const diferencial = toNumberOrZero(
+      original_comprobante?.items.find((item) => item.concept === "Diferencial")
+        ?.amount
+    );
+    summary["Diferencial"] += diferencial;
+    excelRow.push(diferencial);
+    const Aporte = toNumberOrZero(
+      original_comprobante?.items.find((item) => item.concept === "Aporte")
+        ?.amount
+    );
+    summary["Aporte"] += Aporte;
+    excelRow.push(Aporte);
+    const interes = toNumberOrZero(
+      original_comprobante?.items.find((item) => item.concept === "Interes")
+        ?.amount
+    );
+    summary["Interés"] += interes;
+    excelRow.push(interes);
+    const total = toNumberOrZero(
+      parseFloat(original_comprobante?.importe?.toFixed(2)!)
+    );
+    summary["Total a facturar"] += total;
+    excelRow.push(total);
+    const subTotal = computeBase(total, Number(original_comprobante?.iva!));
+    summary["Sub Total"] += subTotal;
+    excelRow.push(subTotal);
+    const iva = computeIva(total, Number(original_comprobante?.iva!));
+    summary.IVA += iva;
+    excelRow.push(iva);
+    excelRows.push(excelRow);
+    const lastEvent = await api.events.getLastByDateAndCC.query({
+      ccId: fg?.cc?.id!,
+      date: preliquidation?.createdAt ?? new Date(),
+    });
+    const currentAccountAmount = lastEvent?.current_amount ?? 0;
+    tableRows.push({
+      id: fg?.id!,
+      nroGF: fg?.numericalId ?? "N/A",
+      nombre: name,
+      cuit,
+      "saldo anterior": saldo_anterior,
+      "cuota pura": cuota_planes,
+      bonificacion,
+      diferencial,
+      Aporte,
+      interes,
+      subtotal: subTotal,
+      iva,
+      total,
+      comprobantes: fg?.comprobantes!,
+      currentAccountAmount,
+    });
+    console.log("comprobantes", fg?.comprobantes);
+  }
+  console.log("tableRows", tableRows);
   return (
     <LayoutContainer>
-      <div className="grid grid-cols-3 gap-x-2 gap-y-2">
-        <p className="opacity-70">
-          <span className="font-bold opacity-100">Razon social: </span>
-          {preliquidation?.razon_social ?? "-"}
-        </p>
-        <p className="opacity-70">
-          <span className="font-bold opacity-100">Periodo: </span>
-          {periodo}
-        </p>
-        <p className="opacity-70">
-          <span className="font-bold opacity-100">Hora: </span>
-          {dayjs.utc(new Date()).format("HH:mm") ?? "-"}
-        </p>
-        <p className="opacity-70">
-          <span className="font-bold opacity-100">CUIT: </span>
-          {preliquidation?.cuit ?? "-"}
-        </p>
-        <p className="opacity-70">
-          <span className="font-bold opacity-100">Nro. Pre-liq: </span>
-          {preliquidation?.number ?? "-"}
-        </p>
-        <p className="opacity-70">
-          <span className="font-bold opacity-100">Unidad de negocio: </span>
-          {preliquidation?.bussinessUnits?.description ?? "-"}
-        </p>
-        <p className="opacity-70">
-          <span className="font-bold opacity-100">PDV: </span>
-          {preliquidation?.pdv?.toString() ?? "-"}
-        </p>
-        <p className="opacity-70">
-          <span className="font-bold opacity-100">Fecha: </span>
-          {dayjs.utc(preliquidation?.createdAt).format("DD/MM/YYYY") ?? "-"}
-        </p>
-        <p className="opacity-70">
-          <span className="font-bold opacity-100">Usuario: </span>
-          {user?.emailAddresses.at(0)?.emailAddress ?? "-"}
-        </p>
+      <div className="flex flex-row justify-between w-full">
+        {preliquidation?.estado === "pendiente" && (
+          <>
+            <div className="opacity-50 flex flex-row items-center">
+              {" "}
+              <ChevronLeft className="mr-1 h-4 w-auto" />
+              <p className="font-medium ">VOLVER</p>
+            </div>
+            <div className="flex flex-row gap-1">
+              <UpdateLiquidationEstadoDialog
+                liquidationId={props.params.liquidationId}
+                userId={userActual?.id ? userActual?.id : ""}
+              />
+              <RejectLiquidationDialog
+                liquidationId={props.params.liquidationId}
+              />
+            </div>
+          </>
+        )}
       </div>
-      <div>
-        <Table className="border-separate  border-spacing-x-0 border-spacing-y-2">
+      <div className="grid grid-cols-3 gap-x-2 gap-y-2 ml-3 text-base opacity-50">
+        <ul className="list-disc">
+          <li>
+            <span className="font-bold "> CUIT: </span>
+            {companyData?.cuit ?? "-"}
+          </li>
+          <li className="opacity-70">
+            <span className="font-bold ">Razon social: </span>
+            {companyData?.razon_social ?? "-"}
+          </li>
+        </ul>
+        <ul className="list-disc">
+          <li>
+            <span className="font-bold ">Gerenciador: </span>
+            {businessUnit?.description ?? "-"}
+          </li>
+          <li>
+            <span className="font-bold ">Periodo: </span>
+            {periodo}
+          </li>
+        </ul>
+        <ul className="list-disc">
+          <li>
+            <span className="font-bold opacity-100">Nro. Pre-liq: </span>
+            {preliquidation?.number ?? "-"}
+          </li>
+          <li>
+            <span className="font-bold opacity-100">Fecha: </span>
+            {dayjs.utc(preliquidation?.createdAt).format("DD/MM/YYYY") ?? "-"}
+          </li>
+        </ul>
+      </div>
+      <div className="bg-[#EBFFFB] flex flex-row justify-stretch w-full pt-5 pb-1">
+        {Object.entries(summary).map(([key, value], index, array) => (
+          <div
+            className={`${
+              index != array.length - 1
+                ? "border-r border-[#4af0d4] border-dashed grow"
+                : ""
+            } px-3`}
+            key={key}>
+            <p className="font-medium text-sm">{key}</p>
+            <p className="text-[#4af0d4] font-bold text-sm">$ {value}</p>
+          </div>
+        ))}
+      </div>
+      <div className="relative">
+        {/* <Table className="border-separate  border-spacing-x-0 border-spacing-y-2">
           <TableHeader className="overflow-hidden">
             <TableRow className="bg-[#79edd6]">
-              <TableHead className="text-gray-800 rounded-l-md border-r-[1.5px] border-[#4af0d4]">
-                Id. GF
-              </TableHead>
-              <TableHead
-                className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
-                Nombre (Resp. Pago){" "}
-              </TableHead>
-              <TableHead
-                className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
-                DNI
-              </TableHead>
-              <TableHead
-                className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
-                CUIL/CUIT (Resp. Pago){" "}
-              </TableHead>
-              <TableHead
-                className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
-                Saldo Cta. Cte.{" "}
-              </TableHead>
-              <TableHead
-                className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
-                Cuota
-              </TableHead>
-              <TableHead
-                className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
-                Bonificacion
-              </TableHead>
-              <TableHead
-                className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
-                Diferencial
-              </TableHead>
-              <TableHead
-                className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
-                Aportes
-              </TableHead>
-              <TableHead
-                className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
-                Interes
-              </TableHead>
-              <TableHead
-                className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
-                Sub total
-              </TableHead>
-              <TableHead
-                className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
-                IVA
-              </TableHead>
-              {preliquidation?.estado !== "pendiente" ? (
-                <>
+              {headers.map((header, index, array) => {
+                const firstHeader = index == 0 ? "rounded-l-md" : "";
+                const lastHeader =
+                  index == array.length - 1 ? "rounded-r-md" : "";
+                return (
                   <TableHead
-                    className="text-gray-800
-               rounded-r-md overflow-hidden">
-                    Total
+                    className={`${firstHeader} ${lastHeader} text-gray-800
+               border-r-[1.5px] border-[#4af0d4]`}
+                  >
+                    {header}
                   </TableHead>
-
-                  <TableHead
-                    className="text-gray-800
-               border-r-[1.5px] border-[#4af0d4]">
-                    Factura
-                  </TableHead>
-                </>
-              ) : (
-                <TableHead
-                  className="text-gray-800
-               rounded-r-md overflow-hidden">
-                  Total
-                </TableHead>
-              )}
+                );
+              })}
             </TableRow>
           </TableHeader>
           <TableBody>
-            {facturas?.map((factura: any) => (
+            {familyGroups?.map((familyGroup) => (
               <TableRowContainer
-                key={factura.id}
-                factura={factura}
+                key={familyGroup?.id}
+                family_group={familyGroup}
                 preliquidation={preliquidation}
                 periodo={periodo}
               />
             ))}
           </TableBody>
-        </Table>
-        <br />
-        {preliquidation?.estado === "pendiente" && (
-          <UpdateLiquidationEstadoDialog
-            liquidationId={props.params.liquidationId}
-            userId={userActual?.id ? userActual?.id : ""}
-          />
-        )}
-        <br />
-        <DownloadExcelButton rows={rows} period={preliquidation?.period} />
+        </Table> */}
+        <DataTable columns={columns} data={tableRows} />
+        <DownloadExcelButton rows={excelRows} period={preliquidation?.period} />
       </div>
     </LayoutContainer>
   );

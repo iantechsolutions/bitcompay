@@ -1,13 +1,15 @@
+"use client";
+
 import LayoutContainer from "~/components/layout-container";
-import { api } from "~/trpc/server";
+import { api } from "~/trpc/react";
 import AddBonusDialog from "./add-bonus-dialog";
 import { Title } from "~/components/title";
 import { List, ListTile } from "~/components/list";
-import { type Bonuses } from "~/server/db/schema";
 
-export default async function Home() {
-  const bonuses: Bonuses[] = await api.bonuses.list.query();
-
+export default function Home() {
+  // const bonuses: Bonuses[] = await api.bonuses.list.query();
+  const { data: bonuses } = api.bonuses.list.useQuery();
+  console.log(bonuses);
   return (
     <LayoutContainer>
       <section className="space-y-2">
@@ -16,15 +18,17 @@ export default async function Home() {
           <AddBonusDialog />
         </div>
         <List>
-          {bonuses.map((bonus) => {
-            return (
-              <ListTile
-                key={bonus.id}
-                title={bonus.reason}
-                href={`/dashboard/management/sales/bonuses/${bonus.id}`}
-              />
-            );
-          })}
+          {bonuses
+            ? bonuses.map((bonus) => {
+                return (
+                  <ListTile
+                    key={bonus.id}
+                    title={bonus.reason}
+                    href={`/dashboard/management/sales/bonuses/${bonus.id}`}
+                  />
+                );
+              })
+            : null}
         </List>
       </section>
     </LayoutContainer>

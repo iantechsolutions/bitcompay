@@ -4,7 +4,7 @@ import "dayjs/locale/es";
 import { Input } from "~/components/ui/input";
 import utc from "dayjs/plugin/utc";
 import { useState } from "react";
-import { PlusCircleIcon, Loader2Icon } from "lucide-react";
+import { PlusCircleIcon, Loader2Icon, Loader2 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { toast } from "sonner";
 import {
@@ -32,8 +32,9 @@ import { Label } from "~/components/ui/label";
 import { api } from "~/trpc/react";
 import { ComboboxDemo } from "~/components/ui/combobox";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
-export default function AddPreLiquidation(props: { companyId: string }) {
+export default function AddPreLiquidation() {
   const [open, setOpen] = useState(false);
   const [fechaVencimiento1, setFechaVencimiento1] = useState<Date>();
   const [fechaVencimiento2, setFechaVencimiento2] = useState<Date>();
@@ -45,15 +46,15 @@ export default function AddPreLiquidation(props: { companyId: string }) {
   const [logo_url, setLogo_url] = useState("");
 
   const [interest, setInterest] = useState<number | null>(null);
-  const { data: marcas } = api.brands.getbyCurrentCompany.useQuery();
+  const { data: marcas } = api.brands.list.useQuery();
   const router = useRouter();
-
+  const queryClient = useQueryClient();
   const [popover1Open, setPopover1Open] = useState(false);
   const [popover2Open, setPopover2Open] = useState(false);
 
   const [brandId, setBrandId] = useState("");
   const { mutateAsync: createLiquidation, isLoading } =
-    api.facturas.createPreLiquidation.useMutation();
+    api.comprobantes.createPreLiquidation.useMutation();
   // const { mutateAsync: createFacturas } = api.family_groups.createPreLiquidation.useMutation();
   async function handleCreate() {
     // const { data:grupos } = api.family_groups.getByBrand.useQuery({brandId: brandId});
@@ -63,16 +64,17 @@ export default function AddPreLiquidation(props: { companyId: string }) {
       dateDesde: new Date(anio, mes - 1, 1),
       dateHasta: new Date(anio, mes, 0),
       dateDue: fechaVencimiento2,
-      companyId: props.companyId,
       interest: interest ?? undefined,
       logo_url: logo_url ?? undefined,
     });
     //TODO CORREGIR ESTO
     // await new Promise((resolve) => setTimeout(resolve, 500));
 
-    if (liquidation) {
+    if ("error" in liquidation!) {
+      toast.error("No se encuentran grupos familiares asociados a esa marca");
+    } else if (liquidation) {
+      queryClient.invalidateQueries();
       toast.success("Pre-liquidacion creada correctamente");
-      router.refresh();
       setOpen(false);
     } else {
       toast.error("Error al crear la pre-liquidacion");
@@ -80,10 +82,6 @@ export default function AddPreLiquidation(props: { companyId: string }) {
   }
 
   const handleBrandChange = (value: string) => {
-    const selectedBrand = marcas?.find((marca) => marca.id === value);
-    if (selectedBrand) {
-      setLogo_url(selectedBrand.logo_url!);
-    }
     setBrandId(value);
   };
 
@@ -97,9 +95,18 @@ export default function AddPreLiquidation(props: { companyId: string }) {
   }
   return (
     <>
-      <Button onClick={() => setOpen(true)}>
+      {/* <Button onClick={() => setOpen(true)}>
         <PlusCircleIcon className="mr-2" /> Crear Pre liquidacion
+      </Button> */}
+      <Button disabled={isLoading} onClick={() => setOpen(true)}>
+        {isLoading ? (
+          <Loader2 className="mr-2 animate-spin" />
+        ) : (
+          <PlusCircleIcon className="mr-2" />
+        )}
+        Crear Pre liquidacion
       </Button>
+
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
@@ -115,10 +122,10 @@ export default function AddPreLiquidation(props: { companyId: string }) {
                 {marcas &&
                   marcas.map((marca) => (
                     <SelectItem
-                      key={marca!.id}
-                      value={marca!.id}
+                      key={marca?.id}
+                      value={marca?.id}
                       className="rounded-none border-b border-gray-600">
-                      {marca!.name}
+                      {marca?.name}
                     </SelectItem>
                   ))}
               </SelectContent>

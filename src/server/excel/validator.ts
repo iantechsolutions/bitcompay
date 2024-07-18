@@ -212,7 +212,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
       "ES TITULAR"?: string | boolean | null | undefined;
       "ES TITULAR DEL PAGO"?: string | boolean | null | undefined;
       "ES RESP PAGADOR"?: string | boolean | null | undefined;
-      "APORTE 3%"?: string | number | null | undefined;
+      "APORTE TOTAL"?: string | number | null | undefined;
       "DIFERENCIAL CODIGO"?: string | null | undefined;
       "DIFERENCIAL VALOR"?: string | number | null | undefined;
       PLAN?: string | null | undefined;
@@ -341,7 +341,7 @@ export const recDocumentValidator = z
     "ES TITULAR": stringAsBoolean.nullable().optional(),
     "ES TITULAR DEL PAGO": stringAsBoolean.nullable().optional(),
     "ES RESP PAGADOR": stringAsBoolean.nullable().optional(),
-    "APORTE 3%": numberAsString.nullable().optional(),
+    "APORTE TOTAL": numberAsString.nullable().optional(),
     "DIFERENCIAL CODIGO": z.string().min(0).max(140).nullable().optional(),
     "DIFERENCIAL VALOR": numberAsString.optional().nullable(),
     "SALDO CUENTA CORRIENTE": numberAsString.nullable().optional(),
@@ -400,7 +400,7 @@ export const recDocumentValidator = z
       isHolder: value["ES TITULAR"] ?? null,
       isPaymentHolder: value["ES TITULAR DEL PAGO"] ?? null,
       isPaymentResponsible: value["ES RESP PAGADOR"] ?? null,
-      contribution: value["APORTE 3%"] ?? null,
+      contribution: value["APORTE TOTAL"] ?? null,
       differential_code: value["DIFERENCIAL CODIGO"] ?? null,
       differential_value: value["DIFERENCIAL VALOR"],
       balance: value["SALDO CUENTA CORRIENTE"] ?? null,
@@ -446,7 +446,7 @@ export const recHeaders: TableHeaders = [
   { key: "phone", label: "TELEFONO", width: 140 },
   { key: "cellphone", label: "CELULAR", width: 140 },
   { key: "email", label: "EMAIL", width: 140 },
-  { key: "contribution", label: "APORTE 3%" },
+  { key: "contribution", label: "APORTE TOTAL" },
   { key: "isAffiliated", label: "ES AFILIADO", width: 140 },
   { key: "isHolder", label: "ES TITULAR", width: 140 },
   { key: "isPaymentHolder", label: "ES TITULAR DEL PAGO", width: 140 },

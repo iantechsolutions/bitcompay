@@ -9,8 +9,8 @@ export type DOCRowsValidatorAndTransformer = (
 const stringToValidIntegerZodTransformer = z
   .string()
   .or(z.number())
-  .transform((v) => Number.parseInt(v.toString().replace(/\s/g, "")))
-  .refine(Number.isInteger);
+  .transform((v) => Number(v.toString().replace(/\s/g, "")))
+  .refine((value) => !isNaN(value));
 
 const stringAsBoolean = z
   .union([z.string(), z.boolean()])
@@ -124,7 +124,7 @@ export const recDocumentValidator = z
     "Nro. Tarjeta": stringToValidIntegerZodTransformer.nullable().optional(),
     "Tipo de Tarjeta": z.string().min(1).max(140).nullable().optional(),
     // NOT OPTIONAL!!!
-    "Nro Factura": stringToValidIntegerZodTransformer.optional(),
+    "Nro Comprobante": stringToValidIntegerZodTransformer.optional(),
     //
     Período: stringAsPeriod.nullable().optional(),
     "Importe 1er Vto.": stringToValidIntegerZodTransformer
@@ -136,13 +136,13 @@ export const recDocumentValidator = z
       .optional(),
     "Fecha 2do. Vto.": stringAsDate.nullable().optional(),
     "Info. Adicional": z.string().min(1).catch("").nullable().optional(),
-    "Canal de Cobro": z
-      .string()
-      .min(0)
-      .max(140)
-      .catch("")
-      .nullable()
-      .optional(),
+    // "Canal de Cobro": z
+    //   .string()
+    //   .min(0)
+    //   .max(140)
+    //   .catch("")
+    //   .nullable()
+    //   .optional(),
     "Fecha de Pago/Débito": stringAsDate.nullable().optional(),
     "Importe Cobrado": nullableStringToValidIntegerZodTransformer
       .nullable()
@@ -165,14 +165,14 @@ export const recDocumentValidator = z
       is_new: value["Alta Nueva"] ?? null,
       card_number: value["Nro. Tarjeta"] ?? null,
       card_type: value["Tipo de Tarjeta"] ?? null,
-      invoice_number: value["Nro Factura"] ?? null,
+      invoice_number: value["Nro Comprobante"] ?? null,
       period: value.Período ?? null,
       first_due_amount: value["Importe 1er Vto."] ?? null,
       first_due_date: value["Fecha 1er Vto."] ?? null,
       second_due_amount: value["Importe 2do Vto."] ?? null,
       second_due_date: value["Fecha 2do. Vto."] ?? null,
       additional_info: value["Info. Adicional"] ?? null,
-      payment_channel: value["Canal de Cobro"] ?? null,
+      // payment_channel: value["Canal de Cobro"] ?? null,
       payment_date: value["Fecha de Pago/Débito"] ?? null,
       collected_amount: value["Importe Cobrado"] ?? null,
       comment: value["Obs."] ?? null,
@@ -200,7 +200,7 @@ export const recDocumentValidatorWithoutProduct = z
     "Nro. Tarjeta": z.any().nullable().optional(),
     "Tipo de Tarjeta": z.any().nullable().optional(),
     // NOT OPTIONAL!!!
-    "Nro Factura": z.any().optional(),
+    "Nro Comprobante": z.any().optional(),
     //
     Período: z.any().nullable().optional(),
     "Importe 1er Vto.": z.any().nullable().optional(),
@@ -208,7 +208,7 @@ export const recDocumentValidatorWithoutProduct = z
     "Importe 2do Vto.": z.any().nullable().optional(),
     "Fecha 2do. Vto.": z.any().nullable().optional(),
     "Info. Adicional": z.any().catch("").nullable().optional(),
-    "Canal de Cobro": z.any().catch("").nullable().optional(),
+    // "Canal de Cobro": z.any().catch("").nullable().optional(),
     "Fecha de Pago/Débito": z.any().nullable().optional(),
     "Importe Cobrado": z.any().nullable().optional(),
     "Obs.": z.any().catch("").nullable().optional(),
@@ -229,14 +229,14 @@ export const recDocumentValidatorWithoutProduct = z
       is_new: value["Alta Nueva"] ?? null,
       card_number: value["Nro. Tarjeta"] ?? null,
       card_type: value["Tipo de Tarjeta"] ?? null,
-      invoice_number: value["Nro Factura"] ?? null,
+      invoice_number: value["Nro Comprobante"] ?? null,
       period: value.Período ?? null,
       first_due_amount: value["Importe 1er Vto."] ?? null,
       first_due_date: value["Fecha 1er Vto."] ?? null,
       second_due_amount: value["Importe 2do Vto."] ?? null,
       second_due_date: value["Fecha 2do. Vto."] ?? null,
       additional_info: value["Info. Adicional"] ?? null,
-      payment_channel: value["Canal de Cobro"] ?? null,
+      // payment_channel: value["Canal de Cobro"] ?? null,
       payment_date: value["Fecha de Pago/Débito"] ?? null,
       collected_amount: value["Importe Cobrado"] ?? null,
       comment: value["Obs."] ?? null,
@@ -270,7 +270,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
       second_due_amount: number | null;
       second_due_date: Date | null;
       additional_info: string | null;
-      payment_channel: string | null;
+      // payment_channel: string | null;
       payment_date: Date | null;
       collected_amount: number | null;
       comment: string | null;
@@ -299,7 +299,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     second_due_amount: number | null;
     second_due_date: Date | null;
     additional_info: string | null;
-    payment_channel: string | null;
+    // payment_channel: string | null;
     payment_date: Date | null;
     collected_amount: number | null;
     comment: string | null;
@@ -325,7 +325,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     second_due_amount: null,
     second_due_date: null,
     additional_info: null,
-    payment_channel: null,
+    // payment_channel: null,
     payment_date: null,
     collected_amount: null,
     comment: null,
@@ -363,7 +363,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
               second_due_amount: parsedRow.at(0)?.second_due_amount,
               second_due_date: parsedRow.at(0)?.second_due_date,
               additional_info: parsedRow.at(0)?.additional_info,
-              payment_channel: parsedRow.at(0)?.payment_channel,
+              // payment_channel: parsedRow.at(0)?.payment_channel,
               payment_date: parsedRow.at(0)?.payment_date,
               collected_amount: parsedRow.at(0)?.collected_amount,
               comment: parsedRow.at(0)?.comment,
@@ -394,7 +394,7 @@ export const recHeaders: TableHeaders = [
   { key: "card_number", label: "Nro. Tarjeta", width: 140 },
   {
     key: "invoice_number",
-    label: "Nro Factura",
+    label: "Nro Comprobante",
     width: 140,
     alwaysRequired: true,
   },
@@ -404,7 +404,7 @@ export const recHeaders: TableHeaders = [
   { key: "second_due_amount", label: "Importe 2do Vto.", width: 140 },
   { key: "second_due_date", label: "Fecha 2do. Vto.", width: 140 },
   { key: "additional_info", label: "Info. Adicional", width: 250 },
-  { key: "payment_channel", label: "Canal de Cobro", width: 140 },
+  // { key: "payment_channel", label: "Canal de Cobro", width: 140 },
   { key: "payment_date", label: "Fecha de Pago/Débito", width: 140 },
   { key: "collected_amount", label: "Importe a cobrar", width: 140 },
   { key: "recollected_amount", label: "Importe cobrado", width: 140 },
@@ -412,13 +412,13 @@ export const recHeaders: TableHeaders = [
   { key: "statusId", label: "Estado de Pago", width: 140 },
 ];
 
-export const FacturasHeaders: TableHeaders = [
+export const ComprobantesHeaders: TableHeaders = [
   { key: "id", label: "Id", width: 200 },
   { key: "createdAt", label: "Created At", width: 100 },
   { key: "generatedAt", label: "Generated At", width: 110 },
   { key: "ptoVenta", label: "Pto Venta", width: 80 },
-  { key: "nroFactura", label: "Nro Factura", width: 100 },
-  { key: "tipoFactura", label: "Tipo Factura", width: 110 },
+  { key: "nroComprobante", label: "Nro Comprobante", width: 100 },
+  { key: "tipoComprobante", label: "Tipo Comprobante", width: 110 },
   { key: "concepto", label: "Concepto", width: 80 },
   { key: "tipoDocumento", label: "Tipo Documento", width: 130 },
   { key: "nroDocumento", label: "Nro Documento", width: 130 },

@@ -18,7 +18,7 @@ import {
 import { cn, htmlBill, ingresarAfip } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
-import { Factura } from "./facturaGenerada";
+import { Comprobante } from "./facturaGenerada";
 import LayoutContainer from "~/components/layout-container";
 import { Title } from "~/components/title";
 import { useRouter } from "next/router";
@@ -31,6 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { create } from "domain";
 
 function formatDate(date: Date | undefined) {
   if (date) {
@@ -44,31 +45,40 @@ function formatDate(date: Date | undefined) {
 }
 
 export default function Page() {
-  const { mutateAsync: createFactura } = api.facturas.create.useMutation();
+  const { mutateAsync: createComprobante } =
+    api.comprobantes.create.useMutation();
+  const { mutateAsync: createItemReturnComprobante } =
+    api.items.createReturnComprobante.useMutation();
+  const { data: company } = api.companies.get.useQuery();
+  const { data: marcas } = api.brands.list.useQuery();
+  const [logo, setLogo] = useState("");
 
-  function generateFactura() {
+  function generateComprobante() {
+    if (marcas) {
+      setLogo(marcas[0]!.logo_url!);
+    }
     try {
       (async () => {
         console.log("1");
 
         setLoading(true);
 
-        const afip = ingresarAfip();
+        const afip = await ingresarAfip();
         // const ivas = await afip.ElectronicBilling.getAliquotTypes();
 
         // const serverStatus = await afip.ElectronicBilling.getServerStatus();
 
         let last_voucher;
         try {
-          last_voucher = (await afip).ElectronicBilling.getLastVoucher(
+          last_voucher = await afip.ElectronicBilling.getLastVoucher(
             puntoVenta,
-            tipoFactura
+            tipoComprobante
           );
         } catch {
           last_voucher = 0;
         }
 
-        const numero_de_factura = (await last_voucher) + 1;
+        const numero_de_comprobante = (await last_voucher) + 1;
 
         const fecha = new Date(
           Date.now() - new Date().getTimezoneOffset() * 60000
@@ -79,12 +89,12 @@ export default function Page() {
         const data = {
           CantReg: 1, // Cantidad de facturas a registrar
           PtoVta: puntoVenta,
-          CbteTipo: tipoFactura,
+          CbteTipo: tipoComprobante,
           Concepto: Number(concepto),
           DocTipo: tipoDocumento,
           DocNro: tipoDocumento !== "99" ? nroDocumento : 0,
-          CbteDesde: numero_de_factura,
-          CbteHasta: numero_de_factura,
+          CbteDesde: numero_de_comprobante,
+          CbteHasta: numero_de_comprobante,
           CbteFch: parseInt(fecha?.replace(/-/g, "") ?? ""),
           FchServDesde: formatDate(dateDesde),
           FchServHasta: formatDate(dateHasta),
@@ -103,36 +113,35 @@ export default function Page() {
           //   Importe: (Number(importe) * 0, 21).toString(),
           // },
         };
-        /**
-         * Creamos la Factura
-         **/
 
-        const res = (await afip).ElectronicBilling.createVoucher(data);
+        const fac = await saveComprobante(numero_de_comprobante);
 
-        // CREAMOS HTML DE LA FACTURA
-        // const html = Factura({
-        //   puntoDeVenta: puntoVenta,
-        //   tipoFactura: tipoFactura,
-        //   concepto: concepto,
-        //   documentoComprador: tipoDocumento,
-        //   nroDocumento: nroDocumento,
-        //   total: Number(importe),
-        //   facturadoDesde: formatDate(dateDesde),
-        //   facturadoHasta: formatDate(dateHasta),
-        //   vtoPago: formatDate(dateVencimiento),
-        //   cantidad: 1,
-        //   nroComprobante: numero_de_factura,
-        //   nroCae: res.CAE,
-        //   vtoCae: res.CAEFchVto,
-        //   nombreServicio: "Servicio de prueba",
-        //   domicilioComprador: "Calle falsa 123",
-        //   nombreComprador: "Homero Simpson",
-        // });
+        const res = await afip.ElectronicBilling.createVoucher(data);
+        if (fac) {
+          const html = htmlBill(
+            fac,
+            company,
+            undefined,
+            2,
+            marcas?.find((x) => x.id === brandId)!
+          );
+          const options = {
+            width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
+            marginLeft: 0.8, // Margen izquierdo en pulgadas. Usar 0.1 para ticket
+            marginRight: 0.8, // Margen derecho en pulgadas. Usar 0.1 para ticket
+            marginTop: 0.4, // Margen superior en pulgadas. Usar 0.1 para ticket
+            marginBottom: 0.4, // Margen inferior en pulgadas. Usar 0.1 para ticket
+          };
+          const resHtml = await afip.ElectronicBilling.createPDF({
+            html: html,
+            file_name: name,
+            options: options,
+          });
 
+          console.log("resultadHTML", resHtml);
+          console.log(html);
+        }
         setLoading(false);
-
-        saveFactura(numero_de_factura);
-
         toast.success("La factura se creo correctamente");
       })();
     } catch {
@@ -140,8 +149,8 @@ export default function Page() {
     }
   }
 
-  function saveFactura(numero_de_factura: number) {
-    createFactura({
+  async function saveComprobante(numero_de_comprobante: number) {
+    const comprobante = await createComprobante({
       billLink: "",
       concepto: Number(concepto),
       importe: Number(importe),
@@ -149,14 +158,23 @@ export default function Page() {
       nroDocumento: Number(nroDocumento),
       ptoVenta: Number(puntoVenta),
       tipoDocumento: Number(tipoDocumento),
-      tipoFactura: tipoFactura,
+      tipoComprobante: tipoComprobante,
       fromPeriod: dateDesde,
       toPeriod: dateHasta,
       due_date: dateVencimiento,
       generated: new Date(),
       prodName: servicioprod,
-      nroFactura: numero_de_factura,
+      nroComprobante: numero_de_comprobante,
     });
+    const updatedComprobante = await createItemReturnComprobante({
+      concept: "Comprobante Manual",
+      amount: Number(importe),
+      iva: 0,
+      total: Number(importe),
+      abono: 0,
+      comprobante_id: comprobante[0]?.id ?? "",
+    });
+    return updatedComprobante;
   }
   type Channel = {
     number: number;
@@ -171,7 +189,7 @@ export default function Page() {
 
   // function showFactura() {}
   const [puntoVenta, setPuntoVenta] = useState("");
-  const [tipoFactura, setTipoFactura] = useState("");
+  const [tipoComprobante, setTipoComprobante] = useState("");
   const [concepto, setConcepto] = useState("");
   const [tipoDocumento, setTipoDocumento] = useState("");
   const [nroDocumento, setNroDocumento] = useState("");
@@ -191,6 +209,8 @@ export default function Page() {
   const [channelsFiltered, setChannelsFiltered] = useState<
     Channel[] | undefined
   >(undefined);
+  const [brandId, setBrandId] = useState("");
+  let selectedBrand;
 
   const [selectedChannel, setSelectedChannel] = useState("");
 
@@ -222,6 +242,11 @@ export default function Page() {
     setDateVencimiento(e);
     setPopoverVencimientoOpen(false);
   }
+
+  const handleBrandChange = (value: string) => {
+    selectedBrand = marcas?.find((marca) => marca.id === value);
+    setBrandId(value);
+  };
 
   return (
     <>
@@ -267,7 +292,7 @@ export default function Page() {
                   { value: "53", label: "NOTA DE CREDITO M" },
                   { value: "21", label: "NOTA DE CREDITO E" },
                 ]}
-                onSelectionChange={(e) => setTipoFactura(e)}
+                onSelectionChange={(e) => setTipoComprobante(e)}
               />
             </div>
             <div>
@@ -285,7 +310,7 @@ export default function Page() {
               />
             </div>
             <div>
-              <Label htmlFor="importe">Importe total de la factura</Label>
+              <Label htmlFor="importe">Importe total del comprobante</Label>
               <Input
                 id="importe"
                 placeholder="..."
@@ -306,10 +331,10 @@ export default function Page() {
                 onSelectionChange={(e) => setName(e)}
               />
             </div>
-            {tipoFactura !== "11" &&
-              tipoFactura !== "14" &&
-              tipoFactura !== "15" &&
-              tipoFactura !== "" && (
+            {tipoComprobante !== "11" &&
+              tipoComprobante !== "14" &&
+              tipoComprobante !== "15" &&
+              tipoComprobante !== "" && (
                 <div>
                   <Label htmlFor="iva">IVA</Label>
                   <br />
@@ -346,7 +371,8 @@ export default function Page() {
               <Select
                 onValueChange={(value) => {
                   setSelectedProduct(value);
-                }}>
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar un producto..." />
                 </SelectTrigger>
@@ -364,6 +390,7 @@ export default function Page() {
             {selectedProduct && channelsFiltered && (
               <div>
                 <Label htmlFor="channel">Canal habilitado</Label>
+                <br></br>
                 <ComboboxDemo
                   title="Seleccionar canal..."
                   placeholder="Canal..."
@@ -421,14 +448,16 @@ export default function Page() {
                   <br />
                   <Popover
                     open={popoverDesdeOpen}
-                    onOpenChange={setPopoverDesdeOpen}>
+                    onOpenChange={setPopoverDesdeOpen}
+                  >
                     <PopoverTrigger asChild={true}>
                       <Button
                         variant={"outline"}
                         className={cn(
                           "w-[220px] justify-start text-left font-normal",
                           !dateDesde && "text-muted-foreground"
-                        )}>
+                        )}
+                      >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {dateDesde ? (
                           format(dateDesde, "PPP")
@@ -452,14 +481,16 @@ export default function Page() {
                   <br />
                   <Popover
                     open={popoverFinOpen}
-                    onOpenChange={setPopoverFinOpen}>
+                    onOpenChange={setPopoverFinOpen}
+                  >
                     <PopoverTrigger asChild={true}>
                       <Button
                         variant={"outline"}
                         className={cn(
                           "w-[220px] justify-start text-left font-normal",
                           !dateHasta && "text-muted-foreground"
-                        )}>
+                        )}
+                      >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {dateHasta ? (
                           format(dateHasta, "PPP")
@@ -483,14 +514,16 @@ export default function Page() {
                   <br />
                   <Popover
                     open={popoverVencimientoOpen}
-                    onOpenChange={setPopoverVencimientoOpen}>
+                    onOpenChange={setPopoverVencimientoOpen}
+                  >
                     <PopoverTrigger asChild={true}>
                       <Button
                         variant={"outline"}
                         className={cn(
                           "w-[220px] justify-start text-left font-normal",
                           !dateVencimiento && "text-muted-foreground"
-                        )}>
+                        )}
+                      >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {dateVencimiento ? (
                           format(dateVencimiento, "PPP")
@@ -509,13 +542,33 @@ export default function Page() {
                     </PopoverContent>
                   </Popover>
                 </div>
+                <div>
+                  <Label>Marca</Label>
+                  <Select onValueChange={handleBrandChange}>
+                    <SelectTrigger className="w-[180px] font-bold">
+                      <SelectValue placeholder="Seleccione una marca" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {marcas &&
+                        marcas.map((marca) => (
+                          <SelectItem
+                            key={marca!.id}
+                            value={marca!.id}
+                            className="rounded-none border-b border-gray-600"
+                          >
+                            {marca!.name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </>
             )}
           </div>
 
-          <Button disabled={loading} onClick={generateFactura}>
+          <Button disabled={loading} onClick={generateComprobante}>
             {loading && <Loader2Icon className="mr-2 animate-spin" size={20} />}
-            Generar nueva Factura
+            Generar nuevo comprobante
           </Button>
         </section>
       </LayoutContainer>

@@ -1,25 +1,15 @@
 "use client";
 import { api } from "~/trpc/react";
 import { Title } from "~/components/title";
-import LayoutContainer from "~/components/layout-container";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "~/components/ui/table";
+
 import { LargeTable } from "~/components/table";
-import { FacturasHeaders } from "~/server/uploads/validators";
+import { ComprobantesHeaders } from "~/server/uploads/validators";
 
 import { useLayoutEffect, useState } from "react";
 
 export default function Page() {
-  const facturas = api.facturas.list.useQuery().data;
-  const [height, setHeight] = useState(600);
-
+  const comprobantes = api.comprobantes.list.useQuery().data;
+  const [height, setHeight] = useState(1200);
   useLayoutEffect(() => {
     function handleResize() {
       setHeight(window.innerHeight - (90 + 24));
@@ -35,21 +25,19 @@ export default function Page() {
   }, []);
 
   return (
-    <LayoutContainer>
-      <section className="space-y-2">
-        <div className="flex justify-between">
-          <Title>Consultas</Title>
-        </div>
-        <div className="mt-5 flex overflow-x-auto">
-          {facturas && (
-            <LargeTable
-              height={height}
-              headers={FacturasHeaders}
-              rows={facturas}
-            />
-          )}
-        </div>
-      </section>
-    </LayoutContainer>
+    <div>
+      <div className="flex justify-between">
+        <Title>Consultas</Title>
+      </div>
+      <div className="mt-5 flex overflow-x-auto overflow-y-auto">
+        {comprobantes && (
+          <LargeTable
+            height={height}
+            headers={ComprobantesHeaders}
+            rows={comprobantes}
+          />
+        )}
+      </div>
+    </div>
   );
 }

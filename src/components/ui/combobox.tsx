@@ -58,9 +58,6 @@ export function ComboboxDemo({
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
   const initialOption = options.find((option) => option.value === value);
-  console.log("value");
-  console.log(value);
-  console.log(initialOption);
   const [_value, _setValue] = React.useState(value ?? "");
   const [label, setLabel] = React.useState(initialOption?.label ?? "");
   const handleSelectionChange = (currentLabel: string) => {

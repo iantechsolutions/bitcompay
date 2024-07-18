@@ -2,6 +2,13 @@
 import { CheckIcon, Loader2 } from "lucide-react";
 import { type MouseEventHandler, useState } from "react";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import LayoutContainer from "~/components/layout-container";
 import { List, ListTile } from "~/components/list";
 import { Title } from "~/components/title";
@@ -34,6 +41,7 @@ import type { RouterOutputs } from "~/trpc/shared";
 import { useRouter } from "next/navigation";
 import { OurFileRouter } from "~/app/api/uploadthing/core";
 import Image from "next/image";
+import { ComboboxDemo } from "~/components/ui/combobox";
 export default function BrandPage({
   brand,
   companies,
@@ -48,6 +56,9 @@ export default function BrandPage({
 
   const router = useRouter();
   const [name, setName] = useState(brand.name);
+  const [iva, setIva] = useState<string>(brand.iva!);
+  const [billType, setBillType] = useState<string>(brand.bill_type!);
+
   const [description, setDescription] = useState(brand.description);
   const [reducedDescription, setReducedDescription] = useState(
     brand.redescription
@@ -86,7 +97,9 @@ export default function BrandPage({
 
       await changeBrand({
         name,
+        iva: iva.toString(),
         description,
+        billType: billType,
         reducedDescription,
         companiesId,
         brandId: brand.id,
@@ -146,7 +159,41 @@ export default function BrandPage({
                       onChange={(e) => setReducedDescription(e.target.value)}
                     />
                   </div>
-
+                  <div></div>
+                  <div className="col-span-2">
+                    <Label htmlFor="iva">IVA</Label>
+                    <Select value={iva} onValueChange={(e) => setIva(e)}>
+                      <SelectTrigger className="w-[180px] font-bold">
+                        <SelectValue placeholder="Seleccionar IVA" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="3">0%</SelectItem>
+                        <SelectItem value="9">2.5%</SelectItem>
+                        <SelectItem value="8">5%</SelectItem>
+                        <SelectItem value="4">10.5%</SelectItem>
+                        <SelectItem value="5">21%</SelectItem>
+                        <SelectItem value="6">27%</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="col-span-2">
+                    <Label htmlFor="billtype">Tipo de factura</Label>
+                    <div>
+                      <ComboboxDemo
+                        title="Seleccionar factura..."
+                        placeholder="Factura X"
+                        value={billType}
+                        options={[
+                          { value: "FACTURA A", label: "FACTURA A" },
+                          { value: "FACTURA B", label: "FACTURA B" },
+                          { value: "FACTURA C", label: "FACTURA C" },
+                          { value: "FACTURA D", label: "FACTURA M" },
+                          { value: "FACTURA E", label: "FACTURA E" },
+                        ]}
+                        onSelectionChange={(e) => setBillType(e)}
+                      />
+                    </div>
+                  </div>
                   <div>
                     <Label> Actualizar Logo Marca</Label>
                     {brand.logo_url && (
@@ -268,8 +315,7 @@ function Deletebrand(props: { brandId: string }) {
           <AlertDialogAction
             className="bg-red-500 active:bg-red-700 hover:bg-red-600"
             onClick={handleDelete}
-            disabled={isLoading}
-          >
+            disabled={isLoading}>
             Eliminar
           </AlertDialogAction>
         </AlertDialogFooter>

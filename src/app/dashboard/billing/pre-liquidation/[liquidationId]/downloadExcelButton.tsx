@@ -1,6 +1,7 @@
 "use client";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import { ExternalLink } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { computeBase, computeIva } from "~/lib/utils";
 import { formatDate } from "~/lib/utils";
@@ -30,12 +31,15 @@ export default function DownloadExcelButton({
   }
   return (
     <Button
-      className="mt-4"
+      className="mt-4 px-6 py-0 bg-[#0DA485] hover:bg-[#0da486e2] 
+       rounded-2xl  h-7  text-xs absolute right-0"
       onClick={async () => {
         alert("Descargando Excel Pre liquidación");
         await handleGenerate(rows);
-      }}>
-      Descargar Excel Pre liquidación
+      }}
+    >
+      <ExternalLink className="mr-1 h-4 w-auto" />
+      Exportar
     </Button>
   );
 }

@@ -32,7 +32,7 @@ export default function AddEstablishment(props: AddEstablishmentProps) {
   const [flag, setFlag] = useState("");
   const [open, setOpen] = useState(false);
   const router = useRouter();
-  const { data: brands } = api.brands.getbyCurrentCompany.useQuery();
+  const { data: brands } = api.brands.list.useQuery();
 
   const selectBrandOptions = brands?.map((brand) => (
     <SelectItem key={brand!.id} value={brand!.id}>
@@ -86,8 +86,7 @@ export default function AddEstablishment(props: AddEstablishmentProps) {
           <Select
             onValueChange={(value) => {
               setBrand(value);
-            }}
-          >
+            }}>
             <SelectTrigger>
               <SelectValue></SelectValue>
             </SelectTrigger>

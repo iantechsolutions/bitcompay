@@ -3,6 +3,7 @@ import { type ClassValue, clsx } from "clsx";
 import { fi } from "date-fns/locale";
 import { nanoid } from "nanoid";
 import { twMerge } from "tailwind-merge";
+import { number } from "zod";
 import { api } from "~/trpc/react";
 import { RouterOutputs } from "~/trpc/shared";
 
@@ -49,6 +50,7 @@ export function calcularEdad(fechaNacimiento: Date): number {
 
 export function formatDate(date: Date | undefined) {
   if (date) {
+    console.log("formatDate", date);
     const year = date.getFullYear();
     const month = (1 + date.getMonth()).toString().padStart(2, "0");
     const day = date.getDate().toString().padStart(2, "0");
@@ -58,8 +60,9 @@ export function formatDate(date: Date | undefined) {
   return null;
 }
 
-export function dateNormalFormat(date: Date | undefined) {
+export function dateNormalFormat(date: Date | undefined | null) {
   if (date) {
+    console.log("formatDateNormal", date);
     const yyyy = date.getFullYear();
     let mm = date.getMonth() + 1; // Months start at 0!
     let dd = date.getDate();
@@ -75,22 +78,25 @@ export function dateNormalFormat(date: Date | undefined) {
     const formattedDate = dia + "/" + mes + "/" + yyyy;
     return formattedDate;
   }
-  return null;
+  return "Sin Fecha";
 }
 
 export const topRightAbsoluteOnDesktopClassName =
   "md:absolute md:top-0 md:right-0 mr-10 mt-10";
 
 export function htmlBill(
-  factura: any,
+  comprobante: any,
   company: any,
   producto: any,
-  voucher: number
+  voucher: number,
+  brand: RouterOutputs["brands"]["list"][number] | undefined
 ) {
-  const billResponsible = factura.family_group?.integrants?.find(
+  const billResponsible = comprobante?.family_group?.integrants?.find(
     (x: any) => x.isBillResponsible
   );
-  const canales = producto?.channels;
+  if (producto) {
+    const canales = producto?.channels;
+  }
   function formatNumberAsCurrency(amount: number): string {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -98,8 +104,8 @@ export function htmlBill(
       minimumFractionDigits: 2,
     }).format(amount);
   }
-  function getImageTagForTipoFactura(tipoFactura: string): string {
-    switch (tipoFactura) {
+  function getImageTagForTipoComprobante(tipoComprobante: string): string {
+    switch (tipoComprobante) {
       case "6":
       case "13":
       case "12":
@@ -112,8 +118,32 @@ export function htmlBill(
         return "X";
     }
   }
-  function getTextoForTipoFactura(tipoFactura: string) {
-    switch (tipoFactura) {
+
+  console.log("brand info");
+  console.log(brand?.logo_url);
+  console.log(brand);
+  console.log(comprobante?.ptoVenta);
+  console.log(voucher);
+
+  function getIimageForLogo(logo: string | null) {
+    if (logo) {
+      return `<img class="logo" src=${logo} alt="logo" />`;
+    } else {
+      return `<img class="logo" src="https://utfs.io/f/f426d7f1-f9c7-437c-a722-f978ab23830d-neiy4q.png" alt="logo" />`;
+    }
+  }
+  function generateConcepts(
+    items: Array<{ concept: string | null; total: number | null }>
+  ): string {
+    return items.map((item) => `<p>${item.concept}</p>`).join("");
+  }
+  function generateAmounts(
+    items: Array<{ concept: string | null; total: number | null }>
+  ): string {
+    return items.map((item) => `<p>${item.total}</p>`).join("");
+  }
+  function getTextoForTipoComprobante(tipoComprobante: string) {
+    switch (tipoComprobante) {
       case "3":
       case "6":
       case "11":
@@ -136,6 +166,8 @@ export function htmlBill(
         return "";
     }
   }
+  const conceptosList = generateConcepts(comprobante?.items ?? []);
+  const amountsList = generateAmounts(comprobante?.items ?? []);
   const htmlContent = `<!DOCTYPE html>
   <html lang="en">
     <head>
@@ -450,11 +482,7 @@ span {
     <body>
       <header>
         <div class="items-1">
-          <img
-            class="logo"
-            src="https://utfs.io/f/f426d7f1-f9c7-437c-a722-f978ab23830d-neiy4q.png"
-            alt=""
-          />
+        ${getIimageForLogo(brand?.logo_url ?? null)}
           <p>
             ${company.razon_social}<br />
             ${company.address} <br />
@@ -463,14 +491,18 @@ span {
         </div>
   
         <div class="items-2">
-              ${getImageTagForTipoFactura(factura.tipoFactura ?? "")}
+              ${getImageTagForTipoComprobante(
+                comprobante?.tipoComprobante ?? ""
+              )}
          
         </div>
   
         <div class="items-3">
           <h2>
-            ${getTextoForTipoFactura(factura.tipoFactura ?? "")} <br />
-            N° ${factura.ptoVenta.toString().padStart(4, "0")}-${voucher
+            ${getTextoForTipoComprobante(
+              comprobante?.tipoComprobante ?? ""
+            )} <br />
+            N° ${comprobante?.ptoVenta.toString().padStart(4, "0")}-${voucher
     .toString()
     .padStart(8, "0")}
           </h2>
@@ -515,10 +547,14 @@ span {
             <p>Condicion de Venta: ---</p>
           </li>
           <li>
-            <p>Periodo facturado:${dateNormalFormat(factura.fromPeriod)}</p>
+            <p>Periodo facturado:${dateNormalFormat(
+              comprobante?.fromPeriod
+            )}</p>
           </li>
           <li>
-            <p>Fecha de vencimiento:${dateNormalFormat(factura.due_date)}</p>
+            <p>Fecha de vencimiento:${dateNormalFormat(
+              comprobante?.due_date
+            )}</p>
           </li>
         </ul>
       </section>
@@ -530,42 +566,22 @@ span {
   
       <section class="parte-5">
         <div>
-          <p>Plan de salud ${
-            factura.family_group?.plan?.plan_code
-          } -- Periodo ${
-    (factura.fromPeriod.getMonth() + 1).toString() +
-    "/" +
-    factura.fromPeriod.getFullYear()
-  }</p>
-          <p>Bonificacion: ${
-            factura?.items?.bonificacion / factura?.items?.abono
-          }%</p>
-          <p>Aportes</p>
-          <p>Factura periodo anterior impaga</p>
-          <p>Interes por pago fuera de termino</p>
-          <p>Pago a cuenta</p>
+          ${conceptosList}
         </div>
   
         <div>
-          <p> ${formatNumberAsCurrency(factura.items?.abono ?? 0)}</p>
-          <p> -${formatNumberAsCurrency(factura.items?.bonificacion ?? 0)}</p>
-          <p> ${formatNumberAsCurrency(factura.items?.contribution ?? 0)}</p>
-          <p> ${formatNumberAsCurrency(
-            factura.items?.previous_bill * -1 ?? 0
-          )}</p>
-          <p> ${formatNumberAsCurrency(factura.items?.interest ?? 0)}</p>
-          <p> ${formatNumberAsCurrency(factura.items?.account_payment ?? 0)}</p>
+          ${amountsList}
         </div>
       </section>
   
       <section class="parte-4">
-        <p>Pesos ${numeroALetras(Math.floor(factura.importe))} ${
-    obtenerDecimales(factura.importe) == "00" || "0"
+        <p>Pesos ${numeroALetras(Math.floor(comprobante?.importe ?? 0))} ${
+    obtenerDecimales(comprobante?.importe) == "00" || "0"
       ? ""
-      : `con ${obtenerDecimales(factura.importe)}/100`
+      : `con ${obtenerDecimales(comprobante?.importe)}/100`
   }</p>
         <p><span>TOTAL: </span>${formatNumberAsCurrency(
-          factura.importe ?? 0
+          comprobante?.importe ?? 0
         )}</p>
       </section>
   
@@ -727,7 +743,7 @@ export async function ingresarAfip() {
   return afip;
 }
 
-function numeroALetras(numero: number): string {
+function numeroALetras(numero: number | undefined): string {
   const unidades = [
     "",
     "uno",
@@ -775,46 +791,54 @@ function numeroALetras(numero: number): string {
     "dieciocho",
     "diecinueve",
   ];
-  if (numero === 0) return "cero";
-  if (numero < 10) return unidades[numero]!;
-  if (numero >= 11 && numero < 20) return especiales[numero - 11]!;
-  if (numero < 100)
-    return (
-      decenas[Math.floor(numero / 10)] +
-      (numero % 10 !== 0 ? " y " + unidades[numero % 10] : "")
-    );
-  if (numero < 1000) {
-    let centena = Math.floor(numero / 100);
-    let resto = numero % 100;
-    if (resto === 0 && centena === 1) return "cien";
-    return centenas[centena] + (resto !== 0 ? " " + numeroALetras(resto) : "");
+  if (numero) {
+    if (numero === 0) return "cero";
+    if (numero < 10) return unidades[numero]!;
+    if (numero >= 11 && numero < 20) return especiales[numero - 11]!;
+    if (numero < 100)
+      return (
+        decenas[Math.floor(numero / 10)] +
+        (numero % 10 !== 0 ? " y " + unidades[numero % 10] : "")
+      );
+    if (numero < 1000) {
+      let centena = Math.floor(numero / 100);
+      let resto = numero % 100;
+      if (resto === 0 && centena === 1) return "cien";
+      return (
+        centenas[centena] + (resto !== 0 ? " " + numeroALetras(resto) : "")
+      );
+    }
+    if (numero < 1000000) {
+      let miles = Math.floor(numero / 1000);
+      let resto = numero % 1000;
+      if (miles === 1)
+        return "mil" + (resto !== 0 ? " " + numeroALetras(resto) : "");
+      return (
+        numeroALetras(miles) +
+        " mil" +
+        (resto !== 0 ? " " + numeroALetras(resto) : "")
+      );
+    }
+    if (numero < 100000000) {
+      let millones = Math.floor(numero / 1000000);
+      let resto = numero % 1000000;
+      if (millones === 1)
+        return "un millón" + (resto !== 0 ? " " + numeroALetras(resto) : "");
+      return (
+        numeroALetras(millones) +
+        " millones" +
+        (resto !== 0 ? " " + numeroALetras(resto) : "")
+      );
+    }
+    return "Número fuera de rango";
   }
-  if (numero < 1000000) {
-    let miles = Math.floor(numero / 1000);
-    let resto = numero % 1000;
-    if (miles === 1)
-      return "mil" + (resto !== 0 ? " " + numeroALetras(resto) : "");
-    return (
-      numeroALetras(miles) +
-      " mil" +
-      (resto !== 0 ? " " + numeroALetras(resto) : "")
-    );
-  }
-  if (numero < 100000000) {
-    let millones = Math.floor(numero / 1000000);
-    let resto = numero % 1000000;
-    if (millones === 1)
-      return "un millón" + (resto !== 0 ? " " + numeroALetras(resto) : "");
-    return (
-      numeroALetras(millones) +
-      " millones" +
-      (resto !== 0 ? " " + numeroALetras(resto) : "")
-    );
-  }
-  return "Número fuera de rango";
+  return "";
 }
 
-function obtenerDecimales(numero: number) {
+function obtenerDecimales(numero: number | undefined) {
+  if (!numero) return "00";
+  console.log("numeroStr");
+  console.log(numero);
   let numeroStr = numero.toString();
   let partes = numeroStr.split(".");
   if (partes.length === 2) {

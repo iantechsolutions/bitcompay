@@ -31,6 +31,25 @@ export default function UploadPage() {
           button: "Continuar",
           allowedContent: "Archivos de excel",
           label: "Arrastra y suelta el archivo aquí",
+          uploadIcon: (
+            <img
+              src="/Uploaded-icon.png"
+              alt="Upload Icon"
+              width={50}
+              height={50}
+            />
+          ),
+        }}
+        appearance={{
+          uploadIcon: {
+            color: "#79edd6",
+          },
+          container: {
+            border: "1px dotted #79edd6",
+          },
+          label: {
+            color: "#79edd6",
+          },
         }}
         onClientUploadComplete={(res) => {
           const [file] = res;

@@ -1,17 +1,34 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db, schema } from "~/server/db";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import {
   administrative_audit,
   medical_audit,
   family_groups,
 } from "~/server/db/schema";
+import { RouterOutputs } from "~/trpc/shared";
+export type FamilyListLiquidationId =
+  RouterOutputs["family_groups"]["getByLiquidation"][number];
 
 export const family_groupsRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({ ctx }) => {
     const family_groups = await db.query.family_groups.findMany({
-      with: { integrants: true, cc: true, businessUnitData: true },
+      with: {
+        integrants: true,
+        cc: true,
+        businessUnitData: true,
+        comprobantes: {
+          with: {
+            items: true,
+            family_group: {
+              with: {
+                integrants: true,
+              },
+            },
+          },
+        },
+      },
     });
     const family_group_reduced = family_groups.filter((family_groups) => {
       return family_groups.businessUnitData?.companyId === ctx.session.orgId!;
@@ -24,13 +41,70 @@ export const family_groupsRouter = createTRPCRouter({
         family_groupsId: z.string(),
       })
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
       const family_groups = await db.query.family_groups.findFirst({
         where: eq(schema.family_groups.id, input.family_groupsId),
+        with: { businessUnitData: true },
       });
 
-      return family_groups;
+      if (family_groups?.businessUnitData?.companyId === ctx.session.orgId) {
+        return family_groups;
+      } else null;
     }),
+
+  getByLiquidation: protectedProcedure
+    .input(z.object({ liquidationId: z.string() }))
+    .query(async ({ input }) => {
+      const liquidation = await db.query.liquidations.findFirst({
+        where: eq(schema.liquidations.id, input.liquidationId),
+        with: {
+          comprobantes: {
+            where: eq(schema.comprobantes.liquidation_id, input.liquidationId),
+            orderBy: [desc(schema.comprobantes.createdAt)],
+            with: {
+              family_group: {
+                with: {
+                  integrants: true,
+                  cc: true,
+                  businessUnitData: true,
+                  comprobantes: {
+                    with: {
+                      items: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!liquidation) {
+        return [];
+      }
+
+      const family_groups = liquidation.comprobantes.map(
+        (comprobante) => comprobante.family_group
+      );
+
+      const uniqueFamilyGroups = family_groups.filter(
+        (family_group, index, self) =>
+          index === self.findIndex((fg) => fg!.id === family_group!.id)
+      );
+
+      const processedFamilyGroups = uniqueFamilyGroups.map((family_group) => {
+        const filteredComprobantes = family_group?.comprobantes.filter(
+          (comprobante) => comprobante.liquidation_id === input.liquidationId
+        );
+        return {
+          ...family_group,
+          comprobantes: filteredComprobantes ?? [],
+        };
+      });
+
+      return processedFamilyGroups;
+    }),
+
   getbyProcedure: protectedProcedure
     .input(
       z.object({
@@ -70,29 +144,29 @@ export const family_groupsRouter = createTRPCRouter({
       });
       return family_group_reduced;
     }),
-  getByOrganization: protectedProcedure.query(async ({ ctx }) => {
-    const companyId = ctx.session.orgId;
+  // getByOrganization: protectedProcedure.query(async ({ ctx }) => {
+  //   const companyId = ctx.session.orgId;
 
-    const family_group = await db.query.family_groups.findMany({
-      with: {
-        businessUnitData: true,
-        abonos: true,
-        integrants: {
-          with: {
-            contribution: true,
-            differentialsValues: true,
-          },
-        },
-        bonus: true,
-        plan: true,
-        modo: true,
-      },
-    });
-    const family_group_reduced = family_group.filter((family_group) => {
-      return family_group.businessUnitData?.companyId === companyId!;
-    });
-    return family_group_reduced;
-  }),
+  //   const family_group = await db.query.family_groups.findMany({
+  //     with: {
+  //       businessUnitData: true,
+  //       abonos: true,
+  //       integrants: {
+  //         with: {
+  //           contribution: true,
+  //           differentialsValues: true,
+  //         },
+  //       },
+  //       bonus: true,
+  //       plan: true,
+  //       modo: true,
+  //     },
+  //   });
+  //   const family_group_reduced = family_group.filter((family_group) => {
+  //     return family_group.businessUnitData?.companyId === companyId!;
+  //   });
+  //   return family_group_reduced;
+  // }),
   create: protectedProcedure
     .input(
       z.object({

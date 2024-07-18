@@ -1,4 +1,4 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, asc } from "drizzle-orm";
 import { z } from "zod";
 import { createId } from "~/lib/utils";
 import { db, schema } from "~/server/db";
@@ -8,6 +8,7 @@ export const productsChannel = createTRPCRouter({
   list: protectedProcedure.query(async () => {
     return await db.query.products.findMany({
       with: { channels: true },
+      orderBy: [asc(schema.products.number)],
     });
   }),
   create: protectedProcedure

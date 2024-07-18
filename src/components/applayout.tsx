@@ -1,9 +1,11 @@
-import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
+import { OrganizationSwitcher } from "@clerk/nextjs";
 import { MenuIcon } from "lucide-react";
 import { SidenavSheet } from "./sidenav-sheet";
 import { Button } from "./ui/button";
 import { checkRole } from "~/lib/utils/server/roles";
-
+import { auth, currentUser } from "@clerk/nextjs/server";
+import { api } from "~/trpc/server";
+import { UserButton } from "./clerk/user-button";
 export type AppLayoutProps = {
   children: React.ReactNode;
   title?: React.ReactNode;
@@ -12,8 +14,9 @@ export type AppLayoutProps = {
   sidenavClass?: string;
 };
 
-export default function AppLayout(props: AppLayoutProps) {
+export default async function AppLayout(props: AppLayoutProps) {
   const isAdmin = checkRole("admin");
+  const company = await api.companies.get.query();
   return (
     <>
       <header
@@ -30,8 +33,13 @@ export default function AppLayout(props: AppLayoutProps) {
         />
         <div className="w-full">{props.title}</div>
         <div className="flex gap-6 px-2">
-          {isAdmin && <OrganizationSwitcher hidePersonal={true} />}
-          <UserButton />
+          {isAdmin && (
+            <OrganizationSwitcher
+              hidePersonal={true}
+              afterSelectOrganizationUrl={""}
+            />
+          )}
+          <UserButton companyName={company?.name} />
         </div>
       </header>
       <aside

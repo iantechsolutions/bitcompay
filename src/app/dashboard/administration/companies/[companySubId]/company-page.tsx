@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckIcon, Loader2 } from "lucide-react";
+import { CheckIcon, Loader2, UserCircleIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type MouseEventHandler, useState } from "react";
 import { toast } from "sonner";
@@ -30,6 +30,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
 import { asTRPCError } from "~/lib/errors";
+import { UserList } from "~/lib/types/clerk";
 import { api } from "~/trpc/react";
 import type { RouterOutputs } from "~/trpc/shared";
 
@@ -38,14 +39,22 @@ interface Brand {
   id: string;
 }
 
+type User = {
+  id: string;
+  name: string;
+  email: string;
+};
+
 export default function CompanyPage({
   company,
   products,
   brands,
+  userList,
 }: {
   company: NonNullable<RouterOutputs["companies"]["get"]>;
   products: RouterOutputs["products"]["list"];
   brands: Brand[] | undefined;
+  userList: User[];
 }) {
   const [name, setName] = useState(company.name);
   const [description, setDescription] = useState(company.description);
@@ -164,16 +173,35 @@ export default function CompanyPage({
                 {brands?.map((brand) => {
                   return (
                     <ListTile
-                      href={`/dashboard/administration/brands/${brand.id}`}
-                      title={brand.name}
-                      key={brand.id}
+                      href={`/dashboard/administration/brands/${brand?.id}`}
+                      title={brand?.name}
+                      key={brand?.id}
                     />
                   );
                 })}
               </List>
             </AccordionContent>
           </AccordionItem>
-          <AccordionItem value="item-5" className="border-none">
+          <AccordionItem value="item-5">
+            <AccordionTrigger>
+              <h2 className="text-md">Usuarios</h2>
+            </AccordionTrigger>
+            <AccordionContent>
+              <List>
+                {userList.map((user) => {
+                  return (
+                    <ListTile
+                      leading={<UserCircleIcon />}
+                      title={user?.name}
+                      key={user?.id}
+                      subtitle={user?.email}
+                    />
+                  );
+                })}
+              </List>
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="item-6" className="border-none">
             <AccordionTrigger>
               <h2 className="text-md">Eliminar entidad</h2>
             </AccordionTrigger>
@@ -200,7 +228,8 @@ function DeleteChannel(props: { companySubId: string }) {
     deleteChannel({ companyId: props.companySubId })
       .then(() => {
         toast.success("Se ha eliminado la compañía correctamente");
-        router.push("../");
+        router.push("./");
+        router.refresh();
       })
       .catch((e) => {
         const error = asTRPCError(e)!;

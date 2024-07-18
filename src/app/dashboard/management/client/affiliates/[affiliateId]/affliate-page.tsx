@@ -32,10 +32,12 @@ export default function AffiliatePage(props: {
     family_group_id: grupos!,
   });
 
-  const { data: facturasList } = api.facturas.list.useQuery();
+  const { data: comprobantesList } = api.comprobantes.list.useQuery();
 
-  const facturas = facturasList
-    ? facturasList.filter((factura) => factura.family_group_id === grupos)
+  const comprobantes = comprobantesList
+    ? comprobantesList.filter(
+        (comprobante) => comprobante.family_group_id === grupos
+      )
     : [];
 
   const [open, setOpen] = useState(false);
@@ -44,7 +46,8 @@ export default function AffiliatePage(props: {
     <div>
       <Link
         className="w-20 h-auto flex justify-between"
-        href={`/dashboard/${company}/management/client/affiliates`}>
+        href={`/dashboard/management/client/affiliates`}
+      >
         <ArrowLeftIcon /> Volver
       </Link>
       <LayoutContainer>
@@ -95,7 +98,7 @@ export default function AffiliatePage(props: {
 
           <div>
             <div className="mb-5 mt-10">
-              <Title>Cuenta corriente</Title>
+              <Title>Ultimos movimientos</Title>
             </div>
             <Table>
               <TableHeader>
@@ -131,7 +134,7 @@ export default function AffiliatePage(props: {
                         {events.type?.toString()}
                       </TableCell>
                       <TableCell className="flex-1 text-left">
-                        {events.current_amount?.toString()}
+                        {events.event_amount?.toString()}
                       </TableCell>
                     </TableRow>
                   ))
@@ -148,7 +151,7 @@ export default function AffiliatePage(props: {
 
           <div>
             <div className="mb-5 mt-10">
-              <Title>Ultimos movimientos</Title>
+              <Title>Comprobantes</Title>
             </div>
             <Table>
               <TableHeader>
@@ -157,34 +160,48 @@ export default function AffiliatePage(props: {
                   <TableHead className="flex-1 text-left w-[100px]">
                     Fecha
                   </TableHead>
+                  <TableHead className="flex-1 text-left">
+                    Tipo comprobante
+                  </TableHead>
                   <TableHead className="flex-1 text-left">IVA</TableHead>
                   <TableHead className="flex-1 text-left">Importe</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {facturas ? (
-                  facturas.slice(0, 4).map((factura) => (
-                    <TableRow key={factura.id} className="flex">
-                      <TableCell className="flex-1 font-medium text-left">
-                        N° {factura.nroFactura}
-                      </TableCell>
-                      <TableCell className="flex-1 text-left">
-                        {new Date(
-                          factura.generated ?? new Date()
-                        ).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
-                      </TableCell>
-                      <TableCell className="flex-1 text-left">
-                        {factura.iva}%
-                      </TableCell>
-                      <TableCell className="flex-1 text-left">
-                        {factura.importe}
-                      </TableCell>
-                    </TableRow>
-                  ))
+                {comprobantes ? (
+                  comprobantes
+                    .filter((x) => x.estado != "generada")
+                    .sort(
+                      (a, b) =>
+                        (b.createdAt?.getTime() ?? 0) -
+                        (a.createdAt?.getTime() ?? 0)
+                    )
+                    .slice(0, 4)
+                    .map((comprobante) => (
+                      <TableRow key={comprobante.id} className="flex">
+                        <TableCell className="flex-1 font-medium text-left">
+                          N° {comprobante.nroComprobante}
+                        </TableCell>
+                        <TableCell className="flex-1 text-left">
+                          {new Date(
+                            comprobante.generated ?? new Date()
+                          ).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </TableCell>
+                        <TableCell className="flex-1 text-left">
+                          {comprobante.tipoComprobante}
+                        </TableCell>
+                        <TableCell className="flex-1 text-left">
+                          {comprobante.iva}%
+                        </TableCell>
+                        <TableCell className="flex-1 text-left">
+                          {comprobante.importe}
+                        </TableCell>
+                      </TableRow>
+                    ))
                 ) : (
                   <TableRow>
                     <TableCell colSpan={4} className="text-center">

@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { db, schema } from "~/server/db";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
@@ -6,9 +6,12 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 export const healthInsurancesRouter = createTRPCRouter({
   get: protectedProcedure
     .input(z.object({ healthInsuranceId: z.string() }))
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
       const healthInsurance_found = await db.query.healthInsurances.findFirst({
-        where: eq(schema.healthInsurances.id, input.healthInsuranceId),
+        where: and(
+          eq(schema.healthInsurances.id, input.healthInsuranceId),
+          eq(schema.healthInsurances.companyId, ctx.session.orgId!)
+        ),
       });
       return healthInsurance_found;
     }),

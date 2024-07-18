@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { and, eq, or, desc, ConsoleLogWriter } from "drizzle-orm";
+import { and, eq, or, desc, inArray, not } from "drizzle-orm";
 import * as xlsx from "xlsx";
 import { record, z } from "zod";
 import { createId } from "~/lib/utils";
@@ -11,6 +11,7 @@ import {
   recRowsTransformer,
 } from "~/server/uploads/validators";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { isArray } from "util";
 
 const statusCodeMap = new Map();
 const statusCodes = await db.query.paymentStatus.findMany();
@@ -137,9 +138,7 @@ export const uploadsRouter = createTRPCRouter({
     .input(
       z.object({
         uploadId: z.string(),
-        // brandId: z.number(),
         channelName: z.string(),
-        // companyId: z.string(),
       })
     )
     .mutation(async ({ input }) => {
@@ -157,7 +156,7 @@ export const uploadsRouter = createTRPCRouter({
             confirmedAt: new Date(),
           })
           .where(eq(schema.responseDocumentUploads.id, input.uploadId));
-        // TODO:
+
         await Promise.all(
           records.map(async (record) => {
             const invoiceNumber = record.invoice_number || 0;
@@ -173,7 +172,7 @@ export const uploadsRouter = createTRPCRouter({
               .update(schema.payments)
               .set({
                 statusId: record.statusId,
-                payment_channel: input.channelName,
+                // payment_channel: input.channelName,
                 recollected_amount: record.recollected_amount,
               })
               .where(
@@ -185,7 +184,7 @@ export const uploadsRouter = createTRPCRouter({
             const payment = await tx.query.payments.findFirst({
               where: eq(schema.payments.invoice_number, invoiceNumber),
               with: {
-                factura: {
+                comprobantes: {
                   with: {
                     family_group: {
                       with: {
@@ -201,87 +200,94 @@ export const uploadsRouter = createTRPCRouter({
               },
             });
 
-            if (payment?.factura?.family_group?.cc) {
-              const currentAccount = payment?.factura?.family_group?.cc;
-              const lastEvent =
-                currentAccount?.events[currentAccount?.events.length - 1];
+            if (payment?.comprobantes?.family_group?.cc) {
+              const currentAccount = payment?.comprobantes?.family_group?.cc;
+              const lastEvent = currentAccount?.events.reduce(
+                (prev, current) => {
+                  return new Date(prev.createdAt) > new Date(current.createdAt)
+                    ? prev
+                    : current;
+                }
+              );
               if (!lastEvent) {
                 throw new Error("No hay eventos en la cuenta corriente");
               }
-              const event = await tx.insert(schema.events).values({
+              const new_event = await tx.insert(schema.events).values({
                 currentAccount_id: currentAccount?.id,
                 event_amount:
                   record.first_due_amount ?? record.collected_amount ?? 0,
                 current_amount:
-                  lastEvent?.current_amount! + payment?.factura?.importe!,
-                description: "Factura aprobada",
-                type: "FC",
+                  lastEvent?.current_amount! + payment?.comprobantes?.importe!,
+                description: "Recaudacion",
+                type: "REC",
               });
             }
-
-            // const payment = await tx.query.payments.findFirst({
-            //   where: and(
-            //     eq(schema.payments.payment_channel, input.channelId),
-            //     eq(schema.payments.g_c, input.brandId),
-            //     eq(schema.payments.companyId, input.companyId),
-            //     eq(schema.payments.invoice_number, invoiceNumber)
-            //   ),
-            //   with: {
-            //     factura: {
-            //       with: {
-            //         family_group: {
-            //           with: {
-            //             cc: true,
-            //           },
-            //         },
-            //       },
-            //     },
-            //   },
-            // });
-            // const recordAmount =
-            //   record.collected_amount ?? record.first_due_amount;
-            // if (payment?.factura && payment.factura.family_group) {
-            //   if (payment?.factura.importe == recordAmount) {
-            //     tx.update(schema.family_groups)
-            //       .set({
-            //         payment_status: "paid",
-            //       })
-            //       .where(
-            //         eq(schema.family_groups.id, payment.factura.family_group.id)
-            //       );
-            //   } else {
-            //     tx.update(schema.family_groups)
-            //       .set({
-            //         payment_status: "partial",
-            //       })
-            //       .where(
-            //         eq(schema.family_groups.id, payment.factura.family_group.id)
-            //       );
-            //   }
-            //   const cc = await tx.query.currentAccount.findFirst({
-            //     where: eq(
-            //       schema.currentAccount.family_group,
-            //       payment.factura.family_group.cc[0]?.id ?? ""
-            //     ),
-            //     with: {
-            //       events: true,
-            //     },
-            //   });
-
-            //   if (cc?.events && cc?.events?.length > 0) {
-            //     const lastEvent = cc?.events[cc.events.length - 1];
-            //     tx.insert(schema.events).values({
-            //       description: "Pago de factura",
-            //       type: "REC",
-            //       currentAccount_id: cc.id,
-            //       event_amount: payment.factura.importe,
-            //       current_amount:
-            //         (lastEvent?.current_amount ?? 0) + payment.factura.importe,
-            //     });
-            //   }
-            // }
           })
         );
+
+        const mapComprobantes = new Map<string, number>();
+        for (const record of records) {
+          if (
+            record.comprobante_id &&
+            !mapComprobantes.has(record.comprobante_id)
+          ) {
+            mapComprobantes.set(
+              record.comprobante_id,
+              record.recollected_amount!
+            );
+          } else if (
+            record.comprobante_id &&
+            mapComprobantes.has(record.comprobante_id)
+          ) {
+            let current = mapComprobantes.get(record.comprobante_id);
+            if (current) {
+              current += record.recollected_amount!;
+              mapComprobantes.set(record.comprobante_id, current);
+            }
+          }
+        }
+        console.log("mapComprobantes", mapComprobantes);
+        for (const [key, value] of mapComprobantes) {
+          console.log(value, key);
+          const missing_payments = await tx.query.payments.findMany({
+            where: and(
+              eq(schema.payments.comprobante_id, key),
+              not(
+                inArray(
+                  schema.payments.id,
+                  records.map((r) => r.id!)
+                )
+              )
+            ),
+          });
+          console.log(missing_payments, missing_payments.length);
+          if (missing_payments.length > 0) {
+            let missing_recollected_amount = 0;
+            missing_payments.forEach((payment) => {
+              missing_recollected_amount += payment.recollected_amount ?? 0;
+            });
+            const current_amount = value;
+            mapComprobantes.set(
+              key,
+              (current_amount ?? 0) + missing_recollected_amount
+            );
+          }
+          const comprobante = await tx.query.comprobantes.findFirst({
+            where: eq(schema.comprobantes.id, key),
+          });
+          console.log("comprobante", comprobante);
+
+          const estado = comprobante?.importe! > value ? "parcial" : "pagada";
+          console.log("key", key);
+          console.log("mapComprobantes", mapComprobantes);
+          console.log("estado", estado);
+          await tx
+            .update(schema.comprobantes)
+            .set({
+              estado: estado,
+            })
+            .where(eq(schema.comprobantes.id, key));
+        }
       });
     }),
 
@@ -341,7 +347,7 @@ export const uploadsRouter = createTRPCRouter({
               second_due_amount: row.second_due_amount ?? null,
               second_due_date: row.second_due_date ?? null,
               additional_info: row.additional_info ?? null,
-              payment_channel: row.payment_channel ?? null,
+              // payment_channel: row.payment_channel ?? null,
               payment_date: row.payment_date ?? null,
               collected_amount: row.collected_amount ?? null,
               cbu: row.cbu ?? null,
