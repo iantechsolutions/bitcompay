@@ -5,6 +5,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "~/components/ui/button";
+import { ComboboxDemo } from "~/components/ui/combobox";
 import {
   Dialog,
   DialogContent,
@@ -31,6 +32,8 @@ export function AddBrandDialog() {
   const [description, setDescription] = useState("");
   const [iva, setIva] = useState<string>("21%");
   const [name, setName] = useState("");
+  const [billType, setBillType] = useState<string>("");
+
   const [number, setNumber] = useState("");
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,6 +51,7 @@ export function AddBrandDialog() {
         iva: iva.toString(),
         description,
         name,
+        billType: billType,
         redescription: reducedDescription,
       });
 
@@ -95,22 +99,40 @@ export function AddBrandDialog() {
             />
           </div>
           <div>
-            <Label htmlFor="iva">IVA</Label>
-            <Select onValueChange={(e) => setIva(e)}>
-              <SelectTrigger className="w-[180px] font-bold">
-                <SelectValue placeholder="Seleccionar IVA" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="3">0%</SelectItem>
-                <SelectItem value="9">2.5%</SelectItem>
-                <SelectItem value="8">5%</SelectItem>
-                <SelectItem value="4">10.5%</SelectItem>
-                <SelectItem value="5">21%</SelectItem>
-                <SelectItem value="6">27%</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
+            <div>
+              <Label htmlFor="iva">IVA</Label>
+              <Select onValueChange={(e) => setIva(e)}>
+                <SelectTrigger className="w-[180px] font-bold">
+                  <SelectValue placeholder="Seleccionar IVA" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="3">0%</SelectItem>
+                  <SelectItem value="9">2.5%</SelectItem>
+                  <SelectItem value="8">5%</SelectItem>
+                  <SelectItem value="4">10.5%</SelectItem>
+                  <SelectItem value="5">21%</SelectItem>
+                  <SelectItem value="6">27%</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="col-span-2">
+              <Label htmlFor="billtype">Tipo de factura</Label>
+              <div>
+                <ComboboxDemo
+                  title="Seleccionar factura..."
+                  placeholder="Factura X"
+                  options={[
+                    { value: "3", label: "FACTURA A" },
+                    { value: "6", label: "FACTURA B" },
+                    { value: "11", label: "FACTURA C" },
+                    { value: "51", label: "FACTURA M" },
+                    { value: "19", label: "FACTURA E" },
+                  ]}
+                  onSelectionChange={(e) => setBillType(e)}
+                />
+              </div>
+            </div>
+
             <Label htmlFor="description_reducida">Descripción Reducida</Label>
             <Input
               id="description_reducida"

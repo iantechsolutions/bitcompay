@@ -41,6 +41,7 @@ import type { RouterOutputs } from "~/trpc/shared";
 import { useRouter } from "next/navigation";
 import { OurFileRouter } from "~/app/api/uploadthing/core";
 import Image from "next/image";
+import { ComboboxDemo } from "~/components/ui/combobox";
 export default function BrandPage({
   brand,
   companies,
@@ -56,6 +57,7 @@ export default function BrandPage({
   const router = useRouter();
   const [name, setName] = useState(brand.name);
   const [iva, setIva] = useState<string>(brand.iva!);
+  const [billType, setBillType] = useState<string>(brand.bill_type!);
 
   const [description, setDescription] = useState(brand.description);
   const [reducedDescription, setReducedDescription] = useState(
@@ -97,6 +99,7 @@ export default function BrandPage({
         name,
         iva: iva.toString(),
         description,
+        billType: billType,
         reducedDescription,
         companiesId,
         brandId: brand.id,
@@ -156,6 +159,7 @@ export default function BrandPage({
                       onChange={(e) => setReducedDescription(e.target.value)}
                     />
                   </div>
+                  <div></div>
                   <div className="col-span-2">
                     <Label htmlFor="iva">IVA</Label>
                     <Select value={iva} onValueChange={(e) => setIva(e)}>
@@ -171,6 +175,24 @@ export default function BrandPage({
                         <SelectItem value="6">27%</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+                  <div className="col-span-2">
+                    <Label htmlFor="billtype">Tipo de factura</Label>
+                    <div>
+                      <ComboboxDemo
+                        title="Seleccionar factura..."
+                        placeholder="Factura X"
+                        value={billType}
+                        options={[
+                          { value: "FACTURA A", label: "FACTURA A" },
+                          { value: "FACTURA B", label: "FACTURA B" },
+                          { value: "FACTURA C", label: "FACTURA C" },
+                          { value: "FACTURA D", label: "FACTURA M" },
+                          { value: "FACTURA E", label: "FACTURA E" },
+                        ]}
+                        onSelectionChange={(e) => setBillType(e)}
+                      />
+                    </div>
                   </div>
                   <div>
                     <Label> Actualizar Logo Marca</Label>

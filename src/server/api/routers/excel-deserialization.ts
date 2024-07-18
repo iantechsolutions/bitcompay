@@ -53,6 +53,12 @@ export const excelDeserializationRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const familyGroupMap = new Map<string | null, string>();
       const contents = await readExcelFile(db, input.uploadId, input.type, ctx);
+      const idDictionary: { [key: string]: number } = {
+        CUIT: 80,
+        CUIL: 86,
+        DNI: 96,
+        "Consumidor Final": 99,
+      };
       await db.transaction(async (db) => {
         for (const row of contents) {
           const business_unit = await db.query.bussinessUnits.findFirst({
@@ -213,20 +219,40 @@ export const excelDeserializationRouter = createTRPCRouter({
             })
             .returning();
           console.log("creando valores diferencial valor");
+          if (new_integrant[0]?.isBillResponsible) {
+            const cc = await db
+              .insert(schema.currentAccount)
+              .values({
+                family_group: new_integrant[0]!.family_group_id,
+              })
+              .returning();
+            const event = await db.insert(schema.events).values({
+              current_amount: parseFloat(row.balance ?? "0"),
+              description: "Apertura",
+              event_amount: parseFloat(row.balance ?? "0"),
+              currentAccount_id: cc[0]!.id,
+              type: "REC",
+            });
 
-          const cc = await db
-            .insert(schema.currentAccount)
-            .values({
-              family_group: new_integrant[0]!.family_group_id,
-            })
-            .returning();
-          const event = await db.insert(schema.events).values({
-            current_amount: parseFloat(row.balance ?? "0"),
-            description: "Apertura",
-            event_amount: parseFloat(row.balance ?? "0"),
-            currentAccount_id: cc[0]!.id,
-            type: "REC",
-          });
+            const tipoDocumento = idDictionary[new_integrant[0]!.id_type ?? ""];
+            const factura = await db.insert(schema.comprobantes).values({
+              origin: "Factura",
+              importe: parseFloat(row.balance ?? "0") * -1,
+              iva: "0",
+              family_group_id: new_integrant[0]!.family_group_id,
+              billLink: "",
+              concepto: 0,
+              nroComprobante: 0,
+              nroDocumento: parseInt(new_integrant[0].id_number ?? "0"),
+              prodName: "",
+              ptoVenta: 0,
+              generated: new Date(),
+              tipoDocumento: tipoDocumento ?? 0,
+              tipoComprobante: "Apertura de CC",
+              estado: "apertura",
+            });
+          }
+
           if (row.differential_value) {
             const ageN = calcularEdad(row.birth_date ?? new Date());
             const preciosPasados = plan?.pricesPerCondition.filter(

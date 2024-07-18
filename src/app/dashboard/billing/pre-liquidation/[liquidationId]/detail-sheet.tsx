@@ -31,7 +31,7 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
     (comprobante) => comprobante.origin === "Nota de credito"
   );
   let comprobanteFCReciente = data.comprobantes.find(
-    (comprobante) => comprobante.origin === "Original"
+    (comprobante) => comprobante.origin === "Factura"
   );
 
   let FCTotal = null;
@@ -79,37 +79,40 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
               $ {data.currentAccountAmount}
             </p>
           </div>
+
           <div className="mt-2">
-            <div
-              className="flex flex-row justify-between items-center py-2 px-2 mb-3 rounded-md bg-[#c2bebe84] hover:bg-[#cbc7c7ce] transition-all hover:cursor-pointer"
-              onClick={() => setOpenNCAccordion(!openNCAccordion)}
-            >
-              <p className="text-xl font-medium opacity-70 flex flex-row items-center ">
-                NC
-                {openNCAccordion ? (
-                  <ChevronDown
-                    className="ml-2 transition-transform duration-200"
-                    size={12}
-                  />
-                ) : (
-                  <ChevronRight
-                    className="ml-2 transition-transform duration-200"
-                    size={12}
-                  />
+            {comprobanteNCReciente && (
+              <div className="mt-2">
+                <div
+                  className="flex flex-row justify-between items-center py-2 px-2 mb-3 rounded-md bg-[#c2bebe84] hover:bg-[#cbc7c7ce] transition-all hover:cursor-pointer"
+                  onClick={() => setOpenNCAccordion(!openNCAccordion)}>
+                  <p className="text-xl font-medium opacity-70 flex flex-row items-center">
+                    NC
+                    {openNCAccordion ? (
+                      <ChevronDown
+                        className="ml-2 transition-transform duration-200"
+                        size={12}
+                      />
+                    ) : (
+                      <ChevronRight
+                        className="ml-2 transition-transform duration-200"
+                        size={12}
+                      />
+                    )}
+                  </p>
+                  <p className="text-lg font-semibold text-[#4af0d4]">
+                    {NCTotal ? `$ ${NCTotal}` : "N/A"}
+                  </p>
+                </div>
+                {openNCAccordion && (
+                  <ContentTable comprobante={comprobanteNCReciente} />
                 )}
-              </p>
-              <p className="text-lg font-semibold text-[#4af0d4]">
-                {NCTotal ? `$ ${NCTotal}` : "N/A"}
-              </p>
-            </div>
-            {openNCAccordion && comprobanteNCReciente && (
-              <ContentTable comprobante={comprobanteNCReciente} />
+              </div>
             )}
 
             <div
               className="flex flex-row justify-between items-center py-2 px-2 mb-3 rounded-md bg-[#c2bebe84] hover:bg-[#cbc7c7ce] transition-all hover:cursor-pointer mt-5"
-              onClick={() => setOpenFCAccordion(!openFCAccordion)}
-            >
+              onClick={() => setOpenFCAccordion(!openFCAccordion)}>
               <p className="text-xl font-medium opacity-70 flex flex-row items-center">
                 FC
                 {openFCAccordion ? (

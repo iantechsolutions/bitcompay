@@ -29,7 +29,7 @@ export default function TableRowContainer({
   const comprobantes = family_group?.comprobantes;
 
   const original_comprobante = comprobantes?.find(
-    (comprobante) => comprobante?.origin?.toLowerCase() === "original"
+    (comprobante) => comprobante?.origin?.toLowerCase() === "factura"
   );
   if (!original_comprobante) {
     return <TableRow>No existe comprobante original</TableRow>;
