@@ -78,7 +78,8 @@ export default function TableRowContainer({
       <TableRow
         onClick={() => setOpen(!open)}
         className="rounded-lg bg-[#f0f0f0] hover:bg-[#d7d3d395] hover:cursor-pointer transition-all duration-200 ease-in-out
-    ">
+    "
+      >
         <TableCell className=" relative rounded-l-md border bg-inherit border-[#6cebd1]">
           {family_group?.numericalId ?? "N/A"}
         </TableCell>

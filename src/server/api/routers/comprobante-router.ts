@@ -683,7 +683,7 @@ export async function preparateComprobante(
     if (grupo) {
       //calculate iva
 
-      const iva =
+      let iva =
         ivaDictionary[Number(grupo.businessUnitData?.brand?.iva ?? 0) ?? 3];
 
       const ivaFloat = (100 + parseFloat(iva ?? "0")) / 100;
@@ -734,16 +734,20 @@ export async function preparateComprobante(
       if (saldo > 0) interest = (interes / 100) * saldo;
 
       //calculate importe
-      const importe = await calculateAmount(
-        grupo,
-        interest,
-        ivaFloat,
-        bonificacion,
-        contribution,
-        abono,
-        differential_amount,
-        saldo
-      );
+      const { amount: importe, ivaCodigo: ivaPostFiltro } =
+        await calculateAmount(
+          grupo,
+          interest,
+          ivaFloat,
+          bonificacion,
+          contribution,
+          abono,
+          differential_amount,
+          saldo
+        );
+      if (ivaPostFiltro) {
+        iva = ivaPostFiltro;
+      }
 
       // let account_payment = 0;
 
@@ -829,7 +833,7 @@ export async function preparateComprobante(
           toPeriod: dateHasta,
           due_date: dateVencimiento,
           prodName: "Servicio",
-          iva: iva ?? "",
+          iva: ivaPostFiltro ?? "",
           billLink: "",
           liquidation_id: liquidationId,
           family_group_id: grupo.id,
@@ -1030,6 +1034,7 @@ async function calculateAmount(
   saldo: number
 ) {
   let amount = 0;
+  let ivaCodigo = null;
   const { modo } = grupo;
 
   const precioNuevo = abono - bonificacion + diferencial;
@@ -1039,7 +1044,8 @@ async function calculateAmount(
 
   if (modo?.description == "MIXTO") {
     amount = saldo + interest + precioNuevo - contribution;
+    ivaCodigo = "3";
   }
 
-  return amount;
+  return { amount, ivaCodigo };
 }
