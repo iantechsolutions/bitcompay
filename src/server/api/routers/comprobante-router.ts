@@ -752,7 +752,7 @@ export async function preparateComprobante(
       let iva =
         ivaDictionary[Number(grupo.businessUnitData?.brand?.iva ?? 0) ?? 3];
 
-      const ivaFloat = (100 + parseFloat(iva ?? "0")) / 100;
+      let ivaFloat = (100 + parseFloat(iva ?? "0")) / 100;
 
       //calculate ppb
       const abono = await getGroupAmount(grupo, dateDesde!);
@@ -838,7 +838,7 @@ export async function preparateComprobante(
           saldo
         );
       if (ivaPostFiltro && ivaPostFiltro == "3") {
-        iva = ivaPostFiltro;
+        ivaFloat = 1;
       }
       const billResponsible = grupo.integrants.find(
         (integrant) => integrant.isBillResponsible
@@ -875,7 +875,7 @@ export async function preparateComprobante(
           .returning();
         //creamos item de NC para visualizacion
         await createcomprobanteItem(
-          ivaFloat,
+          1,
           notaCredito[0]?.id ?? "",
           "Nota de credito",
           previous_bill
@@ -899,7 +899,7 @@ export async function preparateComprobante(
           toPeriod: dateHasta,
           due_date: dateVencimiento,
           prodName: "Servicio",
-          iva: iva ?? "",
+          iva: ivaPostFiltro != "3" ? iva ?? "0" : "0",
           billLink: "",
           liquidation_id: liquidationId,
           family_group_id: grupo.id,
@@ -927,13 +927,13 @@ export async function preparateComprobante(
         -1 * contribution
       );
       await createcomprobanteItem(
-        ivaFloat,
+        1,
         comprobante[0]?.id ?? "",
         "Interes",
         interest
       );
       await createcomprobanteItem(
-        ivaFloat,
+        1,
         comprobante[0]?.id ?? "",
         "Factura Anterior",
         previous_bill
@@ -948,17 +948,17 @@ export async function preparateComprobante(
         ivaFloat,
         comprobante[0]?.id ?? "",
         "Total factura",
-        comprobante[0]?.importe ?? 0
+        (comprobante[0]?.importe ?? 0) / ivaFloat
       );
-      await createcomprobanteItem(
-        ivaFloat,
-        comprobante[0]?.id ?? "",
-        "Total a pagar",
-        comprobante[0]?.importe ?? 0 + saldo
-      );
+      // await createcomprobanteItem(
+      //   ivaFloat,
+      //   comprobante[0]?.id ?? "",
+      //   "Total a pagar",
+      //   (comprobante[0]?.importe ?? 0 + saldo)
+      // );
       if (previous_bill - saldo > 0) {
         await createcomprobanteItem(
-          ivaFloat,
+          1,
           comprobante[0]?.id ?? "",
           "Saldo a favor",
           (previous_bill - saldo) * -1

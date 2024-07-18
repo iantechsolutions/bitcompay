@@ -248,6 +248,7 @@ export const excelDeserializationRouter = createTRPCRouter({
               ptoVenta: 0,
               generated: new Date(),
               tipoDocumento: tipoDocumento ?? 0,
+              tipoComprobante: "Apertura de CC",
               estado: "apertura",
             });
           }
