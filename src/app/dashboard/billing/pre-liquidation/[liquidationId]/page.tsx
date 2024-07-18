@@ -162,7 +162,7 @@ export default async function Home(props: {
       nombre: name,
       cuit,
       "saldo anterior": saldo_anterior,
-      "cuota pura": cuota_planes,
+      "cuota plan": cuota_planes,
       bonificacion,
       diferencial,
       aportes,
@@ -175,6 +175,7 @@ export default async function Home(props: {
     });
     console.log("comprobantes", fg?.comprobantes);
   }
+
   console.log("tableRows", tableRows);
   return (
     <LayoutContainer>
@@ -230,51 +231,8 @@ export default async function Home(props: {
           </li>
         </ul>
       </div>
-      <div className="bg-[#EBFFFB] flex flex-row justify-stretch w-full pt-5 pb-1">
-        {Object.entries(summary).map(([key, value], index, array) => (
-          <div
-            className={`${
-              index != array.length - 1
-                ? "border-r border-[#4af0d4] border-dashed grow"
-                : ""
-            } px-3`}
-            key={key}
-          >
-            <p className="font-medium text-sm">{key}</p>
-            <p className="text-[#4af0d4] font-bold text-sm">$ {value}</p>
-          </div>
-        ))}
-      </div>
+
       <div className="relative">
-        {/* <Table className="border-separate  border-spacing-x-0 border-spacing-y-2">
-          <TableHeader className="overflow-hidden">
-            <TableRow className="bg-[#79edd6]">
-              {headers.map((header, index, array) => {
-                const firstHeader = index == 0 ? "rounded-l-md" : "";
-                const lastHeader =
-                  index == array.length - 1 ? "rounded-r-md" : "";
-                return (
-                  <TableHead
-                    className={`${firstHeader} ${lastHeader} text-gray-800
-               border-r-[1.5px] border-[#4af0d4]`}
-                  >
-                    {header}
-                  </TableHead>
-                );
-              })}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {familyGroups?.map((familyGroup) => (
-              <TableRowContainer
-                key={familyGroup?.id}
-                family_group={familyGroup}
-                preliquidation={preliquidation}
-                periodo={periodo}
-              />
-            ))}
-          </TableBody>
-        </Table> */}
         <DataTable columns={columns} data={tableRows} />
         <DownloadExcelButton rows={excelRows} period={preliquidation?.period} />
       </div>

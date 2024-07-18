@@ -11,7 +11,7 @@ export type TableRecord = {
   nombre: string;
   cuit: string;
   "saldo anterior": number;
-  "cuota pura": number;
+  "cuota plan": number;
   bonificacion: number;
   diferencial: number;
   aportes: number;

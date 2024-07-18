@@ -29,6 +29,7 @@ import { useState } from "react";
 import DetailSheet from "./detail-sheet";
 import { RouterOutputs } from "~/trpc/shared";
 import { TableRecord } from "./columns";
+import DataTableSummary from "~/components/tanstack/summary";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
@@ -80,6 +81,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <>
+      <DataTableSummary table={table} />
       <div className="w-full max-w-sm flex items-center py-4 relative">
         <Input
           placeholder="Buscar responsable grupo familiar..."
