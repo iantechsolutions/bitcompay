@@ -46,11 +46,11 @@ const conceptDictionary = {
 };
 
 const comprobanteDictionary = {
-  "comprobante A": 3,
-  "comprobante B": 6,
-  "comprobante C": 11,
-  "comprobante M": 51,
-  "comprobante E": 19,
+  "Factura A": 3,
+  "Factura B": 6,
+  "Factura C": 11,
+  "Factura M": 51,
+  "Factura E": 19,
   "NOTA DE DEBITO A": 8,
   "NOTA DE DEBITO B": 13,
   "NOTA DE DEBITO C": 15,
@@ -690,7 +690,7 @@ export async function preparateComprobante(
     if (grupo) {
       //calculate iva
 
-      const iva =
+      let iva =
         ivaDictionary[Number(grupo.businessUnitData?.brand?.iva ?? 0) ?? 3];
 
       const ivaFloat = (100 + parseFloat(iva ?? "0")) / 100;
@@ -740,21 +740,6 @@ export async function preparateComprobante(
       let interest = 0;
       if (saldo > 0) interest = (interes / 100) * saldo;
 
-      //calculate importe
-      const importe = await calculateAmount(
-        grupo,
-        interest,
-        ivaFloat,
-        bonificacion,
-        contribution,
-        abono,
-        differential_amount,
-        saldo
-      );
-
-      // let account_payment = 0;
-
-      //calculate previous_bill
       let mostRecentcomprobante;
       let previous_bill = 0;
       if (grupo?.comprobantes.length > 0) {
@@ -776,6 +761,22 @@ export async function preparateComprobante(
         previous_bill = mostRecentcomprobante.importe;
       }
 
+      //calculate importe
+      const { amount: importe, ivaCodigo: ivaPostFiltro } =
+        await calculateAmount(
+          grupo,
+          interest,
+          ivaFloat,
+          bonificacion,
+          contribution,
+          abono,
+          differential_amount,
+          previous_bill,
+          saldo
+        );
+      if (ivaPostFiltro) {
+        iva = ivaPostFiltro;
+      }
       const billResponsible = grupo.integrants.find(
         (integrant) => integrant.isBillResponsible
       );
@@ -836,7 +837,7 @@ export async function preparateComprobante(
           toPeriod: dateHasta,
           due_date: dateVencimiento,
           prodName: "Servicio",
-          iva: iva ?? "",
+          iva: ivaPostFiltro ?? "",
           billLink: "",
           liquidation_id: liquidationId,
           family_group_id: grupo.id,
@@ -872,14 +873,8 @@ export async function preparateComprobante(
       await createcomprobanteItem(
         ivaFloat,
         comprobante[0]?.id ?? "",
-        "comprobante Anterior",
+        "Factura Anterior",
         previous_bill
-      );
-      await createcomprobanteItem(
-        ivaFloat,
-        comprobante[0]?.id ?? "",
-        "Total a pagar",
-        -1 * saldo
       );
       await createcomprobanteItem(
         ivaFloat,
@@ -887,6 +882,26 @@ export async function preparateComprobante(
         "Diferencial",
         differential_amount
       );
+      await createcomprobanteItem(
+        ivaFloat,
+        comprobante[0]?.id ?? "",
+        "Total factura",
+        comprobante[0]?.importe ?? 0
+      );
+      await createcomprobanteItem(
+        ivaFloat,
+        comprobante[0]?.id ?? "",
+        "Total a pagar",
+        comprobante[0]?.importe ?? 0 + saldo
+      );
+      if (previous_bill - saldo > 0) {
+        await createcomprobanteItem(
+          ivaFloat,
+          comprobante[0]?.id ?? "",
+          "Saldo a favor",
+          (previous_bill - saldo) * -1
+        );
+      }
 
       // if (lastEvent.current_amount < 0) {
       //   const comprobantePayment = await db
@@ -1034,19 +1049,35 @@ async function calculateAmount(
   contribution: number,
   abono: number,
   diferencial: number,
+  previous_bill: number,
   saldo: number
 ) {
   let amount = 0;
+  let ivaCodigo = null;
   const { modo } = grupo;
 
-  const precioNuevo = abono - bonificacion + diferencial;
-  if (modo?.description == "PRIVADO") {
-    amount = saldo + interest + precioNuevo * iva;
-  }
-
   if (modo?.description == "MIXTO") {
-    amount = saldo + interest + precioNuevo - contribution;
+    iva = 1;
+  }
+  if (modo?.description == "PRIVADO") {
+    contribution = 0;
   }
 
-  return amount;
+  const precioNuevo = abono - bonificacion + diferencial;
+  if (saldo > 0) {
+    amount = (previous_bill + interest + precioNuevo) * iva - contribution;
+  } else {
+    amount = precioNuevo * iva - contribution;
+  }
+
+  // if (modo?.description == "PRIVADO") {
+  //   amount = saldo + interest + precioNuevo * iva;
+  // }
+
+  // if (modo?.description == "MIXTO") {
+  //   amount = saldo + interest + precioNuevo - contribution;
+  //   ivaCodigo = "3";
+  // }
+
+  return { amount, ivaCodigo };
 }
