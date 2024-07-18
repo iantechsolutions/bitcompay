@@ -11,7 +11,7 @@ import {
   DialogFooter,
 } from "~/components/ui/dialog";
 import { useRouter } from "next/navigation";
-import { Button } from "~/components/ui/button";
+import { Button, buttonVariants } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 import { Loader2Icon } from "lucide-react";
 
@@ -39,8 +39,7 @@ function UpdateLiquidationEstadoDialog({
     <>
       <Button
         className=" h-7 bg-[#0DA485] hover:bg-[#0da486e2] text-[#FAFDFD] font-medium-medium text-xs rounded-2xl py-0 px-6"
-        onClick={() => setOpen(true)}
-      >
+        onClick={() => setOpen(true)}>
         Aprobar
         <CircleCheck className="h-4 w-auto ml-2" />
       </Button>
@@ -59,17 +58,15 @@ function UpdateLiquidationEstadoDialog({
           {/* Add more dialog content here as needed */}
           <DialogFooter>
             <Button
-              className="btn-secondary mr-2"
-              onClick={() => setOpen(false)}
-            >
+              className="bg-gray-400 hover:bg-gray-600"
+              onClick={() => setOpen(false)}>
               Cancelar
             </Button>
             <Button
-              className="btn primary"
+              className={buttonVariants({ variant: "bitcompay" })}
               type="submit"
               disabled={isLoading}
-              onClick={approveLiquidation}
-            >
+              onClick={approveLiquidation}>
               {isLoading && (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}
