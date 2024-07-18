@@ -31,7 +31,7 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
     (comprobante) => comprobante.origin === "Nota de credito"
   );
   let comprobanteFCReciente = data.comprobantes.find(
-    (comprobante) => comprobante.origin === "Original"
+    (comprobante) => comprobante.origin === "Factura"
   );
 
   let FCTotal = null;
