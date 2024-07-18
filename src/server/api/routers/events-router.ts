@@ -17,81 +17,85 @@ export const eventsRouter = createTRPCRouter({
       })
     )
     .query(async ({ input }) => {
-      const event = await db.query.events
-        // .orderBy(schema.events.createdAt, "desc")
-        .findFirst({
-          orderBy: [desc(schema.events.createdAt)],
-          where: and(
-            eq(schema.events.currentAccount_id, input.ccId),
-            lt(schema.events.createdAt, input.date)
-          ),
-        });
+      const event = await db.query.events.findFirst({
+        orderBy: [desc(schema.events.createdAt)],
+        where: and(
+          eq(schema.events.currentAccount_id, input.ccId),
+          lt(schema.events.createdAt, input.date)
+        ),
+      });
 
       return event;
     }),
   createByType: protectedProcedure
     .input(
       z.object({
-        ccId: z.string().max(255),
-        type: z.string().max(255),
-        amount: z.number().max(255),
+        ccId: z.string(),
+        type: z.string(),
+        amount: z.number(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const lastEvent = await db.query.events.findFirst({
         orderBy: [desc(schema.events.createdAt)],
         where: eq(schema.events.currentAccount_id, input.ccId),
       });
-      if (input.type == "REC") {
-        const new_event = await db
-          .insert(schema.events)
-          .values({
-            description: "Recaudacion",
-            currentAccount_id: input.ccId,
-            type: input.type,
-            event_amount: input.amount,
-            current_amount: (lastEvent?.current_amount ?? 0) + input.amount,
-          })
-          .returning();
-        return new_event;
-      }
-      if (input.type == "FC") {
-        const new_event = await db
-          .insert(schema.events)
-          .values({
-            description: "Comprobante Creado",
-            currentAccount_id: input.ccId,
-            type: input.type,
-            event_amount: input.amount * -1,
-            current_amount: (lastEvent?.current_amount ?? 0) - input.amount,
-          })
-          .returning();
-        return new_event;
-      }
-      if (input.type == "NC") {
-        const new_event = await db
-          .insert(schema.events)
-          .values({
-            description: "Nota de credito",
-            currentAccount_id: input.ccId,
-            type: input.type,
-            event_amount: input.amount,
-            current_amount: (lastEvent?.current_amount ?? 0) + input.amount,
-          })
-          .returning();
-        return new_event;
-      }
+      let new_event;
 
-      // const new_plan = await db
-      //   .insert(schema.plans)
-      //   .values({
-      //     user: user?.id ?? "",
-      //     plan_code: input.plan_code,
-      //     description: input.description,
-      //     brand_id: input.brand_id,
-      //   })
-      //   .returning();
-      // return new_plan;
+      await db.insert(schema.events).values({
+        description: "eNTITY",
+        currentAccount_id: "org_2if0GnHd97NNeFY7PHGrkUfSydE",
+        type: "FC",
+        event_amount: input.amount,
+        current_amount: (lastEvent?.current_amount ?? 0) + input.amount,
+      });
+
+      switch (input.type) {
+        case "REC":
+          new_event = await db
+            .insert(schema.events)
+            .values({
+              description: "Recaudacion",
+              currentAccount_id: input.ccId,
+              type: input.type,
+              event_amount: input.amount,
+              current_amount: (lastEvent?.current_amount ?? 0) + input.amount,
+            })
+            .returning();
+          break;
+        case "FC":
+          new_event = await db
+            .insert(schema.events)
+            .values({
+              description: "Comprobante Creado",
+              currentAccount_id: input.ccId,
+              type: input.type,
+              event_amount: input.amount * -1,
+              current_amount: (lastEvent?.current_amount ?? 0) - input.amount,
+            })
+            .returning();
+          break;
+        case "NC":
+          new_event = await db
+            .insert(schema.events)
+            .values({
+              description: "Nota de credito",
+              currentAccount_id: input.ccId,
+              type: input.type,
+              event_amount: input.amount,
+              current_amount: (lastEvent?.current_amount ?? 0) + input.amount,
+            })
+            .returning();
+          break;
+        default:
+          throw new Error("Tipo de evento no reconocido");
+      }
+      console.log(
+        "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?"
+      );
+
+      return new_event;
     }),
 });
+
 export type Events = RouterOutputs["events"]["list"][number];

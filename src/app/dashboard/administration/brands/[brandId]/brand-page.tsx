@@ -2,6 +2,13 @@
 import { CheckIcon, Loader2 } from "lucide-react";
 import { type MouseEventHandler, useState } from "react";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import LayoutContainer from "~/components/layout-container";
 import { List, ListTile } from "~/components/list";
 import { Title } from "~/components/title";
@@ -48,7 +55,7 @@ export default function BrandPage({
 
   const router = useRouter();
   const [name, setName] = useState(brand.name);
-  const [iva, setIva] = useState<number>(parseFloat(brand.iva!));
+  const [iva, setIva] = useState<string>(brand.iva!);
 
   const [description, setDescription] = useState(brand.description);
   const [reducedDescription, setReducedDescription] = useState(
@@ -151,11 +158,19 @@ export default function BrandPage({
                   </div>
                   <div className="col-span-2">
                     <Label htmlFor="iva">IVA</Label>
-                    <Input
-                      id="iva"
-                      value={iva}
-                      onChange={(e) => setIva(Number(e.target.value))}
-                    />
+                    <Select value={iva} onValueChange={(e) => setIva(e)}>
+                      <SelectTrigger className="w-[180px] font-bold">
+                        <SelectValue placeholder="Seleccionar IVA" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="3">0%</SelectItem>
+                        <SelectItem value="9">2.5%</SelectItem>
+                        <SelectItem value="8">5%</SelectItem>
+                        <SelectItem value="4">10.5%</SelectItem>
+                        <SelectItem value="5">21%</SelectItem>
+                        <SelectItem value="6">27%</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <Label> Actualizar Logo Marca</Label>

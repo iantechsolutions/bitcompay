@@ -50,6 +50,7 @@ export function calcularEdad(fechaNacimiento: Date): number {
 
 export function formatDate(date: Date | undefined) {
   if (date) {
+    console.log("formatDate", date);
     const year = date.getFullYear();
     const month = (1 + date.getMonth()).toString().padStart(2, "0");
     const day = date.getDate().toString().padStart(2, "0");
@@ -61,6 +62,7 @@ export function formatDate(date: Date | undefined) {
 
 export function dateNormalFormat(date: Date | undefined | null) {
   if (date) {
+    console.log("formatDateNormal", date);
     const yyyy = date.getFullYear();
     let mm = date.getMonth() + 1; // Months start at 0!
     let dd = date.getDate();
@@ -120,6 +122,8 @@ export function htmlBill(
   console.log("brand info");
   console.log(brand?.logo_url);
   console.log(brand);
+  console.log(comprobante?.ptoVenta);
+  console.log(voucher);
 
   function getIimageForLogo(logo: string | null) {
     if (logo) {
@@ -833,6 +837,8 @@ function numeroALetras(numero: number | undefined): string {
 
 function obtenerDecimales(numero: number | undefined) {
   if (!numero) return "00";
+  console.log("numeroStr");
+  console.log(numero);
   let numeroStr = numero.toString();
   let partes = numeroStr.split(".");
   if (partes.length === 2) {

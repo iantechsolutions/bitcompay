@@ -14,8 +14,8 @@ dayjs.locale("es");
 
 export default function Page() {
   let { data: liquidationsFull } = api.liquidations.list.useQuery();
-  //filter liquidations where companyId is equal to the companyId in the URL and estado: "pendiente"
-  const { data: possibleBrands } = api.brands.list.useQuery();
+  // //filter liquidations where companyId is equal to the companyId in the URL and estado: "pendiente"
+  // const { data: possibleBrands } = api.brands.list.useQuery();
 
   if (liquidationsFull) {
     liquidationsFull = liquidationsFull.filter(

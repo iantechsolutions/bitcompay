@@ -79,28 +79,32 @@ export const family_groupsRouter = createTRPCRouter({
         },
       });
 
-      let family_groups =
-        liquidation?.comprobantes.map(
-          (comprobante) => comprobante.family_group
-        ) || [];
-      const family_groups_reduced = family_groups.filter((family_group) => {
-        return family_groups.includes(family_group);
-      });
-      family_groups = [];
+      if (!liquidation) {
+        return [];
+      }
 
-      family_groups_reduced.map((family_group) => {
-        console.log("family_group en map", family_group);
-        const comprobantes = family_group?.comprobantes.filter(
+      const family_groups = liquidation.comprobantes.map(
+        (comprobante) => comprobante.family_group
+      );
+
+      const uniqueFamilyGroups = family_groups.filter(
+        (family_group, index, self) =>
+          index === self.findIndex((fg) => fg!.id === family_group!.id)
+      );
+
+      const processedFamilyGroups = uniqueFamilyGroups.map((family_group) => {
+        const filteredComprobantes = family_group?.comprobantes.filter(
           (comprobante) => comprobante.liquidation_id === input.liquidationId
         );
-        if (family_group) {
-          family_group.comprobantes = comprobantes ?? [];
-        }
-        family_groups.push(family_group);
+        return {
+          ...family_group,
+          comprobantes: filteredComprobantes ?? [],
+        };
       });
-      console.log("family_groups", family_groups);
-      return family_groups;
+
+      return processedFamilyGroups;
     }),
+
   getbyProcedure: protectedProcedure
     .input(
       z.object({

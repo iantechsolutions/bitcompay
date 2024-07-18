@@ -40,25 +40,25 @@ export default function TableRowContainer({
     date: preliquidation?.createdAt ?? new Date(),
   });
   const currentAccountAmount = lastEvent?.current_amount ?? 0;
-  const billResponsible = family_group?.integrants.find(
+  const billResponsible = family_group?.integrants?.find(
     (x) => x.isBillResponsible == true
   );
-  const abono = original_comprobante.items.find(
+  const abono = original_comprobante.items?.find(
     (item) => item.concept === "Abono"
   );
-  const bonification = original_comprobante.items.find(
+  const bonification = original_comprobante.items?.find(
     (item) => item.concept === "Bonificación"
   );
-  const contribution = original_comprobante.items.find(
+  const contribution = original_comprobante.items?.find(
     (item) => item.concept === "Aporte"
   );
-  const interest = original_comprobante.items.find(
+  const interest = original_comprobante.items?.find(
     (item) => item.concept === "Interes"
   );
-  const differential = original_comprobante.items.find(
+  const differential = original_comprobante.items?.find(
     (item) => item.concept === "Diferencial"
   );
-  const previousBill = original_comprobante.items.find(
+  const previousBill = original_comprobante.items?.find(
     (item) => item.concept === "Comprobante Anterior"
   );
 
@@ -156,14 +156,14 @@ export default function TableRowContainer({
           </TableCell>
         )}
       </TableRow>
-      <DetailSheet
+      {/* <DetailSheet
         name={billResponsible?.name ?? ""}
         cuit={billResponsible?.fiscal_id_number ?? ""}
         currentAccountAmount={currentAccountAmount}
         comprobantes={comprobantes!}
         open={open}
         setOpen={setOpen}
-      />
+      /> */}
     </>
   );
 }

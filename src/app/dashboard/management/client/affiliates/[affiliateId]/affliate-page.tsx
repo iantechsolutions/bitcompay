@@ -97,7 +97,7 @@ export default function AffiliatePage(props: {
 
           <div>
             <div className="mb-5 mt-10">
-              <Title>Cuenta corriente</Title>
+              <Title>Ultimos movimientos</Title>
             </div>
             <Table>
               <TableHeader>
@@ -133,7 +133,7 @@ export default function AffiliatePage(props: {
                         {events.type?.toString()}
                       </TableCell>
                       <TableCell className="flex-1 text-left">
-                        {events.current_amount?.toString()}
+                        {events.event_amount?.toString()}
                       </TableCell>
                     </TableRow>
                   ))
@@ -150,7 +150,7 @@ export default function AffiliatePage(props: {
 
           <div>
             <div className="mb-5 mt-10">
-              <Title>Ultimos movimientos</Title>
+              <Title>Comprobantes</Title>
             </div>
             <Table>
               <TableHeader>

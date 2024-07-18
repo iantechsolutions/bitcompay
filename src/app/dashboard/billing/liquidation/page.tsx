@@ -16,9 +16,7 @@ export default async function Page() {
   const { orgId } = auth();
   const possibleBrands = await api.brands.list.query();
   const liquidations = liquidationsFull.filter(
-    (liquidation) =>
-      // possibleBrands.some((brand) => brand?.id === liquidation.brandId) &&
-      liquidation.estado === "aprobada"
+    (liquidation) => liquidation.estado === "aprobada"
   );
   return (
     <LayoutContainer>
