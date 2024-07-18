@@ -715,7 +715,7 @@ export const differentialsValuesRelations = relations(
 export const comprobantes = pgTable("comprobantes", {
   id: columnId,
   createdAt,
-  generated: timestamp("generated", { mode: "date" }),
+  generated: timestamp("generated", { mode: "date" }).default(new Date()),
   ptoVenta: integer("ptoVenta").notNull(),
   nroComprobante: integer("nroComprobante").notNull(),
   tipoComprobante: varchar("tipoComprobante", { length: 255 }),

@@ -14,6 +14,7 @@ import { calcularEdad, formatDate, htmlBill, ingresarAfip } from "~/lib/utils";
 import { utapi } from "~/server/uploadthing";
 import { id } from "date-fns/locale";
 import { Events } from "./events-router";
+import { datetime } from "drizzle-orm/mysql-core";
 
 type Bonus = {
   id: string;
@@ -45,12 +46,12 @@ const conceptDictionary = {
   "": 0,
 };
 
-const comprobanteDictionary = {
-  "Factura A": 3,
-  "Factura B": 6,
-  "Factura C": 11,
-  "Factura M": 51,
-  "Factura E": 19,
+const comprobanteDictionary: { [key: string]: number } = {
+  "FACTURA A": 3,
+  "FACTURA B": 6,
+  "FACTURA C": 11,
+  "FACTURA M": 51,
+  "FACTURA E": 19,
   "NOTA DE DEBITO A": 8,
   "NOTA DE DEBITO B": 13,
   "NOTA DE DEBITO C": 15,
@@ -62,6 +63,19 @@ const comprobanteDictionary = {
   "NOTA DE CREDITO M": 53,
   "NOTA DE CREDITO E": 21,
   "": 0,
+};
+
+const fcAnc: { [key: string]: string } = {
+  "FACTURA A": "NOTA DE CREDITO A",
+  "FACTURA B": "NOTA DE CREDITO B",
+  "FACTURA C": "NOTA DE CREDITO C",
+  "FACTURA M": "NOTA DE CREDITO M",
+  "FACTURA E": "NOTA DE CREDITO E",
+  "NOTA DE CREDITO A": "FACTURA A",
+  "NOTA DE CREDITO B": "FACTURA B",
+  "NOTA DE CREDITO C": "FACTURA C",
+  "NOTA DE CREDITO M": "FACTURA M",
+  "NOTA DE CREDITO E": "FACTURA E",
 };
 
 const NCbytipocomprobanteDictionarys: { [key: string]: string } = {
@@ -183,10 +197,12 @@ async function approbatecomprobante(liquidationId: string) {
 
     for (let comprobante of liquidation?.comprobantes) {
       console.log("0");
+      const comprobanteCod =
+        comprobanteDictionary[comprobante.tipoComprobante ?? ""];
       try {
         last_voucher = await afip.ElectronicBilling.getLastVoucher(
           comprobante?.ptoVenta,
-          comprobante?.tipoComprobante
+          comprobanteCod
         );
       } catch {
         last_voucher = 0;
@@ -255,7 +271,8 @@ async function approbatecomprobante(liquidationId: string) {
         data = {
           CantReg: 1, // Cantidad de comprobantes a registrar
           PtoVta: comprobante?.ptoVenta,
-          CbteTipo: comprobante?.tipoComprobante,
+          CbteTipo:
+            NCbytipocomprobanteDictionarys[comprobanteCod?.toString() ?? ""],
           Concepto: Number(comprobante?.concepto),
           DocTipo: comprobante?.tipoDocumento,
           DocNro: comprobante?.nroDocumento,
@@ -279,9 +296,7 @@ async function approbatecomprobante(liquidationId: string) {
             Importe: (Number(comprobante?.importe) * ivaFloat).toString(),
           },
           CbtesAsoc: {
-            Tipo: NCbytipocomprobanteDictionarys[
-              comprobante.tipoComprobante ?? ""
-            ],
+            Tipo: fcAnc[comprobante.tipoComprobante ?? ""],
             BaseImp: comprobante.importe / (1 + ivaFloat),
             Importe: comprobante.importe * ivaFloat,
           },
@@ -290,7 +305,7 @@ async function approbatecomprobante(liquidationId: string) {
         data = {
           CantReg: 1, // Cantidad de comprobantes a registrar
           PtoVta: comprobante?.ptoVenta,
-          CbteTipo: comprobante?.tipoComprobante,
+          CbteTipo: comprobanteCod,
           Concepto: Number(comprobante?.concepto),
           DocTipo: comprobante?.tipoDocumento,
           DocNro: comprobante?.nroDocumento,
@@ -822,7 +837,7 @@ export async function preparateComprobante(
           previous_bill,
           saldo
         );
-      if (ivaPostFiltro) {
+      if (ivaPostFiltro && ivaPostFiltro == "3") {
         iva = ivaPostFiltro;
       }
       const billResponsible = grupo.integrants.find(
@@ -841,12 +856,10 @@ export async function preparateComprobante(
           .values({
             ptoVenta: mostRecentFactura.ptoVenta,
             nroComprobante: 0,
-            tipoComprobante:
-              NCbytipocomprobanteDictionarys[
-                grupo.businessUnitData?.brand?.bill_type ?? "0"
-              ],
+            tipoComprobante: fcAnc[mostRecentFactura?.tipoComprobante ?? "0"],
             concepto: mostRecentFactura?.concepto ?? 0,
             tipoDocumento: tipoDocumento ?? 0,
+            generated: new Date(),
             nroDocumento: mostRecentFactura?.nroDocumento ?? 0,
             importe: previous_bill,
             fromPeriod: dateDesde,
@@ -875,6 +888,7 @@ export async function preparateComprobante(
         .insert(schema.comprobantes)
         .values({
           ptoVenta: parseInt(pv),
+          generated: new Date(),
           nroComprobante: 0,
           tipoComprobante: grupo.businessUnitData?.brand?.bill_type,
           concepto: parseInt(grupo.businessUnitData?.brand?.concept ?? "0"),
@@ -885,7 +899,7 @@ export async function preparateComprobante(
           toPeriod: dateHasta,
           due_date: dateVencimiento,
           prodName: "Servicio",
-          iva: ivaPostFiltro ?? "",
+          iva: iva ?? "",
           billLink: "",
           liquidation_id: liquidationId,
           family_group_id: grupo.id,
@@ -973,6 +987,7 @@ async function calculateAmount(
 
   if (modo?.description == "MIXTO") {
     iva = 1;
+    ivaCodigo = "3";
   }
   if (modo?.description == "PRIVADO") {
     contribution = 0;
@@ -991,7 +1006,7 @@ async function calculateAmount(
 
   // if (modo?.description == "MIXTO") {
   //   amount = saldo + interest + precioNuevo - contribution;
-  //   ivaCodigo = "3";
+  //
   // }
 
   return { amount, ivaCodigo };

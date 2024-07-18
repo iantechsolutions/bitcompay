@@ -246,6 +246,7 @@ export const excelDeserializationRouter = createTRPCRouter({
               nroDocumento: parseInt(new_integrant[0].id_number ?? "0"),
               prodName: "",
               ptoVenta: 0,
+              generated: new Date(),
               tipoDocumento: tipoDocumento ?? 0,
               estado: "apertura",
             });
