@@ -38,8 +38,9 @@ function UpdateLiquidationEstadoDialog({
   return (
     <>
       <Button
-        className=" h-7 bg-[#22d8b3] hover:bg-[#58d9bf] text-[#656464]  text-xs rounded-2xl py-0 px-6"
-        onClick={() => setOpen(true)}>
+        className=" h-7 bg-[#0DA485] hover:bg-[#0da486e2] text-[#FAFDFD] font-medium-medium text-xs rounded-2xl py-0 px-6"
+        onClick={() => setOpen(true)}
+      >
         Aprobar
         <CircleCheck className="h-4 w-auto ml-2" />
       </Button>
@@ -59,14 +60,16 @@ function UpdateLiquidationEstadoDialog({
           <DialogFooter>
             <Button
               className="btn-secondary mr-2"
-              onClick={() => setOpen(false)}>
+              onClick={() => setOpen(false)}
+            >
               Cancelar
             </Button>
             <Button
               className="btn primary"
               type="submit"
               disabled={isLoading}
-              onClick={approveLiquidation}>
+              onClick={approveLiquidation}
+            >
               {isLoading && (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}

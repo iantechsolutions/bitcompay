@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db, schema } from "~/server/db";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import {
   administrative_audit,
   medical_audit,
@@ -60,6 +60,7 @@ export const family_groupsRouter = createTRPCRouter({
         with: {
           comprobantes: {
             where: eq(schema.comprobantes.liquidation_id, input.liquidationId),
+            orderBy: [desc(schema.comprobantes.createdAt)],
             with: {
               family_group: {
                 with: {

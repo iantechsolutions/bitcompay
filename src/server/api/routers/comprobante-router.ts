@@ -602,6 +602,13 @@ export const comprobantesRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const companyId = ctx.session.orgId;
       const grupos = await getGruposByBrandId(input.brandId);
+
+      if (!grupos || grupos.length === 0) {
+        return {
+          error: "No se encuentran grupos familiares asociados a esa marca",
+        };
+      }
+
       const user = await currentUser();
       const brand = await db.query.brands.findFirst({
         where: eq(schema.brands.id, input.brandId),

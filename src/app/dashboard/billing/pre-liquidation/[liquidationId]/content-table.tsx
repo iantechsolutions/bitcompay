@@ -23,8 +23,8 @@ function ContentTable(props: propsContentTable) {
   const { comprobante } = props;
   return (
     <Table>
-      <TableRow>
-        <TableHead className="text-black text-sm opacity-70   border-b border-[#4af0d4]">
+      <TableRow className="">
+        <TableHead className="text-black text-sm opacity-70  pl-0 border-b border-[#4af0d4] text-left">
           {" "}
           Concepto{" "}
         </TableHead>
@@ -43,17 +43,17 @@ function ContentTable(props: propsContentTable) {
       {comprobante?.items
         .filter((item) => item.concept != "Total a pagar")
         .map((item) => (
-          <TableRow>
-            <TableCell className=" border-b border-[#4af0d4] py-2 text-[#737171] italic opacity-70 ">
+          <TableRow key={item.id}>
+            <TableCell className=" border-b border-[#4af0d4] py-[0.25rem]  text-[#737171] text-left italic opacity-70 ">
               {item.concept}
             </TableCell>
-            <TableCell className=" border-b border-[#4af0d4] py-2 text-[#737171] font-semibold opacity-70 ">
+            <TableCell className=" border-b border-[#4af0d4] py-[0.25rem] text-[#737171] font-semibold opacity-70 ">
               {item.amount}
             </TableCell>
-            <TableCell className=" border-b border-[#4af0d4] py-2 text-[#737171] font-semibold opacity-70">
+            <TableCell className=" border-b border-[#4af0d4] py-[0.25rem] text-[#737171] font-semibold opacity-70">
               {item.iva}
             </TableCell>
-            <TableCell className=" border-b border-[#4af0d4] py-2 text-[#737171] font-semibold opacity-70">
+            <TableCell className=" border-b border-[#4af0d4] py-[0.25rem] text-[#737171] font-semibold opacity-70">
               {item.total}
             </TableCell>
           </TableRow>

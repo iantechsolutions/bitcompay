@@ -19,6 +19,8 @@ import {
   TableRow,
 } from "~/components/ui/tablePreliq";
 import { Title } from "~/components/title";
+import { type TableRecord, columns } from "./columns";
+import { DataTable } from "./data-table";
 import { api } from "~/trpc/server";
 import dayjs from "dayjs";
 import xlsx from "xlsx";
@@ -68,53 +70,112 @@ export default async function Home(props: {
   ];
   if (preliquidation?.estado !== "pendiente") headers.push("Factura");
   const summary = {
-    "Saldo anterior": 175517.82,
-    "Cuota Planes": 175517.82,
-    Bonificación: 175517.82,
-    Diferencial: 175517.82,
-    Aportes: 175517.82,
-    Interés: 175517.82,
-    "Sub Total": 175517.82,
-    IVA: 175517.82,
-    "Total a facturar": 175517.82,
+    "Saldo anterior": 0,
+    "Cuota Planes": 0,
+    Bonificación: 0,
+    Diferencial: 0,
+    Aportes: 0,
+    Interés: 0,
+    "Sub Total": 0,
+    IVA: 0,
+    "Total a facturar": 0,
   };
-  // const facturas = preliquidation?.facturas;
-  // const rowsPromise =
-  //   facturas?.map(async (factura) => {
-  //     if (!factura) return [];
-  //     const billResponsible = factura?.family_group?.integrants[0];
 
-  //     const lastEvent = await api.events.getLastByDateAndCC.query({
-  //       ccId: factura?.family_group?.cc?.id!,
-  //       date: factura?.liquidations?.createdAt ?? new Date(),
-  //     });
-
-  //     const total = parseFloat(factura?.importe.toFixed(2));
-  //     return [
-  //       factura?.family_group?.numericalId ?? "",
-  //       billResponsible?.name ?? "",
-  //       billResponsible?.id_number ?? "",
-  //       billResponsible?.fiscal_id_number ?? "",
-  //       isNaN(factura.items?.abono!) ? " " : factura.items?.abono,
-  //       isNaN(factura.items?.bonificacion!)
-  //         ? " "
-  //         : factura.items?.bonificacion?.toString(),
-  //       isNaN(factura.items?.differential_amount!)
-  //         ? " "
-  //         : factura.items?.differential_amount,
-  //       isNaN(factura.items?.contribution!) ? " " : factura.items?.contribution,
-  //       isNaN(factura.items?.interest!) ? " " : factura.items?.interest,
-  //       isNaN(computeBase(total, parseFloat(factura?.iva)))
-  //         ? " "
-  //         : computeBase(total, parseFloat(factura?.iva)),
-  //       isNaN(computeIva(total, parseFloat(factura?.iva)))
-  //         ? " "
-  //         : computeIva(total, parseFloat(factura?.iva)),
-  //       isNaN(total) ? " " : total,
-  //     ];
-  //   }) || [];
-  // const rows = await Promise.all(rowsPromise);
-  // rows.unshift(headers);
+  const toNumberOrZero = (value: any) => {
+    const number = Number(value);
+    return isNaN(number) ? 0 : number; // Check if the result is NaN (Not a Number)
+  };
+  const excelRows: (string | number)[][] = [[...headers]];
+  const tableRows: TableRecord[] = [];
+  for (const fg of familyGroups) {
+    const excelRow = [];
+    const billResponsible = fg?.integrants?.find(
+      (integrante) => integrante?.isBillResponsible
+    );
+    const name = billResponsible?.name ?? "";
+    const cuit = billResponsible?.id_number ?? "";
+    excelRow.push(fg?.numericalId ?? "");
+    excelRow.push(name);
+    excelRow.push(cuit);
+    const original_comprobante = fg?.comprobantes?.find(
+      (comprobante) => comprobante?.origin?.toLowerCase() === "original"
+    );
+    const saldo_anterior = toNumberOrZero(
+      original_comprobante?.items.find(
+        (item) => item.concept === "Saldo anterior"
+      )?.amount
+    );
+    summary["Saldo anterior"] += saldo_anterior;
+    excelRow.push(saldo_anterior);
+    const cuota_planes = toNumberOrZero(
+      original_comprobante?.items.find(
+        (item) => item.concept === "Cuota Planes"
+      )?.amount
+    );
+    summary["Cuota Planes"] += cuota_planes;
+    excelRow.push(cuota_planes);
+    const bonificacion = toNumberOrZero(
+      original_comprobante?.items.find(
+        (item) => item.concept === "Bonificación"
+      )?.amount
+    );
+    summary["Bonificación"] += bonificacion;
+    excelRow.push(bonificacion);
+    const diferencial = toNumberOrZero(
+      original_comprobante?.items.find((item) => item.concept === "Diferencial")
+        ?.amount
+    );
+    summary["Diferencial"] += diferencial;
+    excelRow.push(diferencial);
+    const aportes = toNumberOrZero(
+      original_comprobante?.items.find((item) => item.concept === "Aportes")
+        ?.amount
+    );
+    summary["Aportes"] += aportes;
+    excelRow.push(aportes);
+    const interes = toNumberOrZero(
+      original_comprobante?.items.find((item) => item.concept === "Interés")
+        ?.amount
+    );
+    summary["Interés"] += interes;
+    excelRow.push(interes);
+    const total = toNumberOrZero(
+      parseFloat(original_comprobante?.importe?.toFixed(2)!)
+    );
+    summary["Total a facturar"] += total;
+    excelRow.push(total);
+    const subTotal = computeBase(total, Number(original_comprobante?.iva!));
+    summary["Sub Total"] += subTotal;
+    excelRow.push(subTotal);
+    const iva = computeIva(total, Number(original_comprobante?.iva!));
+    summary.IVA += iva;
+    excelRow.push(iva);
+    excelRows.push(excelRow);
+    const lastEvent = await api.events.getLastByDateAndCC.query({
+      ccId: fg?.cc?.id!,
+      date: preliquidation?.createdAt ?? new Date(),
+    });
+    const currentAccountAmount = lastEvent?.current_amount ?? 0;
+    tableRows.push({
+      id: fg?.id!,
+      nroGF: fg?.numericalId ?? "N/A",
+      nombre: name,
+      cuit,
+      "saldo anterior": saldo_anterior,
+      "cuota pura": cuota_planes,
+      bonificacion,
+      diferencial,
+      aportes,
+      interes,
+      subtotal: subTotal,
+      iva,
+      total,
+      comprobantes: fg?.comprobantes!,
+      currentAccountAmount,
+    });
+    console.log("comprobantes", fg?.comprobantes);
+  }
+  console.log("tableRows", tableRows);
   return (
     <LayoutContainer>
       <div className="flex flex-row justify-between w-full">
@@ -169,22 +230,23 @@ export default async function Home(props: {
           </li>
         </ul>
       </div>
-      <div className="bg-[#ecf7f5] flex flex-row justify-stretch w-full">
+      <div className="bg-[#EBFFFB] flex flex-row justify-stretch w-full pt-5 pb-1">
         {Object.entries(summary).map(([key, value], index, array) => (
           <div
             className={`${
               index != array.length - 1
-                ? "border-r border-[#4af0d4] border-dashed"
+                ? "border-r border-[#4af0d4] border-dashed grow"
                 : ""
             } px-3`}
-            key={key}>
+            key={key}
+          >
             <p className="font-medium text-sm">{key}</p>
             <p className="text-[#4af0d4] font-bold text-sm">$ {value}</p>
           </div>
         ))}
       </div>
-      <div>
-        <Table className="border-separate  border-spacing-x-0 border-spacing-y-2">
+      <div className="relative">
+        {/* <Table className="border-separate  border-spacing-x-0 border-spacing-y-2">
           <TableHeader className="overflow-hidden">
             <TableRow className="bg-[#79edd6]">
               {headers.map((header, index, array) => {
@@ -194,7 +256,8 @@ export default async function Home(props: {
                 return (
                   <TableHead
                     className={`${firstHeader} ${lastHeader} text-gray-800
-               border-r-[1.5px] border-[#4af0d4]`}>
+               border-r-[1.5px] border-[#4af0d4]`}
+                  >
                     {header}
                   </TableHead>
                 );
@@ -211,11 +274,9 @@ export default async function Home(props: {
               />
             ))}
           </TableBody>
-        </Table>
-        <br />
-
-        <br />
-        {/* <DownloadExcelButton rows={rows} period={preliquidation?.period} /> */}
+        </Table> */}
+        <DataTable columns={columns} data={tableRows} />
+        <DownloadExcelButton rows={excelRows} period={preliquidation?.period} />
       </div>
     </LayoutContainer>
   );

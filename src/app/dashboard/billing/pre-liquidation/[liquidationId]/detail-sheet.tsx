@@ -7,153 +7,143 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "~/components/ui/sheet";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-} from "~/components/ui/accordion";
+import { ScrollArea } from "~/components/ui/scroll-area";
 import ContentTable from "./content-table";
 import { RouterOutputs } from "~/trpc/shared";
 import { useState } from "react";
-
+import { api } from "~/trpc/react";
 type DetailSheetProps = {
-  comprobantes: RouterOutputs["comprobantes"]["getByLiquidation"];
-  name: string;
+  data: {
+    comprobantes: RouterOutputs["comprobantes"]["getByLiquidation"];
+    currentAccountAmount: number;
+    nombre: string;
+    cuit: string;
+  };
   open: boolean;
   setOpen: (open: boolean) => void;
 };
-export default function DetailSheet({
-  comprobantes,
-  name,
-  open,
-  setOpen,
-}: DetailSheetProps) {
+
+type Comprobante = RouterOutputs["comprobantes"]["getByLiquidation"][number];
+export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
   const [openFCAccordion, setOpenFCAccordion] = useState(false);
   const [openNCAccordion, setOpenNCAccordion] = useState(false);
-  const summary = {
-    "Cuota Planes": 175517.82,
-    Bonificación: 175517.82,
-    Diferencial: 175517.82,
-    Aportes: 175517.82,
-    Interés: 175517.82,
-  };
-  let comprobanteNCReciente = null;
-  let comprobanteFCReciente = null;
+  let comprobanteNCReciente = data.comprobantes.find(
+    (comprobante) => comprobante.origin === "Nota de credito"
+  );
+  let comprobanteFCReciente = data.comprobantes.find(
+    (comprobante) => comprobante.origin === "Original"
+  );
 
-  for (const comprobante of comprobantes) {
-    if (comprobante.origin === "Nota de credito") {
-      if (
-        !comprobanteFCReciente ||
-        new Date(comprobante.createdAt) >
-          new Date(comprobanteFCReciente.createdAt)
-      ) {
-        comprobanteFCReciente = comprobante;
-      }
-    } else {
-      if (
-        !comprobanteFCReciente ||
-        new Date(comprobante.createdAt) >
-          new Date(comprobanteFCReciente.createdAt)
-      ) {
-        comprobanteFCReciente = comprobante;
-      }
-    }
-  }
   let FCTotal = null;
   let NCTotal = null;
   if (comprobanteFCReciente) {
     FCTotal = comprobanteFCReciente.items.find(
-      (item) => item.concept == "Total a pagar"
+      (item) => item.concept === "Total a pagar"
     )?.total;
   }
-  if (comprobanteFCReciente) {
-    NCTotal = comprobanteFCReciente.items.find(
-      (item) => item.concept == "Nota de credito"
+  if (comprobanteNCReciente) {
+    NCTotal = comprobanteNCReciente.items.find(
+      (item) => item.concept === "Nota de credito"
     )?.amount;
+  }
+
+  const total_a_pagar = comprobanteFCReciente?.items.find(
+    (item) => item.concept == "Total a pagar"
+  )?.total;
+  let saldo_a_pagar = null;
+  if (FCTotal && total_a_pagar) {
+    saldo_a_pagar = FCTotal - total_a_pagar;
   }
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent className="sm:max-w-[550px] px-10 py-12">
-        <SheetHeader>
-          <SheetTitle className="font-medium text-2xl">Detalle</SheetTitle>
-          <SheetDescription>
-            <ul className="ml-3">
-              <li className="list-disc">
-                {" "}
-                <span className="font-bold">Nombre:</span> {name}
-              </li>
-              <li className="list-disc">
-                <span className="font-bold">CUIT:</span>{" "}
-              </li>
-            </ul>
-          </SheetDescription>
-        </SheetHeader>
+      <ScrollArea className="h-full overflow-auto">
+        <SheetContent className="sm:max-w-[550px] px-10 py-12">
+          <SheetHeader>
+            <SheetTitle className="font-medium text-2xl">
+              Detalle del movimiento
+            </SheetTitle>
+            <SheetDescription>
+              <ul className="mt-2">
+                <li>
+                  <span className="font-medium text-[1rem]"> Receptor </span>
+                </li>
+                <li className="font-medium-medium"> {data.nombre}</li>
+                <li className="">{data.cuit}</li>
+              </ul>
+            </SheetDescription>
+          </SheetHeader>
 
-        <div className="bg-[#ecf7f5] flex flex-row justify-evenly gap-0.5 w-full mt-2 py-3">
-          {Object.entries(summary).map(([key, value]) => (
-            <div key={key}>
-              <p className="font-medium text-xs">{key}</p>
-              <p className="text-[#4af0d4] font-bold text-sm">$ {value}</p>
-            </div>
-          ))}
-        </div>
-        <div className="mt-2">
-          <div
-            className="flex flex-row justify-between py-2 mb-3 bg-[#fffefe] transition-all"
-            onClick={() => setOpenNCAccordion(!openNCAccordion)}>
-            <p className="text-2xl font-medium opacity-70 flex flex-row items-center">
-              {openNCAccordion ? (
-                <ChevronDown
-                  className="mr-2 transition-transform duration-200"
-                  size={20}
-                />
-              ) : (
-                <ChevronRight
-                  className="mr-2 transition-transform duration-200"
-                  size={20}
-                />
-              )}
-              NC
-            </p>
-            <p className="text-lg font-semibold text-[#4af0d4]">
-              {NCTotal ? `$ ${NCTotal}` : "N/A"}
+          <div className="bg-[#b7f3e8] flex flex-row justify-between items-center px-1.5 py-2 rounded-md mt-3">
+            <p className=" text-sm font-semibold opacity-70">Saldo actual: </p>
+            <p className="text-[#9b9a9a] text-xs">
+              $ {data.currentAccountAmount}
             </p>
           </div>
-          {openNCAccordion && comprobanteFCReciente && (
-            <ContentTable comprobante={comprobanteFCReciente} />
-          )}
-
-          <div
-            className="flex flex-row justify-between py-2 mb-3 bg-[#fffefe] mt-2"
-            onClick={() => setOpenFCAccordion(!openFCAccordion)}>
-            <p className="text-2xl font-medium opacity-70 flex flex-row items-center">
-              {openFCAccordion ? (
-                <ChevronDown className="mr-2" size={20} />
-              ) : (
-                <ChevronRight className="mr-2" size={20} />
-              )}
-              FC
-            </p>
-            <p className="text-lg font-semibold text-[#4af0d4]">
-              {FCTotal ? `$ ${FCTotal * -1}` : "N/A"}
-            </p>
-          </div>
-          {openFCAccordion && comprobanteFCReciente && (
-            <ContentTable comprobante={comprobanteFCReciente} />
-          )}
-        </div>
-        <div className="mt-3">
-          {Object.entries({
-            "Saldo actual": 87567.23,
-            "Saldo a pagar": 87567.23,
-          }).map(([key, value]) => (
-            <div className="bg-[#b7f3e8] flex flex-row justify-between px-1.5 py-2 rounded-md mt-2">
-              <p className=" text-sm font-semibold opacity-70">{key}: </p>
-              <p className="text-[#9b9a9a] text-xs">$ {value}</p>
+          <div className="mt-2">
+            <div
+              className="flex flex-row justify-between items-center py-2 px-2 mb-3 rounded-md bg-[#c2bebe84] hover:bg-[#cbc7c7ce] transition-all hover:cursor-pointer"
+              onClick={() => setOpenNCAccordion(!openNCAccordion)}
+            >
+              <p className="text-xl font-medium opacity-70 flex flex-row items-center ">
+                NC
+                {openNCAccordion ? (
+                  <ChevronDown
+                    className="ml-2 transition-transform duration-200"
+                    size={12}
+                  />
+                ) : (
+                  <ChevronRight
+                    className="ml-2 transition-transform duration-200"
+                    size={12}
+                  />
+                )}
+              </p>
+              <p className="text-lg font-semibold text-[#4af0d4]">
+                {NCTotal ? `$ ${NCTotal}` : "N/A"}
+              </p>
             </div>
-          ))}
-        </div>
-      </SheetContent>
+            {openNCAccordion && comprobanteNCReciente && (
+              <ContentTable comprobante={comprobanteNCReciente} />
+            )}
+
+            <div
+              className="flex flex-row justify-between items-center py-2 px-2 mb-3 rounded-md bg-[#c2bebe84] hover:bg-[#cbc7c7ce] transition-all hover:cursor-pointer mt-5"
+              onClick={() => setOpenFCAccordion(!openFCAccordion)}
+            >
+              <p className="text-xl font-medium opacity-70 flex flex-row items-center">
+                FC
+                {openFCAccordion ? (
+                  <ChevronDown
+                    className="ml-2 transition-transform duration-200"
+                    size={12}
+                  />
+                ) : (
+                  <ChevronRight
+                    className="ml-2 transition-transform duration-200"
+                    size={12}
+                  />
+                )}
+              </p>
+              <p className="text-lg font-semibold text-[#4af0d4]">
+                {FCTotal ? `$ ${FCTotal * -1}` : "N/A"}
+              </p>
+            </div>
+            {openFCAccordion && comprobanteFCReciente && (
+              <ContentTable comprobante={comprobanteFCReciente} />
+            )}
+          </div>
+          <div className="mt-3">
+            <div className="bg-[#b7f3e8] flex flex-row justify-between items-center px-1.5 py-2 rounded-md mt-2">
+              <p className=" text-sm font-semibold opacity-70">
+                Saldo a pagar:{" "}
+              </p>
+              <p className="text-[#9b9a9a] text-xs">
+                {saldo_a_pagar ? `$ ${saldo_a_pagar}` : "N/A"}
+              </p>
+            </div>
+          </div>
+        </SheetContent>
+      </ScrollArea>
     </Sheet>
   );
 }
