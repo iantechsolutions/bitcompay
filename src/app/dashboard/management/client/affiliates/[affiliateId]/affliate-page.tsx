@@ -159,6 +159,9 @@ export default function AffiliatePage(props: {
                   <TableHead className="flex-1 text-left w-[100px]">
                     Fecha
                   </TableHead>
+                  <TableHead className="flex-1 text-left">
+                    Tipo comprobante
+                  </TableHead>
                   <TableHead className="flex-1 text-left">IVA</TableHead>
                   <TableHead className="flex-1 text-left">Importe</TableHead>
                 </TableRow>
@@ -178,6 +181,9 @@ export default function AffiliatePage(props: {
                           day: "numeric",
                           year: "numeric",
                         })}
+                      </TableCell>
+                      <TableCell className="flex-1 text-left">
+                        {comprobante.tipoComprobante}
                       </TableCell>
                       <TableCell className="flex-1 text-left">
                         {comprobante.iva}%
