@@ -871,6 +871,7 @@ export async function preparateComprobante(
             liquidation_id: liquidationId,
             family_group_id: grupo.id,
             origin: "Nota de credito",
+            estado: "generada",
           })
           .returning();
         //creamos item de NC para visualizacion
