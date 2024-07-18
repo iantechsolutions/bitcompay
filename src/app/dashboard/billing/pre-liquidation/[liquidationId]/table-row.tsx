@@ -1,20 +1,23 @@
 "use client";
-import { TableCell, TableRow } from "~/components/ui/tablePreliq";
-import { Sheet, SheetContent } from "~/components/ui/sheet";
 import { FileText } from "lucide-react";
-import ContentTable from "./content-table";
-import { comprobantes, family_groups } from "~/server/db/schema";
+import { Button } from "~/components/ui/button";
+import { TableCell, TableRow } from "~/components/ui/tablePreliq";
+import DetailSheet from "./detail-sheet";
+import { useState } from "react";
+
 import type { RouterOutputs } from "~/trpc/shared";
 import { api } from "~/trpc/react";
 import { computeBase, computeIva } from "~/lib/utils";
-import DetailSheet from "./detail-sheet";
-import { Button } from "~/components/ui/button";
 import Link from "next/link";
-import { useState } from "react";
 type propsTableRowContainer = {
   preliquidation: RouterOutputs["liquidations"]["get"];
   family_group: RouterOutputs["family_groups"]["getByLiquidation"][number];
   periodo: string;
+};
+
+const toNumberOrZero = (value: any) => {
+  const number = Number(value);
+  return isNaN(number) ? 0 : number;
 };
 
 export default function TableRowContainer({
@@ -29,17 +32,17 @@ export default function TableRowContainer({
     (comprobante) => comprobante?.origin?.toLowerCase() === "original"
   );
   if (!original_comprobante) {
-    return <div>No existe comprobante original</div>;
+    return <TableRow>No existe comprobante original</TableRow>;
   }
   const total = parseFloat(original_comprobante.importe.toFixed(2));
   const { data: lastEvent } = api.events.getLastByDateAndCC.useQuery({
     ccId: family_group?.cc?.id!,
     date: preliquidation?.createdAt ?? new Date(),
   });
+  const currentAccountAmount = lastEvent?.current_amount ?? 0;
   const billResponsible = family_group?.integrants.find(
     (x) => x.isBillResponsible == true
   );
-  const currentAccountAmount = lastEvent?.current_amount ?? 0;
   const abono = original_comprobante.items.find(
     (item) => item.concept === "Abono"
   );
@@ -51,6 +54,9 @@ export default function TableRowContainer({
   );
   const interest = original_comprobante.items.find(
     (item) => item.concept === "Interes"
+  );
+  const differential = original_comprobante.items.find(
+    (item) => item.concept === "Diferencial"
   );
   const previousBill = original_comprobante.items.find(
     (item) => item.concept === "Comprobante Anterior"
@@ -103,7 +109,10 @@ export default function TableRowContainer({
           {" "}
           {bonification?.amount}
         </TableCell>
-        <TableCell className="border border-[#6cebd1] p-2 py-4"> {0}</TableCell>
+        <TableCell className="border border-[#6cebd1] p-2 py-4">
+          {" "}
+          {toNumberOrZero(differential?.amount)}
+        </TableCell>
         <TableCell className="border border-[#6cebd1] p-2 py-4">
           {" "}
           {contribution?.amount}
@@ -114,15 +123,19 @@ export default function TableRowContainer({
         </TableCell>
         <TableCell className="border border-[#6cebd1] p-2 py-4">
           {" "}
-          {computeBase(total, parseFloat(original_comprobante?.iva) ?? 0)}
+          {toNumberOrZero(
+            computeBase(total, parseFloat(original_comprobante?.iva) ?? 0)
+          )}
         </TableCell>
         <TableCell className="border border-[#6cebd1] p-2 py-4">
           {" "}
-          {computeIva(total, parseFloat(original_comprobante?.iva) ?? 0)}
+          {toNumberOrZero(
+            computeIva(total, parseFloat(original_comprobante?.iva) ?? 0)
+          )}
         </TableCell>
         <TableCell className="border border-[#6cebd1] p-2 py-4">
           {" "}
-          {total}
+          {toNumberOrZero(total)}
         </TableCell>
         {preliquidation!.estado !== "pendiente" && (
           <TableCell className="rounded-r-md border border-[#6cebd1]">

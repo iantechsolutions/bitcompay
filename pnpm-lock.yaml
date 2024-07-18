@@ -74,6 +74,9 @@ dependencies:
   '@tanstack/react-query':
     specifier: ^4.36.1
     version: 4.36.1(react-dom@18.2.0)(react@18.3.1)
+  '@tanstack/react-table':
+    specifier: ^8.19.3
+    version: 8.19.3(react-dom@18.2.0)(react@18.3.1)
   '@trpc/client':
     specifier: ^10.44.1
     version: 10.44.1(@trpc/server@10.44.1)
@@ -2264,6 +2267,23 @@ packages:
       react: 18.3.1
       react-dom: 18.2.0(react@18.3.1)
       use-sync-external-store: 1.2.0(react@18.3.1)
+    dev: false
+
+  /@tanstack/react-table@8.19.3(react-dom@18.2.0)(react@18.3.1):
+    resolution: {integrity: sha512-MtgPZc4y+cCRtU16y1vh1myuyZ2OdkWgMEBzyjYsoMWMicKZGZvcDnub3Zwb6XF2pj9iRMvm1SO1n57lS0vXLw==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      react: '>=16.8'
+      react-dom: '>=16.8'
+    dependencies:
+      '@tanstack/table-core': 8.19.3
+      react: 18.3.1
+      react-dom: 18.2.0(react@18.3.1)
+    dev: false
+
+  /@tanstack/table-core@8.19.3:
+    resolution: {integrity: sha512-IqREj9ADoml9zCAouIG/5kCGoyIxPFdqdyoxis9FisXFi5vT+iYfEfLosq4xkU/iDbMcEuAj+X8dWRLvKYDNoQ==}
+    engines: {node: '>=12'}
     dev: false
 
   /@trpc/client@10.44.1(@trpc/server@10.44.1):

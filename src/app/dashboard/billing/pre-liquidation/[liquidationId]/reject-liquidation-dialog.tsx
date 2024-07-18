@@ -34,7 +34,7 @@ export default function RejectLiquidationDialog({
   return (
     <>
       <Button
-        className="  h-7 bg-[#c2c0c0] hover:bg-[#7e7c7c] text-[#686767]  text-xs rounded-2xl py-0 px-6"
+        className="  h-7 bg-[#D9D7D8] hover:bg-[#d9d7d8dc] text-[#4B4B4B]  text-xs rounded-2xl py-0 px-6"
         onClick={() => setOpen(true)}
       >
         Anular

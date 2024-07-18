@@ -31,14 +31,15 @@ export default function DownloadExcelButton({
   }
   return (
     <Button
-      className="mt-4 bg-[#45e0c6]"
+      className="mt-4 px-6 py-0 bg-[#0DA485] hover:bg-[#0da486e2] 
+       rounded-2xl  h-7  text-xs absolute right-0"
       onClick={async () => {
         alert("Descargando Excel Pre liquidación");
         await handleGenerate(rows);
       }}
     >
-      <ExternalLink className="mr-2 h-4 w-auto" />
-      exportar
+      <ExternalLink className="mr-1 h-4 w-auto" />
+      Exportar
     </Button>
   );
 }
