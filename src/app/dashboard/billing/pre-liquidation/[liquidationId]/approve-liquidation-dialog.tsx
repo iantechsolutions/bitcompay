@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { currentUser } from "@clerk/nextjs/server";
-import { CircleCheck } from "lucide-react";
+import { CircleCheck, CircleX } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,7 @@ import {
   DialogFooter,
 } from "~/components/ui/dialog";
 import { useRouter } from "next/navigation";
-import { Button } from "~/components/ui/button";
+import { Button, buttonVariants } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 import { Loader2Icon } from "lucide-react";
 
@@ -38,9 +38,8 @@ function UpdateLiquidationEstadoDialog({
   return (
     <>
       <Button
-        className=" h-7 bg-[#0DA485] hover:bg-[#0da486e2] text-[#FAFDFD] font-medium-medium text-xs rounded-2xl py-0 px-6"
-        onClick={() => setOpen(true)}
-      >
+        className="h-7 bg-[#0DA485] hover:bg-[#0da486e2] text-[#FAFDFD] font-medium-medium text-xs rounded-2xl py-0 px-6"
+        onClick={() => setOpen(true)}>
         Aprobar
         <CircleCheck className="h-4 w-auto ml-2" />
       </Button>
@@ -59,21 +58,19 @@ function UpdateLiquidationEstadoDialog({
           {/* Add more dialog content here as needed */}
           <DialogFooter>
             <Button
-              className="btn-secondary mr-2"
-              onClick={() => setOpen(false)}
-            >
-              Cancelar
+              className="h-7 bg-[#D9D7D8] hover:bg-[#d9d7d8dc] text-[#4B4B4B]  text-xs rounded-2xl py-0 px-6"
+              onClick={() => setOpen(false)}>
+              Cancelar <CircleX className="h-4 w-auto ml-2" />
             </Button>
             <Button
-              className="btn primary"
+              className="h-7 bg-[#0DA485] hover:bg-[#0da486e2] text-[#FAFDFD] font-medium-medium text-xs rounded-2xl py-0 px-6"
               type="submit"
               disabled={isLoading}
-              onClick={approveLiquidation}
-            >
+              onClick={approveLiquidation}>
               {isLoading && (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}
-              Aprobar Liquidación
+              Aprobar Liquidación <CircleCheck className="h-4 w-auto ml-2" />
             </Button>
           </DialogFooter>
         </DialogContent>
