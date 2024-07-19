@@ -343,36 +343,12 @@ async function approbatecomprobante(liquidationId: string) {
       const name = `FAC_${last_voucher + 1}.pdf`; // NOMBRE
       last_voucher += 1;
       console.log("9");
-      const options = {
-        width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
-        marginLeft: 0.8, // Margen izquierdo en pulgadas. Usar 0.1 para ticket
-        marginRight: 0.8, // Margen derecho en pulgadas. Usar 0.1 para ticket
-        marginTop: 0.4, // Margen superior en pulgadas. Usar 0.1 para ticket
-        marginBottom: 0.4, // Margen inferior en pulgadas. Usar 0.1 para ticket
-      };
-
-      //MANDAMOS PDF A AFIP, hay que agregar el qr al circuito, y levantar resHtml, por que actualmente solo se logea
-      const resHtml = await afip.ElectronicBilling.createPDF({
-        html: html,
-        file_name: name,
-        options: options,
-      });
-
+      sendHTMLtoAFIP(html, name, afip, comprobante?.id ?? "");
       console.log("10");
-      const url = resHtml.file;
 
       // const uploaded = await utapi.uploadFiles(
       //   new File([text], input.fileName, { type: "text/plain" })
       // );
-
-      await db
-        .update(schema.comprobantes)
-        .set({
-          billLink: resHtml.file,
-          estado: "pendiente",
-        })
-        .where(eq(schema.comprobantes.id, comprobante.id));
-      console.log("11");
       let historicEvents = await db.query.events.findMany({
         where: eq(schema.events.currentAccount_id, cc?.id ?? ""),
       });
@@ -417,6 +393,37 @@ async function approbatecomprobante(liquidationId: string) {
   } else {
     return "Error";
   }
+}
+
+async function sendHTMLtoAFIP(
+  html: string,
+  name: string,
+  afip: Afip,
+  comprobanteId: string
+) {
+  const options = {
+    width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
+    marginLeft: 0.8, // Margen izquierdo en pulgadas. Usar 0.1 para ticket
+    marginRight: 0.8, // Margen derecho en pulgadas. Usar 0.1 para ticket
+    marginTop: 0.4, // Margen superior en pulgadas. Usar 0.1 para ticket
+    marginBottom: 0.4, // Margen inferior en pulgadas. Usar 0.1 para ticket
+  };
+
+  const resHtml = await afip.ElectronicBilling.createPDF({
+    html: html,
+    file_name: name,
+    options: options,
+  });
+  const url = resHtml.file;
+
+  await db
+    .update(schema.comprobantes)
+    .set({
+      billLink: resHtml.file,
+      estado: "pendiente",
+    })
+    .where(eq(schema.comprobantes.id, comprobanteId));
+  console.log("11");
 }
 
 async function createcomprobanteItem(
