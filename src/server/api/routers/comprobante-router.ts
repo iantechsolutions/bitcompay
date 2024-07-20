@@ -15,7 +15,6 @@ import { utapi } from "~/server/uploadthing";
 import { id } from "date-fns/locale";
 import { Events } from "./events-router";
 import { datetime } from "drizzle-orm/mysql-core";
-const puppeteer = require("puppeteer");
 var html_to_pdf = require("html-pdf-node");
 
 type Bonus = {
@@ -189,6 +188,7 @@ async function approbatecomprobante(liquidationId: string) {
     },
   });
   if (liquidation?.estado === "pendiente") {
+    const puppeteer = require("puppeteer");
     const user = await currentUser();
     const updatedLiquidation = await db
       .update(schema.liquidations)
@@ -348,6 +348,7 @@ async function approbatecomprobante(liquidationId: string) {
       const name = `FAC_${last_voucher + 1}.pdf`; // NOMBRE
       last_voucher += 1;
       console.log("9");
+
       await PDFFromHtml(
         html,
         name,
@@ -355,7 +356,8 @@ async function approbatecomprobante(liquidationId: string) {
         comprobante?.id ?? "",
         last_voucher + 1,
         browser,
-        page
+        page,
+        puppeteer
       );
       console.log("10");
 
@@ -415,13 +417,16 @@ async function PDFFromHtml(
   comprobanteId: string,
   voucher: number,
   browser: any,
-  page: any
+  page: any,
+  puppeteer: any
 ) {
   let options = { format: "A4" };
   let file = { content: html };
 
   await page.setContent(html);
-  await page.pdf({ path: "output.pdf", format: "A4" });
+  console.log("1");
+  const pdf = await page.pdf({ format: "A4" });
+  console.log("pdf", pdf);
 
   // html_to_pdf.generatePdf(file, options).then(async (pdfBuffer: BlobPart) => {
   //   const pdfBlob = new Blob([pdfBuffer], { type: "application/pdf" });
