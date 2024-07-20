@@ -15,7 +15,6 @@ import { utapi } from "~/server/uploadthing";
 import { id } from "date-fns/locale";
 import { Events } from "./events-router";
 import { datetime } from "drizzle-orm/mysql-core";
-var html_to_pdf = require("html-pdf-node");
 
 type Bonus = {
   id: string;
@@ -39,7 +38,8 @@ const ivaDictionary: { [key: number]: string } = {
   9: "2.5",
   0: "",
 };
-
+const PuppeteerHTMLPDF = require("puppeteer-html-pdf");
+const htmlPDF = new PuppeteerHTMLPDF();
 const conceptDictionary = {
   Productos: 1,
   Servicios: 2,
@@ -354,10 +354,7 @@ async function approbatecomprobante(liquidationId: string) {
         name,
         afip,
         comprobante?.id ?? "",
-        last_voucher + 1,
-        browser,
-        page,
-        puppeteer
+        last_voucher + 1
       );
       console.log("10");
 
@@ -415,18 +412,28 @@ async function PDFFromHtml(
   name: string,
   afip: Afip,
   comprobanteId: string,
-  voucher: number,
-  browser: any,
-  page: any,
-  puppeteer: any
+  voucher: number
 ) {
-  let options = { format: "A4" };
-  let file = { content: html };
-
-  await page.setContent(html);
-  console.log("1");
-  const pdf = await page.pdf({ format: "A4" });
+  const options = {
+    format: "A4",
+    path: `${__dirname}/sample.pdf`, // you can pass path to save the file
+  };
+  htmlPDF.setOptions(options);
+  const pdf = await htmlPDF.create(html);
   console.log("pdf", pdf);
+  console.log(typeof pdf);
+  const pdfBlob = new Blob([pdf], { type: "application/pdf" });
+  const pdfFile = new File([pdfBlob], name, {
+    type: "application/pdf",
+  });
+
+  // let options = { format: "A4" };
+  // let file = { content: html };
+
+  // await page.setContent(html);
+  // console.log("1");
+  // const pdf = await page.pdf({ format: "A4" });
+  // console.log("pdf", pdf);
 
   // html_to_pdf.generatePdf(file, options).then(async (pdfBuffer: BlobPart) => {
   //   const pdfBlob = new Blob([pdfBuffer], { type: "application/pdf" });
