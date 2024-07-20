@@ -38,7 +38,8 @@ const ivaDictionary: { [key: number]: string } = {
   9: "2.5",
   0: "",
 };
-
+const PuppeteerHTMLPDF = require("puppeteer-html-pdf");
+const htmlPDF = new PuppeteerHTMLPDF();
 const conceptDictionary = {
   Productos: 1,
   Servicios: 2,
@@ -339,11 +340,18 @@ async function approbatecomprobante(liquidationId: string) {
         last_voucher + 1 ?? 0,
         comprobante.family_group?.businessUnitData!.brand
       );
+
       console.log("8");
       const name = `FAC_${last_voucher + 1}.pdf`; // NOMBRE
       last_voucher += 1;
       console.log("9");
-      sendHTMLtoAFIP(html, name, afip, comprobante?.id ?? "");
+      await PDFFromHtml(
+        html,
+        name,
+        afip,
+        comprobante?.id ?? "",
+        last_voucher + 1
+      );
       console.log("10");
 
       // const uploaded = await utapi.uploadFiles(
@@ -395,34 +403,51 @@ async function approbatecomprobante(liquidationId: string) {
   }
 }
 
-async function sendHTMLtoAFIP(
+async function PDFFromHtml(
   html: string,
   name: string,
   afip: Afip,
-  comprobanteId: string
+  comprobanteId: string,
+  voucher: number
 ) {
+  // const options = {
+  //   width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
+  //   marginLeft: 0.8, // Margen izquierdo en pulgadas. Usar 0.1 para ticket
+  //   marginRight: 0.8, // Margen derecho en pulgadas. Usar 0.1 para ticket
+  //   marginTop: 0.4, // Margen superior en pulgadas. Usar 0.1 para ticket
+  //   marginBottom: 0.4, // Margen inferior en pulgadas. Usar 0.1 para ticket
+  // };
+
+  // const resHtml = await afip.ElectronicBilling.createPDF({
+  //   html: html,
+  //   file_name: name,
+  //   options: options,
+  // });
+  // const url = resHtml.file;
   const options = {
-    width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
-    marginLeft: 0.8, // Margen izquierdo en pulgadas. Usar 0.1 para ticket
-    marginRight: 0.8, // Margen derecho en pulgadas. Usar 0.1 para ticket
-    marginTop: 0.4, // Margen superior en pulgadas. Usar 0.1 para ticket
-    marginBottom: 0.4, // Margen inferior en pulgadas. Usar 0.1 para ticket
+    format: "A4",
+    path: `${__dirname}/sample.pdf`, // you can pass path to save the file
   };
-
-  const resHtml = await afip.ElectronicBilling.createPDF({
-    html: html,
-    file_name: name,
-    options: options,
+  htmlPDF.setOptions(options);
+  const pdf = await htmlPDF.create(html);
+  const pdfBlob = new Blob([pdf], { type: "application/pdf" });
+  const pdfFile = new File([pdfBlob], name, {
+    type: "application/pdf",
   });
-  const url = resHtml.file;
 
-  await db
-    .update(schema.comprobantes)
-    .set({
-      billLink: resHtml.file,
-      estado: "pendiente",
-    })
-    .where(eq(schema.comprobantes.id, comprobanteId));
+  const response = await utapi.uploadFiles(pdfFile);
+  console.log("pdf");
+  console.log(pdf);
+  console.log(typeof pdf);
+  console.log(response);
+  // await db
+  //   .update(schema.comprobantes)
+  //   .set({
+  //     billLink: resHtml.file,
+  //     estado: "pendiente",
+  //     nroComprobante: voucher,
+  //   })
+  //   .where(eq(schema.comprobantes.id, comprobanteId));
   console.log("11");
 }
 
