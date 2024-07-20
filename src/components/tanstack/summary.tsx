@@ -25,7 +25,7 @@ export default function DataTableSummary<TData>({
     summary["Cuota Planes"] += row.getValue("cuota plan") as number;
     summary.Bonificación += row.getValue("bonificacion") as number;
     summary.Diferencial += row.getValue("diferencial") as number;
-    summary.Aportes += row.getValue("aportes") as number;
+    summary.Aportes += row.getValue("Aporte") as number;
     summary.Interés += row.getValue("interes") as number;
     summary["Total a facturar"] += row.getValue("total") as number;
     summary["Sub Total"] += row.getValue("subtotal") as number;

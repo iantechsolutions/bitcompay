@@ -52,6 +52,17 @@ export default async function Home(props: {
     liquidationId: props.params.liquidationId,
   });
 
+  const allPlan = await api.plans.list.query();
+  const plansOptions = allPlan.map((plan) => ({
+    value: plan.id,
+    label: plan.plan_code ?? "plan sin nombre",
+  })) || [{ value: "", label: "" }];
+  const allModos = await api.modos.list.query();
+  const modosOptions = allModos.map((modo) => ({
+    value: modo?.id,
+    label: modo?.description ?? "modo sin nombre",
+  })) || [{ value: "", label: "" }];
+
   const periodo =
     dayjs.utc(preliquidation?.period).format("MMMM [de] YYYY") ?? "-";
   const headers = [
@@ -156,6 +167,8 @@ export default async function Home(props: {
       date: preliquidation?.createdAt ?? new Date(),
     });
     const currentAccountAmount = lastEvent?.current_amount ?? 0;
+    const plan = fg?.plan?.id ?? "";
+    const modo = fg?.modo?.id ?? "";
     tableRows.push({
       id: fg?.id!,
       nroGF: fg?.numericalId ?? "N/A",
@@ -172,6 +185,8 @@ export default async function Home(props: {
       total,
       comprobantes: fg?.comprobantes!,
       currentAccountAmount,
+      plan,
+      modo,
     });
     console.log("comprobantes", fg?.comprobantes);
   }
@@ -180,13 +195,13 @@ export default async function Home(props: {
   return (
     <LayoutContainer>
       <div className="flex flex-row justify-between w-full">
+        <div className="opacity-50 flex flex-row items-center hover:cursor-pointer hover:underline transition-all duration-300">
+          {" "}
+          <ChevronLeft className="mr-1 h-4 w-auto" />
+          <p className="font-medium ">VOLVER</p>
+        </div>
         {preliquidation?.estado === "pendiente" && (
           <>
-            <div className="opacity-50 flex flex-row items-center">
-              {" "}
-              <ChevronLeft className="mr-1 h-4 w-auto" />
-              <p className="font-medium ">VOLVER</p>
-            </div>
             <div className="flex flex-row gap-1">
               <UpdateLiquidationEstadoDialog
                 liquidationId={props.params.liquidationId}

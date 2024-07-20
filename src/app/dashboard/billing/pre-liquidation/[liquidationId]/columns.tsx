@@ -21,6 +21,8 @@ export type TableRecord = {
   total: number;
   comprobantes: RouterOutputs["comprobantes"]["getByLiquidation"];
   currentAccountAmount: number;
+  plan: string;
+  modo: string;
 };
 
 export const columns: ColumnDef<TableRecord>[] = [
@@ -44,7 +46,7 @@ export const columns: ColumnDef<TableRecord>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <div className="text-center text-[#909090]">
+        <div className="text-center text-[#909090] w-[100px] overflow-hidden whitespace-nowrap text-overflow-ellipsis">
           {row.getValue("nombre")}
         </div>
       );
@@ -77,12 +79,12 @@ export const columns: ColumnDef<TableRecord>[] = [
     },
   },
   {
-    accessorKey: "cuota pura",
+    accessorKey: "cuota plan",
     header: () => (
-      <div className="text-center text-black text-medium">Cuota pura</div>
+      <div className="text-center text-black text-medium">Cuota plan</div>
     ),
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("cuota pura"));
+      const amount = parseFloat(row.getValue("cuota plan"));
       const formatted = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
@@ -192,6 +194,22 @@ export const columns: ColumnDef<TableRecord>[] = [
       }).format(amount);
 
       return <div className="text-center text-[#909090]">{formatted}</div>;
+    },
+  },
+  {
+    accessorKey: "plan",
+    header: () => null,
+    cell: () => null,
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id));
+    },
+  },
+  {
+    accessorKey: "modo",
+    header: () => null,
+    cell: () => null,
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id));
     },
   },
 ];
