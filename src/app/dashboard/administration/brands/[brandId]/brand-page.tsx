@@ -1,6 +1,6 @@
 "use client";
 import { CheckIcon, Loader2 } from "lucide-react";
-import { type MouseEventHandler, useState } from "react";
+import { type MouseEventHandler, useState, useEffect } from "react";
 import { toast } from "sonner";
 import {
   Select,
@@ -112,6 +112,13 @@ export default function BrandPage({
     }
   }
 
+  useEffect(() => {
+    if (brand) {
+      setName(brand.name ?? "");
+      setIva(brand.iva ?? "");
+      setBillType(brand.bill_type ?? "");
+    }
+  }, [brand]);
   return (
     <LayoutContainer>
       <section className="space-y-2">
