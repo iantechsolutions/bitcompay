@@ -15,7 +15,7 @@ import { utapi } from "~/server/uploadthing";
 import { id } from "date-fns/locale";
 import { Events } from "./events-router";
 import { datetime } from "drizzle-orm/mysql-core";
-// import * as puppeteer from "puppeteer";
+import * as puppeteer from "puppeteer";
 import chromium from "@sparticuz/chromium";
 import puppeteerCore from "puppeteer-core";
 type Bonus = {
@@ -191,18 +191,16 @@ async function approbatecomprobante(liquidationId: string) {
   if (liquidation?.estado === "pendiente") {
     let browser = null;
     if (process.env.NODE_ENV === "development") {
-      browser = await puppeteerCore.launch({
+      browser = await puppeteer.launch({
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
         headless: true,
       });
     }
     if (process.env.NODE_ENV === "production") {
       browser = await puppeteerCore.launch({
-        args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
+        args: chromium.args,
         defaultViewport: chromium.defaultViewport,
-        executablePath: await chromium.executablePath(
-          "https://github.com/Sparticuz/chromium/releases/download/v116.0.0/chromium-v116.0.0-pack.tar"
-        ),
+        executablePath: await chromium.executablePath(),
         headless: chromium.headless,
       });
     }
