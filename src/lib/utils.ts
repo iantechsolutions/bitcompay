@@ -127,9 +127,9 @@ export function htmlBill(
 
   function getIimageForLogo(logo: string | null) {
     if (logo) {
-      return `<img class="logo" src=${logo} alt="logo" />`;
+      return `<img class="logo" style="width: 30vw;height: auto;margin-bottom: 5px;" src=${logo} alt="logo" />`;
     } else {
-      return `<img class="logo" src="https://utfs.io/f/f426d7f1-f9c7-437c-a722-f978ab23830d-neiy4q.png" alt="logo" />`;
+      return `<img class="logo" style="width: 30vw;height: auto;margin-bottom: 5px;" src="https://utfs.io/f/f426d7f1-f9c7-437c-a722-f978ab23830d-neiy4q.png" alt="logo" />`;
     }
   }
   function generateConcepts(

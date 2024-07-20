@@ -40,6 +40,7 @@ import { useFieldArray } from "react-hook-form";
 import { Label } from "~/components/ui/label";
 import { RouterOutputs } from "~/trpc/shared";
 import { GoBackArrow } from "~/components/goback-arrow";
+import { useQueryClient } from "@tanstack/react-query";
 
 dayjs.extend(utc);
 dayjs.locale("es");
@@ -47,11 +48,13 @@ dayjs.locale("es");
 type AddPlanDialogProps = {
   planId?: string;
   onPlanIdChange?: (planId: string) => void;
+  closeDialog: () => void;
 };
 
 export default function AddPlanInfoComponent({
   planId,
   onPlanIdChange,
+  closeDialog,
 }: AddPlanDialogProps) {
   const company = useCompanyData();
   const [brand, setBrand] = useState("");
@@ -81,6 +84,7 @@ export default function AddPlanInfoComponent({
     api.plans.create.useMutation();
   const { mutateAsync: updatePlan, isLoading: isUpdating } =
     api.plans.change.useMutation();
+  const queryClient = useQueryClient();
 
   async function handleSumbit() {
     if (planId) {
@@ -100,8 +104,11 @@ export default function AddPlanInfoComponent({
       if (onPlanIdChange) {
         onPlanIdChange(plan[0]!.id);
       }
+      queryClient.invalidateQueries();
+
       toast.success("Plan creado correctamente");
     }
+    closeDialog();
   }
 
   return (

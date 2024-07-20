@@ -1,6 +1,8 @@
 "use client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import AddPlanInfoComponent from "./add-planinfo-component";
+import { useQueryClient } from "@tanstack/react-query";
+
 import { useState } from "react";
 import {
   Dialog,
@@ -16,9 +18,11 @@ export default function AddPlanDialog(props: { planId?: string }) {
   const [open, setOpen] = useState<boolean>(false);
   const router = useRouter();
   const [planId, setPlanId] = useState<string | undefined>(props.planId);
+  const queryClient = useQueryClient();
+
   async function handleChange() {
     setOpen(false);
-    router.refresh();
+    queryClient.invalidateQueries();
   }
   return (
     <div>
@@ -42,7 +46,7 @@ export default function AddPlanDialog(props: { planId?: string }) {
           <AddPlanInfoComponent
             planId={planId}
             onPlanIdChange={() => handleChange()}
-          ></AddPlanInfoComponent>
+            closeDialog={() => handleChange()}></AddPlanInfoComponent>
         </DialogContent>
       </Dialog>
     </div>

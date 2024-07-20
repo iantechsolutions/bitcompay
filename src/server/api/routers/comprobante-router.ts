@@ -15,7 +15,11 @@ import { utapi } from "~/server/uploadthing";
 import { id } from "date-fns/locale";
 import { Events } from "./events-router";
 import { datetime } from "drizzle-orm/mysql-core";
-
+import * as puppeteer from "puppeteer";
+import chromium from "@sparticuz/chromium";
+import puppeteerCore from "puppeteer-core";
+var wkhtmltopdf = require("wkhtmltopdf");
+const streamToBlob = require("stream-to-blob");
 type Bonus = {
   id: string;
   appliedUser: string;
@@ -187,6 +191,23 @@ async function approbatecomprobante(liquidationId: string) {
     },
   });
   if (liquidation?.estado === "pendiente") {
+    let browser = null;
+    if (process.env.NODE_ENV === "development") {
+      browser = await puppeteer.launch({
+        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        headless: true,
+      });
+    }
+    if (process.env.NODE_ENV === "production") {
+      browser = await puppeteerCore.launch({
+        args: chromium.args,
+        defaultViewport: chromium.defaultViewport,
+        executablePath: await chromium.executablePath(),
+        headless: chromium.headless,
+      });
+    }
+    const page = await browser?.newPage();
+
     const user = await currentUser();
     const updatedLiquidation = await db
       .update(schema.liquidations)
@@ -339,40 +360,25 @@ async function approbatecomprobante(liquidationId: string) {
         last_voucher + 1 ?? 0,
         comprobante.family_group?.businessUnitData!.brand
       );
+
       console.log("8");
       const name = `FAC_${last_voucher + 1}.pdf`; // NOMBRE
       last_voucher += 1;
       console.log("9");
-      const options = {
-        width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
-        marginLeft: 0.8, // Margen izquierdo en pulgadas. Usar 0.1 para ticket
-        marginRight: 0.8, // Margen derecho en pulgadas. Usar 0.1 para ticket
-        marginTop: 0.4, // Margen superior en pulgadas. Usar 0.1 para ticket
-        marginBottom: 0.4, // Margen inferior en pulgadas. Usar 0.1 para ticket
-      };
-
-      //MANDAMOS PDF A AFIP, hay que agregar el qr al circuito, y levantar resHtml, por que actualmente solo se logea
-      const resHtml = await afip.ElectronicBilling.createPDF({
-        html: html,
-        file_name: name,
-        options: options,
-      });
-
+      await PDFFromHtml(
+        html,
+        name,
+        afip,
+        comprobante?.id ?? "",
+        last_voucher + 1,
+        browser,
+        page
+      );
       console.log("10");
-      const url = resHtml.file;
 
       // const uploaded = await utapi.uploadFiles(
       //   new File([text], input.fileName, { type: "text/plain" })
       // );
-
-      await db
-        .update(schema.comprobantes)
-        .set({
-          billLink: resHtml.file,
-          estado: "pendiente",
-        })
-        .where(eq(schema.comprobantes.id, comprobante.id));
-      console.log("11");
       let historicEvents = await db.query.events.findMany({
         where: eq(schema.events.currentAccount_id, cc?.id ?? ""),
       });
@@ -417,6 +423,39 @@ async function approbatecomprobante(liquidationId: string) {
   } else {
     return "Error";
   }
+}
+
+async function PDFFromHtml(
+  html: string,
+  name: string,
+  afip: Afip,
+  comprobanteId: string,
+  voucher: number,
+  browser: any,
+  page: any
+) {
+  const stream = wkhtmltopdf(html);
+  const pdfBlob = await streamToBlob(stream);
+  // await page.setContent(html, { waitUntil: "networkidle0" });
+  // const pdfBuffer = await page.pdf();
+  // const pdfBlob = new Blob([pdf], { type: "application/pdf" });
+  const pdfFile = new File([pdfBlob], name, {
+    type: "application/pdf",
+  });
+  console.log("stream", stream);
+  console.log(typeof stream);
+  console.log("html", html);
+  const response = await utapi.uploadFiles(pdfFile);
+  console.log(response);
+  await db
+    .update(schema.comprobantes)
+    .set({
+      billLink: response.data?.url,
+      estado: "pendiente",
+      nroComprobante: voucher,
+    })
+    .where(eq(schema.comprobantes.id, comprobanteId));
+  console.log("termino la funcion");
 }
 
 async function createcomprobanteItem(
