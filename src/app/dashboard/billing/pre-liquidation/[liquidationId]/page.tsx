@@ -167,8 +167,8 @@ export default async function Home(props: {
       date: preliquidation?.createdAt ?? new Date(),
     });
     const currentAccountAmount = lastEvent?.current_amount ?? 0;
-    const plan = fg?.plan?.id ?? "";
-    const modo = fg?.modo?.id ?? "";
+    const plan = fg?.plan?.description ?? "";
+    const modo = fg?.modo?.description ?? "";
     tableRows.push({
       id: fg?.id!,
       nroGF: fg?.numericalId ?? "N/A",

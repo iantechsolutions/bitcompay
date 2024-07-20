@@ -7,6 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { X } from "lucide-react";
 import { SlidersHorizontal } from "lucide-react";
 import { DataTableFacetedFilter } from "./faceted-filter";
+import Filters from "./filters";
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
 }
@@ -31,6 +32,7 @@ export default function TableToolbar<TData>({
         <Search className="h-5 absolute right-3" color="#71EBD4" />
       </div>
       <div className="flex gap-2">
+        <Filters table={table} />
         <div className="flex gap-2">
           {table.getState().columnFilters.map((column) => (
             <div className="rounded-full h-7 border-2 border-[#71EBD4] px-2 text-muted-foreground text-sm flex items-center">
