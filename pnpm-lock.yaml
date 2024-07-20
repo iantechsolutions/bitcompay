@@ -170,6 +170,9 @@ dependencies:
   playwright:
     specifier: ^1.45.2
     version: 1.45.2
+  puppeteer:
+    specifier: ^22.13.1
+    version: 22.13.1(typescript@5.3.3)
   puppeteer-html-pdf:
     specifier: ^4.0.8
     version: 4.0.8(typescript@5.3.3)
