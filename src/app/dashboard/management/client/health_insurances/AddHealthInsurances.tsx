@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { Loader2Icon, PlusCircleIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -24,6 +25,8 @@ export function AddHealthInsurances() {
   const [description, setDescription] = useState("");
   const [IdNumber, setIdNumber] = useState("");
 
+  const queryClient = useQueryClient();
+
   const [open, setOpen] = useState(false);
 
   const router = useRouter();
@@ -36,7 +39,8 @@ export function AddHealthInsurances() {
       });
 
       toast.success("Obra social creada correctamente");
-      router.refresh();
+      queryClient.invalidateQueries();
+
       setOpen(false);
     } catch (e) {
       const error = asTRPCError(e)!;
