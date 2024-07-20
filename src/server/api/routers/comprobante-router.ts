@@ -15,11 +15,9 @@ import { utapi } from "~/server/uploadthing";
 import { id } from "date-fns/locale";
 import { Events } from "./events-router";
 import { datetime } from "drizzle-orm/mysql-core";
-import * as puppeteer from "puppeteer";
-import chromium from "@sparticuz/chromium";
-import puppeteerCore from "puppeteer-core";
-var wkhtmltopdf = require("wkhtmltopdf");
-const streamToBlob = require("stream-to-blob");
+
+var html_to_pdf = require("html-pdf-node");
+
 type Bonus = {
   id: string;
   appliedUser: string;
@@ -191,23 +189,6 @@ async function approbatecomprobante(liquidationId: string) {
     },
   });
   if (liquidation?.estado === "pendiente") {
-    let browser = null;
-    if (process.env.NODE_ENV === "development") {
-      browser = await puppeteer.launch({
-        args: ["--no-sandbox", "--disable-setuid-sandbox"],
-        headless: true,
-      });
-    }
-    if (process.env.NODE_ENV === "production") {
-      browser = await puppeteerCore.launch({
-        args: chromium.args,
-        defaultViewport: chromium.defaultViewport,
-        executablePath: await chromium.executablePath(),
-        headless: chromium.headless,
-      });
-    }
-    const page = await browser?.newPage();
-
     const user = await currentUser();
     const updatedLiquidation = await db
       .update(schema.liquidations)
@@ -370,9 +351,7 @@ async function approbatecomprobante(liquidationId: string) {
         name,
         afip,
         comprobante?.id ?? "",
-        last_voucher + 1,
-        browser,
-        page
+        last_voucher + 1
       );
       console.log("10");
 
@@ -430,32 +409,37 @@ async function PDFFromHtml(
   name: string,
   afip: Afip,
   comprobanteId: string,
-  voucher: number,
-  browser: any,
-  page: any
+  voucher: number
 ) {
-  const stream = wkhtmltopdf(html);
-  const pdfBlob = await streamToBlob(stream);
-  // await page.setContent(html, { waitUntil: "networkidle0" });
-  // const pdfBuffer = await page.pdf();
-  // const pdfBlob = new Blob([pdf], { type: "application/pdf" });
-  const pdfFile = new File([pdfBlob], name, {
-    type: "application/pdf",
+  let options = { format: "A4" };
+  let file = { content: html };
+  html_to_pdf.generatePdf(file, options).then(async (pdfBuffer: BlobPart) => {
+    const pdfBlob = new Blob([pdfBuffer], { type: "application/pdf" });
+    const pdfFile = new File([pdfBlob], name, {
+      type: "application/pdf",
+    });
+
+    // const stream = wkhtmltopdf(html);
+    // const pdfBlob = await streamToBlob(stream);
+    // await page.setContent(html, { waitUntil: "networkidle0" });
+    // const pdfBuffer = await page.pdf();
+    //
+
+    console.log("pdfBuffer", pdfBuffer);
+    console.log(typeof pdfBuffer);
+    console.log("html", html);
+    const response = await utapi.uploadFiles(pdfFile);
+    console.log(response);
+    await db
+      .update(schema.comprobantes)
+      .set({
+        billLink: response.data?.url,
+        estado: "pendiente",
+        nroComprobante: voucher,
+      })
+      .where(eq(schema.comprobantes.id, comprobanteId));
+    console.log("termino la funcion");
   });
-  console.log("stream", stream);
-  console.log(typeof stream);
-  console.log("html", html);
-  const response = await utapi.uploadFiles(pdfFile);
-  console.log(response);
-  await db
-    .update(schema.comprobantes)
-    .set({
-      billLink: response.data?.url,
-      estado: "pendiente",
-      nroComprobante: voucher,
-    })
-    .where(eq(schema.comprobantes.id, comprobanteId));
-  console.log("termino la funcion");
 }
 
 async function createcomprobanteItem(
