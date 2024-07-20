@@ -53,7 +53,7 @@ const UserButtonAndMenu = ({
         </Button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
-        <DropdownMenu.Content className="mt-4 w-52 rounded-xl border border-gray-200 bg-white px-6 py-2 text-black drop-shadow-2xl">
+        <DropdownMenu.Content className="mt-4 w-52 rounded-2xl border border-gray-200 bg-white px-4 py-2 pb-5 pt-3 text-black drop-shadow-2xl">
           <DropdownMenu.Label />
           <DropdownMenu.Group>
             <DropdownMenu.Item asChild>
@@ -65,16 +65,16 @@ const UserButtonAndMenu = ({
                   </p>
                 </div>
                 <div className="flex flex-row justify-between mb-2 mt-2">
-                  <Button className="w-[48%] h-auto text-[0.6rem] rounded-2xl px-5 bg-slate-300 hover:bg-slate-300  text-black">
+                  <Button className="w-[48%] h-6 text-[0.6rem] rounded-2xl px-5 bg-[#EAEAEA] hover:bg-[#EAEAEA] text-black">
                     Administración
                   </Button>
-                  <Button className="w-[48%] h-auto text-[0.6rem]  rounded-2xl px-5 bg-slate-300 hover:bg-slate-300  text-black">
+                  <Button className="w-[48%] h-6 text-[0.6rem]  rounded-2xl px-5 bg-[#EAEAEA] hover:bg-[#EAEAEA]  text-black">
                     I AN TECH
                   </Button>
                 </div>
                 <Button
                   onClick={() => signOut(() => router.push("/"))}
-                  className="border-none py-1 w-full bg-[#1bdfb899] hover:bg-[#1bdfb7] rounded-2xl text-white"
+                  className="border-none h-7 py-1 w-full bg-[#0DA485] hover:bg-[#0DA485] rounded-2xl text-white text-[0.8rem]"
                 >
                   Salir
                 </Button>
