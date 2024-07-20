@@ -18,6 +18,8 @@ import { datetime } from "drizzle-orm/mysql-core";
 import * as puppeteer from "puppeteer";
 import chromium from "@sparticuz/chromium";
 import puppeteerCore from "puppeteer-core";
+var wkhtmltopdf = require("wkhtmltopdf");
+const streamToBlob = require("stream-to-blob");
 type Bonus = {
   id: string;
   appliedUser: string;
@@ -432,13 +434,17 @@ async function PDFFromHtml(
   browser: any,
   page: any
 ) {
-  await page.setContent(html, { waitUntil: "networkidle0" });
-  const pdfBuffer = await page.pdf();
-  const pdfBlob = new Blob([pdfBuffer], { type: "application/pdf" });
+  const stream = wkhtmltopdf(html);
+  const pdfBlob = await streamToBlob(stream);
+  // await page.setContent(html, { waitUntil: "networkidle0" });
+  // const pdfBuffer = await page.pdf();
+  // const pdfBlob = new Blob([pdf], { type: "application/pdf" });
   const pdfFile = new File([pdfBlob], name, {
     type: "application/pdf",
   });
-
+  console.log("stream", stream);
+  console.log(typeof stream);
+  console.log("html", html);
   const response = await utapi.uploadFiles(pdfFile);
   console.log(response);
   await db
