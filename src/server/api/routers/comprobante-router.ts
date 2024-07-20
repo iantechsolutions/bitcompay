@@ -15,7 +15,9 @@ import { utapi } from "~/server/uploadthing";
 import { id } from "date-fns/locale";
 import { Events } from "./events-router";
 import { datetime } from "drizzle-orm/mysql-core";
-
+import * as puppeteer from "puppeteer";
+import chromium from "@sparticuz/chromium";
+import puppeteerCore from "puppeteer-core";
 type Bonus = {
   id: string;
   appliedUser: string;
@@ -38,8 +40,7 @@ const ivaDictionary: { [key: number]: string } = {
   9: "2.5",
   0: "",
 };
-const PuppeteerHTMLPDF = require("puppeteer-html-pdf");
-const htmlPDF = new PuppeteerHTMLPDF();
+
 const conceptDictionary = {
   Productos: 1,
   Servicios: 2,
@@ -188,6 +189,23 @@ async function approbatecomprobante(liquidationId: string) {
     },
   });
   if (liquidation?.estado === "pendiente") {
+    let browser = null;
+    if (process.env.NODE_ENV === "development") {
+      browser = await puppeteer.launch({
+        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        headless: true,
+      });
+    }
+    if (process.env.NODE_ENV === "production") {
+      browser = await puppeteerCore.launch({
+        args: chromium.args,
+        defaultViewport: chromium.defaultViewport,
+        executablePath: await chromium.executablePath(),
+        headless: chromium.headless,
+      });
+    }
+    const page = await browser?.newPage();
+
     const user = await currentUser();
     const updatedLiquidation = await db
       .update(schema.liquidations)
@@ -350,7 +368,9 @@ async function approbatecomprobante(liquidationId: string) {
         name,
         afip,
         comprobante?.id ?? "",
-        last_voucher + 1
+        last_voucher + 1,
+        browser,
+        page
       );
       console.log("10");
 
@@ -408,47 +428,28 @@ async function PDFFromHtml(
   name: string,
   afip: Afip,
   comprobanteId: string,
-  voucher: number
+  voucher: number,
+  browser: any,
+  page: any
 ) {
-  // const options = {
-  //   width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
-  //   marginLeft: 0.8, // Margen izquierdo en pulgadas. Usar 0.1 para ticket
-  //   marginRight: 0.8, // Margen derecho en pulgadas. Usar 0.1 para ticket
-  //   marginTop: 0.4, // Margen superior en pulgadas. Usar 0.1 para ticket
-  //   marginBottom: 0.4, // Margen inferior en pulgadas. Usar 0.1 para ticket
-  // };
-
-  // const resHtml = await afip.ElectronicBilling.createPDF({
-  //   html: html,
-  //   file_name: name,
-  //   options: options,
-  // });
-  // const url = resHtml.file;
-  const options = {
-    format: "A4",
-    path: `${__dirname}/sample.pdf`, // you can pass path to save the file
-  };
-  htmlPDF.setOptions(options);
-  const pdf = await htmlPDF.create(html);
-  const pdfBlob = new Blob([pdf], { type: "application/pdf" });
+  await page.setContent(html, { waitUntil: "networkidle0" });
+  const pdfBuffer = await page.pdf();
+  const pdfBlob = new Blob([pdfBuffer], { type: "application/pdf" });
   const pdfFile = new File([pdfBlob], name, {
     type: "application/pdf",
   });
 
   const response = await utapi.uploadFiles(pdfFile);
-  console.log("pdf");
-  console.log(pdf);
-  console.log(typeof pdf);
   console.log(response);
-  // await db
-  //   .update(schema.comprobantes)
-  //   .set({
-  //     billLink: resHtml.file,
-  //     estado: "pendiente",
-  //     nroComprobante: voucher,
-  //   })
-  //   .where(eq(schema.comprobantes.id, comprobanteId));
-  console.log("11");
+  await db
+    .update(schema.comprobantes)
+    .set({
+      billLink: response.data?.url,
+      estado: "pendiente",
+      nroComprobante: voucher,
+    })
+    .where(eq(schema.comprobantes.id, comprobanteId));
+  console.log("termino la funcion");
 }
 
 async function createcomprobanteItem(
