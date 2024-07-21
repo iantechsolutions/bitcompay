@@ -15,11 +15,7 @@ import { utapi } from "~/server/uploadthing";
 import { id } from "date-fns/locale";
 import { Events } from "./events-router";
 import { datetime } from "drizzle-orm/mysql-core";
-import * as puppeteer from "puppeteer";
-import chromium from "@sparticuz/chromium";
-import puppeteerCore from "puppeteer-core";
-var wkhtmltopdf = require("wkhtmltopdf");
-const streamToBlob = require("stream-to-blob");
+
 type Bonus = {
   id: string;
   appliedUser: string;
@@ -42,7 +38,8 @@ const ivaDictionary: { [key: number]: string } = {
   9: "2.5",
   0: "",
 };
-
+const PuppeteerHTMLPDF = require("puppeteer-html-pdf");
+const htmlPDF = new PuppeteerHTMLPDF();
 const conceptDictionary = {
   Productos: 1,
   Servicios: 2,
@@ -191,23 +188,7 @@ async function approbatecomprobante(liquidationId: string) {
     },
   });
   if (liquidation?.estado === "pendiente") {
-    let browser = null;
-    if (process.env.NODE_ENV === "development") {
-      browser = await puppeteer.launch({
-        args: ["--no-sandbox", "--disable-setuid-sandbox"],
-        headless: true,
-      });
-    }
-    if (process.env.NODE_ENV === "production") {
-      browser = await puppeteerCore.launch({
-        args: chromium.args,
-        defaultViewport: chromium.defaultViewport,
-        executablePath: await chromium.executablePath(),
-        headless: chromium.headless,
-      });
-    }
-    const page = await browser?.newPage();
-
+    const puppeteer = require("puppeteer");
     const user = await currentUser();
     const updatedLiquidation = await db
       .update(schema.liquidations)
@@ -215,6 +196,8 @@ async function approbatecomprobante(liquidationId: string) {
       .where(eq(schema.liquidations.id, liquidationId));
     const afip = await ingresarAfip();
     let last_voucher;
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
 
     for (let comprobante of liquidation?.comprobantes) {
       console.log("0");
@@ -365,14 +348,13 @@ async function approbatecomprobante(liquidationId: string) {
       const name = `FAC_${last_voucher + 1}.pdf`; // NOMBRE
       last_voucher += 1;
       console.log("9");
+
       await PDFFromHtml(
         html,
         name,
         afip,
         comprobante?.id ?? "",
-        last_voucher + 1,
-        browser,
-        page
+        last_voucher + 1
       );
       console.log("10");
 
@@ -430,32 +412,56 @@ async function PDFFromHtml(
   name: string,
   afip: Afip,
   comprobanteId: string,
-  voucher: number,
-  browser: any,
-  page: any
+  voucher: number
 ) {
-  const stream = wkhtmltopdf(html);
-  const pdfBlob = await streamToBlob(stream);
-  // await page.setContent(html, { waitUntil: "networkidle0" });
-  // const pdfBuffer = await page.pdf();
-  // const pdfBlob = new Blob([pdf], { type: "application/pdf" });
+  const options = {
+    format: "A4",
+    path: `${__dirname}/sample.pdf`, // you can pass path to save the file
+  };
+  htmlPDF.setOptions(options);
+  const pdf = await htmlPDF.create(html);
+  console.log("pdf", pdf);
+  console.log(typeof pdf);
+  const pdfBlob = new Blob([pdf], { type: "application/pdf" });
   const pdfFile = new File([pdfBlob], name, {
     type: "application/pdf",
   });
-  console.log("stream", stream);
-  console.log(typeof stream);
-  console.log("html", html);
-  const response = await utapi.uploadFiles(pdfFile);
-  console.log(response);
-  await db
-    .update(schema.comprobantes)
-    .set({
-      billLink: response.data?.url,
-      estado: "pendiente",
-      nroComprobante: voucher,
-    })
-    .where(eq(schema.comprobantes.id, comprobanteId));
+
+  // let options = { format: "A4" };
+  // let file = { content: html };
+
+  // await page.setContent(html);
+  // console.log("1");
+  // const pdf = await page.pdf({ format: "A4" });
+  // console.log("pdf", pdf);
+
+  // html_to_pdf.generatePdf(file, options).then(async (pdfBuffer: BlobPart) => {
+  //   const pdfBlob = new Blob([pdfBuffer], { type: "application/pdf" });
+  //   const pdfFile = new File([pdfBlob], name, {
+  //     type: "application/pdf",
+  //   });
+
+  //   // const stream = wkhtmltopdf(html);
+  //   // const pdfBlob = await streamToBlob(stream);
+  //   // await page.setContent(html, { waitUntil: "networkidle0" });
+  //   // const pdfBuffer = await page.pdf();
+  //   //
+
+  //   console.log("pdfBuffer", pdfBuffer);
+  //   console.log(typeof pdfBuffer);
+  //   console.log("html", html);
+  //   const response = await utapi.uploadFiles(pdfFile);
+  //   console.log(response);
+  //   await db
+  //     .update(schema.comprobantes)
+  //     .set({
+  //       billLink: response.data?.url,
+  //       estado: "pendiente",
+  //       nroComprobante: voucher,
+  //     })
+  //     .where(eq(schema.comprobantes.id, comprobanteId));
   console.log("termino la funcion");
+  // });
 }
 
 async function createcomprobanteItem(
