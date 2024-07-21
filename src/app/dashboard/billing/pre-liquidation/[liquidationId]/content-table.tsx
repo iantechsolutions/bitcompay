@@ -41,7 +41,7 @@ function ContentTable(props: propsContentTable) {
         </TableHead>
       </TableRow>{" "}
       {comprobante?.items
-        .filter((item) => item.concept != "Total a pagar")
+        .filter((item) => item.concept != "Total factura")
         .map((item) => (
           <TableRow key={item.id}>
             <TableCell className=" border-b border-[#4af0d4] py-[0.25rem]  text-[#737171] text-left italic opacity-70 ">

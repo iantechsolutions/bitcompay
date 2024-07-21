@@ -32,6 +32,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { create } from "domain";
+import BarcodeProcedure from "~/components/barcode";
 
 function formatDate(date: Date | undefined) {
   if (date) {
@@ -114,6 +115,15 @@ export default function Page() {
           // },
         };
 
+        const barcode = BarcodeProcedure({
+          dateVto: dateVencimiento!,
+          amountVto: 2,
+          client: 2,
+          peso: 2,
+          amount2vto: 2,
+          date2vto: 2,
+          Digit: 1,
+        });
         const fac = await saveComprobante(numero_de_comprobante);
 
         const res = await afip.ElectronicBilling.createVoucher(data);
@@ -371,8 +381,7 @@ export default function Page() {
               <Select
                 onValueChange={(value) => {
                   setSelectedProduct(value);
-                }}
-              >
+                }}>
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar un producto..." />
                 </SelectTrigger>
@@ -448,16 +457,14 @@ export default function Page() {
                   <br />
                   <Popover
                     open={popoverDesdeOpen}
-                    onOpenChange={setPopoverDesdeOpen}
-                  >
+                    onOpenChange={setPopoverDesdeOpen}>
                     <PopoverTrigger asChild={true}>
                       <Button
                         variant={"outline"}
                         className={cn(
                           "w-[220px] justify-start text-left font-normal",
                           !dateDesde && "text-muted-foreground"
-                        )}
-                      >
+                        )}>
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {dateDesde ? (
                           format(dateDesde, "PPP")
@@ -481,16 +488,14 @@ export default function Page() {
                   <br />
                   <Popover
                     open={popoverFinOpen}
-                    onOpenChange={setPopoverFinOpen}
-                  >
+                    onOpenChange={setPopoverFinOpen}>
                     <PopoverTrigger asChild={true}>
                       <Button
                         variant={"outline"}
                         className={cn(
                           "w-[220px] justify-start text-left font-normal",
                           !dateHasta && "text-muted-foreground"
-                        )}
-                      >
+                        )}>
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {dateHasta ? (
                           format(dateHasta, "PPP")
@@ -514,16 +519,14 @@ export default function Page() {
                   <br />
                   <Popover
                     open={popoverVencimientoOpen}
-                    onOpenChange={setPopoverVencimientoOpen}
-                  >
+                    onOpenChange={setPopoverVencimientoOpen}>
                     <PopoverTrigger asChild={true}>
                       <Button
                         variant={"outline"}
                         className={cn(
                           "w-[220px] justify-start text-left font-normal",
                           !dateVencimiento && "text-muted-foreground"
-                        )}
-                      >
+                        )}>
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {dateVencimiento ? (
                           format(dateVencimiento, "PPP")
@@ -554,8 +557,7 @@ export default function Page() {
                           <SelectItem
                             key={marca!.id}
                             value={marca!.id}
-                            className="rounded-none border-b border-gray-600"
-                          >
+                            className="rounded-none border-b border-gray-600">
                             {marca!.name}
                           </SelectItem>
                         ))}
