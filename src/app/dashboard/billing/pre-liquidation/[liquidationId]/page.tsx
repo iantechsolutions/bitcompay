@@ -119,9 +119,8 @@ export default async function Home(props: {
     summary["Saldo anterior"] += saldo_anterior;
     excelRow.push(saldo_anterior);
     const cuota_planes = toNumberOrZero(
-      original_comprobante?.items.find(
-        (item) => item.concept === "Cuota Planes"
-      )?.amount
+      original_comprobante?.items.find((item) => item.concept === "Abono")
+        ?.amount
     );
     summary["Cuota Planes"] += cuota_planes;
     excelRow.push(cuota_planes);
