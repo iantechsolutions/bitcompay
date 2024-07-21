@@ -515,7 +515,7 @@ export const healthInsurances = pgTable("health_insurances", {
   ),
   name: varchar("name", { length: 255 }).notNull(),
   identificationNumber: varchar("identificationNumber", { length: 255 }),
-  isClient: boolean("isClientpnpm ").notNull().default(false),
+  isClient: boolean("isClient").notNull().default(false),
 });
 
 export const clientStatuses = pgTable("client_statuses", {
