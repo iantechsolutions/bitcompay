@@ -11,8 +11,12 @@ import Filters from "./filters";
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
   initialValues: {
-    plan?: string;
+    Plan?: string;
     modo?: string;
+    Marca?: string;
+    UN?: string;
+    "Estados GF"?: string;
+    Modalidad?: string;
   };
 }
 
@@ -53,13 +57,15 @@ export default function TableToolbar<TData>({
           ))}
         </div>
         <div>
-          <Button
-            variant="ghost"
-            onClick={() => table.resetColumnFilters()}
-            className="h-8 px-2 lg:px-3 font-semibold text-[#71EBD4] hover:text-[#71EBD4] hover:bg-white"
-          >
-            Limpiar filtros
-          </Button>
+          {table.getState().columnFilters.length > 0 && (
+            <Button
+              variant="ghost"
+              onClick={() => table.resetColumnFilters()}
+              className="h-8 px-2 lg:px-3 font-semibold text-[#71EBD4] hover:text-[#71EBD4] hover:bg-white"
+            >
+              Limpiar filtros
+            </Button>
+          )}
         </div>
       </div>
     </div>

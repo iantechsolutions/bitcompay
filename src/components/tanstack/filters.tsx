@@ -1,12 +1,23 @@
 "use client";
-import { SlidersHorizontal } from "lucide-react";
+import { CalendarIcon, SlidersHorizontal } from "lucide-react";
 import { Search } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Button } from "../ui/button";
 import { Table } from "@tanstack/react-table";
 import { useForm, type SubmitHandler } from "react-hook-form";
-import { Form, FormField, FormItem, FormLabel } from "../ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../ui/form";
 import { Input } from "../ui/input";
+import { Calendar } from "~/components/ui/calendar";
+import { cn } from "~/lib/utils";
+import dayjs from "dayjs";
+import { useState } from "react";
 interface FiltersProps<TData> {
   table: Table<TData>;
   initialValues: Inputs;
@@ -14,13 +25,20 @@ interface FiltersProps<TData> {
 type Inputs = {
   plan?: string;
   modo?: string;
+  Marca?: string;
+  UN?: string;
+  "Estados GF"?: string;
+  Modalidad?: string;
 };
 
 export default function Filters<TData>({
   table,
   initialValues,
 }: FiltersProps<TData>) {
+  const [popoverOpen, setPopoverOpen] = useState(false);
   const form = useForm<Inputs>({ defaultValues: { ...initialValues } });
+  const dateInputs = ["Fechas", "Vigencia"];
+
   const onSubmit: SubmitHandler<Inputs> = (data) => {
     Object.entries(data).forEach(([columnName, value]) => {
       const column = table.getColumn(columnName);
@@ -47,7 +65,7 @@ export default function Filters<TData>({
             className="flex flex-col gap-2"
           >
             <div className="grid grid-cols-2 gap-2">
-              {Object.entries(initialValues).map(([columnName]) => (
+              {Object.entries(initialValues).map(([columnName, value]) => (
                 <FormField
                   control={form.control}
                   name={columnName as keyof Inputs}

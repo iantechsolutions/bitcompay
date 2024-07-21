@@ -21,7 +21,7 @@ export type TableRecord = {
   total: number;
   comprobantes: RouterOutputs["comprobantes"]["getByLiquidation"];
   currentAccountAmount: number;
-  plan: string;
+  Plan: string;
   modo: string;
 };
 
@@ -197,7 +197,7 @@ export const columns: ColumnDef<TableRecord>[] = [
     },
   },
   {
-    accessorKey: "plan",
+    accessorKey: "Plan",
     header: () => null,
     cell: () => null,
     filterFn: (row, id, value) => {
