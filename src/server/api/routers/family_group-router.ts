@@ -64,6 +64,8 @@ export const family_groupsRouter = createTRPCRouter({
             with: {
               family_group: {
                 with: {
+                  plan: true,
+                  modo: true,
                   integrants: true,
                   cc: true,
                   businessUnitData: true,

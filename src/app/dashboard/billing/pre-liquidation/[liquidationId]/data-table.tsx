@@ -25,10 +25,12 @@ import { Sheet, SheetContent } from "~/components/ui/sheet";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { DataTablePagination } from "~/components/tanstack/pagination";
+import TableToolbar from "~/components/tanstack/table-toolbar";
 import { useState } from "react";
 import DetailSheet from "./detail-sheet";
 import { RouterOutputs } from "~/trpc/shared";
 import { TableRecord } from "./columns";
+import DataTableSummary from "~/components/tanstack/summary";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
@@ -59,6 +61,10 @@ export function DataTable<TData, TValue>({
       columnFilters,
     },
   });
+  const initialValues = {
+    modo: "",
+    plan: "",
+  };
   const hiddenDataKeys = [
     "comprobantes",
     "currentAccountAmount",
@@ -80,17 +86,8 @@ export function DataTable<TData, TValue>({
 
   return (
     <>
-      <div className="w-full max-w-sm flex items-center py-4 relative">
-        <Input
-          placeholder="Buscar responsable grupo familiar..."
-          value={(table.getColumn("nombre")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("nombre")?.setFilterValue(event.target.value)
-          }
-          className="w-full h-7 rounded-lg border-2 border-[#71EBD4] focus-visible:ring-[#71EBD4]"
-        ></Input>
-        <Search className="h-5 absolute right-3" color="#71EBD4" />
-      </div>
+      <DataTableSummary table={table} />
+      <TableToolbar table={table} initialValues={initialValues} />
 
       <div className="rounded-md border">
         <Table>

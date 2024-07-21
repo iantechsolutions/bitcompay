@@ -52,6 +52,17 @@ export default async function Home(props: {
     liquidationId: props.params.liquidationId,
   });
 
+  const allPlan = await api.plans.list.query();
+  const plansOptions = allPlan.map((plan) => ({
+    value: plan.id,
+    label: plan.plan_code ?? "plan sin nombre",
+  })) || [{ value: "", label: "" }];
+  const allModos = await api.modos.list.query();
+  const modosOptions = allModos.map((modo) => ({
+    value: modo?.id,
+    label: modo?.description ?? "modo sin nombre",
+  })) || [{ value: "", label: "" }];
+
   const periodo =
     dayjs.utc(preliquidation?.period).format("MMMM [de] YYYY") ?? "-";
   const headers = [
@@ -156,13 +167,15 @@ export default async function Home(props: {
       date: preliquidation?.createdAt ?? new Date(),
     });
     const currentAccountAmount = lastEvent?.current_amount ?? 0;
+    const plan = fg?.plan?.description ?? "";
+    const modo = fg?.modo?.description ?? "";
     tableRows.push({
       id: fg?.id!,
       nroGF: fg?.numericalId ?? "N/A",
       nombre: name,
       cuit,
       "saldo anterior": saldo_anterior,
-      "cuota pura": cuota_planes,
+      "cuota plan": cuota_planes,
       bonificacion,
       diferencial,
       Aporte,
@@ -172,20 +185,23 @@ export default async function Home(props: {
       total,
       comprobantes: fg?.comprobantes!,
       currentAccountAmount,
+      plan,
+      modo,
     });
     console.log("comprobantes", fg?.comprobantes);
   }
+
   console.log("tableRows", tableRows);
   return (
     <LayoutContainer>
       <div className="flex flex-row justify-between w-full">
+        <div className="opacity-50 flex flex-row items-center hover:cursor-pointer hover:underline transition-all duration-300">
+          {" "}
+          <ChevronLeft className="mr-1 h-4 w-auto" />
+          <p className="font-medium ">VOLVER</p>
+        </div>
         {preliquidation?.estado === "pendiente" && (
           <>
-            <div className="opacity-50 flex flex-row items-center">
-              {" "}
-              <ChevronLeft className="mr-1 h-4 w-auto" />
-              <p className="font-medium ">VOLVER</p>
-            </div>
             <div className="flex flex-row gap-1">
               <UpdateLiquidationEstadoDialog
                 liquidationId={props.params.liquidationId}
@@ -230,50 +246,8 @@ export default async function Home(props: {
           </li>
         </ul>
       </div>
-      <div className="bg-[#EBFFFB] flex flex-row justify-stretch w-full pt-5 pb-1">
-        {Object.entries(summary).map(([key, value], index, array) => (
-          <div
-            className={`${
-              index != array.length - 1
-                ? "border-r border-[#4af0d4] border-dashed grow"
-                : ""
-            } px-3`}
-            key={key}>
-            <p className="font-medium text-sm">{key}</p>
-            <p className="text-[#4af0d4] font-bold text-sm">$ {value}</p>
-          </div>
-        ))}
-      </div>
+
       <div className="relative">
-        {/* <Table className="border-separate  border-spacing-x-0 border-spacing-y-2">
-          <TableHeader className="overflow-hidden">
-            <TableRow className="bg-[#79edd6]">
-              {headers.map((header, index, array) => {
-                const firstHeader = index == 0 ? "rounded-l-md" : "";
-                const lastHeader =
-                  index == array.length - 1 ? "rounded-r-md" : "";
-                return (
-                  <TableHead
-                    className={`${firstHeader} ${lastHeader} text-gray-800
-               border-r-[1.5px] border-[#4af0d4]`}
-                  >
-                    {header}
-                  </TableHead>
-                );
-              })}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {familyGroups?.map((familyGroup) => (
-              <TableRowContainer
-                key={familyGroup?.id}
-                family_group={familyGroup}
-                preliquidation={preliquidation}
-                periodo={periodo}
-              />
-            ))}
-          </TableBody>
-        </Table> */}
         <DataTable columns={columns} data={tableRows} />
         <DownloadExcelButton rows={excelRows} period={preliquidation?.period} />
       </div>
