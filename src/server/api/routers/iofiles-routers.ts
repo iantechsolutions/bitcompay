@@ -5,13 +5,14 @@ import { and, eq, inArray, isNull, desc, not } from "drizzle-orm";
 import { z } from "zod";
 import { type DBTX, db, schema } from "~/server/db";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import dayOfYear from "dayjs/plugin/dayOfYear";
-import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import { createId } from "~/lib/utils";
 import { utapi } from "~/server/uploadthing";
 import type { RouterOutputs } from "~/trpc/shared";
 import { Payment } from "~/server/db/schema";
+import dayOfYear from "dayjs/plugin/dayOfYear";
+import timezone from "dayjs/plugin/timezone";
+import { Repeat } from "lucide-react";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(dayOfYear);
@@ -512,6 +513,13 @@ async function generatePagoFacil(
     );
     const name = formatString(" ", transaction.name ?? " ", 40, true);
     const first_due_date = dayjs(transaction.first_due_date).format("DDMMYYYY");
+    const first_codebar = dayjs(transaction.first_due_date).format("DD");
+
+    const second_due_date = dayjs(transaction.first_due_date).format(
+      "DDMMYYYY"
+    );
+    const validity_date = dayjs(transaction.period).format("DDMMYYYY");
+
     const first_due_amount = formatString(
       "0",
       transaction.first_due_amount
@@ -533,7 +541,7 @@ async function generatePagoFacil(
       false
     );
     const first_due_date_bar_code = formatString(
-      " ",
+      "0",
       first_due_date.slice(-2) + dayOfYear,
       5,
       true
@@ -544,13 +552,17 @@ async function generatePagoFacil(
       14,
       true
     );
+
     const second_due_amount_charge = "000330";
-    const bar_code = `${service_company}${first_due_amount_bar_code}${first_due_date_bar_code}${fiscal_id_number_bar_code}0${second_due_amount_charge}${first_due_date.slice(
-      2
-    )}00`;
-    //detalle
-    text += `2${invoice_number}${fiscal_id_number}${seq_number}${message}${name}${bar_code}\r\n`;
     // codigo de barras
+    const bar_code = `${service_company}${first_due_amount_bar_code}${first_due_date_bar_code}${fiscal_id_number_bar_code}0${second_due_amount_charge}${first_codebar}${" ".repeat(
+      15
+    )}`;
+
+    text += `02${invoice_number}${fiscal_id_number}${seq_number}${message}${name}${bar_code}${validity_date}${first_due_date}T${" ".repeat(
+      9
+    )}\r\n`;
+    // detalle;
     total_records++;
     total_collected += transaction.first_due_amount!;
   }
@@ -601,6 +613,15 @@ function generateRapiPago(
       false
     );
     const first_due_date = dayjs(transaction.first_due_date).format("YYYYMMDD");
+
+    const first_due_amount_test = formatAmount(
+      transaction.first_due_amount!,
+      9
+    );
+    const second_due_amount_test = formatAmount(
+      transaction.first_due_amount!,
+      9
+    );
     const first_due_amount = formatString(
       "0",
       transaction.first_due_amount
@@ -622,7 +643,7 @@ function generateRapiPago(
       9,
       false
     );
-    text += `5${fiscal_id_number}${invoice_number}0${first_due_date}${first_due_amount}00${second_due_date}${second_due_amount}00${"0".repeat(
+    text += `5${fiscal_id_number}${invoice_number}0${first_due_date}${first_due_amount_test}00${second_due_date}${second_due_amount_test}00${"0".repeat(
       11
     )}\n`;
     total_records++;
@@ -640,9 +661,11 @@ function generateRapiPago(
     9,
     false
   );
+
+  const total_collected_string_test = formatAmount(total_collected, 9);
   text += `981400${currentDate}${total_records_string}${"0".repeat(
     7
-  )}${total_collected_string}00${"0".repeat(11)}${"0".repeat(40)}`;
+  )}${total_collected_string_test}00${"0".repeat(11)}${"0".repeat(40)}`;
   return text;
 }
 
@@ -662,6 +685,21 @@ function formatString(
     return string.concat(char.repeat(limit - string.length));
   }
   return char.repeat(limit - string.length).concat(string);
+}
+
+function formatAmount(number: number, limit: number) {
+  let numString = number.toString();
+
+  numString = numString.slice(0, -1);
+
+  // Elimina el punto decimal si no hay dígitos después de él
+  numString = numString.replace(".", "");
+
+  while (numString.length < limit) {
+    numString = "0" + numString;
+  }
+
+  return numString;
 }
 
 export async function getBrandAndChannel(
