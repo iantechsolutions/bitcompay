@@ -61,6 +61,10 @@ export function DataTable<TData, TValue>({
       columnFilters,
     },
   });
+  const initialValues = {
+    modo: "",
+    plan: "",
+  };
   const hiddenDataKeys = [
     "comprobantes",
     "currentAccountAmount",
@@ -83,7 +87,7 @@ export function DataTable<TData, TValue>({
   return (
     <>
       <DataTableSummary table={table} />
-      <TableToolbar table={table} />
+      <TableToolbar table={table} initialValues={initialValues} />
 
       <div className="rounded-md border">
         <Table>

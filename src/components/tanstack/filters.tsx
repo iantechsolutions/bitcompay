@@ -9,17 +9,17 @@ import { Form, FormField, FormItem, FormLabel } from "../ui/form";
 import { Input } from "../ui/input";
 interface FiltersProps<TData> {
   table: Table<TData>;
+  initialValues: Inputs;
 }
 type Inputs = {
-  plan: string;
-  modo: string;
+  plan?: string;
+  modo?: string;
 };
 
-export default function Filters<TData>({ table }: FiltersProps<TData>) {
-  const initialValues: Inputs = {
-    plan: "",
-    modo: "",
-  };
+export default function Filters<TData>({
+  table,
+  initialValues,
+}: FiltersProps<TData>) {
   const form = useForm<Inputs>({ defaultValues: { ...initialValues } });
   const onSubmit: SubmitHandler<Inputs> = (data) => {
     Object.entries(data).forEach(([columnName, value]) => {
@@ -47,36 +47,23 @@ export default function Filters<TData>({ table }: FiltersProps<TData>) {
             className="flex flex-col gap-2"
           >
             <div className="grid grid-cols-2 gap-2">
-              <FormField
-                control={form.control}
-                name="plan"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-muted-foreground">
-                      Plan
-                    </FormLabel>
-                    <Input
-                      {...field}
-                      className=" h-6 border border-[#71EBD4]  focus-visible:ring-[#71EBD4]"
-                    />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="modo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-muted-foreground">
-                      Modo
-                    </FormLabel>
-                    <Input
-                      {...field}
-                      className=" h-6 border border-[#71EBD4]  focus-visible:ring-[#71EBD4]"
-                    />
-                  </FormItem>
-                )}
-              />
+              {Object.entries(initialValues).map(([columnName]) => (
+                <FormField
+                  control={form.control}
+                  name={columnName as keyof Inputs}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-muted-foreground">
+                        {columnName}
+                      </FormLabel>
+                      <Input
+                        {...field}
+                        className=" h-6 border border-[#71EBD4]  focus-visible:ring-[#71EBD4]"
+                      />
+                    </FormItem>
+                  )}
+                />
+              ))}
             </div>
             <Button
               variant="outline"
