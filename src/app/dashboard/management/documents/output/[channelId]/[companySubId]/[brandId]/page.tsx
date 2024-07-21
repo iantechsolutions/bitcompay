@@ -30,15 +30,12 @@ export default async function page({
   const genFileStatus = await db.query.paymentStatus.findFirst({
     where: eq(schema.paymentStatus.code, "92"),
   });
-  let payments = await db.query.payments.findMany({
+  const payments = await db.query.payments.findMany({
     where: and(
       eq(schema.payments.companyId, company.id),
-      eq(schema.payments.g_c, brand.number),
       inArray(schema.payments.product_number, productsNumbers) // Solo los productos de la marca y producto -> (los productos salen del canal)
     ),
   });
-
-  payments = payments.filter((p) => !p.genChannels.includes(params.channelId));
 
   const outputFiles = await api.iofiles.list.query({
     channelId: params.channelId,
