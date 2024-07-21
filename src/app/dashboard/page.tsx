@@ -1,4 +1,4 @@
-import { currentUser } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { ArrowLeftRight, HandCoins, Import, LogOut } from "lucide-react";
 import { EyeOff } from "lucide-react";
 import { Clock9 } from "lucide-react";
@@ -16,10 +16,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import AccessDenied from "../accessdenied/page";
 export default async function page() {
+  const { has } = auth();
+  const canAccessDashboard = has!({ permission: "org:general:dashboard" });
+
   const user = await currentUser();
-  if (!user) {
-    return <Title>No se encontró el usuario</Title>;
+  if (!user || !canAccessDashboard) {
+    return <AccessDenied />;
   }
   return (
     <main>
