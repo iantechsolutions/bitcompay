@@ -378,12 +378,12 @@ function generatePagomiscuentas(
   const companyCode =
     codeCompanyMap[brandName.toLowerCase() as keyof typeof codeCompanyMap];
 
-  if (!companyCode) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: `company code not found in this brand`,
-    });
-  }
+  // if (!companyCode) {
+  //   throw new TRPCError({
+  //     code: "BAD_REQUEST",
+  //     message: `company code not found in this brand`,
+  //   });
+  // }
   //header
   let text = `0400${companyCode}${dateAAAAMMDD}${"0".repeat(264)}\n`;
   let total_collected = 0;
@@ -402,24 +402,15 @@ function generatePagomiscuentas(
       true
     );
     const first_due_date = dayjs(transaction.first_due_date).format("YYYYMMDD");
-    const first_due_amount = formatString(
-      "0",
-      transaction.first_due_amount
-        ? transaction.first_due_amount?.toString()
-        : "",
-      9,
-      false
-    );
+    const first_due_amount = formatAmountPC(transaction.first_due_amount!, 10);
+
     const second_due_date = dayjs(transaction.second_due_date).format(
       "YYYYMMDD"
     );
-    const second_due_amount = formatString(
-      "0",
-      transaction.second_due_amount
-        ? transaction.second_due_amount?.toString()
-        : "",
-      9,
-      false
+
+    const second_due_amount = formatAmountPC(
+      transaction.second_due_amount!,
+      10
     );
     const ticketMessage = formatString(
       " ",
@@ -436,7 +427,7 @@ function generatePagomiscuentas(
       15,
       true
     );
-    text += `5${fiscal_id_number}${invoice_number}0${first_due_date}${first_due_amount}00${second_due_date}${second_due_amount}00${"0".repeat(
+    text += `5${fiscal_id_number}${invoice_number}0${first_due_date}${first_due_amount}0${second_due_date}${second_due_amount}0${"0".repeat(
       38
     )}${fiscal_id_number}${ticketMessage}${displayMessage}${" ".repeat(
       60
@@ -445,12 +436,7 @@ function generatePagomiscuentas(
     total_collected += transaction.first_due_amount!;
   }
   // trailer
-  const total_collected_string = formatString(
-    "0",
-    total_collected.toString(),
-    14,
-    false
-  );
+  const total_collected_string = formatAmountPC(total_collected, 15);
   const total_records_string = formatString(
     "0",
     transactions.length.toString(),
@@ -459,7 +445,7 @@ function generatePagomiscuentas(
   );
   text += `9400${companyCode}${dateAAAAMMDD}${total_records_string}${"0".repeat(
     7
-  )}${total_collected_string}00${"0".repeat(234)}\n`;
+  )}${total_collected_string}${"0".repeat(234)}\n`;
 
   return text;
 }
@@ -700,6 +686,29 @@ function formatAmount(number: number, limit: number) {
   }
 
   return numString;
+}
+
+function formatAmountPC(number: number, limit: number) {
+  let numString = number.toString();
+
+  if (numString.length > 16) {
+    numString = numString.replace(".", "");
+    return numString.slice(0, 16);
+  } else {
+    if (numString.charAt(numString.length - 2) === ".") {
+      numString = numString.replace(".", "");
+      while (numString.length < limit) {
+        numString = "0" + numString;
+      }
+      return numString;
+    } else {
+      numString = numString.replace(".", "");
+      while (numString.length < limit - 1) {
+        numString = "0" + numString;
+      }
+      return numString + 0;
+    }
+  }
 }
 
 export async function getBrandAndChannel(
