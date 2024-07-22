@@ -15,9 +15,15 @@ export const family_groupsRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({ ctx }) => {
     const family_groups = await db.query.family_groups.findMany({
       with: {
+        modo: true,
+        plan: true,
         integrants: true,
         cc: true,
-        businessUnitData: true,
+        businessUnitData: {
+          with: {
+            brand: true,
+          },
+        },
         comprobantes: {
           with: {
             items: true,
