@@ -5,11 +5,26 @@ import { db, schema } from "~/server/db";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const productsChannel = createTRPCRouter({
-  list: protectedProcedure.query(async () => {
-    return await db.query.products.findMany({
-      with: { channels: true },
-      orderBy: [asc(schema.products.number)],
+  list: protectedProcedure.query(async ({ ctx }) => {
+    const company = await db.query.companies.findFirst({
+      where: eq(schema.companies.id, ctx.session.orgId ?? ""),
+      with: {
+        products: {
+          with: {
+            product: {
+              with: {
+                channels: {
+                  with: {
+                    channel: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
+    return company?.products.map((product) => product.product);
   }),
   create: protectedProcedure
     .input(
