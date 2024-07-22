@@ -920,3 +920,45 @@ export const reversedIdDictionary: { [key: number]: string } = {
   96: "DNI",
   99: "Consumidor Final",
 };
+
+export function getDifferentialAmount(grupo: any, fechaPreliq: Date) {
+  let importe = 0;
+  grupo.integrants?.forEach((integrant: any) => {
+    if (integrant.birth_date == null) return 0;
+    const age = calcularEdad(integrant.birth_date);
+
+    let precioIntegrante = grupo.plan?.pricesPerCondition
+      ?.sort(
+        (a: any, b: any) => b.validy_date.getTime() - a.validy_date.getTime()
+      )
+      .find(
+        (x: any) =>
+          integrant.relationship &&
+          x.condition == integrant.relationship &&
+          x.validy_date.getTime() <= fechaPreliq.getTime()
+      )?.amount;
+
+    if (precioIntegrante === undefined) {
+      precioIntegrante =
+        grupo.plan?.pricesPerCondition?.find(
+          (x: any) => (x.from_age ?? 1000) <= age && (x.to_age ?? 0) >= age
+        )?.amount ?? 0;
+    }
+    integrant?.differentialsValues.forEach((differential: any) => {
+      const differentialIntegrante =
+        differential.amount * (precioIntegrante ?? 0);
+      importe += differentialIntegrante;
+    });
+  });
+  return importe;
+}
+export function getGroupContribution(grupo: any) {
+  let importe = 0;
+  grupo.integrants?.forEach((integrant: any) => {
+    if (integrant?.contribution?.amount) {
+      const contributionIntegrante = integrant?.contribution?.amount ?? 0;
+      importe += contributionIntegrante;
+    }
+  });
+  return importe;
+}
