@@ -572,6 +572,7 @@ export const integrants = pgTable("integrant", {
   locality: varchar("locality", { length: 255 }),
   partido: varchar("partido", { length: 255 }),
   state: varchar("state", { length: 255 }),
+  province: varchar("province", { length: 255 }),
   cp: varchar("cp", { length: 255 }),
   zone: varchar("zone", { length: 255 }),
   isHolder: boolean("isHolder").notNull().default(false),

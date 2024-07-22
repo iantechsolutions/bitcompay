@@ -532,7 +532,7 @@ span {
             <p>Localidad: ${billResponsible?.locality}</p>
           </li>
           <li>
-            <p>Provincia: ${billResponsible?.partido}</p>
+            <p>Provincia: ${billResponsible?.province}</p>
           </li>
           <li>
             <p>CP: ${billResponsible?.postal_code?.cp}</p>
