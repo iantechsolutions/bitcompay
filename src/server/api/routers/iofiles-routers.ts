@@ -424,7 +424,7 @@ function generatePagomiscuentas(
       15,
       true
     );
-    text += `5${fiscal_id_number}${invoice_number}0${first_due_date}${first_due_amount}0${second_due_date}${second_due_amount}0${"0".repeat(
+    text += `5${fiscal_id_number}${invoice_number}0${first_due_date}${first_due_amount}0${first_due_date}${first_due_amount}0${"0".repeat(
       38
     )}${fiscal_id_number}${ticketMessage}${displayMessage}${" ".repeat(
       60
@@ -616,7 +616,7 @@ function generateRapiPago(
 
     text += `${currentDate}${" ".repeat(
       15
-    )}${fiscal_id_number}${invoice_number}0${first_due_date}${first_due_amount_test}${second_due_date}${second_due_amount_test}${"0".repeat(
+    )}${fiscal_id_number}${invoice_number}0${first_due_date}${first_due_amount_test}${first_due_date}${first_due_amount_test}${"0".repeat(
       5
     )}\n`;
     total_records++;
