@@ -112,7 +112,7 @@ export default function CompanyPage({
             </AccordionTrigger>
             <AccordionContent>
               <List>
-                {products.map((channel) => {
+                {products?.map((channel) => {
                   return (
                     <ListTile
                       key={channel.id}

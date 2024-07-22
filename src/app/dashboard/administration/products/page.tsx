@@ -14,7 +14,7 @@ export default async function Home() {
           <AddProductDialog />
         </div>
         <List>
-          {products.map((product) => {
+          {products?.map((product) => {
             return (
               <ListTile
                 key={product.id}
