@@ -35,7 +35,6 @@ import { toast } from "sonner";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { PlanSchema } from "~/server/forms/plans-schema";
 import { api } from "~/trpc/react";
-import { useCompanyData } from "../../../company-provider";
 import { useFieldArray } from "react-hook-form";
 import { Label } from "~/components/ui/label";
 import { RouterOutputs } from "~/trpc/shared";
@@ -56,7 +55,6 @@ export default function AddPlanInfoComponent({
   onPlanIdChange,
   closeDialog,
 }: AddPlanDialogProps) {
-  const company = useCompanyData();
   const [brand, setBrand] = useState("");
   const [codigo, setCodigo] = useState("");
   const [descripcion, setDescripcion] = useState("");
@@ -117,7 +115,8 @@ export default function AddPlanInfoComponent({
         <Label>Marca</Label>
         <Select
           onValueChange={(value: string) => setBrand(value)}
-          value={brand}>
+          value={brand}
+        >
           <SelectTrigger>
             <SelectValue placeholder="Seleccione una marca" />
           </SelectTrigger>
@@ -152,7 +151,8 @@ export default function AddPlanInfoComponent({
       <Button
         onClick={handleSumbit}
         disabled={isCreating || isUpdating}
-        className="mt-4">
+        className="mt-4"
+      >
         {(isCreating || isUpdating) && (
           <Loader2Icon className="mr-2 animate-spin" size={20} />
         )}

@@ -40,7 +40,11 @@ export default function AffiliatePage(props: {
 
   const { data: cuentasCorrientes } = api.currentAccount.list.useQuery();
   const cc = cuentasCorrientes?.find((cc) => cc.family_group === grupos);
-  const lastEvent = cc?.events[0];
+  const lastEvent = cc?.events.reduce((prev, current) => {
+    return new Date(prev.createdAt) > new Date(current.createdAt)
+      ? prev
+      : current;
+  });
   const { data: integrant } = api.integrants.getByGroup.useQuery({
     family_group_id: grupos!,
   });
@@ -54,21 +58,21 @@ export default function AffiliatePage(props: {
     : [];
 
   const familyGroupData = {
-    "Unidad de negocio": "",
-    Vigencia: "",
-    Modalidad: "",
-    "O.S Origen": "",
-    "O.S Asignada": "",
-    Plan: "",
-    Zona: "",
-    "Fecha alta": "",
-    "Usuario alta": "",
-    Estado: "",
+    "Unidad de negocio": grupo?.businessUnitData?.description,
+    // "O.S Origen": grupo?.origin_os.,
+    // Vendedor: "",
+    Plan: grupo?.plan?.description,
+    // "O.S Asignada": "",
+    // "Usuario alta": "",
+    Modalidad: grupo?.modo?.description,
     "Fecha estado": "",
     "Motivo baja": "",
-    Vendedor: "",
+    Vigencia: "",
+    Estado: grupo?.state,
+    // Gerencia: "",
+    "Fecha alta": dayjs(grupo?.validity).format("YYYY-MM-DD"),
+    Zona: "",
     Supervisor: "",
-    Gerencia: "",
   };
 
   return (
@@ -109,9 +113,14 @@ export default function AffiliatePage(props: {
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-2">
-                <AccordionTrigger>Integrantes</AccordionTrigger>
+                <AccordionTrigger className=" rounded-md overflow-hidden">
+                  Integrantes
+                </AccordionTrigger>
                 <AccordionContent className="pt-6 pl-5">
-                  <AccordionIntegrant type="multiple">
+                  <AccordionIntegrant
+                    type="multiple"
+                    className="rounded-md overflow-hidden"
+                  >
                     {integrant?.map((int) => (
                       <AccordionItemIntegrant value={int.id}>
                         <AccordionTriggerIntegrant>
@@ -123,67 +132,59 @@ export default function AffiliatePage(props: {
                               <span className="font-semibold">
                                 Tipo de documento:{" "}
                               </span>
+                              <br />
                               {int.id_type}
                             </p>
                             <p>
                               <span className="font-semibold">
                                 Numero de documento:{" "}
                               </span>
+                              <br />
                               {int.id_number}
-                            </p>
-                            <p>
-                              <span className="font-semibold">
-                                Tipo de ID fiscal:{" "}
-                              </span>
-                              {int.fiscal_id_type}
-                            </p>
-                            <p>
-                              <span className="font-semibold">
-                                Nro. fiscal:{" "}
-                              </span>
-                              {int.fiscal_id_number}
-                            </p>
-                            <p>
-                              <span className="font-semibold">
-                                Condicion fiscal:{" "}
-                              </span>
-                              {int.afip_status}
                             </p>
                             <p>
                               <span className="font-semibold">
                                 Nro. Afiliado:{" "}
                               </span>
+                              <br />
                               {int?.affiliate_number}
                             </p>
+
                             <p>
                               <span className="font-semibold">Extension: </span>
-                              *****
+                              <br />
+                              {int?.extention}
                             </p>
                             <p>
                               <span className="font-semibold">
                                 Nro. Credencial{" "}
                               </span>
-                              ******
-                            </p>
-                            <p>
-                              <span className="font-semibold">Genero:</span>{" "}
-                              {int.gender}
+                              <br />
+                              {int?.affiliate_number}
                             </p>
                             <p>
                               <span className="font-semibold">
                                 Fecha de Nac:{" "}
                               </span>
+                              <br />
                               {dayjs(int?.birth_date).format("YYYY-MM-DD")}
                             </p>
                             <p>
                               <span className="font-semibold"> Edad</span>
+                              <br />
                               {int.age}
+                            </p>
+                            <p>
+                              <span className="font-semibold">Genero:</span>{" "}
+                              <br />
+                              {int.gender}
                             </p>
                             <p>
                               <span className="font-semibold">
                                 {" "}
                                 Estado Civil:{" "}
                               </span>
+                              <br />
                               {int.civil_status}
                             </p>
                             <p>
@@ -191,59 +192,121 @@ export default function AffiliatePage(props: {
                                 {" "}
                                 Nacionalidad
                               </span>
+                              <br />
                               {int?.nationality}
                             </p>
                             <p>
-                              <span className="font-semibold">Calle: </span>
-                              {int?.address}
+                              <span className="font-semibold">
+                                Condicion de AFIP:{" "}
+                              </span>
+                              <br />
+                              {int.afip_status}
                             </p>
                             <p>
-                              <span className="font-semibold">Nro: </span>
-                              {int?.address_number}
+                              <span className="font-semibold">
+                                Tipo de ID fiscal:{" "}
+                              </span>
+                              <br />
+                              {int.fiscal_id_type}
+                            </p>
+                            <p>
+                              <span className="font-semibold">
+                                Nro. fiscal:{" "}
+                              </span>
+                              <br />
+                              {int.fiscal_id_number}
+                            </p>
+
+                            <p>
+                              <span className="font-semibold">Domicilio: </span>
+                              <br />
+                              {int?.address + " " + int?.address_number}
                             </p>
                             <p>
                               <span className="font-semibold">Piso </span>
-                              {int?.floor}
+                              <br />
+                              {int?.floor ?? "-"}
                             </p>
                             <p>
-                              <span className="font-semibold">Depto: </span>
-                              {int?.department}
+                              <span className="font-semibold">
+                                Departamento:{" "}
+                              </span>
+                              <br />
+                              {int?.department ?? "-"}
                             </p>
                             <p>
                               <span className="font-semibold">Localidad: </span>
-                              {int?.locality}
+                              <br />
+                              {int?.locality ?? "-"}
                             </p>
                             <p>
                               <span className="font-semibold">Provincia: </span>
-                              {int?.state}
+                              <br />
+                              {int?.province}
                             </p>
                             <p>
-                              <span className="font-semibold"> CP: </span>
+                              <span className="font-semibold">
+                                {" "}
+                                Codigo Postal:{" "}
+                              </span>
+                              <br />
                               {int?.cp}
                             </p>
                             <p>
-                              <span className="font-semibold"> Tel: </span>
-                              {int?.phone_number}
-                            </p>
-                            <p>
                               <span className="font-semibold">Email: </span>
+                              <br />
                               {int?.email}
                             </p>
                             <p>
-                              <span className="font-semibold">F. Alta: </span>
+                              <span className="font-semibold">
+                                {" "}
+                                Tel. particular:{" "}
+                              </span>
+                              <br />
+                              {int?.phone_number}
+                            </p>
+                            <p>
+                              <span className="font-semibold">
+                                {" "}
+                                Tel. movil:{" "}
+                              </span>
+                              <br />
+                              {int?.cellphone_number}
+                            </p>
+
+                            <p>
+                              <span className="font-semibold">
+                                Fecha Alta:{" "}
+                              </span>
                             </p>
                             <p>
                               <span className="font-semibold">Estado: </span>
+                              <br />
                             </p>
                             <p>
                               <span className="font-semibold">
                                 Fecha EStado:{" "}
                               </span>
+                              <br />
+                            </p>
+                            <p>
+                              <span className="font-semibold">
+                                Parentesco:{" "}
+                              </span>
+                              <br />
+                              {int?.relationship}
                             </p>
                             <p>
                               <span className="font-semibold">
                                 Motivo baja:{" "}
                               </span>
+                              <br />
+                            </p>
+                            <p>
+                              <span className="font-semibold">
+                                Usuario baja:{" "}
+                              </span>
+                              <br />
                             </p>
                           </div>
                         </AccordionContentIntegrant>

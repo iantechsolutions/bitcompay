@@ -67,7 +67,7 @@ export const integrantsRouter = createTRPCRouter({
         department: z.string().optional(),
         locality: z.string().optional(),
         partido: z.string().optional(),
-        state: z.string().optional(),
+        province: z.string().optional(),
         cp: z.string().optional(),
         zone: z.string().optional(),
         isHolder: z.boolean().optional(),

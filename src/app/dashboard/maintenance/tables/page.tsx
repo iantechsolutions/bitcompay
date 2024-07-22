@@ -23,7 +23,7 @@ const items = [
   { es: "Nomenclador", en: "nomenclator" },
   { es: "Paises", en: "countries" },
   { es: "Parental", en: "parental" },
-  { es: "Provincias", en: "state" },
+  { es: "Provincias", en: "province" },
   { es: "Rubros", en: "items" },
   { es: "Unidades de negocio", en: "bussiness_unit" },
   { es: "Zonas", en: "zone" },
