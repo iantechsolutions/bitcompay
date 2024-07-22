@@ -572,6 +572,7 @@ export const integrants = pgTable("integrant", {
   locality: varchar("locality", { length: 255 }),
   partido: varchar("partido", { length: 255 }),
   state: varchar("state", { length: 255 }),
+  province: varchar("province", { length: 255 }),
   cp: varchar("cp", { length: 255 }),
   zone: varchar("zone", { length: 255 }),
   isHolder: boolean("isHolder").notNull().default(false),
@@ -729,6 +730,7 @@ export const comprobantes = pgTable("comprobantes", {
   fromPeriod: timestamp("fromperiod", { mode: "date" }),
   toPeriod: timestamp("toperiod", { mode: "date" }),
   due_date: timestamp("due_date", { mode: "date" }),
+  second_due_date: timestamp("due_date", { mode: "date" }),
   payedDate: timestamp("payedDate", { mode: "date" }),
   prodName: varchar("prodName", { length: 255 }).notNull(),
   iva: varchar("iva", { length: 255 }).notNull(),
@@ -752,6 +754,7 @@ export const comprobantes = pgTable("comprobantes", {
   family_group_id: varchar("family_group_id", { length: 255 }).references(
     () => family_groups.id
   ),
+  previous_facturaId: varchar("previous_factura", { length: 255 }),
 });
 
 export const comprobantesRelations = relations(
@@ -766,6 +769,10 @@ export const comprobantesRelations = relations(
     family_group: one(family_groups, {
       fields: [comprobantes.family_group_id],
       references: [family_groups.id],
+    }),
+    anterior: one(comprobantes, {
+      fields: [comprobantes.previous_facturaId],
+      references: [comprobantes.id],
     }),
   })
 );

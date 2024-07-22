@@ -107,7 +107,7 @@ export default function Page() {
         department: member.depto,
         locality: member.localidad,
         partido: member.county,
-        state: member.state,
+        province: member.province,
         cp: member.cp,
         zone: member.zone,
         isAffiliate: member.isAffiliate,
@@ -161,7 +161,8 @@ export default function Page() {
       <section className="space-y-2">
         <Link
           className="w-20 h-auto flex justify-between"
-          href={`/dashboard/management/sales/procedures`}>
+          href={`/dashboard/management/sales/procedures`}
+        >
           <ArrowLeftIcon /> Volver
         </Link>
         <div className="flex justify-between">

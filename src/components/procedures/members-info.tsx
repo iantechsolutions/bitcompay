@@ -70,7 +70,8 @@ export type InputsMembers = {
   depto: string;
   localidad: string;
   county: string;
-  state: string;
+  // state: string;
+  province: string;
   cp: string;
   zone: string;
   phone_number: string;
@@ -123,7 +124,8 @@ export default function AddMembers(props: AddMembersProps) {
         <Form {...props.form}>
           <form
             onSubmit={props.form.handleSubmit(onSubmit)}
-            className="mt-4 flex flex-col gap-2">
+            className="mt-4 flex flex-col gap-2"
+          >
             <div className="grid grid-cols-4 gap-x-16 gap-y-6">
               <FormField
                 control={props.form.control}
@@ -133,7 +135,8 @@ export default function AddMembers(props: AddMembersProps) {
                     <FormLabel>Parentezco</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}>
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccione un parentezco" />
@@ -169,7 +172,8 @@ export default function AddMembers(props: AddMembersProps) {
                     <FormLabel>Tipo Documento</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}>
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccione un tipo de documento" />
@@ -210,7 +214,8 @@ export default function AddMembers(props: AddMembersProps) {
                             className={cn(
                               "w-[240px] pl-3 text-left font-normal",
                               !field.value && "text-muted-foreground"
-                            )}>
+                            )}
+                          >
                             <p>
                               {field.value ? (
                                 dayjs
@@ -249,7 +254,8 @@ export default function AddMembers(props: AddMembersProps) {
                     <FormLabel>Género</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}>
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccione un género" />
@@ -272,7 +278,8 @@ export default function AddMembers(props: AddMembersProps) {
                     <FormLabel>Estado Civil</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}>
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccione un estado civil" />
@@ -306,7 +313,8 @@ export default function AddMembers(props: AddMembersProps) {
                     <FormLabel>Condición Impositiva</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}>
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccione una condición impositiva" />
@@ -336,7 +344,8 @@ export default function AddMembers(props: AddMembersProps) {
                     <FormLabel>Tipo de id fiscal</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}>
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccione un tipo de id fiscal" />
@@ -428,7 +437,7 @@ export default function AddMembers(props: AddMembersProps) {
               />
               <FormField
                 control={props.form.control}
-                name="state"
+                name="province"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Provincia</FormLabel>
@@ -498,7 +507,8 @@ export default function AddMembers(props: AddMembersProps) {
                     <FormLabel>Seleccione el iva a utilizar</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}>
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccione un tipo de iva" />

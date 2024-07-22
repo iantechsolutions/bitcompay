@@ -50,7 +50,14 @@ export const family_groupsRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       const family_groups = await db.query.family_groups.findFirst({
         where: eq(schema.family_groups.id, input.family_groupsId),
-        with: { businessUnitData: true },
+        with: {
+          businessUnitData: true,
+          plan: true,
+          modo: true,
+          integrants: {
+            with: {},
+          },
+        },
       });
 
       if (family_groups?.businessUnitData?.companyId === ctx.session.orgId) {

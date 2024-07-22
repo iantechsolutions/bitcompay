@@ -238,33 +238,10 @@ async function approbatecomprobante(liquidationId: string) {
       const status = await db.query.paymentStatus.findFirst({
         where: eq(schema.paymentStatus.code, "00"),
       });
+      const statusCancelado = await db.query.paymentStatus.findFirst({
+        where: eq(schema.paymentStatus.code, "90"),
+      });
       console.log("4");
-      const payment = await db
-        .insert(schema.payments)
-        .values({
-          companyId:
-            comprobante.family_group?.businessUnitData?.company?.id ?? "",
-          invoice_number: randomNumber,
-          userId: user?.id ?? "",
-          g_c: comprobante.family_group?.businessUnitData?.brand?.number ?? 0,
-          name: billResponsible?.name ?? "",
-          fiscal_id_type: billResponsible?.fiscal_id_type,
-          fiscal_id_number: parseInt(billResponsible?.fiscal_id_number ?? "0"),
-          du_type: billResponsible?.id_type,
-          du_number: parseInt(billResponsible?.id_number ?? "0"),
-          product: producto?.id,
-          period: comprobante.due_date,
-          first_due_amount: comprobante?.importe,
-          first_due_date: comprobante.due_date,
-          cbu: billResponsible?.pa[0]?.CBU,
-          comprobante_id: comprobante?.id,
-          documentUploadId: "0AspRyw8g4jgDAuNGAeBX",
-          product_number: producto?.number ?? 0,
-          statusId: status?.id,
-          // address: billResponsible?.address,
-        })
-        .returning();
-      console.log("5");
       const fecha = new Date(
         Date.now() - new Date().getTimezoneOffset() * 60000
       )
@@ -282,8 +259,7 @@ async function approbatecomprobante(liquidationId: string) {
         data = {
           CantReg: 1, // Cantidad de comprobantes a registrar
           PtoVta: comprobante?.ptoVenta,
-          CbteTipo:
-            NCbytipocomprobanteDictionarys[comprobanteCod?.toString() ?? ""],
+          CbteTipo: comprobanteCod?.toString() ?? "",
           Concepto: Number(comprobante?.concepto),
           DocTipo: comprobante?.tipoDocumento,
           DocNro: comprobante?.nroDocumento,
@@ -307,12 +283,53 @@ async function approbatecomprobante(liquidationId: string) {
             Importe: (Number(comprobante?.importe) * ivaFloat).toString(),
           },
           CbtesAsoc: {
-            Tipo: fcAnc[comprobante.tipoComprobante ?? ""],
-            BaseImp: comprobante.importe / (1 + ivaFloat),
-            Importe: comprobante.importe * ivaFloat,
+            Tipo: comprobanteDictionary[
+              fcAnc[comprobante.tipoComprobante ?? ""] ?? ""
+            ],
+            PtoVta: comprobante?.ptoVenta,
+            Importe: comprobante?.nroComprobante,
           },
         };
+        await db
+          .update(schema.payments)
+          .set({
+            statusId: statusCancelado?.id,
+          })
+          .where(
+            eq(
+              schema.payments.comprobante_id,
+              comprobante?.previous_facturaId ?? ""
+            )
+          );
       } else {
+        const payment = await db
+          .insert(schema.payments)
+          .values({
+            companyId:
+              comprobante.family_group?.businessUnitData?.company?.id ?? "",
+            invoice_number: randomNumber,
+            userId: user?.id ?? "",
+            g_c: comprobante.family_group?.businessUnitData?.brand?.number ?? 0,
+            name: billResponsible?.name ?? "",
+            fiscal_id_type: billResponsible?.fiscal_id_type,
+            fiscal_id_number: parseInt(
+              billResponsible?.fiscal_id_number ?? "0"
+            ),
+            du_type: billResponsible?.id_type,
+            du_number: parseInt(billResponsible?.id_number ?? "0"),
+            product: producto?.id,
+            period: comprobante.due_date,
+            first_due_amount: comprobante?.importe,
+            first_due_date: comprobante.due_date,
+            cbu: billResponsible?.pa[0]?.CBU,
+            comprobante_id: comprobante?.id,
+            documentUploadId: "0AspRyw8g4jgDAuNGAeBX",
+            product_number: producto?.number ?? 0,
+            statusId: status?.id,
+            // address: billResponsible?.address,
+          })
+          .returning();
+        console.log("5");
         data = {
           CantReg: 1, // Cantidad de comprobantes a registrar
           PtoVta: comprobante?.ptoVenta,
@@ -590,6 +607,7 @@ export async function getGruposForLiquidation(brandId: string, date: Date) {
       comprobantes: {
         with: {
           payments: true,
+          anterior: true,
         },
       },
       bonus: true,
@@ -686,6 +704,30 @@ export const comprobantesRouter = createTRPCRouter({
   create: protectedProcedure
     .input(ComprobantesSchemaDB)
     .mutation(async ({ input }) => {
+      const comprobante = await db
+        .insert(schema.comprobantes)
+        .values({ ...input })
+        .returning();
+      const comprobanteGotten = await db.query.comprobantes.findFirst({
+        where: eq(schema.comprobantes.id, comprobante[0]?.id ?? ""),
+        with: {
+          family_group: {
+            with: {
+              integrants: {
+                with: {
+                  postal_code: true,
+                },
+              },
+            },
+          },
+          items: true,
+        },
+      });
+      return [comprobanteGotten];
+    }),
+  createManual: protectedProcedure
+    .input(ComprobantesSchemaDB)
+    .mutation(async ({ input }) => {
       const newProvider = await db
         .insert(schema.comprobantes)
         .values({ ...input })
@@ -778,7 +820,22 @@ export const comprobantesRouter = createTRPCRouter({
         .where(eq(schema.comprobantes.id, id));
       return updatedProvider;
     }),
-
+  addBillLink: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        billLink: z.string(),
+      })
+    )
+    .mutation(async ({ input: { id, billLink } }) => {
+      const updatedProvider = await db
+        .update(schema.comprobantes)
+        .set({
+          billLink: billLink,
+        })
+        .where(eq(schema.comprobantes.id, id));
+      return updatedProvider;
+    }),
   delete: protectedProcedure
     .input(
       z.object({
@@ -922,7 +979,7 @@ export async function preparateComprobante(
           .insert(schema.comprobantes)
           .values({
             ptoVenta: mostRecentFactura.ptoVenta,
-            nroComprobante: 0,
+            nroComprobante: mostRecentFactura.nroComprobante,
             tipoComprobante: fcAnc[mostRecentFactura?.tipoComprobante ?? "0"],
             concepto: mostRecentFactura?.concepto ?? 0,
             tipoDocumento: tipoDocumento ?? 0,
@@ -939,6 +996,7 @@ export async function preparateComprobante(
             family_group_id: grupo.id,
             origin: "Nota de credito",
             estado: "generada",
+            previous_facturaId: mostRecentFactura?.id,
           })
           .returning();
         //creamos item de NC para visualizacion

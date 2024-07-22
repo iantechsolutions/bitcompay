@@ -3,7 +3,10 @@ import { NextResponse } from "next/server";
 
 const isProtectedRoute = createRouteMatcher(["/dashboard(.*)"]);
 const isProtectedAdmin = createRouteMatcher(["/dashboard/administration(.*)"]);
-const isPublicRoute = createRouteMatcher(["/api/uploadthing(.*)"]);
+const isPublicRoute = createRouteMatcher([
+  "/api/uploadthing(.*)",
+  "/signin(.*)",
+]);
 
 export default clerkMiddleware((auth, req) => {
   if (!isPublicRoute(req)) {
