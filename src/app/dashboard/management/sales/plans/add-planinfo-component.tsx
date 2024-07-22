@@ -35,11 +35,11 @@ import { toast } from "sonner";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { PlanSchema } from "~/server/forms/plans-schema";
 import { api } from "~/trpc/react";
-import { useCompanyData } from "../../../company-provider";
 import { useFieldArray } from "react-hook-form";
 import { Label } from "~/components/ui/label";
 import { RouterOutputs } from "~/trpc/shared";
 import { GoBackArrow } from "~/components/goback-arrow";
+import { useQueryClient } from "@tanstack/react-query";
 
 dayjs.extend(utc);
 dayjs.locale("es");
@@ -47,13 +47,14 @@ dayjs.locale("es");
 type AddPlanDialogProps = {
   planId?: string;
   onPlanIdChange?: (planId: string) => void;
+  closeDialog: () => void;
 };
 
 export default function AddPlanInfoComponent({
   planId,
   onPlanIdChange,
+  closeDialog,
 }: AddPlanDialogProps) {
-  const company = useCompanyData();
   const [brand, setBrand] = useState("");
   const [codigo, setCodigo] = useState("");
   const [descripcion, setDescripcion] = useState("");
@@ -81,6 +82,7 @@ export default function AddPlanInfoComponent({
     api.plans.create.useMutation();
   const { mutateAsync: updatePlan, isLoading: isUpdating } =
     api.plans.change.useMutation();
+  const queryClient = useQueryClient();
 
   async function handleSumbit() {
     if (planId) {
@@ -100,8 +102,11 @@ export default function AddPlanInfoComponent({
       if (onPlanIdChange) {
         onPlanIdChange(plan[0]!.id);
       }
+      queryClient.invalidateQueries();
+
       toast.success("Plan creado correctamente");
     }
+    closeDialog();
   }
 
   return (
@@ -110,7 +115,8 @@ export default function AddPlanInfoComponent({
         <Label>Marca</Label>
         <Select
           onValueChange={(value: string) => setBrand(value)}
-          value={brand}>
+          value={brand}
+        >
           <SelectTrigger>
             <SelectValue placeholder="Seleccione una marca" />
           </SelectTrigger>
@@ -145,7 +151,8 @@ export default function AddPlanInfoComponent({
       <Button
         onClick={handleSumbit}
         disabled={isCreating || isUpdating}
-        className="mt-4">
+        className="mt-4"
+      >
         {(isCreating || isUpdating) && (
           <Loader2Icon className="mr-2 animate-spin" size={20} />
         )}

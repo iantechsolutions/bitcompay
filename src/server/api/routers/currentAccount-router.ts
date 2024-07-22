@@ -32,9 +32,12 @@ export const currentAccountRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input }) => {
-      const currentAccount = await db.insert(schema.currentAccount).values({
-        family_group: input.family_group,
-      });
+      const currentAccount = await db
+        .insert(schema.currentAccount)
+        .values({
+          family_group: input.family_group,
+        })
+        .returning();
 
       return currentAccount;
     }),

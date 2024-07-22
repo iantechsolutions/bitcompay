@@ -515,6 +515,7 @@ export const healthInsurances = pgTable("health_insurances", {
   ),
   name: varchar("name", { length: 255 }).notNull(),
   identificationNumber: varchar("identificationNumber", { length: 255 }),
+  isClient: boolean("isClient").notNull().default(false),
 });
 
 export const clientStatuses = pgTable("client_statuses", {
@@ -728,6 +729,7 @@ export const comprobantes = pgTable("comprobantes", {
   fromPeriod: timestamp("fromperiod", { mode: "date" }),
   toPeriod: timestamp("toperiod", { mode: "date" }),
   due_date: timestamp("due_date", { mode: "date" }),
+  second_due_date: timestamp("due_date", { mode: "date" }),
   payedDate: timestamp("payedDate", { mode: "date" }),
   prodName: varchar("prodName", { length: 255 }).notNull(),
   iva: varchar("iva", { length: 255 }).notNull(),
@@ -751,6 +753,7 @@ export const comprobantes = pgTable("comprobantes", {
   family_group_id: varchar("family_group_id", { length: 255 }).references(
     () => family_groups.id
   ),
+  previous_facturaId: varchar("previous_factura", { length: 255 }),
 });
 
 export const comprobantesRelations = relations(
@@ -765,6 +768,10 @@ export const comprobantesRelations = relations(
     family_group: one(family_groups, {
       fields: [comprobantes.family_group_id],
       references: [family_groups.id],
+    }),
+    anterior: one(comprobantes, {
+      fields: [comprobantes.previous_facturaId],
+      references: [comprobantes.id],
     }),
   })
 );

@@ -2,18 +2,19 @@
 import { UploadDropzone } from "~/components/uploadthing";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useCompanyData } from "~/app/dashboard/company-provider";
+import { useAuth } from "@clerk/nextjs";
+import AccessDenied from "~/app/accessdenied/page";
 
 export default function UploadDropzoneV1() {
   const [errorMessage, setErrorMessage] = useState<string | null>();
 
   const router = useRouter();
-  const company = useCompanyData();
-
+  const { orgId } = useAuth();
+  if (!orgId) return <AccessDenied />;
   return (
     <div>
       <UploadDropzone
-        input={{ companyId: company.id }}
+        input={{ companyId: orgId }}
         endpoint="massiveGenerationUpload"
         config={{
           mode: "manual",

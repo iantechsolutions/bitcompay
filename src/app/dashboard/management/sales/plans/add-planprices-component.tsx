@@ -2,7 +2,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useForm, useFieldArray, type SubmitHandler } from "react-hook-form";
 import { api } from "~/trpc/react";
-import { useCompanyData } from "../../../company-provider";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import "dayjs/locale/es";
@@ -66,7 +65,6 @@ export default function AddPlanPricesComponent({
   date,
   onPricesChange,
 }: AddPlanDialogProps) {
-  const company = useCompanyData();
   const [anio, setAnio] = useState(date?.getFullYear() ?? 2020);
   const [mes, setMes] = useState((date?.getMonth() ?? 0) + 1);
   const router = useRouter();

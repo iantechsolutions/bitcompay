@@ -5,15 +5,16 @@ import { Title } from "~/components/title";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { UploadDropzone } from "~/components/uploadthing";
-import { useCompanyData } from "../../../company-provider";
+import { useAuth } from "@clerk/nextjs";
+import AccessDenied from "~/app/accessdenied/page";
 
 export default function UploadPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>();
 
   const router = useRouter();
 
-  const company = useCompanyData();
-
+  const { orgId } = useAuth();
+  if (!orgId) return <AccessDenied />;
   return (
     <LayoutContainer>
       <Title>Cargar documento</Title>
@@ -21,7 +22,7 @@ export default function UploadPage() {
       {errorMessage && <p className="text-red-500">{errorMessage}</p>}
 
       <UploadDropzone
-        input={{ companyId: company.id }}
+        input={{ companyId: orgId }}
         endpoint="documentUpload"
         config={{
           mode: "manual",

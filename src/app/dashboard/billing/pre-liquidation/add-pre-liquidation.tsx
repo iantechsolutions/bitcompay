@@ -40,8 +40,8 @@ export default function AddPreLiquidation() {
   const [fechaVencimiento2, setFechaVencimiento2] = useState<Date>();
   // const [fechaDesde, setFechaDesde] = useState<Date>();
   // const [fechaHasta, setFechaHasta] = useState<Date>();
-  const [mes, setMes] = useState<number>(1);
-  const [anio, setAnio] = useState<number>(2021);
+  const [mes, setMes] = useState<number | null>(null);
+  const [anio, setAnio] = useState<number>(new Date().getFullYear());
   const [puntoVenta, setPuntoVenta] = useState("");
   const [logo_url, setLogo_url] = useState("");
 
@@ -58,27 +58,34 @@ export default function AddPreLiquidation() {
   // const { mutateAsync: createFacturas } = api.family_groups.createPreLiquidation.useMutation();
   async function handleCreate() {
     // const { data:grupos } = api.family_groups.getByBrand.useQuery({brandId: brandId});
-    const liquidation = await createLiquidation({
-      pv: puntoVenta,
-      brandId: brandId,
-      dateDesde: new Date(anio, mes - 1, 1),
-      dateHasta: new Date(anio, mes, 0),
-      dateDue: fechaVencimiento2,
-      interest: interest ?? undefined,
-      logo_url: logo_url ?? undefined,
-    });
+    // const date = new Date(anio, mes - 1, 1);
+    if (mes && anio && anio >= new Date().getFullYear()) {
+      const liquidation = await createLiquidation({
+        pv: puntoVenta,
+        brandId: brandId,
+        dateDesde: new Date(anio, mes - 1, 1),
+        dateHasta: new Date(anio, mes, 0),
+        dateDue: fechaVencimiento2,
+        interest: interest ?? undefined,
+        logo_url: logo_url ?? undefined,
+      });
+      if ("error" in liquidation!) {
+        toast.error("No se encuentran grupos familiares asociados a esa marca");
+      } else if (liquidation) {
+        queryClient.invalidateQueries();
+        toast.success("Pre-liquidacion creada correctamente");
+        setOpen(false);
+      } else {
+        toast.error("Error al crear la pre-liquidacion");
+      }
+    }
+    if (!mes) {
+      toast.error("Seleccione un mes");
+    } else if (!anio || anio < new Date().getFullYear()) {
+      toast.error("El año seleccionado no es valido");
+    }
     //TODO CORREGIR ESTO
     // await new Promise((resolve) => setTimeout(resolve, 500));
-
-    if ("error" in liquidation!) {
-      toast.error("No se encuentran grupos familiares asociados a esa marca");
-    } else if (liquidation) {
-      queryClient.invalidateQueries();
-      toast.success("Pre-liquidacion creada correctamente");
-      setOpen(false);
-    } else {
-      toast.error("Error al crear la pre-liquidacion");
-    }
   }
 
   const handleBrandChange = (value: string) => {
@@ -124,7 +131,8 @@ export default function AddPreLiquidation() {
                     <SelectItem
                       key={marca?.id}
                       value={marca?.id}
-                      className="rounded-none border-b border-gray-600">
+                      className="rounded-none border-b border-gray-600"
+                    >
                       {marca?.name}
                     </SelectItem>
                   ))}
@@ -141,7 +149,8 @@ export default function AddPreLiquidation() {
                   className={cn(
                     "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
                     !fechaVencimiento1 && "text-muted-foreground"
-                  )}>
+                  )}
+                >
                   <p>
                     {fechaVencimiento1 ? (
                       dayjs(fechaVencimiento1).format("D [de] MMMM [de] YYYY")
@@ -175,7 +184,8 @@ export default function AddPreLiquidation() {
                   className={cn(
                     "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
                     !fechaVencimiento2 && "text-muted-foreground"
-                  )}>
+                  )}
+                >
                   <p>
                     {fechaVencimiento2 ? (
                       dayjs(fechaVencimiento2).format("D [de] MMMM [de] YYYY")
@@ -266,23 +276,84 @@ export default function AddPreLiquidation() {
               <Label htmlFor="validy_date">Mes de vigencia</Label>
               <Select
                 onValueChange={(e) => setMes(Number(e))}
-                defaultValue={mes.toString()}>
+                defaultValue={mes?.toString()}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccione un mes" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1">Enero</SelectItem>
-                  <SelectItem value="2">Febrero</SelectItem>
-                  <SelectItem value="3">Marzo</SelectItem>
-                  <SelectItem value="4">Abril</SelectItem>
-                  <SelectItem value="5">Mayo</SelectItem>
-                  <SelectItem value="6">Junio</SelectItem>
-                  <SelectItem value="7">Julio</SelectItem>
-                  <SelectItem value="8">Agosto</SelectItem>
-                  <SelectItem value="9">Septiembre</SelectItem>
-                  <SelectItem value="10">Octubre</SelectItem>
-                  <SelectItem value="11">Noviembre</SelectItem>
-                  <SelectItem value="12">Diciembre</SelectItem>
+                  <SelectItem
+                    value="1"
+                    disabled={new Date(anio, 1, 1) < new Date()}
+                  >
+                    Enero
+                  </SelectItem>
+                  <SelectItem
+                    value="2"
+                    disabled={new Date(anio, 2, 1) < new Date()}
+                  >
+                    Febrero
+                  </SelectItem>
+                  <SelectItem
+                    value="3"
+                    disabled={new Date(anio, 3, 1) < new Date()}
+                  >
+                    Marzo
+                  </SelectItem>
+                  <SelectItem
+                    value="4"
+                    disabled={new Date(anio, 4, 1) < new Date()}
+                  >
+                    Abril
+                  </SelectItem>
+                  <SelectItem
+                    value="5"
+                    disabled={new Date(anio, 5, 1) < new Date()}
+                  >
+                    Mayo
+                  </SelectItem>
+                  <SelectItem
+                    value="6"
+                    disabled={new Date(anio, 6, 1) < new Date()}
+                  >
+                    Junio
+                  </SelectItem>
+                  <SelectItem
+                    value="7"
+                    disabled={new Date(anio, 7, 1) < new Date()}
+                  >
+                    Julio
+                  </SelectItem>
+                  <SelectItem
+                    value="8"
+                    disabled={new Date(anio, 8, 1) < new Date()}
+                  >
+                    Agosto
+                  </SelectItem>
+                  <SelectItem
+                    value="9"
+                    disabled={new Date(anio, 9, 1) < new Date()}
+                  >
+                    Septiembre
+                  </SelectItem>
+                  <SelectItem
+                    value="10"
+                    disabled={new Date(anio, 10, 1) < new Date()}
+                  >
+                    Octubre
+                  </SelectItem>
+                  <SelectItem
+                    value="11"
+                    disabled={new Date(anio, 11, 1) < new Date()}
+                  >
+                    Noviembre
+                  </SelectItem>
+                  <SelectItem
+                    value="12"
+                    disabled={new Date(anio, 12, 1) < new Date()}
+                  >
+                    Diciembre
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -291,6 +362,7 @@ export default function AddPreLiquidation() {
               <Input
                 className="border-green-300 focus-visible:ring-green-400 w-[100px]"
                 type="number"
+                min={new Date().getFullYear()}
                 value={anio}
                 onChange={(e) => setAnio(Number(e.target.value))}
               />
@@ -328,7 +400,8 @@ export default function AddPreLiquidation() {
             className="mt-2"
             type="submit"
             disabled={isLoading}
-            onClick={handleCreate}>
+            onClick={handleCreate}
+          >
             {isLoading && (
               <Loader2Icon className="mr-2 animate-spin" size={20} />
             )}

@@ -12,6 +12,17 @@ import { api } from "~/trpc/react";
 import { toast } from "sonner";
 import { type RouterOutputs } from "~/trpc/shared";
 import { Loader2Icon } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
 dayjs.extend(utc);
 dayjs.locale("es");
 
@@ -29,8 +40,14 @@ export default function HealthInsurancePage(props: {
     props.healthInsurance!.identificationNumber!
   );
 
+  const [isPending, setIsLoading] = useState<boolean>(false);
+  const [openPopover, setOpenPopover] = useState<boolean>(false);
+
   const { mutateAsync: updateHealthInsurance, isLoading } =
     api.healthInsurances.change.useMutation();
+
+  const { mutateAsync: deleteHealthInsurance } =
+    api.healthInsurances.delete.useMutation();
 
   async function handleUpdate() {
     try {
@@ -42,6 +59,21 @@ export default function HealthInsurancePage(props: {
 
       toast.success("Obra social actualizada correctamente");
       router.refresh();
+    } catch (e) {
+      const error = asTRPCError(e)!;
+      toast.error(error.message);
+    }
+  }
+
+  async function handleDelete() {
+    try {
+      setIsLoading(true);
+      await deleteHealthInsurance({
+        healthInsuranceId: props.healthInsurance!.id,
+      });
+
+      toast.success("Obra social eliminada correctamente");
+      router.push("./");
     } catch (e) {
       const error = asTRPCError(e)!;
       toast.error(error.message);
@@ -75,6 +107,40 @@ export default function HealthInsurancePage(props: {
         {isLoading && <Loader2Icon className="mr-2 animate-spin" size={20} />}
         Actualizar
       </Button>
+
+      <AlertDialog open={openPopover}>
+        <AlertDialogTrigger asChild={true}>
+          <Button
+            variant="destructive"
+            className="w-[160px]"
+            disabled={isPending}
+            onClick={() => setOpenPopover(true)}>
+            {isPending && (
+              <Loader2Icon className="mr-2 animate-spin" size={20} />
+            )}
+            Eliminar Marca
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              ¿Estás seguro que querés eliminar la marca?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Eliminar marca permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-500 active:bg-red-700 hover:bg-red-600"
+              onClick={handleDelete}
+              disabled={isPending}>
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

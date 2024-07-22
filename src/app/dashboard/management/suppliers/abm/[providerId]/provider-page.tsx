@@ -22,13 +22,13 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "~/components/ui/accordion";
-// import { useCompanyData } from "../../../company-provider";
-import { useCompanyData } from "../../../../company-provider";
 import { asTRPCError } from "~/lib/errors";
 import { RouterOutputs } from "~/trpc/shared";
 import { Card } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
+import { useAuth } from "@clerk/nextjs";
+import AccessDenied from "~/app/accessdenied/page";
 
 export default function ProviderPage(props: {
   provider: RouterOutputs["providers"]["get"];
@@ -65,18 +65,18 @@ export default function ProviderPage(props: {
 }
 
 function DeleteProvider(props: { providerId: string }) {
-  const company = useCompanyData();
   const { mutateAsync: deleteProvider, isLoading } =
     api.providers.delete.useMutation();
 
   const router = useRouter();
-
+  const { orgId } = useAuth();
+  if (!orgId) return <AccessDenied />;
   const handleDelete: MouseEventHandler<HTMLButtonElement> = (e) => {
     e.preventDefault();
     deleteProvider({ providerId: props.providerId })
       .then(() => {
         toast.success("Se ha eliminado el proveedor correctamente");
-        router.push(`/dashboard/${company.id}/administration/providers`);
+        router.push(`/dashboard/${orgId}/administration/providers`);
         router.refresh();
       })
       .catch((e) => {

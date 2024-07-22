@@ -27,28 +27,17 @@ import { Input } from "~/components/ui/input";
 import { DataTablePagination } from "~/components/tanstack/pagination";
 import TableToolbar from "~/components/tanstack/table-toolbar";
 import { useState } from "react";
-import DetailSheet from "./detail-sheet";
 import { RouterOutputs } from "~/trpc/shared";
-import { TableRecord } from "./columns";
 import DataTableSummary from "~/components/tanstack/summary";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
 
-interface DetailData {
-  comprobantes: RouterOutputs["comprobantes"]["getByLiquidation"];
-  currentAccountAmount: number;
-  nombre: string;
-  cuit: string;
-  [index: string]: any;
-}
 export function DataTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
-  const [open, setOpen] = useState(false);
-  const [detailData, setDetailData] = useState<DetailData | null>(null);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const table = useReactTable({
     data,
@@ -60,33 +49,33 @@ export function DataTable<TData, TValue>({
     state: {
       columnFilters,
     },
+    initialState: {
+      columnVisibility: {
+        id: false,
+        Marca: false,
+        Plan: false,
+        UN: false,
+        Modalidad: false,
+      },
+    },
   });
   const initialValues = {
-    modo: "",
-    plan: "",
+    Marca: "",
+    Plan: "",
+    UN: "",
+    "Estados GF": "",
+    Modalidad: "",
   };
-  const hiddenDataKeys = [
-    "comprobantes",
-    "currentAccountAmount",
-    "nombre",
-    "cuit",
-  ];
 
   const handleRowClick = (row: Row<TData>) => {
-    let detailData = {} as DetailData;
-    for (const key in row.original) {
-      if (hiddenDataKeys.includes(key)) {
-        detailData[key] = row.original[key];
-      }
-    }
-    console.log(detailData);
-    setDetailData(detailData);
-    setOpen(!open);
+    const linked = (link: string) => {
+      window.location.href = link;
+    };
+    linked(`/dashboard/management/client/affiliates/${row.getValue("id")}`);
   };
 
   return (
     <>
-      <DataTableSummary table={table} />
       <TableToolbar table={table} initialValues={initialValues} />
 
       <div className="rounded-md border">
@@ -131,13 +120,6 @@ export function DataTable<TData, TValue>({
                     ))}
                   </TableRow>
                 ))}
-                {detailData && (
-                  <DetailSheet
-                    open={open}
-                    setOpen={setOpen}
-                    data={detailData}
-                  />
-                )}
               </>
             ) : (
               <TableRow>

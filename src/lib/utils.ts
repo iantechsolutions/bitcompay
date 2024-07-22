@@ -4,7 +4,7 @@ import { fi } from "date-fns/locale";
 import { nanoid } from "nanoid";
 import { twMerge } from "tailwind-merge";
 import { number } from "zod";
-import { api } from "~/trpc/react";
+import { api } from "~/trpc/server";
 import { RouterOutputs } from "~/trpc/shared";
 
 export function cn(...inputs: ClassValue[]) {
@@ -94,6 +94,9 @@ export function htmlBill(
   const billResponsible = comprobante?.family_group?.integrants?.find(
     (x: any) => x.isBillResponsible
   );
+  // const family_group = api.family_groups.get.query({
+  //   family_groupsId: comprobante?.family_group_id,
+  // });
   if (producto) {
     const canales = producto?.channels;
   }
@@ -119,17 +122,15 @@ export function htmlBill(
     }
   }
 
-  console.log("brand info");
-  console.log(brand?.logo_url);
-  console.log(brand);
-  console.log(comprobante?.ptoVenta);
-  console.log(voucher);
+  console.log("comprobante info");
+  console.log(comprobante);
+  // console.log(voucher);
 
   function getIimageForLogo(logo: string | null) {
     if (logo) {
-      return `<img class="logo" src=${logo} alt="logo" />`;
+      return `<img class="logo" style="width: 30vw;height: auto;margin-bottom: 5px;" src=${logo} alt="logo" />`;
     } else {
-      return `<img class="logo" src="https://utfs.io/f/f426d7f1-f9c7-437c-a722-f978ab23830d-neiy4q.png" alt="logo" />`;
+      return `<img class="logo" style="width: 30vw;height: auto;margin-bottom: 5px;" src="https://utfs.io/f/f426d7f1-f9c7-437c-a722-f978ab23830d-neiy4q.png" alt="logo" />`;
     }
   }
   function generateConcepts(
@@ -492,7 +493,9 @@ span {
   
         <div class="items-2">
               ${getImageTagForTipoComprobante(
-                comprobante?.tipoComprobante ?? ""
+                comprobanteDictionary[
+                  comprobante?.tipoComprobante
+                ]?.toString() ?? ""
               )}
          
         </div>
@@ -847,3 +850,73 @@ function obtenerDecimales(numero: number | undefined) {
   }
   return "00"; // Retorna "00" si no hay parte decimal
 }
+export const comprobanteDictionary: { [key: string]: number } = {
+  "FACTURA A": 3,
+  "FACTURA B": 6,
+  "FACTURA C": 11,
+  "FACTURA M": 51,
+  "FACTURA E": 19,
+  "NOTA DE DEBITO A": 8,
+  "NOTA DE DEBITO B": 13,
+  "NOTA DE DEBITO C": 15,
+  "NOTA DE DEBITO M": 52,
+  "NOTA DE DEBITO E": 20,
+  "NOTA DE CREDITO A": 2,
+  "NOTA DE CREDITO B": 12,
+  "NOTA DE CREDITO C": 14,
+  "NOTA DE CREDITO M": 53,
+  "NOTA DE CREDITO E": 21,
+  "": 0,
+};
+
+export const reverseComprobanteDictionary: { [key: number]: string } = {
+  3: "FACTURA A",
+  6: "FACTURA B",
+  11: "FACTURA C",
+  51: "FACTURA M",
+  19: "FACTURA E",
+  8: "NOTA DE DEBITO A",
+  13: "NOTA DE DEBITO B",
+  15: "NOTA DE DEBITO C",
+  52: "NOTA DE DEBITO M",
+  20: "NOTA DE DEBITO E",
+  2: "NOTA DE CREDITO A",
+  12: "NOTA DE CREDITO B",
+  14: "NOTA DE CREDITO C",
+  53: "NOTA DE CREDITO M",
+  21: "NOTA DE CREDITO E",
+  0: "RECIBO",
+};
+
+export const reversedIvaDictionary: { [key: string]: number } = {
+  "0": 3,
+  "10.5": 4,
+  "21": 5,
+  "27": 6,
+  "5": 8,
+  "2.5": 9,
+  "": 0,
+};
+
+export const ivaDictionary: { [key: number]: string } = {
+  3: "0",
+  4: "10.5",
+  5: "21",
+  6: "27",
+  8: "5",
+  9: "2.5",
+  0: "",
+};
+
+export const idDictionary: { [key: string]: number } = {
+  CUIT: 80,
+  CUIL: 86,
+  DNI: 96,
+  "Consumidor Final": 99,
+};
+export const reversedIdDictionary: { [key: number]: string } = {
+  80: "CUIT",
+  86: "CUIL",
+  96: "DNI",
+  99: "Consumidor Final",
+};

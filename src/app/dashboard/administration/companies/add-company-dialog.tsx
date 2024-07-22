@@ -22,7 +22,10 @@ export function AddCompanyDialog() {
   const { createOrganization } = useOrganizationList();
   const { mutateAsync: createCompany, isLoading } =
     api.companies.create.useMutation();
-
+  const { mutateAsync: createCC, isLoading: isLoadingCC } =
+    api.currentAccount.create.useMutation();
+  const { mutateAsync: createEvent, isLoading: isLoadingEvent } =
+    api.events.createFirstEvent.useMutation();
   const [description, setDescription] = useState("");
   const [name, setName] = useState("");
   const [organizationName, setOrganizationName] = useState("");
@@ -50,6 +53,15 @@ export function AddCompanyDialog() {
           description,
           name,
           concept,
+        });
+        const cc = await createCC({
+          company_id: organization.id,
+          family_group: null,
+        });
+        await createEvent({
+          ccId: cc[0]?.id ?? "",
+          type: "REC",
+          amount: 0,
         });
       }
       setName("");
@@ -125,7 +137,7 @@ export function AddCompanyDialog() {
               <span className="text-red-600 text-xs">{error}</span>
             </div>
             <DialogFooter>
-              <Button disabled={isLoading} type="submit">
+              <Button disabled={isLoadingCC} type="submit">
                 Crear entidad
               </Button>
             </DialogFooter>

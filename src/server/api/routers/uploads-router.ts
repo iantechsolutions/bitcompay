@@ -222,6 +222,34 @@ export const uploadsRouter = createTRPCRouter({
                 type: "REC",
               });
             }
+            const ccORG = await db.query.currentAccount.findFirst({
+              where: eq(
+                schema.currentAccount.company_id,
+                payment?.companyId ?? ""
+              ),
+              with: {
+                events: true,
+              },
+            });
+            const lastEvent = ccORG?.events.reduce((prev, current) => {
+              return new Date(prev.createdAt) > new Date(current.createdAt)
+                ? prev
+                : current;
+            });
+            if (!lastEvent) {
+              throw new Error(
+                "No hay eventos en la cuenta corriente de la empresa"
+              );
+            }
+            const new_event = await tx.insert(schema.events).values({
+              currentAccount_id: ccORG?.id,
+              event_amount:
+                record.first_due_amount ?? record.collected_amount ?? 0,
+              current_amount:
+                lastEvent?.current_amount! + payment?.comprobantes?.importe!,
+              description: "Recaudacion",
+              type: "REC",
+            });
           })
         );
 

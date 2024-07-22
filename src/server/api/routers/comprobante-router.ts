@@ -15,6 +15,7 @@ import { utapi } from "~/server/uploadthing";
 import { id } from "date-fns/locale";
 import { Events } from "./events-router";
 import { datetime } from "drizzle-orm/mysql-core";
+// import chromium from "chrome-aws-lambda";
 
 type Bonus = {
   id: string;
@@ -27,7 +28,7 @@ type Bonus = {
 };
 
 type grupoCompleto =
-  RouterOutputs["comprobantes"]["getGruposByBrandId"][number];
+  RouterOutputs["comprobantes"]["getGruposForLiquidation"][number];
 
 const ivaDictionary: { [key: number]: string } = {
   3: "0",
@@ -38,7 +39,8 @@ const ivaDictionary: { [key: number]: string } = {
   9: "2.5",
   0: "",
 };
-
+// const PuppeteerHTMLPDF = require("puppeteer-html-pdf");
+// const htmlPDF = new PuppeteerHTMLPDF();
 const conceptDictionary = {
   Productos: 1,
   Servicios: 2,
@@ -187,6 +189,7 @@ async function approbatecomprobante(liquidationId: string) {
     },
   });
   if (liquidation?.estado === "pendiente") {
+    const puppeteer = require("puppeteer");
     const user = await currentUser();
     const updatedLiquidation = await db
       .update(schema.liquidations)
@@ -194,6 +197,14 @@ async function approbatecomprobante(liquidationId: string) {
       .where(eq(schema.liquidations.id, liquidationId));
     const afip = await ingresarAfip();
     let last_voucher;
+    // const browser = await chromium.puppeteer.launch({
+    //   args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
+    //   defaultViewport: chromium.defaultViewport,
+    //   executablePath: await chromium.executablePath,
+    //   headless: true,
+    //   ignoreHTTPSErrors: true,
+    // });
+    // const page = await browser.newPage();
 
     for (let comprobante of liquidation?.comprobantes) {
       console.log("0");
@@ -225,35 +236,12 @@ async function approbatecomprobante(liquidationId: string) {
       });
       console.log("3");
       const status = await db.query.paymentStatus.findFirst({
-        where: eq(schema.paymentStatus.code, "91"),
+        where: eq(schema.paymentStatus.code, "00"),
+      });
+      const statusCancelado = await db.query.paymentStatus.findFirst({
+        where: eq(schema.paymentStatus.code, "90"),
       });
       console.log("4");
-      const payment = await db
-        .insert(schema.payments)
-        .values({
-          companyId:
-            comprobante.family_group?.businessUnitData?.company?.id ?? "",
-          invoice_number: randomNumber,
-          userId: user?.id ?? "",
-          g_c: comprobante.family_group?.businessUnitData?.brand?.number ?? 0,
-          name: billResponsible?.name ?? "",
-          fiscal_id_type: billResponsible?.fiscal_id_type,
-          fiscal_id_number: parseInt(billResponsible?.fiscal_id_number ?? "0"),
-          du_type: billResponsible?.id_type,
-          du_number: parseInt(billResponsible?.id_number ?? "0"),
-          product: producto?.id,
-          period: comprobante.due_date,
-          first_due_amount: comprobante?.importe,
-          first_due_date: comprobante.due_date,
-          cbu: billResponsible?.pa[0]?.CBU,
-          comprobante_id: comprobante?.id,
-          documentUploadId: "0AspRyw8g4jgDAuNGAeBX",
-          product_number: producto?.number ?? 0,
-          statusId: status?.id,
-          // address: billResponsible?.address,
-        })
-        .returning();
-      console.log("5");
       const fecha = new Date(
         Date.now() - new Date().getTimezoneOffset() * 60000
       )
@@ -271,8 +259,7 @@ async function approbatecomprobante(liquidationId: string) {
         data = {
           CantReg: 1, // Cantidad de comprobantes a registrar
           PtoVta: comprobante?.ptoVenta,
-          CbteTipo:
-            NCbytipocomprobanteDictionarys[comprobanteCod?.toString() ?? ""],
+          CbteTipo: comprobanteCod?.toString() ?? "",
           Concepto: Number(comprobante?.concepto),
           DocTipo: comprobante?.tipoDocumento,
           DocNro: comprobante?.nroDocumento,
@@ -296,12 +283,53 @@ async function approbatecomprobante(liquidationId: string) {
             Importe: (Number(comprobante?.importe) * ivaFloat).toString(),
           },
           CbtesAsoc: {
-            Tipo: fcAnc[comprobante.tipoComprobante ?? ""],
-            BaseImp: comprobante.importe / (1 + ivaFloat),
-            Importe: comprobante.importe * ivaFloat,
+            Tipo: comprobanteDictionary[
+              fcAnc[comprobante.tipoComprobante ?? ""] ?? ""
+            ],
+            PtoVta: comprobante?.ptoVenta,
+            Importe: comprobante?.nroComprobante,
           },
         };
+        await db
+          .update(schema.payments)
+          .set({
+            statusId: statusCancelado?.id,
+          })
+          .where(
+            eq(
+              schema.payments.comprobante_id,
+              comprobante?.previous_facturaId ?? ""
+            )
+          );
       } else {
+        const payment = await db
+          .insert(schema.payments)
+          .values({
+            companyId:
+              comprobante.family_group?.businessUnitData?.company?.id ?? "",
+            invoice_number: randomNumber,
+            userId: user?.id ?? "",
+            g_c: comprobante.family_group?.businessUnitData?.brand?.number ?? 0,
+            name: billResponsible?.name ?? "",
+            fiscal_id_type: billResponsible?.fiscal_id_type,
+            fiscal_id_number: parseInt(
+              billResponsible?.fiscal_id_number ?? "0"
+            ),
+            du_type: billResponsible?.id_type,
+            du_number: parseInt(billResponsible?.id_number ?? "0"),
+            product: producto?.id,
+            period: comprobante.due_date,
+            first_due_amount: comprobante?.importe,
+            first_due_date: comprobante.due_date,
+            cbu: billResponsible?.pa[0]?.CBU,
+            comprobante_id: comprobante?.id,
+            documentUploadId: "0AspRyw8g4jgDAuNGAeBX",
+            product_number: producto?.number ?? 0,
+            statusId: status?.id,
+            // address: billResponsible?.address,
+          })
+          .returning();
+        console.log("5");
         data = {
           CantReg: 1, // Cantidad de comprobantes a registrar
           PtoVta: comprobante?.ptoVenta,
@@ -339,40 +367,24 @@ async function approbatecomprobante(liquidationId: string) {
         last_voucher + 1 ?? 0,
         comprobante.family_group?.businessUnitData!.brand
       );
+
       console.log("8");
       const name = `FAC_${last_voucher + 1}.pdf`; // NOMBRE
       last_voucher += 1;
       console.log("9");
-      const options = {
-        width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
-        marginLeft: 0.8, // Margen izquierdo en pulgadas. Usar 0.1 para ticket
-        marginRight: 0.8, // Margen derecho en pulgadas. Usar 0.1 para ticket
-        marginTop: 0.4, // Margen superior en pulgadas. Usar 0.1 para ticket
-        marginBottom: 0.4, // Margen inferior en pulgadas. Usar 0.1 para ticket
-      };
 
-      //MANDAMOS PDF A AFIP, hay que agregar el qr al circuito, y levantar resHtml, por que actualmente solo se logea
-      const resHtml = await afip.ElectronicBilling.createPDF({
-        html: html,
-        file_name: name,
-        options: options,
-      });
-
+      await PDFFromHtml(
+        html,
+        name,
+        afip,
+        comprobante?.id ?? "",
+        last_voucher + 1
+      );
       console.log("10");
-      const url = resHtml.file;
 
       // const uploaded = await utapi.uploadFiles(
       //   new File([text], input.fileName, { type: "text/plain" })
       // );
-
-      await db
-        .update(schema.comprobantes)
-        .set({
-          billLink: resHtml.file,
-          estado: "pendiente",
-        })
-        .where(eq(schema.comprobantes.id, comprobante.id));
-      console.log("11");
       let historicEvents = await db.query.events.findMany({
         where: eq(schema.events.currentAccount_id, cc?.id ?? ""),
       });
@@ -417,6 +429,63 @@ async function approbatecomprobante(liquidationId: string) {
   } else {
     return "Error";
   }
+}
+
+async function PDFFromHtml(
+  html: string,
+  name: string,
+  afip: Afip,
+  comprobanteId: string,
+  voucher: number
+) {
+  // const options = {
+  //   format: "A4",
+  //   path: `${__dirname}/sample.pdf`, // you can pass path to save the file
+  // };
+  // htmlPDF.setOptions(options);
+  // const pdf = await htmlPDF.create(html);
+  // console.log("pdf", pdf);
+  // console.log(typeof pdf);
+  // const pdfBlob = new Blob([pdf], { type: "application/pdf" });
+  // const pdfFile = new File([pdfBlob], name, {
+  //   type: "application/pdf",
+  // });
+
+  // let options = { format: "A4" };
+  // let file = { content: html };
+
+  // await page.setContent(html);
+  // console.log("1");
+  // const pdf = await page.pdf({ format: "A4" });
+  // console.log("pdf", pdf);
+
+  // html_to_pdf.generatePdf(file, options).then(async (pdfBuffer: BlobPart) => {
+  //   const pdfBlob = new Blob([pdfBuffer], { type: "application/pdf" });
+  //   const pdfFile = new File([pdfBlob], name, {
+  //     type: "application/pdf",
+  //   });
+
+  //   // const stream = wkhtmltopdf(html);
+  //   // const pdfBlob = await streamToBlob(stream);
+  //   // await page.setContent(html, { waitUntil: "networkidle0" });
+  //   // const pdfBuffer = await page.pdf();
+  //   //
+
+  //   console.log("pdfBuffer", pdfBuffer);
+  //   console.log(typeof pdfBuffer);
+  //   console.log("html", html);
+  //   const response = await utapi.uploadFiles(pdfFile);
+  //   console.log(response);
+  //   await db
+  //     .update(schema.comprobantes)
+  //     .set({
+  //       billLink: response.data?.url,
+  //       estado: "pendiente",
+  //       nroComprobante: voucher,
+  //     })
+  //     .where(eq(schema.comprobantes.id, comprobanteId));
+  console.log("termino la funcion");
+  // });
 }
 
 async function createcomprobanteItem(
@@ -512,8 +581,9 @@ async function getDifferentialAmount(grupo: grupoCompleto, fechaPreliq: Date) {
   return importe;
 }
 
-export async function getGruposByBrandId(brandId: string) {
+export async function getGruposForLiquidation(brandId: string, date: Date) {
   const family_group = await db.query.family_groups.findMany({
+    where: eq(schema.family_groups.state, "ACTIVO"),
     with: {
       businessUnitData: {
         with: {
@@ -537,6 +607,7 @@ export async function getGruposByBrandId(brandId: string) {
       comprobantes: {
         with: {
           payments: true,
+          anterior: true,
         },
       },
       bonus: true,
@@ -549,7 +620,10 @@ export async function getGruposByBrandId(brandId: string) {
     },
   });
   const family_group_reduced = family_group.filter((family_group) => {
-    return family_group.businessUnitData?.brandId === brandId;
+    return (
+      family_group.businessUnitData?.brandId === brandId &&
+      checkExistingBill(family_group.comprobantes, date)
+    );
   });
 
   return family_group_reduced;
@@ -610,10 +684,10 @@ export const comprobantesRouter = createTRPCRouter({
 
       return comprobante;
     }),
-  getGruposByBrandId: protectedProcedure
-    .input(z.object({ brandId: z.string() }))
+  getGruposForLiquidation: protectedProcedure
+    .input(z.object({ brandId: z.string(), date: z.date() }))
     .query(async ({ input }) => {
-      const grupos = await getGruposByBrandId(input.brandId);
+      const grupos = await getGruposForLiquidation(input.brandId, input.date);
       return grupos;
     }),
   getByLiquidation: protectedProcedure
@@ -628,6 +702,30 @@ export const comprobantesRouter = createTRPCRouter({
       return comprobantes;
     }),
   create: protectedProcedure
+    .input(ComprobantesSchemaDB)
+    .mutation(async ({ input }) => {
+      const comprobante = await db
+        .insert(schema.comprobantes)
+        .values({ ...input })
+        .returning();
+      const comprobanteGotten = await db.query.comprobantes.findFirst({
+        where: eq(schema.comprobantes.id, comprobante[0]?.id ?? ""),
+        with: {
+          family_group: {
+            with: {
+              integrants: {
+                with: {
+                  postal_code: true,
+                },
+              },
+            },
+          },
+          items: true,
+        },
+      });
+      return [comprobanteGotten];
+    }),
+  createManual: protectedProcedure
     .input(ComprobantesSchemaDB)
     .mutation(async ({ input }) => {
       const newProvider = await db
@@ -660,7 +758,10 @@ export const comprobantesRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       const companyId = ctx.session.orgId;
-      const grupos = await getGruposByBrandId(input.brandId);
+      const grupos = await getGruposForLiquidation(
+        input.brandId,
+        input.dateDesde!
+      );
 
       if (!grupos || grupos.length === 0) {
         return {
@@ -719,7 +820,22 @@ export const comprobantesRouter = createTRPCRouter({
         .where(eq(schema.comprobantes.id, id));
       return updatedProvider;
     }),
-
+  addBillLink: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        billLink: z.string(),
+      })
+    )
+    .mutation(async ({ input: { id, billLink } }) => {
+      const updatedProvider = await db
+        .update(schema.comprobantes)
+        .set({
+          billLink: billLink,
+        })
+        .where(eq(schema.comprobantes.id, id));
+      return updatedProvider;
+    }),
   delete: protectedProcedure
     .input(
       z.object({
@@ -803,6 +919,7 @@ export async function preparateComprobante(
       if (saldo > 0) interest = (interes / 100) * saldo;
 
       let mostRecentFactura;
+      let ivaFloatAnterior = 1;
       let previous_bill = 0;
       if (grupo?.comprobantes.length > 0) {
         const listadoFac = grupo.comprobantes?.filter(
@@ -820,10 +937,21 @@ export async function preparateComprobante(
       }
 
       if (mostRecentFactura) {
+        ivaFloatAnterior =
+          (100 + parseFloat(mostRecentFactura.iva ?? "0")) / 100;
         previous_bill = mostRecentFactura.importe;
       }
+
       console.log("mostRecentFactura", mostRecentFactura);
       console.log("previous_bill", previous_bill);
+
+      const billResponsible = grupo.integrants.find(
+        (integrant) => integrant.isBillResponsible
+      );
+      const tipoComprobante = getBillingData(billResponsible, grupo);
+
+      const tipoDocumento = idDictionary[billResponsible?.fiscal_id_type ?? ""];
+
       //calculate importe
       const { amount: importe, ivaCodigo: ivaPostFiltro } =
         await calculateAmount(
@@ -840,10 +968,6 @@ export async function preparateComprobante(
       if (ivaPostFiltro && ivaPostFiltro == "3") {
         ivaFloat = 1;
       }
-      const billResponsible = grupo.integrants.find(
-        (integrant) => integrant.isBillResponsible
-      );
-      const tipoDocumento = idDictionary[billResponsible?.fiscal_id_type ?? ""];
 
       //creamos una NC virtual anulando la última factura si la ultima factura tiene importe
       if (
@@ -855,7 +979,7 @@ export async function preparateComprobante(
           .insert(schema.comprobantes)
           .values({
             ptoVenta: mostRecentFactura.ptoVenta,
-            nroComprobante: 0,
+            nroComprobante: mostRecentFactura.nroComprobante,
             tipoComprobante: fcAnc[mostRecentFactura?.tipoComprobante ?? "0"],
             concepto: mostRecentFactura?.concepto ?? 0,
             tipoDocumento: tipoDocumento ?? 0,
@@ -872,6 +996,7 @@ export async function preparateComprobante(
             family_group_id: grupo.id,
             origin: "Nota de credito",
             estado: "generada",
+            previous_facturaId: mostRecentFactura?.id,
           })
           .returning();
         //creamos item de NC para visualizacion
@@ -891,7 +1016,7 @@ export async function preparateComprobante(
           ptoVenta: parseInt(pv),
           generated: new Date(),
           nroComprobante: 0,
-          tipoComprobante: grupo.businessUnitData?.brand?.bill_type,
+          tipoComprobante: tipoComprobante,
           concepto: parseInt(grupo.businessUnitData?.brand?.concept ?? "0"),
           tipoDocumento: tipoDocumento ?? 0,
           nroDocumento: parseInt(billResponsible?.fiscal_id_number ?? "0"),
@@ -928,16 +1053,16 @@ export async function preparateComprobante(
         -1 * contribution
       );
       await createcomprobanteItem(
-        1,
+        ivaFloatAnterior,
         comprobante[0]?.id ?? "",
         "Interes",
-        interest
+        interest / ivaFloatAnterior
       );
       await createcomprobanteItem(
-        1,
+        ivaFloatAnterior,
         comprobante[0]?.id ?? "",
         "Factura Anterior",
-        previous_bill
+        previous_bill / ivaFloatAnterior
       );
       await createcomprobanteItem(
         ivaFloat,
@@ -1011,4 +1136,185 @@ async function calculateAmount(
   // }
 
   return { amount, ivaCodigo };
+}
+function getBillingData(
+  billResponsible:
+    | {
+        id: string;
+        name: string | null;
+        address: string | null;
+        fiscal_id_type: string | null;
+        fiscal_id_number: string | null;
+        iva: string | null;
+        family_group_id: string | null;
+        state: string | null;
+        id_type: string | null;
+        id_number: string | null;
+        afip_status: string | null;
+        gender: "MASCULINO" | "FEMENINO" | "OTRO" | null;
+        birth_date: Date | null;
+        civil_status: "SOLTERO" | "CASADO" | "DIVORCIADO" | "VIUDO" | null;
+        nationality: string | null;
+        phone_number: string | null;
+        cellphone_number: string | null;
+        email: string | null;
+        affiliate_type: string | null;
+        relationship: string | null;
+        address_number: string | null;
+        floor: string | null;
+        department: string | null;
+        locality: string | null;
+        partido: string | null;
+        cp: string | null;
+        zone: string | null;
+        isHolder: boolean;
+        isPaymentHolder: boolean;
+        isAffiliate: boolean;
+        isBillResponsible: boolean;
+        age: number | null;
+        affiliate_number: string | null;
+        extention: string | null;
+        postal_codeId: string | null;
+        health_insuranceId: string | null;
+        originating_health_insuranceId: string | null;
+        pa: {
+          id: string;
+          card_brand: string | null;
+          card_number: string | null;
+          card_type: string | null;
+          product_id: string | null;
+          expire_date: Date | null;
+          CCV: string | null;
+          CBU: string | null;
+          new_registration: boolean | null;
+          integrant_id: string | null;
+        }[];
+        contribution: {
+          id: string;
+          amount: number;
+          integrant_id: string | null;
+          employerContribution: number;
+          employeeContribution: number;
+          cuitEmployer: string;
+        } | null;
+        differentialsValues: {
+          id: string;
+          createdAt: Date;
+          amount: number;
+          integrant_id: string | null;
+          differentialId: string | null;
+        }[];
+      }
+    | undefined,
+  grupo: grupoCompleto
+) {
+  if (grupo.modo?.description == "MIXTO") {
+    return "FACTURA B";
+  }
+  switch (billResponsible?.afip_status?.toUpperCase()) {
+    case "MONOTRIBUTISTA":
+    case "RESPONSABLE INSCRIPTO":
+      return "FACTURA A";
+    case "CONSUMIDOR FINAL":
+      return "FACTURA B";
+  }
+  return "FACTURA A";
+  // if (billResponsible) {
+  //   if (billResponsible.iva) {
+  //     iva = billResponsible.iva;
+  //   }
+  //   if (billResponsible.fiscal_id_type) {
+  //     tipoComprobante = billResponsible.fiscal_id_type;
+  //   }
+  // }
+  // return { tipoComprobante, iva };
+}
+function checkExistingBill(
+  comprobantes: {
+    id: string;
+    createdAt: Date;
+    generated: Date | null;
+    ptoVenta: number;
+    nroComprobante: number;
+    tipoComprobante: string | null;
+    concepto: number;
+    tipoDocumento: number;
+    nroDocumento: number;
+    importe: number;
+    fromPeriod: Date | null;
+    toPeriod: Date | null;
+    due_date: Date | null;
+    payedDate: Date | null;
+    prodName: string;
+    iva: string;
+    billLink: string;
+    estado:
+      | "generada"
+      | "pendiente"
+      | "pagada"
+      | "parcial"
+      | "anulada"
+      | "apertura"
+      | null;
+    origin:
+      | "anulada"
+      | "apertura"
+      | "Factura"
+      | "Nota de credito"
+      | "Recibo"
+      | "Nota de debito"
+      | null;
+    liquidation_id: string | null;
+    family_group_id: string | null;
+    payments: {
+      id: string;
+      userId: string;
+      name: string | null;
+      companyId: string;
+      createdAt: Date;
+      updatedAt: Date | null;
+      documentUploadId: string | null;
+      responseDocumentId: string | null;
+      g_c: number | null;
+      fiscal_id_type: string | null;
+      fiscal_id_number: number | null;
+      du_type: string | null;
+      du_number: number | null;
+      product: string | null;
+      product_number: number;
+      invoice_number: number;
+      period: Date | null;
+      first_due_amount: number | null;
+      first_due_date: Date | null;
+      second_due_amount: number | null;
+      second_due_date: Date | null;
+      additional_info: string | null;
+      payment_channel: string | null;
+      payment_date: Date | null;
+      collected_amount: number | null;
+      cbu: string | null;
+      card_brand: string | null;
+      card_number: string | null;
+      card_type: string | null;
+      is_new: boolean;
+      recollected_amount: number | null;
+      statusId: string | null;
+      outputFileId: string | null;
+      genChannels: string[];
+      comprobante_id: string | null;
+    }[];
+  }[],
+  date: Date
+) {
+  console.log("date", date);
+  console.log(
+    "comprobantes",
+    comprobantes.filter(
+      (comprobante) => comprobante.fromPeriod?.getTime() == date.getTime()
+    )
+  );
+  return !comprobantes.some(
+    (comprobante) => comprobante.fromPeriod?.getTime() == date.getTime()
+  );
+  // return true;
 }
