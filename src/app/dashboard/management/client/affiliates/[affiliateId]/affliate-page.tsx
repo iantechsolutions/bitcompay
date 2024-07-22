@@ -29,6 +29,7 @@ import {
 } from "~/components/affiliate-page/integrante-accordion";
 import dayjs from "dayjs";
 import { getDifferentialAmount, getGroupContribution } from "~/lib/utils";
+import { RouterOutputs } from "~/trpc/shared";
 export default function AffiliatePage(props: {
   params: { affiliateId: string; companyId: string };
 }) {
@@ -60,7 +61,7 @@ export default function AffiliatePage(props: {
   );
   const billResponsible = grupo?.integrants.find((x) => x.isBillResponsible);
   const paymentResponsible = grupo?.integrants.find((x) => x.isPaymentHolder);
-  let pa = null;
+  let pa: RouterOutputs["pa"]["get"];
   if (paymentResponsible?.pa && paymentResponsible.pa.length > 0) {
     pa = paymentResponsible?.pa.reduce((prev, current) => {
       return new Date(prev.createdAt) > new Date(current.createdAt)

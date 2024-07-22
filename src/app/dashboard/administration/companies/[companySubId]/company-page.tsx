@@ -51,7 +51,7 @@ export default function CompanyPage({
   brands,
   userList,
 }: {
-  company: NonNullable<RouterOutputs["companies"]["get"]>;
+  company: NonNullable<RouterOutputs["companies"]["getById"]>;
   products: RouterOutputs["products"]["list"];
   brands: Brand[] | undefined;
   userList: User[];
