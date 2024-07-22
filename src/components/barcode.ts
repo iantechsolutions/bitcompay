@@ -2,8 +2,8 @@ import utc from "dayjs/plugin/utc";
 import dayOfYear from "dayjs/plugin/dayOfYear";
 import timezone from "dayjs/plugin/timezone";
 import dayjs from "dayjs";
-import { useBarcode } from "next-barcode";
-import { Comprobantes } from "~/server/db/schema";
+// import { useBarcode } from "next-barcode";
+// import { Comprobantes } from "~/server/db/schema";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
