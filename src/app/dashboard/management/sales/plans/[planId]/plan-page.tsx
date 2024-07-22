@@ -15,7 +15,6 @@ import { List, ListTile } from "~/components/list";
 import utc from "dayjs/plugin/utc";
 import LayoutContainer from "~/components/layout-container";
 import { Title } from "~/components/title";
-import { useCompanyData } from "~/app/dashboard/company-provider";
 import { type RouterOutputs } from "~/trpc/shared";
 import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
@@ -97,7 +96,6 @@ export default function PlanPage(props: {
     sortedArrayFechas.sort((a, b) => b.getTime() - a.getTime());
     setArrayFechas(sortedArrayFechas);
   }, []);
-  const company = useCompanyData();
   async function handleUpdatePrice() {
     setLoading(true);
     if (plan?.pricesPerCondition) {
@@ -174,7 +172,8 @@ export default function PlanPage(props: {
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <Link
-                      href={`/dashboard/management/sales/plans/${plan?.id}/editPrice`}>
+                      href={`/dashboard/management/sales/plans/${plan?.id}/editPrice`}
+                    >
                       Actualizar manualmente
                     </Link>
                   </DropdownMenuItem>
@@ -214,7 +213,8 @@ export default function PlanPage(props: {
           <Label htmlFor="validy_date">Mes de vigencia</Label>
           <Select
             onValueChange={(e) => setMes(Number(e))}
-            defaultValue={mes.toString()}>
+            defaultValue={mes.toString()}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Seleccione un mes" />
             </SelectTrigger>

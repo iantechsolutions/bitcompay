@@ -35,13 +35,3 @@ export function CompanyProvider(props: {
     </companyContext.Provider>
   );
 }
-
-export function useCompanyData() {
-  const d = useContext(companyContext);
-
-  if (!d) {
-    throw new Error("useCompanyData must be used inside a CompanyProvider");
-  }
-
-  return d;
-}
