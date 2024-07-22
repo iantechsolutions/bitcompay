@@ -185,7 +185,7 @@ export default async function Home(props: {
       total,
       comprobantes: fg?.comprobantes!,
       currentAccountAmount,
-      plan,
+      Plan: plan,
       modo,
     });
     console.log("comprobantes", fg?.comprobantes);

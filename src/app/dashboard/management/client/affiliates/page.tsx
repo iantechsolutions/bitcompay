@@ -11,55 +11,46 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-
+import { AffiliatesTableRecord } from "./columns";
+import { DataTable } from "./data-table";
+import { columns } from "./columns";
 export default function Home() {
-  const { data: grupo } = api.family_groups.list.useQuery();
+  const { data: grupos, isLoading } = api.family_groups.list.useQuery();
   const linked = (link: string) => {
     window.location.href = link;
   };
 
+  if (isLoading) return <div>Cargando...</div>;
+  if (!grupos) return <div>no hay grupos familiares para mostrar</div>;
+  const tableRecords: AffiliatesTableRecord[] = [];
+  for (const grupo of grupos) {
+    const billResponsible = grupo.integrants.find(
+      (integrant) => integrant.isBillResponsible
+    );
+
+    tableRecords.push({
+      id: grupo.id,
+      nroGF: grupo.numericalId,
+      nombre: billResponsible?.name ?? "Sin responsable pagador",
+      cuil: billResponsible?.fiscal_id_number ?? "Sin CUIL",
+      integrantes: grupo.integrants.length,
+      "Estados GF": grupo.state ?? "Sin estado",
+      fechaEstado: grupo.validity!,
+      Marca: grupo?.businessUnitData?.brand?.name ?? "",
+      Plan: grupo?.plan?.description ?? "",
+      UN: grupo?.businessUnitData?.description ?? "",
+      Modalidad: grupo?.modo?.description ?? "",
+    });
+  }
+  console.log(tableRecords);
   return (
     <LayoutContainer>
       <section className="space-y-2">
         <div>
           <Title>Afiliados</Title>
         </div>
-        <Table>
-          <TableCaption>Tabla de grupos familiares</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Grupo familiar</TableHead>
-              <TableHead>Integrantes</TableHead>
-              <TableHead>Estado</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {grupo ? (
-              grupo.map((grupo) => (
-                <TableRow
-                  key={grupo.id}
-                  className="hover:cursor-pointer"
-                  onClick={() =>
-                    linked(
-                      `/dashboard/management/client/affiliates/${grupo.id}`
-                    )
-                  }>
-                  <TableCell>{grupo.numericalId}</TableCell>
-                  <TableCell className="text-justify">
-                    {grupo.integrants.length}
-                  </TableCell>
-                  <TableCell className="text-justify">{grupo.state}</TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center">
-                  No hay afiliados disponibles.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+
+        <DataTable columns={columns} data={tableRecords} />
       </section>
     </LayoutContainer>
   );

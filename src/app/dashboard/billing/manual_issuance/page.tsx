@@ -41,6 +41,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { create } from "domain";
+import BarcodeProcedure from "~/components/barcode";
 
 function formatDate(date: Date | undefined) {
   if (date) {
