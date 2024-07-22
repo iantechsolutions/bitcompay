@@ -30,15 +30,21 @@ export const eventsRouter = createTRPCRouter({
   createByType: protectedProcedure
     .input(
       z.object({
-        ccId: z.string(),
+        family_group_id: z.string(),
         type: z.string(),
         amount: z.number(),
       })
     )
     .mutation(async ({ input, ctx }) => {
+      const cc = await db.query.currentAccount.findFirst({
+        where: eq(
+          schema.currentAccount.family_group,
+          input.family_group_id ?? ""
+        ),
+      });
       const lastEvent = await db.query.events.findFirst({
         orderBy: [desc(schema.events.createdAt)],
-        where: eq(schema.events.currentAccount_id, input.ccId),
+        where: eq(schema.events.currentAccount_id, cc?.id ?? ""),
       });
       let new_event;
 
@@ -56,7 +62,7 @@ export const eventsRouter = createTRPCRouter({
             .insert(schema.events)
             .values({
               description: "Recaudacion",
-              currentAccount_id: input.ccId,
+              currentAccount_id: cc?.id,
               type: input.type,
               event_amount: input.amount,
               current_amount: (lastEvent?.current_amount ?? 0) + input.amount,
@@ -68,7 +74,7 @@ export const eventsRouter = createTRPCRouter({
             .insert(schema.events)
             .values({
               description: "Comprobante Creado",
-              currentAccount_id: input.ccId,
+              currentAccount_id: cc?.id,
               type: input.type,
               event_amount: input.amount * -1,
               current_amount: (lastEvent?.current_amount ?? 0) - input.amount,
@@ -80,7 +86,7 @@ export const eventsRouter = createTRPCRouter({
             .insert(schema.events)
             .values({
               description: "Nota de credito",
-              currentAccount_id: input.ccId,
+              currentAccount_id: cc?.id,
               type: input.type,
               event_amount: input.amount,
               current_amount: (lastEvent?.current_amount ?? 0) + input.amount,
@@ -99,15 +105,17 @@ export const eventsRouter = createTRPCRouter({
   createByTypeOrg: protectedProcedure
     .input(
       z.object({
-        ccId: z.string(),
         type: z.string(),
         amount: z.number(),
       })
     )
     .mutation(async ({ input, ctx }) => {
+      const cc = await db.query.currentAccount.findFirst({
+        where: eq(schema.currentAccount.company_id, ctx.session.orgId ?? ""),
+      });
       const lastEvent = await db.query.events.findFirst({
         orderBy: [desc(schema.events.createdAt)],
-        where: eq(schema.events.currentAccount_id, input.ccId),
+        where: eq(schema.events.currentAccount_id, cc?.id ?? ""),
       });
       let new_event;
       switch (input.type) {
@@ -116,7 +124,7 @@ export const eventsRouter = createTRPCRouter({
             .insert(schema.events)
             .values({
               description: "Recaudacion",
-              currentAccount_id: input.ccId,
+              currentAccount_id: cc?.id,
               type: input.type,
               event_amount: input.amount,
               current_amount: (lastEvent?.current_amount ?? 0) + input.amount,
@@ -128,7 +136,7 @@ export const eventsRouter = createTRPCRouter({
             .insert(schema.events)
             .values({
               description: "Comprobante Creado",
-              currentAccount_id: input.ccId,
+              currentAccount_id: cc?.id,
               type: input.type,
               event_amount: input.amount,
               current_amount: (lastEvent?.current_amount ?? 0) - input.amount,
@@ -140,7 +148,7 @@ export const eventsRouter = createTRPCRouter({
             .insert(schema.events)
             .values({
               description: "Nota de credito",
-              currentAccount_id: input.ccId,
+              currentAccount_id: cc?.id,
               type: input.type,
               event_amount: input.amount * -1,
               current_amount: (lastEvent?.current_amount ?? 0) + input.amount,

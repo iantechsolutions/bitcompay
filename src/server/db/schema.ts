@@ -752,6 +752,7 @@ export const comprobantes = pgTable("comprobantes", {
   family_group_id: varchar("family_group_id", { length: 255 }).references(
     () => family_groups.id
   ),
+  previous_facturaId: varchar("previous_factura", { length: 255 }),
 });
 
 export const comprobantesRelations = relations(
@@ -766,6 +767,10 @@ export const comprobantesRelations = relations(
     family_group: one(family_groups, {
       fields: [comprobantes.family_group_id],
       references: [family_groups.id],
+    }),
+    anterior: one(comprobantes, {
+      fields: [comprobantes.previous_facturaId],
+      references: [comprobantes.id],
     }),
   })
 );
