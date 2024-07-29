@@ -18,6 +18,9 @@ export default withUt({
       },
     },
     extend: {
+      backgroundImage: {
+        "bg-singnin": "url('/landing_images/fondo compu.jpg')",
+      },
       colors: {
         boxShadow: {
           simple: "0px 1px black",

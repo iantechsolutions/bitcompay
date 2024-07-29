@@ -471,22 +471,20 @@ async function generatePagoFacil(
     true
   );
   const utility = formatString(" ", "Bitcom", 8, true);
-  text += `1${todayDate}90063509BITCOM SRL${" ".repeat(
-    30
-  )}PAGO FACIL${"0".repeat(123)}\r\n`;
+  text += `01${records_number}A${utility}${todayDate}${" ".repeat(172)}\r\n`;
   let total_records = 0;
   let total_collected = 0;
   for (const transaction of transactions) {
     const fiscal_id_number = formatString(
       " ",
       transaction.fiscal_id_number!.toString(),
-      21,
+      30,
       true
     );
     const invoice_number = formatString(
       "0",
       transaction.invoice_number.toString(),
-      6,
+      21,
       false
     );
     const seq_number = `${dayjs(transaction.first_due_date).year()}01`;
@@ -520,13 +518,18 @@ async function generatePagoFacil(
     // codigo de barras
     const service_company = "3509"; // ultimos 4 digitos del ID de entidad
     const dayOfYear = dayjs(transaction.first_due_date).dayOfYear();
-    const first_due_date_bar_code = dayjs(transaction.first_due_date).format(
-      "YYDDD"
+    const first_due_date_bar_code_YY = dayjs(transaction.first_due_date).format(
+      "YY"
     );
+    const first_due_date_bar_code_DDD = dayjs(transaction.first_due_date)
+      .dayOfYear()
+      .toString()
+      .padStart(3, "0");
+
     const fiscal_id_number_bar_code = formatString(
       " ",
       transaction.fiscal_id_number!.toString(),
-      13,
+      14,
       true
     );
     const second_due_date_barcode = dayjs(transaction.second_due_date).format(
@@ -539,18 +542,22 @@ async function generatePagoFacil(
 
     const second_due_amount_charge = formatAmount(
       transaction.second_due_amount!,
-      6
+      4
     );
     // codigo de barras
-    const bar_code = `${service_company}${first_due_amount_bar_code}${first_due_date_bar_code}${fiscal_id_number_bar_code}0${second_due_amount_charge}${second_due_date_barcode}00`;
-
+    const bar_code = `${service_company}${first_due_amount_bar_code}${first_due_date_bar_code_YY}${first_due_date_bar_code_DDD}${fiscal_id_number_bar_code}0${second_due_amount_charge}${second_due_date_barcode}00${" ".repeat(
+      13
+    )}`;
+    console.log(
+      "first_due_date",
+      first_due_date_bar_code_YY,
+      first_due_date_bar_code_DDD
+    );
     const barcode = formatString(" ", bar_code, 60, true);
 
-    text += `3${todayDate}${"0".repeat(
-      6
-    )}${invoice_number}10${barcode}${fiscal_id_number}PES${first_due_amount}${terminal_id}${todayDate}${payment_time}${seq_terminal} PESE${" ".repeat(
-      29
-    )}${"0".repeat(5)}${first_due_amount}\r\n`;
+    text += `02${invoice_number}${fiscal_id_number}${seq_number}${message}${name}${bar_code}${validity_date}${first_due_date}T${" ".repeat(
+      9
+    )}\r\n`;
     // detalle;
     total_records++;
     total_collected += transaction.first_due_amount!;
@@ -579,9 +586,11 @@ function generateRapiPago(
   transactions: RouterOutputs["transactions"]["list"]
 ) {
   const currentDate = dayjs().format("YYYYMMDD");
-  let text = `${"0".repeat(8)}BITCOM SRL${" ".repeat(
-    10
-  )}${currentDate}Cobranzas Rapipago${" ".repeat(19)}\n`;
+
+  let text = `081400${currentDate}${"0".repeat(76)}\n`;
+  // let text = `${"0".repeat(8)}BITCOM SRL${" ".repeat(
+  //   10
+  // )}${currentDate}Cobranzas Rapipago${" ".repeat(19)}\n`;
   let total_records = 0;
   let total_collected = 0;
 
@@ -614,25 +623,31 @@ function generateRapiPago(
         : transaction.first_due_date
     ).format("YYYYMMDD");
 
-    text += `${currentDate}${" ".repeat(
-      15
-    )}${fiscal_id_number}${invoice_number}0${first_due_date}${first_due_amount_test}${first_due_date}${first_due_amount_test}${"0".repeat(
-      5
+    text += `5${fiscal_id_number}${invoice_number}0${first_due_date}${first_due_amount_test}${second_due_date}${second_due_amount_test}${"0".repeat(
+      11
     )}\n`;
+    // text += `${currentDate}${" ".repeat(
+    //   15
+    // )}${fiscal_id_number}${invoice_number}0${first_due_date}${first_due_amount_test}${first_due_date}${first_due_amount_test}${"0".repeat(
+    //   5
+    // )}\n`;
     total_records++;
     total_collected += transaction.first_due_amount ?? 0;
   }
   const total_records_string = formatString(
     "0",
     total_records.toString(),
-    8,
+    7,
     false
   );
 
-  const total_collected_string_test = formatAmount(total_collected, 16);
-  text += `${"9".repeat(
-    8
-  )}${total_records_string}${total_collected_string_test}${" ".repeat(39)}`;
+  const total_collected_string_test = formatAmount(total_collected, 9);
+  text += `981400${currentDate}${total_records_string}${"0".repeat(
+    7
+  )}${total_collected_string_test}${"0".repeat(51)}`;
+  // text += `${"9".repeat(
+  //   8
+  // )}${total_records_string}${total_collected_string_test}${" ".repeat(39)}`;
   return text;
 }
 

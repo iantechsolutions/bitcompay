@@ -87,7 +87,7 @@ export function DataTable<TData, TValue>({
   return (
     <>
       <DataTableSummary table={table} />
-      <TableToolbar table={table} initialValues={initialValues} />
+      <TableToolbar table={table} initialValues={initialValues} search={true} />
 
       <div className="rounded-md border">
         <Table>
