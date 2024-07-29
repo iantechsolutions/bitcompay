@@ -21,14 +21,15 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/tablePreliq";
-import { Sheet, SheetContent } from "~/components/ui/sheet";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { DataTablePagination } from "~/components/tanstack/pagination";
 import TableToolbar from "~/components/tanstack/table-toolbar";
 import { useState } from "react";
 import { RouterOutputs } from "~/trpc/shared";
+import { TableRecord } from "./columns";
 import DataTableSummary from "~/components/tanstack/summary";
+import { useRouter } from "next/navigation";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
@@ -38,6 +39,7 @@ export function DataTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
+  const [open, setOpen] = useState(false);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const table = useReactTable({
     data,
@@ -49,36 +51,26 @@ export function DataTable<TData, TValue>({
     state: {
       columnFilters,
     },
-    initialState: {
-      columnVisibility: {
-        id: false,
-        Marca: false,
-        Plan: false,
-        UN: false,
-        Modalidad: false,
-      },
-    },
   });
+  const router = useRouter();
   const initialValues = {
     Marca: "",
-    Plan: "",
     UN: "",
-    "Estados GF": "",
-    Modalidad: "",
   };
-
+  const hiddenDataKeys = [
+    "comprobantes",
+    "currentAccountAmount",
+    "nombre",
+    "cuit",
+  ];
   const handleRowClick = (row: Row<TData>) => {
-    const linked = (link: string) => {
-      window.location.href = link;
-    };
-    linked(`/dashboard/management/client/affiliates/${row.getValue("id")}`);
+    const originalData = row.original as { id: string };
+    router.push(`/dashboard/billing/pre-liquidation/${originalData.id}`);
   };
-
   return (
     <>
-      <TableToolbar table={table} initialValues={initialValues} search={true} />
-
       <div className="rounded-md border">
+        <TableToolbar table={table} initialValues={initialValues} />
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

@@ -21,11 +21,7 @@ export const metadata = {
 
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
-    <ClerkProvider
-      signInUrl="/"
-      signUpUrl="/"
-      signInFallbackRedirectUrl={"/dashboard"}
-    >
+    <ClerkProvider signInFallbackRedirectUrl={"/dashboard"}>
       <html lang="es">
         {/* biome-ignore lint/nursery/useSortedClasses: <explanation> */}
         <body className={`font-family ${roboto.className}`}>

@@ -18,25 +18,33 @@ interface DataTableToolbarProps<TData> {
     "Estados GF"?: string;
     Modalidad?: string;
   };
+  search?: boolean;
 }
 
 export default function TableToolbar<TData>({
   table,
   initialValues,
+  search,
 }: DataTableToolbarProps<TData>) {
   console.log(table.getState().columnFilters);
   return (
     <div className="flex flex-row justify-between items-center w-full">
       <div className="w-full max-w-sm flex items-center py-4 relative">
-        <Input
-          placeholder="Buscar responsable grupo familiar..."
-          value={(table.getColumn("nombre")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("nombre")?.setFilterValue(event.target.value)
-          }
-          className="w-full h-7 rounded-full border-2 border-[#71EBD4] focus-visible:ring-[#71EBD4]"
-        ></Input>
-        <Search className="h-5 absolute right-3" color="#71EBD4" />
+        {search && (
+          <>
+            <Input
+              placeholder="Buscar responsable grupo familiar..."
+              value={
+                (table.getColumn("nombre")?.getFilterValue() as string) ?? ""
+              }
+              onChange={(event) =>
+                table.getColumn("nombre")?.setFilterValue(event.target.value)
+              }
+              className="w-full h-7 rounded-full border-2 border-[#71EBD4] focus-visible:ring-[#71EBD4]"
+            ></Input>
+            <Search className="h-5 absolute right-3" color="#71EBD4" />
+          </>
+        )}
       </div>
       <div className="flex gap-2">
         <Filters table={table} initialValues={initialValues} />

@@ -40,13 +40,14 @@ export default function DataTableSummary<TData>({
             index != array.length - 1
               ? "border-r border-[#4af0d4] border-dashed grow"
               : ""
-          } px-3`}
+          } px-2`}
           key={key}
         >
           <p className="font-medium text-sm">{key}</p>
-          <p className="text-[#4af0d4] font-bold text-sm">$ {value}</p>
+          <p className="text-[#4af0d4] font-bold text-[0.8rem]">$ {value}</p>
         </div>
       ))}
+      c
     </div>
   );
 }
