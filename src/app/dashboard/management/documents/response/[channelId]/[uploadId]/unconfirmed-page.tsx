@@ -102,6 +102,7 @@ export default function ResponseUnconfirmedPage(props: UploadedPageProps) {
       const data = await readResponseUploadContents({
         uploadId: upload.id,
         type: documentType,
+        channelName: props.channel.name,
       });
       const TableRows = data.records.map((record) => {
         return {
@@ -141,8 +142,7 @@ export default function ResponseUnconfirmedPage(props: UploadedPageProps) {
           className="w-full py-6"
           variant="outline"
           disabled={!documentType || isLoading}
-          onClick={handleContinue}
-        >
+          onClick={handleContinue}>
           Leer datos
         </Button>
 

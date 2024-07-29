@@ -1000,6 +1000,7 @@ export type Administrative_audit = z.infer<
 export const pa = pgTable("pa", {
   id: columnId,
   card_number: varchar("card_number", { length: 255 }),
+  createdAt,
   expire_date: timestamp("expire_date", { mode: "date" }),
   CCV: varchar("CCV", { length: 255 }),
   CBU: varchar("CBU", { length: 255 }),

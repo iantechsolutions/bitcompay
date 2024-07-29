@@ -12,6 +12,8 @@ import {
 } from "~/server/uploads/validators";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { isArray } from "util";
+import { fiscalIdType } from "~/server/forms/providers-schema";
+import { Console } from "console";
 
 const statusCodeMap = new Map();
 const statusCodes = await db.query.paymentStatus.findMany();
@@ -105,6 +107,7 @@ export const uploadsRouter = createTRPCRouter({
       z.object({
         type: z.literal("txt"),
         uploadId: z.string(),
+        channelName: z.string(),
       })
     )
     .mutation(async ({ input }) => {
@@ -112,7 +115,8 @@ export const uploadsRouter = createTRPCRouter({
         const contents = await readResponseUploadContents(
           db,
           input.uploadId,
-          input.type
+          input.type,
+          input.channelName
         );
         await db.update(schema.responseDocumentUploads).set({
           documentType: input.type,
@@ -146,7 +150,8 @@ export const uploadsRouter = createTRPCRouter({
         const { records } = await readResponseUploadContents(
           tx,
           input.uploadId,
-          undefined
+          undefined,
+          input.channelName
         );
 
         await tx
@@ -209,15 +214,16 @@ export const uploadsRouter = createTRPCRouter({
                     : current;
                 }
               );
-              if (!lastEvent) {
-                throw new Error("No hay eventos en la cuenta corriente");
-              }
+              // if (!lastEvent) {
+              //   throw new Error("No hay eventos en la cuenta corriente");
+              // }
               const new_event = await tx.insert(schema.events).values({
                 currentAccount_id: currentAccount?.id,
                 event_amount:
                   record.first_due_amount ?? record.collected_amount ?? 0,
                 current_amount:
-                  lastEvent?.current_amount! + payment?.comprobantes?.importe!,
+                  lastEvent?.current_amount ??
+                  0 + payment?.comprobantes?.importe!,
                 description: "Recaudacion",
                 type: "REC",
               });
@@ -236,17 +242,18 @@ export const uploadsRouter = createTRPCRouter({
                 ? prev
                 : current;
             });
-            if (!lastEvent) {
-              throw new Error(
-                "No hay eventos en la cuenta corriente de la empresa"
-              );
-            }
+            // if (!lastEvent) {
+            //   throw new Error(
+            //     "No hay eventos en la cuenta corriente de la empresa"
+            //   );
+            // }
             const new_event = await tx.insert(schema.events).values({
               currentAccount_id: ccORG?.id,
               event_amount:
                 record.first_due_amount ?? record.collected_amount ?? 0,
               current_amount:
-                lastEvent?.current_amount! + payment?.comprobantes?.importe!,
+                lastEvent?.current_amount ??
+                0 + payment?.comprobantes?.importe!,
               description: "Recaudacion",
               type: "REC",
             });
@@ -468,7 +475,8 @@ async function getCompanyBrands(companyId: string) {
 async function readResponseUploadContents(
   db: DBTX,
   id: string,
-  inputType: string | undefined
+  inputType: string | undefined,
+  channelName: string
 ) {
   const upload = await db.query.responseDocumentUploads.findFirst({
     where: eq(schema.responseDocumentUploads.id, id),
@@ -484,6 +492,7 @@ async function readResponseUploadContents(
     throw new TRPCError({ code: "BAD_REQUEST" });
   }
 
+  console.log("channelName", channelName);
   const response = await fetch(upload.fileUrl);
   const fileContent = await response.text();
   const lines: string[] = fileContent.trim().split(/\r?\n/);
@@ -494,30 +503,23 @@ async function readResponseUploadContents(
   let total_rows = 2;
   let recordIndex = 1;
   const records = [];
-  for (const line of lines) {
-    if (recordIndex === 1) {
+
+  if (channelName == "PAGOFACIL") {
+    for (const line of lines) {
       const recordValues = line.trim().split(/\s{2,}/);
       console.log("recordValues", recordValues);
-      //trato el ultimo elemento que esta junto nro de factura y estado de pago
-      const largeNumber = recordValues[2];
-      console.log(largeNumber);
-      const status_code = largeNumber?.slice(-2);
-      const importe = largeNumber?.slice(22, 39);
-      console.log("length", importe?.length);
-      const importe_int = importe?.slice(0, importe.length - 2);
-      const importe_dec = importe?.slice(importe.length - 2);
-      const parte_entera = parseInt(importe_int!);
-      const parte_dec = parseInt(importe_dec!);
-      const importe_final = parte_entera + parte_dec / 100;
-      // extract invoice_number
-      const stringInvoiceNumber = recordValues[recordValues.length - 1] ?? null;
-      console.log("stringInvoiceNumber", stringInvoiceNumber);
-      if (!stringInvoiceNumber) {
-        throw new Error("there is no invoice number");
-      }
+      const largeNumber = recordValues[0];
+      const fiscal_id_number = recordValues[1];
+      const importe_final = recordValues[3];
+      const invoice_number = largeNumber?.slice(15, 20);
+      // const fiscal_id_number = largeNumber?.slice(84, 104);
+      // const invoice_number = largeNumber?.slice(16, 21);
+      // const importe_final = largeNumber?.slice(48, 58);
+      console.log(recordValues);
 
-      const invoice_number = stringInvoiceNumber.slice(10, 15) ?? null;
       console.log("invoice_number", invoice_number);
+      console.log("fiscal_id_number", fiscal_id_number);
+
       if (invoice_number) {
         const original_transaction = await db.query.payments.findFirst({
           where: eq(
@@ -526,25 +528,136 @@ async function readResponseUploadContents(
           ),
         });
         if (original_transaction) {
-          original_transaction.statusId =
-            statusCodeMap.get(status_code) ?? "91";
-          original_transaction.recollected_amount = importe_final;
-          console.log("statusCode", status_code);
-          console.log("status", original_transaction.statusId);
-          console.log("importeString", importe_int, importe_dec);
-          console.log("parte_entera", parte_entera);
-          console.log("parte_dec", parte_dec);
-          console.log("importe", importe_final);
+          original_transaction.statusId = "91";
+          original_transaction.recollected_amount = parseInt(importe_final!);
           records.push(original_transaction);
         }
       } else {
         throw Error("cannot read invoice number");
       }
-    } else if (recordIndex === 4) {
-      recordIndex = 0;
+
+      total_rows++;
+      recordIndex++;
     }
-    total_rows++;
-    recordIndex++;
+  }
+  if (channelName == "PAGOMISCUENTAS") {
+    for (const line of lines) {
+      const recordValues = line.trim().split(/\s{2,}/);
+      console.log("recordValues", recordValues);
+
+      const largeNumber = recordValues[0];
+      const largeNumber2 = recordValues[2];
+
+      const invoice_number = recordValues[1] ?? "33666";
+      const fiscal_id_number = largeNumber?.slice(1, 12);
+      const importe_final = largeNumber2?.slice(17, 28);
+
+      console.log("invoice_number", invoice_number);
+
+      if (invoice_number) {
+        const original_transaction = await db.query.payments.findFirst({
+          where: eq(
+            schema.payments.invoice_number,
+            Number.parseInt(invoice_number)
+          ),
+        });
+        if (original_transaction) {
+          original_transaction.statusId = "91";
+          original_transaction.recollected_amount = parseInt(importe_final!);
+          records.push(original_transaction);
+        }
+      } else {
+        throw Error("cannot read invoice number");
+      }
+
+      total_rows++;
+      recordIndex++;
+    }
+  }
+  if (channelName === "RAPIPAGO") {
+    for (const line of lines) {
+      const recordValues = line.trim().split(/\s{2,}/);
+      console.log("recordValues", recordValues);
+      const largeNumber = recordValues[1];
+
+      const fiscal_id_number = largeNumber?.slice(10, 19);
+      const invoice_number = largeNumber?.slice(34, 39);
+      const importe_final = largeNumber?.slice(48, 58);
+
+      if (invoice_number) {
+        const original_transaction = await db.query.payments.findFirst({
+          where: eq(
+            schema.payments.invoice_number,
+            Number.parseInt(invoice_number)
+          ),
+        });
+        if (original_transaction) {
+          original_transaction.statusId = "91";
+          original_transaction.recollected_amount = parseInt(importe_final!);
+          records.push(original_transaction);
+        }
+      } else {
+        throw Error("cannot read invoice number");
+      }
+
+      total_rows++;
+      recordIndex++;
+    }
+  }
+  if (channelName == "DEBITO DIRECTO CBU") {
+    for (const line of lines) {
+      if (recordIndex === 1) {
+        const recordValues = line.trim().split(/\s{2,}/);
+        console.log("recordValues", recordValues);
+        //trato el ultimo elemento que esta junto nro de factura y estado de pago
+        const largeNumber = recordValues[2];
+        console.log(largeNumber);
+        const status_code = largeNumber?.slice(-2);
+        const importe = largeNumber?.slice(22, 39);
+        console.log("length", importe?.length);
+        const importe_int = importe?.slice(0, importe.length - 2);
+        const importe_dec = importe?.slice(importe.length - 2);
+        const parte_entera = parseInt(importe_int!);
+        const parte_dec = parseInt(importe_dec!);
+        const importe_final = parte_entera + parte_dec / 100;
+        // extract invoice_number
+        const stringInvoiceNumber =
+          recordValues[recordValues.length - 1] ?? null;
+        console.log("stringInvoiceNumber", stringInvoiceNumber);
+        if (!stringInvoiceNumber) {
+          throw new Error("there is no invoice number");
+        }
+
+        const invoice_number = stringInvoiceNumber.slice(10, 15) ?? null;
+        console.log("invoice_number", invoice_number);
+        if (invoice_number) {
+          const original_transaction = await db.query.payments.findFirst({
+            where: eq(
+              schema.payments.invoice_number,
+              Number.parseInt(invoice_number)
+            ),
+          });
+          if (original_transaction) {
+            original_transaction.statusId =
+              statusCodeMap.get(status_code) ?? "91";
+            original_transaction.recollected_amount = importe_final;
+            console.log("statusCode", status_code);
+            console.log("status", original_transaction.statusId);
+            console.log("importeString", importe_int, importe_dec);
+            console.log("parte_entera", parte_entera);
+            console.log("parte_dec", parte_dec);
+            console.log("importe", importe_final);
+            records.push(original_transaction);
+          }
+        } else {
+          throw Error("cannot read invoice number");
+        }
+      } else if (recordIndex === 4) {
+        recordIndex = 0;
+      }
+      total_rows++;
+      recordIndex++;
+    }
   }
   return { upload, records, total_rows, header: recHeaders };
 }

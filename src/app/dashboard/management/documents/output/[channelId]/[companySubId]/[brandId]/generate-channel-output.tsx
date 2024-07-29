@@ -58,7 +58,7 @@ dayjs.extend(utc);
 dayjs.locale("es");
 export default function GenerateChannelOutputPage(props: {
   channel: { id: string; name: string };
-  company: NonNullable<RouterOutputs["companies"]["get"]>;
+  company: NonNullable<RouterOutputs["companies"]["getById"]>;
   brand: { id: string; name: string };
   status_batch: Record<string, string | number>[];
   outputFiles: RouterOutputs["iofiles"]["list"];
@@ -182,7 +182,8 @@ export default function GenerateChannelOutputPage(props: {
               <Button
                 disabled={isLoading || disabled}
                 size="lg"
-                className="w-full">
+                className="w-full"
+              >
                 {isLoading && <Loader2Icon className="mr-2 animate-spin" />}
                 Generar Archivo
               </Button>
@@ -248,7 +249,8 @@ export default function GenerateChannelOutputPage(props: {
                                           "w-[240px] pl-3 text-left font-normal",
                                           !field.value &&
                                             "text-muted-foreground"
-                                        )}>
+                                        )}
+                                      >
                                         <p>
                                           {field.value ? (
                                             dayjs
@@ -264,7 +266,8 @@ export default function GenerateChannelOutputPage(props: {
                                   </PopoverTrigger>
                                   <PopoverContent
                                     className="w-auto p-0"
-                                    align="start">
+                                    align="start"
+                                  >
                                     <Calendar
                                       mode="single"
                                       selected={
@@ -309,7 +312,8 @@ export default function GenerateChannelOutputPage(props: {
               {dataDataURL && (
                 <a
                   href={dataDataURL}
-                  download={`${fileName ?? fileNameCard ?? " "}.txt`}>
+                  download={`${fileName ?? fileNameCard ?? " "}.txt`}
+                >
                   <Button size="lg">
                     <DownloadIcon className="mr-2" />
                     Descargar archivo
