@@ -1,33 +1,22 @@
+"use client";
 import { SignIn } from "@clerk/nextjs";
+import { ChevronRight } from "lucide-react";
 import LayoutContainer from "~/components/layout-container";
 import { Button } from "~/components/ui/button";
+import { Separator } from "~/components/ui/separator";
 import { Input } from "~/components/ui/input";
 import { Form, FormField } from "~/components/ui/form";
-
+import LoginForm from "~/components/signin/login-form";
+import Image from "next/image";
+import { useState } from "react";
 export default function SignInComponent() {
+  const [showRegister, setShowRegister] = useState(false);
   const onSubmit = () => {
     return null;
   };
   return (
-    <LayoutContainer>
-      <div className="flex flex-col items-center px-5 pt-3 pb-7">
-        <p className="text-lg">
-          Acceso a <span className="font-bold"> Entidades</span>
-        </p>
-        <p className="text-muted-foreground text-xs">
-          Ingrese sus datos para{" "}
-          <span className="font-bold"> iniciar sesion</span>
-        </p>
-        <Button className="w-full">Ingresar con Google</Button>
-        <p className="text-xs text-muted-foreground">recupero de contraseña</p>
-        <Button className="w-full h-8">Ingresar</Button>
-        <p className="text-muted-foreground opacity-60">
-          ¿No tiene una cuenta?{" "}
-          <span className="text-[#4dd694] font-bold opacity-100">
-            Registrarme
-          </span>
-        </p>
-      </div>
+    <LayoutContainer className="flex h-screen w-screen justify-center items-center bg-bg-singnin bg-cover bg-scroll">
+      <LoginForm />
     </LayoutContainer>
   );
 }
