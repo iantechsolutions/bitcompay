@@ -9,11 +9,12 @@ import Image from "next/image";
 type Inputs = {
   username: string;
   password: string;
+  mail: string;
 };
-interface LoginFormProps {
+interface RegisterFormProps {
   setShowRegister: (showRegister: boolean) => void;
 }
-export default function LoginForm({ setShowRegister }: LoginFormProps) {
+export default function RegisterForm({ setShowRegister }: RegisterFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const form = useForm<Inputs>();
   const onSubmit = () => {
@@ -27,14 +28,10 @@ export default function LoginForm({ setShowRegister }: LoginFormProps) {
         <p className="text-lg mt-7">
           Acceso a <span className="font-bold"> Entidades</span>
         </p>
-        <p className="text-muted-foreground text-xs font-medium">
+        <p className="text-muted-foreground text-xs font-medium mb-3">
           Ingrese sus datos para{" "}
-          <span className="font-bold"> iniciar sesion</span>
+          <span className="font-bold"> crear cuenta</span>
         </p>
-        <Button className="w-full px-20 py-3 mt-6 mb-3 text-black bg-[#DEDEDE] hover:bg-[#DEDEDE] ">
-          <img src="google-icon.svg" alt="google icon" />
-          Ingresar con Google <ChevronRight className="h-4" />{" "}
-        </Button>
 
         <Form {...form}>
           <form
@@ -48,6 +45,20 @@ export default function LoginForm({ setShowRegister }: LoginFormProps) {
                 <FormItem className="w-full">
                   <FormLabel className="text-muted-foreground text-sm opacity-70 font-medium-medium ">
                     Usuario
+                  </FormLabel>
+                  <FormControl>
+                    <Input {...field} className="w-full" />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="mail"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel className="text-muted-foreground text-sm opacity-70 font-medium-medium ">
+                    Mail
                   </FormLabel>
                   <FormControl>
                     <Input {...field} className="w-full" />
@@ -89,19 +100,21 @@ export default function LoginForm({ setShowRegister }: LoginFormProps) {
                   )}
                 </Button>
               )}
-              <p className="text-xs font-semibold text-muted-foreground mt-2 hover:cursor-pointer">
-                Recupero de contraseña
-              </p>
-              <Button className="w-full px-20 h-8 py-3 my-1 text-black bg-[#1BDFB7] hover:bg-[#1BDFB7] ">
-                Ingresar <ChevronRight className=" h-4" />
+
+              <Button
+                className="w-full px-32 h-8 py-3 my-1 mt-4
+               text-black bg-[#1BDFB7] hover:bg-[#1BDFB7] "
+              >
+                Continuar <ChevronRight className=" h-4" />
               </Button>
+
               <p className="text-muted-foreground opacity-60 text-xs">
-                ¿No tiene una cuenta?{" "}
+                ¿Ya tiene una cuenta ?{" "}
                 <span
                   className="text-[#1BDFB7] font-bold opacity-100 hover:cursor-pointer"
-                  onClick={() => setShowRegister(true)}
+                  onClick={() => setShowRegister(false)}
                 >
-                  Registrarme
+                  Ingresar
                 </span>
               </p>
             </div>
