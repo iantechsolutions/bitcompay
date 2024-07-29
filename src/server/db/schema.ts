@@ -516,6 +516,14 @@ export const healthInsurances = pgTable("health_insurances", {
   name: varchar("name", { length: 255 }).notNull(),
   identificationNumber: varchar("identificationNumber", { length: 255 }),
   isClient: boolean("isClient").notNull().default(false),
+  fiscal_id_type: varchar("fiscal_id_type", { length: 255 }),
+  fiscal_id_number: integer("fiscal_id_number"),
+  responsibleName: varchar("responsibleName", { length: 255 }),
+  adress: varchar("adress", { length: 255 }),
+  locality: varchar("locality", { length: 255 }),
+  province: varchar("province", { length: 255 }),
+  postal_code: varchar("postal_code", { length: 255 }),
+  afip_status: varchar("afip_status", { length: 255 }),
 });
 
 export const clientStatuses = pgTable("client_statuses", {
