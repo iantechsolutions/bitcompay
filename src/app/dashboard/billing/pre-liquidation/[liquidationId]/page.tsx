@@ -35,6 +35,7 @@ import { computeBase, computeIva } from "~/lib/utils";
 import DownloadExcelButton from "./downloadExcelButton";
 import RejectLiquidationDialog from "./reject-liquidation-dialog";
 import { ChevronLeft, CircleX } from "lucide-react";
+import { GoBackButton } from "~/components/goback-button";
 export default async function Home(props: {
   params: { liquidationId: string };
 }) {
@@ -111,13 +112,17 @@ export default async function Home(props: {
     const original_comprobante = fg?.comprobantes?.find(
       (comprobante) => comprobante?.origin?.toLowerCase() === "factura"
     );
-    const saldo_anterior = toNumberOrZero(
-      original_comprobante?.items.find(
-        (item) => item.concept === "Saldo anterior"
-      )?.amount
-    );
-    summary["Saldo anterior"] += saldo_anterior;
-    excelRow.push(saldo_anterior);
+    const eventPreComprobante = await api.events.getLastByDateAndCC.query({
+      ccId: fg?.cc?.id ?? "",
+      date: preliquidation?.createdAt ?? new Date(),
+    });
+    // const saldo_anterior = toNumberOrZero(
+    //   original_comprobante?.items.find(
+    //     (item) => item.concept === "Saldo anterior"
+    //   )?.amount
+    // );
+    summary["Saldo anterior"] += eventPreComprobante?.current_amount ?? 0;
+    excelRow.push(eventPreComprobante?.current_amount ?? 0);
     const cuota_planes = toNumberOrZero(
       original_comprobante?.items.find((item) => item.concept === "Abono")
         ?.amount
@@ -173,7 +178,7 @@ export default async function Home(props: {
       nroGF: fg?.numericalId ?? "N/A",
       nombre: name,
       cuit,
-      "saldo anterior": saldo_anterior,
+      "saldo anterior": eventPreComprobante?.current_amount ?? 0,
       "cuota plan": cuota_planes,
       bonificacion,
       diferencial,
@@ -194,11 +199,7 @@ export default async function Home(props: {
   return (
     <LayoutContainer>
       <div className="flex flex-row justify-between w-full">
-        <div className="opacity-50 flex flex-row items-center hover:cursor-pointer hover:underline transition-all duration-300">
-          {" "}
-          <ChevronLeft className="mr-1 h-4 w-auto" />
-          <p className="font-medium ">VOLVER</p>
-        </div>
+        <GoBackButton url="/dashboard/billing/pre-liquidation" />
         {preliquidation?.estado === "pendiente" && (
           <>
             <div className="flex flex-row gap-1">
