@@ -1,11 +1,14 @@
 "use client";
-import { ChevronRight, Eye, EyeOff } from "lucide-react";
+import { ChevronRight, Eye, EyeOff, Loader2Icon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Form, FormField, FormItem, FormLabel, FormControl } from "../ui/form";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
+import { useClerk, useSignIn } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { CustomGoogleOneTap } from "./google-onetap";
 type Inputs = {
   username: string;
   password: string;
@@ -15,15 +18,41 @@ interface LoginFormProps {
 }
 export default function LoginForm({ setShowRegister }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const form = useForm<Inputs>();
-  const onSubmit = () => {
+  const signIn = useSignIn();
+  const clerk = useClerk();
+  const router = useRouter();
+  const onSubmit = async () => {
+    setLoading(true);
     const values = form.getValues();
-    return null;
+    const signInAttempt = await signIn.signIn?.create({
+      identifier: values.username,
+    });
+    // await signInAttempt?.prepareFirstFactor({
+    //   strategy:""
+    // })
+    await signInAttempt?.attemptFirstFactor({
+      strategy: "password",
+      password: values.password,
+    });
+    if (
+      signInAttempt?.status === "complete" &&
+      signInAttempt.createdSessionId
+    ) {
+      clerk.setActive({ session: signInAttempt.createdSessionId });
+      router.push("/dashboard");
+    }
   };
   return (
     <>
       <div className="flex flex-col items-center px-10 pt-3 pb-7 bg-white rounded-2xl">
-        <Image src="/bitcom-03.png" alt="bitcom_logo" width={160} height={80} />
+        <Image
+          src="/public/bitcom-03.png"
+          alt="bitcom_logo"
+          width={160}
+          height={80}
+        />
         <p className="text-lg mt-7">
           Acceso a <span className="font-bold"> Entidades</span>
         </p>
@@ -31,10 +60,15 @@ export default function LoginForm({ setShowRegister }: LoginFormProps) {
           Ingrese sus datos para{" "}
           <span className="font-bold"> iniciar sesion</span>
         </p>
-        <Button className="w-full px-20 py-3 mt-6 mb-3 text-black bg-[#DEDEDE] hover:bg-[#DEDEDE] ">
-          <img src="google-icon.svg" alt="google icon" />
-          Ingresar con Google <ChevronRight className="h-4" />{" "}
-        </Button>
+        <CustomGoogleOneTap>
+          {/* <h1>AAAA</h1> */}
+          {/* <img src="public/google-icon.svg" alt="google icon" /> */}
+          {/* Ingresar con Google <ChevronRight className="h-4" />{" "} */}
+          <Button className="w-full px-20 py-3 mt-6 mb-3 text-black bg-[#DEDEDE] hover:bg-[#DEDEDE] ">
+            <img src="public/google-icon.svg" alt="google icon" />
+            Ingresar con Google <ChevronRight className="h-4" />{" "}
+          </Button>
+        </CustomGoogleOneTap>
 
         <Form {...form}>
           <form
@@ -47,7 +81,7 @@ export default function LoginForm({ setShowRegister }: LoginFormProps) {
               render={({ field }) => (
                 <FormItem className="w-full">
                   <FormLabel className="text-muted-foreground text-sm opacity-70 font-medium-medium ">
-                    Usuario
+                    Mail
                   </FormLabel>
                   <FormControl>
                     <Input {...field} className="w-full" />
@@ -92,7 +126,13 @@ export default function LoginForm({ setShowRegister }: LoginFormProps) {
               <p className="text-xs font-semibold text-muted-foreground mt-2 hover:cursor-pointer">
                 Recupero de contraseña
               </p>
-              <Button className="w-full px-20 h-8 py-3 my-1 text-black bg-[#1BDFB7] hover:bg-[#1BDFB7] ">
+              <Button
+                className="w-full px-20 h-8 py-3 my-1 text-black bg-[#1BDFB7] hover:bg-[#1BDFB7] "
+                disabled={loading}
+              >
+                {loading && (
+                  <Loader2Icon className="mr-2 animate-spin" size={20} />
+                )}
                 Ingresar <ChevronRight className=" h-4" />
               </Button>
               <p className="text-muted-foreground opacity-60 text-xs">

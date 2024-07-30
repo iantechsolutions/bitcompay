@@ -33,7 +33,7 @@ export default function UploadResponsePage(props: {
           label: "Arrastra y suelta el archivo aquí",
           uploadIcon: (
             <img
-              src="/Uploaded-icon.png"
+              src="/public/Uploaded-icon.png"
               alt="Upload Icon"
               width={50}
               height={50}

@@ -6,6 +6,8 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useState } from "react";
 import Image from "next/image";
+import { useClerk, useSignUp } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 type Inputs = {
   username: string;
   password: string;
@@ -17,6 +19,9 @@ interface RegisterFormProps {
 export default function RegisterForm({ setShowRegister }: RegisterFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const form = useForm<Inputs>();
+  const signUp = useSignUp();
+  const clerk = useClerk();
+  const router = useRouter();
   const onSubmit = () => {
     const values = form.getValues();
     return null;
@@ -24,7 +29,12 @@ export default function RegisterForm({ setShowRegister }: RegisterFormProps) {
   return (
     <>
       <div className="flex flex-col items-center px-10 pt-3 pb-7 bg-white rounded-2xl">
-        <Image src="/bitcom-03.png" alt="bitcom_logo" width={160} height={80} />
+        <Image
+          src="/public/bitcom-03.png"
+          alt="bitcom_logo"
+          width={160}
+          height={80}
+        />
         <p className="text-lg mt-7">
           Acceso a <span className="font-bold"> Entidades</span>
         </p>
