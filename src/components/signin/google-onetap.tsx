@@ -77,16 +77,16 @@ export function CustomGoogleOneTap({
   const call = async (token: any) => {
     try {
       console.log("response", token);
-      // const res = await clerk.authenticateWithGoogleOneTap({
-      //   token,
-      // });
+      const res = await clerk.authenticateWithGoogleOneTap({
+        token,
+      });
 
-      // await clerk.handleGoogleOneTapCallback(res, {
-      //   signInFallbackRedirectUrl: "/dashboard",
-      // });
-      // router.push("/dashboard");
+      await clerk.handleGoogleOneTapCallback(res, {
+        signInFallbackRedirectUrl: "/dashboard",
+      });
+      router.push("/dashboard");
     } catch (error) {
-      // router.push("/signin");
+      router.push("/signin");
     }
   };
 
