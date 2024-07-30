@@ -14,6 +14,15 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { isArray } from "util";
 import { fiscalIdType } from "~/server/forms/providers-schema";
 import { Console } from "console";
+import dayjs from "dayjs";
+import "dayjs/locale/es";
+import utc from "dayjs/plugin/utc";
+import dayOfYear from "dayjs/plugin/dayOfYear";
+import timezone from "dayjs/plugin/timezone";
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.extend(dayOfYear);
+dayjs.locale("es");
 
 const statusCodeMap = new Map();
 const statusCodes = await db.query.paymentStatus.findMany();
@@ -511,11 +520,19 @@ async function readResponseUploadContents(
       const largeNumber = recordValues[0];
       const fiscal_id_number = recordValues[1];
       const importe_final = recordValues[3];
-      const invoice_number = largeNumber?.slice(15, 20);
+      const payment_date = recordValues[2]?.slice(19, 27);
+
+      const invoice_number = largeNumber?.slice(16, 21);
       // const fiscal_id_number = largeNumber?.slice(84, 104);
       // const invoice_number = largeNumber?.slice(16, 21);
       // const importe_final = largeNumber?.slice(48, 58);
-      console.log(recordValues);
+      console.log(payment_date!, "payments_date");
+
+      const day = payment_date!.slice(0, 2);
+      const month = payment_date![2];
+      const year = payment_date!.slice(3);
+
+      const date = dayjs(`${day}${month}${year}`, "DDMMYY").format("DD-MM-YY");
 
       console.log("invoice_number", invoice_number);
       console.log("fiscal_id_number", fiscal_id_number);
@@ -529,7 +546,13 @@ async function readResponseUploadContents(
         });
         if (original_transaction) {
           original_transaction.statusId = "91";
-          original_transaction.recollected_amount = parseInt(importe_final!);
+          original_transaction.payment_date = dayjs(date, "DD-MM-YY").toDate();
+          original_transaction.collected_amount =
+            original_transaction.first_due_amount! +
+            original_transaction.second_due_amount!;
+          original_transaction.recollected_amount = parceImporte(
+            importe_final!
+          );
           records.push(original_transaction);
         }
       } else {
@@ -550,9 +573,17 @@ async function readResponseUploadContents(
 
       const invoice_number = recordValues[1] ?? "33666";
       const fiscal_id_number = largeNumber?.slice(1, 12);
-      const importe_final = largeNumber2?.slice(17, 28);
+      const importe_final = largeNumber2?.slice(17, 27);
+
+      const payment_date = recordValues[2]!.slice(0, 8);
+      const year = payment_date!.slice(0, 4);
+      const month = payment_date!.slice(4, 6);
+      const day = payment_date!.slice(6);
+
+      const date = dayjs(`${day}${month}${year}`, "DDMMYY").format("DD-MM-YY");
 
       console.log("invoice_number", invoice_number);
+      console.log("invoice_number", importe_final);
 
       if (invoice_number) {
         const original_transaction = await db.query.payments.findFirst({
@@ -563,7 +594,14 @@ async function readResponseUploadContents(
         });
         if (original_transaction) {
           original_transaction.statusId = "91";
-          original_transaction.recollected_amount = parseInt(importe_final!);
+
+          original_transaction.payment_date = dayjs(date, "DD-MM-YY").toDate();
+          original_transaction.collected_amount =
+            original_transaction.first_due_amount! +
+            original_transaction.second_due_amount!;
+          original_transaction.recollected_amount = parceImporte(
+            importe_final!
+          );
           records.push(original_transaction);
         }
       } else {
@@ -578,11 +616,23 @@ async function readResponseUploadContents(
     for (const line of lines) {
       const recordValues = line.trim().split(/\s{2,}/);
       console.log("recordValues", recordValues);
-      const largeNumber = recordValues[1];
 
-      const fiscal_id_number = largeNumber?.slice(10, 19);
-      const invoice_number = largeNumber?.slice(34, 39);
-      const importe_final = largeNumber?.slice(48, 58);
+      const fiscal_id_number = recordValues[0]?.slice(32, 42);
+      const invoice_number = recordValues[0]?.slice(42, 48);
+      const payment_date = recordValues[0]?.slice(0, 8);
+
+      const importe_final = recordValues[0]?.slice(9, 23);
+
+      const year = payment_date!.slice(0, 4);
+      const month = payment_date!.slice(4, 6);
+      const day = payment_date!.slice(6);
+
+      const date = dayjs(`${day}${month}${year}`, "DDMMYY").format("DD-MM-YY");
+
+      console.log(payment_date?.slice(0, 4), "ES ESTAAA");
+
+      console.log(date, "ES ESTAAA");
+      console.log(importe_final);
 
       if (invoice_number) {
         const original_transaction = await db.query.payments.findFirst({
@@ -593,7 +643,67 @@ async function readResponseUploadContents(
         });
         if (original_transaction) {
           original_transaction.statusId = "91";
-          original_transaction.recollected_amount = parseInt(importe_final!);
+          original_transaction.payment_date = dayjs(date, "DD-MM-YY").toDate();
+          original_transaction.collected_amount =
+            original_transaction.first_due_amount! +
+            original_transaction.second_due_amount!;
+
+          original_transaction.recollected_amount = parceImporte(
+            importe_final!
+          );
+          records.push(original_transaction);
+        }
+      } else {
+        throw Error("cannot read invoice number");
+      }
+
+      total_rows++;
+      recordIndex++;
+    }
+  }
+  if (channelName === "DEBITO AUTOMATICO EN TARJETAS") {
+    for (const line of lines) {
+      const recordValues = line.trim().split(/\s{2,}/);
+      console.log("recordValues", recordValues);
+
+      const invoice_number = recordValues[0]?.slice(45, 50);
+      const importe_final = recordValues[1];
+      const payment_date = recordValues[5]?.slice(16, 22);
+      console.log(invoice_number, "largeNumber");
+      console.log(importe_final, "importe_final");
+      console.log(recordValues[4], "importe_final");
+
+      let estado;
+      if (recordValues[4] === "0") {
+        estado == "00";
+      } else {
+        estado == "92";
+      }
+      console.log(estado, "estado");
+
+      const day = payment_date!.slice(0, 2);
+      const month = payment_date![2];
+      const year = payment_date!.slice(3);
+
+      const date = dayjs(`${day}${month}${year}`, "DDMMYY").format("DD-MM-YY");
+
+      console.log(dayjs(date!), "date");
+      if (invoice_number) {
+        const original_transaction = await db.query.payments.findFirst({
+          where: eq(
+            schema.payments.invoice_number,
+            Number.parseInt(invoice_number)
+          ),
+        });
+        if (original_transaction) {
+          original_transaction.statusId = estado!;
+          original_transaction.payment_date = dayjs(date, "DD-MM-YY").toDate();
+          original_transaction.collected_amount =
+            original_transaction.first_due_amount! +
+            original_transaction.second_due_amount!;
+          original_transaction.recollected_amount = parceImporte(
+            importe_final!
+          );
           records.push(original_transaction);
         }
       } else {
@@ -956,4 +1066,11 @@ function trimObject(obj: Record<string, unknown>) {
       return [key, value];
     })
   );
+}
+
+function parceImporte(number: string) {
+  const formattedNumber = parseFloat((parseInt(number) / 100).toFixed(2));
+  console.log("number, ", formattedNumber);
+
+  return formattedNumber;
 }
