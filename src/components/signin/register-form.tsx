@@ -1,13 +1,22 @@
 "use client";
 import { ChevronRight, Eye, EyeOff } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { Form, FormField, FormItem, FormLabel, FormControl } from "../ui/form";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useState } from "react";
 import Image from "next/image";
 import { useClerk, useSignUp } from "@clerk/nextjs";
+import { ClerkAPIError } from "@clerk/types";
+import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
 import { useRouter } from "next/navigation";
+import { Title } from "../title";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSeparator,
+  InputOTPSlot,
+} from "../ui/input-otp";
 type Inputs = {
   username: string;
   password: string;
@@ -18,14 +27,87 @@ interface RegisterFormProps {
 }
 export default function RegisterForm({ setShowRegister }: RegisterFormProps) {
   const [showPassword, setShowPassword] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [code, setCode] = useState("");
+  const [errors, setErrors] = useState<ClerkAPIError[]>([]);
+  const [error, setError] = useState("");
   const form = useForm<Inputs>();
-  const signUp = useSignUp();
+  const { isLoaded, signUp, setActive } = useSignUp();
   const clerk = useClerk();
   const router = useRouter();
-  const onSubmit = () => {
-    const values = form.getValues();
-    return null;
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    const { username, password, mail } = data;
+    if (!isLoaded) return;
+    try {
+      await signUp.create({ emailAddress: mail, password });
+      await signUp.prepareEmailAddressVerification({
+        strategy: "email_code",
+      });
+      setVerifying(true);
+    } catch (err: any) {
+      const error = JSON.stringify(err);
+      console.error(JSON.stringify(err));
+    }
   };
+
+  const handleVerify = async () => {
+    if (!isLoaded) return;
+    try {
+      const completeSignUp = await signUp.attemptEmailAddressVerification({
+        code,
+      });
+      if (completeSignUp.status == "complete") {
+        await setActive({ session: completeSignUp.createdSessionId });
+        router.push("/dashboard");
+      } else {
+        console.error(JSON.stringify(completeSignUp, null, 2));
+      }
+    } catch (err: any) {
+      if (isClerkAPIResponseError(err)) {
+        const apiErrors = err.errors;
+        setError(JSON.stringify(apiErrors));
+      }
+      console.error(JSON.stringify(err, null, 2));
+    }
+  };
+  if (verifying) {
+    return (
+      <div className="flex flex-col items-center px-10 pt-3 pb-7 bg-white rounded-2xl">
+        <Title>Ingresar codigo de verificacion</Title>
+        <InputOTP
+          value={code}
+          onChange={(value: string) => setCode(value)}
+          maxLength={6}
+        >
+          <InputOTPGroup>
+            <InputOTPSlot index={0} />
+            <InputOTPSlot index={1} />
+            <InputOTPSlot index={2} />
+          </InputOTPGroup>
+          <InputOTPSeparator />
+          <InputOTPGroup>
+            <InputOTPSlot index={3} />
+            <InputOTPSlot index={4} />
+            <InputOTPSlot index={5} />
+          </InputOTPGroup>
+        </InputOTP>
+        {errors && (
+          <ul>
+            {errors.map((el, index) => (
+              <li key={index}>{el.longMessage}</li>
+            ))}
+          </ul>
+        )}
+
+        <Button
+          onClick={handleVerify}
+          className="bg-[#1BDFB7] hover:bg-[#1BDFB7] mt-3"
+        >
+          Verificar
+        </Button>
+      </div>
+    );
+  }
   return (
     <>
       <div className="flex flex-col items-center px-10 pt-3 pb-7 bg-white rounded-2xl">
@@ -76,7 +158,7 @@ export default function RegisterForm({ setShowRegister }: RegisterFormProps) {
                 </FormItem>
               )}
             />
-            <div className="relative w-full mb-4 flex flex-col items-center justify-center ">
+            <div className="relative w-full">
               <FormField
                 font-medium-medium
                 control={form.control}
@@ -110,8 +192,10 @@ export default function RegisterForm({ setShowRegister }: RegisterFormProps) {
                   )}
                 </Button>
               )}
-
+            </div>
+            <div className=" w-full mb-4 flex flex-col items-center justify-center ">
               <Button
+                type="submit"
                 className="w-full px-32 h-8 py-3 my-1 mt-4
                text-black bg-[#1BDFB7] hover:bg-[#1BDFB7] "
               >

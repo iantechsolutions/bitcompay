@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     /* Base Options: */
+    "types": ["@clerk/types"],
     "esModuleInterop": true,
     "skipLibCheck": true,
     "target": "es2022",
