@@ -402,13 +402,13 @@ function generatePagomiscuentas(
       true
     );
     const first_due_date = dayjs(transaction.first_due_date).format("YYYYMMDD");
-    const first_due_amount = formatAmount(transaction.first_due_amount!, 10);
+    const first_due_amount = formatAmount(transaction.first_due_amount!, 9);
 
     const second_due_date = dayjs(transaction.second_due_date).format(
       "YYYYMMDD"
     );
 
-    const second_due_amount = formatAmount(transaction.second_due_amount!, 10);
+    const second_due_amount = formatAmount(transaction.second_due_amount!, 9);
     const ticketMessage = formatString(
       " ",
       transaction.additional_info ?? "",
@@ -420,11 +420,11 @@ function generatePagomiscuentas(
       `${input.concept}-${dayjs
         .utc(transaction.period)
         .locale("es")
-        .format("MM-YYYY")}`,
+        .format("MMYYYY")}`,
       15,
       true
     );
-    text += `5${fiscal_id_number}${invoice_number}0${first_due_date}${first_due_amount}0${first_due_date}${first_due_amount}0${"0".repeat(
+    text += `5${fiscal_id_number}${invoice_number}0${first_due_date}${first_due_amount}${second_due_date}${second_due_amount}${"0".repeat(
       38
     )}${fiscal_id_number}${ticketMessage}${displayMessage}${" ".repeat(
       60
@@ -433,7 +433,7 @@ function generatePagomiscuentas(
     total_collected += transaction.first_due_amount!;
   }
   // trailer
-  const total_collected_string = formatAmount(total_collected, 15);
+  const total_collected_string = formatAmount(total_collected, 14);
   const total_records_string = formatString(
     "0",
     transactions.length.toString(),
