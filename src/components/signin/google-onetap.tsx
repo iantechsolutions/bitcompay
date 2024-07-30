@@ -81,10 +81,10 @@ export function CustomGoogleOneTap({
         token,
       });
 
-      await clerk.handleGoogleOneTapCallback(res, {
-        signInFallbackRedirectUrl: "/dashboard",
-      });
-      router.push("/dashboard");
+      // await clerk.handleGoogleOneTapCallback(res, {
+      //   signInFallbackRedirectUrl: "/dashboard",
+      // });
+      // router.push("/dashboard");
     } catch (error) {
       router.push("/signin");
     }
