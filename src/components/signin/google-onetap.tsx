@@ -80,7 +80,7 @@ export function CustomGoogleOneTap({
       const res = await clerk.authenticateWithGoogleOneTap({
         token,
       });
-
+      clerk.handleGoogleOneTapCallback(res, {});
       // await clerk.handleGoogleOneTapCallback(res, {
       //   signInFallbackRedirectUrl: "/dashboard",
       // });
