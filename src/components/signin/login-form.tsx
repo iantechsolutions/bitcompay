@@ -17,6 +17,15 @@ interface LoginFormProps {
   setShowRegister: (showRegister: boolean) => void;
 }
 export default function LoginForm({ setShowRegister }: LoginFormProps) {
+  function showGoogle() {
+    console.log("showGoogle");
+    const params = {
+      cancelOnTapOutside: false,
+      itpSupport: false,
+      fedCmSupport: false,
+    };
+    clerk.openGoogleOneTap(params);
+  }
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const form = useForm<Inputs>();
@@ -59,15 +68,18 @@ export default function LoginForm({ setShowRegister }: LoginFormProps) {
         Ingrese sus datos para{" "}
         <span className="font-bold"> iniciar sesion</span>
       </p>
-      <CustomGoogleOneTap>
-        {/* <h1>AAAA</h1> */}
-        {/* <img src="public/google-icon.svg" alt="google icon" /> */}
-        {/* Ingresar con Google <ChevronRight className="h-4" />{" "} */}
-        <Button className="w-full px-20 py-3 mt-6 mb-3 text-black bg-[#DEDEDE] hover:bg-[#DEDEDE] ">
-          <img src="public/google-icon.svg" alt="google icon" />
-          Ingresar con Google <ChevronRight className="h-4" />{" "}
-        </Button>
-      </CustomGoogleOneTap>
+      {/* <CustomGoogleOneTap> */}
+      {/* <h1>AAAA</h1> */}
+      {/* <img src="public/google-icon.svg" alt="google icon" /> */}
+      {/* Ingresar con Google <ChevronRight className="h-4" />{" "} */}
+      <Button
+        className="w-full px-20 py-3 mt-6 mb-3 text-black bg-[#DEDEDE] hover:bg-[#DEDEDE] "
+        onClick={showGoogle}
+      >
+        <img src="public/google-icon.svg" alt="google icon" />
+        Ingresar con Google <ChevronRight className="h-4" />{" "}
+      </Button>
+      {/* </CustomGoogleOneTap> */}
 
       <Form {...form}>
         <form
