@@ -7,10 +7,11 @@ const isPublicRoute = createRouteMatcher([
   "/api/uploadthing(.*)",
   "/signin(.*)",
   "/_next(.*)",
+  "/landing_images(.*)",
+  "/public(.*)",
 ]);
 
 export default clerkMiddleware((auth, req) => {
-  console.log("URLLLLL", req.url);
   if (!isPublicRoute(req)) {
     auth().protect();
     const role = auth()?.sessionClaims?.metadata.role;
