@@ -24,11 +24,7 @@ export default function LoginForm({ setShowRegister }: LoginFormProps) {
       itpSupport: false,
       fedCmSupport: false,
     };
-    console.log("aaa");
-    console.log(clerk);
     clerk.openGoogleOneTap(params);
-    console.log("bbb");
-    console.log(clerk);
     if (clerk.session) {
     }
   }
@@ -41,6 +37,9 @@ export default function LoginForm({ setShowRegister }: LoginFormProps) {
   useEffect(() => {
     console.log("useEffect");
     console.log(clerk.session);
+    if (clerk.session) {
+      router.push("/dashboard");
+    }
   }, [clerk.session]);
   const onSubmit = async () => {
     setLoading(true);
@@ -60,7 +59,6 @@ export default function LoginForm({ setShowRegister }: LoginFormProps) {
       signInAttempt.createdSessionId
     ) {
       clerk.setActive({ session: signInAttempt.createdSessionId });
-      router.push("/dashboard");
     }
   };
   return (
