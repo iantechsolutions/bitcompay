@@ -3,6 +3,7 @@ import { useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
 import { useEffect } from "react";
+import { env } from "~/env";
 
 // Add clerk to Window to avoid type errors
 declare global {
@@ -34,7 +35,7 @@ export function CustomGoogleOneTap({
     if (google) {
       google.accounts.id.initialize({
         // Add your Google Client ID here.
-        client_id: "",
+        client_id: env.GOOGLE_CLIENT_ID,
         callback: async (response: any) => {
           // Here we call our provider with the token provided by Google
           call(response.credential);
@@ -53,8 +54,12 @@ export function CustomGoogleOneTap({
             "getNotDisplayedReason ::",
             notification.getNotDisplayedReason()
           );
+          document.cookie = `g_state=;path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT`;
+          google.accounts.id.prompt();
         } else if (notification.isSkippedMoment()) {
           console.log("getSkippedReason  ::", notification.getSkippedReason());
+          document.cookie = `g_state=;path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT`;
+          google.accounts.id.prompt();
         } else if (notification.isDismissedMoment()) {
           console.log(
             "getDismissedReason ::",
@@ -72,10 +77,10 @@ export function CustomGoogleOneTap({
       });
 
       await clerk.handleGoogleOneTapCallback(res, {
-        signInFallbackRedirectUrl: "/example-fallback-path",
+        signInFallbackRedirectUrl: "/dashboard",
       });
     } catch (error) {
-      router.push("/sign-in");
+      router.push("/signin");
     }
   };
 

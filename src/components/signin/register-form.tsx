@@ -109,112 +109,109 @@ export default function RegisterForm({ setShowRegister }: RegisterFormProps) {
     );
   }
   return (
-    <>
-      <div className="flex flex-col items-center px-10 pt-3 pb-7 bg-white rounded-2xl">
-        <Image
-          src="/public/bitcom-03.png"
-          alt="bitcom_logo"
-          width={160}
-          height={80}
-        />
-        <p className="text-lg mt-7">
-          Acceso a <span className="font-bold"> Entidades</span>
-        </p>
-        <p className="text-muted-foreground text-xs font-medium mb-3">
-          Ingrese sus datos para{" "}
-          <span className="font-bold"> crear cuenta</span>
-        </p>
+    <div className="flex flex-col items-center px-10 pt-3 pb-7 bg-white rounded-2xl">
+      <Image
+        src="/public/bitcom-03.png"
+        alt="bitcom_logo"
+        width={160}
+        height={80}
+      />
+      <p className="text-lg mt-7">
+        Acceso a <span className="font-bold"> Entidades</span>
+      </p>
+      <p className="text-muted-foreground text-xs font-medium mb-3">
+        Ingrese sus datos para <span className="font-bold"> crear cuenta</span>
+      </p>
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-8 w-full flex flex-col items-center"
-          >
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-8 w-full flex flex-col items-center"
+        >
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel className="text-muted-foreground text-sm opacity-70 font-medium-medium ">
+                  Usuario
+                </FormLabel>
+                <FormControl>
+                  <Input {...field} className="w-full" />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="mail"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel className="text-muted-foreground text-sm opacity-70 font-medium-medium ">
+                  Mail
+                </FormLabel>
+                <FormControl>
+                  <Input {...field} className="w-full" />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <div className="relative w-full">
             <FormField
+              font-medium-medium
               control={form.control}
-              name="username"
+              name="password"
               render={({ field }) => (
                 <FormItem className="w-full">
                   <FormLabel className="text-muted-foreground text-sm opacity-70 font-medium-medium ">
-                    Usuario
+                    Contraseña
                   </FormLabel>
                   <FormControl>
-                    <Input {...field} className="w-full" />
+                    <Input
+                      {...field}
+                      type={showPassword ? "text" : "password"}
+                      className="w-full"
+                    />
                   </FormControl>
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="mail"
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <FormLabel className="text-muted-foreground text-sm opacity-70 font-medium-medium ">
-                    Mail
-                  </FormLabel>
-                  <FormControl>
-                    <Input {...field} className="w-full" />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <div className="relative w-full">
-              <FormField
-                font-medium-medium
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem className="w-full">
-                    <FormLabel className="text-muted-foreground text-sm opacity-70 font-medium-medium ">
-                      Contraseña
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type={showPassword ? "text" : "password"}
-                        className="w-full"
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              {form.watch().password && (
-                <Button
-                  className="absolute right-2 bottom-0"
-                  onClick={() => setShowPassword(!showPassword)}
-                  variant="outline"
-                  size="icon"
-                >
-                  {showPassword ? (
-                    <Eye className="h-4 opacity-80 text-muted-foreground" />
-                  ) : (
-                    <EyeOff className="h-4 opacity-80 text-muted-foreground" />
-                  )}
-                </Button>
-              )}
-            </div>
-            <div className=" w-full mb-4 flex flex-col items-center justify-center ">
+            {form.watch().password && (
               <Button
-                type="submit"
-                className="w-full px-32 h-8 py-3 my-1 mt-4
-               text-black bg-[#1BDFB7] hover:bg-[#1BDFB7] "
+                className="absolute right-2 bottom-0"
+                onClick={() => setShowPassword(!showPassword)}
+                variant="outline"
+                size="icon"
               >
-                Continuar <ChevronRight className=" h-4" />
+                {showPassword ? (
+                  <Eye className="h-4 opacity-80 text-muted-foreground" />
+                ) : (
+                  <EyeOff className="h-4 opacity-80 text-muted-foreground" />
+                )}
               </Button>
+            )}
+          </div>
+          <div className=" w-full mb-4 flex flex-col items-center justify-center ">
+            <Button
+              type="submit"
+              className="w-full px-32 h-8 py-3 my-1 mt-4
+               text-black bg-[#1BDFB7] hover:bg-[#1BDFB7] "
+            >
+              Continuar <ChevronRight className=" h-4" />
+            </Button>
 
-              <p className="text-muted-foreground opacity-60 text-xs">
-                ¿Ya tiene una cuenta ?{" "}
-                <span
-                  className="text-[#1BDFB7] font-bold opacity-100 hover:cursor-pointer"
-                  onClick={() => setShowRegister(false)}
-                >
-                  Ingresar
-                </span>
-              </p>
-            </div>
-          </form>
-        </Form>
-      </div>
-    </>
+            <p className="text-muted-foreground opacity-60 text-xs">
+              ¿Ya tiene una cuenta ?{" "}
+              <span
+                className="text-[#1BDFB7] font-bold opacity-100 hover:cursor-pointer"
+                onClick={() => setShowRegister(false)}
+              >
+                Ingresar
+              </span>
+            </p>
+          </div>
+        </form>
+      </Form>
+    </div>
   );
 }
