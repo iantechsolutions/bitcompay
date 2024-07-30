@@ -38,6 +38,10 @@ export default function LoginForm({ setShowRegister }: LoginFormProps) {
   const signIn = useSignIn();
   const clerk = useClerk();
   const router = useRouter();
+  useEffect(() => {
+    console.log("useEffect");
+    console.log(clerk.session);
+  }, [clerk.session]);
   const onSubmit = async () => {
     setLoading(true);
     const values = form.getValues();
