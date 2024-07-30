@@ -38,7 +38,7 @@ export default function LoginForm({ setShowRegister }: LoginFormProps) {
     console.log("useEffect");
     console.log(clerk.session);
     if (clerk.session) {
-      router.push("/dashboard");
+      router.push("/");
     }
   }, [clerk.session]);
   const onSubmit = async () => {
