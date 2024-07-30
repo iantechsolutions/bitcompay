@@ -33,13 +33,16 @@ export function CustomGoogleOneTap({
     console.log("One Tap");
     const { google } = window;
     if (google) {
+      console.log("Google");
       google.accounts.id.initialize({
         // Add your Google Client ID here.
+        use_fedcm_for_prompt: true,
         client_id:
           "386943125567-r86179ke4p0nfg1q1ir6p1klc6849vpg.apps.googleusercontent.com",
+
         callback: async (response: any) => {
           // Here we call our provider with the token provided by Google
-          call(response.credential);
+          await call(response.credential);
         },
       });
 
@@ -73,15 +76,17 @@ export function CustomGoogleOneTap({
 
   const call = async (token: any) => {
     try {
-      const res = await clerk.authenticateWithGoogleOneTap({
-        token,
-      });
+      console.log("response", token);
+      // const res = await clerk.authenticateWithGoogleOneTap({
+      //   token,
+      // });
 
-      await clerk.handleGoogleOneTapCallback(res, {
-        signInFallbackRedirectUrl: "/dashboard",
-      });
+      // await clerk.handleGoogleOneTapCallback(res, {
+      //   signInFallbackRedirectUrl: "/dashboard",
+      // });
+      // router.push("/dashboard");
     } catch (error) {
-      router.push("/signin");
+      // router.push("/signin");
     }
   };
 
