@@ -35,7 +35,8 @@ export function CustomGoogleOneTap({
     if (google) {
       google.accounts.id.initialize({
         // Add your Google Client ID here.
-        client_id: env.GOOGLE_CLIENT_ID,
+        client_id:
+          "386943125567-r86179ke4p0nfg1q1ir6p1klc6849vpg.apps.googleusercontent.com",
         callback: async (response: any) => {
           // Here we call our provider with the token provided by Google
           call(response.credential);
