@@ -16,7 +16,7 @@ const roboto = Roboto({
 export const metadata = {
   title: "Bitcompay",
   description: "Sistema de gestión de Bitcompay",
-  icons: [{ rel: "icon", url: "/bitcom_icon.png" }],
+  icons: [{ rel: "icon", url: "/public/bitcom_icon.png" }],
 };
 
 export default function RootLayout(props: { children: React.ReactNode }) {

@@ -88,7 +88,7 @@ export default async function page() {
         </h2>{" "}
         <div className="relative inline-flex">
           <Image
-            src={"/bitcom_icon.png"}
+            src={"/public/bitcom_icon.png"}
             alt="icono_bitcom"
             width={50}
             height={50}
