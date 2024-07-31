@@ -236,7 +236,7 @@ async function approbatecomprobante(liquidationId: string) {
       });
       console.log("3");
       const status = await db.query.paymentStatus.findFirst({
-        where: eq(schema.paymentStatus.code, "00"),
+        where: eq(schema.paymentStatus.code, "91"),
       });
       const statusCancelado = await db.query.paymentStatus.findFirst({
         where: eq(schema.paymentStatus.code, "90"),
