@@ -1,7 +1,13 @@
 "use client";
 import Afip from "@afipsdk/afip.js";
 import { format } from "date-fns";
-import { Loader2Icon, PlusCircleIcon } from "lucide-react";
+import {
+  Loader2Icon,
+  PlusCircleIcon,
+  CircleX,
+  CircleCheck,
+  Search,
+} from "lucide-react";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import * as React from "react";
@@ -37,11 +43,11 @@ import {
   SelectGroup,
   SelectItem,
   SelectLabel,
-  SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
 import { create } from "domain";
 import BarcodeProcedure from "~/components/barcode";
+import { SelectTrigger } from "~/components/selectwithsearchIcon";
 
 function formatDate(date: Date | undefined) {
   if (date) {
@@ -59,8 +65,6 @@ export default function Page() {
     api.comprobantes.create.useMutation();
   const { mutateAsync: updateComprobante } =
     api.comprobantes.addBillLink.useMutation();
-  // const { mutateAsync: createItemReturnComprobante } =
-  //   api.items.createReturnComprobante.useMutation();
   const { mutateAsync: createEventFamily } =
     api.events.createByType.useMutation();
   const { mutateAsync: createEventOrg } =
@@ -348,33 +352,6 @@ export default function Page() {
     }
   }
 
-  // async function saveComprobante(numero_de_comprobante: number) {
-  //   const comprobante = await createComprobante({
-  //     billLink: "",
-  //     concepto: Number(concepto),
-  //     importe: Number(importe),
-  //     iva: iva,
-  //     nroDocumento: Number(nroDocumento),
-  //     ptoVenta: Number(puntoVenta),
-  //     tipoDocumento: Number(tipoDocumento),
-  //     tipoComprobante: tipoComprobante,
-  //     fromPeriod: dateDesde,
-  //     toPeriod: dateHasta,
-  //     due_date: dateVencimiento,
-  //     generated: new Date(),
-  //     prodName: servicioprod,
-  //     nroComprobante: numero_de_comprobante,
-  //   });
-  //   const updatedComprobante = await createItemReturnComprobante({
-  //     concept: "Comprobante Manual",
-  //     amount: Number(importe),
-  //     iva: 0,
-  //     total: Number(importe),
-  //     abono: 0,
-  //     comprobante_id: comprobante[0]?.id ?? "",
-  //   });
-  //   return updatedComprobante;
-  // }
   type Channel = {
     number: number;
     id: string;
@@ -386,12 +363,13 @@ export default function Page() {
     requiredColumns: string[];
   };
 
-  // function showFactura() {}
   const [puntoVenta, setPuntoVenta] = useState("");
   const [tipoComprobante, setTipoComprobante] = useState("");
   const [concepto, setConcepto] = useState("");
   const [tipoDocumento, setTipoDocumento] = useState("");
   const [nroDocumento, setNroDocumento] = useState("");
+  const [nroDocumentoDNI, setNroDocumentoDNI] = useState("");
+  const [nombre, setNombre] = useState("");
   const [importe, setImporte] = useState("");
   const [dateDesde, setDateDesde] = React.useState<Date>();
   const [dateHasta, setDateHasta] = React.useState<Date>();
@@ -415,6 +393,8 @@ export default function Page() {
     let billResponsible = grupo?.integrants.find((x) => x.isBillResponsible);
 
     setNroDocumento(billResponsible?.fiscal_id_number ?? "");
+    setNroDocumentoDNI(billResponsible?.id_number ?? "");
+    setNombre(billResponsible?.name ?? "");
     setTipoDocumento(billResponsible?.fiscal_id_type ?? "");
     setBrandId(grupo?.businessUnitData?.brandId ?? "");
   }
@@ -461,7 +441,71 @@ export default function Page() {
       <LayoutContainer>
         <section className="space-y-2">
           <div>
-            <Title>Facturación</Title>
+            <Title>Generación de comprobantes</Title>
+          </div>
+          <div className="flex flex-row justify-between border-[#0DA485] border-b-2">
+            <p>Receptor</p>
+            <div className="pb-3">
+              <Button
+                className="h-7 bg-[#0DA485] hover:bg-[#0da486e2] text-[#FAFDFD] font-medium-medium text-xs rounded-2xl py-0 px-6 mr-3"
+                // onClick={() => setOpen(true)}
+              >
+                Aprobar
+                <CircleCheck className="h-4 w-auto ml-2" />
+              </Button>
+              <Button
+                className="  h-7 bg-[#D9D7D8] hover:bg-[#d9d7d8dc] text-[#4B4B4B]  text-xs rounded-2xl py-0 px-6 "
+                // onClick={() => setOpen(true)}
+              >
+                Anular
+                <CircleX className="h-4 w-auto ml-2" />
+              </Button>
+            </div>
+          </div>
+          <div>
+            <Select onValueChange={(e) => handleGrupoFamilarChange(e)}>
+              <SelectTrigger className="w-full font-bold">
+                <SelectValue placeholder="Buscar afiliado" />
+              </SelectTrigger>
+              <SelectContent>
+                {gruposFamiliar &&
+                  gruposFamiliar.map((gruposFamiliar) => (
+                    <SelectItem
+                      key={gruposFamiliar?.id}
+                      value={gruposFamiliar?.id}
+                      className="rounded-none border-b border-gray-600"
+                    >
+                      {gruposFamiliar?.numericalId}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="bg-[#e9fcf8] rounded-lg p-4 flex flex-row justify-between">
+            <div className="flex flex-col gap-2">
+              <Label>APELLIDO</Label>
+              <Input
+                disabled={true}
+                value={nombre}
+                className="bg-white w-72 opacity-100 border-[#0DA485] border"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label>DNI</Label>
+              <Input
+                disabled={true}
+                value={nroDocumentoDNI}
+                className="bg-white w-72 opacity-100 border-[#0DA485] border"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label>CUIT</Label>
+              <Input
+                disabled={true}
+                value={nroDocumento}
+                className="bg-white w-72 opacity-100 border-[#0DA485] border"
+              />
+            </div>
           </div>
           <div className="grid grid-cols-3 gap-4">
             <div>
@@ -529,20 +573,9 @@ export default function Page() {
                   {[
                     { value: "3", label: "FACTURA A" },
                     { value: "6", label: "FACTURA B" },
-                    // { value: "8", label: "NOTA DE DEBITO A" },
-                    // { value: "13", label: "NOTA DE DEBITO B" },
                     { value: "2", label: "NOTA DE CREDITO A" },
                     { value: "12", label: "NOTA DE CREDITO B" },
                     { value: "0", label: "RECIBO" },
-                    // { value: "15", label: "NOTA DE DEBITO C" },
-                    // { value: "52", label: "NOTA DE DEBITO M" },
-                    // { value: "20", label: "NOTA DE DEBITO E" },
-                    // { value: "11", label: "FACTURA C" },
-                    // { value: "51", label: "FACTURA M" },
-                    // { value: "19", label: "FACTURA E" },
-                    // { value: "14", label: "NOTA DE CREDITO C" },
-                    // { value: "53", label: "NOTA DE CREDITO M" },
-                    // { value: "21", label: "NOTA DE CREDITO E" },
                   ].map((option) => (
                     <SelectItem
                       key={option.value}
@@ -622,7 +655,6 @@ export default function Page() {
                     { value: "CUIT", label: "CUIT" },
                     { value: "CUIL", label: "CUIL" },
                     { value: "DNI", label: "DNI" },
-                    // { value: "99", label: "Consumidor Final" },
                   ].map((option) => (
                     <SelectItem
                       key={option.value}
