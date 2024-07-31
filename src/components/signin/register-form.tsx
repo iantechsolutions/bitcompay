@@ -85,9 +85,9 @@ export default function RegisterForm({ setShowRegister }: RegisterFormProps) {
       if (isClerkAPIResponseError(err)) {
         const apiErrors = err.errors;
         setError(JSON.stringify(apiErrors));
-        toast.error("Código Inválido", {
-          position: "top-right",
-        });
+        // toast.error("Código Inválido", {
+        //   position: "top-right",
+        // });
         setErrors(apiErrors);
       }
     }
