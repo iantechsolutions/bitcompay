@@ -75,9 +75,9 @@ export default function Page() {
   const { data: marcas } = api.brands.list.useQuery();
   const { data: gruposFamiliar } = api.family_groups.list.useQuery();
   const { data: obrasSociales } = api.healthInsurances.list.useQuery();
-  const { data: comprobantes } = api.comprobantes.list.useQuery();
   const [logo, setLogo] = useState("");
   const [fcSelec, setFCSelec] = useState("");
+  const [comprobantes, setComprobantes] = useState<any[]>([]);
   function generateComprobante() {
     if (marcas) {
       setLogo(marcas[0]!.logo_url!);
@@ -394,9 +394,12 @@ export default function Page() {
   const [brandId, setBrandId] = useState("");
   function handleGrupoFamilarChange(value: string) {
     setGrupoFamiliarId(value);
+
     let grupo = gruposFamiliar?.find((x) => x.id == value);
     let billResponsible = grupo?.integrants.find((x) => x.isBillResponsible);
-
+    console.log("comprobantes", grupo?.comprobantes);
+    console.log("puntoVenta", puntoVenta);
+    setComprobantes(grupo?.comprobantes ?? []);
     setNroDocumento(billResponsible?.fiscal_id_number ?? "");
     setNroDocumentoDNI(billResponsible?.id_number ?? "");
     setNombre(billResponsible?.name ?? "");
@@ -607,26 +610,28 @@ export default function Page() {
             <div>
               <Label htmlFor="factura">Comprobante Asociado</Label>
               <br />
-              <Select onValueChange={(e) => setTipoComprobante(e)}>
+              <Select onValueChange={(e) => setFCSelec(e)}>
                 <SelectTrigger className="font-bold border-[#0DA485] border">
                   <SelectValue placeholder="Seleccionar comprobante..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {[
-                    { value: "3", label: "FACTURA A" },
-                    { value: "6", label: "FACTURA B" },
-                    { value: "2", label: "NOTA DE CREDITO A" },
-                    { value: "12", label: "NOTA DE CREDITO B" },
-                    { value: "0", label: "RECIBO" },
-                  ].map((option) => (
-                    <SelectItem
-                      key={option.value}
-                      value={option.value}
-                      className="rounded-none border-b border-gray-600"
-                    >
-                      {option.label}
-                    </SelectItem>
-                  ))}
+                  {gruposFamiliar?.find((x) => x.id == grupoFamiliarId) &&
+                    gruposFamiliar
+                      ?.find((x) => x.id == grupoFamiliarId)
+                      ?.comprobantes.filter(
+                        (x) =>
+                          x.estado != "generada" &&
+                          x.ptoVenta.toString() === puntoVenta
+                      )
+                      .map((comprobante) => (
+                        <SelectItem
+                          key={comprobante?.id}
+                          value={comprobante?.id}
+                          className="rounded-none border-b border-gray-600"
+                        >
+                          {comprobante?.nroComprobante}
+                        </SelectItem>
+                      ))}
                 </SelectContent>
               </Select>
             </div>
@@ -895,19 +900,21 @@ export default function Page() {
                     <SelectValue placeholder="Seleccione una factura" />
                   </SelectTrigger>
                   <SelectContent>
-                    {gruposFamiliar?.find((x) => x.id == grupoFamiliarId) &&
-                      gruposFamiliar
-                        ?.find((x) => x.id == grupoFamiliarId)
-                        ?.comprobantes.filter((x) => x.estado != "generada")
-                        .map((comprobante) => (
-                          <SelectItem
-                            key={comprobante?.id}
-                            value={comprobante?.id}
-                            className="rounded-none border-b border-gray-600"
-                          >
-                            {comprobante?.nroComprobante}
-                          </SelectItem>
-                        ))}
+                    {comprobantes
+                      .filter(
+                        (x) =>
+                          x.estado != "generada" &&
+                          x.ptoVenta.toString() == puntoVenta
+                      )
+                      .map((comprobante) => (
+                        <SelectItem
+                          key={comprobante?.id}
+                          value={comprobante?.id}
+                          className="rounded-none border-b border-gray-600"
+                        >
+                          {comprobante?.nroComprobante}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>

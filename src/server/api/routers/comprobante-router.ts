@@ -476,14 +476,26 @@ async function PDFFromHtml(
   //   console.log("html", html);
   //   const response = await utapi.uploadFiles(pdfFile);
   //   console.log(response);
-  //   await db
-  //     .update(schema.comprobantes)
-  //     .set({
-  //       billLink: response.data?.url,
-  //       estado: "pendiente",
-  //       nroComprobante: voucher,
-  //     })
-  //     .where(eq(schema.comprobantes.id, comprobanteId));
+  const options = {
+    width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
+    marginLeft: 0.4, // Margen izquierdo en pulgadas. Usar 0.1 para ticket
+    marginRight: 0.4, // Margen derecho en pulgadas. Usar 0.1 para ticket
+    marginTop: 0.4, // Margen superior en pulgadas. Usar 0.1 para ticket
+    marginBottom: 0.4, // Margen inferior en pulgadas. Usar 0.1 para ticket
+  };
+  const res = await afip.ElectronicBilling.createPDF({
+    html: html,
+    file_name: name,
+    options: options,
+  });
+  await db
+    .update(schema.comprobantes)
+    .set({
+      billLink: res.file,
+      estado: "pendiente",
+      nroComprobante: voucher,
+    })
+    .where(eq(schema.comprobantes.id, comprobanteId));
   console.log("termino la funcion");
   // });
 }
