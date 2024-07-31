@@ -72,6 +72,7 @@ export default function Page() {
   const { data: company } = api.companies.get.useQuery();
   const { data: marcas } = api.brands.list.useQuery();
   const { data: gruposFamiliar } = api.family_groups.list.useQuery();
+  const { data: obrasSociales } = api.healthInsurances.list.useQuery();
   const { data: comprobantes } = api.comprobantes.list.useQuery();
   const [logo, setLogo] = useState("");
   const [fcSelec, setFCSelec] = useState("");
@@ -398,6 +399,14 @@ export default function Page() {
     setTipoDocumento(billResponsible?.fiscal_id_type ?? "");
     setBrandId(grupo?.businessUnitData?.brandId ?? "");
   }
+  function handleObraSocialChange(value: string) {
+    let obra = obrasSociales?.find((x) => x.id == value);
+    setNroDocumento(obra?.fiscal_id_number?.toString() ?? "");
+    setNroDocumentoDNI("0" ?? "");
+    setNombre(obra?.responsibleName ?? "");
+    // setTipoDocumento(billResponsible?.fiscal_id_type ?? "");
+    // setBrandId(obra?.businessUnitData?.brandId ?? "");
+  }
   let selectedBrand;
 
   const [selectedChannel, setSelectedChannel] = useState("");
@@ -462,9 +471,9 @@ export default function Page() {
               </Button>
             </div>
           </div>
-          <div>
+          <div className="flex flex-row justify-between gap-8">
             <Select onValueChange={(e) => handleGrupoFamilarChange(e)}>
-              <SelectTrigger className="w-full font-bold">
+              <SelectTrigger className=" font-bold w-full">
                 <SelectValue placeholder="Buscar afiliado" />
               </SelectTrigger>
               <SelectContent>
@@ -480,10 +489,28 @@ export default function Page() {
                   ))}
               </SelectContent>
             </Select>
+            <p> O </p>
+            <Select onValueChange={(e) => handleObraSocialChange(e)}>
+              <SelectTrigger className="w-full font-bold">
+                <SelectValue placeholder="Buscar obra social" />
+              </SelectTrigger>
+              <SelectContent>
+                {obrasSociales &&
+                  obrasSociales.map((obrasSocial) => (
+                    <SelectItem
+                      key={obrasSocial?.id}
+                      value={obrasSocial?.id}
+                      className="rounded-none border-b border-gray-600"
+                    >
+                      {obrasSocial?.name}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="bg-[#e9fcf8] rounded-lg p-4 flex flex-row justify-between">
             <div className="flex flex-col gap-2">
-              <Label>APELLIDO</Label>
+              <Label>NOMBRE RESPONSABLE</Label>
               <Input
                 disabled={true}
                 value={nombre}
