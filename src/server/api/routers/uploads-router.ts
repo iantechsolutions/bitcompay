@@ -223,6 +223,12 @@ export const uploadsRouter = createTRPCRouter({
                     : current;
                 }
               );
+
+              console.log(
+                "tributo",
+                record.first_due_amount,
+                record.collected_amount
+              );
               // if (!lastEvent) {
               //   throw new Error("No hay eventos en la cuenta corriente");
               // }
@@ -231,8 +237,8 @@ export const uploadsRouter = createTRPCRouter({
                 event_amount:
                   record.first_due_amount ?? record.collected_amount ?? 0,
                 current_amount:
-                  lastEvent?.current_amount ??
-                  0 + payment?.comprobantes?.importe!,
+                  (lastEvent?.current_amount ?? 0) +
+                  (record.first_due_amount ?? record.collected_amount ?? 0),
                 description: "Recaudacion",
                 type: "REC",
               });
@@ -388,8 +394,8 @@ export const uploadsRouter = createTRPCRouter({
               period: row.period,
               first_due_amount: row.first_due_amount,
               first_due_date: row.first_due_date,
-              second_due_amount: row.second_due_amount ?? null,
-              second_due_date: row.second_due_date ?? null,
+              second_due_amount: null,
+              second_due_date: null,
               additional_info: row.additional_info ?? null,
               // payment_channel: row.payment_channel ?? null,
               payment_date: row.payment_date ?? null,
@@ -534,9 +540,12 @@ async function readResponseUploadContents(
 
       const date = dayjs(`${day}${month}${year}`, "DDMMYY").format("DD-MM-YY");
 
-      console.log("invoice_number", invoice_number);
-      console.log("fiscal_id_number", fiscal_id_number);
-
+      let status;
+      if (parceImporte(importe_final!) > 0) {
+        status = "00";
+      } else {
+        status = "90";
+      }
       if (invoice_number) {
         const original_transaction = await db.query.payments.findFirst({
           where: eq(
@@ -545,7 +554,7 @@ async function readResponseUploadContents(
           ),
         });
         if (original_transaction) {
-          original_transaction.statusId = "91";
+          original_transaction.statusId = statusCodeMap.get(status) ?? "90";
           original_transaction.payment_date = dayjs(date, "DD-MM-YY").toDate();
           original_transaction.collected_amount =
             original_transaction.first_due_amount! +
@@ -553,6 +562,13 @@ async function readResponseUploadContents(
           original_transaction.recollected_amount = parceImporte(
             importe_final!
           );
+
+          console.log(
+            status,
+            original_transaction.statusId,
+            "Este es el estado"
+          );
+
           records.push(original_transaction);
         }
       } else {
@@ -631,6 +647,13 @@ async function readResponseUploadContents(
 
       console.log(payment_date?.slice(0, 4), "ES ESTAAA");
 
+      let status;
+      if (parceImporte(importe_final!) > 0) {
+        status = "00";
+      } else {
+        status = "90";
+      }
+
       console.log(date, "ES ESTAAA");
       console.log(importe_final);
 
@@ -642,7 +665,7 @@ async function readResponseUploadContents(
           ),
         });
         if (original_transaction) {
-          original_transaction.statusId = "91";
+          original_transaction.statusId = statusCodeMap.get(status) ?? "90";
           original_transaction.payment_date = dayjs(date, "DD-MM-YY").toDate();
           original_transaction.collected_amount =
             original_transaction.first_due_amount! +
@@ -722,7 +745,7 @@ async function readResponseUploadContents(
         //trato el ultimo elemento que esta junto nro de factura y estado de pago
         const largeNumber = recordValues[2];
         console.log(largeNumber);
-        const status_code = largeNumber?.slice(-2);
+        const status_code = largeNumber?.slice(37, 39);
         const importe = largeNumber?.slice(22, 39);
         console.log("length", importe?.length);
         const importe_int = importe?.slice(0, importe.length - 2);
@@ -749,7 +772,7 @@ async function readResponseUploadContents(
           });
           if (original_transaction) {
             original_transaction.statusId =
-              statusCodeMap.get(status_code) ?? "91";
+              statusCodeMap.get(status_code) ?? "DESCONOCIDO";
             original_transaction.recollected_amount = importe_final;
             console.log("statusCode", status_code);
             console.log("status", original_transaction.statusId);

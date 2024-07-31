@@ -47,10 +47,13 @@ export default async function page({
   const status_batch = [
     { status: "Pendiente", records: 0, amount_collected: 0 },
   ];
+
   for (const transaction of payments) {
-    status_batch[0]!.records += 1;
-    status_batch[0]!.amount_collected +=
-      transaction?.collected_amount ?? transaction?.first_due_amount ?? 0;
+    if (!transaction.genChannels.includes(channel.id)) {
+      status_batch[0]!.records += 1;
+      status_batch[0]!.amount_collected +=
+        transaction?.collected_amount ?? transaction?.first_due_amount ?? 0;
+    }
   }
 
   return (

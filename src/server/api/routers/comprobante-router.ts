@@ -1286,8 +1286,8 @@ function checkExistingBill(
       period: Date | null;
       first_due_amount: number | null;
       first_due_date: Date | null;
-      second_due_amount: number | null;
-      second_due_date: Date | null;
+      // second_due_amount: number | null;
+      // second_due_date: Date | null;
       additional_info: string | null;
       payment_channel: string | null;
       payment_date: Date | null;

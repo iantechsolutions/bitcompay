@@ -131,10 +131,10 @@ export const recDocumentValidator = z
       .nullable()
       .optional(),
     "Fecha 1er Vto.": stringAsDate.nullable().optional(),
-    "Importe 2do Vto.": stringToValidIntegerZodTransformer
-      .nullable()
-      .optional(),
-    "Fecha 2do. Vto.": stringAsDate.nullable().optional(),
+    // "Importe 2do Vto.": stringToValidIntegerZodTransformer
+    //   .nullable()
+    //   .optional(),
+    // "Fecha 2do. Vto.": stringAsDate.nullable().optional(),
     "Info. Adicional": z.string().min(1).catch("").nullable().optional(),
     // "Canal de Cobro": z
     //   .string()
@@ -169,8 +169,8 @@ export const recDocumentValidator = z
       period: value.Período ?? null,
       first_due_amount: value["Importe 1er Vto."] ?? null,
       first_due_date: value["Fecha 1er Vto."] ?? null,
-      second_due_amount: value["Importe 2do Vto."] ?? null,
-      second_due_date: value["Fecha 2do. Vto."] ?? null,
+      // second_due_amount: value["Importe 2do Vto."] ?? null,
+      // second_due_date: value["Fecha 2do. Vto."] ?? null,
       additional_info: value["Info. Adicional"] ?? null,
       // payment_channel: value["Canal de Cobro"] ?? null,
       payment_date: value["Fecha de Pago/Débito"] ?? null,
@@ -233,8 +233,8 @@ export const recDocumentValidatorWithoutProduct = z
       period: value.Período ?? null,
       first_due_amount: value["Importe 1er Vto."] ?? null,
       first_due_date: value["Fecha 1er Vto."] ?? null,
-      second_due_amount: value["Importe 2do Vto."] ?? null,
-      second_due_date: value["Fecha 2do. Vto."] ?? null,
+      // second_due_amount: value["Importe 2do Vto."] ?? null,
+      // second_due_date: value["Fecha 2do. Vto."] ?? null,
       additional_info: value["Info. Adicional"] ?? null,
       // payment_channel: value["Canal de Cobro"] ?? null,
       payment_date: value["Fecha de Pago/Débito"] ?? null,
@@ -267,8 +267,8 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
       period: Date | null;
       first_due_amount: number | null;
       first_due_date: Date | null;
-      second_due_amount: number | null;
-      second_due_date: Date | null;
+      // second_due_amount: number | null;
+      // second_due_date: Date | null;
       additional_info: string | null;
       // payment_channel: string | null;
       payment_date: Date | null;
@@ -296,8 +296,8 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     period: Date | null;
     first_due_amount: number | null;
     first_due_date: Date | null;
-    second_due_amount: number | null;
-    second_due_date: Date | null;
+    // second_due_amount: number | null;
+    // second_due_date: Date | null;
     additional_info: string | null;
     // payment_channel: string | null;
     payment_date: Date | null;
@@ -322,8 +322,8 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     period: null,
     first_due_amount: null,
     first_due_date: null,
-    second_due_amount: null,
-    second_due_date: null,
+    // second_due_amount: null,
+    // second_due_date: null,
     additional_info: null,
     // payment_channel: null,
     payment_date: null,
@@ -360,8 +360,8 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
               period: parsedRow.at(0)?.period,
               first_due_amount: parsedRow.at(0)?.first_due_amount,
               first_due_date: parsedRow.at(0)?.first_due_date,
-              second_due_amount: parsedRow.at(0)?.second_due_amount,
-              second_due_date: parsedRow.at(0)?.second_due_date,
+              // second_due_amount: parsedRow.at(0)?.second_due_amount,
+              // second_due_date: parsedRow.at(0)?.second_due_date,
               additional_info: parsedRow.at(0)?.additional_info,
               // payment_channel: parsedRow.at(0)?.payment_channel,
               payment_date: parsedRow.at(0)?.payment_date,
