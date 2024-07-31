@@ -7,6 +7,7 @@ import {
   CircleX,
   CircleCheck,
   Search,
+  Scroll,
 } from "lucide-react";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -43,11 +44,12 @@ import {
   SelectGroup,
   SelectItem,
   SelectLabel,
+  SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
 import { create } from "domain";
 import BarcodeProcedure from "~/components/barcode";
-import { SelectTrigger } from "~/components/selectwithsearchIcon";
+import { SelectTrigger as SelectTriggerMagnify } from "~/components/selectwithsearchIcon";
 
 function formatDate(date: Date | undefined) {
   if (date) {
@@ -372,9 +374,11 @@ export default function Page() {
   const [nroDocumentoDNI, setNroDocumentoDNI] = useState("");
   const [nombre, setNombre] = useState("");
   const [importe, setImporte] = useState("");
+  const [tributos, setTributos] = useState("");
   const [dateDesde, setDateDesde] = React.useState<Date>();
   const [dateHasta, setDateHasta] = React.useState<Date>();
   const [dateVencimiento, setDateVencimiento] = React.useState<Date>();
+  const [dateEmision, setDateEmision] = React.useState<Date>();
   const [servicioprod, setservicioprod] = useState("");
   const [iva, setIva] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -414,6 +418,7 @@ export default function Page() {
   const [popoverDesdeOpen, setPopoverDesdeOpen] = useState(false);
   const [popoverFinOpen, setPopoverFinOpen] = useState(false);
   const [popoverVencimientoOpen, setPopoverVencimientoOpen] = useState(false);
+  const [popoverEmisionOpen, setPopoverEmisionOpen] = useState(false);
 
   useEffect(() => {
     if (selectedProduct) {
@@ -439,6 +444,10 @@ export default function Page() {
     setDateVencimiento(e);
     setPopoverVencimientoOpen(false);
   }
+  async function FechasCreateEmision(e: any) {
+    setDateEmision(e);
+    setPopoverEmisionOpen(false);
+  }
 
   const handleBrandChange = (value: string) => {
     selectedBrand = marcas?.find((marca) => marca.id === value);
@@ -453,8 +462,8 @@ export default function Page() {
             <Title>Generación de comprobantes</Title>
           </div>
           <div className="flex flex-row justify-between border-[#0DA485] border-b-2">
-            <p>Receptor</p>
-            <div className="pb-3">
+            <p className=" text-lg">Receptor</p>
+            <div className="pb-2">
               <Button
                 className="h-7 bg-[#0DA485] hover:bg-[#0da486e2] text-[#FAFDFD] font-medium-medium text-xs rounded-2xl py-0 px-6 mr-3"
                 // onClick={() => setOpen(true)}
@@ -473,9 +482,9 @@ export default function Page() {
           </div>
           <div className="flex flex-row justify-between gap-8">
             <Select onValueChange={(e) => handleGrupoFamilarChange(e)}>
-              <SelectTrigger className=" font-bold w-full">
+              <SelectTriggerMagnify className=" font-bold w-full">
                 <SelectValue placeholder="Buscar afiliado" />
-              </SelectTrigger>
+              </SelectTriggerMagnify>
               <SelectContent>
                 {gruposFamiliar &&
                   gruposFamiliar.map((gruposFamiliar) => (
@@ -489,11 +498,11 @@ export default function Page() {
                   ))}
               </SelectContent>
             </Select>
-            <p> O </p>
+            <p className="text-lg font-bold mt-1"> O </p>
             <Select onValueChange={(e) => handleObraSocialChange(e)}>
-              <SelectTrigger className="w-full font-bold">
+              <SelectTriggerMagnify className="w-full font-bold">
                 <SelectValue placeholder="Buscar obra social" />
-              </SelectTrigger>
+              </SelectTriggerMagnify>
               <SelectContent>
                 {obrasSociales &&
                   obrasSociales.map((obrasSocial) => (
@@ -534,6 +543,293 @@ export default function Page() {
               />
             </div>
           </div>
+
+          <div className="flex flex-row justify-between border-[#0DA485] border-b-2">
+            <p className=" text-lg">Datos del Comprobante</p>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="name">Punto de venta</Label>
+              <br />
+              <Select onValueChange={(e) => setPuntoVenta(e)}>
+                <SelectTrigger className="font-bold border-[#0DA485] border">
+                  <SelectValue placeholder="Seleccionar PV..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {[
+                    { value: "1", label: "1" },
+                    { value: "2", label: "2" },
+                  ].map((option) => (
+                    <SelectItem
+                      key={option.value}
+                      value={option.value}
+                      className="rounded-none border-b border-gray-600"
+                    >
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="emition">Fecha de emisión</Label>
+              <br />
+              <Popover
+                open={popoverEmisionOpen}
+                onOpenChange={setPopoverEmisionOpen}
+              >
+                <PopoverTrigger asChild={true}>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "justify-start text-left font-normal border-[#0DA485] border w-full",
+                      !dateEmision && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {dateEmision ? (
+                      format(dateEmision, "PPP")
+                    ) : (
+                      <span>Seleccionar fecha</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={dateEmision}
+                    onSelect={(e) => FechasCreateEmision(e)}
+                    initialFocus={true}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div>
+              <Label htmlFor="factura">Comprobante Asociado</Label>
+              <br />
+              <Select onValueChange={(e) => setTipoComprobante(e)}>
+                <SelectTrigger className="font-bold border-[#0DA485] border">
+                  <SelectValue placeholder="Seleccionar comprobante..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {[
+                    { value: "3", label: "FACTURA A" },
+                    { value: "6", label: "FACTURA B" },
+                    { value: "2", label: "NOTA DE CREDITO A" },
+                    { value: "12", label: "NOTA DE CREDITO B" },
+                    { value: "0", label: "RECIBO" },
+                  ].map((option) => (
+                    <SelectItem
+                      key={option.value}
+                      value={option.value}
+                      className="rounded-none border-b border-gray-600"
+                    >
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="concepto">Tipo de concepto</Label>
+              <br />
+              <Select onValueChange={(e) => setConcepto(e)}>
+                <SelectTrigger className="font-bold border-[#0DA485] border">
+                  <SelectValue placeholder="Seleccionar concepto" />
+                </SelectTrigger>
+                <SelectContent>
+                  {[
+                    { value: "1", label: "Productos" },
+                    { value: "2", label: "Servicios" },
+                    { value: "3", label: "Productos y Servicios" },
+                  ].map((option) => (
+                    <SelectItem
+                      key={option.value}
+                      value={option.value}
+                      className="rounded-none border-b border-gray-600"
+                    >
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="bg-[#e9fcf8] rounded-lg p-4 flex flex-row justify-between gap-4">
+              <div className="flex flex-col gap-2">
+                <Label>Punto de venta</Label>
+                <Input
+                  disabled={true}
+                  value={nombre}
+                  className="bg-white opacity-100 border-[#0DA485] border"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label>Nro factura</Label>
+                <Input
+                  disabled={true}
+                  value={nroDocumentoDNI}
+                  className="bg-white opacity-100 border-[#0DA485] border"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label>Fecha emision</Label>
+                <Input
+                  disabled={true}
+                  value={nroDocumento}
+                  className="bg-white opacity-100 border-[#0DA485] border"
+                />
+              </div>
+            </div>
+
+            <div className="bg-[#e9fcf8] rounded-lg p-4 flex flex-row justify-between gap-4">
+              <div className="flex flex-col gap-2">
+                <Label>Desde</Label>
+                <Input
+                  disabled={true}
+                  value={nombre}
+                  className="bg-white opacity-100 border-[#0DA485] border"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label>Hasta</Label>
+                <Input
+                  disabled={true}
+                  value={nroDocumentoDNI}
+                  className="bg-white opacity-100 border-[#0DA485] border"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label>Concepto</Label>
+                <Input
+                  disabled={true}
+                  value={nroDocumento}
+                  className="bg-white opacity-100 border-[#0DA485] border"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label>Importe</Label>
+                <Input
+                  disabled={true}
+                  value={nroDocumento}
+                  className="bg-white opacity-100 border-[#0DA485] border"
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="factura">Tipo Comprobante</Label>
+              <br />
+              <Select onValueChange={(e) => setTipoComprobante(e)}>
+                <SelectTrigger className="font-bold border-[#0DA485] border">
+                  <SelectValue placeholder="Seleccionar comprobante..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {[
+                    { value: "3", label: "FACTURA A" },
+                    { value: "6", label: "FACTURA B" },
+                    { value: "2", label: "NOTA DE CREDITO A" },
+                    { value: "12", label: "NOTA DE CREDITO B" },
+                    { value: "0", label: "RECIBO" },
+                  ].map((option) => (
+                    <SelectItem
+                      key={option.value}
+                      value={option.value}
+                      className="rounded-none border-b border-gray-600"
+                    >
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="iva">Alicuota</Label>
+              <br />
+              <Select onValueChange={(e) => setIva(e)}>
+                <SelectTrigger className="font-bold border-[#0DA485] border">
+                  <SelectValue placeholder="Seleccionar alicuota" />
+                </SelectTrigger>
+                <SelectContent>
+                  {[
+                    { value: "3", label: "0%" },
+                    { value: "4", label: "10.5%" },
+                    { value: "5", label: "21%" },
+                    { value: "6", label: "27%" },
+                    { value: "8", label: "5%" },
+                    { value: "9", label: "2.5%" },
+                  ].map((option) => (
+                    <SelectItem
+                      key={option.value}
+                      value={option.value}
+                      className="rounded-none border-b border-gray-600"
+                    >
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="flex flex-row justify-between border-[#0DA485] border-b-2">
+            <p className=" text-lg">Totales</p>
+          </div>
+          <div className="flex flex-row justify-between pb-2">
+            <div className="flex flex-col gap-2">
+              <Label>Sub-total factura</Label>
+              <Input
+                // disabled={true}
+                value={"$ " + importe}
+                onChange={(e) => setImporte(e.target.value.slice(2))}
+                className="bg-[#e9fcf8] text-[#0DA485] rounded-none opacity-100 border-[#e9fcf8] border"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label>Importe IVA</Label>
+              <Input
+                // disabled={true}
+                value={
+                  "$ " +
+                  (
+                    (Number(importe) * Number(ivaDictionary[Number(iva)])) /
+                    100
+                  ).toFixed(2)
+                }
+                className="bg-[#e9fcf8] text-[#0DA485] rounded-none opacity-100 border-[#e9fcf8] border"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label>Otros tributos</Label>
+              <Input
+                // disabled={true}
+                value={"$ " + tributos}
+                onChange={(e) => setTributos(e.target.value.slice(2))}
+                className="bg-[#e9fcf8] text-[#0DA485] rounded-none opacity-100 border-[#e9fcf8] border"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label>Total</Label>
+              <Input
+                // disabled={true}
+                value={
+                  "$ " +
+                  (
+                    Number(importe) +
+                    (Number(importe) * Number(ivaDictionary[Number(iva)])) /
+                      100 +
+                    Number(tributos)
+                  ).toFixed(2)
+                }
+                className="bg-[#e9fcf8] text-[#0DA485] rounded-none  opacity-100 border-[#e9fcf8] border"
+              />
+            </div>
+          </div>
+          <Button
+            className="h-7 bg-[#0DA485] hover:bg-[#0da486e2] text-[#FAFDFD] font-medium-medium text-md rounded-2xl py-4 px-6 mr-3 float-right "
+            // onClick={() => setOpen(true)}
+          >
+            <Scroll className="h-5 w-auto ml-2" />
+            <p className="p-4">Previsualizacion de factura</p>
+          </Button>
           <div className="grid grid-cols-3 gap-4">
             <div>
               <Label htmlFor="family_group">Grupo Familiar</Label>
@@ -589,32 +885,7 @@ export default function Page() {
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label htmlFor="factura">Tipo de factura</Label>
-              <br />
-              <Select onValueChange={(e) => setTipoComprobante(e)}>
-                <SelectTrigger className="w-[180px] font-bold">
-                  <SelectValue placeholder="Seleccionar factura..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {[
-                    { value: "3", label: "FACTURA A" },
-                    { value: "6", label: "FACTURA B" },
-                    { value: "2", label: "NOTA DE CREDITO A" },
-                    { value: "12", label: "NOTA DE CREDITO B" },
-                    { value: "0", label: "RECIBO" },
-                  ].map((option) => (
-                    <SelectItem
-                      key={option.value}
-                      value={option.value}
-                      className="rounded-none border-b border-gray-600"
-                    >
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+
             {(tipoComprobante == "2" || tipoComprobante == "12") && (
               <div>
                 <Label> Factura a Cancelar</Label>
@@ -709,30 +980,6 @@ export default function Page() {
               tipoComprobante == "6" ||
               tipoComprobante == "0") && (
               <>
-                <div>
-                  <Label htmlFor="concepto">Concepto del comprobante</Label>
-                  <br />
-                  <Select onValueChange={(e) => setConcepto(e)}>
-                    <SelectTrigger className="w-[180px] font-bold">
-                      <SelectValue placeholder="Concepto" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[
-                        { value: "1", label: "Productos" },
-                        { value: "2", label: "Servicios" },
-                        { value: "3", label: "Productos y Servicios" },
-                      ].map((option) => (
-                        <SelectItem
-                          key={option.value}
-                          value={option.value}
-                          className="rounded-none border-b border-gray-600"
-                        >
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
                 <div>
                   <Label htmlFor="importe">Importe total del comprobante</Label>
                   <Input
@@ -915,6 +1162,7 @@ export default function Page() {
             )}
           </div>
           <br />
+
           <Button disabled={loading} onClick={generateComprobante}>
             {loading && <Loader2Icon className="mr-2 animate-spin" size={20} />}
             Generar nuevo comprobante

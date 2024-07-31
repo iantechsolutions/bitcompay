@@ -1050,11 +1050,18 @@ export const liquidations = pgTable("liquidations", {
   period: timestamp("period", { mode: "date" }),
   number: integer("number").notNull(),
   interest: real("interest"),
+  bussinessUnits_id: varchar("bussinessUnits_id", { length: 255 }).references(
+    () => bussinessUnits.id
+  ),
 });
 
 export const liquidationsRelations = relations(
   liquidations,
   ({ one, many }) => ({
+    bussinessUnits: one(bussinessUnits, {
+      fields: [liquidations.bussinessUnits_id],
+      references: [bussinessUnits.id],
+    }),
     brand: one(brands, {
       fields: [liquidations.brandId],
       references: [brands.id],
