@@ -170,7 +170,7 @@ export default function GenerateChannelOutputPage(props: {
                       </TableCell>
                       <TableCell>
                         {typeof row.amount_collected === "number"
-                          ? "$".concat(row.amount_collected.toString())
+                          ? "$".concat(row.amount_collected.toFixed(2))
                           : ""}
                       </TableCell>
                     </TableRow>

@@ -95,9 +95,6 @@ export const iofilesRouter = createTRPCRouter({
           };
           text = generateRapiPago(generateInput, payments);
         } else if (channel.name.includes("DEBITO AUTOMATICO")) {
-          console.log("lol", input.card_type);
-          console.log("lol", input.card_brand);
-
           // if (
           //   !input.card_brand ||
           //   !input.card_type
@@ -193,26 +190,26 @@ export const iofilesRouter = createTRPCRouter({
             try {
               if (payment.genChannels.length === channelsList?.length! - 1) {
                 // update statuses
-                //   await db
-                //     .update(schema.payments)
-                //     .set({
-                //       genChannels: newGenChannles,
-                //       statusId: genFileStatus?.id,
-                //     })
-                //     .where(eq(schema.payments.id, payment.id));
-                // } else {
-                //   await db
-                //     .update(schema.payments)
-                //     .set({
-                //       genChannels: newGenChannles,
-                //     })
-                //     .where(eq(schema.payments.id, payment.id));
-                //   console.log(
-                //     "gen channes updated",
-                //     // updated_payment,
-                //     "old: ",
-                //     payment.genChannels
-                //   );
+                await db
+                  .update(schema.payments)
+                  .set({
+                    genChannels: newGenChannles,
+                    statusId: genFileStatus?.id,
+                  })
+                  .where(eq(schema.payments.id, payment.id));
+              } else {
+                await db
+                  .update(schema.payments)
+                  .set({
+                    genChannels: newGenChannles,
+                  })
+                  .where(eq(schema.payments.id, payment.id));
+                console.log(
+                  "gen channes updated",
+                  // updated_payment,
+                  "old: ",
+                  payment.genChannels
+                );
               }
             } catch (e) {
               console.log(e);

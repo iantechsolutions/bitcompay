@@ -219,6 +219,8 @@ export const excelDeserializationRouter = createTRPCRouter({
             })
             .returning();
           console.log("creando valores diferencial valor");
+          console.log("Llego Llego");
+
           if (new_integrant[0]?.isBillResponsible) {
             const cc = await db
               .insert(schema.currentAccount)
@@ -233,6 +235,7 @@ export const excelDeserializationRouter = createTRPCRouter({
               currentAccount_id: cc[0]!.id,
               type: "REC",
             });
+            console.log("Llego Llego");
 
             const tipoDocumento = idDictionary[new_integrant[0]!.id_type ?? ""];
             const factura = await db.insert(schema.comprobantes).values({
@@ -252,7 +255,7 @@ export const excelDeserializationRouter = createTRPCRouter({
               estado: "apertura",
             });
           }
-
+          console.log("Llego Llego");
           if (row.differential_value) {
             const ageN = calcularEdad(row.birth_date ?? new Date());
             const preciosPasados = plan?.pricesPerCondition.filter(
