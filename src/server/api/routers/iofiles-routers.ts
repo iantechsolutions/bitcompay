@@ -404,11 +404,9 @@ function generatePagomiscuentas(
     const first_due_date = dayjs(transaction.first_due_date).format("YYYYMMDD");
     const first_due_amount = formatAmount(transaction.first_due_amount!, 9);
 
-    const second_due_date = dayjs(transaction.second_due_date).format(
-      "YYYYMMDD"
-    );
+    const second_due_date = "00000000";
 
-    const second_due_amount = formatAmount(transaction.second_due_amount!, 9);
+    const second_due_amount = "000000000";
     const ticketMessage = formatString(
       " ",
       transaction.additional_info ?? "",
@@ -498,9 +496,7 @@ async function generatePagoFacil(
     const first_due_date = dayjs(transaction.first_due_date).format("DDMMYYYY");
     const first_codebar = dayjs(transaction.first_due_date).format("DD");
 
-    const second_due_date = dayjs(transaction.first_due_date).format(
-      "DDMMYYYY"
-    );
+    const second_due_date = "00000000";
     const validity_date = dayjs(transaction.period).format("DDMMYYYY");
 
     const first_due_amount = formatString(
@@ -532,18 +528,13 @@ async function generatePagoFacil(
       14,
       true
     );
-    const second_due_date_barcode = dayjs(transaction.second_due_date).format(
-      "DD"
-    );
+    const second_due_date_barcode = "00";
     const first_due_amount_bar_code = formatAmount(
       transaction.first_due_amount!,
       6
     );
 
-    const second_due_amount_charge = formatAmount(
-      transaction.second_due_amount!,
-      4
-    );
+    const second_due_amount_charge = "000000";
     // codigo de barras
     const bar_code = `${service_company}${first_due_amount_bar_code}${first_due_date_bar_code_YY}${first_due_date_bar_code_DDD}${fiscal_id_number_bar_code}0${second_due_amount_charge}${second_due_date_barcode}00${" ".repeat(
       13
