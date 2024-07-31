@@ -9,41 +9,80 @@ import Image from "next/image";
 import { useClerk, useSignIn } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { CustomGoogleOneTap } from "./google-onetap";
+import { toast } from "sonner";
+import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
+
 type Inputs = {
   username: string;
   password: string;
 };
+
 interface LoginFormProps {
   setShowRegister: (showRegister: boolean) => void;
 }
+
 export default function LoginForm({ setShowRegister }: LoginFormProps) {
+  function showGoogle() {
+    console.log("showGoogle");
+    const params = {
+      cancelOnTapOutside: false,
+      itpSupport: false,
+      fedCmSupport: false,
+    };
+    clerk.openGoogleOneTap(params);
+    if (clerk.session) {
+    }
+  }
+
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const form = useForm<Inputs>();
   const signIn = useSignIn();
   const clerk = useClerk();
   const router = useRouter();
+
+  useEffect(() => {
+    console.log("useEffect");
+    console.log(clerk.session);
+    if (clerk.session) {
+      router.push("/");
+    }
+  }, [clerk.session]);
+
   const onSubmit = async () => {
     setLoading(true);
-    const values = form.getValues();
-    const signInAttempt = await signIn.signIn?.create({
-      identifier: values.username,
-    });
-    // await signInAttempt?.prepareFirstFactor({
-    //   strategy:""
-    // })
-    await signInAttempt?.attemptFirstFactor({
-      strategy: "password",
-      password: values.password,
-    });
-    if (
-      signInAttempt?.status === "complete" &&
-      signInAttempt.createdSessionId
-    ) {
-      clerk.setActive({ session: signInAttempt.createdSessionId });
-      router.push("/dashboard");
+    setError("");
+    try {
+      const values = form.getValues();
+      const signInAttempt = await signIn.signIn?.create({
+        identifier: values.username,
+      });
+      await signInAttempt?.attemptFirstFactor({
+        strategy: "password",
+        password: values.password,
+      });
+
+      if (
+        signInAttempt?.status === "complete" &&
+        signInAttempt.createdSessionId
+      ) {
+        clerk.setActive({ session: signInAttempt.createdSessionId });
+      } else {
+        setError("Los datos proporcionados no son correctos");
+      }
+    } catch (err: any) {
+      console.error(JSON.stringify(err, null, 2));
+      if (isClerkAPIResponseError(err)) {
+        setError("Los datos proporcionados no son correctos");
+      } else {
+        setError("Los datos proporcionados no son correctos");
+      }
+    } finally {
+      // setLoading(false);
     }
   };
+
   return (
     <div className="flex flex-col items-center px-10 pt-3 pb-7 bg-white rounded-2xl">
       <Image
@@ -59,21 +98,20 @@ export default function LoginForm({ setShowRegister }: LoginFormProps) {
         Ingrese sus datos para{" "}
         <span className="font-bold"> iniciar sesion</span>
       </p>
-      <CustomGoogleOneTap>
-        {/* <h1>AAAA</h1> */}
-        {/* <img src="public/google-icon.svg" alt="google icon" /> */}
-        {/* Ingresar con Google <ChevronRight className="h-4" />{" "} */}
-        <Button className="w-full px-20 py-3 mt-6 mb-3 text-black bg-[#DEDEDE] hover:bg-[#DEDEDE] ">
-          <img src="public/google-icon.svg" alt="google icon" />
-          Ingresar con Google <ChevronRight className="h-4" />{" "}
-        </Button>
-      </CustomGoogleOneTap>
+      <Button
+        className="w-full px-20 py-3 mt-6 mb-3 text-black bg-[#DEDEDE] hover:bg-[#DEDEDE] "
+        onClick={showGoogle}
+      >
+        <img src="public/google-icon.svg" alt="google icon" />
+        Ingresar con Google <ChevronRight className="h-4" />{" "}
+      </Button>
 
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-8 w-full flex flex-col items-center"
         >
+          {error && <p className="text-red-500 text-sm">{error}</p>}
           <FormField
             control={form.control}
             name="username"
@@ -88,7 +126,7 @@ export default function LoginForm({ setShowRegister }: LoginFormProps) {
               </FormItem>
             )}
           />
-          <div className="relative w-full mb-4 flex flex-col items-center justify-center ">
+          <div className="relative w-full ">
             <FormField
               font-medium-medium
               control={form.control}
@@ -110,10 +148,12 @@ export default function LoginForm({ setShowRegister }: LoginFormProps) {
             />
             {form.watch().password && (
               <Button
-                className="absolute right-2 bottom-0"
+                className="absolute right-2 bottom-1 rounded-full h-7 w-7"
                 onClick={() => setShowPassword(!showPassword)}
-                variant="outline"
+                // variant="outline"
+                variant="ghost"
                 size="icon"
+                type="button"
               >
                 {showPassword ? (
                   <Eye className="h-4 opacity-80 text-muted-foreground" />
@@ -122,28 +162,27 @@ export default function LoginForm({ setShowRegister }: LoginFormProps) {
                 )}
               </Button>
             )}
-            <p className="text-xs font-semibold text-muted-foreground mt-2 hover:cursor-pointer">
-              Recupero de contraseña
-            </p>
-            <Button
-              className="w-full px-20 h-8 py-3 my-1 text-black bg-[#1BDFB7] hover:bg-[#1BDFB7] "
-              disabled={loading}
-            >
-              {loading && (
-                <Loader2Icon className="mr-2 animate-spin" size={20} />
-              )}
-              Ingresar <ChevronRight className=" h-4" />
-            </Button>
-            <p className="text-muted-foreground opacity-60 text-xs">
-              ¿No tiene una cuenta?{" "}
-              <span
-                className="text-[#1BDFB7] font-bold opacity-100 hover:cursor-pointer"
-                onClick={() => setShowRegister(true)}
-              >
-                Registrarme
-              </span>
-            </p>
           </div>
+          <p className="text-xs font-semibold text-muted-foreground mt-2 hover:cursor-pointer">
+            Recupero de contraseña
+          </p>
+
+          <Button
+            className="w-full px-20 h-8 py-3 my-1 text-black bg-[#1BDFB7] hover:bg-[#1BDFB7] "
+            disabled={loading}
+          >
+            {loading && <Loader2Icon className="mr-2 animate-spin" size={20} />}
+            Ingresar <ChevronRight className=" h-4" />
+          </Button>
+          <p className="text-muted-foreground opacity-60 text-xs">
+            ¿No tiene una cuenta?{" "}
+            <span
+              className="text-[#1BDFB7] font-bold opacity-100 hover:cursor-pointer"
+              onClick={() => setShowRegister(true)}
+            >
+              Registrarme
+            </span>
+          </p>
         </form>
       </Form>
     </div>

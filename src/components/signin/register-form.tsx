@@ -17,14 +17,18 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "../ui/input-otp";
+import { toast } from "sonner";
+
 type Inputs = {
   username: string;
   password: string;
   mail: string;
 };
+
 interface RegisterFormProps {
   setShowRegister: (showRegister: boolean) => void;
 }
+
 export default function RegisterForm({ setShowRegister }: RegisterFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [verifying, setVerifying] = useState(false);
@@ -35,6 +39,7 @@ export default function RegisterForm({ setShowRegister }: RegisterFormProps) {
   const { isLoaded, signUp, setActive } = useSignUp();
   const clerk = useClerk();
   const router = useRouter();
+
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     const { username, password, mail } = data;
     if (!isLoaded) return;
@@ -43,10 +48,23 @@ export default function RegisterForm({ setShowRegister }: RegisterFormProps) {
       await signUp.prepareEmailAddressVerification({
         strategy: "email_code",
       });
+      setErrors([]);
       setVerifying(true);
     } catch (err: any) {
-      const error = JSON.stringify(err);
       console.error(JSON.stringify(err));
+      if (isClerkAPIResponseError(err)) {
+        const apiErrors = err.errors;
+        setErrors(apiErrors);
+        // apiErrors.forEach((apiError) => {
+        //   // if (apiError.code === "form_identifier_exists") {
+        //   //   toast.error("El correo electrónico ya está en uso", {
+        //   //     position: "top-right",
+        //   //   });
+        //   // }
+        // });
+      } else {
+        console.error(JSON.stringify(err));
+      }
     }
   };
 
@@ -63,13 +81,18 @@ export default function RegisterForm({ setShowRegister }: RegisterFormProps) {
         console.error(JSON.stringify(completeSignUp, null, 2));
       }
     } catch (err: any) {
+      console.error(JSON.stringify(err, null, 2));
       if (isClerkAPIResponseError(err)) {
         const apiErrors = err.errors;
         setError(JSON.stringify(apiErrors));
+        toast.error("Código Inválido", {
+          position: "top-right",
+        });
+        setErrors(apiErrors);
       }
-      console.error(JSON.stringify(err, null, 2));
     }
   };
+
   if (verifying) {
     return (
       <div className="flex flex-col items-center px-10 pt-3 pb-7 bg-white rounded-2xl">
@@ -78,23 +101,44 @@ export default function RegisterForm({ setShowRegister }: RegisterFormProps) {
           value={code}
           onChange={(value: string) => setCode(value)}
           maxLength={6}
+          className={errors.length ? "border-red-500" : ""}
         >
           <InputOTPGroup>
-            <InputOTPSlot index={0} />
-            <InputOTPSlot index={1} />
-            <InputOTPSlot index={2} />
+            <InputOTPSlot
+              index={0}
+              className={errors.length ? "border-red-500" : ""}
+            />
+            <InputOTPSlot
+              index={1}
+              className={errors.length ? "border-red-500" : ""}
+            />
+            <InputOTPSlot
+              index={2}
+              className={errors.length ? "border-red-500" : ""}
+            />
           </InputOTPGroup>
           <InputOTPSeparator />
           <InputOTPGroup>
-            <InputOTPSlot index={3} />
-            <InputOTPSlot index={4} />
-            <InputOTPSlot index={5} />
+            <InputOTPSlot
+              index={3}
+              className={errors.length ? "border-red-500" : ""}
+            />
+            <InputOTPSlot
+              index={4}
+              className={errors.length ? "border-red-500" : ""}
+            />
+            <InputOTPSlot
+              index={5}
+              className={errors.length ? "border-red-500" : ""}
+            />
           </InputOTPGroup>
         </InputOTP>
         {errors && (
           <ul>
             {errors.map((el, index) => (
-              <li key={index}>{el.longMessage}</li>
+              <li key={index} className="text-red-500">
+                {el.longMessage}
+              </li>
             ))}
           </ul>
         )}
@@ -108,6 +152,7 @@ export default function RegisterForm({ setShowRegister }: RegisterFormProps) {
       </div>
     );
   }
+
   return (
     <div className="flex flex-col items-center px-10 pt-3 pb-7 bg-white rounded-2xl">
       <Image
@@ -151,11 +196,41 @@ export default function RegisterForm({ setShowRegister }: RegisterFormProps) {
                   Mail
                 </FormLabel>
                 <FormControl>
-                  <Input {...field} className="w-full" />
+                  <Input
+                    {...field}
+                    className={
+                      errors.some(
+                        (e) =>
+                          e.code === "form_identifier_exists" ||
+                          e.code === "form_param_format_invalid"
+                      )
+                        ? "border-red-500"
+                        : "w-full"
+                    }
+                  />
                 </FormControl>
+                {errors && (
+                  <>
+                    {errors.some(
+                      (e) => e.code === "form_identifier_exists"
+                    ) && (
+                      <p className="text-red-500 text-sm">
+                        El mail ingresado ya esta registrado
+                      </p>
+                    )}
+                    {errors.some(
+                      (e) => e.code === "form_param_format_invalid"
+                    ) && (
+                      <p className="text-red-500 text-sm">
+                        El mail ingresado no es correcto
+                      </p>
+                    )}
+                  </>
+                )}
               </FormItem>
             )}
           />
+
           <div className="relative w-full">
             <FormField
               font-medium-medium
@@ -170,18 +245,46 @@ export default function RegisterForm({ setShowRegister }: RegisterFormProps) {
                     <Input
                       {...field}
                       type={showPassword ? "text" : "password"}
-                      className="w-full"
+                      className={
+                        errors.some(
+                          (e) =>
+                            e.code === "form_password_length_too_short" ||
+                            e.code === "form_password_size_in_bytes_exceeded"
+                        )
+                          ? "border-red-500"
+                          : "w-full"
+                      }
                     />
                   </FormControl>
+                  {errors && (
+                    <>
+                      {errors.some(
+                        (e) => e.code === "form_password_length_too_short"
+                      ) && (
+                        <p className="text-red-500 text-sm">
+                          La contraseña debe tener un minimo de 8 caracteres
+                        </p>
+                      )}
+                      {errors.some(
+                        (e) => e.code === "form_password_size_in_bytes_exceeded"
+                      ) && (
+                        <p className="text-red-500 text-sm">
+                          La contraseña debe tener un maximo de 20 caracteres
+                        </p>
+                      )}
+                    </>
+                  )}
                 </FormItem>
               )}
             />
             {form.watch().password && (
               <Button
-                className="absolute right-2 bottom-0"
+                className="absolute right-2 bottom-8 rounded-full h-7 w-7"
                 onClick={() => setShowPassword(!showPassword)}
-                variant="outline"
+                // variant="outline"
+                variant="ghost"
                 size="icon"
+                type="button"
               >
                 {showPassword ? (
                   <Eye className="h-4 opacity-80 text-muted-foreground" />
