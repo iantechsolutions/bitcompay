@@ -224,21 +224,25 @@ export const uploadsRouter = createTRPCRouter({
                 }
               );
 
+              const recollected_amount =
+                records.find((x) => x.id === payment?.id)
+                  ?.recollected_amount! ?? 0;
               console.log(
                 "tributo",
-                record.first_due_amount,
-                record.collected_amount
+                lastEvent?.current_amount,
+                payment?.comprobantes?.importe!,
+                record.collected_amount!,
+                "lolo",
+                recollected_amount
               );
               // if (!lastEvent) {
               //   throw new Error("No hay eventos en la cuenta corriente");
               // }
               const new_event = await tx.insert(schema.events).values({
                 currentAccount_id: currentAccount?.id,
-                event_amount:
-                  record.first_due_amount ?? record.collected_amount ?? 0,
+                event_amount: record.collected_amount ?? 0,
                 current_amount:
-                  (lastEvent?.current_amount ?? 0) +
-                  (record.first_due_amount ?? record.collected_amount ?? 0),
+                  (lastEvent?.current_amount ?? 0) + recollected_amount,
                 description: "Recaudacion",
                 type: "REC",
               });
@@ -262,13 +266,17 @@ export const uploadsRouter = createTRPCRouter({
             //     "No hay eventos en la cuenta corriente de la empresa"
             //   );
             // }
+            const recollected_amount =
+              records.find((x) => x.id === payment?.id)?.recollected_amount! ??
+              0;
+
             const new_event = await tx.insert(schema.events).values({
               currentAccount_id: ccORG?.id,
               event_amount:
-                record.first_due_amount ?? record.collected_amount ?? 0,
+                // record.first_due_amount ??
+                record.collected_amount ?? 0,
               current_amount:
-                lastEvent?.current_amount ??
-                0 + payment?.comprobantes?.importe!,
+                (lastEvent?.current_amount ?? 0) + recollected_amount,
               description: "Recaudacion",
               type: "REC",
             });
