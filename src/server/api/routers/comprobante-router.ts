@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import Afip from "@afipsdk/afip.js";
 import { z } from "zod";
 import { db, schema } from "~/server/db";
@@ -221,9 +221,22 @@ async function approbatecomprobante(liquidationId: string) {
       console.log("1");
       const randomNumber =
         Math.floor(Math.random() * (100000 - 1000 + 1)) + 1000;
-      const billResponsible = comprobante.family_group?.integrants.find(
-        (integrant) => integrant.isBillResponsible
-      );
+      // const billResponsible = comprobante.family_group?.integrants.find(
+      //   (integrant) => integrant.isBillResponsible
+      // );
+      const billResponsible = await db.query.integrants.findFirst({
+        where: and(
+          eq(
+            schema.integrants.family_group_id,
+            comprobante.family_group?.id ?? ""
+          ),
+          eq(schema.integrants.isBillResponsible, true)
+        ),
+        with: {
+          postal_code: true,
+          pa: true,
+        },
+      });
       console.log("2");
       const producto = await db.query.products.findFirst({
         where: eq(schema.products.id, billResponsible?.pa[0]?.product_id ?? ""),
@@ -365,7 +378,17 @@ async function approbatecomprobante(liquidationId: string) {
         comprobante.family_group?.businessUnitData!.company,
         producto,
         last_voucher + 1 ?? 0,
-        comprobante.family_group?.businessUnitData!.brand
+        comprobante.family_group?.businessUnitData!.brand,
+        billResponsible?.name ?? "",
+        (billResponsible?.address ?? "") +
+          " " +
+          (billResponsible?.address_number ?? ""),
+        billResponsible?.locality ?? "",
+        billResponsible?.province ?? "",
+        billResponsible?.postal_code?.cp ?? "",
+        billResponsible?.fiscal_id_type ?? "",
+        billResponsible?.fiscal_id_number ?? "",
+        billResponsible?.afip_status ?? ""
       );
 
       console.log("8");

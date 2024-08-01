@@ -62,7 +62,6 @@ export function formatDate(date: Date | undefined) {
 
 export function dateNormalFormat(date: Date | undefined | null) {
   if (date) {
-    console.log("formatDateNormal", date);
     const yyyy = date.getFullYear();
     let mm = date.getMonth() + 1; // Months start at 0!
     let dd = date.getDate();
@@ -89,14 +88,16 @@ export function htmlBill(
   company: any,
   producto: any,
   voucher: number,
-  brand: RouterOutputs["brands"]["list"][number] | undefined
+  brand: RouterOutputs["brands"]["list"][number] | undefined,
+  name: string,
+  domicilio: string,
+  localidad: string,
+  provincia: string,
+  cp: string,
+  id_type: string,
+  id_number: string,
+  afip_status: string
 ) {
-  const billResponsible = comprobante?.family_group?.integrants?.find(
-    (x: any) => x.isBillResponsible
-  );
-  // const family_group = api.family_groups.get.query({
-  //   family_groupsId: comprobante?.family_group_id,
-  // });
   if (producto) {
     const canales = producto?.channels;
   }
@@ -523,28 +524,28 @@ span {
       <section class="parte-2">
         <ul class="datos-1">
           <li>
-            <p>Cliente: ${billResponsible?.name}</p>
+            <p>Cliente: ${name}</p>
           </li>
           <li>
-            <p>Domicilio: ${billResponsible?.address}</p>
+            <p>Domicilio: ${domicilio}</p>
           </li>
           <li>
-            <p>Localidad: ${billResponsible?.locality}</p>
+            <p>Localidad: ${localidad}</p>
           </li>
           <li>
-            <p>Provincia: ${billResponsible?.province}</p>
+            <p>Provincia: ${provincia}</p>
           </li>
           <li>
-            <p>CP: ${billResponsible?.postal_code?.cp}</p>
+            <p>CP: ${cp}</p>
           </li>
         </ul>
   
         <ul class="datos-2">
           <li>
-            <p>C.U.I.T:: ${billResponsible?.fiscal_id_number}</p>
+            <p>${id_type}: ${id_number}</p>
           </li>
           <li>
-            <p>Categoria I.V.A: ${billResponsible?.afip_status}</p>
+            <p>Categoria I.V.A: ${afip_status}</p>
           </li>
           <li>
             <p>Condicion de Venta: ---</p>
