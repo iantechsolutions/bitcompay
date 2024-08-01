@@ -89,7 +89,7 @@ export default function Page() {
       const afip = await ingresarAfip();
       const voucherTypes = await afip.ElectronicBilling.getVoucherTypes();
       console.log("afip loaded");
-      console.log("voucherTypes",voucherTypes)
+      console.log("voucherTypes", voucherTypes);
       setAfip(afip);
     }
 
