@@ -1,7 +1,5 @@
 "use client";
 
-import { Search } from "lucide-react";
-
 import {
   ColumnDef,
   flexRender,
@@ -23,14 +21,11 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/tablePreliq";
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
+
 import { DataTablePagination } from "~/components/tanstack/pagination";
 import TableToolbar from "~/components/tanstack/table-toolbar";
 import { useState } from "react";
-import { RouterOutputs } from "~/trpc/shared";
-import { TableRecord } from "./columns";
-import DataTableSummary from "~/components/tanstack/summary";
+
 import { useRouter } from "next/navigation";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -59,20 +54,22 @@ export function DataTable<TData, TValue>({
 
   const handleRowClick = (row: Row<TData>) => {
     const originalData = row.original as { id: string };
-    router.push(`/dashboard/billing/pre-liquidation/${originalData.id}`);
+    router.push(
+      `/dashboard/management/client/health_insurances/${originalData.id}`
+    );
   };
 
-  const desiredColumns = ["Marca"];
+  const desiredColumns = ["afip_status"];
   const filteredColumns = Array.from(table.getAllColumns()).filter((column) =>
     desiredColumns.includes(column.id!)
   );
-  console.log("filtered", filteredColumns);
+
   return (
     <>
       <TableToolbar
         table={table}
         columns={filteredColumns}
-        searchColumn="number"
+        searchColumn="responsibleName"
       />
       <Table>
         <TableHeader>

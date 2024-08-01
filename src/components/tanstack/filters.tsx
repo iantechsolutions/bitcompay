@@ -3,8 +3,9 @@ import { CalendarIcon, SlidersHorizontal } from "lucide-react";
 import { Search } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Button } from "../ui/button";
-import { Table } from "@tanstack/react-table";
-import { useForm, type SubmitHandler } from "react-hook-form";
+import { Column, Table } from "@tanstack/react-table";
+import { Path, useForm, type SubmitHandler } from "react-hook-form";
+
 import {
   Form,
   FormControl,
@@ -18,28 +19,35 @@ import { Calendar } from "~/components/ui/calendar";
 import { cn } from "~/lib/utils";
 import dayjs from "dayjs";
 import { useState } from "react";
-interface FiltersProps<TData> {
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "../ui/select";
+interface FiltersProps<TData, TValue> {
   table: Table<TData>;
-  initialValues: Inputs;
+  columns?: Column<TData, TValue>[];
 }
-type Inputs = {
-  plan?: string;
-  modo?: string;
-  Marca?: string;
-  UN?: string;
-  "Estados GF"?: string;
-  Modalidad?: string;
-};
 
-export default function Filters<TData>({
+export default function Filters<TData, TValue>({
   table,
-  initialValues,
-}: FiltersProps<TData>) {
+  columns,
+}: FiltersProps<TData, TValue>) {
   const [popoverOpen, setPopoverOpen] = useState(false);
-  const form = useForm<Inputs>({ defaultValues: { ...initialValues } });
-  const dateInputs = ["Fechas", "Vigencia"];
+  const form = useForm();
+  // como sacar uniqueValues por cada columna
+  console.log("columns", columns);
+  if (columns) {
+    columns.forEach((column) => {
+      const uniqueValues = column?.getFacetedUniqueValues();
+      console.log("uniqueValues", uniqueValues);
+    });
+  }
 
-  const onSubmit: SubmitHandler<Inputs> = (data) => {
+  const onSubmit = () => {
+    const data = form.getValues();
     Object.entries(data).forEach(([columnName, value]) => {
       const column = table.getColumn(columnName);
       if (column) {
@@ -65,19 +73,39 @@ export default function Filters<TData>({
             className="flex flex-col gap-2"
           >
             <div className="grid grid-cols-2 gap-2">
-              {Object.entries(initialValues).map(([columnName, value]) => (
+              {columns?.map((column) => (
                 <FormField
+                  key={column.id}
                   control={form.control}
-                  name={columnName as keyof Inputs}
+                  name={column.id}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-muted-foreground">
-                        {columnName}
+                        {column.id}
                       </FormLabel>
-                      <Input
-                        {...field}
-                        className=" h-6 border border-[#71EBD4]  focus-visible:ring-[#71EBD4]"
-                      />
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value as string}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {Array.from(
+                            column.getFacetedUniqueValues().keys()
+                          ).map((value) => (
+                            <SelectItem
+                              value={value}
+                              className="text-sm"
+                              key={value}
+                            >
+                              {value}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </FormItem>
                   )}
                 />

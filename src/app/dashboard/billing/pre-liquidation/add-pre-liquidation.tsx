@@ -105,7 +105,11 @@ export default function AddPreLiquidation() {
       {/* <Button onClick={() => setOpen(true)}>
         <PlusCircleIcon className="mr-2" /> Crear Pre liquidacion
       </Button> */}
-      <Button disabled={isLoading} onClick={() => setOpen(true)}>
+      <Button
+        disabled={isLoading}
+        onClick={() => setOpen(true)}
+        className="bg-[#0DA485] hover:bg-[#0DA485] rounded-full"
+      >
         {isLoading ? (
           <Loader2 className="mr-2 animate-spin" />
         ) : (

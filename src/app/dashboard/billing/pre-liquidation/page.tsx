@@ -11,6 +11,7 @@ import "dayjs/locale/es";
 import { type TableRecord } from "./columns";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
+
 dayjs.extend(utc);
 dayjs.locale("es");
 
@@ -18,7 +19,6 @@ export default function Page() {
   let { data: liquidationsFull } = api.liquidations.list.useQuery();
   // //filter liquidations where companyId is equal to the companyId in the URL and estado: "pendiente"
   // const { data: possibleBrands } = api.brands.list.useQuery();
-
   const tableData: TableRecord[] = [];
   if (liquidationsFull) {
     liquidationsFull = liquidationsFull.filter(
@@ -27,7 +27,7 @@ export default function Page() {
     for (const liquidation of liquidationsFull) {
       tableData.push({
         id: liquidation?.id!,
-        number: liquidation?.number!,
+        number: String(liquidation?.number) ?? "NO NUMBER",
         Marca: liquidation?.brand?.name ?? "NO BRAND",
         period: dayjs(liquidation?.period).format("MM-YYYY"),
         cuit: liquidation?.cuit ?? "NO CUIT",
@@ -35,7 +35,7 @@ export default function Page() {
       });
     }
   }
-
+  console.log("liquidationsFull", liquidationsFull);
   return (
     <LayoutContainer>
       <section className="space-y-2">

@@ -73,7 +73,10 @@ export function AddHealthInsurances() {
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>
+      <Button
+        onClick={() => setOpen(true)}
+        className="rounded-full bg-[#0DA485] hover:bg-[#0DA485]"
+      >
         <PlusCircleIcon className="mr-2" size={20} />
         Agregar obra social como cliente
       </Button>
