@@ -39,7 +39,7 @@ import { toast } from "sonner";
 import { Comprobante } from "./facturaGenerada";
 import LayoutContainer from "~/components/layout-container";
 import { Title } from "~/components/title";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import {
   Select,
   SelectContent,
