@@ -470,16 +470,21 @@ async function readExcelFile(
     }
 
     const business_unit = await db.query.bussinessUnits.findFirst({
-      where: and(eq(schema.bussinessUnits.description, row.business_unit!)),
+      where: and(
+        eq(schema.bussinessUnits.description, row.business_unit!),
+        eq(schema.bussinessUnits.companyId, ctx.session.orgId!)
+      ),
     });
     if (!business_unit) {
-      errors.push(`UNIDAD DE NEGOCIO no valida en (fila:${rowNum})`);
-    }
-    if (business_unit?.companyId !== ctx.session.orgId) {
       errors.push(
-        `UNIDAD DE NEGOCIO no pertenece a la organizacion (fila:${rowNum}) `
+        `UNIDAD DE NEGOCIO no valida o no perteneciente a la organizacion en (fila:${rowNum})`
       );
     }
+    // if (business_unit?.companyId !== ctx.session.orgId) {
+    //   errors.push(
+    //     `UNIDAD DE NEGOCIO no pertenece a la organizacion (fila:${rowNum}) `
+    //   );
+    // }
     if (row.differential_value && !row.differential_code) {
       errors.push(`CODIGO DIFERENCIAL requerido en (fila:${rowNum})`);
     }
