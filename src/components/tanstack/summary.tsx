@@ -47,7 +47,6 @@ export default function DataTableSummary<TData>({
           <p className="text-[#4af0d4] font-bold text-[0.8rem]">$ {value}</p>
         </div>
       ))}
-      c
     </div>
   );
 }

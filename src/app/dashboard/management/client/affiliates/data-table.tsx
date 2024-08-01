@@ -1,7 +1,5 @@
 "use client";
 
-import { Search } from "lucide-react";
-
 import {
   ColumnDef,
   flexRender,
@@ -11,6 +9,8 @@ import {
   ColumnFiltersState,
   useReactTable,
   Row,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
 } from "@tanstack/react-table";
 
 import { TableCell } from "~/components/ui/table";
@@ -21,14 +21,11 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/tablePreliq";
-import { Sheet, SheetContent } from "~/components/ui/sheet";
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
+
 import { DataTablePagination } from "~/components/tanstack/pagination";
 import TableToolbar from "~/components/tanstack/table-toolbar";
 import { useState } from "react";
-import { RouterOutputs } from "~/trpc/shared";
-import DataTableSummary from "~/components/tanstack/summary";
+
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
@@ -45,6 +42,8 @@ export function DataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onColumnFiltersChange: setColumnFilters,
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
     getFilteredRowModel: getFilteredRowModel(),
     state: {
       columnFilters,
@@ -59,14 +58,13 @@ export function DataTable<TData, TValue>({
       },
     },
   });
-  const initialValues = {
-    Marca: "",
-    Plan: "",
-    UN: "",
-    "Estados GF": "",
-    Modalidad: "",
-  };
 
+  const allColumns = table.getAllColumns();
+  const desiredColumns = ["Marca", "Plan", "UN", "Modalidad"];
+  const filteredColumns = Array.from(allColumns).filter((column) =>
+    desiredColumns.includes(column.id!)
+  );
+  console.log(filteredColumns);
   const handleRowClick = (row: Row<TData>) => {
     const linked = (link: string) => {
       window.location.href = link;
@@ -76,7 +74,11 @@ export function DataTable<TData, TValue>({
 
   return (
     <>
-      <TableToolbar table={table} initialValues={initialValues} search={true} />
+      <TableToolbar
+        table={table}
+        searchColumn={"nombre"}
+        columns={filteredColumns}
+      />
 
       <div className="rounded-md border">
         <Table>

@@ -7,7 +7,7 @@ import { RouterOutputs } from "~/trpc/shared";
 // You can use a Zod schema here if you want.
 export type TableRecord = {
   id: string;
-  number: number;
+  number: string;
   Marca: string;
   period: string;
   cuit: string;

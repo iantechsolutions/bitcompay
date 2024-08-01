@@ -43,7 +43,7 @@ export default function Home() {
       Modalidad: grupo?.modo?.description ?? "",
     });
   }
-  console.log(tableRecords);
+  console.log("TableRecords", tableRecords);
   return (
     <LayoutContainer>
       <section className="space-y-2">

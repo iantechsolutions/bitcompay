@@ -3,42 +3,38 @@ import { Table } from "@tanstack/react-table";
 import { Input } from "../ui/input";
 import { Search } from "lucide-react";
 import { Button } from "../ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { X } from "lucide-react";
-import { SlidersHorizontal } from "lucide-react";
-import { DataTableFacetedFilter } from "./faceted-filter";
 import Filters from "./filters";
-interface DataTableToolbarProps<TData> {
+import { Column } from "@tanstack/react-table";
+
+interface DataTableToolbarProps<TData, TValue> {
   table: Table<TData>;
-  initialValues: {
-    Plan?: string;
-    modo?: string;
-    Marca?: string;
-    UN?: string;
-    "Estados GF"?: string;
-    Modalidad?: string;
-  };
-  search?: boolean;
+  searchColumn?: string;
+  columns?: Column<TData, TValue>[];
 }
 
-export default function TableToolbar<TData>({
+export default function TableToolbar<TData, TValue>({
   table,
-  initialValues,
-  search,
-}: DataTableToolbarProps<TData>) {
+  columns,
+  searchColumn,
+}: DataTableToolbarProps<TData, TValue>) {
   console.log(table.getState().columnFilters);
   return (
     <div className="flex flex-row justify-between items-center w-full">
       <div className="w-full max-w-sm flex items-center py-4 relative">
-        {search && (
+        {searchColumn !== undefined && table.getColumn(searchColumn ?? "") && (
           <>
             <Input
-              placeholder="Buscar responsable grupo familiar..."
+              placeholder={`Buscar por ... `}
               value={
-                (table.getColumn("nombre")?.getFilterValue() as string) ?? ""
+                (table
+                  .getColumn(searchColumn ?? "")
+                  ?.getFilterValue() as string) ?? ""
               }
               onChange={(event) =>
-                table.getColumn("nombre")?.setFilterValue(event.target.value)
+                table
+                  .getColumn(searchColumn ?? "")
+                  ?.setFilterValue(event.target.value)
               }
               className="w-full h-7 rounded-full border-2 border-[#71EBD4] focus-visible:ring-[#71EBD4]"
             ></Input>
@@ -47,7 +43,7 @@ export default function TableToolbar<TData>({
         )}
       </div>
       <div className="flex gap-2">
-        <Filters table={table} initialValues={initialValues} />
+        <Filters table={table} columns={columns} />
         <div className="flex gap-2">
           {table.getState().columnFilters.map((column) => (
             <div className="rounded-full h-7 border-2 border-[#71EBD4] px-2 text-muted-foreground text-sm flex items-center">
