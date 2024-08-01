@@ -62,7 +62,10 @@ export const excelDeserializationRouter = createTRPCRouter({
       await db.transaction(async (db) => {
         for (const row of contents) {
           const business_unit = await db.query.bussinessUnits.findFirst({
-            where: eq(schema.bussinessUnits.description, row.business_unit!),
+            where: and(
+              eq(schema.bussinessUnits.description, row.business_unit!),
+              eq(schema.bussinessUnits.companyId, ctx.session.orgId!)
+            ),
           });
 
           const mode = await db.query.modos.findFirst({

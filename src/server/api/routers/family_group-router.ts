@@ -40,6 +40,7 @@ export const family_groupsRouter = createTRPCRouter({
         },
       },
     });
+    console.log("orgId", ctx.session.orgId);
     const family_group_reduced = family_groups.filter((family_groups) => {
       return family_groups.businessUnitData?.companyId === ctx.session.orgId!;
     });
