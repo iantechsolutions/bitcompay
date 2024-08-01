@@ -1127,7 +1127,7 @@ export default function Page() {
                 // disabled={true}
                 value={
                   "$ " +
-                  (tipoComprobante != "2" && tipoComprobante != "12"
+                  (selectedComprobante
                     ? importe
                     : (selectedComprobante?.importe /
                         Number(selectedComprobante.iva)) *
@@ -1143,7 +1143,7 @@ export default function Page() {
                 // disabled={true}
                 value={
                   "$ " +
-                  (tipoComprobante != "2" && tipoComprobante != "12"
+                  (selectedComprobante
                     ? (
                         (Number(importe) * Number(ivaDictionary[Number(iva)])) /
                         100
@@ -1160,11 +1160,7 @@ export default function Page() {
               <Label>Otros tributos</Label>
               <Input
                 // disabled={true}
-                value={
-                  "$ " + (tipoComprobante != "2" && tipoComprobante != "12")
-                    ? tributos
-                    : "0"
-                }
+                value={"$ " + selectedComprobante ? tributos : "0"}
                 onChange={(e) => setTributos(e.target.value.slice(2))}
                 className="bg-[#e9fcf8] text-[#0DA485] rounded-none opacity-100 border-[#e9fcf8] border"
               />
@@ -1175,7 +1171,7 @@ export default function Page() {
                 // disabled={true}
                 value={
                   "$ " +
-                  (tipoComprobante != "2" && tipoComprobante != "12"
+                  (selectedComprobante
                     ? (
                         Number(importe) +
                         (Number(importe) * Number(ivaDictionary[Number(iva)])) /
