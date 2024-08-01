@@ -563,6 +563,7 @@ export default function Page() {
         router.push("./");
       })();
     } catch {
+      setLoading(false);
       toast.error("Error");
     }
   }
