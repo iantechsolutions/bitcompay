@@ -83,6 +83,7 @@ export default function Page() {
   const [selectedComprobante, setSelectedComprobante] = useState<any>(null);
   const [comprobanteCreado, setComprobanteCreado] = useState<any>(null);
   const [afip, setAfip] = useState<any>(null);
+  const router = useRouter();
   useEffect(() => {
     async function loginAfip() {
       const afip = await ingresarAfip();
@@ -269,7 +270,6 @@ export default function Page() {
     try {
       (async () => {
         setLoading(true);
-        const afip = await ingresarAfip();
         let comprobante = null;
         let last_voucher = 0;
         let data = null;
@@ -556,6 +556,7 @@ export default function Page() {
         }
         setLoading(false);
         toast.success("La factura se creo correctamente");
+        router.push("./");
       })();
     } catch {
       toast.error("Error");
@@ -664,10 +665,15 @@ export default function Page() {
               <Button
                 className="h-7 bg-[#0DA485] hover:bg-[#0da486e2] text-[#FAFDFD] font-medium-medium text-xs rounded-2xl py-0 px-6 mr-3"
                 // onClick={() => setOpen(true)}
+                disabled={loading}
                 onClick={generateComprobante}
               >
                 Aprobar
-                <CircleCheck className="h-4 w-auto ml-2" />
+                {loading ? (
+                  <Loader2Icon className="mr-2 animate-spin" size={20} />
+                ) : (
+                  <CircleCheck className="h-4 w-auto ml-2" />
+                )}
               </Button>
               <Button
                 className="  h-7 bg-[#D9D7D8] hover:bg-[#d9d7d8dc] text-[#4B4B4B]  text-xs rounded-2xl py-0 px-6 "
@@ -929,7 +935,7 @@ export default function Page() {
                 <PopoverTrigger asChild={true}>
                   <Button
                     variant={"outline"}
-                    disabled={concepto != "1"}
+                    disabled={concepto == "1"}
                     className={cn(
                       "justify-start text-left font-normal border-[#0DA485] border w-full",
                       !dateDesde && "text-muted-foreground"
@@ -963,7 +969,7 @@ export default function Page() {
                 <PopoverTrigger asChild={true}>
                   <Button
                     variant={"outline"}
-                    disabled={concepto != "1"}
+                    disabled={concepto == "1"}
                     className={cn(
                       "justify-start text-left font-normal border-[#0DA485] border w-full",
                       !dateHasta && "text-muted-foreground"
@@ -1117,7 +1123,14 @@ export default function Page() {
               <Label>Sub-total factura</Label>
               <Input
                 // disabled={true}
-                value={"$ " + importe}
+                value={
+                  "$ " +
+                  (tipoComprobante != "2" && tipoComprobante != "12"
+                    ? importe
+                    : (selectedComprobante?.importe /
+                        Number(selectedComprobante.iva)) *
+                      100)
+                }
                 onChange={(e) => setImporte(e.target.value.slice(2))}
                 className="bg-[#e9fcf8] text-[#0DA485] rounded-none opacity-100 border-[#e9fcf8] border"
               />
@@ -1128,10 +1141,15 @@ export default function Page() {
                 // disabled={true}
                 value={
                   "$ " +
-                  (
-                    (Number(importe) * Number(ivaDictionary[Number(iva)])) /
-                    100
-                  ).toFixed(2)
+                  (tipoComprobante != "2" && tipoComprobante != "12"
+                    ? (
+                        (Number(importe) * Number(ivaDictionary[Number(iva)])) /
+                        100
+                      ).toFixed(2)
+                    : selectedComprobante?.importe -
+                      (selectedComprobante?.importe /
+                        Number(selectedComprobante.iva)) *
+                        100)
                 }
                 className="bg-[#e9fcf8] text-[#0DA485] rounded-none opacity-100 border-[#e9fcf8] border"
               />
@@ -1140,7 +1158,11 @@ export default function Page() {
               <Label>Otros tributos</Label>
               <Input
                 // disabled={true}
-                value={"$ " + tributos}
+                value={
+                  "$ " + (tipoComprobante != "2" && tipoComprobante != "12")
+                    ? tributos
+                    : "0"
+                }
                 onChange={(e) => setTributos(e.target.value.slice(2))}
                 className="bg-[#e9fcf8] text-[#0DA485] rounded-none opacity-100 border-[#e9fcf8] border"
               />
@@ -1151,12 +1173,14 @@ export default function Page() {
                 // disabled={true}
                 value={
                   "$ " +
-                  (
-                    Number(importe) +
-                    (Number(importe) * Number(ivaDictionary[Number(iva)])) /
-                      100 +
-                    Number(tributos)
-                  ).toFixed(2)
+                  (tipoComprobante != "2" && tipoComprobante != "12"
+                    ? (
+                        Number(importe) +
+                        (Number(importe) * Number(ivaDictionary[Number(iva)])) /
+                          100 +
+                        Number(tributos)
+                      ).toFixed(2)
+                    : selectedComprobante?.importe)
                 }
                 className="bg-[#e9fcf8] text-[#0DA485] rounded-none  opacity-100 border-[#e9fcf8] border"
               />
