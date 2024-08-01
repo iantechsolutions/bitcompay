@@ -219,6 +219,8 @@ export const excelDeserializationRouter = createTRPCRouter({
             })
             .returning();
           console.log("creando valores diferencial valor");
+          console.log("Llego Llego");
+
           if (new_integrant[0]?.isBillResponsible) {
             const cc = await db
               .insert(schema.currentAccount)
@@ -233,6 +235,7 @@ export const excelDeserializationRouter = createTRPCRouter({
               currentAccount_id: cc[0]!.id,
               type: "REC",
             });
+            console.log("Llego Llego");
 
             const tipoDocumento = idDictionary[new_integrant[0]!.id_type ?? ""];
             const factura = await db.insert(schema.comprobantes).values({
@@ -252,7 +255,7 @@ export const excelDeserializationRouter = createTRPCRouter({
               estado: "apertura",
             });
           }
-
+          console.log("Llego Llego");
           if (row.differential_value) {
             const ageN = calcularEdad(row.birth_date ?? new Date());
             const preciosPasados = plan?.pricesPerCondition.filter(
@@ -467,16 +470,21 @@ async function readExcelFile(
     }
 
     const business_unit = await db.query.bussinessUnits.findFirst({
-      where: and(eq(schema.bussinessUnits.description, row.business_unit!)),
+      where: and(
+        eq(schema.bussinessUnits.description, row.business_unit!),
+        eq(schema.bussinessUnits.companyId, ctx.session.orgId!)
+      ),
     });
     if (!business_unit) {
-      errors.push(`UNIDAD DE NEGOCIO no valida en (fila:${rowNum})`);
-    }
-    if (business_unit?.companyId !== ctx.session.orgId) {
       errors.push(
-        `UNIDAD DE NEGOCIO no pertenece a la organizacion (fila:${rowNum}) `
+        `UNIDAD DE NEGOCIO no valida o no perteneciente a la organizacion en (fila:${rowNum})`
       );
     }
+    // if (business_unit?.companyId !== ctx.session.orgId) {
+    //   errors.push(
+    //     `UNIDAD DE NEGOCIO no pertenece a la organizacion (fila:${rowNum}) `
+    //   );
+    // }
     if (row.differential_value && !row.differential_code) {
       errors.push(`CODIGO DIFERENCIAL requerido en (fila:${rowNum})`);
     }

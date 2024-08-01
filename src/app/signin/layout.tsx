@@ -9,7 +9,6 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
     <html lang="es">
       <body>
         <div className="flex justify-center">{props.children}</div>
-        <div></div>
       </body>
     </html>
   );

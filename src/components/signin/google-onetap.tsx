@@ -3,6 +3,7 @@ import { useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
 import { useEffect } from "react";
+import { env } from "~/env";
 
 // Add clerk to Window to avoid type errors
 declare global {
@@ -32,12 +33,16 @@ export function CustomGoogleOneTap({
     console.log("One Tap");
     const { google } = window;
     if (google) {
+      console.log("Google");
       google.accounts.id.initialize({
         // Add your Google Client ID here.
-        client_id: "",
+        use_fedcm_for_prompt: true,
+        client_id:
+          "386943125567-r86179ke4p0nfg1q1ir6p1klc6849vpg.apps.googleusercontent.com",
+
         callback: async (response: any) => {
           // Here we call our provider with the token provided by Google
-          call(response.credential);
+          await call(response.credential);
         },
       });
 
@@ -53,8 +58,12 @@ export function CustomGoogleOneTap({
             "getNotDisplayedReason ::",
             notification.getNotDisplayedReason()
           );
+          document.cookie = `g_state=;path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT`;
+          google.accounts.id.prompt();
         } else if (notification.isSkippedMoment()) {
           console.log("getSkippedReason  ::", notification.getSkippedReason());
+          document.cookie = `g_state=;path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT`;
+          google.accounts.id.prompt();
         } else if (notification.isDismissedMoment()) {
           console.log(
             "getDismissedReason ::",
@@ -67,15 +76,18 @@ export function CustomGoogleOneTap({
 
   const call = async (token: any) => {
     try {
+      console.log("response", token);
       const res = await clerk.authenticateWithGoogleOneTap({
         token,
       });
-
-      await clerk.handleGoogleOneTapCallback(res, {
-        signInFallbackRedirectUrl: "/example-fallback-path",
-      });
+      console.log("res", res);
+      clerk.handleGoogleOneTapCallback(res, {});
+      // await clerk.handleGoogleOneTapCallback(res, {
+      //   signInFallbackRedirectUrl: "/dashboard",
+      // });
+      // router.push("/dashboard");
     } catch (error) {
-      router.push("/sign-in");
+      router.push("/signin");
     }
   };
 

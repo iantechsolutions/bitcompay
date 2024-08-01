@@ -14,6 +14,15 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { isArray } from "util";
 import { fiscalIdType } from "~/server/forms/providers-schema";
 import { Console } from "console";
+import dayjs from "dayjs";
+import "dayjs/locale/es";
+import utc from "dayjs/plugin/utc";
+import dayOfYear from "dayjs/plugin/dayOfYear";
+import timezone from "dayjs/plugin/timezone";
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.extend(dayOfYear);
+dayjs.locale("es");
 
 const statusCodeMap = new Map();
 const statusCodes = await db.query.paymentStatus.findMany();
@@ -214,16 +223,26 @@ export const uploadsRouter = createTRPCRouter({
                     : current;
                 }
               );
+
+              const recollected_amount =
+                records.find((x) => x.id === payment?.id)
+                  ?.recollected_amount! ?? 0;
+              console.log(
+                "tributo",
+                lastEvent?.current_amount,
+                payment?.comprobantes?.importe!,
+                record.collected_amount!,
+                "lolo",
+                recollected_amount
+              );
               // if (!lastEvent) {
               //   throw new Error("No hay eventos en la cuenta corriente");
               // }
               const new_event = await tx.insert(schema.events).values({
                 currentAccount_id: currentAccount?.id,
-                event_amount:
-                  record.first_due_amount ?? record.collected_amount ?? 0,
+                event_amount: record.collected_amount ?? 0,
                 current_amount:
-                  lastEvent?.current_amount ??
-                  0 + payment?.comprobantes?.importe!,
+                  (lastEvent?.current_amount ?? 0) + recollected_amount,
                 description: "Recaudacion",
                 type: "REC",
               });
@@ -247,13 +266,17 @@ export const uploadsRouter = createTRPCRouter({
             //     "No hay eventos en la cuenta corriente de la empresa"
             //   );
             // }
+            const recollected_amount =
+              records.find((x) => x.id === payment?.id)?.recollected_amount! ??
+              0;
+
             const new_event = await tx.insert(schema.events).values({
               currentAccount_id: ccORG?.id,
               event_amount:
-                record.first_due_amount ?? record.collected_amount ?? 0,
+                // record.first_due_amount ??
+                record.collected_amount ?? 0,
               current_amount:
-                lastEvent?.current_amount ??
-                0 + payment?.comprobantes?.importe!,
+                (lastEvent?.current_amount ?? 0) + recollected_amount,
               description: "Recaudacion",
               type: "REC",
             });
@@ -379,8 +402,8 @@ export const uploadsRouter = createTRPCRouter({
               period: row.period,
               first_due_amount: row.first_due_amount,
               first_due_date: row.first_due_date,
-              second_due_amount: row.second_due_amount ?? null,
-              second_due_date: row.second_due_date ?? null,
+              second_due_amount: null,
+              second_due_date: null,
               additional_info: row.additional_info ?? null,
               // payment_channel: row.payment_channel ?? null,
               payment_date: row.payment_date ?? null,
@@ -511,15 +534,26 @@ async function readResponseUploadContents(
       const largeNumber = recordValues[0];
       const fiscal_id_number = recordValues[1];
       const importe_final = recordValues[3];
-      const invoice_number = largeNumber?.slice(15, 20);
+      const payment_date = recordValues[2]?.slice(19, 27);
+
+      const invoice_number = largeNumber?.slice(16, 21);
       // const fiscal_id_number = largeNumber?.slice(84, 104);
       // const invoice_number = largeNumber?.slice(16, 21);
       // const importe_final = largeNumber?.slice(48, 58);
-      console.log(recordValues);
+      console.log(invoice_number!, "payments_date");
 
-      console.log("invoice_number", invoice_number);
-      console.log("fiscal_id_number", fiscal_id_number);
+      const day = payment_date!.slice(0, 2);
+      const month = payment_date![2];
+      const year = payment_date!.slice(3);
 
+      const date = dayjs(`${day}${month}${year}`, "DDMMYY").format("DD-MM-YY");
+
+      let status;
+      if (parceImporte(importe_final!) > 0) {
+        status = "00";
+      } else {
+        status = "90";
+      }
       if (invoice_number) {
         const original_transaction = await db.query.payments.findFirst({
           where: eq(
@@ -528,8 +562,21 @@ async function readResponseUploadContents(
           ),
         });
         if (original_transaction) {
-          original_transaction.statusId = "91";
-          original_transaction.recollected_amount = parseInt(importe_final!);
+          original_transaction.statusId = statusCodeMap.get(status) ?? "90";
+          original_transaction.payment_date = dayjs(date, "DD-MM-YY").toDate();
+          original_transaction.collected_amount =
+            original_transaction.first_due_amount! +
+            original_transaction.second_due_amount!;
+          original_transaction.recollected_amount = parceImporte(
+            importe_final!
+          );
+
+          console.log(
+            status,
+            original_transaction.statusId,
+            "Este es el estado"
+          );
+
           records.push(original_transaction);
         }
       } else {
@@ -550,9 +597,21 @@ async function readResponseUploadContents(
 
       const invoice_number = recordValues[1] ?? "33666";
       const fiscal_id_number = largeNumber?.slice(1, 12);
-      const importe_final = largeNumber2?.slice(17, 28);
+      const importe_final = largeNumber2?.slice(17, 27);
 
-      console.log("invoice_number", invoice_number);
+      const payment_date = recordValues[2]!.slice(0, 8);
+      const year = payment_date!.slice(0, 4);
+      const month = payment_date!.slice(4, 6);
+      const day = payment_date!.slice(6);
+
+      const date = dayjs(`${day}${month}${year}`, "DDMMYY").format("DD-MM-YY");
+
+      let status;
+      if (parceImporte(importe_final!) > 0) {
+        status = "00";
+      } else {
+        status = "90";
+      }
 
       if (invoice_number) {
         const original_transaction = await db.query.payments.findFirst({
@@ -562,8 +621,15 @@ async function readResponseUploadContents(
           ),
         });
         if (original_transaction) {
-          original_transaction.statusId = "91";
-          original_transaction.recollected_amount = parseInt(importe_final!);
+          original_transaction.statusId = statusCodeMap.get(status) ?? "90";
+
+          original_transaction.payment_date = dayjs(date, "DD-MM-YY").toDate();
+          original_transaction.collected_amount =
+            original_transaction.first_due_amount! +
+            original_transaction.second_due_amount!;
+          original_transaction.recollected_amount = parceImporte(
+            importe_final!
+          );
           records.push(original_transaction);
         }
       } else {
@@ -578,11 +644,30 @@ async function readResponseUploadContents(
     for (const line of lines) {
       const recordValues = line.trim().split(/\s{2,}/);
       console.log("recordValues", recordValues);
-      const largeNumber = recordValues[1];
 
-      const fiscal_id_number = largeNumber?.slice(10, 19);
-      const invoice_number = largeNumber?.slice(34, 39);
-      const importe_final = largeNumber?.slice(48, 58);
+      const fiscal_id_number = recordValues[0]?.slice(32, 42);
+      const invoice_number = recordValues[0]?.slice(42, 48);
+      const payment_date = recordValues[0]?.slice(0, 8);
+
+      const importe_final = recordValues[0]?.slice(9, 23);
+
+      const year = payment_date!.slice(0, 4);
+      const month = payment_date!.slice(4, 6);
+      const day = payment_date!.slice(6);
+
+      const date = dayjs(`${day}${month}${year}`, "DDMMYY").format("DD-MM-YY");
+
+      console.log(payment_date?.slice(0, 4), "ES ESTAAA");
+
+      let status;
+      if (parceImporte(importe_final!) > 0) {
+        status = "00";
+      } else {
+        status = "90";
+      }
+
+      console.log(date, "ES ESTAAA");
+      console.log(importe_final);
 
       if (invoice_number) {
         const original_transaction = await db.query.payments.findFirst({
@@ -592,8 +677,68 @@ async function readResponseUploadContents(
           ),
         });
         if (original_transaction) {
-          original_transaction.statusId = "91";
-          original_transaction.recollected_amount = parseInt(importe_final!);
+          original_transaction.statusId = statusCodeMap.get(status) ?? "90";
+          original_transaction.payment_date = dayjs(date, "DD-MM-YY").toDate();
+          original_transaction.collected_amount =
+            original_transaction.first_due_amount! +
+            original_transaction.second_due_amount!;
+
+          original_transaction.recollected_amount = parceImporte(
+            importe_final!
+          );
+          records.push(original_transaction);
+        }
+      } else {
+        throw Error("cannot read invoice number");
+      }
+
+      total_rows++;
+      recordIndex++;
+    }
+  }
+  if (channelName === "DEBITO AUTOMATICO EN TARJETAS") {
+    for (const line of lines) {
+      const recordValues = line.trim().split(/\s{2,}/);
+      console.log("recordValues", recordValues);
+
+      const invoice_number = recordValues[0]?.slice(45, 50);
+      const importe_final = recordValues[1];
+      const payment_date = recordValues[5]?.slice(16, 22);
+      console.log(invoice_number, "largeNumber");
+      console.log(importe_final, "importe_final");
+      console.log(recordValues[4], "importe_final");
+
+      let estado;
+      if (parceImporte(importe_final!) > 0) {
+        estado == "00";
+      } else {
+        estado == "92";
+      }
+      console.log(estado, "estado");
+
+      const day = payment_date!.slice(0, 2);
+      const month = payment_date![2];
+      const year = payment_date!.slice(3);
+
+      const date = dayjs(`${day}${month}${year}`, "DDMMYY").format("DD-MM-YY");
+
+      console.log(dayjs(date!), "date");
+      if (invoice_number) {
+        const original_transaction = await db.query.payments.findFirst({
+          where: eq(
+            schema.payments.invoice_number,
+            Number.parseInt(invoice_number)
+          ),
+        });
+        if (original_transaction) {
+          original_transaction.statusId = estado!;
+          original_transaction.payment_date = dayjs(date, "DD-MM-YY").toDate();
+          original_transaction.collected_amount =
+            original_transaction.first_due_amount! +
+            original_transaction.second_due_amount!;
+          original_transaction.recollected_amount = parceImporte(
+            importe_final!
+          );
           records.push(original_transaction);
         }
       } else {
@@ -612,7 +757,7 @@ async function readResponseUploadContents(
         //trato el ultimo elemento que esta junto nro de factura y estado de pago
         const largeNumber = recordValues[2];
         console.log(largeNumber);
-        const status_code = largeNumber?.slice(-2);
+        const status_code = largeNumber?.slice(37, 39);
         const importe = largeNumber?.slice(22, 39);
         console.log("length", importe?.length);
         const importe_int = importe?.slice(0, importe.length - 2);
@@ -639,7 +784,7 @@ async function readResponseUploadContents(
           });
           if (original_transaction) {
             original_transaction.statusId =
-              statusCodeMap.get(status_code) ?? "91";
+              statusCodeMap.get(status_code) ?? "DESCONOCIDO";
             original_transaction.recollected_amount = importe_final;
             console.log("statusCode", status_code);
             console.log("status", original_transaction.statusId);
@@ -956,4 +1101,11 @@ function trimObject(obj: Record<string, unknown>) {
       return [key, value];
     })
   );
+}
+
+function parceImporte(number: string) {
+  const formattedNumber = parseFloat((parseInt(number) / 100).toFixed(2));
+  console.log("number, ", formattedNumber);
+
+  return formattedNumber;
 }

@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import Afip from "@afipsdk/afip.js";
 import { z } from "zod";
 import { db, schema } from "~/server/db";
@@ -221,9 +221,22 @@ async function approbatecomprobante(liquidationId: string) {
       console.log("1");
       const randomNumber =
         Math.floor(Math.random() * (100000 - 1000 + 1)) + 1000;
-      const billResponsible = comprobante.family_group?.integrants.find(
-        (integrant) => integrant.isBillResponsible
-      );
+      // const billResponsible = comprobante.family_group?.integrants.find(
+      //   (integrant) => integrant.isBillResponsible
+      // );
+      const billResponsible = await db.query.integrants.findFirst({
+        where: and(
+          eq(
+            schema.integrants.family_group_id,
+            comprobante.family_group?.id ?? ""
+          ),
+          eq(schema.integrants.isBillResponsible, true)
+        ),
+        with: {
+          postal_code: true,
+          pa: true,
+        },
+      });
       console.log("2");
       const producto = await db.query.products.findFirst({
         where: eq(schema.products.id, billResponsible?.pa[0]?.product_id ?? ""),
@@ -236,7 +249,7 @@ async function approbatecomprobante(liquidationId: string) {
       });
       console.log("3");
       const status = await db.query.paymentStatus.findFirst({
-        where: eq(schema.paymentStatus.code, "00"),
+        where: eq(schema.paymentStatus.code, "91"),
       });
       const statusCancelado = await db.query.paymentStatus.findFirst({
         where: eq(schema.paymentStatus.code, "90"),
@@ -365,7 +378,17 @@ async function approbatecomprobante(liquidationId: string) {
         comprobante.family_group?.businessUnitData!.company,
         producto,
         last_voucher + 1 ?? 0,
-        comprobante.family_group?.businessUnitData!.brand
+        comprobante.family_group?.businessUnitData!.brand,
+        billResponsible?.name ?? "",
+        (billResponsible?.address ?? "") +
+          " " +
+          (billResponsible?.address_number ?? ""),
+        billResponsible?.locality ?? "",
+        billResponsible?.province ?? "",
+        billResponsible?.postal_code?.cp ?? "",
+        billResponsible?.fiscal_id_type ?? "",
+        billResponsible?.fiscal_id_number ?? "",
+        billResponsible?.afip_status ?? ""
       );
 
       console.log("8");
@@ -373,13 +396,7 @@ async function approbatecomprobante(liquidationId: string) {
       last_voucher += 1;
       console.log("9");
 
-      await PDFFromHtml(
-        html,
-        name,
-        afip,
-        comprobante?.id ?? "",
-        last_voucher + 1
-      );
+      PDFFromHtml(html, name, afip, comprobante?.id ?? "", last_voucher + 1);
       console.log("10");
 
       // const uploaded = await utapi.uploadFiles(
@@ -476,14 +493,26 @@ async function PDFFromHtml(
   //   console.log("html", html);
   //   const response = await utapi.uploadFiles(pdfFile);
   //   console.log(response);
-  //   await db
-  //     .update(schema.comprobantes)
-  //     .set({
-  //       billLink: response.data?.url,
-  //       estado: "pendiente",
-  //       nroComprobante: voucher,
-  //     })
-  //     .where(eq(schema.comprobantes.id, comprobanteId));
+  const options = {
+    width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
+    marginLeft: 0.4, // Margen izquierdo en pulgadas. Usar 0.1 para ticket
+    marginRight: 0.4, // Margen derecho en pulgadas. Usar 0.1 para ticket
+    marginTop: 0.4, // Margen superior en pulgadas. Usar 0.1 para ticket
+    marginBottom: 0.4, // Margen inferior en pulgadas. Usar 0.1 para ticket
+  };
+  const res = await afip.ElectronicBilling.createPDF({
+    html: html,
+    file_name: name,
+    options: options,
+  });
+  await db
+    .update(schema.comprobantes)
+    .set({
+      billLink: res.file,
+      estado: "pendiente",
+      nroComprobante: voucher,
+    })
+    .where(eq(schema.comprobantes.id, comprobanteId));
   console.log("termino la funcion");
   // });
 }
@@ -1286,8 +1315,8 @@ function checkExistingBill(
       period: Date | null;
       first_due_amount: number | null;
       first_due_date: Date | null;
-      second_due_amount: number | null;
-      second_due_date: Date | null;
+      // second_due_amount: number | null;
+      // second_due_date: Date | null;
       additional_info: string | null;
       payment_channel: string | null;
       payment_date: Date | null;

@@ -1,18 +1,18 @@
 import { TRPCError } from "@trpc/server";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
+import utc from "dayjs/plugin/utc";
 import { and, eq, inArray, isNull, desc, not } from "drizzle-orm";
 import { z } from "zod";
 import { type DBTX, db, schema } from "~/server/db";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import utc from "dayjs/plugin/utc";
 import { createId } from "~/lib/utils";
 import { utapi } from "~/server/uploadthing";
 import type { RouterOutputs } from "~/trpc/shared";
 import { Payment } from "~/server/db/schema";
+import { Repeat } from "lucide-react";
 import dayOfYear from "dayjs/plugin/dayOfYear";
 import timezone from "dayjs/plugin/timezone";
-import { Repeat } from "lucide-react";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(dayOfYear);
@@ -28,7 +28,7 @@ export const iofilesRouter = createTRPCRouter({
         fileName: z.string().max(12).nullable().optional(),
         card_brand: z.string().nullable().optional(),
         card_type: z.string().nullable().optional(),
-        presentation_date: z.date().nullable().optional(),
+        // presentation_date: z.date().nullable().optional(),
         concept: z.string(),
       })
     )
@@ -58,7 +58,10 @@ export const iofilesRouter = createTRPCRouter({
 
         const regexPagoFacil = /pago\s*f[aá]cil/i;
         // Generamos el archivo de salida segun el canal
-        if (channel.name.includes("DEBITO DIRECTO")) {
+
+        if (payments.length === 0) {
+          text = "No existen payments disponibles";
+        } else if (channel.name.includes("DEBITO DIRECTO")) {
           const generateInput = {
             channelId: channel.id,
             companyId: companyId!,
@@ -95,21 +98,21 @@ export const iofilesRouter = createTRPCRouter({
           };
           text = generateRapiPago(generateInput, payments);
         } else if (channel.name.includes("DEBITO AUTOMATICO")) {
-          if (
-            !input.card_brand ||
-            !input.card_type ||
-            !input.presentation_date
-          ) {
-            throw new TRPCError({
-              code: "BAD_REQUEST",
-              message: `card_brand, card_type and presentation_date are required for DEBITO AUTOMATICO`,
-            });
-          }
+          // if (
+          //   !input.card_brand ||
+          //   !input.card_type
+          //   //|| !input.presentation_date
+          // ) {
+          //   throw new TRPCError({
+          //     code: "BAD_REQUEST",
+          //     message: `card_brand, card_type and presentation_date are required for DEBITO AUTOMATICO`,
+          //   });
+          // }
 
           const establishment = await db.query.establishments.findFirst({
             where: and(
-              eq(schema.establishments.brandId, input.brandId),
-              eq(schema.establishments.flag, input.card_brand)
+              eq(schema.establishments.brandId, "OC_f8Ci-Z2nmxivdWmWiZ"),
+              eq(schema.establishments.flag, "Visa")
             ),
           });
           if (!establishment) {
@@ -121,9 +124,9 @@ export const iofilesRouter = createTRPCRouter({
           text = generateDebitoAutomatico({
             payments,
             EstablishmentNumber: establishment.establishment_number,
-            cardType: input.card_type,
-            flag: input.card_brand,
-            presentationDate: input.presentation_date,
+            cardType: input.card_type!,
+            flag: input.card_brand!,
+            // presentationDate: input.presentation_date,
           });
         } else {
           throw new TRPCError({
@@ -190,26 +193,26 @@ export const iofilesRouter = createTRPCRouter({
             try {
               if (payment.genChannels.length === channelsList?.length! - 1) {
                 // update statuses
-                //   await db
-                //     .update(schema.payments)
-                //     .set({
-                //       genChannels: newGenChannles,
-                //       statusId: genFileStatus?.id,
-                //     })
-                //     .where(eq(schema.payments.id, payment.id));
-                // } else {
-                //   await db
-                //     .update(schema.payments)
-                //     .set({
-                //       genChannels: newGenChannles,
-                //     })
-                //     .where(eq(schema.payments.id, payment.id));
-                //   console.log(
-                //     "gen channes updated",
-                //     // updated_payment,
-                //     "old: ",
-                //     payment.genChannels
-                //   );
+                await db
+                  .update(schema.payments)
+                  .set({
+                    genChannels: newGenChannles,
+                    statusId: genFileStatus?.id,
+                  })
+                  .where(eq(schema.payments.id, payment.id));
+              } else {
+                await db
+                  .update(schema.payments)
+                  .set({
+                    genChannels: newGenChannles,
+                  })
+                  .where(eq(schema.payments.id, payment.id));
+                console.log(
+                  "gen channes updated",
+                  // updated_payment,
+                  "old: ",
+                  payment.genChannels
+                );
               }
             } catch (e) {
               console.log(e);
@@ -402,13 +405,11 @@ function generatePagomiscuentas(
       true
     );
     const first_due_date = dayjs(transaction.first_due_date).format("YYYYMMDD");
-    const first_due_amount = formatAmount(transaction.first_due_amount!, 10);
+    const first_due_amount = formatAmount(transaction.first_due_amount!, 9);
 
-    const second_due_date = dayjs(transaction.second_due_date).format(
-      "YYYYMMDD"
-    );
+    const second_due_date = "00000000";
 
-    const second_due_amount = formatAmount(transaction.second_due_amount!, 10);
+    const second_due_amount = "000000000";
     const ticketMessage = formatString(
       " ",
       transaction.additional_info ?? "",
@@ -420,20 +421,20 @@ function generatePagomiscuentas(
       `${input.concept}-${dayjs
         .utc(transaction.period)
         .locale("es")
-        .format("MM-YYYY")}`,
-      15,
+        .format("MMYYYY")}`,
+      9,
       true
     );
-    text += `5${fiscal_id_number}${invoice_number}0${first_due_date}${first_due_amount}0${first_due_date}${first_due_amount}0${"0".repeat(
-      38
-    )}${fiscal_id_number}${ticketMessage}${displayMessage}${" ".repeat(
+    text += `5${fiscal_id_number}${invoice_number}0${first_due_date}${first_due_amount}${"0".repeat(
+      57
+    )}${fiscal_id_number}${ticketMessage}ABONO ${displayMessage}${" ".repeat(
       60
     )}${"0".repeat(29)}\n`;
 
     total_collected += transaction.first_due_amount!;
   }
   // trailer
-  const total_collected_string = formatAmount(total_collected, 15);
+  const total_collected_string = formatAmount(total_collected, 14);
   const total_records_string = formatString(
     "0",
     transactions.length.toString(),
@@ -495,13 +496,11 @@ async function generatePagoFacil(
       true
     );
     const name = formatString(" ", transaction.name ?? " ", 40, true);
-    const first_due_date = dayjs(transaction.first_due_date).format("DDMMYYYY");
+    const first_due_date = dayjs(transaction.first_due_date).format("YYYYMMDD");
     const first_codebar = dayjs(transaction.first_due_date).format("DD");
 
-    const second_due_date = dayjs(transaction.first_due_date).format(
-      "DDMMYYYY"
-    );
-    const validity_date = dayjs(transaction.period).format("DDMMYYYY");
+    const second_due_date = "00000000";
+    const validity_date = dayjs(transaction.period).format("YYYYMMDD");
 
     const first_due_amount = formatString(
       "0",
@@ -532,21 +531,16 @@ async function generatePagoFacil(
       14,
       true
     );
-    const second_due_date_barcode = dayjs(transaction.second_due_date).format(
-      "DD"
-    );
+    const second_due_date_barcode = "00";
     const first_due_amount_bar_code = formatAmount(
       transaction.first_due_amount!,
       6
     );
 
-    const second_due_amount_charge = formatAmount(
-      transaction.second_due_amount!,
-      4
-    );
+    const second_due_amount_charge = "000000";
     // codigo de barras
     const bar_code = `${service_company}${first_due_amount_bar_code}${first_due_date_bar_code_YY}${first_due_date_bar_code_DDD}${fiscal_id_number_bar_code}0${second_due_amount_charge}${second_due_date_barcode}00${" ".repeat(
-      13
+      12
     )}`;
     console.log(
       "first_due_date",
@@ -737,33 +731,58 @@ export async function getBrandAndChannel(
 
 type generateDAprops = {
   payments: Payment[];
-  presentationDate: Date;
+  // presentationDate: Date;
   EstablishmentNumber: number;
   cardType: string;
   flag: string;
 };
 function generateDebitoAutomatico(props: generateDAprops) {
   const FileNameMap: Record<string, string> = {
-    "Visa Credito": "DEBLIQC_",
-    "Visa Debito": "DEBLIQD_",
-    "Mastercard Credito": "DEBLIMC_",
+    "Visa Credito": "DEBLIQC ",
+    "Visa Debito": "DEBLIQD ",
+    "Mastercard Credito": "DEBLIMC ",
   };
+
+  let currentDate = dayjs().utc().tz("America/Argentina/Buenos_Aires");
+  const currentHour = currentDate.hour();
+  const currentMinutes = currentDate.minute();
+  if (currentHour > 16 || (currentHour === 16 && currentMinutes > 0)) {
+    currentDate = currentDate.add(1, "day");
+  }
+  const dateYYYYMMDD = currentDate.format("YYYYMMDD");
+
   const key = `${props.flag} ${props.cardType}`;
-  const fileName = FileNameMap[key];
-  const presentationDate = dayjs(props.presentationDate).format("YYYYMMDD");
+  const fileName = FileNameMap[key] || " ".repeat(8);
+
+  const establishmentNumber = formatString(
+    "0",
+    props.EstablishmentNumber.toString(),
+    15,
+    false
+  );
+
+  // const presentationDate = dayjs(props.presentationDate).format("YYYYMMDD");
   const hour = dayjs().format("HHmm");
-  let header = `0${fileName}${
-    props.EstablishmentNumber
-  }900000    ${presentationDate}${hour}0  ${" ".repeat(55)}*\r\n`;
+  let header = `0${fileName}${establishmentNumber}900000    ${dateYYYYMMDD}${hour}0  ${" ".repeat(
+    50
+  )}*\r\n`;
+
   let body = "";
   let total_collected = 0;
   for (const payment of props.payments) {
+    const invoice_number = formatString(
+      "0",
+      payment.invoice_number.toString(),
+      8,
+      false
+    );
     const importe = payment.collected_amount ?? payment.first_due_amount;
-    const importeString = formatString("0", importe!.toString(), 15, false);
+    const importeString = formatAmount(importe!, 13);
+
     const registrationCode = payment.is_new ? "E" : " ";
-    body += `1${payment.card_number!}   ${
-      payment.invoice_number
-    }${presentationDate}0005${importeString}00000${
+    body += `1${
+      payment.card_number || " ".repeat(16)
+    }   ${invoice_number}${dateYYYYMMDD}0005${importeString}${"0".repeat(4)}${
       payment.fiscal_id_number
     }${registrationCode}${" ".repeat(28)}*\r\n`;
     total_collected += importe!;
@@ -774,15 +793,19 @@ function generateDebitoAutomatico(props: generateDAprops) {
     7,
     false
   );
+  const establishment = formatString(
+    "0",
+    props.EstablishmentNumber.toString(),
+    10,
+    false
+  );
   const total_collected_string = formatString(
     "0",
     total_collected.toString(),
     15,
     false
   );
-  let footer = `9 ${fileName} ${
-    props.EstablishmentNumber
-  } 900000    ${presentationDate}${hour}${total_records}${total_collected_string}${" ".repeat(
+  let footer = `9${fileName}${establishment}900000    ${dateYYYYMMDD}${hour}${total_records}${total_collected_string}${" ".repeat(
     36
   )}*`;
 
