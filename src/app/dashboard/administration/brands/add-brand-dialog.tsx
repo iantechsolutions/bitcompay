@@ -122,11 +122,10 @@ export function AddBrandDialog() {
                   title="Seleccionar factura..."
                   placeholder="Factura X"
                   options={[
-                    { value: "3", label: "FACTURA A" },
+                    { value: "1", label: "FACTURA A" },
                     { value: "6", label: "FACTURA B" },
                     { value: "11", label: "FACTURA C" },
                     { value: "51", label: "FACTURA M" },
-                    { value: "19", label: "FACTURA E" },
                   ]}
                   onSelectionChange={(e) => setBillType(e)}
                 />

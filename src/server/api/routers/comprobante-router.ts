@@ -10,7 +10,13 @@ import { Integrant } from "./integrant-router";
 import { currentUser } from "@clerk/nextjs/server";
 import { Brand } from "./brands-router";
 import { RouterOutputs } from "~/trpc/shared";
-import { calcularEdad, formatDate, htmlBill, ingresarAfip } from "~/lib/utils";
+import {
+  calcularEdad,
+  comprobanteDictionary,
+  formatDate,
+  htmlBill,
+  ingresarAfip,
+} from "~/lib/utils";
 import { utapi } from "~/server/uploadthing";
 import { id } from "date-fns/locale";
 import { Events } from "./events-router";
@@ -39,33 +45,6 @@ const ivaDictionary: { [key: number]: string } = {
   9: "2.5",
   0: "",
 };
-// const PuppeteerHTMLPDF = require("puppeteer-html-pdf");
-// const htmlPDF = new PuppeteerHTMLPDF();
-const conceptDictionary = {
-  Productos: 1,
-  Servicios: 2,
-  "Productos y Servicios": 3,
-  "": 0,
-};
-
-const comprobanteDictionary: { [key: string]: number } = {
-  "FACTURA A": 3,
-  "FACTURA B": 6,
-  "FACTURA C": 11,
-  "FACTURA M": 51,
-  "FACTURA E": 19,
-  "NOTA DE DEBITO A": 8,
-  "NOTA DE DEBITO B": 13,
-  "NOTA DE DEBITO C": 15,
-  "NOTA DE DEBITO M": 52,
-  "NOTA DE DEBITO E": 20,
-  "NOTA DE CREDITO A": 2,
-  "NOTA DE CREDITO B": 12,
-  "NOTA DE CREDITO C": 14,
-  "NOTA DE CREDITO M": 53,
-  "NOTA DE CREDITO E": 21,
-  "": 0,
-};
 
 const fcAnc: { [key: string]: string } = {
   "FACTURA A": "NOTA DE CREDITO A",
@@ -78,19 +57,6 @@ const fcAnc: { [key: string]: string } = {
   "NOTA DE CREDITO C": "FACTURA C",
   "NOTA DE CREDITO M": "FACTURA M",
   "NOTA DE CREDITO E": "FACTURA E",
-};
-
-const NCbytipocomprobanteDictionarys: { [key: string]: string } = {
-  "3": "2",
-  "6": "12",
-  "11": "14",
-  "51": "53",
-  "19": "21",
-  "2": "3",
-  "12": "6",
-  "14": "11",
-  "53": "51",
-  "21": "19",
 };
 
 const idDictionary: { [key: string]: number } = {
@@ -189,7 +155,6 @@ async function approbatecomprobante(liquidationId: string) {
     },
   });
   if (liquidation?.estado === "pendiente") {
-    const puppeteer = require("puppeteer");
     const user = await currentUser();
     const updatedLiquidation = await db
       .update(schema.liquidations)

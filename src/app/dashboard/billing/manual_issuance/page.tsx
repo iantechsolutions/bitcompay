@@ -88,8 +88,10 @@ export default function Page() {
     async function loginAfip() {
       const afip = await ingresarAfip();
       const voucherTypes = await afip.ElectronicBilling.getVoucherTypes();
+      const ivaTypes = await afip.ElectronicBilling.getAliquotTypes();
       console.log("afip loaded");
       console.log("voucherTypes", voucherTypes);
+      console.log("aliquot types", ivaTypes);
       setAfip(afip);
     }
 
@@ -825,10 +827,10 @@ export default function Page() {
                 </SelectTrigger>
                 <SelectContent>
                   {[
-                    { value: "3", label: "FACTURA A" },
+                    { value: "1", label: "FACTURA A" },
                     { value: "6", label: "FACTURA B" },
-                    { value: "2", label: "NOTA DE CREDITO A" },
-                    { value: "12", label: "NOTA DE CREDITO B" },
+                    { value: "3", label: "NOTA DE CREDITO A" },
+                    { value: "8", label: "NOTA DE CREDITO B" },
                     { value: "0", label: "RECIBO" },
                   ].map((option) => (
                     <SelectItem
