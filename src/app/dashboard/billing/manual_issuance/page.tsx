@@ -31,6 +31,8 @@ import {
   reversedIvaDictionary,
   ivaDictionary,
   idDictionary,
+  dateNormalFormat,
+  reverseConceptDictionary,
 } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
@@ -78,6 +80,7 @@ export default function Page() {
   const [logo, setLogo] = useState("");
   const [fcSelec, setFCSelec] = useState("");
   const [comprobantes, setComprobantes] = useState<any[]>([]);
+  const [selectedComprobante, setSelectedComprobante] = useState<any>(null);
   function generateComprobante() {
     if (marcas) {
       setLogo(marcas[0]!.logo_url!);
@@ -414,6 +417,10 @@ export default function Page() {
     // setTipoDocumento(billResponsible?.fiscal_id_type ?? "");
     // setBrandId(obra?.businessUnitData?.brandId ?? "");
   }
+  function handleComprobanteChange(value: string) {
+    setFCSelec(value);
+    setSelectedComprobante(comprobantes?.find((x) => x.id == value));
+  }
   let selectedBrand;
 
   const [selectedChannel, setSelectedChannel] = useState("");
@@ -610,7 +617,7 @@ export default function Page() {
             <div>
               <Label htmlFor="factura">Comprobante Asociado</Label>
               <br />
-              <Select onValueChange={(e) => setFCSelec(e)}>
+              <Select onValueChange={(e) => handleComprobanteChange(e)}>
                 <SelectTrigger className="font-bold border-[#0DA485] border">
                   <SelectValue placeholder="Seleccionar comprobante..." />
                 </SelectTrigger>
@@ -665,7 +672,7 @@ export default function Page() {
                 <Label>Punto de venta</Label>
                 <Input
                   disabled={true}
-                  value={nombre}
+                  value={selectedComprobante ? puntoVenta : "-"}
                   className="bg-white opacity-100 border-[#0DA485] border"
                 />
               </div>
@@ -673,7 +680,11 @@ export default function Page() {
                 <Label>Nro factura</Label>
                 <Input
                   disabled={true}
-                  value={nroDocumentoDNI}
+                  value={
+                    selectedComprobante
+                      ? selectedComprobante.nroComprobante
+                      : "-"
+                  }
                   className="bg-white opacity-100 border-[#0DA485] border"
                 />
               </div>
@@ -681,7 +692,11 @@ export default function Page() {
                 <Label>Fecha emision</Label>
                 <Input
                   disabled={true}
-                  value={nroDocumento}
+                  value={
+                    selectedComprobante
+                      ? dateNormalFormat(selectedComprobante.createdAt)
+                      : "-"
+                  }
                   className="bg-white opacity-100 border-[#0DA485] border"
                 />
               </div>
@@ -692,7 +707,11 @@ export default function Page() {
                 <Label>Desde</Label>
                 <Input
                   disabled={true}
-                  value={nombre}
+                  value={
+                    selectedComprobante
+                      ? dateNormalFormat(selectedComprobante.fromPeriod)
+                      : "-"
+                  }
                   className="bg-white opacity-100 border-[#0DA485] border"
                 />
               </div>
@@ -700,7 +719,11 @@ export default function Page() {
                 <Label>Hasta</Label>
                 <Input
                   disabled={true}
-                  value={nroDocumentoDNI}
+                  value={
+                    selectedComprobante
+                      ? dateNormalFormat(selectedComprobante.toPeriod)
+                      : "-"
+                  }
                   className="bg-white opacity-100 border-[#0DA485] border"
                 />
               </div>
@@ -708,7 +731,11 @@ export default function Page() {
                 <Label>Concepto</Label>
                 <Input
                   disabled={true}
-                  value={nroDocumento}
+                  value={
+                    selectedComprobante
+                      ? reverseConceptDictionary[selectedComprobante.concepto]
+                      : "-"
+                  }
                   className="bg-white opacity-100 border-[#0DA485] border"
                 />
               </div>
@@ -716,7 +743,9 @@ export default function Page() {
                 <Label>Importe</Label>
                 <Input
                   disabled={true}
-                  value={nroDocumento}
+                  value={
+                    selectedComprobante ? selectedComprobante.importe : "-"
+                  }
                   className="bg-white opacity-100 border-[#0DA485] border"
                 />
               </div>
@@ -835,339 +864,6 @@ export default function Page() {
             <Scroll className="h-5 w-auto ml-2" />
             <p className="p-4">Previsualizacion de factura</p>
           </Button>
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="family_group">Grupo Familiar</Label>
-              <br />
-              <Select onValueChange={(e) => handleGrupoFamilarChange(e)}>
-                <SelectTrigger className="w-[180px] font-bold">
-                  <SelectValue placeholder="Seleccione un grupo familiar" />
-                </SelectTrigger>
-                <SelectContent>
-                  {gruposFamiliar &&
-                    gruposFamiliar.map((gruposFamiliar) => (
-                      <SelectItem
-                        key={gruposFamiliar?.id}
-                        value={gruposFamiliar?.id}
-                        className="rounded-none border-b border-gray-600"
-                      >
-                        {gruposFamiliar?.numericalId}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-
-              {/* <ComboboxDemo
-                title="Afiliado"
-                placeholder="Afiliado"
-                options={[
-                  { value: "Juan Hernandez", label: "Juan Hernandez" },
-                  { value: "Joaquin Sabina", label: "Sabina" },
-                ]}
-                onSelectionChange={(e) => setName(e)}
-              /> */}
-            </div>
-            <div>
-              <Label htmlFor="name">Punto de venta a utilizar</Label>
-              <br />
-              <Select onValueChange={(e) => setPuntoVenta(e)}>
-                <SelectTrigger className="w-[180px] font-bold">
-                  <SelectValue placeholder="Seleccionar PV..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {[
-                    { value: "1", label: "1" },
-                    { value: "2", label: "2" },
-                  ].map((option) => (
-                    <SelectItem
-                      key={option.value}
-                      value={option.value}
-                      className="rounded-none border-b border-gray-600"
-                    >
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {(tipoComprobante == "2" || tipoComprobante == "12") && (
-              <div>
-                <Label> Factura a Cancelar</Label>
-                <br />
-                <Select onValueChange={(e) => setFCSelec(e)}>
-                  <SelectTrigger className="w-[180px] font-bold">
-                    <SelectValue placeholder="Seleccione una factura" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {comprobantes
-                      .filter(
-                        (x) =>
-                          x.estado != "generada" &&
-                          x.ptoVenta.toString() == puntoVenta
-                      )
-                      .map((comprobante) => (
-                        <SelectItem
-                          key={comprobante?.id}
-                          value={comprobante?.id}
-                          className="rounded-none border-b border-gray-600"
-                        >
-                          {comprobante?.nroComprobante}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-            <div>
-              <Label>Marca</Label>
-              <Select
-                onValueChange={handleBrandChange}
-                value={brandId}
-                disabled={true}
-              >
-                <SelectTrigger className="w-[180px] font-bold">
-                  <SelectValue placeholder="Seleccione una marca" />
-                </SelectTrigger>
-                <SelectContent>
-                  {marcas &&
-                    marcas.map((marca) => (
-                      <SelectItem
-                        key={marca!.id}
-                        value={marca!.id}
-                        className="rounded-none border-b border-gray-600"
-                      >
-                        {marca!.name}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label htmlFor="tipoDocumento">Tipo de documento</Label>
-              <br />
-              <Select
-                onValueChange={(e) => setTipoDocumento(e)}
-                value={tipoDocumento}
-                disabled={true}
-              >
-                <SelectTrigger className="w-[180px] font-bold">
-                  <SelectValue placeholder="Tipo de documento" />
-                </SelectTrigger>
-                <SelectContent>
-                  {[
-                    { value: "CUIT", label: "CUIT" },
-                    { value: "CUIL", label: "CUIL" },
-                    { value: "DNI", label: "DNI" },
-                  ].map((option) => (
-                    <SelectItem
-                      key={option.value}
-                      value={option.value}
-                      className="rounded-none border-b border-gray-600"
-                    >
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label htmlFor="nroDocumento">Número de documento</Label>
-              <Input
-                disabled={true}
-                id="nroDocumento"
-                placeholder="..."
-                value={tipoDocumento !== "99" ? nroDocumento : "0"}
-                onChange={(e) => setNroDocumento(e.target.value)}
-              />
-            </div>
-            {(tipoComprobante == "3" ||
-              tipoComprobante == "6" ||
-              tipoComprobante == "0") && (
-              <>
-                <div>
-                  <Label htmlFor="importe">Importe total del comprobante</Label>
-                  <Input
-                    id="importe"
-                    placeholder="..."
-                    value={importe}
-                    onChange={(e) => setImporte(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="nombreprod">
-                    {concepto === "1"
-                      ? "Nombre del producto"
-                      : "Nombre del servicio"}{" "}
-                  </Label>
-                  <Input
-                    id="nombrepro"
-                    placeholder="..."
-                    value={servicioprod}
-                    onChange={(e) => setservicioprod(e.target.value)}
-                  />
-                </div>
-              </>
-            )}
-            {(tipoComprobante == "3" || tipoComprobante == "6") && (
-              <>
-                <div>
-                  <Label htmlFor="nroDocumento">Productos disponibles</Label>
-                  <Select
-                    onValueChange={(value) => {
-                      setSelectedProduct(value);
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar un producto..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {products?.map((product) => (
-                          <SelectItem key={product.id} value={product.id}>
-                            {product.name}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="importe">Fecha de vencimiento</Label>
-                  <br />
-                  <Popover
-                    open={popoverVencimientoOpen}
-                    onOpenChange={setPopoverVencimientoOpen}
-                  >
-                    <PopoverTrigger asChild={true}>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-[220px] justify-start text-left font-normal",
-                          !dateVencimiento && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dateVencimiento ? (
-                          format(dateVencimiento, "PPP")
-                        ) : (
-                          <span>Selecciona una fecha</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={dateVencimiento}
-                        onSelect={(e) => FechasCreateVencimiento(e)}
-                        initialFocus={true}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div>
-                  <Label htmlFor="iva">IVA</Label>
-                  <br />
-                  <Select onValueChange={(e) => setIva(e)}>
-                    <SelectTrigger className="w-[180px] font-bold">
-                      <SelectValue placeholder="IVA" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[
-                        { value: "3", label: "0%" },
-                        { value: "4", label: "10.5%" },
-                        { value: "5", label: "21%" },
-                        { value: "6", label: "27%" },
-                        { value: "8", label: "5%" },
-                        { value: "9", label: "2.5%" },
-                      ].map((option) => (
-                        <SelectItem
-                          key={option.value}
-                          value={option.value}
-                          className="rounded-none border-b border-gray-600"
-                        >
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </>
-            )}
-
-            {(concepto === "2" || concepto === "3") && (
-              <>
-                <div>
-                  <Label htmlFor="importe">Fecha de inicio de servicio</Label>
-                  <br />
-                  <Popover
-                    open={popoverDesdeOpen}
-                    onOpenChange={setPopoverDesdeOpen}
-                  >
-                    <PopoverTrigger asChild={true}>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-[220px] justify-start text-left font-normal",
-                          !dateDesde && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dateDesde ? (
-                          format(dateDesde, "PPP")
-                        ) : (
-                          <span>Selecciona una fecha</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={dateDesde}
-                        onSelect={(e) => FechasCreateDesde(e)}
-                        initialFocus={true}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div>
-                  <Label htmlFor="importe">Fecha de fin de servicio</Label>
-                  <br />
-                  <Popover
-                    open={popoverFinOpen}
-                    onOpenChange={setPopoverFinOpen}
-                  >
-                    <PopoverTrigger asChild={true}>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-[220px] justify-start text-left font-normal",
-                          !dateHasta && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dateHasta ? (
-                          format(dateHasta, "PPP")
-                        ) : (
-                          <span>Selecciona una fecha</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={dateHasta}
-                        onSelect={(e) => FechasCreateFin(e)}
-                        initialFocus={true}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </>
-            )}
-          </div>
           <br />
 
           <Button disabled={loading} onClick={generateComprobante}>
