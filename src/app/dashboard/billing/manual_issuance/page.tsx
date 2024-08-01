@@ -87,7 +87,9 @@ export default function Page() {
   useEffect(() => {
     async function loginAfip() {
       const afip = await ingresarAfip();
+      
       console.log("afip loaded");
+      console.log("voucherTypes",const voucherTypes = await afip.ElectronicBilling.getVoucherTypes();)
       setAfip(afip);
     }
 
