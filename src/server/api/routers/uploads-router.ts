@@ -598,8 +598,12 @@ async function readResponseUploadContents(
 
       const date = dayjs(`${day}${month}${year}`, "DDMMYY").format("DD-MM-YY");
 
-      console.log("invoice_number", invoice_number);
-      console.log("invoice_number", importe_final);
+      let status;
+      if (parceImporte(importe_final!) > 0) {
+        status = "00";
+      } else {
+        status = "90";
+      }
 
       if (invoice_number) {
         const original_transaction = await db.query.payments.findFirst({
@@ -609,7 +613,7 @@ async function readResponseUploadContents(
           ),
         });
         if (original_transaction) {
-          original_transaction.statusId = "91";
+          original_transaction.statusId = statusCodeMap.get(status) ?? "90";
 
           original_transaction.payment_date = dayjs(date, "DD-MM-YY").toDate();
           original_transaction.collected_amount =
@@ -697,7 +701,7 @@ async function readResponseUploadContents(
       console.log(recordValues[4], "importe_final");
 
       let estado;
-      if (recordValues[4] === "0") {
+      if (parceImporte(importe_final!) > 0) {
         estado == "00";
       } else {
         estado == "92";

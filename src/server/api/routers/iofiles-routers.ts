@@ -419,12 +419,12 @@ function generatePagomiscuentas(
         .utc(transaction.period)
         .locale("es")
         .format("MMYYYY")}`,
-      15,
+      9,
       true
     );
-    text += `5${fiscal_id_number}${invoice_number}0${first_due_date}${first_due_amount}${second_due_date}${second_due_amount}${"0".repeat(
-      38
-    )}${fiscal_id_number}${ticketMessage}${displayMessage}${" ".repeat(
+    text += `5${fiscal_id_number}${invoice_number}0${first_due_date}${first_due_amount}${"0".repeat(
+      57
+    )}${fiscal_id_number}${ticketMessage}ABONO ${displayMessage}${" ".repeat(
       60
     )}${"0".repeat(29)}\n`;
 
@@ -493,11 +493,11 @@ async function generatePagoFacil(
       true
     );
     const name = formatString(" ", transaction.name ?? " ", 40, true);
-    const first_due_date = dayjs(transaction.first_due_date).format("DDMMYYYY");
+    const first_due_date = dayjs(transaction.first_due_date).format("YYYYMMDD");
     const first_codebar = dayjs(transaction.first_due_date).format("DD");
 
     const second_due_date = "00000000";
-    const validity_date = dayjs(transaction.period).format("DDMMYYYY");
+    const validity_date = dayjs(transaction.period).format("YYYYMMDD");
 
     const first_due_amount = formatString(
       "0",
@@ -537,7 +537,7 @@ async function generatePagoFacil(
     const second_due_amount_charge = "000000";
     // codigo de barras
     const bar_code = `${service_company}${first_due_amount_bar_code}${first_due_date_bar_code_YY}${first_due_date_bar_code_DDD}${fiscal_id_number_bar_code}0${second_due_amount_charge}${second_due_date_barcode}00${" ".repeat(
-      13
+      12
     )}`;
     console.log(
       "first_due_date",
@@ -739,22 +739,47 @@ function generateDebitoAutomatico(props: generateDAprops) {
     "Visa Debito": "DEBLIQD ",
     "Mastercard Credito": "DEBLIMC ",
   };
+
+  let currentDate = dayjs().utc().tz("America/Argentina/Buenos_Aires");
+  const currentHour = currentDate.hour();
+  const currentMinutes = currentDate.minute();
+  if (currentHour > 16 || (currentHour === 16 && currentMinutes > 0)) {
+    currentDate = currentDate.add(1, "day");
+  }
+  const dateYYYYMMDD = currentDate.format("YYYYMMDD");
+
   const key = `${props.flag} ${props.cardType}`;
-  const fileName = FileNameMap[key];
+  const fileName = FileNameMap[key] || " ".repeat(8);
+
+  const establishmentNumber = formatString(
+    "0",
+    props.EstablishmentNumber.toString(),
+    15,
+    false
+  );
+
   // const presentationDate = dayjs(props.presentationDate).format("YYYYMMDD");
   const hour = dayjs().format("HHmm");
-  let header = `0${fileName}${
-    props.EstablishmentNumber
-  }900000    ${hour}0  ${" ".repeat(55)}*\r\n`;
+  let header = `0${fileName}${establishmentNumber}900000    ${dateYYYYMMDD}${hour}0  ${" ".repeat(
+    50
+  )}*\r\n`;
+
   let body = "";
   let total_collected = 0;
   for (const payment of props.payments) {
+    const invoice_number = formatString(
+      "0",
+      payment.invoice_number.toString(),
+      8,
+      false
+    );
     const importe = payment.collected_amount ?? payment.first_due_amount;
-    const importeString = formatString("0", importe!.toString(), 15, false);
+    const importeString = formatAmount(importe!, 13);
+
     const registrationCode = payment.is_new ? "E" : " ";
-    body += `1${payment.card_number!}   ${
-      payment.invoice_number
-    }0005${importeString}00000${
+    body += `1${
+      payment.card_number || " ".repeat(16)
+    }   ${invoice_number}${dateYYYYMMDD}0005${importeString}${"0".repeat(4)}${
       payment.fiscal_id_number
     }${registrationCode}${" ".repeat(28)}*\r\n`;
     total_collected += importe!;
@@ -765,15 +790,19 @@ function generateDebitoAutomatico(props: generateDAprops) {
     7,
     false
   );
+  const establishment = formatString(
+    "0",
+    props.EstablishmentNumber.toString(),
+    10,
+    false
+  );
   const total_collected_string = formatString(
     "0",
     total_collected.toString(),
     15,
     false
   );
-  let footer = `9 ${fileName} ${
-    props.EstablishmentNumber
-  } 900000    ${hour}${total_records}${total_collected_string}${" ".repeat(
+  let footer = `9${fileName}${establishment}900000    ${dateYYYYMMDD}${hour}${total_records}${total_collected_string}${" ".repeat(
     36
   )}*`;
 
