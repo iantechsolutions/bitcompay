@@ -964,10 +964,7 @@ export default function Page() {
             <div>
               <Label htmlFor="emition">Fecha fin de servicio</Label>
               <br />
-              <Popover
-                open={popoverFinOpen}
-                onOpenChange={setPopoverVencimientoOpen}
-              >
+              <Popover open={popoverFinOpen} onOpenChange={setPopoverFinOpen}>
                 <PopoverTrigger asChild={true}>
                   <Button
                     variant={"outline"}
@@ -1127,10 +1124,10 @@ export default function Page() {
                 // disabled={true}
                 value={
                   "$ " +
-                  (tipoComprobante != "2" &&
-                  tipoComprobante != "12" &&
-                  selectedComprobante
+                  (!selectedComprobante
                     ? importe
+                    : selectedComprobante.iva == "0"
+                    ? selectedComprobante?.importe
                     : (selectedComprobante?.importe /
                         Number(selectedComprobante.iva)) *
                       100)
@@ -1145,13 +1142,13 @@ export default function Page() {
                 // disabled={true}
                 value={
                   "$ " +
-                  (tipoComprobante != "2" &&
-                  tipoComprobante != "12" &&
-                  selectedComprobante
+                  (!selectedComprobante
                     ? (
                         (Number(importe) * Number(ivaDictionary[Number(iva)])) /
                         100
                       ).toFixed(2)
+                    : selectedComprobante.iva == "0"
+                    ? "0"
                     : selectedComprobante?.importe -
                       (selectedComprobante?.importe /
                         Number(selectedComprobante.iva)) *
@@ -1164,14 +1161,7 @@ export default function Page() {
               <Label>Otros tributos</Label>
               <Input
                 // disabled={true}
-                value={
-                  "$ " +
-                  (tipoComprobante != "2" &&
-                    tipoComprobante != "12" &&
-                    selectedComprobante)
-                    ? tributos
-                    : "0"
-                }
+                value={"$ " + !selectedComprobante ? tributos : "0"}
                 onChange={(e) => setTributos(e.target.value.slice(2))}
                 className="bg-[#e9fcf8] text-[#0DA485] rounded-none opacity-100 border-[#e9fcf8] border"
               />
@@ -1182,9 +1172,7 @@ export default function Page() {
                 // disabled={true}
                 value={
                   "$ " +
-                  (tipoComprobante != "2" &&
-                  tipoComprobante != "12" &&
-                  selectedComprobante
+                  (!selectedComprobante
                     ? (
                         Number(importe) +
                         (Number(importe) * Number(ivaDictionary[Number(iva)])) /
