@@ -293,7 +293,7 @@ export default function Page() {
           .toISOString()
           .split("T")[0];
 
-        if (fcSelec && (tipoComprobante == "2" || tipoComprobante == "12")) {
+        if (fcSelec && (tipoComprobante == "3" || tipoComprobante == "8")) {
           const facSeleccionada = comprobantes?.find((x) => x.id == fcSelec);
 
           let ivaFloat = (100 + parseFloat(facSeleccionada?.iva ?? "0")) / 100;
@@ -391,7 +391,7 @@ export default function Page() {
             type: "NC",
             amount: comprobante[0]?.importe ?? 0,
           });
-        } else if (tipoComprobante == "3" || tipoComprobante == "6") {
+        } else if (tipoComprobante == "1" || tipoComprobante == "6") {
           let ivaFloat =
             (100 + parseFloat(ivaDictionary[Number(iva)] ?? "0")) / 100;
           // const billResponsible = gruposFamiliar
