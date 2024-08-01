@@ -540,7 +540,7 @@ async function readResponseUploadContents(
       // const fiscal_id_number = largeNumber?.slice(84, 104);
       // const invoice_number = largeNumber?.slice(16, 21);
       // const importe_final = largeNumber?.slice(48, 58);
-      console.log(payment_date!, "payments_date");
+      console.log(invoice_number!, "payments_date");
 
       const day = payment_date!.slice(0, 2);
       const month = payment_date![2];

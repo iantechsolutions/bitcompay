@@ -49,7 +49,10 @@ export default async function page({
   ];
 
   for (const transaction of payments) {
-    if (!transaction.genChannels.includes(channel.id)) {
+    if (
+      !transaction.genChannels.includes(channel.id) &&
+      transaction.g_c === brand.number
+    ) {
       status_batch[0]!.records += 1;
       status_batch[0]!.amount_collected +=
         transaction?.collected_amount ?? transaction?.first_due_amount ?? 0;

@@ -58,7 +58,10 @@ export const iofilesRouter = createTRPCRouter({
 
         const regexPagoFacil = /pago\s*f[aá]cil/i;
         // Generamos el archivo de salida segun el canal
-        if (channel.name.includes("DEBITO DIRECTO")) {
+
+        if (payments.length === 0) {
+          text = "No existen payments disponibles";
+        } else if (channel.name.includes("DEBITO DIRECTO")) {
           const generateInput = {
             channelId: channel.id,
             companyId: companyId!,
