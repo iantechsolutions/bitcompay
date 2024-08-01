@@ -560,7 +560,6 @@ export default function Page() {
         }
         setLoading(false);
         toast.success("La factura se creo correctamente");
-        router.push("./");
       })();
     } catch {
       setLoading(false);
