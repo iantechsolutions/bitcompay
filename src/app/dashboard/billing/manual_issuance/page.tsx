@@ -1004,7 +1004,7 @@ export default function Page() {
               <br />
               <Select
                 onValueChange={(e) => handleComprobanteChange(e)}
-                disabled={tipoComprobante != "2" && tipoComprobante != "12"}
+                disabled={tipoComprobante != "3" && tipoComprobante != "8"}
               >
                 <SelectTrigger className="font-bold border-[#0DA485] border">
                   <SelectValue placeholder="Seleccionar comprobante..." />

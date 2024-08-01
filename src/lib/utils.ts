@@ -111,11 +111,11 @@ export function htmlBill(
   function getImageTagForTipoComprobante(tipoComprobante: string): string {
     switch (tipoComprobante) {
       case "6":
-      case "13":
-      case "12":
+      case "7":
+      case "8":
         return `<img src="https://utfs.io/f/8ab5059a-71e9-4cb2-8e0c-4743f73c8fe5-kmcofx.png" alt="" />`;
-      case "14":
-      case "15":
+      case "12":
+      case "13":
       case "11":
         return `C`;
       default:
@@ -146,21 +146,21 @@ export function htmlBill(
   }
   function getTextoForTipoComprobante(tipoComprobante: string) {
     switch (tipoComprobante) {
-      case "3":
+      case "1":
       case "6":
       case "11":
       case "51":
       case "19":
         return "FACTURA";
-      case "8":
-      case "13":
-      case "15":
+      case "2":
+      case "7":
+      case "12":
       case "52":
       case "20":
         return "NOTA DE DEBITO";
-      case "2":
-      case "12":
-      case "14":
+      case "3":
+      case "8":
+      case "13":
       case "53":
       case "21":
         return "NOTA DE CREDITO";
