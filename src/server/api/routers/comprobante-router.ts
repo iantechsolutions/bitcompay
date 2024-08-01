@@ -373,13 +373,7 @@ async function approbatecomprobante(liquidationId: string) {
       last_voucher += 1;
       console.log("9");
 
-      await PDFFromHtml(
-        html,
-        name,
-        afip,
-        comprobante?.id ?? "",
-        last_voucher + 1
-      );
+      PDFFromHtml(html, name, afip, comprobante?.id ?? "", last_voucher + 1);
       console.log("10");
 
       // const uploaded = await utapi.uploadFiles(

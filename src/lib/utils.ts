@@ -962,3 +962,10 @@ export function getGroupContribution(grupo: any) {
   });
   return importe;
 }
+
+export const reverseConceptDictionary: { [key: number]: string } = {
+  1: "Productos",
+  2: "Servicios",
+  3: "Productos y Servicios",
+  0: "",
+};
