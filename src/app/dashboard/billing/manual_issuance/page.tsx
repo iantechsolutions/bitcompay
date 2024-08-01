@@ -297,6 +297,16 @@ export default function Page() {
           const facSeleccionada = comprobantes?.find((x) => x.id == fcSelec);
 
           let ivaFloat = (100 + parseFloat(facSeleccionada?.iva ?? "0")) / 100;
+          console.log("IMPORTE NC");
+          console.log(facSeleccionada?.importe);
+          console.log(
+            Math.round(
+              100 *
+                ((facSeleccionada?.importe ?? 0) -
+                  Number(facSeleccionada?.importe) / ivaFloat)
+            ) / 100
+          );
+          console.log((Number(facSeleccionada?.importe) / ivaFloat).toFixed(2));
 
           comprobante = await createComprobante({
             billLink: "",
@@ -353,11 +363,8 @@ export default function Page() {
             ImpIVA:
               Math.round(
                 100 *
-                  (comprobante[0]?.importe ??
-                    0 -
-                      parseFloat(
-                        (Number(comprobante[0]?.importe) / ivaFloat).toFixed(2)
-                      ))
+                  ((comprobante[0]?.importe ?? 0) -
+                    Number(comprobante[0]?.importe) / ivaFloat)
               ) / 100,
 
             ImpTrib: 0,
@@ -369,21 +376,18 @@ export default function Page() {
               Importe:
                 Math.round(
                   100 *
-                    (comprobante[0]?.importe ??
-                      0 -
-                        parseFloat(
-                          (Number(comprobante[0]?.importe) / ivaFloat).toFixed(
-                            2
-                          )
-                        ))
+                    ((comprobante[0]?.importe ?? 0) -
+                      parseFloat(
+                        (Number(comprobante[0]?.importe) / ivaFloat).toFixed(2)
+                      ))
                 ) / 100,
             },
             CbtesAsoc: {
               Tipo: comprobanteDictionary[
                 facSeleccionada?.tipoComprobante ?? ""
               ],
-              BaseImp: (facSeleccionada?.importe ?? 0) / ivaFloat,
-              Importe: (facSeleccionada?.importe ?? 0) * (1 - ivaFloat),
+              PtoVta: facSeleccionada?.ptoVenta ?? 1,
+              Nro: facSeleccionada?.nroComprobante ?? 0,
             },
           };
           const event = createEventFamily({
@@ -400,7 +404,7 @@ export default function Page() {
           comprobante = await createComprobante({
             billLink: "",
             concepto: Number(concepto) ?? 0,
-            importe: Number(importe) ?? 0,
+            importe: Number(importe) * ivaFloat + Number(tributos) ?? 0,
             iva: iva ?? "0",
             nroDocumento: Number(nroDocumento) ?? 0,
             ptoVenta: Number(puntoVenta) ?? 0,
@@ -440,27 +444,26 @@ export default function Page() {
               concepto != "1"
                 ? formatDate(dateVencimiento ?? new Date())
                 : null,
-            ImpTotal: Number(importe),
+            ImpTotal:
+              Math.round(
+                100 * (Number(importe) * ivaFloat + Number(tributos))
+              ) / 100,
             ImpTotConc: 0,
-            ImpNeto: (Number(importe) / ivaFloat).toFixed(2),
+            ImpNeto: Number(importe),
             ImpOpEx: 0,
             ImpIVA:
               Math.round(
-                100 *
-                  (Number(importe ?? 0) -
-                    parseFloat((Number(importe) / ivaFloat).toFixed(2)))
+                100 * (Number(importe ?? 0) * ivaFloat - Number(importe))
               ) / 100,
             ImpTrib: 0,
             MonId: "PES",
             MonCotiz: 1,
             Iva: {
               Id: iva,
-              BaseImp: (Number(importe) / ivaFloat).toFixed(2),
+              BaseImp: Number(importe),
               Importe:
                 Math.round(
-                  100 *
-                    (Number(importe ?? 0) -
-                      parseFloat((Number(importe) / ivaFloat).toFixed(2)))
+                  100 * (Number(importe ?? 0) * ivaFloat - Number(importe))
                 ) / 100,
             },
           };
@@ -476,7 +479,7 @@ export default function Page() {
           comprobante = await createComprobante({
             billLink: "",
             concepto: Number(concepto) ?? 0,
-            importe: Number(importe) ?? 0,
+            importe: Number(importe) * ivaFloat + Number(tributos) ?? 0,
             iva: "0",
             nroDocumento: Number(nroDocumento) ?? 0,
             ptoVenta: Number(puntoVenta) ?? 0,
@@ -1164,7 +1167,7 @@ export default function Page() {
               <Input
                 // disabled={true}
                 value={"$ " + !selectedComprobante ? tributos : "0"}
-                onChange={(e) => setTributos(e.target.value.slice(2))}
+                // onChange={(e) => setTributos(e.target.value.slice(2))}
                 className="bg-[#e9fcf8] text-[#0DA485] rounded-none opacity-100 border-[#e9fcf8] border"
               />
             </div>
