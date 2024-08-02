@@ -942,7 +942,7 @@ export default function Page() {
                 <PopoverTrigger asChild={true}>
                   <Button
                     variant={"outline"}
-                    disabled={concepto == "1"}
+                    disabled={concepto == null || concepto == "1"}
                     className={cn(
                       "justify-start text-left font-normal border-[#0DA485] border w-full",
                       !dateDesde && "text-muted-foreground"
@@ -973,7 +973,7 @@ export default function Page() {
                 <PopoverTrigger asChild={true}>
                   <Button
                     variant={"outline"}
-                    disabled={concepto == "1"}
+                    disabled={concepto == null || concepto == "1"}
                     className={cn(
                       "justify-start text-left font-normal border-[#0DA485] border w-full",
                       !dateHasta && "text-muted-foreground"
