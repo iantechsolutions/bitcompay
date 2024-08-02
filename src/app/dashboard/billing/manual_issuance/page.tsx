@@ -68,7 +68,7 @@ export default function Page() {
   const { mutateAsync: createComprobante } =
     api.comprobantes.create.useMutation();
   const { mutateAsync: updateComprobante } =
-    api.comprobantes.addBillLink.useMutation();
+    api.comprobantes.addBillLinkAndNumber.useMutation();
   const { mutateAsync: createEventFamily } =
     api.events.createByType.useMutation();
   const { mutateAsync: createEventOrg } =
@@ -325,6 +325,7 @@ export default function Page() {
             prodName: facSeleccionada?.prodName ?? "",
             nroComprobante: facSeleccionada?.nroComprobante ?? 0,
             family_group_id: grupoFamiliarId,
+            previous_facturaId: facSeleccionada?.id,
           });
           try {
             last_voucher = await afip.ElectronicBilling.getLastVoucher(
@@ -563,6 +564,7 @@ export default function Page() {
           const updatedComprobante = await updateComprobante({
             id: comprobante[0]?.id ?? "",
             billLink: resHtml.file,
+            number: last_voucher + 1,
           });
           console.log("resultadHTML", resHtml);
         }
@@ -712,7 +714,7 @@ export default function Page() {
                       value={gruposFamiliar?.id}
                       className="rounded-none border-b border-gray-600"
                     >
-                      {gruposFamiliar?.numericalId}
+                      {gruposFamiliar?.integrants.find((x) => x.isHolder)?.name}
                     </SelectItem>
                   ))}
               </SelectContent>
@@ -947,7 +949,7 @@ export default function Page() {
                 <PopoverTrigger asChild={true}>
                   <Button
                     variant={"outline"}
-                    disabled={concepto == null || concepto == "1"}
+                    disabled={concepto == "" || concepto == "1"}
                     className={cn(
                       "justify-start text-left font-normal border-[#0DA485] border w-full",
                       !dateDesde && "text-muted-foreground"
@@ -978,7 +980,7 @@ export default function Page() {
                 <PopoverTrigger asChild={true}>
                   <Button
                     variant={"outline"}
-                    disabled={concepto == null || concepto == "1"}
+                    disabled={concepto == "" || concepto == "1"}
                     className={cn(
                       "justify-start text-left font-normal border-[#0DA485] border w-full",
                       !dateHasta && "text-muted-foreground"

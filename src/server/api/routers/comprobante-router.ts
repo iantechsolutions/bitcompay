@@ -697,7 +697,7 @@ export const comprobantesRouter = createTRPCRouter({
     }),
   create: protectedProcedure
     .input(ComprobantesSchemaDB)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const comprobante = await db
         .insert(schema.comprobantes)
         .values({ ...input })
@@ -717,6 +717,99 @@ export const comprobantesRouter = createTRPCRouter({
           items: true,
         },
       });
+      console.log("justo antes de crear payments");
+
+      if (
+        input.tipoComprobante?.toUpperCase() === "NOTA DE CREDITO A" ||
+        input.tipoComprobante?.toUpperCase() === "NOTA DE CREDITO B"
+      ) {
+        console.log("entro NC ");
+        const statusCancelado = await db.query.paymentStatus.findFirst({
+          where: eq(schema.paymentStatus.code, "90"),
+        });
+        console.log("Encontro status");
+        console.log(input);
+        const res = await db
+          .update(schema.payments)
+          .set({
+            statusId: statusCancelado?.id,
+          })
+          .where(
+            eq(schema.payments.comprobante_id, input.previous_facturaId ?? "")
+          );
+        console.log("Actualizo payments");
+      } else if (
+        input.tipoComprobante?.toUpperCase() === "FACTURA A" ||
+        input.tipoComprobante?.toUpperCase() === "FACTURA B"
+      ) {
+        console.log("entro FC ");
+        const status = await db.query.paymentStatus.findFirst({
+          where: eq(schema.paymentStatus.code, "91"),
+        });
+        console.log("Encontro status");
+        const user = await currentUser();
+        const family_group = await db.query.family_groups.findFirst({
+          where: eq(
+            schema.family_groups.id,
+            comprobanteGotten?.family_group?.id ?? ""
+          ),
+          with: {
+            businessUnitData: {
+              with: {
+                brand: true,
+              },
+            },
+          },
+        });
+        console.log("Encontro family_group");
+        const billResponsible = await db.query.integrants.findFirst({
+          where: and(
+            eq(
+              schema.integrants.family_group_id,
+              comprobanteGotten?.family_group?.id ?? ""
+            ),
+            eq(schema.integrants.isBillResponsible, true)
+          ),
+          with: {
+            postal_code: true,
+            pa: true,
+          },
+        });
+        const producto = await db.query.products.findFirst({
+          where: eq(
+            schema.products.id,
+            billResponsible?.pa[0]?.product_id ?? ""
+          ),
+        });
+        console.log("Encontro producto");
+        const payment = await db
+          .insert(schema.payments)
+          .values({
+            companyId: ctx.session.orgId ?? "",
+            invoice_number: comprobanteGotten?.nroComprobante ?? 0,
+            userId: user?.id ?? "",
+            g_c: family_group?.businessUnitData?.brand?.number ?? 0,
+            name: billResponsible?.name ?? "",
+            fiscal_id_type: billResponsible?.fiscal_id_type,
+            fiscal_id_number: parseInt(
+              billResponsible?.fiscal_id_number ?? "0"
+            ),
+            du_type: billResponsible?.id_type,
+            du_number: parseInt(billResponsible?.id_number ?? "0"),
+            product: producto?.id,
+            period: comprobanteGotten?.due_date,
+            first_due_amount: comprobanteGotten?.importe,
+            first_due_date: comprobanteGotten?.due_date,
+            cbu: billResponsible?.pa[0]?.CBU,
+            comprobante_id: comprobanteGotten?.id,
+            documentUploadId: "0AspRyw8g4jgDAuNGAeBX",
+            product_number: producto?.number ?? 0,
+            statusId: status?.id,
+            // address: billResponsible?.address,
+          })
+          .returning();
+        console.log("Creo payment");
+      }
       return [comprobanteGotten];
     }),
   createManual: protectedProcedure
@@ -815,18 +908,20 @@ export const comprobantesRouter = createTRPCRouter({
         .where(eq(schema.comprobantes.id, id));
       return updatedProvider;
     }),
-  addBillLink: protectedProcedure
+  addBillLinkAndNumber: protectedProcedure
     .input(
       z.object({
         id: z.string(),
         billLink: z.string(),
+        number: z.number(),
       })
     )
-    .mutation(async ({ input: { id, billLink } }) => {
+    .mutation(async ({ input: { id, billLink, number } }) => {
       const updatedProvider = await db
         .update(schema.comprobantes)
         .set({
           billLink: billLink,
+          nroComprobante: number,
         })
         .where(eq(schema.comprobantes.id, id));
       return updatedProvider;

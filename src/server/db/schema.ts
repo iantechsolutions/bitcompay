@@ -809,6 +809,7 @@ export const ComprobantesSchemaDB = insertComprobantesSchema.pick({
   liquidation_id: true,
   family_group_id: true,
   origin: true,
+  previous_facturaId: true,
 });
 export type Comprobantes = z.infer<typeof selectComprobantesSchema>;
 
