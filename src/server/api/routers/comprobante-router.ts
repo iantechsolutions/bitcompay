@@ -759,7 +759,8 @@ export const comprobantesRouter = createTRPCRouter({
 
       if (!grupos || grupos.length === 0) {
         return {
-          error: "No se encuentran grupos familiares asociados a esa marca",
+          error:
+            "No se encuentran grupos familiares.\n Revise si no se creo una liquidacion para este periodo o si la marca es correcta.",
         };
       }
 
