@@ -82,7 +82,7 @@ export default function CompanySidenav() {
 
   const canSeeCompanies = has!({ permission: "org:administration:companies" });
   const canSeeProducts = has!({ permission: "org:administration:products" });
-  const canSeeChannels = has!({ permission: "administration:channels" });
+  const canSeeChannels = has!({ permission: "org:administration:channels" });
   const canSeeBrands = has!({ permission: "org:administration:brands" });
   const canSeeServices = has!({ permission: "org:administration:services" });
   const canSeeQuotes = has!({ permission: "org:administration:quotes" });
