@@ -160,7 +160,7 @@ async function approbatecomprobante(liquidationId: string) {
       .update(schema.liquidations)
       .set({ estado: "aprobada", userApproved: user?.id })
       .where(eq(schema.liquidations.id, liquidationId));
-    const afip = await ingresarAfip();
+    // const afip = await ingresarAfip();
     let last_voucher;
     // const browser = await chromium.puppeteer.launch({
     //   args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
@@ -176,10 +176,11 @@ async function approbatecomprobante(liquidationId: string) {
       const comprobanteCod =
         comprobanteDictionary[comprobante.tipoComprobante ?? ""];
       try {
-        last_voucher = await afip.ElectronicBilling.getLastVoucher(
-          comprobante?.ptoVenta,
-          comprobanteCod
-        );
+        // last_voucher = await afip.ElectronicBilling.getLastVoucher(
+        //   comprobante?.ptoVenta,
+        //   comprobanteCod
+        // );
+        last_voucher = 0;
       } catch {
         last_voucher = 0;
       }
@@ -361,7 +362,7 @@ async function approbatecomprobante(liquidationId: string) {
       last_voucher += 1;
       console.log("9");
 
-      PDFFromHtml(html, name, afip, comprobante?.id ?? "", last_voucher + 1);
+      // PDFFromHtml(html, name, afip, comprobante?.id ?? "", last_voucher + 1);
       console.log("10");
 
       // const uploaded = await utapi.uploadFiles(
