@@ -87,6 +87,7 @@ export default function Page() {
   useEffect(() => {
     async function loginAfip() {
       const afip = await ingresarAfip();
+      setLoading(false);
       const voucherTypes = await afip.ElectronicBilling.getVoucherTypes();
       const ivaTypes = await afip.ElectronicBilling.getAliquotTypes();
       console.log("afip loaded");
@@ -505,7 +506,11 @@ export default function Page() {
         }
 
         if (data) {
-          const res = await afip.ElectronicBilling.createVoucher(data);
+          try {
+            const res = await afip.ElectronicBilling.createVoucher(data);
+          } catch (error) {
+            console.log(error);
+          }
         }
         const billResponsible = gruposFamiliar
           ?.find((x) => x.id == grupoFamiliarId)
@@ -598,7 +603,7 @@ export default function Page() {
   const [obraSocialId, setObraSocialId] = useState("");
   const [iva, setIva] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [grupoFamiliarId, setGrupoFamiliarId] = useState("");
 
   const products = api.products.list.useQuery().data;
