@@ -156,7 +156,7 @@ async function approbatecomprobante(liquidationId: string) {
   });
   if (liquidation?.estado === "pendiente") {
     const user = await currentUser();
-    const updatedLiquidation = db
+    const updatedLiquidation = await db
       .update(schema.liquidations)
       .set({ estado: "aprobada", userApproved: user?.id })
       .where(eq(schema.liquidations.id, liquidationId));
