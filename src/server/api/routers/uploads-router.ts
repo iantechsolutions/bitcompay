@@ -775,6 +775,9 @@ async function readResponseUploadContents(
 
         const invoice_number = stringInvoiceNumber.slice(10, 15) ?? null;
         console.log("invoice_number", invoice_number);
+        const errorStatus = await db.query.paymentStatus.findFirst({
+          where: eq(schema.paymentStatus.code, "04"),
+        });
         if (invoice_number) {
           const original_transaction = await db.query.payments.findFirst({
             where: eq(
@@ -784,7 +787,7 @@ async function readResponseUploadContents(
           });
           if (original_transaction) {
             original_transaction.statusId =
-              statusCodeMap.get(status_code) ?? "DESCONOCIDO";
+              statusCodeMap.get(status_code) ?? errorStatus?.id;
             original_transaction.recollected_amount = importe_final;
             console.log("statusCode", status_code);
             console.log("status", original_transaction.statusId);
