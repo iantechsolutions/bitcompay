@@ -44,6 +44,9 @@ export const iofilesRouter = createTRPCRouter({
         const genFileStatus = await db.query.paymentStatus.findFirst({
           where: eq(schema.paymentStatus.code, "92"),
         });
+        const statusCancelado = await db.query.paymentStatus.findFirst({
+          where: eq(schema.paymentStatus.code, "90"),
+        });
 
         const paymentsFull = await db.query.payments.findMany({
           where: and(
@@ -53,7 +56,9 @@ export const iofilesRouter = createTRPCRouter({
           ),
         });
         const payments = paymentsFull.filter(
-          (p) => p.genChannels.includes(channel.id) === false
+          (p) =>
+            p.genChannels.includes(channel.id) === false &&
+            p.statusId !== statusCancelado?.id
         );
 
         const regexPagoFacil = /pago\s*f[aá]cil/i;
