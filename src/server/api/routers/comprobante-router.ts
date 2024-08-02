@@ -156,7 +156,7 @@ async function approbatecomprobante(liquidationId: string) {
   });
   if (liquidation?.estado === "pendiente") {
     const user = await currentUser();
-    const updatedLiquidation = await db
+    const updatedLiquidation = db
       .update(schema.liquidations)
       .set({ estado: "aprobada", userApproved: user?.id })
       .where(eq(schema.liquidations.id, liquidationId));
@@ -269,8 +269,7 @@ async function approbatecomprobante(liquidationId: string) {
             Importe: comprobante?.nroComprobante,
           },
         };
-        await db
-          .update(schema.payments)
+        db.update(schema.payments)
           .set({
             statusId: statusCancelado?.id,
           })
@@ -281,7 +280,7 @@ async function approbatecomprobante(liquidationId: string) {
             )
           );
       } else {
-        const payment = await db
+        const payment = db
           .insert(schema.payments)
           .values({
             companyId:
@@ -339,23 +338,23 @@ async function approbatecomprobante(liquidationId: string) {
       }
 
       console.log("7");
-      const html = htmlBill(
-        comprobante,
-        comprobante.family_group?.businessUnitData!.company,
-        producto,
-        last_voucher + 1 ?? 0,
-        comprobante.family_group?.businessUnitData!.brand,
-        billResponsible?.name ?? "",
-        (billResponsible?.address ?? "") +
-          " " +
-          (billResponsible?.address_number ?? ""),
-        billResponsible?.locality ?? "",
-        billResponsible?.province ?? "",
-        billResponsible?.postal_code?.cp ?? "",
-        billResponsible?.fiscal_id_type ?? "",
-        billResponsible?.fiscal_id_number ?? "",
-        billResponsible?.afip_status ?? ""
-      );
+      // const html = htmlBill(
+      //   comprobante,
+      //   comprobante.family_group?.businessUnitData!.company,
+      //   producto,
+      //   last_voucher + 1 ?? 0,
+      //   comprobante.family_group?.businessUnitData!.brand,
+      //   billResponsible?.name ?? "",
+      //   (billResponsible?.address ?? "") +
+      //     " " +
+      //     (billResponsible?.address_number ?? ""),
+      //   billResponsible?.locality ?? "",
+      //   billResponsible?.province ?? "",
+      //   billResponsible?.postal_code?.cp ?? "",
+      //   billResponsible?.fiscal_id_type ?? "",
+      //   billResponsible?.fiscal_id_number ?? "",
+      //   billResponsible?.afip_status ?? ""
+      // );
 
       console.log("8");
       const name = `FAC_${last_voucher + 1}.pdf`; // NOMBRE
@@ -381,7 +380,7 @@ async function approbatecomprobante(liquidationId: string) {
             : current;
         });
         if (comprobante.origin === "Nota de credito") {
-          const event = await db.insert(schema.events).values({
+          const event = db.insert(schema.events).values({
             currentAccount_id: cc?.id,
             event_amount: comprobante.importe,
             current_amount: lastEvent.current_amount + comprobante.importe,
@@ -390,7 +389,7 @@ async function approbatecomprobante(liquidationId: string) {
           });
         }
         if (comprobante.origin === "Factura") {
-          const event = await db.insert(schema.events).values({
+          const event = db.insert(schema.events).values({
             currentAccount_id: cc?.id,
             event_amount: comprobante.importe * -1,
             current_amount: lastEvent.current_amount - comprobante.importe,
@@ -399,7 +398,7 @@ async function approbatecomprobante(liquidationId: string) {
           });
         }
       } else {
-        const event = await db.insert(schema.events).values({
+        const event = db.insert(schema.events).values({
           currentAccount_id: cc?.id,
           event_amount: comprobante.importe * -1,
           current_amount: 0 - comprobante.importe,
@@ -489,7 +488,7 @@ async function createcomprobanteItem(
   concept: string,
   amount: number
 ) {
-  const abonoItem = await db
+  const abonoItem = db
     .insert(schema.items)
     .values({
       concept: concept,
@@ -736,7 +735,7 @@ export const comprobantesRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const response = await approbatecomprobante(input.liquidationId);
+      const response = approbatecomprobante(input.liquidationId);
       // return response;
     }),
   createPreLiquidation: protectedProcedure
@@ -790,7 +789,7 @@ export const comprobantesRouter = createTRPCRouter({
           logo_url: input.logo_url,
         })
         .returning();
-      await preparateComprobante(
+      preparateComprobante(
         grupos,
         input.dateDesde,
         input.dateHasta,
@@ -838,9 +837,9 @@ export const comprobantesRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input }) => {
-      await db
-        .delete(schema.comprobantes)
-        .where(eq(schema.comprobantes.id, input.providerId));
+      db.delete(schema.comprobantes).where(
+        eq(schema.comprobantes.id, input.providerId)
+      );
     }),
 });
 
@@ -853,7 +852,7 @@ export async function preparateComprobante(
   liquidationId: string,
   interes: number
 ) {
-  const user = await currentUser();
+  const user = currentUser();
 
   for (let i = 0; i < grupos.length; i++) {
     const grupo = grupos[i];
@@ -995,7 +994,7 @@ export async function preparateComprobante(
           })
           .returning();
         //creamos item de NC para visualizacion
-        await createcomprobanteItem(
+        createcomprobanteItem(
           1,
           notaCredito[0]?.id ?? "",
           "Nota de credito",
@@ -1029,43 +1028,38 @@ export async function preparateComprobante(
         })
         .returning();
       //creamos items de fc para visualizacion
-      await createcomprobanteItem(
-        ivaFloat,
-        comprobante[0]?.id ?? "",
-        "Abono",
-        abono
-      );
-      await createcomprobanteItem(
+      createcomprobanteItem(ivaFloat, comprobante[0]?.id ?? "", "Abono", abono);
+      createcomprobanteItem(
         ivaFloat,
         comprobante[0]?.id ?? "",
         "Bonificación",
         -1 * bonificacion
       );
-      await createcomprobanteItem(
+      createcomprobanteItem(
         ivaFloat,
         comprobante[0]?.id ?? "",
         "Aporte",
         -1 * contribution
       );
-      await createcomprobanteItem(
+      createcomprobanteItem(
         ivaFloatAnterior,
         comprobante[0]?.id ?? "",
         "Interes",
         interest / ivaFloatAnterior
       );
-      await createcomprobanteItem(
+      createcomprobanteItem(
         ivaFloatAnterior,
         comprobante[0]?.id ?? "",
         "Factura Anterior",
         previous_bill / ivaFloatAnterior
       );
-      await createcomprobanteItem(
+      createcomprobanteItem(
         ivaFloat,
         comprobante[0]?.id ?? "",
         "Diferencial",
         differential_amount
       );
-      await createcomprobanteItem(
+      createcomprobanteItem(
         ivaFloat,
         comprobante[0]?.id ?? "",
         "Total factura",
@@ -1078,7 +1072,7 @@ export async function preparateComprobante(
       //   (comprobante[0]?.importe ?? 0 + saldo)
       // );
       if (previous_bill - saldo > 0) {
-        await createcomprobanteItem(
+        createcomprobanteItem(
           1,
           comprobante[0]?.id ?? "",
           "Saldo a favor",
