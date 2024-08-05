@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { cn } from "~/lib/utils";
+import { Pencil, Trash2, CirclePlus } from "lucide-react";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
 import {
@@ -140,7 +140,12 @@ export default function PlanPage(props: {
           <div className="flex justify-between">
             <Title>{plan!.description}</Title>
             <div className="flex items-center space-x-2">
-              <Button onClick={() => setOpenDelete(true)}>Eliminar plan</Button>
+              <Button
+                onClick={() => setOpenDelete(true)}
+                className="bg-[#b12b2b] hover:bg-[#b12b2b] rounded-full text-white text-sm"
+              >
+                <Trash2 className="mr-1 h-4" /> Eliminar plan
+              </Button>
 
               <Dialog open={openDelete} onOpenChange={setOpenDelete}>
                 <DialogContent className="sm:max-w-[425px]">
@@ -162,8 +167,11 @@ export default function PlanPage(props: {
               <AddPlanDialog planId={plan?.id}></AddPlanDialog>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button onClick={() => setOpen(true)}>
-                    Actualizar precio{" "}
+                  <Button
+                    onClick={() => setOpen(true)}
+                    className="bg-[#727272] hover:bg-[#727272] rounded-full text-white"
+                  >
+                    <Pencil className="mr-1 h-4" /> Actualizar precio{" "}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>

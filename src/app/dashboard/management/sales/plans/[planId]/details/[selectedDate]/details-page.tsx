@@ -35,6 +35,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/components/ui/tablePreliq";
 // import AddPlanDialogPerPrice from "./AddPlanDialog";
 
 dayjs.extend(utc);
@@ -246,41 +254,79 @@ export default function DetailsPage(props: {
         {!isLoading && (
           <Tabs defaultValue="perAge">
             <TabsList>
-              <TabsTrigger value="perAge">Precios Por Edad</TabsTrigger>
+              <TabsTrigger
+                value="perAge"
+                className="data-[state=active]:bg-[#71EBD4]"
+              >
+                Precios Por Edad
+              </TabsTrigger>
 
-              <TabsTrigger value="conditional">
+              <TabsTrigger
+                value="conditional"
+                className="data-[state=active]:bg-[#71EBD4]"
+              >
                 Precios por relacion
               </TabsTrigger>
             </TabsList>
             <TabsContent value="conditional">
-              <LargeTable
-                // height={height}
-                headers={conditionHeaders}
-                rows={
-                  data
-                    ? data!.filter(
-                        (precio) =>
-                          precio.isAmountByAge === false &&
-                          precio.validy_date.getTime() == props.date.getTime()
-                      )
-                    : []
-                }
-              />
+              <Table className="w-1/2 overflow-x-hidden">
+                <TableHeader>
+                  <TableRow className="bg-[#71EBD4] hover:bg-[#71EBD4] rounded-lg">
+                    <TableHead className="h-7 text-left">Relacion</TableHead>
+                    <TableHead className="h-7 text-left">Monto</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data
+                    ?.filter(
+                      (precio) =>
+                        precio.isAmountByAge === false &&
+                        precio.validy_date.getTime() == props.date.getTime()
+                    )
+                    .map((price) => (
+                      <TableRow key={price.id}>
+                        <TableCell className="text-left pl-4 text-[#909090]">
+                          {price.condition}
+                        </TableCell>
+                        <TableCell className="text-left pl-4 text-[#909090]">
+                          {price.amount}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
             </TabsContent>
             <TabsContent value="perAge">
-              <LargeTable
-                // height={height}
-                headers={ageHeaders}
-                rows={
-                  props.plan?.pricesPerCondition
-                    ? props.plan?.pricesPerCondition.filter(
-                        (x) =>
-                          x.isAmountByAge &&
-                          x.validy_date.getTime() == props.date.getTime()
-                      )
-                    : []
-                }
-              />
+              <Table className="w-1/2">
+                <TableHeader>
+                  <TableRow className="bg-[#71EBD4] hover:bg-[#71EBD4] rounded-lg">
+                    <TableHead className="h-7 text-left">Desde edad</TableHead>
+                    <TableHead className="h-7 text-left">Hasta edad</TableHead>
+                    <TableHead className="h-7 text-left">Monto</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data
+                    ?.filter(
+                      (precio) =>
+                        precio.isAmountByAge === true &&
+                        precio.validy_date.getTime() == props.date.getTime()
+                    )
+                    .map((price) => (
+                      <TableRow key={price.id} className="py-2">
+                        <TableCell className="text-left pl-4 text-[#909090]">
+                          {price.from_age}
+                        </TableCell>
+                        <TableCell className="text-left pl-4 text-[#909090]">
+                          {price.to_age}
+                        </TableCell>
+                        <TableCell className="text-left pl-4 text-[#909090]">
+                          ${price.amount}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
             </TabsContent>
           </Tabs>
         )}

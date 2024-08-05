@@ -11,7 +11,7 @@ import { asTRPCError } from "~/lib/errors";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
 import { type RouterOutputs } from "~/trpc/shared";
-import { Loader2Icon } from "lucide-react";
+import { ArrowLeftIcon, Loader2Icon } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,6 +23,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
+import Link from "next/link";
+import LayoutContainer from "~/components/layout-container";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "~/components/ui/accordion";
 dayjs.extend(utc);
 dayjs.locale("es");
 
@@ -80,67 +88,83 @@ export default function HealthInsurancePage(props: {
     }
   }
 
+  const basicData = {
+    Código: "123123",
+    Sigla: "1232",
+    "Razón Social": "23123",
+    CUIT: "44398273",
+    "Condición AFIP": "asdfdf",
+    "Condición IIBB": "asdfsdf",
+    "Nro. IIBB": "dasdf",
+    "Domicilio Comercial": "cordoba 233",
+    Piso: "1",
+    Oficina: "3",
+    Localidad: "tigre",
+    Provincia: "Buenos Aires",
+    "Código Postal": "1133",
+    Teléfono: "1123232",
+    "E-mail": "fulanito@gmail.com",
+    Estado: "Gran provinvia de Bs As",
+    "Fecha de Estado": "12/12/12",
+    "Motivo de baja": "Ninguno",
+    "Usuario baja": "fulanito",
+  };
+
+  const facturacion = {
+    "Unidad de negocio": "Cristal Salud",
+    Provincia: "Buenos Aires",
+    Oficina: "123",
+    "Domicilio Fiscal": "Entre rios 123",
+    Piso: "1",
+    "Condicion de venta": "Mixto",
+    "Codigo postal": "1233",
+    Localidad: "Jose C Paz",
+  };
   return (
     <div>
-      <h1 className=" m-3 text-lg">Actualizar Obra Social</h1>
-      <div className="m-3">
-        <div>
-          <Label htmlFor="name">Nombre</Label>
-          <Input
-            id="name"
-            placeholder="..."
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </div>
-        <div>
-          <Label htmlFor="idNumber">Numero de Identificacion</Label>
-          <Input
-            id="idNumber"
-            placeholder="..."
-            value={idNumber}
-            onChange={(e) => setIdNumber(e.target.value)}
-          />
-        </div>
-      </div>
-      <Button disabled={isLoading} onClick={handleUpdate} className="m-3 ml-0">
-        {isLoading && <Loader2Icon className="mr-2 animate-spin" size={20} />}
-        Actualizar
-      </Button>
-
-      <AlertDialog open={openPopover}>
-        <AlertDialogTrigger asChild={true}>
-          <Button
-            variant="destructive"
-            className="w-[160px]"
-            disabled={isPending}
-            onClick={() => setOpenPopover(true)}>
-            {isPending && (
-              <Loader2Icon className="mr-2 animate-spin" size={20} />
-            )}
-            Eliminar Marca
-          </Button>
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              ¿Estás seguro que querés eliminar la marca?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Eliminar marca permanentemente.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-red-500 active:bg-red-700 hover:bg-red-600"
-              onClick={handleDelete}
-              disabled={isPending}>
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <Link
+        className="w-20 h-auto flex justify-between"
+        href={`/dashboard/management/client/health_insurances`}
+      >
+        <ArrowLeftIcon /> Volver
+      </Link>
+      <LayoutContainer>
+        <section className="space-y-2">
+          <div>
+            <h2 className="text-xl mt-2">Cuadro de saldo en Cta. Cte.:</h2>
+          </div>
+          <div className="border rounded-lg border-[#20E0B9] mt-2 p-4 w-1/4">
+            <p className="text-lg font-semibold">Saldo O.S Nro.</p>
+            <span className="text-[#CD3D3B] text-2xl font-bold">-$10000</span>
+          </div>
+          <div className="w-full border-b-2 border-[#20E0B9]">
+            <h2 className="text-xl mt-2">Datos Básicos:</h2>
+          </div>
+          <div className="grid grid-cols-4 px-6 py-5">
+            {Object.entries(basicData).map(([key, value]) => (
+              <div key={key} className="flex flex-col mb-2">
+                <p className="font-extrabold text-[0.9rem] text-[#3e3e3e]">
+                  {key}:{" "}
+                </p>
+                <div className="text-sm text-[#3e3e3e] opacity-75">{value}</div>
+              </div>
+            ))}
+          </div>
+          <div className="w-full border-b-2 border-[#20E0B9]">
+            <h2 className="text-xl mt-2">Facturación:</h2>
+          </div>
+          <div className="grid grid-cols-4 px-6 py-5">
+            {Object.entries(facturacion).map(([key, value]) => (
+              <div key={key} className="flex flex-col mb-2">
+                <p className="font-extrabold text-[0.9rem] text-[#3e3e3e]">
+                  {key}:{" "}
+                </p>
+                <div className="text-sm text-[#3e3e3e] opacity-75">{value}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </LayoutContainer>
     </div>
   );
 }
