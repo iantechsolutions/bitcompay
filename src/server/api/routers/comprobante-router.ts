@@ -269,7 +269,8 @@ async function approbatecomprobante(liquidationId: string) {
             Importe: comprobante?.nroComprobante,
           },
         };
-        db.update(schema.payments)
+        await db
+          .update(schema.payments)
           .set({
             statusId: statusCancelado?.id,
           })
@@ -280,7 +281,7 @@ async function approbatecomprobante(liquidationId: string) {
             )
           );
       } else {
-        const payment = db
+        const payment = await db
           .insert(schema.payments)
           .values({
             companyId:
@@ -380,7 +381,7 @@ async function approbatecomprobante(liquidationId: string) {
             : current;
         });
         if (comprobante.origin === "Nota de credito") {
-          const event = db.insert(schema.events).values({
+          const event = await db.insert(schema.events).values({
             currentAccount_id: cc?.id,
             event_amount: comprobante.importe,
             current_amount: lastEvent.current_amount + comprobante.importe,
@@ -389,7 +390,7 @@ async function approbatecomprobante(liquidationId: string) {
           });
         }
         if (comprobante.origin === "Factura") {
-          const event = db.insert(schema.events).values({
+          const event = await db.insert(schema.events).values({
             currentAccount_id: cc?.id,
             event_amount: comprobante.importe * -1,
             current_amount: lastEvent.current_amount - comprobante.importe,
@@ -398,7 +399,7 @@ async function approbatecomprobante(liquidationId: string) {
           });
         }
       } else {
-        const event = db.insert(schema.events).values({
+        const event = await db.insert(schema.events).values({
           currentAccount_id: cc?.id,
           event_amount: comprobante.importe * -1,
           current_amount: 0 - comprobante.importe,
