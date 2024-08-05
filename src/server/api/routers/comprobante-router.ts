@@ -1126,36 +1126,45 @@ export async function preparateComprobante(
         .returning();
       //creamos items de fc para visualizacion
       createcomprobanteItem(ivaFloat, comprobante[0]?.id ?? "", "Abono", abono);
-      createcomprobanteItem(
-        ivaFloat,
-        comprobante[0]?.id ?? "",
-        "Bonificación",
-        -1 * bonificacion
-      );
-      createcomprobanteItem(
-        ivaFloat,
-        comprobante[0]?.id ?? "",
-        "Aporte",
-        -1 * contribution
-      );
-      createcomprobanteItem(
-        ivaFloatAnterior,
-        comprobante[0]?.id ?? "",
-        "Interes",
-        interest / ivaFloatAnterior
-      );
-      createcomprobanteItem(
-        ivaFloatAnterior,
-        comprobante[0]?.id ?? "",
-        "Factura Anterior",
-        previous_bill / ivaFloatAnterior
-      );
-      createcomprobanteItem(
-        ivaFloat,
-        comprobante[0]?.id ?? "",
-        "Diferencial",
-        differential_amount
-      );
+      if (bonificacion != 0) {
+        createcomprobanteItem(
+          ivaFloat,
+          comprobante[0]?.id ?? "",
+          "Bonificación",
+          -1 * bonificacion
+        );
+      }
+      if (contribution != 0) {
+        createcomprobanteItem(
+          ivaFloat,
+          comprobante[0]?.id ?? "",
+          "Aporte",
+          -1 * contribution
+        );
+      }
+      if (interest != 0) {
+        createcomprobanteItem(
+          ivaFloatAnterior,
+          comprobante[0]?.id ?? "",
+          "Interes",
+          interest / ivaFloatAnterior
+        );
+      }
+      if (previous_bill != 0) {
+        createcomprobanteItem(
+          ivaFloatAnterior,
+          comprobante[0]?.id ?? "",
+          "Factura Anterior",
+          previous_bill / ivaFloatAnterior
+        );
+      }
+
+      // createcomprobanteItem(
+      //   ivaFloat,
+      //   comprobante[0]?.id ?? "",
+      //   "Diferencial",
+      //   differential_amount
+      // );
       createcomprobanteItem(
         ivaFloat,
         comprobante[0]?.id ?? "",
