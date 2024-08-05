@@ -256,11 +256,14 @@ export const uploadsRouter = createTRPCRouter({
                 events: true,
               },
             });
-            const lastEvent = ccORG?.events.reduce((prev, current) => {
-              return new Date(prev.createdAt) > new Date(current.createdAt)
-                ? prev
-                : current;
-            });
+            let lastEvent = null;
+            if (ccORG && ccORG.events.length > 0) {
+              lastEvent = ccORG?.events.reduce((prev, current) => {
+                return new Date(prev.createdAt) > new Date(current.createdAt)
+                  ? prev
+                  : current;
+              });
+            }
             // if (!lastEvent) {
             //   throw new Error(
             //     "No hay eventos en la cuenta corriente de la empresa"
