@@ -32,6 +32,8 @@ export function AddBrandDialog() {
   const [description, setDescription] = useState("");
   const [iva, setIva] = useState<string>("21%");
   const [name, setName] = useState("");
+  const [code, setCode] = useState("");
+
   const [billType, setBillType] = useState<string>("");
 
   const [number, setNumber] = useState("");
@@ -46,6 +48,18 @@ export function AddBrandDialog() {
 
   async function handleCreate() {
     try {
+      if (
+        !name ||
+        !code ||
+        !description ||
+        !iva ||
+        !billType ||
+        !reducedDescription
+      ) {
+        setError("Todos los campos son obligatorios.");
+        return;
+      }
+
       schema.parse({ texto: reducedDescription });
       await createBrand({
         iva: iva.toString(),
@@ -78,77 +92,101 @@ export function AddBrandDialog() {
           <DialogHeader>
             <DialogTitle>Crear nueva marca</DialogTitle>
           </DialogHeader>
-          <div>
-            <Label htmlFor="name">Nombre de la marca</Label>
-            <Input
-              id="name"
-              placeholder="..."
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required={true}
-            />
-          </div>
 
-          <div>
-            <Label htmlFor="description">Descripción</Label>
-            <Input
-              id="description"
-              placeholder="..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
-          <div>
+          <div className="space-y-4">
+            {/* Nombre de la marca */}
             <div>
-              <Label htmlFor="iva">IVA</Label>
-              <Select onValueChange={(e) => setIva(e)}>
-                <SelectTrigger className="w-[180px] font-bold">
-                  <SelectValue placeholder="Seleccionar IVA" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="3">0%</SelectItem>
-                  <SelectItem value="9">2.5%</SelectItem>
-                  <SelectItem value="8">5%</SelectItem>
-                  <SelectItem value="4">10.5%</SelectItem>
-                  <SelectItem value="5">21%</SelectItem>
-                  <SelectItem value="6">27%</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="name">Nombre de la marca</Label>
+              <Input
+                id="name"
+                placeholder="..."
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
             </div>
-            <div className="col-span-2">
-              <Label htmlFor="billtype">Tipo de factura</Label>
+
+            {/* Código de marca */}
+            <div>
+              <Label htmlFor="code">Código de marca(max. 4 carac)</Label>
+              <Input
+                id="code"
+                placeholder="..."
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                required
+                maxLength={4}
+              />
+            </div>
+
+            {/* Descripción */}
+            <div>
+              <Label htmlFor="description">Descripción</Label>
+              <Input
+                id="description"
+                placeholder="..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
+
+            {/* IVA, Tipo de factura y Descripción Reducida */}
+            <div className="flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
               <div>
-                <ComboboxDemo
-                  title="Seleccionar factura..."
-                  placeholder="Factura X"
-                  options={[
-                    { value: "1", label: "FACTURA A" },
-                    { value: "6", label: "FACTURA B" },
-                    { value: "11", label: "FACTURA C" },
-                    { value: "51", label: "FACTURA M" },
-                  ]}
-                  onSelectionChange={(e) => setBillType(e)}
-                />
+                <Label htmlFor="iva">IVA</Label>
+                <Select onValueChange={(e) => setIva(e)}>
+                  <SelectTrigger className="w-[180px] font-bold">
+                    <SelectValue placeholder="Seleccionar IVA" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="3">0%</SelectItem>
+                    <SelectItem value="9">2.5%</SelectItem>
+                    <SelectItem value="8">5%</SelectItem>
+                    <SelectItem value="4">10.5%</SelectItem>
+                    <SelectItem value="5">21%</SelectItem>
+                    <SelectItem value="6">27%</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex-1">
+                <Label htmlFor="billtype">Tipo de factura</Label>
+                <div>
+                  <ComboboxDemo
+                    title="Seleccionar factura..."
+                    placeholder="Factura X"
+                    options={[
+                      { value: "1", label: "FACTURA A" },
+                      { value: "6", label: "FACTURA B" },
+                      { value: "11", label: "FACTURA C" },
+                      { value: "51", label: "FACTURA M" },
+                    ]}
+                    onSelectionChange={(e) => setBillType(e)}
+                  />
+                </div>
               </div>
             </div>
 
-            <Label htmlFor="description_reducida">Descripción Reducida</Label>
-            <Input
-              id="description_reducida"
-              placeholder="..."
-              value={reducedDescription}
-              onChange={(e) => {
-                setReducedDescription(e.target.value);
-                try {
-                  schema.parse({ texto: reducedDescription });
-                } catch {
-                  setError(
-                    "por favor inserte una descripcion reducida de 10 caracteres o menos"
-                  );
-                }
-              }}
-            />
-            {error && <span className="text-red-600 text-xs">{error}</span>}
+            {/* Descripción Reducida */}
+            <div className="mt-4">
+              <Label htmlFor="description_reducida">Descripción Reducida</Label>
+              <Input
+                id="description_reducida"
+                placeholder="..."
+                value={reducedDescription}
+                onChange={(e) => {
+                  setReducedDescription(e.target.value);
+                  try {
+                    schema.parse({ texto: reducedDescription });
+                  } catch {
+                    setError(
+                      "Por favor inserte una descripción reducida de 10 caracteres o menos"
+                    );
+                  }
+                }}
+              />
+              {error && <span className="text-red-600 text-xs">{error}</span>}
+            </div>
           </div>
 
           <DialogFooter>
