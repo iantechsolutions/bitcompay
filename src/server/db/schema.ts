@@ -266,6 +266,7 @@ export const brands = pgTable(
     createdAt,
     updatedAt,
     logo_url: varchar("logo_url"),
+    prisma_code: varchar("prisma_code"),
     number: serial("number"),
   },
   (brands) => ({

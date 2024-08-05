@@ -240,7 +240,7 @@ export const uploadsRouter = createTRPCRouter({
               // }
               const new_event = await tx.insert(schema.events).values({
                 currentAccount_id: currentAccount?.id,
-                event_amount: record.collected_amount ?? 0,
+                event_amount: recollected_amount ?? 0,
                 current_amount:
                   (lastEvent?.current_amount ?? 0) + recollected_amount,
                 description: "Recaudacion",
@@ -277,7 +277,7 @@ export const uploadsRouter = createTRPCRouter({
               currentAccount_id: ccORG?.id,
               event_amount:
                 // record.first_due_amount ??
-                record.collected_amount ?? 0,
+                recollected_amount ?? 0,
               current_amount:
                 (lastEvent?.current_amount ?? 0) + recollected_amount,
               description: "Recaudacion",

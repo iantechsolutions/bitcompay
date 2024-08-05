@@ -48,6 +48,10 @@ export const iofilesRouter = createTRPCRouter({
           where: eq(schema.paymentStatus.code, "90"),
         });
 
+        const statusEnviado = await db.query.paymentStatus.findFirst({
+          where: eq(schema.paymentStatus.code, "00"),
+        });
+
         const paymentsFull = await db.query.payments.findMany({
           where: and(
             eq(schema.payments.companyId, input.companyId),
@@ -58,7 +62,8 @@ export const iofilesRouter = createTRPCRouter({
         const payments = paymentsFull.filter(
           (p) =>
             p.genChannels.includes(channel.id) === false &&
-            p.statusId !== statusCancelado?.id
+            p.statusId !== statusCancelado?.id &&
+            p.statusId !== statusEnviado?.id
         );
 
         const regexPagoFacil = /pago\s*f[aá]cil/i;
@@ -83,7 +88,12 @@ export const iofilesRouter = createTRPCRouter({
             concept: input.concept,
             redescription: brand.redescription,
           };
-          text = generatePagomiscuentas(generateInput, brand.name, payments);
+          text = generatePagomiscuentas(
+            generateInput,
+            brand.name,
+            brand.prisma_code ?? "",
+            payments
+          );
         } else if (channel.name.match(regexPagoFacil)) {
           const generateInput = {
             channelId: channel.id,
@@ -376,15 +386,11 @@ function generatePagomiscuentas(
     redescription: string;
   },
   brandName: string,
+  prismaCode: string,
   transactions: RouterOutputs["transactions"]["list"]
 ) {
-  const codeCompanyMap: Record<string, string> = {
-    "red argentina de sanatorios": "REDA",
-    "cristal salud": "AL6N",
-  };
   const dateAAAAMMDD = dayjs().locale("es").format("YYYYMMDD");
-  const companyCode =
-    codeCompanyMap[brandName.toLowerCase() as keyof typeof codeCompanyMap];
+  // codeCompanyMap[brandName.toLowerCase() as keyof typeof codeCompanyMap];
 
   // if (!companyCode) {
   //   throw new TRPCError({
@@ -393,7 +399,7 @@ function generatePagomiscuentas(
   //   });
   // }
   //header
-  let text = `0400${companyCode}${dateAAAAMMDD}${"0".repeat(264)}\n`;
+  let text = `0400${prismaCode}${dateAAAAMMDD}${"0".repeat(264)}\n`;
   let total_collected = 0;
   for (const transaction of transactions) {
     // registro
@@ -446,7 +452,7 @@ function generatePagomiscuentas(
     7,
     false
   );
-  text += `9400${companyCode}${dateAAAAMMDD}${total_records_string}${"0".repeat(
+  text += `9400${prismaCode}${dateAAAAMMDD}${total_records_string}${"0".repeat(
     7
   )}${total_collected_string}${"0".repeat(234)}\n`;
 
