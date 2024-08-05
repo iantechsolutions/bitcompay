@@ -19,7 +19,7 @@ export default function Home() {
         identificationNumber:
           os?.identificationNumber ?? "SIN NRO DE IDENTIFICACION",
         responsibleName: os?.responsibleName ?? "SIN NOMBRE DE RESPONSABLE",
-        fiscal_id_number: String(os?.fiscal_id_number) ?? "SIN CUIL/CUIT",
+        fiscal_id_number: os?.fiscal_id_number ?? "SIN CUIL/CUIT",
         afip_status: os?.afip_status ?? "SIN ESTADO AFIP",
       });
     }

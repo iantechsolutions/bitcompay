@@ -32,7 +32,7 @@ export function AddHealthInsurances() {
   const [IdNumber, setIdNumber] = useState("");
   const [adress, setAdress] = useState("");
   const [afip_status, setAfip_status] = useState("");
-  const [id_number, setId_number] = useState(0);
+  const [id_number, setId_number] = useState("");
   const [id_type, setId_type] = useState("");
   const [responsible_name, setResponsible_name] = useState("");
   const [locality, setLocality] = useState("");
@@ -75,8 +75,7 @@ export function AddHealthInsurances() {
     <>
       <Button
         onClick={() => setOpen(true)}
-        className="rounded-full bg-[#0DA485] hover:bg-[#0DA485]"
-      >
+        className="rounded-full bg-[#0DA485] hover:bg-[#0DA485]">
         <PlusCircleIcon className="mr-2" size={20} />
         Agregar obra social como cliente
       </Button>
@@ -135,8 +134,7 @@ export function AddHealthInsurances() {
                 id="idNumber"
                 placeholder="..."
                 value={id_number}
-                type="number"
-                onChange={(e) => setId_number(Number(e.target.value))}
+                onChange={(e) => setId_number(e.target.value)}
               />
             </div>
             <div>

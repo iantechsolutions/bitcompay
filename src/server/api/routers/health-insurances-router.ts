@@ -29,7 +29,7 @@ export const healthInsurancesRouter = createTRPCRouter({
         identificationNumber: z.string(),
         adress: z.string().optional(),
         afip_status: z.string().optional(),
-        fiscal_id_number: z.number().optional(),
+        fiscal_id_number: z.string().optional(),
         fiscal_id_type: z.string().optional(),
         isClient: z.boolean().optional(),
         responsibleName: z.string().optional(),
