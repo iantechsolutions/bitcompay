@@ -117,6 +117,7 @@ export default function GenerateChannelOutputPage(props: {
     } catch (_error) {
       // Si hay errores de validación, mostrarlos al usuario
       setError("no se puede asignar un nombre mayor a 10 caracteres");
+      console.log(_error);
     }
   }
 
@@ -195,7 +196,7 @@ export default function GenerateChannelOutputPage(props: {
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className=" items-center gap-4">
-                  {props.channel.name !== "DEBITO AUTOMATICO" ? (
+                  {props.channel.name !== "DEBITO AUTOMATICO EN TARJETAS" ? (
                     <>
                       <Label htmlFor="fileName" className="text-right">
                         Nombre del archivo
@@ -288,6 +289,14 @@ export default function GenerateChannelOutputPage(props: {
                           />
                         </form>
                       </Form>
+                      <Label htmlFor="fileName" className="text-left">
+                        Nombre del archivo
+                      </Label>
+                      <Input
+                        id="fileName"
+                        onChange={handleName}
+                        className="col-span-3"
+                      />
                     </div>
                   )}
                   {error && (

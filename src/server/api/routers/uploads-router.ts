@@ -3,7 +3,8 @@ import { and, eq, or, desc, inArray, not } from "drizzle-orm";
 import * as xlsx from "xlsx";
 import { record, z } from "zod";
 import { createId } from "~/lib/utils";
-import { type DBTX, db } from "~/server/db";
+import postgres from "postgres";
+const queryClient = postgres(env.POSTGRES_URL);
 import * as schema from "~/server/db/schema";
 import {
   columnLabelByKey,
@@ -11,18 +12,19 @@ import {
   recRowsTransformer,
 } from "~/server/uploads/validators";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { isArray } from "util";
-import { fiscalIdType } from "~/server/forms/providers-schema";
-import { Console } from "console";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
 import utc from "dayjs/plugin/utc";
 import dayOfYear from "dayjs/plugin/dayOfYear";
 import timezone from "dayjs/plugin/timezone";
+import { env } from "~/env";
+import { drizzle } from "drizzle-orm/postgres-js";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(dayOfYear);
 dayjs.locale("es");
+
+const db = drizzle(queryClient, { schema });
 
 const statusCodeMap = new Map();
 const statusCodes = await db.query.paymentStatus.findMany();
@@ -87,12 +89,11 @@ export const uploadsRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       const companyId = ctx.session.orgId;
-      return await db.transaction(async (db) => {
+      return await db.transaction(async () => {
         const channels = await getCompanyProducts(companyId!);
         const brands = await getCompanyBrands(companyId!);
 
         const contents = await readUploadContents(
-          db,
           input.id,
           input.type,
           companyId!,
@@ -120,9 +121,8 @@ export const uploadsRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input }) => {
-      return await db.transaction(async (db) => {
+      return await db.transaction(async () => {
         const contents = await readResponseUploadContents(
-          db,
           input.uploadId,
           input.type,
           input.channelName
@@ -157,7 +157,6 @@ export const uploadsRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       await db.transaction(async (tx) => {
         const { records } = await readResponseUploadContents(
-          tx,
           input.uploadId,
           undefined,
           input.channelName
@@ -364,7 +363,6 @@ export const uploadsRouter = createTRPCRouter({
         const channels = await getCompanyProducts(companyId!);
         const brands = await getCompanyBrands(companyId!);
         const result = await readUploadContents(
-          tx,
           input.id,
           "rec",
           companyId!,
@@ -499,7 +497,6 @@ async function getCompanyBrands(companyId: string) {
 
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
 async function readResponseUploadContents(
-  db: DBTX,
   id: string,
   inputType: string | undefined,
   channelName: string
@@ -600,13 +597,14 @@ async function readResponseUploadContents(
 
       const invoice_number = recordValues[1] ?? "33666";
       const fiscal_id_number = largeNumber?.slice(1, 12);
-      const importe_final = largeNumber2?.slice(17, 27);
+      const importe_final = largeNumber2?.slice(17, 28);
 
       const payment_date = recordValues[2]!.slice(0, 8);
       const year = payment_date!.slice(0, 4);
       const month = payment_date!.slice(4, 6);
       const day = payment_date!.slice(6);
 
+      console.log(importe_final, "testtt", invoice_number);
       const date = dayjs(`${day}${month}${year}`, "DDMMYY").format("DD-MM-YY");
 
       let status;
@@ -712,10 +710,15 @@ async function readResponseUploadContents(
       console.log(recordValues[4], "importe_final");
 
       let estado;
+
       if (parceImporte(importe_final!) > 0) {
-        estado == "00";
+        estado = await db.query.paymentStatus.findFirst({
+          where: eq(schema.paymentStatus.code, "00"),
+        });
       } else {
-        estado == "92";
+        estado = await db.query.paymentStatus.findFirst({
+          where: eq(schema.paymentStatus.code, "03"),
+        });
       }
       console.log(estado, "estado");
 
@@ -734,7 +737,7 @@ async function readResponseUploadContents(
           ),
         });
         if (original_transaction) {
-          original_transaction.statusId = estado!;
+          original_transaction.statusId = estado?.id ?? "";
           original_transaction.payment_date = dayjs(date, "DD-MM-YY").toDate();
           original_transaction.collected_amount =
             original_transaction.first_due_amount! +
@@ -818,7 +821,6 @@ type BrandsOfCompany = Awaited<ReturnType<typeof getCompanyBrands>>;
 
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
 async function readUploadContents(
-  db: DBTX,
   id: string,
   inputType: string | undefined,
   companyId: string,

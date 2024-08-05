@@ -139,8 +139,8 @@ export const iofilesRouter = createTRPCRouter({
           text = generateDebitoAutomatico({
             payments,
             EstablishmentNumber: establishment.establishment_number,
-            cardType: input.card_type!,
-            flag: input.card_brand!,
+            cardType: input.card_type ?? "",
+            flag: input.card_brand ?? "",
             // presentationDate: input.presentation_date,
           });
         } else {
@@ -749,9 +749,9 @@ type generateDAprops = {
 };
 function generateDebitoAutomatico(props: generateDAprops) {
   const FileNameMap: Record<string, string> = {
-    "Visa Credito": "DEBLIQC ",
-    "Visa Debito": "DEBLIQD ",
-    "Mastercard Credito": "DEBLIMC ",
+    "visa credito": "DEBLIQC ",
+    "visa debito": "DEBLIQD ",
+    "mastercard credito": "DEBLIMC ",
   };
 
   let currentDate = dayjs().utc().tz("America/Argentina/Buenos_Aires");
@@ -762,20 +762,21 @@ function generateDebitoAutomatico(props: generateDAprops) {
   }
   const dateYYYYMMDD = currentDate.format("YYYYMMDD");
 
-  const key = `${props.flag} ${props.cardType}`;
+  let key = `${props.flag.toLowerCase()} ${props.cardType.toLowerCase()}`;
+  console.log("testamento", props.flag, props.cardType, key);
   const fileName = FileNameMap[key] || " ".repeat(8);
 
   const establishmentNumber = formatString(
     "0",
     props.EstablishmentNumber.toString(),
-    15,
+    10,
     false
   );
 
   // const presentationDate = dayjs(props.presentationDate).format("YYYYMMDD");
   const hour = dayjs().format("HHmm");
   let header = `0${fileName}${establishmentNumber}900000    ${dateYYYYMMDD}${hour}0  ${" ".repeat(
-    50
+    55
   )}*\r\n`;
 
   let body = "";
@@ -787,6 +788,7 @@ function generateDebitoAutomatico(props: generateDAprops) {
       8,
       false
     );
+
     const importe = payment.collected_amount ?? payment.first_due_amount;
     const importeString = formatAmount(importe!, 13);
 
@@ -810,12 +812,7 @@ function generateDebitoAutomatico(props: generateDAprops) {
     10,
     false
   );
-  const total_collected_string = formatString(
-    "0",
-    total_collected.toString(),
-    15,
-    false
-  );
+  const total_collected_string = formatAmount(total_collected, 13);
   let footer = `9${fileName}${establishment}900000    ${dateYYYYMMDD}${hour}${total_records}${total_collected_string}${" ".repeat(
     36
   )}*`;
