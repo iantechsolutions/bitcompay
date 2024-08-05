@@ -140,7 +140,8 @@ export default function EditCompany() {
                     <SelectItem
                       key={marca?.id}
                       value={marca?.id}
-                      className="rounded-none border-b border-gray-600">
+                      className="rounded-none border-b border-gray-600"
+                    >
                       {marca?.name}
                     </SelectItem>
                   ))}
@@ -166,26 +167,24 @@ export default function EditCompany() {
                 <br />
                 <Select
                   onValueChange={(e) => setTipoComprobante(e)}
-                  value={tipoComprobante ?? ""}>
+                  value={tipoComprobante ?? ""}
+                >
                   <SelectTrigger className="w-[180px] font-bold">
                     <SelectValue placeholder="Seleccionar factura..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="3">FACTURA A</SelectItem>
+                    <SelectItem value="1">FACTURA A</SelectItem>
                     <SelectItem value="6">FACTURA B</SelectItem>
                     <SelectItem value="11">FACTURA C</SelectItem>
                     <SelectItem value="51">FACTURA M</SelectItem>
-                    <SelectItem value="19">FACTURA E</SelectItem>
-                    <SelectItem value="8">NOTA DE DEBITO A</SelectItem>
-                    <SelectItem value="13">NOTA DE DEBITO B</SelectItem>
-                    <SelectItem value="15">NOTA DE DEBITO C</SelectItem>
+                    <SelectItem value="2">NOTA DE DEBITO A</SelectItem>
+                    <SelectItem value="7">NOTA DE DEBITO B</SelectItem>
+                    <SelectItem value="12">NOTA DE DEBITO C</SelectItem>
                     <SelectItem value="52">NOTA DE DEBITO M</SelectItem>
-                    <SelectItem value="20">NOTA DE DEBITO E</SelectItem>
-                    <SelectItem value="2">NOTA DE CREDITO A</SelectItem>
-                    <SelectItem value="12">NOTA DE CREDITO B</SelectItem>
-                    <SelectItem value="14">NOTA DE CREDITO C</SelectItem>
+                    <SelectItem value="3">NOTA DE CREDITO A</SelectItem>
+                    <SelectItem value="8">NOTA DE CREDITO B</SelectItem>
+                    <SelectItem value="13">NOTA DE CREDITO C</SelectItem>
                     <SelectItem value="53">NOTA DE CREDITO M</SelectItem>
-                    <SelectItem value="21">NOTA DE CREDITO E</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -194,7 +193,8 @@ export default function EditCompany() {
                 <br />
                 <Select
                   onValueChange={(e) => setConcepto(e)}
-                  value={concepto ?? ""}>
+                  value={concepto ?? ""}
+                >
                   <SelectTrigger className="w-[180px] font-bold">
                     <SelectValue placeholder="Seleccionar concepto..." />
                   </SelectTrigger>

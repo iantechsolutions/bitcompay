@@ -30,10 +30,15 @@ export default async function page({
   const genFileStatus = await db.query.paymentStatus.findFirst({
     where: eq(schema.paymentStatus.code, "92"),
   });
+  const statusCancelado = await db.query.paymentStatus.findFirst({
+    where: eq(schema.paymentStatus.code, "90"),
+  });
   const payments = await db.query.payments.findMany({
     where: and(
-      eq(schema.payments.companyId, company.id),
-      inArray(schema.payments.product_number, productsNumbers) // Solo los productos de la marca y producto -> (los productos salen del canal)
+      and(
+        eq(schema.payments.companyId, company.id),
+        inArray(schema.payments.product_number, productsNumbers) // Solo los productos de la marca y producto -> (los productos salen del canal)
+      )
     ),
   });
 
@@ -48,7 +53,9 @@ export default async function page({
     { status: "Pendiente", records: 0, amount_collected: 0 },
   ];
 
-  for (const transaction of payments) {
+  for (const transaction of payments.filter(
+    (x) => x.statusId != statusCancelado?.id
+  )) {
     if (
       !transaction.genChannels.includes(channel.id) &&
       transaction.g_c === brand.number

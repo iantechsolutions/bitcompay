@@ -61,6 +61,11 @@ export const productsChannel = createTRPCRouter({
               channel: true,
             },
           },
+          company: {
+            with: {
+              company: true,
+            },
+          },
         },
       });
 
@@ -96,6 +101,7 @@ export const productsChannel = createTRPCRouter({
         name: z.string().min(1).max(255).optional(),
         description: z.string().min(0).max(1023).optional(),
         channels: z.array(z.string()).optional(),
+        companies: z.array(z.string()).optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -149,6 +155,58 @@ export const productsChannel = createTRPCRouter({
               }))
             );
           }
+        }
+        const productCompanies = await tx.query.companyProducts.findMany({
+          where: eq(schema.companyProducts.productId, input.productId),
+        });
+        console.log("input.companies", input.companies);
+        if (input.companies) {
+          const companies = new Set(input.companies);
+
+          const companiesToDelete = productCompanies.filter(
+            (productCompany) => {
+              return !companies.has(productCompany.companyId);
+            }
+          );
+
+          // const channelsToDelete = productChannels.filter((productChannel) => {
+          //   return !channels.has(productChannel.channelId);
+          // });
+          const companiesToAdd = input.companies.filter((companyId) => {
+            return !productCompanies.find(
+              (productCompany) => productCompany.companyId === companyId
+            );
+          });
+
+          if (companiesToDelete.length > 0) {
+            await tx.delete(schema.companyProducts).where(
+              and(
+                eq(schema.companyProducts.productId, input.productId),
+                inArray(
+                  schema.companyProducts.companyId,
+                  companiesToDelete.map(
+                    (companiesToDelete) => companiesToDelete.companyId
+                  )
+                )
+              )
+            );
+          }
+          if (companiesToAdd.length > 0) {
+            await tx.insert(schema.companyProducts).values(
+              companiesToAdd.map((companyId) => ({
+                productId: input.productId,
+                companyId,
+              }))
+            );
+          }
+          // if (channelsToAdd.length > 0) {
+          //   await tx.insert(schema.productChannels).values(
+          //     channelsToAdd.map((channelId) => ({
+          //       productId: input.productId,
+          //       channelId,
+          //     }))
+          //   );
+          // }
         }
       });
     }),

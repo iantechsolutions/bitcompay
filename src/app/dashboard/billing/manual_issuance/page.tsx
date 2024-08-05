@@ -39,7 +39,7 @@ import { toast } from "sonner";
 import { Comprobante } from "./facturaGenerada";
 import LayoutContainer from "~/components/layout-container";
 import { Title } from "~/components/title";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import {
   Select,
   SelectContent,
@@ -68,7 +68,7 @@ export default function Page() {
   const { mutateAsync: createComprobante } =
     api.comprobantes.create.useMutation();
   const { mutateAsync: updateComprobante } =
-    api.comprobantes.addBillLink.useMutation();
+    api.comprobantes.addBillLinkAndNumber.useMutation();
   const { mutateAsync: createEventFamily } =
     api.events.createByType.useMutation();
   const { mutateAsync: createEventOrg } =
@@ -83,10 +83,16 @@ export default function Page() {
   const [selectedComprobante, setSelectedComprobante] = useState<any>(null);
   const [comprobanteCreado, setComprobanteCreado] = useState<any>(null);
   const [afip, setAfip] = useState<any>(null);
+  const router = useRouter();
   useEffect(() => {
     async function loginAfip() {
       const afip = await ingresarAfip();
+      setLoading(false);
+      const voucherTypes = await afip.ElectronicBilling.getVoucherTypes();
+      const ivaTypes = await afip.ElectronicBilling.getAliquotTypes();
       console.log("afip loaded");
+      console.log("voucherTypes", voucherTypes);
+      console.log("aliquot types", ivaTypes);
       setAfip(afip);
     }
 
@@ -269,7 +275,6 @@ export default function Page() {
     try {
       (async () => {
         setLoading(true);
-        const afip = await ingresarAfip();
         let comprobante = null;
         let last_voucher = 0;
         let data = null;
@@ -289,10 +294,20 @@ export default function Page() {
           .toISOString()
           .split("T")[0];
 
-        if (fcSelec && (tipoComprobante == "2" || tipoComprobante == "12")) {
+        if (fcSelec && (tipoComprobante == "3" || tipoComprobante == "8")) {
           const facSeleccionada = comprobantes?.find((x) => x.id == fcSelec);
 
           let ivaFloat = (100 + parseFloat(facSeleccionada?.iva ?? "0")) / 100;
+          console.log("IMPORTE NC");
+          console.log(facSeleccionada?.importe);
+          console.log(
+            Math.round(
+              100 *
+                ((facSeleccionada?.importe ?? 0) -
+                  Number(facSeleccionada?.importe) / ivaFloat)
+            ) / 100
+          );
+          console.log((Number(facSeleccionada?.importe) / ivaFloat).toFixed(2));
 
           comprobante = await createComprobante({
             billLink: "",
@@ -310,6 +325,7 @@ export default function Page() {
             prodName: facSeleccionada?.prodName ?? "",
             nroComprobante: facSeleccionada?.nroComprobante ?? 0,
             family_group_id: grupoFamiliarId,
+            previous_facturaId: facSeleccionada?.id,
           });
           try {
             last_voucher = await afip.ElectronicBilling.getLastVoucher(
@@ -349,11 +365,8 @@ export default function Page() {
             ImpIVA:
               Math.round(
                 100 *
-                  (comprobante[0]?.importe ??
-                    0 -
-                      parseFloat(
-                        (Number(comprobante[0]?.importe) / ivaFloat).toFixed(2)
-                      ))
+                  ((comprobante[0]?.importe ?? 0) -
+                    Number(comprobante[0]?.importe) / ivaFloat)
               ) / 100,
 
             ImpTrib: 0,
@@ -365,21 +378,18 @@ export default function Page() {
               Importe:
                 Math.round(
                   100 *
-                    (comprobante[0]?.importe ??
-                      0 -
-                        parseFloat(
-                          (Number(comprobante[0]?.importe) / ivaFloat).toFixed(
-                            2
-                          )
-                        ))
+                    ((comprobante[0]?.importe ?? 0) -
+                      parseFloat(
+                        (Number(comprobante[0]?.importe) / ivaFloat).toFixed(2)
+                      ))
                 ) / 100,
             },
             CbtesAsoc: {
               Tipo: comprobanteDictionary[
                 facSeleccionada?.tipoComprobante ?? ""
               ],
-              BaseImp: (facSeleccionada?.importe ?? 0) / ivaFloat,
-              Importe: (facSeleccionada?.importe ?? 0) * (1 - ivaFloat),
+              PtoVta: facSeleccionada?.ptoVenta ?? 1,
+              Nro: facSeleccionada?.nroComprobante ?? 0,
             },
           };
           const event = createEventFamily({
@@ -387,7 +397,7 @@ export default function Page() {
             type: "NC",
             amount: comprobante[0]?.importe ?? 0,
           });
-        } else if (tipoComprobante == "3" || tipoComprobante == "6") {
+        } else if (tipoComprobante == "1" || tipoComprobante == "6") {
           let ivaFloat =
             (100 + parseFloat(ivaDictionary[Number(iva)] ?? "0")) / 100;
           // const billResponsible = gruposFamiliar
@@ -396,7 +406,7 @@ export default function Page() {
           comprobante = await createComprobante({
             billLink: "",
             concepto: Number(concepto) ?? 0,
-            importe: Number(importe) ?? 0,
+            importe: Number(importe) * ivaFloat + Number(tributos) ?? 0,
             iva: iva ?? "0",
             nroDocumento: Number(nroDocumento) ?? 0,
             ptoVenta: Number(puntoVenta) ?? 0,
@@ -436,27 +446,26 @@ export default function Page() {
               concepto != "1"
                 ? formatDate(dateVencimiento ?? new Date())
                 : null,
-            ImpTotal: Number(importe),
+            ImpTotal:
+              Math.round(
+                100 * (Number(importe) * ivaFloat + Number(tributos))
+              ) / 100,
             ImpTotConc: 0,
-            ImpNeto: (Number(importe) / ivaFloat).toFixed(2),
+            ImpNeto: Number(importe),
             ImpOpEx: 0,
             ImpIVA:
               Math.round(
-                100 *
-                  (Number(importe ?? 0) -
-                    parseFloat((Number(importe) / ivaFloat).toFixed(2)))
+                100 * (Number(importe ?? 0) * ivaFloat - Number(importe))
               ) / 100,
             ImpTrib: 0,
             MonId: "PES",
             MonCotiz: 1,
             Iva: {
               Id: iva,
-              BaseImp: (Number(importe) / ivaFloat).toFixed(2),
+              BaseImp: Number(importe),
               Importe:
                 Math.round(
-                  100 *
-                    (Number(importe ?? 0) -
-                      parseFloat((Number(importe) / ivaFloat).toFixed(2)))
+                  100 * (Number(importe ?? 0) * ivaFloat - Number(importe))
                 ) / 100,
             },
           };
@@ -472,7 +481,7 @@ export default function Page() {
           comprobante = await createComprobante({
             billLink: "",
             concepto: Number(concepto) ?? 0,
-            importe: Number(importe) ?? 0,
+            importe: Number(importe) * ivaFloat + Number(tributos) ?? 0,
             iva: "0",
             nroDocumento: Number(nroDocumento) ?? 0,
             ptoVenta: Number(puntoVenta) ?? 0,
@@ -498,7 +507,11 @@ export default function Page() {
         }
 
         if (data) {
-          const res = await afip.ElectronicBilling.createVoucher(data);
+          try {
+            const res = await afip.ElectronicBilling.createVoucher(data);
+          } catch (error) {
+            console.log(error);
+          }
         }
         const billResponsible = gruposFamiliar
           ?.find((x) => x.id == grupoFamiliarId)
@@ -551,6 +564,7 @@ export default function Page() {
           const updatedComprobante = await updateComprobante({
             id: comprobante[0]?.id ?? "",
             billLink: resHtml.file,
+            number: last_voucher + 1,
           });
           console.log("resultadHTML", resHtml);
         }
@@ -558,6 +572,7 @@ export default function Page() {
         toast.success("La factura se creo correctamente");
       })();
     } catch {
+      setLoading(false);
       toast.error("Error");
     }
   }
@@ -590,7 +605,7 @@ export default function Page() {
   const [obraSocialId, setObraSocialId] = useState("");
   const [iva, setIva] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [grupoFamiliarId, setGrupoFamiliarId] = useState("");
 
   const products = api.products.list.useQuery().data;
@@ -664,10 +679,15 @@ export default function Page() {
               <Button
                 className="h-7 bg-[#0DA485] hover:bg-[#0da486e2] text-[#FAFDFD] font-medium-medium text-xs rounded-2xl py-0 px-6 mr-3"
                 // onClick={() => setOpen(true)}
+                disabled={loading}
                 onClick={generateComprobante}
               >
                 Aprobar
-                <CircleCheck className="h-4 w-auto ml-2" />
+                {loading ? (
+                  <Loader2Icon className="mr-2 animate-spin" size={20} />
+                ) : (
+                  <CircleCheck className="h-4 w-auto ml-2" />
+                )}
               </Button>
               <Button
                 className="  h-7 bg-[#D9D7D8] hover:bg-[#d9d7d8dc] text-[#4B4B4B]  text-xs rounded-2xl py-0 px-6 "
@@ -694,7 +714,7 @@ export default function Page() {
                       value={gruposFamiliar?.id}
                       className="rounded-none border-b border-gray-600"
                     >
-                      {gruposFamiliar?.numericalId}
+                      {gruposFamiliar?.integrants.find((x) => x.isHolder)?.name}
                     </SelectItem>
                   ))}
               </SelectContent>
@@ -817,10 +837,10 @@ export default function Page() {
                 </SelectTrigger>
                 <SelectContent>
                   {[
-                    { value: "3", label: "FACTURA A" },
+                    { value: "1", label: "FACTURA A" },
                     { value: "6", label: "FACTURA B" },
-                    { value: "2", label: "NOTA DE CREDITO A" },
-                    { value: "12", label: "NOTA DE CREDITO B" },
+                    { value: "3", label: "NOTA DE CREDITO A" },
+                    { value: "8", label: "NOTA DE CREDITO B" },
                     { value: "0", label: "RECIBO" },
                   ].map((option) => (
                     <SelectItem
@@ -929,7 +949,7 @@ export default function Page() {
                 <PopoverTrigger asChild={true}>
                   <Button
                     variant={"outline"}
-                    disabled={concepto != "1"}
+                    disabled={concepto == "" || concepto == "1"}
                     className={cn(
                       "justify-start text-left font-normal border-[#0DA485] border w-full",
                       !dateDesde && "text-muted-foreground"
@@ -956,14 +976,11 @@ export default function Page() {
             <div>
               <Label htmlFor="emition">Fecha fin de servicio</Label>
               <br />
-              <Popover
-                open={popoverFinOpen}
-                onOpenChange={setPopoverVencimientoOpen}
-              >
+              <Popover open={popoverFinOpen} onOpenChange={setPopoverFinOpen}>
                 <PopoverTrigger asChild={true}>
                   <Button
                     variant={"outline"}
-                    disabled={concepto != "1"}
+                    disabled={concepto == "" || concepto == "1"}
                     className={cn(
                       "justify-start text-left font-normal border-[#0DA485] border w-full",
                       !dateHasta && "text-muted-foreground"
@@ -997,7 +1014,7 @@ export default function Page() {
               <br />
               <Select
                 onValueChange={(e) => handleComprobanteChange(e)}
-                disabled={tipoComprobante != "2" && tipoComprobante != "12"}
+                disabled={tipoComprobante != "3" && tipoComprobante != "8"}
               >
                 <SelectTrigger className="font-bold border-[#0DA485] border">
                   <SelectValue placeholder="Seleccionar comprobante..." />
@@ -1117,7 +1134,16 @@ export default function Page() {
               <Label>Sub-total factura</Label>
               <Input
                 // disabled={true}
-                value={"$ " + importe}
+                value={
+                  "$ " +
+                  (!selectedComprobante
+                    ? importe
+                    : selectedComprobante.iva == "0"
+                    ? selectedComprobante?.importe
+                    : (selectedComprobante?.importe /
+                        Number(selectedComprobante.iva)) *
+                      100)
+                }
                 onChange={(e) => setImporte(e.target.value.slice(2))}
                 className="bg-[#e9fcf8] text-[#0DA485] rounded-none opacity-100 border-[#e9fcf8] border"
               />
@@ -1128,10 +1154,17 @@ export default function Page() {
                 // disabled={true}
                 value={
                   "$ " +
-                  (
-                    (Number(importe) * Number(ivaDictionary[Number(iva)])) /
-                    100
-                  ).toFixed(2)
+                  (!selectedComprobante
+                    ? (
+                        (Number(importe) * Number(ivaDictionary[Number(iva)])) /
+                        100
+                      ).toFixed(2)
+                    : selectedComprobante.iva == "0"
+                    ? "0"
+                    : selectedComprobante?.importe -
+                      (selectedComprobante?.importe /
+                        Number(selectedComprobante.iva)) *
+                        100)
                 }
                 className="bg-[#e9fcf8] text-[#0DA485] rounded-none opacity-100 border-[#e9fcf8] border"
               />
@@ -1140,8 +1173,8 @@ export default function Page() {
               <Label>Otros tributos</Label>
               <Input
                 // disabled={true}
-                value={"$ " + tributos}
-                onChange={(e) => setTributos(e.target.value.slice(2))}
+                value={"$ " + !selectedComprobante ? tributos : "0"}
+                // onChange={(e) => setTributos(e.target.value.slice(2))}
                 className="bg-[#e9fcf8] text-[#0DA485] rounded-none opacity-100 border-[#e9fcf8] border"
               />
             </div>
@@ -1151,12 +1184,14 @@ export default function Page() {
                 // disabled={true}
                 value={
                   "$ " +
-                  (
-                    Number(importe) +
-                    (Number(importe) * Number(ivaDictionary[Number(iva)])) /
-                      100 +
-                    Number(tributos)
-                  ).toFixed(2)
+                  (!selectedComprobante
+                    ? (
+                        Number(importe) +
+                        (Number(importe) * Number(ivaDictionary[Number(iva)])) /
+                          100 +
+                        Number(tributos)
+                      ).toFixed(2)
+                    : selectedComprobante?.importe)
                 }
                 className="bg-[#e9fcf8] text-[#0DA485] rounded-none  opacity-100 border-[#e9fcf8] border"
               />

@@ -111,11 +111,11 @@ export function htmlBill(
   function getImageTagForTipoComprobante(tipoComprobante: string): string {
     switch (tipoComprobante) {
       case "6":
-      case "13":
-      case "12":
+      case "7":
+      case "8":
         return `<img src="https://utfs.io/f/8ab5059a-71e9-4cb2-8e0c-4743f73c8fe5-kmcofx.png" alt="" />`;
-      case "14":
-      case "15":
+      case "12":
+      case "13":
       case "11":
         return `C`;
       default:
@@ -146,21 +146,21 @@ export function htmlBill(
   }
   function getTextoForTipoComprobante(tipoComprobante: string) {
     switch (tipoComprobante) {
-      case "3":
+      case "1":
       case "6":
       case "11":
       case "51":
       case "19":
         return "FACTURA";
-      case "8":
-      case "13":
-      case "15":
+      case "2":
+      case "7":
+      case "12":
       case "52":
       case "20":
         return "NOTA DE DEBITO";
-      case "2":
-      case "12":
-      case "14":
+      case "3":
+      case "8":
+      case "13":
       case "53":
       case "21":
         return "NOTA DE CREDITO";
@@ -852,40 +852,34 @@ function obtenerDecimales(numero: number | undefined) {
   return "00"; // Retorna "00" si no hay parte decimal
 }
 export const comprobanteDictionary: { [key: string]: number } = {
-  "FACTURA A": 3,
+  "FACTURA A": 1,
   "FACTURA B": 6,
   "FACTURA C": 11,
   "FACTURA M": 51,
-  "FACTURA E": 19,
-  "NOTA DE DEBITO A": 8,
-  "NOTA DE DEBITO B": 13,
-  "NOTA DE DEBITO C": 15,
+  "NOTA DE DEBITO A": 2,
+  "NOTA DE DEBITO B": 7,
+  "NOTA DE DEBITO C": 12,
   "NOTA DE DEBITO M": 52,
-  "NOTA DE DEBITO E": 20,
-  "NOTA DE CREDITO A": 2,
-  "NOTA DE CREDITO B": 12,
-  "NOTA DE CREDITO C": 14,
+  "NOTA DE CREDITO A": 3,
+  "NOTA DE CREDITO B": 8,
+  "NOTA DE CREDITO C": 13,
   "NOTA DE CREDITO M": 53,
-  "NOTA DE CREDITO E": 21,
   "": 0,
 };
 
 export const reverseComprobanteDictionary: { [key: number]: string } = {
-  3: "FACTURA A",
+  1: "FACTURA A",
   6: "FACTURA B",
   11: "FACTURA C",
   51: "FACTURA M",
-  19: "FACTURA E",
-  8: "NOTA DE DEBITO A",
-  13: "NOTA DE DEBITO B",
-  15: "NOTA DE DEBITO C",
+  2: "NOTA DE DEBITO A",
+  7: "NOTA DE DEBITO B",
+  12: "NOTA DE DEBITO C",
   52: "NOTA DE DEBITO M",
-  20: "NOTA DE DEBITO E",
-  2: "NOTA DE CREDITO A",
-  12: "NOTA DE CREDITO B",
-  14: "NOTA DE CREDITO C",
+  3: "NOTA DE CREDITO A",
+  8: "NOTA DE CREDITO B",
+  13: "NOTA DE CREDITO C",
   53: "NOTA DE CREDITO M",
-  21: "NOTA DE CREDITO E",
   0: "RECIBO",
 };
 

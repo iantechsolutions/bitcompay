@@ -16,6 +16,7 @@ import { DataTable } from "./data-table";
 import { columns } from "./columns";
 export default function Home() {
   const { data: grupos, isLoading } = api.family_groups.list.useQuery();
+  console.log("grupos", grupos);
   const linked = (link: string) => {
     window.location.href = link;
   };

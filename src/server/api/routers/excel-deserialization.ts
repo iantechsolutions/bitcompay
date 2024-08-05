@@ -62,7 +62,10 @@ export const excelDeserializationRouter = createTRPCRouter({
       await db.transaction(async (db) => {
         for (const row of contents) {
           const business_unit = await db.query.bussinessUnits.findFirst({
-            where: eq(schema.bussinessUnits.description, row.business_unit!),
+            where: and(
+              eq(schema.bussinessUnits.description, row.business_unit!),
+              eq(schema.bussinessUnits.companyId, ctx.session.orgId!)
+            ),
           });
 
           const mode = await db.query.modos.findFirst({
@@ -306,9 +309,15 @@ export const excelDeserializationRouter = createTRPCRouter({
               });
           }
           if (row.isPaymentResponsible) {
-            const product = await db.query.products.findFirst({
-              where: eq(schema.products.name, row.product!),
+            const companyProducts = await db.query.companyProducts.findMany({
+              where: eq(schema.companyProducts.companyId, ctx.session.orgId!),
+              with: {
+                product: true,
+              },
             });
+            const product = companyProducts.find(
+              (x) => x.product.name === row.product
+            )?.product;
 
             await db.insert(schema.pa).values({
               card_number: row.card_number?.toString() ?? null,
@@ -413,9 +422,18 @@ async function readExcelFile(
   for (let i = 0; i < transformedRows.length; i++) {
     const row = transformedRows[i]!;
     const rowNum = i + 2;
-    const product = await db.query.products.findFirst({
-      where: eq(schema.products.name, row.product!),
+    const companyProducts = await db.query.companyProducts.findMany({
+      where: eq(schema.companyProducts.companyId, ctx.session.orgId!),
+      with: {
+        product: true,
+      },
     });
+    const product = companyProducts.find(
+      (x) => x.product.name === row.product
+    )?.product;
+    // await db.query.products.findFirst({
+    //   where: eq(schema.products.name, row.product!),
+    // });
     if (product) {
       const requiredColumns = await getRequiredColums(product.description);
       if (requiredColumns.has("card_number")) {

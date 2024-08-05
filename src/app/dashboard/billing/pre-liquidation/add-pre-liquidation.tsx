@@ -70,7 +70,8 @@ export default function AddPreLiquidation() {
         logo_url: logo_url ?? undefined,
       });
       if ("error" in liquidation!) {
-        toast.error("No se encuentran grupos familiares asociados a esa marca");
+        console.log("liquidation", liquidation);
+        toast.error(liquidation.error);
       } else if (liquidation) {
         queryClient.invalidateQueries();
         toast.success("Pre-liquidacion creada correctamente");
