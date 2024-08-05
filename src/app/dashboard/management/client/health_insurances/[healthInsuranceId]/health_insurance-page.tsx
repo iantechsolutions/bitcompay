@@ -124,7 +124,7 @@ export default function HealthInsurancePage(props: {
     <div>
       <Link
         className="w-20 h-auto flex justify-between"
-        href={`/dashboard/management/client/affiliates`}
+        href={`/dashboard/management/client/health_insurances`}
       >
         <ArrowLeftIcon /> Volver
       </Link>
