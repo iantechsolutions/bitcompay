@@ -286,27 +286,18 @@ function generateDebitoDirecto(
     const monthName = date.format("MMMM").toUpperCase();
     const period = formatString(" ", `${monthName} ${year}`, 22, true);
     const dateYYYYMMDD = date.format("YYYYMMDD");
-    let collected_amount;
-    collected_amount =
-      transaction.collected_amount ?? transaction.first_due_amount;
-    if (!collected_amount) {
+
+    const collectedAmount = formatAmount(
+      transaction.collected_amount! ?? transaction.first_due_amount!,
+      13
+    );
+    if (!collectedAmount) {
       throw new TRPCError({
         code: "BAD_REQUEST",
         message: ` no hay informacion sobre importe a cobrar (invoice number:${transaction.invoice_number}`,
       });
     }
-    const parteEntera = Math.floor(collected_amount);
-    const parteDecimal = Math.round((collected_amount - parteEntera) * 100);
-    console.log(collected_amount - parteEntera, parteDecimal);
-    console.log("descom collected amount", parteEntera, parteDecimal);
-    console.log(parteDecimal.toString(), parteDecimal.toString().length);
-    const collectedAmount = formatString(
-      "0",
-      `${parteEntera}${formatString("0", parteDecimal.toString(), 2, false)}`,
-      15,
-      false
-    );
-    console.log(formatString(parteDecimal.toString(), "0", 2, false));
+
     const fiscalNumber = formatString(
       " ",
       transaction.fiscal_id_number!.toString(),
@@ -325,7 +316,10 @@ function generateDebitoDirecto(
       15,
       false
     );
-    const CBU = transaction.cbu;
+    let CBU = "0".repeat(22);
+    if (transaction.cbu.length === 22) {
+      CBU = transaction.cbu;
+    }
     text += `421002513  ${fiscalNumber}${CBU}${collectedAmount}    ${period}${dateYYYYMMDD}  ${invoice_number}${" ".repeat(
       127
     )}\r\n`;
@@ -675,6 +669,7 @@ function formatString(
 }
 
 function formatAmount(number: number, limit: number) {
+  console.log("el numero", number);
   let numString = number.toString();
 
   if (numString.includes(".")) {
@@ -694,6 +689,7 @@ function formatAmount(number: number, limit: number) {
       numString = "0" + numString;
     }
 
+    console.log(numString);
     return numString + "00";
   }
 }
