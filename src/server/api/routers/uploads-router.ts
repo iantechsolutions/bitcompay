@@ -934,7 +934,6 @@ async function readUploadContents(
     const rowNum = i + 2;
     // verificar producto
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-
     let product: any = undefined;
     if (row.product_number) {
       if (row.product_number in productsMap) {
@@ -1000,6 +999,9 @@ async function readUploadContents(
           );
         }
         if (!value) {
+          console.log("aca");
+          console.log(column);
+          console.log(row);
           errors.push(
             `La columna ${columnName} es obligatoria y no esta en el archivo(fila:${rowNum})`
           );

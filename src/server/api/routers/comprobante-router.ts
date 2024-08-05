@@ -488,7 +488,7 @@ async function createcomprobanteItem(
   concept: string,
   amount: number
 ) {
-  const abonoItem = db
+  const abonoItem = await db
     .insert(schema.items)
     .values({
       concept: concept,
@@ -828,7 +828,7 @@ export const comprobantesRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const response = approbatecomprobante(input.liquidationId);
+      const response = await approbatecomprobante(input.liquidationId);
       // return response;
     }),
   createPreLiquidation: protectedProcedure
@@ -883,7 +883,7 @@ export const comprobantesRouter = createTRPCRouter({
           logo_url: input.logo_url,
         })
         .returning();
-      preparateComprobante(
+      await preparateComprobante(
         grupos,
         input.dateDesde,
         input.dateHasta,
