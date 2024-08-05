@@ -11,7 +11,7 @@ import {
   DialogHeader,
 } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
-import { PlusCircleIcon } from "lucide-react";
+import { PlusCircleIcon, Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function AddPlanDialog(props: { planId?: string }) {
@@ -26,9 +26,15 @@ export default function AddPlanDialog(props: { planId?: string }) {
   }
   return (
     <div>
-      <Button onClick={() => setOpen(true)} className="mr-3">
+      <Button
+        onClick={() => setOpen(true)}
+        className=" bg-[#209d84] hover:bg-[#209d84]  rounded-full"
+      >
         {planId ? (
-          "Actualizar info"
+          <>
+            <Pencil className="mr-2" size={20} />
+            Actualizar info
+          </>
         ) : (
           <>
             <PlusCircleIcon className="mr-2" size={20} />
@@ -46,7 +52,8 @@ export default function AddPlanDialog(props: { planId?: string }) {
           <AddPlanInfoComponent
             planId={planId}
             onPlanIdChange={() => handleChange()}
-            closeDialog={() => handleChange()}></AddPlanInfoComponent>
+            closeDialog={() => handleChange()}
+          ></AddPlanInfoComponent>
         </DialogContent>
       </Dialog>
     </div>
