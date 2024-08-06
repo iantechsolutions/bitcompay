@@ -84,25 +84,25 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
         <div className="mt-2">
           {comprobanteNCReciente && (
             <div className="mt-2">
+              {comprobanteNCReciente.billLink &&
+              comprobanteNCReciente.billLink !== "" ? (
+                <div className="items-center justify-center">
+                  <Link href={comprobanteNCReciente.billLink}>
+                    <FileText></FileText>
+                  </Link>
+                </div>
+              ) : (
+                <div className="items-center justify-center">
+                  <Button disabled={true} variant="link">
+                    <FileText></FileText>
+                  </Button>
+                </div>
+              )}
               <div
                 className="flex flex-row justify-between items-center py-2 px-2 mb-3 rounded-md bg-[#c2bebe84] hover:bg-[#cbc7c7ce] transition-all hover:cursor-pointer"
                 onClick={() => setOpenNCAccordion(!openNCAccordion)}
               >
                 <p className="text-xl font-medium opacity-70 flex flex-row items-center">
-                  {comprobanteNCReciente.billLink &&
-                  comprobanteNCReciente.billLink !== "" ? (
-                    <div className="items-center justify-center">
-                      <Link href={comprobanteNCReciente.billLink}>
-                        <FileText></FileText>
-                      </Link>
-                    </div>
-                  ) : (
-                    <div className="items-center justify-center">
-                      <Button disabled={true} variant="link">
-                        <FileText></FileText>
-                      </Button>
-                    </div>
-                  )}
                   NC
                   {openNCAccordion ? (
                     <ChevronDown
@@ -125,26 +125,25 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
               )}
             </div>
           )}
-
+          {comprobanteFCReciente?.billLink &&
+          comprobanteFCReciente?.billLink !== "" ? (
+            <div className="items-center justify-center">
+              <Link href={comprobanteFCReciente?.billLink}>
+                <FileText></FileText>
+              </Link>
+            </div>
+          ) : (
+            <div className="items-center justify-center">
+              <Button disabled={true} variant="link">
+                <FileText></FileText>
+              </Button>
+            </div>
+          )}
           <div
             className="flex flex-row justify-between items-center py-2 px-2 mb-3 rounded-md bg-[#c2bebe84] hover:bg-[#cbc7c7ce] transition-all hover:cursor-pointer mt-5"
             onClick={() => setOpenFCAccordion(!openFCAccordion)}
           >
             <p className="text-xl font-medium opacity-70 flex flex-row items-center">
-              {comprobanteFCReciente?.billLink &&
-              comprobanteFCReciente?.billLink !== "" ? (
-                <div className="items-center justify-center">
-                  <Link href={comprobanteFCReciente?.billLink}>
-                    <FileText></FileText>
-                  </Link>
-                </div>
-              ) : (
-                <div className="items-center justify-center">
-                  <Button disabled={true} variant="link">
-                    <FileText></FileText>
-                  </Button>
-                </div>
-              )}
               FC
               {openFCAccordion ? (
                 <ChevronDown
