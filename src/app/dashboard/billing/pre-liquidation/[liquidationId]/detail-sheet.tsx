@@ -1,4 +1,6 @@
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, FileText } from "lucide-react";
+import Link from "next/link";
+import { Button } from "~/components/ui/button";
 import {
   Sheet,
   SheetContent,
@@ -87,6 +89,20 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
                 onClick={() => setOpenNCAccordion(!openNCAccordion)}
               >
                 <p className="text-xl font-medium opacity-70 flex flex-row items-center">
+                  {comprobanteNCReciente.billLink &&
+                  comprobanteNCReciente.billLink !== "" ? (
+                    <div className="items-center justify-center">
+                      <Link href={comprobanteNCReciente.billLink}>
+                        <FileText></FileText>
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="items-center justify-center">
+                      <Button disabled={true} variant="link">
+                        <FileText></FileText>
+                      </Button>
+                    </div>
+                  )}
                   NC
                   {openNCAccordion ? (
                     <ChevronDown
@@ -115,6 +131,20 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
             onClick={() => setOpenFCAccordion(!openFCAccordion)}
           >
             <p className="text-xl font-medium opacity-70 flex flex-row items-center">
+              {comprobanteFCReciente?.billLink &&
+              comprobanteFCReciente?.billLink !== "" ? (
+                <div className="items-center justify-center">
+                  <Link href={comprobanteFCReciente?.billLink}>
+                    <FileText></FileText>
+                  </Link>
+                </div>
+              ) : (
+                <div className="items-center justify-center">
+                  <Button disabled={true} variant="link">
+                    <FileText></FileText>
+                  </Button>
+                </div>
+              )}
               FC
               {openFCAccordion ? (
                 <ChevronDown
