@@ -48,6 +48,10 @@ export const iofilesRouter = createTRPCRouter({
           where: eq(schema.paymentStatus.code, "90"),
         });
 
+        const statusEnviado = await db.query.paymentStatus.findFirst({
+          where: eq(schema.paymentStatus.code, "00"),
+        });
+
         const paymentsFull = await db.query.payments.findMany({
           where: and(
             eq(schema.payments.companyId, input.companyId),
@@ -58,7 +62,8 @@ export const iofilesRouter = createTRPCRouter({
         const payments = paymentsFull.filter(
           (p) =>
             p.genChannels.includes(channel.id) === false &&
-            p.statusId !== statusCancelado?.id
+            p.statusId !== statusCancelado?.id &&
+            p.statusId !== statusEnviado?.id
         );
 
         const regexPagoFacil = /pago\s*f[aá]cil/i;
@@ -83,7 +88,12 @@ export const iofilesRouter = createTRPCRouter({
             concept: input.concept,
             redescription: brand.redescription,
           };
-          text = generatePagomiscuentas(generateInput, brand.name, payments);
+          text = generatePagomiscuentas(
+            generateInput,
+            brand.name,
+            brand.prisma_code ?? "",
+            payments
+          );
         } else if (channel.name.match(regexPagoFacil)) {
           const generateInput = {
             channelId: channel.id,
@@ -129,8 +139,8 @@ export const iofilesRouter = createTRPCRouter({
           text = generateDebitoAutomatico({
             payments,
             EstablishmentNumber: establishment.establishment_number,
-            cardType: input.card_type!,
-            flag: input.card_brand!,
+            cardType: input.card_type ?? "",
+            flag: input.card_brand ?? "",
             // presentationDate: input.presentation_date,
           });
         } else {
@@ -276,27 +286,18 @@ function generateDebitoDirecto(
     const monthName = date.format("MMMM").toUpperCase();
     const period = formatString(" ", `${monthName} ${year}`, 22, true);
     const dateYYYYMMDD = date.format("YYYYMMDD");
-    let collected_amount;
-    collected_amount =
-      transaction.collected_amount ?? transaction.first_due_amount;
-    if (!collected_amount) {
+
+    const collectedAmount = formatAmount(
+      transaction.collected_amount! ?? transaction.first_due_amount!,
+      13
+    );
+    if (!collectedAmount) {
       throw new TRPCError({
         code: "BAD_REQUEST",
         message: ` no hay informacion sobre importe a cobrar (invoice number:${transaction.invoice_number}`,
       });
     }
-    const parteEntera = Math.floor(collected_amount);
-    const parteDecimal = Math.round((collected_amount - parteEntera) * 100);
-    console.log(collected_amount - parteEntera, parteDecimal);
-    console.log("descom collected amount", parteEntera, parteDecimal);
-    console.log(parteDecimal.toString(), parteDecimal.toString().length);
-    const collectedAmount = formatString(
-      "0",
-      `${parteEntera}${formatString("0", parteDecimal.toString(), 2, false)}`,
-      15,
-      false
-    );
-    console.log(formatString(parteDecimal.toString(), "0", 2, false));
+
     const fiscalNumber = formatString(
       " ",
       transaction.fiscal_id_number!.toString(),
@@ -315,7 +316,10 @@ function generateDebitoDirecto(
       15,
       false
     );
-    const CBU = transaction.cbu;
+    let CBU = "0".repeat(22);
+    if (transaction.cbu.length === 22) {
+      CBU = transaction.cbu;
+    }
     text += `421002513  ${fiscalNumber}${CBU}${collectedAmount}    ${period}${dateYYYYMMDD}  ${invoice_number}${" ".repeat(
       127
     )}\r\n`;
@@ -376,15 +380,11 @@ function generatePagomiscuentas(
     redescription: string;
   },
   brandName: string,
+  prismaCode: string,
   transactions: RouterOutputs["transactions"]["list"]
 ) {
-  const codeCompanyMap: Record<string, string> = {
-    "red argentina de sanatorios": "REDA",
-    "cristal salud": "AL6N",
-  };
   const dateAAAAMMDD = dayjs().locale("es").format("YYYYMMDD");
-  const companyCode =
-    codeCompanyMap[brandName.toLowerCase() as keyof typeof codeCompanyMap];
+  // codeCompanyMap[brandName.toLowerCase() as keyof typeof codeCompanyMap];
 
   // if (!companyCode) {
   //   throw new TRPCError({
@@ -393,7 +393,7 @@ function generatePagomiscuentas(
   //   });
   // }
   //header
-  let text = `0400${companyCode}${dateAAAAMMDD}${"0".repeat(264)}\n`;
+  let text = `0400${prismaCode}${dateAAAAMMDD}${"0".repeat(264)}\n`;
   let total_collected = 0;
   for (const transaction of transactions) {
     // registro
@@ -446,7 +446,7 @@ function generatePagomiscuentas(
     7,
     false
   );
-  text += `9400${companyCode}${dateAAAAMMDD}${total_records_string}${"0".repeat(
+  text += `9400${prismaCode}${dateAAAAMMDD}${total_records_string}${"0".repeat(
     7
   )}${total_collected_string}${"0".repeat(234)}\n`;
 
@@ -669,6 +669,7 @@ function formatString(
 }
 
 function formatAmount(number: number, limit: number) {
+  console.log("el numero", number);
   let numString = number.toString();
 
   if (numString.includes(".")) {
@@ -688,6 +689,7 @@ function formatAmount(number: number, limit: number) {
       numString = "0" + numString;
     }
 
+    console.log(numString);
     return numString + "00";
   }
 }
@@ -743,9 +745,9 @@ type generateDAprops = {
 };
 function generateDebitoAutomatico(props: generateDAprops) {
   const FileNameMap: Record<string, string> = {
-    "Visa Credito": "DEBLIQC ",
-    "Visa Debito": "DEBLIQD ",
-    "Mastercard Credito": "DEBLIMC ",
+    "visa credito": "DEBLIQC ",
+    "visa debito": "DEBLIQD ",
+    "mastercard credito": "DEBLIMC ",
   };
 
   let currentDate = dayjs().utc().tz("America/Argentina/Buenos_Aires");
@@ -756,20 +758,21 @@ function generateDebitoAutomatico(props: generateDAprops) {
   }
   const dateYYYYMMDD = currentDate.format("YYYYMMDD");
 
-  const key = `${props.flag} ${props.cardType}`;
+  let key = `${props.flag.toLowerCase()} ${props.cardType.toLowerCase()}`;
+  console.log("testamento", props.flag, props.cardType, key);
   const fileName = FileNameMap[key] || " ".repeat(8);
 
   const establishmentNumber = formatString(
     "0",
     props.EstablishmentNumber.toString(),
-    15,
+    10,
     false
   );
 
   // const presentationDate = dayjs(props.presentationDate).format("YYYYMMDD");
   const hour = dayjs().format("HHmm");
   let header = `0${fileName}${establishmentNumber}900000    ${dateYYYYMMDD}${hour}0  ${" ".repeat(
-    50
+    55
   )}*\r\n`;
 
   let body = "";
@@ -781,6 +784,7 @@ function generateDebitoAutomatico(props: generateDAprops) {
       8,
       false
     );
+
     const importe = payment.collected_amount ?? payment.first_due_amount;
     const importeString = formatAmount(importe!, 13);
 
@@ -804,12 +808,7 @@ function generateDebitoAutomatico(props: generateDAprops) {
     10,
     false
   );
-  const total_collected_string = formatString(
-    "0",
-    total_collected.toString(),
-    15,
-    false
-  );
+  const total_collected_string = formatAmount(total_collected, 13);
   let footer = `9${fileName}${establishment}900000    ${dateYYYYMMDD}${hour}${total_records}${total_collected_string}${" ".repeat(
     36
   )}*`;

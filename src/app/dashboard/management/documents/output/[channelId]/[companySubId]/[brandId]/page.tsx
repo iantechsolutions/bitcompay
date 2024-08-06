@@ -33,6 +33,14 @@ export default async function page({
   const statusCancelado = await db.query.paymentStatus.findFirst({
     where: eq(schema.paymentStatus.code, "90"),
   });
+  const statusEnviado = await db.query.paymentStatus.findFirst({
+    where: eq(schema.paymentStatus.code, "00"),
+  });
+
+  // const statusGenerado = await db.query.paymentStatus.findFirst({
+  //   where: eq(schema.paymentStatus.code, "91"),
+  // });
+
   const payments = await db.query.payments.findMany({
     where: and(
       and(
@@ -54,7 +62,7 @@ export default async function page({
   ];
 
   for (const transaction of payments.filter(
-    (x) => x.statusId != statusCancelado?.id
+    (x) => x.statusId != statusCancelado?.id && x.statusId != statusEnviado?.id
   )) {
     if (
       !transaction.genChannels.includes(channel.id) &&

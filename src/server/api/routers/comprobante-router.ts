@@ -305,6 +305,10 @@ async function approbatecomprobante(liquidationId: string) {
             documentUploadId: "0AspRyw8g4jgDAuNGAeBX",
             product_number: producto?.number ?? 0,
             statusId: status?.id,
+            card_number: billResponsible?.pa[0]?.card_number,
+            card_brand: billResponsible?.pa[0]?.card_brand,
+            card_type: billResponsible?.pa[0]?.card_type,
+
             // address: billResponsible?.address,
           })
           .returning();
@@ -806,6 +810,9 @@ export const comprobantesRouter = createTRPCRouter({
             documentUploadId: "0AspRyw8g4jgDAuNGAeBX",
             product_number: producto?.number ?? 0,
             statusId: status?.id,
+            card_number: billResponsible?.pa[0]?.card_number,
+            card_brand: billResponsible?.pa[0]?.card_brand,
+            card_type: billResponsible?.pa[0]?.card_type,
             // address: billResponsible?.address,
           })
           .returning();
@@ -925,6 +932,12 @@ export const comprobantesRouter = createTRPCRouter({
           nroComprobante: number,
         })
         .where(eq(schema.comprobantes.id, id));
+      const updatedPayments = await db
+        .update(schema.payments)
+        .set({
+          invoice_number: number,
+        })
+        .where(eq(schema.payments.comprobante_id, id));
       return updatedProvider;
     }),
   delete: protectedProcedure
@@ -1126,36 +1139,45 @@ export async function preparateComprobante(
         .returning();
       //creamos items de fc para visualizacion
       createcomprobanteItem(ivaFloat, comprobante[0]?.id ?? "", "Abono", abono);
-      createcomprobanteItem(
-        ivaFloat,
-        comprobante[0]?.id ?? "",
-        "Bonificación",
-        -1 * bonificacion
-      );
-      createcomprobanteItem(
-        ivaFloat,
-        comprobante[0]?.id ?? "",
-        "Aporte",
-        -1 * contribution
-      );
-      createcomprobanteItem(
-        ivaFloatAnterior,
-        comprobante[0]?.id ?? "",
-        "Interes",
-        interest / ivaFloatAnterior
-      );
-      createcomprobanteItem(
-        ivaFloatAnterior,
-        comprobante[0]?.id ?? "",
-        "Factura Anterior",
-        previous_bill / ivaFloatAnterior
-      );
-      createcomprobanteItem(
-        ivaFloat,
-        comprobante[0]?.id ?? "",
-        "Diferencial",
-        differential_amount
-      );
+      if (bonificacion != 0) {
+        createcomprobanteItem(
+          ivaFloat,
+          comprobante[0]?.id ?? "",
+          "Bonificación",
+          -1 * bonificacion
+        );
+      }
+      if (contribution != 0) {
+        createcomprobanteItem(
+          ivaFloat,
+          comprobante[0]?.id ?? "",
+          "Aporte",
+          -1 * contribution
+        );
+      }
+      if (interest != 0) {
+        createcomprobanteItem(
+          ivaFloatAnterior,
+          comprobante[0]?.id ?? "",
+          "Interes",
+          interest / ivaFloatAnterior
+        );
+      }
+      if (previous_bill != 0) {
+        createcomprobanteItem(
+          ivaFloatAnterior,
+          comprobante[0]?.id ?? "",
+          "Factura Anterior",
+          previous_bill / ivaFloatAnterior
+        );
+      }
+
+      // createcomprobanteItem(
+      //   ivaFloat,
+      //   comprobante[0]?.id ?? "",
+      //   "Diferencial",
+      //   differential_amount
+      // );
       createcomprobanteItem(
         ivaFloat,
         comprobante[0]?.id ?? "",
