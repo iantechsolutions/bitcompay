@@ -21,6 +21,7 @@ interface unconfirmedPageProps {
 
 export default function UnconfirmedPage(props: unconfirmedPageProps) {
   const { upload } = props;
+  const { mutateAsync: deleteUpload } = api.uploads.delete.useMutation();
   const [confirmed, setConfirmed] = useState(upload!.confirmed);
   const [data, setData] = useState<
     RouterOutputs["excelDeserialization"]["deserialization"] | null
@@ -54,6 +55,13 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
     router.push(`./`);
   }
 
+  async function handleDelete() {
+    try {
+      await deleteUpload({ uploadId: props.upload!.id });
+      router.back();
+    } catch (_error) {}
+  }
+
   return (
     <LayoutContainer>
       <Card className="flex items-center gap-3 p-3">
@@ -75,6 +83,9 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
         </Button>
         <Button onClick={handleConfirm} disabled={isDataLoading}>
           Escribir a la base de datos
+        </Button>
+        <Button variant="destructive" onClick={handleDelete}>
+          Cancelar y eliminar
         </Button>
       </div>
       {errorRead && (

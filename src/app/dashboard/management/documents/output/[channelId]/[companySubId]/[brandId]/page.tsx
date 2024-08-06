@@ -37,6 +37,10 @@ export default async function page({
     where: eq(schema.paymentStatus.code, "00"),
   });
 
+  // const statusGenerado = await db.query.paymentStatus.findFirst({
+  //   where: eq(schema.paymentStatus.code, "91"),
+  // });
+
   const payments = await db.query.payments.findMany({
     where: and(
       and(

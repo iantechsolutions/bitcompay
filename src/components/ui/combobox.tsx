@@ -45,6 +45,7 @@ export interface ComboboxProps {
   title: string;
   placeholder: string;
   options: { value: string; label: string }[];
+  classNameButton?: string;
   onSelectionChange?: (value: string) => void;
   value?: string;
 }
@@ -55,6 +56,7 @@ export function ComboboxDemo({
   options = [],
   onSelectionChange,
   value,
+  classNameButton,
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
   const initialOption = options.find((option) => option.value === value);
@@ -77,7 +79,7 @@ export function ComboboxDemo({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[200px] justify-between"
+          className={cn("w-[200px] justify-between", classNameButton)}
         >
           {label || title}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />

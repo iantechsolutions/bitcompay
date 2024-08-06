@@ -168,7 +168,7 @@ export default function CompanySidenav() {
     canSeeConsults;
   //Tesoreria
   //lo ocultamos por ahora
-  const canSeeTreasury = true;
+  const canSeeTreasury = has!({ permission: "org:treasury:collection" });
 
   // const canSeeBilling = has!({ permission: "org:management:sales" });
   // const canSeeBilling = has!({ permission: "org:management:sales" });

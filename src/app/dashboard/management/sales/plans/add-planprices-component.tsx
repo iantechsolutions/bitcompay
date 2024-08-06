@@ -172,7 +172,31 @@ export default function AddPlanPricesComponent({
           onSubmit={form.handleSubmit(onSubmit)}
           className="flex-col items-center justify-center gap-2 space-y-8"
         >
-          <div className="flex flex-row space-x-24">
+          <div className="mb-1">
+            <Button
+              type="button"
+              className="float-right bg-[#1bdfb7] hover:bg-[#1bdfb7] rounded-full"
+              onClick={() =>
+                append({
+                  id: "",
+                  createdAt: new Date(),
+                  validy_date: new Date(),
+                  from_age: null,
+                  to_age: null,
+                  condition: "",
+                  isAmountByAge: false,
+                  plan_id: "",
+                  amount: 0,
+                })
+              }
+            >
+              <PlusCircle className="mr-2" size={20} />
+              Agregar Precio
+            </Button>
+
+            <h1 className="font-bold text-2xl">Editar Precio Manualmente</h1>
+          </div>
+          <div className="flex flex-row gap-5">
             <FormItem>
               <FormLabel htmlFor="validy_date">Mes de vigencia</FormLabel>
               <Select
@@ -215,92 +239,69 @@ export default function AddPlanPricesComponent({
               <FormMessage />
             </FormItem>
           </div>
-          <div className="mb-10">
-            <Button
-              type="button"
-              className="float-right"
-              onClick={() =>
-                append({
-                  id: "",
-                  createdAt: new Date(),
-                  validy_date: new Date(),
-                  from_age: null,
-                  to_age: null,
-                  condition: "",
-                  isAmountByAge: false,
-                  plan_id: "",
-                  amount: 0,
-                })
-              }
-            >
-              <PlusCircle className="mr-2" size={20} />
-              Agregar Precio
-            </Button>
-            {fields.length > 0 && (
-              <h1 className="font-bold text-2xl">Condicion</h1>
-            )}
-          </div>
+          {fields.length > 0 && (
+            <h1 className="font-bold text-2xl">Condicion</h1>
+          )}
           {fields.map((item, index) => {
             const isAmountByAge = form.watch(`prices.${index}.isAmountByAge`);
             return (
-              <div key={item.id} className="flex space-x-4 items-center">
-                <div className="w-[300px]">
-                  <FormField
-                    control={form.control}
-                    name={`prices.${index}.isAmountByAge`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel
-                          htmlFor={`prices.${index}.isAmountByAge`}
-                          className="font-bold"
-                        >
-                          Tipo
-                        </FormLabel>
-                        <Select
-                          onValueChange={(value: "true" | "false") => {
-                            const boolValue = value === "true";
-                            form.setValue(
-                              `prices.${index}.isAmountByAge`,
-                              boolValue
-                            );
-                            if (boolValue) {
-                              form.setValue(`prices.${index}.condition`, null);
-                            } else {
-                              form.setValue(`prices.${index}.from_age`, null);
-                              form.setValue(`prices.${index}.to_age`, null);
-                            }
-                          }}
-                          value={
-                            form.getValues(`prices.${index}.isAmountByAge`)
-                              ? "true"
-                              : "false"
+              <div key={item.id} className="flex items-center gap-5">
+                <FormField
+                  control={form.control}
+                  name={`prices.${index}.isAmountByAge`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel
+                        htmlFor={`prices.${index}.isAmountByAge`}
+                        className="font-bold"
+                      >
+                        Tipo
+                      </FormLabel>
+                      <Select
+                        onValueChange={(value: "true" | "false") => {
+                          const boolValue = value === "true";
+                          form.setValue(
+                            `prices.${index}.isAmountByAge`,
+                            boolValue
+                          );
+                          if (boolValue) {
+                            form.setValue(`prices.${index}.condition`, null);
+                          } else {
+                            form.setValue(`prices.${index}.from_age`, null);
+                            form.setValue(`prices.${index}.to_age`, null);
                           }
-                        >
-                          <FormControl>
-                            <SelectTrigger className="w-[150px] font-bold">
-                              <SelectValue placeholder="Seleccione una opción" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem
-                              value="true"
-                              className="rounded-none border-b border-gray-600"
-                            >
-                              Rango de edad
-                            </SelectItem>
-                            <SelectItem
-                              value="false"
-                              className="rounded-none border-b border-gray-600"
-                            >
-                              Parentesco
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                        }}
+                        value={
+                          form.getValues(`prices.${index}.isAmountByAge`)
+                            ? "true"
+                            : "false"
+                        }
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-[150px] font-bold">
+                            <SelectValue placeholder="Seleccione una opción" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem
+                            value="true"
+                            className="rounded-none border-b border-gray-600"
+                          >
+                            Rango de edad
+                          </SelectItem>
+                          <SelectItem
+                            value="false"
+                            className="rounded-none border-b border-gray-600"
+                          >
+                            Parentesco
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 {!isAmountByAge ? (
                   <FormField
                     control={form.control}

@@ -169,7 +169,7 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
           id: upload.id,
           type: documentType,
         });
-      console.log("datos en el front",data)
+      console.log("datos en el front", data);
       if (data) {
         setData(data);
       }
@@ -227,8 +227,7 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
               className="w-full py-6"
               variant="outline"
               disabled={!documentType || isLoading}
-              onClick={handleContinue}
-            >
+              onClick={handleContinue}>
               Leer datos
             </Button>
 

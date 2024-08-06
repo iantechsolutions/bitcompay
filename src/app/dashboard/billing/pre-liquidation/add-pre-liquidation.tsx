@@ -4,7 +4,7 @@ import "dayjs/locale/es";
 import { Input } from "~/components/ui/input";
 import utc from "dayjs/plugin/utc";
 import { useState } from "react";
-import { PlusCircleIcon, Loader2Icon, Loader2 } from "lucide-react";
+import { PlusCircleIcon, Loader2Icon, Loader2, Plus } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { toast } from "sonner";
 import {
@@ -124,10 +124,10 @@ export default function AddPreLiquidation() {
           <DialogHeader>
             <DialogTitle>Crear Pre liquidacion</DialogTitle>
           </DialogHeader>
-          <div>
+          <div className="w-full">
             <Label>Marca</Label>
             <Select onValueChange={handleBrandChange}>
-              <SelectTrigger className="w-[180px] font-bold">
+              <SelectTrigger className="w-full font-bold">
                 <SelectValue placeholder="Seleccione una marca" />
               </SelectTrigger>
               <SelectContent>
@@ -144,73 +144,77 @@ export default function AddPreLiquidation() {
               </SelectContent>
             </Select>
           </div>
-          <div>
-            <Label>1er Fecha de vencimiento</Label>
-            <br />
-            <Popover open={popover1Open} onOpenChange={setPopover1Open}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={"outline"}
-                  className={cn(
-                    "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
-                    !fechaVencimiento1 && "text-muted-foreground"
-                  )}
-                >
-                  <p>
-                    {fechaVencimiento1 ? (
-                      dayjs(fechaVencimiento1).format("D [de] MMMM [de] YYYY")
-                    ) : (
-                      <span>Seleccione una fecha</span>
+          <div className="w-full flex flex-row gap-2">
+            <div className="w-1/2">
+              <Label>1er Fecha de vencimiento</Label>
+              <br />
+              <Popover open={popover1Open} onOpenChange={setPopover1Open}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-full border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
+                      !fechaVencimiento1 && "text-muted-foreground"
                     )}
-                  </p>
-                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={
-                    fechaVencimiento1 ? new Date(fechaVencimiento1) : undefined
-                  }
-                  onSelect={(e) => FechasCreate(e)}
-                  disabled={(date: Date) => date < new Date()}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-          <div>
-            <Label>2da Fecha de vencimiento</Label>
-            <br />
-            <Popover open={popover2Open} onOpenChange={setPopover2Open}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={"outline"}
-                  className={cn(
-                    "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
-                    !fechaVencimiento2 && "text-muted-foreground"
-                  )}
-                >
-                  <p>
-                    {fechaVencimiento2 ? (
-                      dayjs(fechaVencimiento2).format("D [de] MMMM [de] YYYY")
-                    ) : (
-                      <span>Seleccione una fecha</span>
+                  >
+                    <p className="overflow-hidden text-ellipsis whitespace-nowrap">
+                      {fechaVencimiento1 ? (
+                        dayjs(fechaVencimiento1).format("D [de] MMMM [de] YYYY")
+                      ) : (
+                        <span>Seleccione una fecha</span>
+                      )}
+                    </p>
+                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={
+                      fechaVencimiento1
+                        ? new Date(fechaVencimiento1)
+                        : undefined
+                    }
+                    onSelect={(e) => FechasCreate(e)}
+                    disabled={(date: Date) => date < new Date()}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="w-1/2">
+              <Label>2da Fecha de vencimiento</Label>
+              <br />
+              <Popover open={popover2Open} onOpenChange={setPopover2Open}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-full border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
+                      !fechaVencimiento2 && "text-muted-foreground"
                     )}
-                  </p>
-                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={fechaVencimiento2 ? fechaVencimiento2 : undefined}
-                  onSelect={(e) => FechasCreate2(e)}
-                  disabled={(date: Date) => date < new Date()}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+                  >
+                    <p className="overflow-hidden text-ellipsis whitespace-nowrap">
+                      {fechaVencimiento2 ? (
+                        dayjs(fechaVencimiento2).format("D [de] MMMM [de] YYYY")
+                      ) : (
+                        <span>Seleccione una fecha</span>
+                      )}
+                    </p>
+                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={fechaVencimiento2 ? fechaVencimiento2 : undefined}
+                    onSelect={(e) => FechasCreate2(e)}
+                    disabled={(date: Date) => date < new Date()}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
           {/* <div>
             <Label>Fecha inicio de servicio</Label>
@@ -276,14 +280,14 @@ export default function AddPreLiquidation() {
               </PopoverContent>
             </Popover>
           </div> */}
-          <div className="flex flex-row space-x-24">
-            <div>
+          <div className="w-full flex flex-row  gap-2 ">
+            <div className="w-1/2">
               <Label htmlFor="validy_date">Mes de vigencia</Label>
               <Select
                 onValueChange={(e) => setMes(Number(e))}
                 defaultValue={mes?.toString()}
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Seleccione un mes" />
                 </SelectTrigger>
                 <SelectContent>
@@ -362,10 +366,10 @@ export default function AddPreLiquidation() {
                 </SelectContent>
               </Select>
             </div>
-            <div>
+            <div className="w-1/2">
               <Label>Año de Vigencia</Label>
               <Input
-                className="border-green-300 focus-visible:ring-green-400 w-[100px]"
+                className="border-green-300 focus-visible:ring-green-400 w-full"
                 type="number"
                 min={new Date().getFullYear()}
                 value={anio}
@@ -373,43 +377,47 @@ export default function AddPreLiquidation() {
               />
             </div>
           </div>
-          <div>
-            <Label htmlFor="name">Punto de venta a utilizar</Label>
-            <br />
-            <ComboboxDemo
-              title="Seleccionar PV..."
-              placeholder="_"
-              options={[
-                { value: "1", label: "1" },
-                { value: "2", label: "2" },
-              ]}
-              onSelectionChange={(e) => {
-                setPuntoVenta(e);
-              }}
-            />
-          </div>
-          <div>
-            <label htmlFor="interest"> Interes (%) </label>
-            <Input
-              className="border-green-300 focus-visible:ring-green-400 w-[100px]"
-              type="number"
-              value={interest ?? 0}
-              onChange={(e) => {
-                Number(e.target.value) === 0
-                  ? setInterest(null)
-                  : setInterest(Number(e.target.value));
-              }}
-            />
+          <div className="w-full flex flex-row  gap-2">
+            <div className="w-1/2">
+              <Label htmlFor="name">Punto de venta a utilizar</Label>
+              <br />
+              <ComboboxDemo
+                title="Seleccionar PV..."
+                classNameButton="w-full"
+                placeholder="_"
+                options={[
+                  { value: "1", label: "1" },
+                  { value: "2", label: "2" },
+                ]}
+                onSelectionChange={(e) => {
+                  setPuntoVenta(e);
+                }}
+              />
+            </div>
+            <div className="w-1/2">
+              <label htmlFor="interest"> Interes (%) </label>
+              <Input
+                className="border-green-300 focus-visible:ring-green-400 w-full"
+                type="number"
+                value={interest ?? 0}
+                onChange={(e) => {
+                  Number(e.target.value) === 0
+                    ? setInterest(null)
+                    : setInterest(Number(e.target.value));
+                }}
+              />
+            </div>
           </div>
           <Button
-            className="mt-2"
             type="submit"
+            className="mt-2 bg-[#0DA485] hover:bg-[#0DA485]  flex items-center"
             disabled={isLoading}
             onClick={handleCreate}
           >
             {isLoading && (
               <Loader2Icon className="mr-2 animate-spin" size={20} />
             )}
+            <Plus className="mr-2" />
             Crear Pre-liquidacion
           </Button>
         </DialogContent>

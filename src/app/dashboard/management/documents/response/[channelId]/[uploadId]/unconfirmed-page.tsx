@@ -25,6 +25,7 @@ export default function ResponseUnconfirmedPage(props: UploadedPageProps) {
   const router = useRouter();
 
   const { upload } = props;
+  const { mutateAsync: deleteUpload } = api.uploads.delete.useMutation();
 
   const [documentType] = useState<"txt">("txt");
 
@@ -120,6 +121,13 @@ export default function ResponseUnconfirmedPage(props: UploadedPageProps) {
     }
   }
 
+  async function handleDelete() {
+    try {
+      await deleteUpload({ uploadId: props.upload!.id });
+      router.back();
+    } catch (_error) {}
+  }
+
   return (
     <>
       <LayoutContainer>
@@ -152,9 +160,10 @@ export default function ResponseUnconfirmedPage(props: UploadedPageProps) {
           </pre>
         )}
 
-        <div className="flex gap-2">
-          <Button variant="destructive">Cancelar y eliminar</Button>
-
+        <div className="flex gap-4">
+          <Button onClick={handleDelete} variant="destructive">
+            Cancelar y eliminar
+          </Button>
           {data && (
             <Button onClick={handlerConfirm}>
               Confirmar y escribir a la base de datos
