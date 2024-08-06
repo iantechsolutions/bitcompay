@@ -384,6 +384,7 @@ function generatePagomiscuentas(
   transactions: RouterOutputs["transactions"]["list"]
 ) {
   const dateAAAAMMDD = dayjs().locale("es").format("YYYYMMDD");
+
   // codeCompanyMap[brandName.toLowerCase() as keyof typeof codeCompanyMap];
 
   // if (!companyCode) {
@@ -393,6 +394,10 @@ function generatePagomiscuentas(
   //   });
   // }
   //header
+
+  if (prismaCode.length != 4) {
+    prismaCode = "ERROR";
+  }
   let text = `0400${prismaCode}${dateAAAAMMDD}${"0".repeat(264)}\n`;
   let total_collected = 0;
   for (const transaction of transactions) {
