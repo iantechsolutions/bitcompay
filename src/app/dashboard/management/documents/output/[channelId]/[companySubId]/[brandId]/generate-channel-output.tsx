@@ -58,7 +58,7 @@ dayjs.extend(utc);
 dayjs.locale("es");
 export default function GenerateChannelOutputPage(props: {
   channel: { id: string; name: string };
-  company: NonNullable<RouterOutputs["companies"]["get"]>;
+  company: NonNullable<RouterOutputs["companies"]["getById"]>;
   brand: { id: string; name: string };
   status_batch: Record<string, string | number>[];
   outputFiles: RouterOutputs["iofiles"]["list"];
@@ -82,9 +82,9 @@ export default function GenerateChannelOutputPage(props: {
   const [disabled, setDisabled] = useState(false);
 
   const FileNameMap: Record<string, string> = {
-    "Visa Credito": "DEBLIQC_",
-    "Visa Debito": "DEBLIQD_",
-    "Mastercard Credito": "DEBLIMC_",
+    "Visa Credito": "DEBLIQC ",
+    "Visa Debito": "DEBLIQD ",
+    "Mastercard Credito": "DEBLIMC ",
   };
   let fileNameCard;
   const form = useForm();
@@ -105,8 +105,10 @@ export default function GenerateChannelOutputPage(props: {
         concept: company.concept,
         card_type: cardType ?? null,
         card_brand: cardBrand ?? null,
-        presentation_date: form.watch().presentation_date ?? null,
+        // presentation_date: form.watch().presentation_date ?? null,
       });
+
+      console.log(cardBrand, "texto");
 
       // Limpiar los errores
       setError(null);
@@ -168,7 +170,7 @@ export default function GenerateChannelOutputPage(props: {
                       </TableCell>
                       <TableCell>
                         {typeof row.amount_collected === "number"
-                          ? "$".concat(row.amount_collected.toString())
+                          ? "$".concat(row.amount_collected.toFixed(2))
                           : ""}
                       </TableCell>
                     </TableRow>

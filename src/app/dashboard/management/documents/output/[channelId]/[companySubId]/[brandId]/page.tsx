@@ -30,10 +30,19 @@ export default async function page({
   const genFileStatus = await db.query.paymentStatus.findFirst({
     where: eq(schema.paymentStatus.code, "92"),
   });
+  const statusCancelado = await db.query.paymentStatus.findFirst({
+    where: eq(schema.paymentStatus.code, "90"),
+  });
+  const statusEnviado = await db.query.paymentStatus.findFirst({
+    where: eq(schema.paymentStatus.code, "00"),
+  });
+
   const payments = await db.query.payments.findMany({
     where: and(
-      eq(schema.payments.companyId, company.id),
-      inArray(schema.payments.product_number, productsNumbers) // Solo los productos de la marca y producto -> (los productos salen del canal)
+      and(
+        eq(schema.payments.companyId, company.id),
+        inArray(schema.payments.product_number, productsNumbers) // Solo los productos de la marca y producto -> (los productos salen del canal)
+      )
     ),
   });
 
@@ -47,10 +56,18 @@ export default async function page({
   const status_batch = [
     { status: "Pendiente", records: 0, amount_collected: 0 },
   ];
-  for (const transaction of payments) {
-    status_batch[0]!.records += 1;
-    status_batch[0]!.amount_collected +=
-      transaction?.collected_amount ?? transaction?.first_due_amount ?? 0;
+
+  for (const transaction of payments.filter(
+    (x) => x.statusId != statusCancelado?.id && x.statusId != statusEnviado?.id
+  )) {
+    if (
+      !transaction.genChannels.includes(channel.id) &&
+      transaction.g_c === brand.number
+    ) {
+      status_batch[0]!.records += 1;
+      status_batch[0]!.amount_collected +=
+        transaction?.collected_amount ?? transaction?.first_due_amount ?? 0;
+    }
   }
 
   return (

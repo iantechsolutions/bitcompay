@@ -1,7 +1,14 @@
 "use client";
 import Afip from "@afipsdk/afip.js";
 import { format } from "date-fns";
-import { Loader2Icon, PlusCircleIcon } from "lucide-react";
+import {
+  Loader2Icon,
+  PlusCircleIcon,
+  CircleX,
+  CircleCheck,
+  Search,
+  Scroll,
+} from "lucide-react";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import * as React from "react";
@@ -24,13 +31,15 @@ import {
   reversedIvaDictionary,
   ivaDictionary,
   idDictionary,
+  dateNormalFormat,
+  reverseConceptDictionary,
 } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
 import { Comprobante } from "./facturaGenerada";
 import LayoutContainer from "~/components/layout-container";
 import { Title } from "~/components/title";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import {
   Select,
   SelectContent,
@@ -42,6 +51,7 @@ import {
 } from "~/components/ui/select";
 import { create } from "domain";
 import BarcodeProcedure from "~/components/barcode";
+import { SelectTrigger as SelectTriggerMagnify } from "~/components/selectwithsearchIcon";
 
 function formatDate(date: Date | undefined) {
   if (date) {
@@ -58,9 +68,7 @@ export default function Page() {
   const { mutateAsync: createComprobante } =
     api.comprobantes.create.useMutation();
   const { mutateAsync: updateComprobante } =
-    api.comprobantes.addBillLink.useMutation();
-  // const { mutateAsync: createItemReturnComprobante } =
-  //   api.items.createReturnComprobante.useMutation();
+    api.comprobantes.addBillLinkAndNumber.useMutation();
   const { mutateAsync: createEventFamily } =
     api.events.createByType.useMutation();
   const { mutateAsync: createEventOrg } =
@@ -68,9 +76,198 @@ export default function Page() {
   const { data: company } = api.companies.get.useQuery();
   const { data: marcas } = api.brands.list.useQuery();
   const { data: gruposFamiliar } = api.family_groups.list.useQuery();
-  const { data: comprobantes } = api.comprobantes.list.useQuery();
+  const { data: obrasSociales } = api.healthInsurances.list.useQuery();
   const [logo, setLogo] = useState("");
   const [fcSelec, setFCSelec] = useState("");
+  const [comprobantes, setComprobantes] = useState<any[]>([]);
+  const [selectedComprobante, setSelectedComprobante] = useState<any>(null);
+  const [comprobanteCreado, setComprobanteCreado] = useState<any>(null);
+  const [afip, setAfip] = useState<any>(null);
+  const router = useRouter();
+  useEffect(() => {
+    async function loginAfip() {
+      const afip = await ingresarAfip();
+      setLoading(false);
+      const voucherTypes = await afip.ElectronicBilling.getVoucherTypes();
+      const ivaTypes = await afip.ElectronicBilling.getAliquotTypes();
+      console.log("afip loaded");
+      console.log("voucherTypes", voucherTypes);
+      console.log("aliquot types", ivaTypes);
+      setAfip(afip);
+    }
+
+    loginAfip();
+  }, []);
+
+  // async function handlePrevisualize() {
+  //   console.log("arranca");
+  //   let comprobanteAhora = null;
+  //   if (!comprobanteCreado) {
+  //     console.log("empieza a crear");
+  //     if (marcas) {
+  //       setLogo(marcas[0]!.logo_url!);
+  //     }
+  //     setLoading(true);
+  //     let comprobante = null;
+  //     const fecha = new Date(
+  //       Date.now() - new Date().getTimezoneOffset() * 60000
+  //     )
+  //       .toISOString()
+  //       .split("T")[0];
+  //     console.log("se define por tipoComprobante", tipoComprobante);
+  //     if (fcSelec && (tipoComprobante == "2" || tipoComprobante == "12")) {
+  //       const facSeleccionada = comprobantes?.find((x) => x.id == fcSelec);
+  //       let ivaFloat = (100 + parseFloat(facSeleccionada?.iva ?? "0")) / 100;
+  //       comprobante = await createComprobante({
+  //         billLink: "",
+  //         concepto: facSeleccionada?.concepto ?? 0,
+  //         importe: facSeleccionada?.importe ?? 0,
+  //         iva: facSeleccionada?.iva ?? "0",
+  //         nroDocumento: facSeleccionada?.nroDocumento ?? 0,
+  //         ptoVenta: facSeleccionada?.ptoVenta ?? 0,
+  //         tipoDocumento: facSeleccionada?.tipoDocumento ?? 0,
+  //         tipoComprobante: reverseComprobanteDictionary[tipoComprobante],
+  //         fromPeriod: facSeleccionada?.fromPeriod,
+  //         toPeriod: facSeleccionada?.toPeriod,
+  //         due_date: facSeleccionada?.due_date,
+  //         generated: new Date(),
+  //         prodName: facSeleccionada?.prodName ?? "",
+  //         nroComprobante: facSeleccionada?.nroComprobante ?? 0,
+  //         family_group_id: grupoFamiliarId,
+  //       });
+  //       setComprobanteCreado(comprobante[0]);
+  //       const event = createEventFamily({
+  //         family_group_id: grupoFamiliarId,
+  //         type: "NC",
+  //         amount: comprobante[0]?.importe ?? 0,
+  //       });
+  //     } else if (tipoComprobante == "3" || tipoComprobante == "6") {
+  //       let ivaFloat =
+  //         (100 + parseFloat(ivaDictionary[Number(iva)] ?? "0")) / 100;
+  //       comprobante = await createComprobante({
+  //         billLink: "",
+  //         concepto: Number(concepto) ?? 0,
+  //         importe: Number(importe) ?? 0,
+  //         iva: iva ?? "0",
+  //         nroDocumento: Number(nroDocumento) ?? 0,
+  //         ptoVenta: Number(puntoVenta) ?? 0,
+  //         tipoDocumento: idDictionary[tipoDocumento ?? ""] ?? 0,
+  //         tipoComprobante: reverseComprobanteDictionary[tipoComprobante],
+  //         fromPeriod: dateDesde,
+  //         toPeriod: dateHasta,
+  //         due_date: dateVencimiento,
+  //         generated: new Date(),
+  //         prodName: servicioprod ?? "",
+  //         nroComprobante: 0,
+  //         family_group_id: grupoFamiliarId,
+  //       });
+  //       setComprobanteCreado(comprobante[0]);
+  //       const event = createEventFamily({
+  //         family_group_id: grupoFamiliarId,
+  //         type: "FC",
+  //         amount: comprobante[0]?.importe ?? 0,
+  //       });
+  //     } else if (tipoComprobante == "0") {
+  //       comprobante = await createComprobante({
+  //         billLink: "",
+  //         concepto: Number(concepto) ?? 0,
+  //         importe: Number(importe) ?? 0,
+  //         iva: "0",
+  //         nroDocumento: Number(nroDocumento) ?? 0,
+  //         ptoVenta: Number(puntoVenta) ?? 0,
+  //         tipoDocumento: idDictionary[tipoDocumento ?? ""] ?? 0,
+  //         tipoComprobante: reverseComprobanteDictionary[tipoComprobante],
+  //         fromPeriod: dateDesde,
+  //         toPeriod: dateHasta,
+  //         due_date: dateVencimiento,
+  //         generated: new Date(),
+  //         prodName: servicioprod ?? "",
+  //         nroComprobante: 0,
+  //         family_group_id: grupoFamiliarId,
+  //       });
+  //       setComprobanteCreado(comprobante[0]);
+  //       const event = createEventFamily({
+  //         family_group_id: grupoFamiliarId,
+  //         type: "REC",
+  //         amount: comprobante[0]?.importe ?? 0,
+  //       });
+  //       const eventOrg = createEventOrg({
+  //         type: "REC",
+  //         amount: comprobante[0]?.importe ?? 0,
+  //       });
+  //     }
+  //     comprobanteAhora = comprobante ? comprobante[0] : null;
+  //     console.log("hecho");
+  //     setLoading(false);
+  //     // toast.success("La factura se creo correctamente");
+  //   }
+  //   console.log("billLink if");
+  //   if (comprobanteAhora || !comprobanteCreado?.billLink) {
+  //     console.log("creacion link");
+  //     const billResponsible = gruposFamiliar
+  //       ?.find((x) => x.id == grupoFamiliarId)
+  //       ?.integrants.find((x) => x.isBillResponsible);
+  //     const obraSocial = obrasSociales?.find((x) => x.id == obraSocialId);
+  //     console.log("html");
+  //     const html = htmlBill(
+  //       comprobanteCreado,
+  //       company,
+  //       undefined,
+  //       2,
+  //       marcas?.find((x) => x.id === brandId),
+  //       nombre,
+  //       billResponsible
+  //         ? billResponsible?.address ??
+  //             "" + " " + (billResponsible?.address_number ?? "")
+  //         : obraSocial?.adress ?? "",
+  //       (billResponsible ? billResponsible?.locality : obraSocial?.locality) ??
+  //         "",
+  //       (billResponsible ? billResponsible?.province : obraSocial?.province) ??
+  //         "",
+  //       (billResponsible
+  //         ? billResponsible?.postal_code?.cp
+  //         : obraSocial?.postal_code) ?? "",
+  //       (billResponsible
+  //         ? billResponsible?.fiscal_id_type
+  //         : obraSocial?.fiscal_id_type) ?? "",
+  //       (billResponsible
+  //         ? billResponsible?.fiscal_id_number
+  //         : obraSocial?.fiscal_id_number?.toString()) ?? "",
+  //       (billResponsible
+  //         ? billResponsible?.afip_status
+  //         : obraSocial?.afip_status) ?? ""
+  //     );
+  //     const options = {
+  //       width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
+  //       marginLeft: 0.8, // Margen izquierdo en pulgadas. Usar 0.1 para ticket
+  //       marginRight: 0.8, // Margen derecho en pulgadas. Usar 0.1 para ticket
+  //       marginTop: 0.4, // Margen superior en pulgadas. Usar 0.1 para ticket
+  //       marginBottom: 0.4, // Margen inferior en pulgadas. Usar 0.1 para ticket
+  //     };
+  //     const name = "DEMO.pdf";
+  //     console.log("subiendo");
+  //     const resHtml = await afip.ElectronicBilling.createPDF({
+  //       html: html,
+  //       file_name: name,
+  //       options: options,
+  //     });
+  //     console.log("resHtml", resHtml);
+  //     const updatedComprobante = await updateComprobante({
+  //       id: comprobanteCreado?.id ?? "",
+  //       billLink: resHtml.file,
+  //     });
+  //     setComprobanteCreado(updatedComprobante);
+  //   }
+  //   console.log("aca hay window");
+  //   console.log(comprobanteAhora);
+  //   console.log(comprobanteCreado);
+  //   if (comprobanteAhora && comprobanteAhora?.billLink) {
+  //     window.open(comprobanteAhora?.billLink, "_blank");
+  //   } else {
+  //     window.open(comprobanteCreado.billLink, "_blank");
+  //   }
+  // }
+
   function generateComprobante() {
     if (marcas) {
       setLogo(marcas[0]!.logo_url!);
@@ -78,7 +275,6 @@ export default function Page() {
     try {
       (async () => {
         setLoading(true);
-        const afip = await ingresarAfip();
         let comprobante = null;
         let last_voucher = 0;
         let data = null;
@@ -98,10 +294,20 @@ export default function Page() {
           .toISOString()
           .split("T")[0];
 
-        if (fcSelec && (tipoComprobante == "2" || tipoComprobante == "12")) {
+        if (fcSelec && (tipoComprobante == "3" || tipoComprobante == "8")) {
           const facSeleccionada = comprobantes?.find((x) => x.id == fcSelec);
 
           let ivaFloat = (100 + parseFloat(facSeleccionada?.iva ?? "0")) / 100;
+          console.log("IMPORTE NC");
+          console.log(facSeleccionada?.importe);
+          console.log(
+            Math.round(
+              100 *
+                ((facSeleccionada?.importe ?? 0) -
+                  Number(facSeleccionada?.importe) / ivaFloat)
+            ) / 100
+          );
+          console.log((Number(facSeleccionada?.importe) / ivaFloat).toFixed(2));
 
           comprobante = await createComprobante({
             billLink: "",
@@ -119,6 +325,7 @@ export default function Page() {
             prodName: facSeleccionada?.prodName ?? "",
             nroComprobante: facSeleccionada?.nroComprobante ?? 0,
             family_group_id: grupoFamiliarId,
+            previous_facturaId: facSeleccionada?.id,
           });
           try {
             last_voucher = await afip.ElectronicBilling.getLastVoucher(
@@ -158,11 +365,8 @@ export default function Page() {
             ImpIVA:
               Math.round(
                 100 *
-                  (comprobante[0]?.importe ??
-                    0 -
-                      parseFloat(
-                        (Number(comprobante[0]?.importe) / ivaFloat).toFixed(2)
-                      ))
+                  ((comprobante[0]?.importe ?? 0) -
+                    Number(comprobante[0]?.importe) / ivaFloat)
               ) / 100,
 
             ImpTrib: 0,
@@ -174,21 +378,18 @@ export default function Page() {
               Importe:
                 Math.round(
                   100 *
-                    (comprobante[0]?.importe ??
-                      0 -
-                        parseFloat(
-                          (Number(comprobante[0]?.importe) / ivaFloat).toFixed(
-                            2
-                          )
-                        ))
+                    ((comprobante[0]?.importe ?? 0) -
+                      parseFloat(
+                        (Number(comprobante[0]?.importe) / ivaFloat).toFixed(2)
+                      ))
                 ) / 100,
             },
             CbtesAsoc: {
               Tipo: comprobanteDictionary[
                 facSeleccionada?.tipoComprobante ?? ""
               ],
-              BaseImp: (facSeleccionada?.importe ?? 0) / ivaFloat,
-              Importe: (facSeleccionada?.importe ?? 0) * (1 - ivaFloat),
+              PtoVta: facSeleccionada?.ptoVenta ?? 1,
+              Nro: facSeleccionada?.nroComprobante ?? 0,
             },
           };
           const event = createEventFamily({
@@ -196,21 +397,20 @@ export default function Page() {
             type: "NC",
             amount: comprobante[0]?.importe ?? 0,
           });
-        } else if (tipoComprobante == "3" || tipoComprobante == "6") {
+        } else if (tipoComprobante == "1" || tipoComprobante == "6") {
           let ivaFloat =
             (100 + parseFloat(ivaDictionary[Number(iva)] ?? "0")) / 100;
-          const billResponsible = gruposFamiliar
-            ?.find((x) => x.id == grupoFamiliarId)
-            ?.integrants.find((x) => x.isBillResponsible);
+          // const billResponsible = gruposFamiliar
+          //   ?.find((x) => x.id == grupoFamiliarId)
+          //   ?.integrants.find((x) => x.isBillResponsible);
           comprobante = await createComprobante({
             billLink: "",
             concepto: Number(concepto) ?? 0,
-            importe: Number(importe) ?? 0,
+            importe: Number(importe) * ivaFloat + Number(tributos) ?? 0,
             iva: iva ?? "0",
-            nroDocumento: Number(billResponsible?.fiscal_id_number) ?? 0,
+            nroDocumento: Number(nroDocumento) ?? 0,
             ptoVenta: Number(puntoVenta) ?? 0,
-            tipoDocumento:
-              idDictionary[billResponsible?.fiscal_id_type ?? ""] ?? 0,
+            tipoDocumento: idDictionary[tipoDocumento ?? ""] ?? 0,
             tipoComprobante: reverseComprobanteDictionary[tipoComprobante],
             fromPeriod: dateDesde,
             toPeriod: dateHasta,
@@ -233,8 +433,8 @@ export default function Page() {
             PtoVta: Number(puntoVenta),
             CbteTipo: Number(tipoComprobante),
             Concepto: Number(concepto),
-            DocTipo: idDictionary[billResponsible?.fiscal_id_type ?? ""],
-            DocNro: billResponsible?.fiscal_id_number ?? 0,
+            DocTipo: idDictionary[tipoDocumento ?? ""],
+            DocNro: nroDocumento ?? 0,
             CbteDesde: last_voucher + 1,
             CbteHasta: last_voucher + 1,
             CbteFch: parseInt(fecha?.replace(/-/g, "") ?? ""),
@@ -246,27 +446,26 @@ export default function Page() {
               concepto != "1"
                 ? formatDate(dateVencimiento ?? new Date())
                 : null,
-            ImpTotal: Number(importe),
+            ImpTotal:
+              Math.round(
+                100 * (Number(importe) * ivaFloat + Number(tributos))
+              ) / 100,
             ImpTotConc: 0,
-            ImpNeto: (Number(importe) / ivaFloat).toFixed(2),
+            ImpNeto: Number(importe),
             ImpOpEx: 0,
             ImpIVA:
               Math.round(
-                100 *
-                  (Number(importe ?? 0) -
-                    parseFloat((Number(importe) / ivaFloat).toFixed(2)))
+                100 * (Number(importe ?? 0) * ivaFloat - Number(importe))
               ) / 100,
             ImpTrib: 0,
             MonId: "PES",
             MonCotiz: 1,
             Iva: {
               Id: iva,
-              BaseImp: (Number(importe) / ivaFloat).toFixed(2),
+              BaseImp: Number(importe),
               Importe:
                 Math.round(
-                  100 *
-                    (Number(importe ?? 0) -
-                      parseFloat((Number(importe) / ivaFloat).toFixed(2)))
+                  100 * (Number(importe ?? 0) * ivaFloat - Number(importe))
                 ) / 100,
             },
           };
@@ -278,18 +477,15 @@ export default function Page() {
         } else if (tipoComprobante == "0") {
           // iva = 0;
 
-          const billResponsible = gruposFamiliar
-            ?.find((x) => x.id == grupoFamiliarId)
-            ?.integrants.find((x) => x.isBillResponsible);
+          //
           comprobante = await createComprobante({
             billLink: "",
             concepto: Number(concepto) ?? 0,
-            importe: Number(importe) ?? 0,
+            importe: Number(importe) * ivaFloat + Number(tributos) ?? 0,
             iva: "0",
-            nroDocumento: Number(billResponsible?.fiscal_id_number) ?? 0,
+            nroDocumento: Number(nroDocumento) ?? 0,
             ptoVenta: Number(puntoVenta) ?? 0,
-            tipoDocumento:
-              idDictionary[billResponsible?.fiscal_id_type ?? ""] ?? 0,
+            tipoDocumento: idDictionary[tipoDocumento ?? ""] ?? 0,
             tipoComprobante: reverseComprobanteDictionary[tipoComprobante],
             fromPeriod: dateDesde,
             toPeriod: dateHasta,
@@ -311,15 +507,46 @@ export default function Page() {
         }
 
         if (data) {
-          const res = await afip.ElectronicBilling.createVoucher(data);
+          try {
+            const res = await afip.ElectronicBilling.createVoucher(data);
+          } catch (error) {
+            console.log(error);
+          }
         }
+        const billResponsible = gruposFamiliar
+          ?.find((x) => x.id == grupoFamiliarId)
+          ?.integrants.find((x) => x.isBillResponsible);
+        const obraSocial = obrasSociales?.find((x) => x.id == obraSocialId);
         if (comprobante && comprobante[0]) {
           const html = htmlBill(
             comprobante[0],
             company,
             undefined,
             2,
-            marcas?.find((x) => x.id === brandId)!
+            marcas?.find((x) => x.id === brandId),
+            nombre,
+            billResponsible
+              ? billResponsible?.address ??
+                  "" + " " + (billResponsible?.address_number ?? "")
+              : obraSocial?.adress ?? "",
+            (billResponsible
+              ? billResponsible?.locality
+              : obraSocial?.locality) ?? "",
+            (billResponsible
+              ? billResponsible?.province
+              : obraSocial?.province) ?? "",
+            (billResponsible
+              ? billResponsible?.postal_code?.cp
+              : obraSocial?.postal_code) ?? "",
+            (billResponsible
+              ? billResponsible?.fiscal_id_type
+              : obraSocial?.fiscal_id_type) ?? "",
+            (billResponsible
+              ? billResponsible?.fiscal_id_number
+              : obraSocial?.fiscal_id_number?.toString()) ?? "",
+            (billResponsible
+              ? billResponsible?.afip_status
+              : obraSocial?.afip_status) ?? ""
           );
           const options = {
             width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
@@ -337,6 +564,7 @@ export default function Page() {
           const updatedComprobante = await updateComprobante({
             id: comprobante[0]?.id ?? "",
             billLink: resHtml.file,
+            number: last_voucher + 1,
           });
           console.log("resultadHTML", resHtml);
         }
@@ -344,37 +572,11 @@ export default function Page() {
         toast.success("La factura se creo correctamente");
       })();
     } catch {
+      setLoading(false);
       toast.error("Error");
     }
   }
 
-  // async function saveComprobante(numero_de_comprobante: number) {
-  //   const comprobante = await createComprobante({
-  //     billLink: "",
-  //     concepto: Number(concepto),
-  //     importe: Number(importe),
-  //     iva: iva,
-  //     nroDocumento: Number(nroDocumento),
-  //     ptoVenta: Number(puntoVenta),
-  //     tipoDocumento: Number(tipoDocumento),
-  //     tipoComprobante: tipoComprobante,
-  //     fromPeriod: dateDesde,
-  //     toPeriod: dateHasta,
-  //     due_date: dateVencimiento,
-  //     generated: new Date(),
-  //     prodName: servicioprod,
-  //     nroComprobante: numero_de_comprobante,
-  //   });
-  //   const updatedComprobante = await createItemReturnComprobante({
-  //     concept: "Comprobante Manual",
-  //     amount: Number(importe),
-  //     iva: 0,
-  //     total: Number(importe),
-  //     abono: 0,
-  //     comprobante_id: comprobante[0]?.id ?? "",
-  //   });
-  //   return updatedComprobante;
-  // }
   type Channel = {
     number: number;
     id: string;
@@ -386,57 +588,61 @@ export default function Page() {
     requiredColumns: string[];
   };
 
-  // function showFactura() {}
   const [puntoVenta, setPuntoVenta] = useState("");
   const [tipoComprobante, setTipoComprobante] = useState("");
   const [concepto, setConcepto] = useState("");
   const [tipoDocumento, setTipoDocumento] = useState("");
   const [nroDocumento, setNroDocumento] = useState("");
-  const [importe, setImporte] = useState("");
+  const [nroDocumentoDNI, setNroDocumentoDNI] = useState("");
+  const [nombre, setNombre] = useState("");
+  const [importe, setImporte] = useState("0");
+  const [tributos, setTributos] = useState("0");
   const [dateDesde, setDateDesde] = React.useState<Date>();
   const [dateHasta, setDateHasta] = React.useState<Date>();
   const [dateVencimiento, setDateVencimiento] = React.useState<Date>();
-  const [servicioprod, setservicioprod] = useState("");
+  const [dateEmision, setDateEmision] = React.useState<Date>();
+  const [servicioprod, setservicioprod] = useState("Servicio");
+  const [obraSocialId, setObraSocialId] = useState("");
   const [iva, setIva] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [grupoFamiliarId, setGrupoFamiliarId] = useState("");
 
   const products = api.products.list.useQuery().data;
-  const channelList = api.channels.list.useQuery().data;
-  const [selectedProduct, setSelectedProduct] = useState("");
-  const [channelsFiltered, setChannelsFiltered] = useState<
-    Channel[] | undefined
-  >(undefined);
   const [brandId, setBrandId] = useState("");
   function handleGrupoFamilarChange(value: string) {
     setGrupoFamiliarId(value);
+    setObraSocialId("");
     let grupo = gruposFamiliar?.find((x) => x.id == value);
     let billResponsible = grupo?.integrants.find((x) => x.isBillResponsible);
-
+    setComprobantes(grupo?.comprobantes ?? []);
     setNroDocumento(billResponsible?.fiscal_id_number ?? "");
+    setNroDocumentoDNI(billResponsible?.id_number ?? "");
+    setNombre(billResponsible?.name ?? "");
     setTipoDocumento(billResponsible?.fiscal_id_type ?? "");
     setBrandId(grupo?.businessUnitData?.brandId ?? "");
   }
+  function handleObraSocialChange(value: string) {
+    setGrupoFamiliarId("");
+    setObraSocialId(value);
+    let obra = obrasSociales?.find((x) => x.id == value);
+    setNroDocumento(obra?.fiscal_id_number?.toString() ?? "");
+    setNroDocumentoDNI("0" ?? "");
+    setNombre(obra?.responsibleName ?? "");
+    setTipoDocumento(obra?.fiscal_id_type ?? "");
+    // setTipoDocumento(billResponsible?.fiscal_id_type ?? "");
+    // setBrandId(obra?.businessUnitData?.brandId ?? "");
+  }
+  function handleComprobanteChange(value: string) {
+    setFCSelec(value);
+    setSelectedComprobante(comprobantes?.find((x) => x.id == value));
+  }
   let selectedBrand;
-
-  const [selectedChannel, setSelectedChannel] = useState("");
 
   const [popoverDesdeOpen, setPopoverDesdeOpen] = useState(false);
   const [popoverFinOpen, setPopoverFinOpen] = useState(false);
   const [popoverVencimientoOpen, setPopoverVencimientoOpen] = useState(false);
-
-  useEffect(() => {
-    if (selectedProduct) {
-      const product = products?.find((x) => x.id === selectedProduct);
-
-      const channels = product?.channels.flatMap(
-        (chanel) => channelList?.filter((x) => x.id === chanel.channelId) || []
-      );
-
-      setChannelsFiltered(channels);
-    }
-  }, [selectedProduct, products, channelList]);
+  const [popoverEmisionOpen, setPopoverEmisionOpen] = useState(false);
 
   async function FechasCreateDesde(e: any) {
     setDateDesde(e);
@@ -450,6 +656,10 @@ export default function Page() {
     setDateVencimiento(e);
     setPopoverVencimientoOpen(false);
   }
+  async function FechasCreateEmision(e: any) {
+    setDateEmision(e);
+    setPopoverEmisionOpen(false);
+  }
 
   const handleBrandChange = (value: string) => {
     selectedBrand = marcas?.find((marca) => marca.id === value);
@@ -461,45 +671,112 @@ export default function Page() {
       <LayoutContainer>
         <section className="space-y-2">
           <div>
-            <Title>Facturación</Title>
+            <Title>Generación de comprobantes</Title>
           </div>
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="family_group">Grupo Familiar</Label>
-              <br />
-              <Select onValueChange={(e) => handleGrupoFamilarChange(e)}>
-                <SelectTrigger className="w-[180px] font-bold">
-                  <SelectValue placeholder="Seleccione un grupo familiar" />
-                </SelectTrigger>
-                <SelectContent>
-                  {gruposFamiliar &&
-                    gruposFamiliar.map((gruposFamiliar) => (
-                      <SelectItem
-                        key={gruposFamiliar?.id}
-                        value={gruposFamiliar?.id}
-                        className="rounded-none border-b border-gray-600"
-                      >
-                        {gruposFamiliar?.numericalId}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-
-              {/* <ComboboxDemo
-                title="Afiliado"
-                placeholder="Afiliado"
-                options={[
-                  { value: "Juan Hernandez", label: "Juan Hernandez" },
-                  { value: "Joaquin Sabina", label: "Sabina" },
-                ]}
-                onSelectionChange={(e) => setName(e)}
-              /> */}
+          <div className="flex flex-row justify-between border-[#0DA485] border-b-2">
+            <p className=" text-lg">Receptor</p>
+            <div className="pb-2">
+              <Button
+                className="h-7 bg-[#0DA485] hover:bg-[#0da486e2] text-[#FAFDFD] font-medium-medium text-xs rounded-2xl py-0 px-6 mr-3"
+                // onClick={() => setOpen(true)}
+                disabled={loading}
+                onClick={generateComprobante}
+              >
+                Aprobar
+                {loading ? (
+                  <Loader2Icon className="mr-2 animate-spin" size={20} />
+                ) : (
+                  <CircleCheck className="h-4 w-auto ml-2" />
+                )}
+              </Button>
+              <Button
+                className="  h-7 bg-[#D9D7D8] hover:bg-[#d9d7d8dc] text-[#4B4B4B]  text-xs rounded-2xl py-0 px-6 "
+                // onClick={() => setOpen(true)}
+              >
+                Anular
+                <CircleX className="h-4 w-auto ml-2" />
+              </Button>
             </div>
+          </div>
+          <div className="flex flex-row justify-between gap-8">
+            <Select
+              onValueChange={(e) => handleGrupoFamilarChange(e)}
+              value={grupoFamiliarId}
+            >
+              <SelectTriggerMagnify className=" font-bold w-full">
+                <SelectValue placeholder="Buscar afiliado" />
+              </SelectTriggerMagnify>
+              <SelectContent>
+                {gruposFamiliar &&
+                  gruposFamiliar.map((gruposFamiliar) => (
+                    <SelectItem
+                      key={gruposFamiliar?.id}
+                      value={gruposFamiliar?.id}
+                      className="rounded-none border-b border-gray-600"
+                    >
+                      {gruposFamiliar?.integrants.find((x) => x.isHolder)?.name}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+            <p className="text-lg font-bold mt-1"> O </p>
+            <Select
+              onValueChange={(e) => handleObraSocialChange(e)}
+              value={obraSocialId}
+            >
+              <SelectTriggerMagnify className="w-full font-bold">
+                <SelectValue placeholder="Buscar obra social" />
+              </SelectTriggerMagnify>
+              <SelectContent>
+                {obrasSociales &&
+                  obrasSociales.map((obrasSocial) => (
+                    <SelectItem
+                      key={obrasSocial?.id}
+                      value={obrasSocial?.id}
+                      className="rounded-none border-b border-gray-600"
+                    >
+                      {obrasSocial?.name}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="bg-[#e9fcf8] rounded-lg p-4 flex flex-row justify-between">
+            <div className="flex flex-col gap-2">
+              <Label>NOMBRE RESPONSABLE</Label>
+              <Input
+                disabled={true}
+                value={nombre}
+                className="bg-white w-72 opacity-100 border-[#0DA485] border"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label>DNI</Label>
+              <Input
+                disabled={true}
+                value={nroDocumentoDNI}
+                className="bg-white w-72 opacity-100 border-[#0DA485] border"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label>CUIT</Label>
+              <Input
+                disabled={true}
+                value={nroDocumento}
+                className="bg-white w-72 opacity-100 border-[#0DA485] border"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-row justify-between border-[#0DA485] border-b-2">
+            <p className=" text-lg">Datos del Comprobante</p>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="name">Punto de venta a utilizar</Label>
+              <Label htmlFor="name">Punto de venta</Label>
               <br />
               <Select onValueChange={(e) => setPuntoVenta(e)}>
-                <SelectTrigger className="w-[180px] font-bold">
+                <SelectTrigger className="font-bold border-[#0DA485] border">
                   <SelectValue placeholder="Seleccionar PV..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -519,30 +796,52 @@ export default function Page() {
               </Select>
             </div>
             <div>
-              <Label htmlFor="factura">Tipo de factura</Label>
+              <Label htmlFor="emition">Fecha de emisión</Label>
+              <br />
+              <Popover
+                open={popoverEmisionOpen}
+                onOpenChange={setPopoverEmisionOpen}
+              >
+                <PopoverTrigger asChild={true}>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "justify-start text-left font-normal border-[#0DA485] border w-full",
+                      !dateEmision && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {dateEmision ? (
+                      format(dateEmision, "PPP")
+                    ) : (
+                      <span>Seleccionar fecha</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={dateEmision}
+                    onSelect={(e) => FechasCreateEmision(e)}
+                    initialFocus={true}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div>
+              <Label htmlFor="factura">Tipo Comprobante</Label>
               <br />
               <Select onValueChange={(e) => setTipoComprobante(e)}>
-                <SelectTrigger className="w-[180px] font-bold">
-                  <SelectValue placeholder="Seleccionar factura..." />
+                <SelectTrigger className="font-bold border-[#0DA485] border">
+                  <SelectValue placeholder="Seleccionar comprobante..." />
                 </SelectTrigger>
                 <SelectContent>
                   {[
-                    { value: "3", label: "FACTURA A" },
+                    { value: "1", label: "FACTURA A" },
                     { value: "6", label: "FACTURA B" },
-                    // { value: "8", label: "NOTA DE DEBITO A" },
-                    // { value: "13", label: "NOTA DE DEBITO B" },
-                    { value: "2", label: "NOTA DE CREDITO A" },
-                    { value: "12", label: "NOTA DE CREDITO B" },
+                    { value: "3", label: "NOTA DE CREDITO A" },
+                    { value: "8", label: "NOTA DE CREDITO B" },
                     { value: "0", label: "RECIBO" },
-                    // { value: "15", label: "NOTA DE DEBITO C" },
-                    // { value: "52", label: "NOTA DE DEBITO M" },
-                    // { value: "20", label: "NOTA DE DEBITO E" },
-                    // { value: "11", label: "FACTURA C" },
-                    // { value: "51", label: "FACTURA M" },
-                    // { value: "19", label: "FACTURA E" },
-                    // { value: "14", label: "NOTA DE CREDITO C" },
-                    // { value: "53", label: "NOTA DE CREDITO M" },
-                    // { value: "21", label: "NOTA DE CREDITO E" },
                   ].map((option) => (
                     <SelectItem
                       key={option.value}
@@ -555,311 +854,367 @@ export default function Page() {
                 </SelectContent>
               </Select>
             </div>
-            {(tipoComprobante == "2" || tipoComprobante == "12") && (
-              <div>
-                <Label> Factura a Cancelar</Label>
-                <br />
-                <Select onValueChange={(e) => setFCSelec(e)}>
-                  <SelectTrigger className="w-[180px] font-bold">
-                    <SelectValue placeholder="Seleccione una factura" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {gruposFamiliar?.find((x) => x.id == grupoFamiliarId) &&
-                      gruposFamiliar
-                        ?.find((x) => x.id == grupoFamiliarId)
-                        ?.comprobantes.filter((x) => x.estado != "generada")
-                        .map((comprobante) => (
-                          <SelectItem
-                            key={comprobante?.id}
-                            value={comprobante?.id}
-                            className="rounded-none border-b border-gray-600"
-                          >
-                            {comprobante?.nroComprobante}
-                          </SelectItem>
-                        ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
             <div>
-              <Label>Marca</Label>
-              <Select
-                onValueChange={handleBrandChange}
-                value={brandId}
-                disabled={true}
-              >
-                <SelectTrigger className="w-[180px] font-bold">
-                  <SelectValue placeholder="Seleccione una marca" />
+              <Label htmlFor="iva">Alicuota</Label>
+              <br />
+              <Select onValueChange={(e) => setIva(e)}>
+                <SelectTrigger className="font-bold border-[#0DA485] border">
+                  <SelectValue placeholder="Seleccionar alicuota" />
                 </SelectTrigger>
                 <SelectContent>
-                  {marcas &&
-                    marcas.map((marca) => (
-                      <SelectItem
-                        key={marca!.id}
-                        value={marca!.id}
-                        className="rounded-none border-b border-gray-600"
-                      >
-                        {marca!.name}
-                      </SelectItem>
-                    ))}
+                  {[
+                    { value: "3", label: "0%" },
+                    { value: "4", label: "10.5%" },
+                    { value: "5", label: "21%" },
+                    { value: "6", label: "27%" },
+                    { value: "8", label: "5%" },
+                    { value: "9", label: "2.5%" },
+                  ].map((option) => (
+                    <SelectItem
+                      key={option.value}
+                      value={option.value}
+                      className="rounded-none border-b border-gray-600"
+                    >
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
 
             <div>
-              <Label htmlFor="tipoDocumento">Tipo de documento</Label>
+              <Label htmlFor="concepto">Tipo de concepto</Label>
+              <br />
+              <Select onValueChange={(e) => setConcepto(e)}>
+                <SelectTrigger className="font-bold border-[#0DA485] border">
+                  <SelectValue placeholder="Seleccionar concepto" />
+                </SelectTrigger>
+                <SelectContent>
+                  {[
+                    { value: "1", label: "Productos" },
+                    { value: "2", label: "Servicios" },
+                    { value: "3", label: "Productos y Servicios" },
+                  ].map((option) => (
+                    <SelectItem
+                      key={option.value}
+                      value={option.value}
+                      className="rounded-none border-b border-gray-600"
+                    >
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="emition">Fecha de vencimiento</Label>
+              <br />
+              <Popover
+                open={popoverVencimientoOpen}
+                onOpenChange={setPopoverVencimientoOpen}
+              >
+                <PopoverTrigger asChild={true}>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "justify-start text-left font-normal border-[#0DA485] border w-full",
+                      !dateVencimiento && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {dateVencimiento ? (
+                      format(dateVencimiento, "PPP")
+                    ) : (
+                      <span>Seleccionar fecha</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={dateVencimiento}
+                    onSelect={(e) => FechasCreateVencimiento(e)}
+                    initialFocus={true}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div>
+              <Label htmlFor="emition">Fecha inicio de servicio</Label>
+              <br />
+              <Popover
+                open={popoverDesdeOpen}
+                onOpenChange={setPopoverDesdeOpen}
+              >
+                <PopoverTrigger asChild={true}>
+                  <Button
+                    variant={"outline"}
+                    disabled={concepto == "" || concepto == "1"}
+                    className={cn(
+                      "justify-start text-left font-normal border-[#0DA485] border w-full",
+                      !dateDesde && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {dateDesde ? (
+                      format(dateDesde, "PPP")
+                    ) : (
+                      <span>Seleccionar fecha</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={dateDesde}
+                    onSelect={(e) => FechasCreateDesde(e)}
+                    initialFocus={true}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div>
+              <Label htmlFor="emition">Fecha fin de servicio</Label>
+              <br />
+              <Popover open={popoverFinOpen} onOpenChange={setPopoverFinOpen}>
+                <PopoverTrigger asChild={true}>
+                  <Button
+                    variant={"outline"}
+                    disabled={concepto == "" || concepto == "1"}
+                    className={cn(
+                      "justify-start text-left font-normal border-[#0DA485] border w-full",
+                      !dateHasta && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {dateHasta ? (
+                      format(dateHasta, "PPP")
+                    ) : (
+                      <span>Seleccionar fecha</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={dateHasta}
+                    onSelect={(e) => FechasCreateFin(e)}
+                    initialFocus={true}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+          <div className="flex flex-row justify-between border-[#0DA485] border-b-2">
+            <p className=" text-lg">Datos del Comprobante Asociado</p>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="factura">Comprobante Asociado</Label>
               <br />
               <Select
-                onValueChange={(e) => setTipoDocumento(e)}
-                value={tipoDocumento}
-                disabled={true}
+                onValueChange={(e) => handleComprobanteChange(e)}
+                disabled={tipoComprobante != "3" && tipoComprobante != "8"}
               >
-                <SelectTrigger className="w-[180px] font-bold">
-                  <SelectValue placeholder="Tipo de documento" />
+                <SelectTrigger className="font-bold border-[#0DA485] border">
+                  <SelectValue placeholder="Seleccionar comprobante..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {[
-                    { value: "CUIT", label: "CUIT" },
-                    { value: "CUIL", label: "CUIL" },
-                    { value: "DNI", label: "DNI" },
-                    // { value: "99", label: "Consumidor Final" },
-                  ].map((option) => (
-                    <SelectItem
-                      key={option.value}
-                      value={option.value}
-                      className="rounded-none border-b border-gray-600"
-                    >
-                      {option.label}
-                    </SelectItem>
-                  ))}
+                  {gruposFamiliar?.find((x) => x.id == grupoFamiliarId) &&
+                    gruposFamiliar
+                      ?.find((x) => x.id == grupoFamiliarId)
+                      ?.comprobantes.filter(
+                        (x) =>
+                          x.estado != "generada" &&
+                          x.ptoVenta.toString() === puntoVenta
+                      )
+                      .map((comprobante) => (
+                        <SelectItem
+                          key={comprobante?.id}
+                          value={comprobante?.id}
+                          className="rounded-none border-b border-gray-600"
+                        >
+                          {comprobante?.nroComprobante}
+                        </SelectItem>
+                      ))}
                 </SelectContent>
               </Select>
             </div>
+            <div></div>
+            <div className="bg-[#e9fcf8] rounded-lg p-4 flex flex-row justify-between gap-4">
+              <div className="flex flex-col gap-2">
+                <Label>Punto de venta</Label>
+                <Input
+                  disabled={true}
+                  value={selectedComprobante ? puntoVenta : "-"}
+                  className="bg-white opacity-100 border-[#0DA485] border"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label>Nro factura</Label>
+                <Input
+                  disabled={true}
+                  value={
+                    selectedComprobante
+                      ? selectedComprobante.nroComprobante
+                      : "-"
+                  }
+                  className="bg-white opacity-100 border-[#0DA485] border"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label>Fecha emision</Label>
+                <Input
+                  disabled={true}
+                  value={
+                    selectedComprobante
+                      ? dateNormalFormat(selectedComprobante.createdAt)
+                      : "-"
+                  }
+                  className="bg-white opacity-100 border-[#0DA485] border"
+                />
+              </div>
+            </div>
 
-            <div>
-              <Label htmlFor="nroDocumento">Número de documento</Label>
+            <div className="bg-[#e9fcf8] rounded-lg p-4 flex flex-row justify-between gap-4">
+              <div className="flex flex-col gap-2">
+                <Label>Desde</Label>
+                <Input
+                  disabled={true}
+                  value={
+                    selectedComprobante
+                      ? dateNormalFormat(selectedComprobante.fromPeriod)
+                      : "-"
+                  }
+                  className="bg-white opacity-100 border-[#0DA485] border"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label>Hasta</Label>
+                <Input
+                  disabled={true}
+                  value={
+                    selectedComprobante
+                      ? dateNormalFormat(selectedComprobante.toPeriod)
+                      : "-"
+                  }
+                  className="bg-white opacity-100 border-[#0DA485] border"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label>Concepto</Label>
+                <Input
+                  disabled={true}
+                  value={
+                    selectedComprobante
+                      ? reverseConceptDictionary[selectedComprobante.concepto]
+                      : "-"
+                  }
+                  className="bg-white opacity-100 border-[#0DA485] border"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label>Importe</Label>
+                <Input
+                  disabled={true}
+                  value={
+                    selectedComprobante ? selectedComprobante.importe : "-"
+                  }
+                  className="bg-white opacity-100 border-[#0DA485] border"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-row justify-between border-[#0DA485] border-b-2">
+            <p className=" text-lg">Totales</p>
+          </div>
+          <div className="flex flex-row justify-between pb-2">
+            <div className="flex flex-col gap-2">
+              <Label>Sub-total factura</Label>
               <Input
-                disabled={true}
-                id="nroDocumento"
-                placeholder="..."
-                value={tipoDocumento !== "99" ? nroDocumento : "0"}
-                onChange={(e) => setNroDocumento(e.target.value)}
+                // disabled={true}
+                value={
+                  "$ " +
+                  (!selectedComprobante
+                    ? importe
+                    : selectedComprobante.iva == "0"
+                    ? selectedComprobante?.importe
+                    : (selectedComprobante?.importe /
+                        Number(selectedComprobante.iva)) *
+                      100)
+                }
+                onChange={(e) => setImporte(e.target.value.slice(2))}
+                className="bg-[#e9fcf8] text-[#0DA485] rounded-none opacity-100 border-[#e9fcf8] border"
               />
             </div>
-            {(tipoComprobante == "3" ||
-              tipoComprobante == "6" ||
-              tipoComprobante == "0") && (
-              <>
-                <div>
-                  <Label htmlFor="concepto">Concepto del comprobante</Label>
-                  <br />
-                  <Select onValueChange={(e) => setConcepto(e)}>
-                    <SelectTrigger className="w-[180px] font-bold">
-                      <SelectValue placeholder="Concepto" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[
-                        { value: "1", label: "Productos" },
-                        { value: "2", label: "Servicios" },
-                        { value: "3", label: "Productos y Servicios" },
-                      ].map((option) => (
-                        <SelectItem
-                          key={option.value}
-                          value={option.value}
-                          className="rounded-none border-b border-gray-600"
-                        >
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="importe">Importe total del comprobante</Label>
-                  <Input
-                    id="importe"
-                    placeholder="..."
-                    value={importe}
-                    onChange={(e) => setImporte(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="nombreprod">
-                    {concepto === "1"
-                      ? "Nombre del producto"
-                      : "Nombre del servicio"}{" "}
-                  </Label>
-                  <Input
-                    id="nombrepro"
-                    placeholder="..."
-                    value={servicioprod}
-                    onChange={(e) => setservicioprod(e.target.value)}
-                  />
-                </div>
-              </>
-            )}
-            {(tipoComprobante == "3" || tipoComprobante == "6") && (
-              <>
-                <div>
-                  <Label htmlFor="nroDocumento">Productos disponibles</Label>
-                  <Select
-                    onValueChange={(value) => {
-                      setSelectedProduct(value);
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar un producto..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {products?.map((product) => (
-                          <SelectItem key={product.id} value={product.id}>
-                            {product.name}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="importe">Fecha de vencimiento</Label>
-                  <br />
-                  <Popover
-                    open={popoverVencimientoOpen}
-                    onOpenChange={setPopoverVencimientoOpen}
-                  >
-                    <PopoverTrigger asChild={true}>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-[220px] justify-start text-left font-normal",
-                          !dateVencimiento && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dateVencimiento ? (
-                          format(dateVencimiento, "PPP")
-                        ) : (
-                          <span>Selecciona una fecha</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={dateVencimiento}
-                        onSelect={(e) => FechasCreateVencimiento(e)}
-                        initialFocus={true}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div>
-                  <Label htmlFor="iva">IVA</Label>
-                  <br />
-                  <Select onValueChange={(e) => setIva(e)}>
-                    <SelectTrigger className="w-[180px] font-bold">
-                      <SelectValue placeholder="IVA" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[
-                        { value: "3", label: "0%" },
-                        { value: "4", label: "10.5%" },
-                        { value: "5", label: "21%" },
-                        { value: "6", label: "27%" },
-                        { value: "8", label: "5%" },
-                        { value: "9", label: "2.5%" },
-                      ].map((option) => (
-                        <SelectItem
-                          key={option.value}
-                          value={option.value}
-                          className="rounded-none border-b border-gray-600"
-                        >
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </>
-            )}
-
-            {(concepto === "2" || concepto === "3") && (
-              <>
-                <div>
-                  <Label htmlFor="importe">Fecha de inicio de servicio</Label>
-                  <br />
-                  <Popover
-                    open={popoverDesdeOpen}
-                    onOpenChange={setPopoverDesdeOpen}
-                  >
-                    <PopoverTrigger asChild={true}>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-[220px] justify-start text-left font-normal",
-                          !dateDesde && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dateDesde ? (
-                          format(dateDesde, "PPP")
-                        ) : (
-                          <span>Selecciona una fecha</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={dateDesde}
-                        onSelect={(e) => FechasCreateDesde(e)}
-                        initialFocus={true}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div>
-                  <Label htmlFor="importe">Fecha de fin de servicio</Label>
-                  <br />
-                  <Popover
-                    open={popoverFinOpen}
-                    onOpenChange={setPopoverFinOpen}
-                  >
-                    <PopoverTrigger asChild={true}>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-[220px] justify-start text-left font-normal",
-                          !dateHasta && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dateHasta ? (
-                          format(dateHasta, "PPP")
-                        ) : (
-                          <span>Selecciona una fecha</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={dateHasta}
-                        onSelect={(e) => FechasCreateFin(e)}
-                        initialFocus={true}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </>
-            )}
+            <div className="flex flex-col gap-2">
+              <Label>Importe IVA</Label>
+              <Input
+                // disabled={true}
+                value={
+                  "$ " +
+                  (!selectedComprobante
+                    ? (
+                        (Number(importe) * Number(ivaDictionary[Number(iva)])) /
+                        100
+                      ).toFixed(2)
+                    : selectedComprobante.iva == "0"
+                    ? "0"
+                    : selectedComprobante?.importe -
+                      (selectedComprobante?.importe /
+                        Number(selectedComprobante.iva)) *
+                        100)
+                }
+                className="bg-[#e9fcf8] text-[#0DA485] rounded-none opacity-100 border-[#e9fcf8] border"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label>Otros tributos</Label>
+              <Input
+                // disabled={true}
+                value={"$ " + !selectedComprobante ? tributos : "0"}
+                // onChange={(e) => setTributos(e.target.value.slice(2))}
+                className="bg-[#e9fcf8] text-[#0DA485] rounded-none opacity-100 border-[#e9fcf8] border"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label>Total</Label>
+              <Input
+                // disabled={true}
+                value={
+                  "$ " +
+                  (!selectedComprobante
+                    ? (
+                        Number(importe) +
+                        (Number(importe) * Number(ivaDictionary[Number(iva)])) /
+                          100 +
+                        Number(tributos)
+                      ).toFixed(2)
+                    : selectedComprobante?.importe)
+                }
+                className="bg-[#e9fcf8] text-[#0DA485] rounded-none  opacity-100 border-[#e9fcf8] border"
+              />
+            </div>
           </div>
+          {/* <Button
+            className="h-7 bg-[#0DA485] hover:bg-[#0da486e2] text-[#FAFDFD] font-medium-medium text-md rounded-2xl py-4 px-6 mr-3 float-right "
+            onClick={() => handlePrevisualize()}
+            disabled={loading}
+          >
+            {loading ? (
+              <Loader2Icon className="mr-2 animate-spin" size={20} />
+            ) : (
+              <Scroll className="h-5 w-auto ml-2" />
+            )}
+            <p className="p-4">Previsualizacion de factura</p>
+          </Button> */}
           <br />
-          <Button disabled={loading} onClick={generateComprobante}>
+
+          {/* <Button disabled={loading} onClick={generateComprobante}>
             {loading && <Loader2Icon className="mr-2 animate-spin" size={20} />}
             Generar nuevo comprobante
-          </Button>
+          </Button> */}
         </section>
       </LayoutContainer>
     </>

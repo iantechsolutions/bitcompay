@@ -17,7 +17,11 @@ export const family_groupsRouter = createTRPCRouter({
       with: {
         modo: true,
         plan: true,
-        integrants: true,
+        integrants: {
+          with: {
+            postal_code: true,
+          },
+        },
         cc: true,
         businessUnitData: {
           with: {
@@ -36,6 +40,7 @@ export const family_groupsRouter = createTRPCRouter({
         },
       },
     });
+    console.log("orgId", ctx.session.orgId);
     const family_group_reduced = family_groups.filter((family_groups) => {
       return family_groups.businessUnitData?.companyId === ctx.session.orgId!;
     });
@@ -50,7 +55,19 @@ export const family_groupsRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       const family_groups = await db.query.family_groups.findFirst({
         where: eq(schema.family_groups.id, input.family_groupsId),
-        with: { businessUnitData: true },
+        with: {
+          businessUnitData: true,
+          plan: true,
+          modo: true,
+          bonus: true,
+          integrants: {
+            with: {
+              contribution: true,
+              differentialsValues: true,
+              pa: true,
+            },
+          },
+        },
       });
 
       if (family_groups?.businessUnitData?.companyId === ctx.session.orgId) {

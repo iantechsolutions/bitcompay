@@ -15,7 +15,11 @@ export const companiesRouter = createTRPCRouter({
       const company_found = await db.query.companies.findFirst({
         where: eq(schema.companies.id, input.companyId),
         with: {
-          products: {},
+          products: {
+            with: {
+              product: true,
+            },
+          },
           brands: {
             columns: {
               companyId: false,
@@ -41,7 +45,11 @@ export const companiesRouter = createTRPCRouter({
     const company = await db.query.companies.findFirst({
       where: eq(schema.companies.id, companyId!),
       with: {
-        products: {},
+        products: {
+          with: {
+            product: true,
+          },
+        },
         brands: {
           columns: {
             companyId: false,

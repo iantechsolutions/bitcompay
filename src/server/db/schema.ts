@@ -266,6 +266,7 @@ export const brands = pgTable(
     createdAt,
     updatedAt,
     logo_url: varchar("logo_url"),
+    prisma_code: varchar("prisma_code"),
     number: serial("number"),
   },
   (brands) => ({
@@ -516,6 +517,14 @@ export const healthInsurances = pgTable("health_insurances", {
   name: varchar("name", { length: 255 }).notNull(),
   identificationNumber: varchar("identificationNumber", { length: 255 }),
   isClient: boolean("isClient").notNull().default(false),
+  fiscal_id_type: varchar("fiscal_id_type", { length: 255 }),
+  fiscal_id_number: varchar("fiscal_id_number"),
+  responsibleName: varchar("responsibleName", { length: 255 }),
+  adress: varchar("adress", { length: 255 }),
+  locality: varchar("locality", { length: 255 }),
+  province: varchar("province", { length: 255 }),
+  postal_code: varchar("postal_code", { length: 255 }),
+  afip_status: varchar("afip_status", { length: 255 }),
 });
 
 export const clientStatuses = pgTable("client_statuses", {
@@ -572,6 +581,7 @@ export const integrants = pgTable("integrant", {
   locality: varchar("locality", { length: 255 }),
   partido: varchar("partido", { length: 255 }),
   state: varchar("state", { length: 255 }),
+  province: varchar("province", { length: 255 }),
   cp: varchar("cp", { length: 255 }),
   zone: varchar("zone", { length: 255 }),
   isHolder: boolean("isHolder").notNull().default(false),
@@ -729,7 +739,7 @@ export const comprobantes = pgTable("comprobantes", {
   fromPeriod: timestamp("fromperiod", { mode: "date" }),
   toPeriod: timestamp("toperiod", { mode: "date" }),
   due_date: timestamp("due_date", { mode: "date" }),
-  second_due_date: timestamp("due_date", { mode: "date" }),
+  // second_due_date: timestamp("second_due_date", { mode: "date" }),
   payedDate: timestamp("payedDate", { mode: "date" }),
   prodName: varchar("prodName", { length: 255 }).notNull(),
   iva: varchar("iva", { length: 255 }).notNull(),
@@ -800,6 +810,7 @@ export const ComprobantesSchemaDB = insertComprobantesSchema.pick({
   liquidation_id: true,
   family_group_id: true,
   origin: true,
+  previous_facturaId: true,
 });
 export type Comprobantes = z.infer<typeof selectComprobantesSchema>;
 
@@ -999,6 +1010,7 @@ export type Administrative_audit = z.infer<
 export const pa = pgTable("pa", {
   id: columnId,
   card_number: varchar("card_number", { length: 255 }),
+  createdAt,
   expire_date: timestamp("expire_date", { mode: "date" }),
   CCV: varchar("CCV", { length: 255 }),
   CBU: varchar("CBU", { length: 255 }),

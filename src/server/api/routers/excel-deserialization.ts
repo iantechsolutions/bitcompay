@@ -62,7 +62,10 @@ export const excelDeserializationRouter = createTRPCRouter({
       await db.transaction(async (db) => {
         for (const row of contents) {
           const business_unit = await db.query.bussinessUnits.findFirst({
-            where: eq(schema.bussinessUnits.description, row.business_unit!),
+            where: and(
+              eq(schema.bussinessUnits.description, row.business_unit!),
+              eq(schema.bussinessUnits.companyId, ctx.session.orgId!)
+            ),
           });
 
           const mode = await db.query.modos.findFirst({
@@ -219,6 +222,8 @@ export const excelDeserializationRouter = createTRPCRouter({
             })
             .returning();
           console.log("creando valores diferencial valor");
+          console.log("Llego Llego");
+
           if (new_integrant[0]?.isBillResponsible) {
             const cc = await db
               .insert(schema.currentAccount)
@@ -233,6 +238,7 @@ export const excelDeserializationRouter = createTRPCRouter({
               currentAccount_id: cc[0]!.id,
               type: "REC",
             });
+            console.log("Llego Llego");
 
             const tipoDocumento = idDictionary[new_integrant[0]!.id_type ?? ""];
             const factura = await db.insert(schema.comprobantes).values({
@@ -252,7 +258,7 @@ export const excelDeserializationRouter = createTRPCRouter({
               estado: "apertura",
             });
           }
-
+          console.log("Llego Llego");
           if (row.differential_value) {
             const ageN = calcularEdad(row.birth_date ?? new Date());
             const preciosPasados = plan?.pricesPerCondition.filter(
@@ -303,9 +309,15 @@ export const excelDeserializationRouter = createTRPCRouter({
               });
           }
           if (row.isPaymentResponsible) {
-            const product = await db.query.products.findFirst({
-              where: eq(schema.products.name, row.product!),
+            const companyProducts = await db.query.companyProducts.findMany({
+              where: eq(schema.companyProducts.companyId, ctx.session.orgId!),
+              with: {
+                product: true,
+              },
             });
+            const product = companyProducts.find(
+              (x) => x.product.name === row.product
+            )?.product;
 
             await db.insert(schema.pa).values({
               card_number: row.card_number?.toString() ?? null,
@@ -410,9 +422,18 @@ async function readExcelFile(
   for (let i = 0; i < transformedRows.length; i++) {
     const row = transformedRows[i]!;
     const rowNum = i + 2;
-    const product = await db.query.products.findFirst({
-      where: eq(schema.products.name, row.product!),
+    const companyProducts = await db.query.companyProducts.findMany({
+      where: eq(schema.companyProducts.companyId, ctx.session.orgId!),
+      with: {
+        product: true,
+      },
     });
+    const product = companyProducts.find(
+      (x) => x.product.name === row.product
+    )?.product;
+    // await db.query.products.findFirst({
+    //   where: eq(schema.products.name, row.product!),
+    // });
     if (product) {
       const requiredColumns = await getRequiredColums(product.description);
       if (requiredColumns.has("card_number")) {
@@ -467,16 +488,21 @@ async function readExcelFile(
     }
 
     const business_unit = await db.query.bussinessUnits.findFirst({
-      where: and(eq(schema.bussinessUnits.description, row.business_unit!)),
+      where: and(
+        eq(schema.bussinessUnits.description, row.business_unit!),
+        eq(schema.bussinessUnits.companyId, ctx.session.orgId!)
+      ),
     });
     if (!business_unit) {
-      errors.push(`UNIDAD DE NEGOCIO no valida en (fila:${rowNum})`);
-    }
-    if (business_unit?.companyId !== ctx.session.orgId) {
       errors.push(
-        `UNIDAD DE NEGOCIO no pertenece a la organizacion (fila:${rowNum}) `
+        `UNIDAD DE NEGOCIO no valida o no perteneciente a la organizacion en (fila:${rowNum})`
       );
     }
+    // if (business_unit?.companyId !== ctx.session.orgId) {
+    //   errors.push(
+    //     `UNIDAD DE NEGOCIO no pertenece a la organizacion (fila:${rowNum}) `
+    //   );
+    // }
     if (row.differential_value && !row.differential_code) {
       errors.push(`CODIGO DIFERENCIAL requerido en (fila:${rowNum})`);
     }

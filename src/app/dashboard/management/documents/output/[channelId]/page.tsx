@@ -21,6 +21,7 @@ export default async function Page(props: { params: { channelId: string } }) {
       await api.companies.getByProduct.query({
         productId: product.id,
       });
+    console.log("companiesOfProduct", companiesOfProduct);
     if (companiesOfProduct) {
       if (companiesOfProduct) {
         for (const companyOfProduct of companiesOfProduct) {

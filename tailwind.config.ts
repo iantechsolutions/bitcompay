@@ -18,6 +18,9 @@ export default withUt({
       },
     },
     extend: {
+      backgroundImage: {
+        "bg-singnin": "url('/landing_images/fondo compu.jpg')",
+      },
       colors: {
         boxShadow: {
           simple: "0px 1px black",
@@ -74,10 +77,15 @@ export default withUt({
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "caret-blink": {
+          "0%,70%,100%": { opacity: "1" },
+          "20%,50%": { opacity: "0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "caret-blink": "caret-blink 1.25s ease-out infinite",
       },
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],

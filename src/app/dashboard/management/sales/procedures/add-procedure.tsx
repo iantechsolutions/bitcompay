@@ -103,7 +103,7 @@ export default function AddProcedure() {
         department: member.depto,
         locality: member.localidad,
         partido: member.county,
-        state: member.state,
+        province: member.province,
         cp: member.cp,
         zone: member.zone,
         isAffiliate: member.isAffiliate,
@@ -166,7 +166,8 @@ export default function AddProcedure() {
           </DialogHeader>
           <Tabs
             value={activeTab}
-            onValueChange={(value) => setActiveTab(value)}>
+            onValueChange={(value) => setActiveTab(value)}
+          >
             <TabsList>
               <TabsTrigger value="general_info">
                 Informacion General

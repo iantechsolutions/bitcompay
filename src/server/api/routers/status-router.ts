@@ -24,6 +24,14 @@ export const statusRouter = createTRPCRouter({
       });
       return status_found;
     }),
+  getByCode: protectedProcedure
+    .input(z.object({ statusCode: z.string() }))
+    .query(async ({ input }) => {
+      const status_found = await db.query.paymentStatus.findFirst({
+        where: eq(schema.paymentStatus.code, input.statusCode),
+      });
+      return status_found;
+    }),
   create: protectedProcedure
     .input(z.object({ description: z.string(), code: z.string() }))
     .mutation(async ({ input }) => {

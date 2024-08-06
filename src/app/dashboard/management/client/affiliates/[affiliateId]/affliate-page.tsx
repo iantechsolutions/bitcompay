@@ -2,18 +2,10 @@
 import { useState, useEffect } from "react";
 import { api } from "~/trpc/react";
 import { ArrowLeftIcon } from "lucide-react";
-import { PlusCircle } from "lucide-react";
+
 import LayoutContainer from "~/components/layout-container";
 import Link from "next/link";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "~/components/ui/tablePreliq";
-import { Title } from "~/components/title";
+
 import {
   Accordion,
   AccordionContent,
@@ -28,10 +20,12 @@ import {
   AccordionTrigger as AccordionTriggerIntegrant,
 } from "~/components/affiliate-page/integrante-accordion";
 import dayjs from "dayjs";
+import { getDifferentialAmount, getGroupContribution } from "~/lib/utils";
+import { RouterOutputs } from "~/trpc/shared";
 export default function AffiliatePage(props: {
   params: { affiliateId: string; companyId: string };
 }) {
-  const company = props.params.companyId;
+  // const company = props.params.companyId;
   const grupos = props.params.affiliateId;
 
   const { data: grupo } = api.family_groups.get.useQuery({
@@ -40,11 +34,33 @@ export default function AffiliatePage(props: {
 
   const { data: cuentasCorrientes } = api.currentAccount.list.useQuery();
   const cc = cuentasCorrientes?.find((cc) => cc.family_group === grupos);
-  const lastEvent = cc?.events[0];
+  const { data: company } = api.companies.get.useQuery(undefined);
+  const lastEvent = cc?.events.reduce((prev, current) => {
+    return new Date(prev.createdAt) > new Date(current.createdAt)
+      ? prev
+      : current;
+  });
   const { data: integrant } = api.integrants.getByGroup.useQuery({
     family_group_id: grupos!,
   });
-
+  const bonusValido = grupo?.bonus?.find(
+    (bonus) =>
+      (bonus.from === null && bonus.to === null) ||
+      (bonus.from !== null &&
+        bonus.to !== null &&
+        new Date().getTime() >= bonus.from.getTime() &&
+        new Date().getTime() <= bonus.to.getTime())
+  );
+  const billResponsible = grupo?.integrants.find((x) => x.isBillResponsible);
+  const paymentResponsible = grupo?.integrants.find((x) => x.isPaymentHolder);
+  let pa: RouterOutputs["pa"]["get"];
+  if (paymentResponsible?.pa && paymentResponsible.pa.length > 0) {
+    pa = paymentResponsible?.pa.reduce((prev, current) => {
+      return new Date(prev.createdAt) > new Date(current.createdAt)
+        ? prev
+        : current;
+    });
+  }
   const { data: comprobantesList } = api.comprobantes.list.useQuery();
 
   const comprobantes = comprobantesList
@@ -54,21 +70,21 @@ export default function AffiliatePage(props: {
     : [];
 
   const familyGroupData = {
-    "Unidad de negocio": "",
-    Vigencia: "",
-    Modalidad: "",
-    "O.S Origen": "",
-    "O.S Asignada": "",
-    Plan: "",
-    Zona: "",
-    "Fecha alta": "",
-    "Usuario alta": "",
-    Estado: "",
+    "Unidad de negocio": grupo?.businessUnitData?.description,
+    // "O.S Origen": grupo?.origin_os.,
+    // Vendedor: "",
+    Plan: grupo?.plan?.description,
+    // "O.S Asignada": "",
+    // "Usuario alta": "",
+    Modalidad: grupo?.modo?.description,
     "Fecha estado": "",
     "Motivo baja": "",
-    Vendedor: "",
+    Vigencia: "",
+    Estado: grupo?.state,
+    // Gerencia: "",
+    "Fecha alta": dayjs(grupo?.validity).format("YYYY-MM-DD"),
+    Zona: "",
     Supervisor: "",
-    Gerencia: "",
   };
 
   return (
@@ -99,151 +115,214 @@ export default function AffiliatePage(props: {
               <AccordionItem value="item-1">
                 <AccordionTrigger>Datos del grupo familiar</AccordionTrigger>
                 <AccordionContent className="pt-6 pl-5">
-                  <div className="grid grid-cols-5 gap-4 ml-3 ">
+                  <div className="grid grid-cols-5 gap-4 p-3 bg-[#e9fcf8] rounded-md">
                     {Object.entries(familyGroupData).map(([key, value]) => (
                       <p>
-                        <span className="font-semibold">{key}:</span> {value}
+                        <span className="font-semibold">{key}:</span>
+                        <br /> {value}
                       </p>
                     ))}
                   </div>
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-2">
-                <AccordionTrigger>Integrantes</AccordionTrigger>
+                <AccordionTrigger className=" rounded-md overflow-hidden">
+                  Integrantes
+                </AccordionTrigger>
                 <AccordionContent className="pt-6 pl-5">
-                  <AccordionIntegrant type="multiple">
+                  <AccordionIntegrant
+                    type="multiple"
+                    className="rounded-md overflow-hidden"
+                  >
                     {integrant?.map((int) => (
                       <AccordionItemIntegrant value={int.id}>
-                        <AccordionTriggerIntegrant>
-                          {int.name}
+                        <AccordionTriggerIntegrant className="bg-[#e9fcf8]">
+                          {int.name + " - " + int?.relationship}
                         </AccordionTriggerIntegrant>
                         <AccordionContentIntegrant>
-                          <div className="grid grid-cols-5 gap-4 ml-3 ">
+                          <div className="grid grid-cols-5 gap-4 p-3 bg-[#e9fcf8] pt-6">
                             <p>
                               <span className="font-semibold">
                                 Tipo de documento:{" "}
                               </span>
-                              {int.id_type}
+                              <br />
+                              {int.id_type ?? "-"}
                             </p>
                             <p>
                               <span className="font-semibold">
                                 Numero de documento:{" "}
                               </span>
-                              {int.id_number}
-                            </p>
-                            <p>
-                              <span className="font-semibold">
-                                Tipo de ID fiscal:{" "}
-                              </span>
-                              {int.fiscal_id_type}
-                            </p>
-                            <p>
-                              <span className="font-semibold">
-                                Nro. fiscal:{" "}
-                              </span>
-                              {int.fiscal_id_number}
-                            </p>
-                            <p>
-                              <span className="font-semibold">
-                                Condicion fiscal:{" "}
-                              </span>
-                              {int.afip_status}
+                              <br />
+                              {int.id_number ?? "-"}
                             </p>
                             <p>
                               <span className="font-semibold">
                                 Nro. Afiliado:{" "}
                               </span>
-                              {int?.affiliate_number}
+                              <br />
+                              {int?.affiliate_number ?? "-"}
                             </p>
+
                             <p>
                               <span className="font-semibold">Extension: </span>
-                              *****
+                              <br />
+                              {int?.extention ?? "-"}
                             </p>
                             <p>
                               <span className="font-semibold">
                                 Nro. Credencial{" "}
                               </span>
-                              ******
-                            </p>
-                            <p>
-                              <span className="font-semibold">Genero:</span>{" "}
-                              {int.gender}
+                              <br />
+                              {int?.affiliate_number ?? "-"}
                             </p>
                             <p>
                               <span className="font-semibold">
                                 Fecha de Nac:{" "}
                               </span>
-                              {dayjs(int?.birth_date).format("YYYY-MM-DD")}
+                              <br />
+                              {dayjs(int?.birth_date).format("YYYY-MM-DD") ??
+                                "-"}
                             </p>
                             <p>
                               <span className="font-semibold"> Edad</span>
-                              {int.age}
+                              <br />
+                              {int.age ?? "-"}
+                            </p>
+                            <p>
+                              <span className="font-semibold">Genero:</span>{" "}
+                              <br />
+                              {int.gender ?? "-"}
                             </p>
                             <p>
                               <span className="font-semibold">
                                 {" "}
                                 Estado Civil:{" "}
                               </span>
-                              {int.civil_status}
+                              <br />
+                              {int.civil_status ?? "-"}
                             </p>
                             <p>
                               <span className="font-semibold">
                                 {" "}
                                 Nacionalidad
                               </span>
-                              {int?.nationality}
-                            </p>
-                            <p>
-                              <span className="font-semibold">Calle: </span>
-                              {int?.address}
-                            </p>
-                            <p>
-                              <span className="font-semibold">Nro: </span>
-                              {int?.address_number}
-                            </p>
-                            <p>
-                              <span className="font-semibold">Piso </span>
-                              {int?.floor}
-                            </p>
-                            <p>
-                              <span className="font-semibold">Depto: </span>
-                              {int?.department}
-                            </p>
-                            <p>
-                              <span className="font-semibold">Localidad: </span>
-                              {int?.locality}
-                            </p>
-                            <p>
-                              <span className="font-semibold">Provincia: </span>
-                              {int?.state}
-                            </p>
-                            <p>
-                              <span className="font-semibold"> CP: </span>
-                              {int?.cp}
-                            </p>
-                            <p>
-                              <span className="font-semibold"> Tel: </span>
-                              {int?.phone_number}
-                            </p>
-                            <p>
-                              <span className="font-semibold">Email: </span>
-                              {int?.email}
-                            </p>
-                            <p>
-                              <span className="font-semibold">F. Alta: </span>
-                            </p>
-                            <p>
-                              <span className="font-semibold">Estado: </span>
+                              <br />
+                              {int?.nationality ?? "-"}
                             </p>
                             <p>
                               <span className="font-semibold">
-                                Fecha EStado:{" "}
+                                Condicion de AFIP:{" "}
                               </span>
+                              <br />
+                              {int.afip_status ?? "-"}
+                            </p>
+                            <p>
+                              <span className="font-semibold">
+                                Tipo de ID fiscal:{" "}
+                              </span>
+                              <br />
+                              {int.fiscal_id_type ?? "-"}
+                            </p>
+                            <p>
+                              <span className="font-semibold">
+                                Nro. fiscal:{" "}
+                              </span>
+                              <br />
+                              {int.fiscal_id_number ?? "-"}
+                            </p>
+
+                            <p>
+                              <span className="font-semibold">Domicilio: </span>
+                              <br />
+                              {int?.address ??
+                                "" + " " + int?.address_number ??
+                                ""}
+                            </p>
+                            <p>
+                              <span className="font-semibold">Piso </span>
+                              <br />
+                              {int?.floor ?? "-"}
+                            </p>
+                            <p>
+                              <span className="font-semibold">
+                                Departamento:{" "}
+                              </span>
+                              <br />
+                              {int?.department ?? "-"}
+                            </p>
+                            <p>
+                              <span className="font-semibold">Localidad: </span>
+                              <br />
+                              {int?.locality ?? "-"}
+                            </p>
+                            <p>
+                              <span className="font-semibold">Provincia: </span>
+                              <br />
+                              {int?.province ?? "-"}
+                            </p>
+                            <p>
+                              <span className="font-semibold">
+                                {" "}
+                                Codigo Postal:{" "}
+                              </span>
+                              <br />
+                              {int?.cp ?? "-"}
+                            </p>
+                            <p>
+                              <span className="font-semibold">Email: </span>
+                              <br />
+                              {int?.email ?? "-"}
+                            </p>
+                            <p>
+                              <span className="font-semibold">
+                                {" "}
+                                Tel. particular:{" "}
+                              </span>
+                              <br />
+                              {int?.phone_number ?? "-"}
+                            </p>
+                            <p>
+                              <span className="font-semibold">
+                                {" "}
+                                Tel. movil:{" "}
+                              </span>
+                              <br />
+                              {int?.cellphone_number ?? "-"}
+                            </p>
+
+                            <p>
+                              <span className="font-semibold">
+                                Fecha Alta:{" "}
+                              </span>
+                            </p>
+                            <p>
+                              <span className="font-semibold">Estado: </span>
+                              <br />
+                            </p>
+                            <p>
+                              <span className="font-semibold">
+                                Fecha Estado:{" "}
+                              </span>
+                              <br />
+                            </p>
+                            <p>
+                              <span className="font-semibold">
+                                Parentesco:{" "}
+                              </span>
+                              <br />
+                              {int?.relationship ?? "-"}
                             </p>
                             <p>
                               <span className="font-semibold">
                                 Motivo baja:{" "}
                               </span>
+                              <br />
+                            </p>
+                            <p>
+                              <span className="font-semibold">
+                                Usuario baja:{" "}
+                              </span>
+                              <br />
                             </p>
                           </div>
                         </AccordionContentIntegrant>
@@ -257,60 +336,128 @@ export default function AffiliatePage(props: {
                 <AccordionContent className="pt-8 pl-5">
                   <div className="flex flex-col gap-2">
                     <div className="flex flex-col gap-1">
-                      <p className="font-semibold">Tipo de comprobante</p>
-                      <p className="font-semibold">Condicion de Venta</p>
+                      <p>
+                        <span className="font-semibold">
+                          Tipo de comprobante:{" "}
+                        </span>
+                        {billResponsible?.afip_status == "CONSUMIDOR FINAL"
+                          ? "B"
+                          : "A"}
+                      </p>
+                      <p className="font-semibold">Condicion de Venta:</p>
                       <p className="font-bold">Modalidad de Pago: </p>
                     </div>
-                    <p>Voluntario:</p>
-                    <div className="w-full h-20 border border-[#A7D3C7] rounded-lg"></div>
-                    <p>Debito Directo:</p>
-                    <div className="w-full h-20 border py-2 px-4 flex items-center justify-around border-[#A7D3C7] rounded-lg">
-                      {Object.entries({
-                        Codigo: 234234,
-                        Banco: "Banco Galicia",
-                        CBU: 123123123,
-                      }).map(([key, value]) => (
-                        <p>
-                          <span className="font-semibold">{key}:</span> {value}
-                        </p>
-                      ))}
-                    </div>
-                    <p>Debito automatico: </p>
-                    <div className="w-full h-20 border py-2 px-4 flex items-center justify-around border-[#A7D3C7] rounded-lg">
-                      {Object.entries({
-                        "Tipo de Tarjeta": 234234,
-                        "Nro de Tarjeta": "923904280",
-                        Banco: "Santander",
-                      }).map(([key, value]) => (
-                        <p>
-                          <span className="font-semibold">{key}:</span> {value}
-                        </p>
-                      ))}
-                    </div>
-                    <div className="grid grid-cols-2">
+                    {company?.products.some(
+                      (product) => product.product.name == "PAGO VOLUNTARIO"
+                    ) && <p>-Voluntario</p>}
+                    {company?.products.some(
+                      (product) => product.product.name == "EFECTIVO"
+                    ) && <p>-Efectivo</p>}
+                    {company?.products.some(
+                      (product) =>
+                        product.product.name == "DEBITO DIRECTO CBU" && pa
+                    ) && (
+                      <>
+                        <p>-Debito Directo:</p>
+                        <div className="w-full h-20 border py-2 px-4 flex items-center justify-around border-[#A7D3C7] rounded-lg">
+                          {Object.entries({
+                            CBU: pa?.CBU,
+                          }).map(([key, value]) => (
+                            <p>
+                              <span className="font-semibold">{key}:</span>{" "}
+                              {value}
+                            </p>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                    {/* <div className="w-full h-20 border border-[#A7D3C7] rounded-lg"></div> */}
+                    {company?.products.some(
+                      (product) =>
+                        product.product.name == "DEBITO AUTOMATICO" && pa
+                    ) && (
+                      <>
+                        <p>-Debito Automatico:</p>
+                        <div className="w-full h-20 border py-2 px-4 flex items-center justify-around border-[#A7D3C7] rounded-lg">
+                          {Object.entries({
+                            "Marca de tarjeta": pa?.card_brand,
+                            "Tipo de tarjeta": pa?.card_type,
+                            "Nro. de tarjeta": pa?.card_number,
+                          }).map(([key, value]) => (
+                            <p>
+                              <span className="font-semibold">{key}:</span>{" "}
+                              {value}
+                            </p>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                    {company?.products.some(
+                      (product) =>
+                        product.product.name == "DEBITO DIRECTO PLUS" && pa
+                    ) && (
+                      <>
+                        <p>-Debito Directo Plus:</p>
+                        <div className="w-full h-20 border py-2 px-4 flex items-center justify-around border-[#A7D3C7] rounded-lg">
+                          {Object.entries({
+                            "Marca de tarjeta": pa?.card_brand,
+                            "Tipo de tarjeta": pa?.card_type,
+                            "Nro. de tarjeta": pa?.card_number,
+                          }).map(([key, value]) => (
+                            <p>
+                              <span className="font-semibold">{key}:</span>{" "}
+                              {value}
+                            </p>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                    <div className="grid grid-cols-5 gap-4 p-3 bg-[#e9fcf8] pt-6">
                       <p>
-                        <span className="font-bold">Aportes del GF: </span>
+                        <span className="font-bold">Promocion:</span>
+                        <br />
+                        {bonusValido?.amount + " %" ?? "-"}
+                      </p>
+                      <p>
+                        <span className="font-bold">Desde: </span>
+                        <br />
+                        {dayjs(bonusValido?.from).format("YYYY-MM-DD") ?? "-"}
+                      </p>
+                      <p>
+                        <span className="font-bold">Hasta: </span>
+                        <br />
+                        {dayjs(bonusValido?.to).format("YYYY-MM-DD") ?? "-"}
+                      </p>
+                      <p>
+                        <span className="font-bold">Diferencial: </span>
+                        <br />
+                        {grupo ? getDifferentialAmount(grupo, new Date()) : "-"}
+                      </p>
+                      <p>
+                        <span className="font-bold">Aportes: </span>
+                        <br />
+                        {grupo ? getGroupContribution(grupo) : "-"}
                       </p>
                       <p>
                         <span className="font-bold">Fecha Aportes: </span>
+                        <br />-
                       </p>
                       <p>
                         <span className="font-bold">Periodo Aportado: </span>
+                        <br />-
                       </p>
-                      <p>
+                      {/* <p>
                         <span className="font-bold">CUIT Empleador: </span>
-                      </p>
-                      <p>
-                        <span className="font-bold">Promocion: </span>
-                      </p>
-                      <p>
+                      </p> */}
+
+                      {/* <p>
                         <span className="font-bold">
                           Diferenciales del GF:{" "}
                         </span>
-                      </p>
+                      </p> */}
                     </div>
                   </div>
-                  <div className="mt-3">
+                  {/* <div className="mt-3">
                     <Table>
                       <TableHeader>
                         <TableRow className="flex border-b border-[#4af0d4] py text-left text-base text-[#737171] font-bold opacity-70 h-6">
@@ -376,7 +523,7 @@ export default function AffiliatePage(props: {
                         </TableRow>
                       </TableBody>
                     </Table>
-                  </div>
+                  </div> */}
                 </AccordionContent>
               </AccordionItem>
             </Accordion>

@@ -23,7 +23,21 @@ export const healthInsurancesRouter = createTRPCRouter({
     return healthInsurances;
   }),
   create: protectedProcedure
-    .input(z.object({ name: z.string(), identificationNumber: z.string() }))
+    .input(
+      z.object({
+        name: z.string(),
+        identificationNumber: z.string(),
+        adress: z.string().optional(),
+        afip_status: z.string().optional(),
+        fiscal_id_number: z.string().optional(),
+        fiscal_id_type: z.string().optional(),
+        isClient: z.boolean().optional(),
+        responsibleName: z.string().optional(),
+        locality: z.string().optional(),
+        province: z.string().optional(),
+        postal_code: z.string().optional(),
+      })
+    )
     .mutation(async ({ input, ctx }) => {
       const companyId = ctx.session.orgId;
       const new_healthInsurance = await db
@@ -32,6 +46,15 @@ export const healthInsurancesRouter = createTRPCRouter({
           companyId,
           name: input.name,
           identificationNumber: input.identificationNumber,
+          adress: input.adress,
+          afip_status: input.afip_status,
+          fiscal_id_number: input.fiscal_id_number,
+          fiscal_id_type: input.fiscal_id_type,
+          isClient: input.isClient,
+          responsibleName: input.responsibleName,
+          locality: input.locality,
+          province: input.province,
+          postal_code: input.postal_code,
         });
       return new_healthInsurance;
     }),

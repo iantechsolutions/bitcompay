@@ -1,7 +1,20 @@
-export default function LayoutContainer(props: { children: React.ReactNode }) {
+import { cn } from "~/lib/utils";
+interface LayoutContainerProps {
+  children: React.ReactNode;
+  className?: string;
+}
+export default function LayoutContainer({
+  children,
+  className,
+}: LayoutContainerProps) {
   return (
-    <div className="w-full max-w-[1000px] space-y-5 overflow-visible">
-      {props.children}
+    <div
+      className={cn(
+        `w-full max-w-[1000px] space-y-5 overflow-visible`,
+        className
+      )}
+    >
+      {children}
     </div>
   );
 }

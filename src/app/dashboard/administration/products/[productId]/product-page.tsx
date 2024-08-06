@@ -35,13 +35,18 @@ import type { RouterOutputs } from "~/trpc/shared";
 export default function ProductPage({
   product,
   channels,
+  companies,
 }: {
   product: NonNullable<RouterOutputs["products"]["get"]>;
   channels: RouterOutputs["channels"]["list"];
+  companies: RouterOutputs["companies"]["list"];
 }) {
   const router = useRouter();
   const [productChannels, setProductChannels] = useState<Set<string>>(
     new Set(product.channels.map((c) => c.channelId))
+  );
+  const [productCompanies, setProductCompanies] = useState<Set<string>>(
+    new Set(product.company.map((c) => c.companyId))
   );
 
   const { mutateAsync: changeProduct, isLoading } =
@@ -55,6 +60,7 @@ export default function ProductPage({
       await changeProduct({
         productId: product.id,
         channels: Array.from(productChannels),
+        companies: Array.from(productCompanies),
         name,
         description,
       });
@@ -73,6 +79,15 @@ export default function ProductPage({
       productChannels.delete(channelId);
     }
     setProductChannels(new Set(productChannels));
+  }
+
+  function changeProductCompany(companyId: string, enabled: boolean) {
+    if (enabled) {
+      productCompanies.add(companyId);
+    } else {
+      productCompanies.delete(companyId);
+    }
+    setProductCompanies(new Set(productCompanies));
   }
 
   return (
@@ -107,6 +122,35 @@ export default function ProductPage({
                           checked={productChannels.has(channel.id)}
                           onCheckedChange={(checked) =>
                             changeProductChannel(channel.id, checked)
+                          }
+                        />
+                      }
+                    />
+                  );
+                })}
+              </List>
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="item-3">
+            <AccordionTrigger>
+              <h2 className="text-md">Agregar entidad</h2>
+            </AccordionTrigger>
+            <AccordionContent>
+              <List>
+                {companies?.map((company) => {
+                  const isChecked = productCompanies.has(company.id);
+                  // const isChecked = Array.from(productCompanies).some(
+                  //   (c) => c?.id === company?.id
+                  // );
+                  return (
+                    <ListTile
+                      key={company?.id}
+                      title={company?.name}
+                      trailing={
+                        <Switch
+                          checked={isChecked}
+                          onCheckedChange={(required) =>
+                            changeProductCompany(company.id, required)
                           }
                         />
                       }

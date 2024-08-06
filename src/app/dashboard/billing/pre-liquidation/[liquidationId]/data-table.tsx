@@ -11,6 +11,8 @@ import {
   ColumnFiltersState,
   useReactTable,
   Row,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
 } from "@tanstack/react-table";
 
 import { TableCell } from "~/components/ui/table";
@@ -56,15 +58,14 @@ export function DataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onColumnFiltersChange: setColumnFilters,
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
     getFilteredRowModel: getFilteredRowModel(),
     state: {
       columnFilters,
     },
   });
-  const initialValues = {
-    modo: "",
-    plan: "",
-  };
+
   const hiddenDataKeys = [
     "comprobantes",
     "currentAccountAmount",
@@ -84,10 +85,18 @@ export function DataTable<TData, TValue>({
     setOpen(!open);
   };
 
+  const desiredColumns = ["modo", "Plan"];
+  const filteredColumns = Array.from(table.getAllColumns()).filter((column) =>
+    desiredColumns.includes(column.id!)
+  );
   return (
     <>
       <DataTableSummary table={table} />
-      <TableToolbar table={table} initialValues={initialValues} />
+      <TableToolbar
+        table={table}
+        searchColumn={"nombre"}
+        columns={filteredColumns}
+      />
 
       <div className="rounded-md border">
         <Table>

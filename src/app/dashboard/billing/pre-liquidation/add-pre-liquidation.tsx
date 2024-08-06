@@ -70,7 +70,8 @@ export default function AddPreLiquidation() {
         logo_url: logo_url ?? undefined,
       });
       if ("error" in liquidation!) {
-        toast.error("No se encuentran grupos familiares asociados a esa marca");
+        console.log("liquidation", liquidation);
+        toast.error(liquidation.error);
       } else if (liquidation) {
         queryClient.invalidateQueries();
         toast.success("Pre-liquidacion creada correctamente");
@@ -105,7 +106,11 @@ export default function AddPreLiquidation() {
       {/* <Button onClick={() => setOpen(true)}>
         <PlusCircleIcon className="mr-2" /> Crear Pre liquidacion
       </Button> */}
-      <Button disabled={isLoading} onClick={() => setOpen(true)}>
+      <Button
+        disabled={isLoading}
+        onClick={() => setOpen(true)}
+        className="bg-[#0DA485] hover:bg-[#0DA485] rounded-full"
+      >
         {isLoading ? (
           <Loader2 className="mr-2 animate-spin" />
         ) : (

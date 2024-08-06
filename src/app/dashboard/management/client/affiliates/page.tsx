@@ -16,6 +16,7 @@ import { DataTable } from "./data-table";
 import { columns } from "./columns";
 export default function Home() {
   const { data: grupos, isLoading } = api.family_groups.list.useQuery();
+  console.log("grupos", grupos);
   const linked = (link: string) => {
     window.location.href = link;
   };
@@ -42,7 +43,7 @@ export default function Home() {
       Modalidad: grupo?.modo?.description ?? "",
     });
   }
-  console.log(tableRecords);
+  console.log("TableRecords", tableRecords);
   return (
     <LayoutContainer>
       <section className="space-y-2">

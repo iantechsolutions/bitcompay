@@ -12,6 +12,17 @@ import {
 } from "~/server/uploads/validators";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { isArray } from "util";
+import { fiscalIdType } from "~/server/forms/providers-schema";
+import { Console } from "console";
+import dayjs from "dayjs";
+import "dayjs/locale/es";
+import utc from "dayjs/plugin/utc";
+import dayOfYear from "dayjs/plugin/dayOfYear";
+import timezone from "dayjs/plugin/timezone";
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.extend(dayOfYear);
+dayjs.locale("es");
 
 const statusCodeMap = new Map();
 const statusCodes = await db.query.paymentStatus.findMany();
@@ -105,6 +116,7 @@ export const uploadsRouter = createTRPCRouter({
       z.object({
         type: z.literal("txt"),
         uploadId: z.string(),
+        channelName: z.string(),
       })
     )
     .mutation(async ({ input }) => {
@@ -112,7 +124,8 @@ export const uploadsRouter = createTRPCRouter({
         const contents = await readResponseUploadContents(
           db,
           input.uploadId,
-          input.type
+          input.type,
+          input.channelName
         );
         await db.update(schema.responseDocumentUploads).set({
           documentType: input.type,
@@ -146,7 +159,8 @@ export const uploadsRouter = createTRPCRouter({
         const { records } = await readResponseUploadContents(
           tx,
           input.uploadId,
-          undefined
+          undefined,
+          input.channelName
         );
 
         await tx
@@ -209,15 +223,26 @@ export const uploadsRouter = createTRPCRouter({
                     : current;
                 }
               );
-              if (!lastEvent) {
-                throw new Error("No hay eventos en la cuenta corriente");
-              }
+
+              const recollected_amount =
+                records.find((x) => x.id === payment?.id)
+                  ?.recollected_amount! ?? 0;
+              console.log(
+                "tributo",
+                lastEvent?.current_amount,
+                payment?.comprobantes?.importe!,
+                record.collected_amount!,
+                "lolo",
+                recollected_amount
+              );
+              // if (!lastEvent) {
+              //   throw new Error("No hay eventos en la cuenta corriente");
+              // }
               const new_event = await tx.insert(schema.events).values({
                 currentAccount_id: currentAccount?.id,
-                event_amount:
-                  record.first_due_amount ?? record.collected_amount ?? 0,
+                event_amount: recollected_amount ?? 0,
                 current_amount:
-                  lastEvent?.current_amount! + payment?.comprobantes?.importe!,
+                  (lastEvent?.current_amount ?? 0) + recollected_amount,
                 description: "Recaudacion",
                 type: "REC",
               });
@@ -231,22 +256,30 @@ export const uploadsRouter = createTRPCRouter({
                 events: true,
               },
             });
-            const lastEvent = ccORG?.events.reduce((prev, current) => {
-              return new Date(prev.createdAt) > new Date(current.createdAt)
-                ? prev
-                : current;
-            });
-            if (!lastEvent) {
-              throw new Error(
-                "No hay eventos en la cuenta corriente de la empresa"
-              );
+            let lastEvent = null;
+            if (ccORG && ccORG.events.length > 0) {
+              lastEvent = ccORG?.events.reduce((prev, current) => {
+                return new Date(prev.createdAt) > new Date(current.createdAt)
+                  ? prev
+                  : current;
+              });
             }
+            // if (!lastEvent) {
+            //   throw new Error(
+            //     "No hay eventos en la cuenta corriente de la empresa"
+            //   );
+            // }
+            const recollected_amount =
+              records.find((x) => x.id === payment?.id)?.recollected_amount! ??
+              0;
+
             const new_event = await tx.insert(schema.events).values({
               currentAccount_id: ccORG?.id,
               event_amount:
-                record.first_due_amount ?? record.collected_amount ?? 0,
+                // record.first_due_amount ??
+                recollected_amount ?? 0,
               current_amount:
-                lastEvent?.current_amount! + payment?.comprobantes?.importe!,
+                (lastEvent?.current_amount ?? 0) + recollected_amount,
               description: "Recaudacion",
               type: "REC",
             });
@@ -372,8 +405,8 @@ export const uploadsRouter = createTRPCRouter({
               period: row.period,
               first_due_amount: row.first_due_amount,
               first_due_date: row.first_due_date,
-              second_due_amount: row.second_due_amount ?? null,
-              second_due_date: row.second_due_date ?? null,
+              second_due_amount: null,
+              second_due_date: null,
               additional_info: row.additional_info ?? null,
               // payment_channel: row.payment_channel ?? null,
               payment_date: row.payment_date ?? null,
@@ -468,7 +501,8 @@ async function getCompanyBrands(companyId: string) {
 async function readResponseUploadContents(
   db: DBTX,
   id: string,
-  inputType: string | undefined
+  inputType: string | undefined,
+  channelName: string
 ) {
   const upload = await db.query.responseDocumentUploads.findFirst({
     where: eq(schema.responseDocumentUploads.id, id),
@@ -484,6 +518,7 @@ async function readResponseUploadContents(
     throw new TRPCError({ code: "BAD_REQUEST" });
   }
 
+  console.log("channelName", channelName);
   const response = await fetch(upload.fileUrl);
   const fileContent = await response.text();
   const lines: string[] = fileContent.trim().split(/\r?\n/);
@@ -494,30 +529,34 @@ async function readResponseUploadContents(
   let total_rows = 2;
   let recordIndex = 1;
   const records = [];
-  for (const line of lines) {
-    if (recordIndex === 1) {
+
+  if (channelName == "PAGOFACIL") {
+    for (const line of lines) {
       const recordValues = line.trim().split(/\s{2,}/);
       console.log("recordValues", recordValues);
-      //trato el ultimo elemento que esta junto nro de factura y estado de pago
-      const largeNumber = recordValues[2];
-      console.log(largeNumber);
-      const status_code = largeNumber?.slice(-2);
-      const importe = largeNumber?.slice(22, 39);
-      console.log("length", importe?.length);
-      const importe_int = importe?.slice(0, importe.length - 2);
-      const importe_dec = importe?.slice(importe.length - 2);
-      const parte_entera = parseInt(importe_int!);
-      const parte_dec = parseInt(importe_dec!);
-      const importe_final = parte_entera + parte_dec / 100;
-      // extract invoice_number
-      const stringInvoiceNumber = recordValues[recordValues.length - 1] ?? null;
-      console.log("stringInvoiceNumber", stringInvoiceNumber);
-      if (!stringInvoiceNumber) {
-        throw new Error("there is no invoice number");
-      }
+      const largeNumber = recordValues[0];
+      const fiscal_id_number = recordValues[1];
+      const importe_final = recordValues[3];
+      const payment_date = recordValues[2]?.slice(19, 27);
 
-      const invoice_number = stringInvoiceNumber.slice(10, 15) ?? null;
-      console.log("invoice_number", invoice_number);
+      const invoice_number = largeNumber?.slice(16, 21);
+      // const fiscal_id_number = largeNumber?.slice(84, 104);
+      // const invoice_number = largeNumber?.slice(16, 21);
+      // const importe_final = largeNumber?.slice(48, 58);
+      console.log(invoice_number!, "payments_date");
+
+      const day = payment_date!.slice(0, 2);
+      const month = payment_date![2];
+      const year = payment_date!.slice(3);
+
+      const date = dayjs(`${day}${month}${year}`, "DDMMYY").format("DD-MM-YY");
+
+      let status;
+      if (parceImporte(importe_final!) > 0) {
+        status = "00";
+      } else {
+        status = "90";
+      }
       if (invoice_number) {
         const original_transaction = await db.query.payments.findFirst({
           where: eq(
@@ -526,25 +565,250 @@ async function readResponseUploadContents(
           ),
         });
         if (original_transaction) {
-          original_transaction.statusId =
-            statusCodeMap.get(status_code) ?? "91";
-          original_transaction.recollected_amount = importe_final;
-          console.log("statusCode", status_code);
-          console.log("status", original_transaction.statusId);
-          console.log("importeString", importe_int, importe_dec);
-          console.log("parte_entera", parte_entera);
-          console.log("parte_dec", parte_dec);
-          console.log("importe", importe_final);
+          original_transaction.statusId = statusCodeMap.get(status) ?? "90";
+          original_transaction.payment_date = dayjs(date, "DD-MM-YY").toDate();
+          original_transaction.collected_amount =
+            original_transaction.first_due_amount! +
+            original_transaction.second_due_amount!;
+          original_transaction.recollected_amount = parceImporte(
+            importe_final!
+          );
+
+          console.log(
+            status,
+            original_transaction.statusId,
+            "Este es el estado"
+          );
+
           records.push(original_transaction);
         }
       } else {
         throw Error("cannot read invoice number");
       }
-    } else if (recordIndex === 4) {
-      recordIndex = 0;
+
+      total_rows++;
+      recordIndex++;
     }
-    total_rows++;
-    recordIndex++;
+  }
+  if (channelName == "PAGOMISCUENTAS") {
+    for (const line of lines) {
+      const recordValues = line.trim().split(/\s{2,}/);
+      console.log("recordValues", recordValues);
+
+      const largeNumber = recordValues[0];
+      const largeNumber2 = recordValues[2];
+
+      const invoice_number = recordValues[1] ?? "33666";
+      const fiscal_id_number = largeNumber?.slice(1, 12);
+      const importe_final = largeNumber2?.slice(17, 27);
+
+      const payment_date = recordValues[2]!.slice(0, 8);
+      const year = payment_date!.slice(0, 4);
+      const month = payment_date!.slice(4, 6);
+      const day = payment_date!.slice(6);
+
+      const date = dayjs(`${day}${month}${year}`, "DDMMYY").format("DD-MM-YY");
+
+      let status;
+      if (parceImporte(importe_final!) > 0) {
+        status = "00";
+      } else {
+        status = "90";
+      }
+
+      if (invoice_number) {
+        const original_transaction = await db.query.payments.findFirst({
+          where: eq(
+            schema.payments.invoice_number,
+            Number.parseInt(invoice_number)
+          ),
+        });
+        if (original_transaction) {
+          original_transaction.statusId = statusCodeMap.get(status) ?? "90";
+
+          original_transaction.payment_date = dayjs(date, "DD-MM-YY").toDate();
+          original_transaction.collected_amount =
+            original_transaction.first_due_amount! +
+            original_transaction.second_due_amount!;
+          original_transaction.recollected_amount = parceImporte(
+            importe_final!
+          );
+          records.push(original_transaction);
+        }
+      } else {
+        throw Error("cannot read invoice number");
+      }
+
+      total_rows++;
+      recordIndex++;
+    }
+  }
+  if (channelName === "RAPIPAGO") {
+    for (const line of lines) {
+      const recordValues = line.trim().split(/\s{2,}/);
+      console.log("recordValues", recordValues);
+
+      const fiscal_id_number = recordValues[0]?.slice(32, 42);
+      const invoice_number = recordValues[0]?.slice(42, 48);
+      const payment_date = recordValues[0]?.slice(0, 8);
+
+      const importe_final = recordValues[0]?.slice(9, 23);
+
+      const year = payment_date!.slice(0, 4);
+      const month = payment_date!.slice(4, 6);
+      const day = payment_date!.slice(6);
+
+      const date = dayjs(`${day}${month}${year}`, "DDMMYY").format("DD-MM-YY");
+
+      console.log(payment_date?.slice(0, 4), "ES ESTAAA");
+
+      let status;
+      if (parceImporte(importe_final!) > 0) {
+        status = "00";
+      } else {
+        status = "90";
+      }
+
+      console.log(date, "ES ESTAAA");
+      console.log(importe_final);
+
+      if (invoice_number) {
+        const original_transaction = await db.query.payments.findFirst({
+          where: eq(
+            schema.payments.invoice_number,
+            Number.parseInt(invoice_number)
+          ),
+        });
+        if (original_transaction) {
+          original_transaction.statusId = statusCodeMap.get(status) ?? "90";
+          original_transaction.payment_date = dayjs(date, "DD-MM-YY").toDate();
+          original_transaction.collected_amount =
+            original_transaction.first_due_amount! +
+            original_transaction.second_due_amount!;
+
+          original_transaction.recollected_amount = parceImporte(
+            importe_final!
+          );
+          records.push(original_transaction);
+        }
+      } else {
+        throw Error("cannot read invoice number");
+      }
+
+      total_rows++;
+      recordIndex++;
+    }
+  }
+  if (channelName === "DEBITO AUTOMATICO EN TARJETAS") {
+    for (const line of lines) {
+      const recordValues = line.trim().split(/\s{2,}/);
+      console.log("recordValues", recordValues);
+
+      const invoice_number = recordValues[0]?.slice(45, 50);
+      const importe_final = recordValues[1];
+      const payment_date = recordValues[5]?.slice(16, 22);
+      console.log(invoice_number, "largeNumber");
+      console.log(importe_final, "importe_final");
+      console.log(recordValues[4], "importe_final");
+
+      let estado;
+      if (parceImporte(importe_final!) > 0) {
+        estado == "00";
+      } else {
+        estado == "92";
+      }
+      console.log(estado, "estado");
+
+      const day = payment_date!.slice(0, 2);
+      const month = payment_date![2];
+      const year = payment_date!.slice(3);
+
+      const date = dayjs(`${day}${month}${year}`, "DDMMYY").format("DD-MM-YY");
+
+      console.log(dayjs(date!), "date");
+      if (invoice_number) {
+        const original_transaction = await db.query.payments.findFirst({
+          where: eq(
+            schema.payments.invoice_number,
+            Number.parseInt(invoice_number)
+          ),
+        });
+        if (original_transaction) {
+          original_transaction.statusId = estado!;
+          original_transaction.payment_date = dayjs(date, "DD-MM-YY").toDate();
+          original_transaction.collected_amount =
+            original_transaction.first_due_amount! +
+            original_transaction.second_due_amount!;
+          original_transaction.recollected_amount = parceImporte(
+            importe_final!
+          );
+          records.push(original_transaction);
+        }
+      } else {
+        throw Error("cannot read invoice number");
+      }
+
+      total_rows++;
+      recordIndex++;
+    }
+  }
+  if (channelName == "DEBITO DIRECTO CBU") {
+    for (const line of lines) {
+      if (recordIndex === 1) {
+        const recordValues = line.trim().split(/\s{2,}/);
+        console.log("recordValues", recordValues);
+        //trato el ultimo elemento que esta junto nro de factura y estado de pago
+        const largeNumber = recordValues[2];
+        console.log(largeNumber);
+        const status_code = largeNumber?.slice(37, 39);
+        const importe = largeNumber?.slice(22, 39);
+        console.log("length", importe?.length);
+        const importe_int = importe?.slice(0, importe.length - 2);
+        const importe_dec = importe?.slice(importe.length - 2);
+        const parte_entera = parseInt(importe_int!);
+        const parte_dec = parseInt(importe_dec!);
+        const importe_final = parte_entera + parte_dec / 100;
+        // extract invoice_number
+        const stringInvoiceNumber =
+          recordValues[recordValues.length - 1] ?? null;
+        console.log("stringInvoiceNumber", stringInvoiceNumber);
+        if (!stringInvoiceNumber) {
+          throw new Error("there is no invoice number");
+        }
+
+        const invoice_number = stringInvoiceNumber.slice(10, 15) ?? null;
+        console.log("invoice_number", invoice_number);
+        const errorStatus = await db.query.paymentStatus.findFirst({
+          where: eq(schema.paymentStatus.code, "04"),
+        });
+        if (invoice_number) {
+          const original_transaction = await db.query.payments.findFirst({
+            where: eq(
+              schema.payments.invoice_number,
+              Number.parseInt(invoice_number)
+            ),
+          });
+          if (original_transaction) {
+            original_transaction.statusId =
+              statusCodeMap.get(status_code) ?? errorStatus?.id;
+            original_transaction.recollected_amount = importe_final;
+            console.log("statusCode", status_code);
+            console.log("status", original_transaction.statusId);
+            console.log("importeString", importe_int, importe_dec);
+            console.log("parte_entera", parte_entera);
+            console.log("parte_dec", parte_dec);
+            console.log("importe", importe_final);
+            records.push(original_transaction);
+          }
+        } else {
+          throw Error("cannot read invoice number");
+        }
+      } else if (recordIndex === 4) {
+        recordIndex = 0;
+      }
+      total_rows++;
+      recordIndex++;
+    }
   }
   return { upload, records, total_rows, header: recHeaders };
 }
@@ -673,7 +937,6 @@ async function readUploadContents(
     const rowNum = i + 2;
     // verificar producto
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-
     let product: any = undefined;
     if (row.product_number) {
       if (row.product_number in productsMap) {
@@ -739,6 +1002,9 @@ async function readUploadContents(
           );
         }
         if (!value) {
+          console.log("aca");
+          console.log(column);
+          console.log(row);
           errors.push(
             `La columna ${columnName} es obligatoria y no esta en el archivo(fila:${rowNum})`
           );
@@ -843,4 +1109,11 @@ function trimObject(obj: Record<string, unknown>) {
       return [key, value];
     })
   );
+}
+
+function parceImporte(number: string) {
+  const formattedNumber = parseFloat((parseInt(number) / 100).toFixed(2));
+  console.log("number, ", formattedNumber);
+
+  return formattedNumber;
 }

@@ -62,7 +62,6 @@ export function formatDate(date: Date | undefined) {
 
 export function dateNormalFormat(date: Date | undefined | null) {
   if (date) {
-    console.log("formatDateNormal", date);
     const yyyy = date.getFullYear();
     let mm = date.getMonth() + 1; // Months start at 0!
     let dd = date.getDate();
@@ -89,14 +88,16 @@ export function htmlBill(
   company: any,
   producto: any,
   voucher: number,
-  brand: RouterOutputs["brands"]["list"][number] | undefined
+  brand: RouterOutputs["brands"]["list"][number] | undefined,
+  name: string,
+  domicilio: string,
+  localidad: string,
+  provincia: string,
+  cp: string,
+  id_type: string,
+  id_number: string,
+  afip_status: string
 ) {
-  const billResponsible = comprobante?.family_group?.integrants?.find(
-    (x: any) => x.isBillResponsible
-  );
-  // const family_group = api.family_groups.get.query({
-  //   family_groupsId: comprobante?.family_group_id,
-  // });
   if (producto) {
     const canales = producto?.channels;
   }
@@ -110,11 +111,11 @@ export function htmlBill(
   function getImageTagForTipoComprobante(tipoComprobante: string): string {
     switch (tipoComprobante) {
       case "6":
-      case "13":
-      case "12":
+      case "7":
+      case "8":
         return `<img src="https://utfs.io/f/8ab5059a-71e9-4cb2-8e0c-4743f73c8fe5-kmcofx.png" alt="" />`;
-      case "14":
-      case "15":
+      case "12":
+      case "13":
       case "11":
         return `C`;
       default:
@@ -145,21 +146,21 @@ export function htmlBill(
   }
   function getTextoForTipoComprobante(tipoComprobante: string) {
     switch (tipoComprobante) {
-      case "3":
+      case "1":
       case "6":
       case "11":
       case "51":
       case "19":
         return "FACTURA";
-      case "8":
-      case "13":
-      case "15":
+      case "2":
+      case "7":
+      case "12":
       case "52":
       case "20":
         return "NOTA DE DEBITO";
-      case "2":
-      case "12":
-      case "14":
+      case "3":
+      case "8":
+      case "13":
       case "53":
       case "21":
         return "NOTA DE CREDITO";
@@ -523,28 +524,28 @@ span {
       <section class="parte-2">
         <ul class="datos-1">
           <li>
-            <p>Cliente: ${billResponsible?.name}</p>
+            <p>Cliente: ${name}</p>
           </li>
           <li>
-            <p>Domicilio: ${billResponsible?.address}</p>
+            <p>Domicilio: ${domicilio}</p>
           </li>
           <li>
-            <p>Localidad: ${billResponsible?.locality}</p>
+            <p>Localidad: ${localidad}</p>
           </li>
           <li>
-            <p>Provincia: ${billResponsible?.partido}</p>
+            <p>Provincia: ${provincia}</p>
           </li>
           <li>
-            <p>CP: ${billResponsible?.postal_code?.cp}</p>
+            <p>CP: ${cp}</p>
           </li>
         </ul>
   
         <ul class="datos-2">
           <li>
-            <p>C.U.I.T:: ${billResponsible?.fiscal_id_number}</p>
+            <p>${id_type}: ${id_number}</p>
           </li>
           <li>
-            <p>Categoria I.V.A: ${billResponsible?.afip_status}</p>
+            <p>Categoria I.V.A: ${afip_status}</p>
           </li>
           <li>
             <p>Condicion de Venta: ---</p>
@@ -851,40 +852,34 @@ function obtenerDecimales(numero: number | undefined) {
   return "00"; // Retorna "00" si no hay parte decimal
 }
 export const comprobanteDictionary: { [key: string]: number } = {
-  "FACTURA A": 3,
+  "FACTURA A": 1,
   "FACTURA B": 6,
   "FACTURA C": 11,
   "FACTURA M": 51,
-  "FACTURA E": 19,
-  "NOTA DE DEBITO A": 8,
-  "NOTA DE DEBITO B": 13,
-  "NOTA DE DEBITO C": 15,
+  "NOTA DE DEBITO A": 2,
+  "NOTA DE DEBITO B": 7,
+  "NOTA DE DEBITO C": 12,
   "NOTA DE DEBITO M": 52,
-  "NOTA DE DEBITO E": 20,
-  "NOTA DE CREDITO A": 2,
-  "NOTA DE CREDITO B": 12,
-  "NOTA DE CREDITO C": 14,
+  "NOTA DE CREDITO A": 3,
+  "NOTA DE CREDITO B": 8,
+  "NOTA DE CREDITO C": 13,
   "NOTA DE CREDITO M": 53,
-  "NOTA DE CREDITO E": 21,
   "": 0,
 };
 
 export const reverseComprobanteDictionary: { [key: number]: string } = {
-  3: "FACTURA A",
+  1: "FACTURA A",
   6: "FACTURA B",
   11: "FACTURA C",
   51: "FACTURA M",
-  19: "FACTURA E",
-  8: "NOTA DE DEBITO A",
-  13: "NOTA DE DEBITO B",
-  15: "NOTA DE DEBITO C",
+  2: "NOTA DE DEBITO A",
+  7: "NOTA DE DEBITO B",
+  12: "NOTA DE DEBITO C",
   52: "NOTA DE DEBITO M",
-  20: "NOTA DE DEBITO E",
-  2: "NOTA DE CREDITO A",
-  12: "NOTA DE CREDITO B",
-  14: "NOTA DE CREDITO C",
+  3: "NOTA DE CREDITO A",
+  8: "NOTA DE CREDITO B",
+  13: "NOTA DE CREDITO C",
   53: "NOTA DE CREDITO M",
-  21: "NOTA DE CREDITO E",
   0: "RECIBO",
 };
 
@@ -919,4 +914,53 @@ export const reversedIdDictionary: { [key: number]: string } = {
   86: "CUIL",
   96: "DNI",
   99: "Consumidor Final",
+};
+
+export function getDifferentialAmount(grupo: any, fechaPreliq: Date) {
+  let importe = 0;
+  grupo.integrants?.forEach((integrant: any) => {
+    if (integrant.birth_date == null) return 0;
+    const age = calcularEdad(integrant.birth_date);
+
+    let precioIntegrante = grupo.plan?.pricesPerCondition
+      ?.sort(
+        (a: any, b: any) => b.validy_date.getTime() - a.validy_date.getTime()
+      )
+      .find(
+        (x: any) =>
+          integrant.relationship &&
+          x.condition == integrant.relationship &&
+          x.validy_date.getTime() <= fechaPreliq.getTime()
+      )?.amount;
+
+    if (precioIntegrante === undefined) {
+      precioIntegrante =
+        grupo.plan?.pricesPerCondition?.find(
+          (x: any) => (x.from_age ?? 1000) <= age && (x.to_age ?? 0) >= age
+        )?.amount ?? 0;
+    }
+    integrant?.differentialsValues.forEach((differential: any) => {
+      const differentialIntegrante =
+        differential.amount * (precioIntegrante ?? 0);
+      importe += differentialIntegrante;
+    });
+  });
+  return importe;
+}
+export function getGroupContribution(grupo: any) {
+  let importe = 0;
+  grupo.integrants?.forEach((integrant: any) => {
+    if (integrant?.contribution?.amount) {
+      const contributionIntegrante = integrant?.contribution?.amount ?? 0;
+      importe += contributionIntegrante;
+    }
+  });
+  return importe;
+}
+
+export const reverseConceptDictionary: { [key: number]: string } = {
+  1: "Productos",
+  2: "Servicios",
+  3: "Productos y Servicios",
+  0: "",
 };
