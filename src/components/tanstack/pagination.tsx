@@ -5,6 +5,7 @@ import {
   DoubleArrowRightIcon,
 } from "@radix-ui/react-icons";
 import { Table } from "@tanstack/react-table";
+import { useEffect, useState } from "react";
 
 import { Button } from "~/components/ui/button";
 import {
@@ -22,17 +23,59 @@ interface DataTablePaginationProps<TData> {
 export function DataTablePagination<TData>({
   table,
 }: DataTablePaginationProps<TData>) {
-  const totalRows = table.getFilteredRowModel().rows.length;
+  const [pages, setPages] = useState<(number | string)[]>([]);
   const { pageIndex, pageSize } = table.getState().pagination;
+  const totalRows = table.getFilteredRowModel().rows.length;
+  const totalPages = Math.ceil(totalRows / pageSize);
+  useEffect(() => {
+    const getPageNumbers = () => {
+      const pages: (number | string)[] = [];
+      const maxButtons = 10;
+
+      const half = Math.floor(maxButtons / 2);
+      const currentIndex = pageIndex + 1;
+      let start = Math.max(1, currentIndex - half);
+      let end = Math.min(totalPages, currentIndex + half);
+
+      if (currentIndex <= half) {
+        end = Math.min(maxButtons, totalPages);
+      } else if (currentIndex + half >= totalPages) {
+        start = Math.max(1, totalPages - maxButtons + 1);
+      }
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      if (start > 1) {
+        pages.unshift(1);
+        if (start > 2) {
+          pages.splice(1, 0, "...");
+        }
+      }
+
+      if (end < totalPages) {
+        pages.push(totalPages);
+        if (end < totalPages - 1) {
+          pages.splice(pages.length - 1, 0, "...");
+        }
+      }
+
+      return pages;
+    };
+    setPages(getPageNumbers());
+  }, [pageIndex, totalPages]);
   const firstRowShown = pageIndex * pageSize + 1;
   const lastRowShown = Math.min(
     (pageIndex + 1) * pageSize,
     table.getFilteredRowModel().rows.length
   );
-  const totalPages = Math.ceil(totalRows / pageSize);
   const goToPage = (pageNumber: number) => {
     table.setPageIndex(pageNumber);
   };
+
+  console.log(pages);
+  console.log(pageIndex);
   return (
     <div className="flex items-center justify-between px-2 mt-2 w-full">
       <div className="flex items-center space-x-2">
@@ -73,17 +116,26 @@ export function DataTablePagination<TData>({
         >
           Previo
         </Button>
-        {Array.from({ length: totalPages }, (_, index) => (
-          <button
-            key={index}
-            className={`px-3 h-5 w-auto text-[0.6rem] rounded-md text-muted-foreground ${
-              pageIndex === index ? "bg-[#71EBD4] " : "bg-gray-200"
-            }`}
-            onClick={() => goToPage(index)}
-          >
-            {index + 1}
-          </button>
-        ))}
+        {pages.map((page, index) =>
+          typeof page === "number" ? (
+            <button
+              key={index}
+              className={`px-3 h-5 w-auto text-[0.6rem] rounded-md text-muted-foreground ${
+                pageIndex === page - 1 ? "bg-[#71EBD4] " : "bg-gray-200"
+              }`}
+              onClick={() => goToPage(page - 1)}
+            >
+              {page}
+            </button>
+          ) : (
+            <span
+              key={index}
+              className="px-3 h-5 w-auto text-[0.6rem] rounded-md text-muted-foreground"
+            >
+              {page}
+            </span>
+          )
+        )}
 
         <Button
           variant="outline"
