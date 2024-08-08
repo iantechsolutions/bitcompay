@@ -160,7 +160,7 @@ async function approbatecomprobante(liquidationId: string) {
       .update(schema.liquidations)
       .set({ estado: "aprobada", userApproved: user?.id })
       .where(eq(schema.liquidations.id, liquidationId));
-    // const afip = await ingresarAfip();
+    const afip = await ingresarAfip();
     let last_voucher;
     // const browser = await chromium.puppeteer.launch({
     //   args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
@@ -343,30 +343,30 @@ async function approbatecomprobante(liquidationId: string) {
       }
 
       console.log("7");
-      // const html = htmlBill(
-      //   comprobante,
-      //   comprobante.family_group?.businessUnitData!.company,
-      //   producto,
-      //   last_voucher + 1 ?? 0,
-      //   comprobante.family_group?.businessUnitData!.brand,
-      //   billResponsible?.name ?? "",
-      //   (billResponsible?.address ?? "") +
-      //     " " +
-      //     (billResponsible?.address_number ?? ""),
-      //   billResponsible?.locality ?? "",
-      //   billResponsible?.province ?? "",
-      //   billResponsible?.postal_code?.cp ?? "",
-      //   billResponsible?.fiscal_id_type ?? "",
-      //   billResponsible?.fiscal_id_number ?? "",
-      //   billResponsible?.afip_status ?? ""
-      // );
+      const html = htmlBill(
+        comprobante,
+        comprobante.family_group?.businessUnitData!.company,
+        producto,
+        last_voucher + 1 ?? 0,
+        comprobante.family_group?.businessUnitData!.brand,
+        billResponsible?.name ?? "",
+        (billResponsible?.address ?? "") +
+          " " +
+          (billResponsible?.address_number ?? ""),
+        billResponsible?.locality ?? "",
+        billResponsible?.province ?? "",
+        billResponsible?.postal_code?.cp ?? "",
+        billResponsible?.fiscal_id_type ?? "",
+        billResponsible?.fiscal_id_number ?? "",
+        billResponsible?.afip_status ?? ""
+      );
 
       console.log("8");
       const name = `FAC_${last_voucher + 1}.pdf`; // NOMBRE
       last_voucher += 1;
       console.log("9");
 
-      // PDFFromHtml(html, name, afip, comprobante?.id ?? "", last_voucher + 1);
+      PDFFromHtml(html, name, afip, comprobante?.id ?? "", last_voucher + 1);
       console.log("10");
 
       // const uploaded = await utapi.uploadFiles(

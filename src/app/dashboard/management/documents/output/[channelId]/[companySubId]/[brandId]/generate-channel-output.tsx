@@ -75,6 +75,7 @@ export default function GenerateChannelOutputPage(props: {
     texto: z.string().max(12),
   });
 
+  const [open, setOpen] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
   const [cardType, setCardType] = useState<string | null>(null);
   const [cardBrand, setCardBrand] = useState<string | null>(null);
@@ -242,7 +243,7 @@ export default function GenerateChannelOutputPage(props: {
                                 <FormLabel htmlFor="presentation_date">
                                   Fecha de presentacion
                                 </FormLabel>
-                                <Popover>
+                                <Popover open={open} onOpenChange={setOpen}>
                                   <PopoverTrigger asChild>
                                     <FormControl>
                                       <Button
@@ -253,13 +254,11 @@ export default function GenerateChannelOutputPage(props: {
                                             "text-muted-foreground"
                                         )}>
                                         <p>
-                                          {field.value ? (
-                                            dayjs
-                                              .utc(field.value)
-                                              .format("D [de] MMMM [de] YYYY")
-                                          ) : (
-                                            <span>Escoga una fecha</span>
-                                          )}
+                                          {field.value
+                                            ? dayjs
+                                                .utc(field.value)
+                                                .format("D [de] MMMM [de] YYYY")
+                                            : "Escoga una fecha"}
                                         </p>
                                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                       </Button>
@@ -275,7 +274,10 @@ export default function GenerateChannelOutputPage(props: {
                                           ? new Date(field.value)
                                           : undefined
                                       }
-                                      onSelect={field.onChange}
+                                      onSelect={(date) => {
+                                        field.onChange(date);
+                                        setOpen(false); // Cierra el popover después de seleccionar la fecha
+                                      }}
                                       disabled={(date: Date) =>
                                         date < new Date("1900-01-01")
                                       }
@@ -289,6 +291,7 @@ export default function GenerateChannelOutputPage(props: {
                           />
                         </form>
                       </Form>
+
                       <Label htmlFor="fileName" className="text-left">
                         Nombre del archivo
                       </Label>

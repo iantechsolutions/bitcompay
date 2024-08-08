@@ -1,4 +1,6 @@
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, FileText } from "lucide-react";
+import Link from "next/link";
+import { Button } from "~/components/ui/button";
 import {
   Sheet,
   SheetContent,
@@ -82,6 +84,20 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
         <div className="mt-2">
           {comprobanteNCReciente && (
             <div className="mt-2">
+              {comprobanteNCReciente.billLink &&
+              comprobanteNCReciente.billLink !== "" ? (
+                <div className="items-center justify-center">
+                  <Link href={comprobanteNCReciente.billLink}>
+                    <FileText></FileText>
+                  </Link>
+                </div>
+              ) : (
+                <div className="items-center justify-center">
+                  <Button disabled={true} variant="link">
+                    <FileText></FileText>
+                  </Button>
+                </div>
+              )}
               <div
                 className="flex flex-row justify-between items-center py-2 px-2 mb-3 rounded-md bg-[#c2bebe84] hover:bg-[#cbc7c7ce] transition-all hover:cursor-pointer"
                 onClick={() => setOpenNCAccordion(!openNCAccordion)}
@@ -109,7 +125,20 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
               )}
             </div>
           )}
-
+          {comprobanteFCReciente?.billLink &&
+          comprobanteFCReciente?.billLink !== "" ? (
+            <div className="items-center justify-center">
+              <Link href={comprobanteFCReciente?.billLink}>
+                <FileText></FileText>
+              </Link>
+            </div>
+          ) : (
+            <div className="items-center justify-center">
+              <Button disabled={true} variant="link">
+                <FileText></FileText>
+              </Button>
+            </div>
+          )}
           <div
             className="flex flex-row justify-between items-center py-2 px-2 mb-3 rounded-md bg-[#c2bebe84] hover:bg-[#cbc7c7ce] transition-all hover:cursor-pointer mt-5"
             onClick={() => setOpenFCAccordion(!openFCAccordion)}

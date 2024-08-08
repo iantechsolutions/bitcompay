@@ -567,9 +567,13 @@ export default function Page() {
             number: last_voucher + 1,
           });
           console.log("resultadHTML", resHtml);
+          if (resHtml.file) {
+            window.open(resHtml.file, "_blank");
+          }
         }
         setLoading(false);
         toast.success("La factura se creo correctamente");
+        router.push("/dashboard");
       })();
     } catch {
       setLoading(false);
