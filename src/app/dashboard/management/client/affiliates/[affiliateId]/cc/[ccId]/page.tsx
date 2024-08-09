@@ -17,7 +17,7 @@ export default function CCDetail(props: {
   params: { ccId: string; affiliateId: string };
 }) {
   const router = useRouter();
-  const events = api.events.list.useQuery({ ccId: props.params.ccId });
+  const events = api.events.getByCC.useQuery({ ccId: props.params.ccId });
   const grupo = api.family_groups.get.useQuery({
     family_groupsId: props.params.affiliateId,
   });

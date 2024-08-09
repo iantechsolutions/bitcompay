@@ -5,7 +5,11 @@ import { eq, lt, and, desc } from "drizzle-orm";
 import { RouterOutputs } from "~/trpc/shared";
 
 export const eventsRouter = createTRPCRouter({
-  list: protectedProcedure
+  list: protectedProcedure.query(async ({ input }) => {
+    const events = await db.query.events.findMany({});
+    return events;
+  }),
+  getByCC: protectedProcedure
     .input(
       z.object({
         ccId: z.string(),
