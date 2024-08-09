@@ -853,7 +853,6 @@ export const comprobantesRouter = createTRPCRouter({
           period: input.dateDesde,
           userCreated: user?.id ?? "",
           userApproved: "",
-          number: randomNumberLiq,
           pdv: parseInt(input.pv),
           interest: input.interest,
           logo_url: input.logo_url,
