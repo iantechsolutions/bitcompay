@@ -176,7 +176,7 @@ async function approbatecomprobante(liquidationId: string) {
     // });
     // const page = await browser.newPage();
     const { results, errors } = await PromisePool.for(liquidation?.comprobantes)
-      .withConcurrency(10)
+      .withConcurrency(100)
       .process(async (comprobante: any) => {
         console.log("0");
         const comprobanteCod =
