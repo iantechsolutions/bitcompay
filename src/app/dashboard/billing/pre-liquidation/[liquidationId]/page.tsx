@@ -112,17 +112,22 @@ export default async function Home(props: {
     const original_comprobante = fg?.comprobantes?.find(
       (comprobante) => comprobante?.origin?.toLowerCase() === "factura"
     );
-    const eventPreComprobante = await api.events.getLastByDateAndCC.query({
-      ccId: fg?.cc?.id ?? "",
-      date: preliquidation?.createdAt ?? new Date(),
-    });
+    // const eventPreComprobante = await api.events.getLastByDateAndCC.query({
+    //   ccId: fg?.cc?.id ?? "",
+    //   date: preliquidation?.createdAt ?? new Date(),
+    // });
     // const saldo_anterior = toNumberOrZero(
     //   original_comprobante?.items.find(
     //     (item) => item.concept === "Saldo anterior"
     //   )?.amount
     // );
-    summary["Saldo anterior"] += eventPreComprobante?.current_amount ?? 0;
-    excelRow.push(eventPreComprobante?.current_amount ?? 0);
+    summary["Saldo anterior"] +=
+      // eventPreComprobante?.current_amount ??
+      0;
+    excelRow.push(
+      // eventPreComprobante?.current_amount ??
+      0
+    );
     const cuota_planes = toNumberOrZero(
       original_comprobante?.items.find((item) => item.concept === "Abono")
         ?.amount
@@ -166,11 +171,13 @@ export default async function Home(props: {
     summary.IVA += iva;
     excelRow.push(iva);
     excelRows.push(excelRow);
-    const lastEvent = await api.events.getLastByDateAndCC.query({
-      ccId: fg?.cc?.id!,
-      date: preliquidation?.createdAt ?? new Date(),
-    });
-    const currentAccountAmount = lastEvent?.current_amount ?? 0;
+    // const lastEvent = await api.events.getLastByDateAndCC.query({
+    //   ccId: fg?.cc?.id!,
+    //   date: preliquidation?.createdAt ?? new Date(),
+    // });
+    const currentAccountAmount =
+      // lastEvent?.current_amount ??
+      0;
     const plan = fg?.plan?.description ?? "";
     const modo = fg?.modo?.description ?? "";
     tableRows.push({
@@ -178,7 +185,9 @@ export default async function Home(props: {
       nroGF: fg?.numericalId ?? "N/A",
       nombre: name,
       cuit,
-      "saldo anterior": eventPreComprobante?.current_amount ?? 0,
+      "saldo anterior":
+        //  eventPreComprobante?.current_amount ??
+        0,
       "cuota plan": cuota_planes,
       bonificacion,
       diferencial,
