@@ -165,8 +165,14 @@ async function approbatecomprobante(liquidationId: string) {
     console.log("Ingresando afip");
     // const afip = await ingresarAfip();
     console.log("Fin ingreso");
-
+    const status = await db.query.paymentStatus.findFirst({
+      where: eq(schema.paymentStatus.code, "91"),
+    });
+    const statusCancelado = await db.query.paymentStatus.findFirst({
+      where: eq(schema.paymentStatus.code, "90"),
+    });
     let last_voucher;
+    const productos = await db.query.products.findMany();
     // const browser = await chromium.puppeteer.launch({
     //   args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
     //   defaultViewport: chromium.defaultViewport,
@@ -210,26 +216,17 @@ async function approbatecomprobante(liquidationId: string) {
           },
         });
         console.log("2");
-        const producto = await db.query.products.findFirst({
-          where: eq(
-            schema.products.id,
-            billResponsible?.pa[0]?.product_id ?? ""
-          ),
-        });
+
+        const producto = productos.find(
+          (x) => x.id == billResponsible?.pa[0]?.product_id
+        );
         const cc = await db.query.currentAccount.findFirst({
           where: eq(
             schema.currentAccount.family_group,
             comprobante.family_group?.id ?? ""
           ),
         });
-        console.log("3");
-        const status = await db.query.paymentStatus.findFirst({
-          where: eq(schema.paymentStatus.code, "91"),
-        });
-        const statusCancelado = await db.query.paymentStatus.findFirst({
-          where: eq(schema.paymentStatus.code, "90"),
-        });
-        console.log("4");
+
         const fecha = new Date(
           Date.now() - new Date().getTimezoneOffset() * 60000
         )
