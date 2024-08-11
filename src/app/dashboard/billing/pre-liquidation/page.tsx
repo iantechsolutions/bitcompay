@@ -14,6 +14,8 @@ import { DataTable } from "./data-table";
 
 dayjs.extend(utc);
 dayjs.locale("es");
+export const maxDuration = 300;
+export const dynamic = "force-dynamic";
 
 export default function Page() {
   let { data: liquidationsFull } = api.liquidations.list.useQuery();
