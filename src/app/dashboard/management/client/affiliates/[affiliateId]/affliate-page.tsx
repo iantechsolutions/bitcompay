@@ -22,9 +22,12 @@ import {
 import dayjs from "dayjs";
 import { getDifferentialAmount, getGroupContribution } from "~/lib/utils";
 import { RouterOutputs } from "~/trpc/shared";
+import { useRouter } from "next/navigation";
+import { router } from "@trpc/server";
 export default function AffiliatePage(props: {
   params: { affiliateId: string; companyId: string };
 }) {
+  const router = useRouter();
   // const company = props.params.companyId;
   const grupos = props.params.affiliateId;
 
@@ -86,6 +89,12 @@ export default function AffiliatePage(props: {
     Zona: "",
     Supervisor: "",
   };
+  const goToCCDetail = (id: string | undefined) => {
+    if (!id) return;
+    router.push(
+      `/dashboard/management/client/affiliates/${props.params.affiliateId}/cc/${id}`
+    );
+  };
 
   return (
     <div>
@@ -100,7 +109,12 @@ export default function AffiliatePage(props: {
           <div>
             <h2 className="text-xl mt-2">Afiliados</h2>
           </div>
-          <div className="mt-2 border border-[#A7D3C7] p-4 w-1/2 rounded-lg">
+          <div
+            className="mt-2 border border-[#A7D3C7] p-4 w-1/2 rounded-lg hover:cursor-pointer hover:bg-[#f0f0f0d1]"
+            onClick={() => {
+              goToCCDetail(cc?.id);
+            }}
+          >
             <p className="text-lg font-semibold">Saldo actual</p>
             <span className="text-[#CD3D3B] text-2xl font-bold">
               $ {lastEvent?.current_amount}
