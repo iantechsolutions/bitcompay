@@ -162,7 +162,7 @@ async function approbatecomprobante(liquidationId: string) {
       .update(schema.liquidations)
       .set({ estado: "aprobada", userApproved: user?.id })
       .where(eq(schema.liquidations.id, liquidationId));
-    const afip = await ingresarAfip();
+    // const afip = await ingresarAfip();
     let last_voucher;
     // const browser = await chromium.puppeteer.launch({
     //   args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
