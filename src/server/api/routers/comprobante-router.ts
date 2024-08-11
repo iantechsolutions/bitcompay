@@ -163,7 +163,7 @@ async function approbatecomprobante(liquidationId: string) {
       .set({ estado: "aprobada", userApproved: user?.id })
       .where(eq(schema.liquidations.id, liquidationId));
     console.log("Ingresando afip");
-    const afip = await ingresarAfip();
+    // const afip = await ingresarAfip();
     console.log("Fin ingreso");
 
     let last_voucher;
