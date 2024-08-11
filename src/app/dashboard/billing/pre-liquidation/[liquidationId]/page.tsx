@@ -36,9 +36,6 @@ import DownloadExcelButton from "./downloadExcelButton";
 import RejectLiquidationDialog from "./reject-liquidation-dialog";
 import { ChevronLeft, CircleX } from "lucide-react";
 import { GoBackButton } from "~/components/goback-button";
-export const config = {
-  maxDuration: 5,
-};
 export default async function Home(props: {
   params: { liquidationId: string };
 }) {
