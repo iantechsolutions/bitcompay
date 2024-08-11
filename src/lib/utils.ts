@@ -738,8 +738,8 @@ export async function ingresarAfip() {
     key: key,
     // production: true,
   });
-  const serSer = await afip.CreateWSAuth(_username, _password, alias, wsid);
-  console.log(serSer);
+  // const serSer = await afip.CreateWSAuth(_username, _password, alias, wsid);
+  // console.log(serSer);
   // const salesPoints = await afip.ElectronicBilling.getSalesPoints();
   // console.log(salesPoints);
   // const serSer = await afip.CreateWSAuth(username, password, alias, wsid);
