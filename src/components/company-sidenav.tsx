@@ -168,7 +168,11 @@ export default function CompanySidenav() {
     canSeeConsults;
   //Tesoreria
   //lo ocultamos por ahora
-  const canSeeTreasury = has!({ permission: "org:treasury:collection" });
+  const canSeeCC = has!({ permission: "org:treasury:current_count" });
+  const canSeePayments = has!({ permission: "org:treasury:payments" });
+  const canSeeCollections = has!({ permission: "org:treasury:collection" });
+
+  const canSeeTreasury = canSeeCC || canSeePayments || canSeeCollections;
 
   // const canSeeBilling = has!({ permission: "org:management:sales" });
   // const canSeeBilling = has!({ permission: "org:management:sales" });
@@ -638,24 +642,30 @@ export default function CompanySidenav() {
                 <SidenavSeparator>Tesoreria</SidenavSeparator>
               </AccordionTrigger>
               <AccordionContent>
-                <SidenavItem
-                  icon={<Database />}
-                  href={`/dashboard/treasury/current_count`}
-                >
-                  Cuenta Corriente
-                </SidenavItem>
-                <SidenavItem
-                  icon={<Hand />}
-                  href={`/dashboard/treasury/collection`}
-                >
-                  Cobranzas
-                </SidenavItem>
-                <SidenavItem
-                  icon={<Wallet />}
-                  href={`/dashboard/treasury/payments`}
-                >
-                  Pagos
-                </SidenavItem>
+                {canSeeCC && (
+                  <SidenavItem
+                    icon={<Database />}
+                    href={`/dashboard/treasury/current_count`}
+                  >
+                    Cuenta Corriente
+                  </SidenavItem>
+                )}
+                {canSeeCollections && (
+                  <SidenavItem
+                    icon={<Hand />}
+                    href={`/dashboard/treasury/collection`}
+                  >
+                    Cobranzas
+                  </SidenavItem>
+                )}
+                {canSeePayments && (
+                  <SidenavItem
+                    icon={<Wallet />}
+                    href={`/dashboard/treasury/payments`}
+                  >
+                    Pagos
+                  </SidenavItem>
+                )}
               </AccordionContent>
             </AccordionItem>
           )}

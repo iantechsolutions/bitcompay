@@ -373,7 +373,13 @@ async function approbatecomprobante(liquidationId: string) {
         last_voucher += 1;
         console.log("9");
 
-        PDFFromHtml(html, name, afip, comprobante?.id ?? "", last_voucher + 1);
+        await PDFFromHtml(
+          html,
+          name,
+          afip,
+          comprobante?.id ?? "",
+          last_voucher + 1
+        );
         console.log("10");
 
         // const uploaded = await utapi.uploadFiles(
@@ -674,44 +680,6 @@ async function PDFFromHtml(
   comprobanteId: string,
   voucher: number
 ) {
-  // const options = {
-  //   format: "A4",
-  //   path: `${__dirname}/sample.pdf`, // you can pass path to save the file
-  // };
-  // htmlPDF.setOptions(options);
-  // const pdf = await htmlPDF.create(html);
-  // console.log("pdf", pdf);
-  // console.log(typeof pdf);
-  // const pdfBlob = new Blob([pdf], { type: "application/pdf" });
-  // const pdfFile = new File([pdfBlob], name, {
-  //   type: "application/pdf",
-  // });
-
-  // let options = { format: "A4" };
-  // let file = { content: html };
-
-  // await page.setContent(html);
-  // console.log("1");
-  // const pdf = await page.pdf({ format: "A4" });
-  // console.log("pdf", pdf);
-
-  // html_to_pdf.generatePdf(file, options).then(async (pdfBuffer: BlobPart) => {
-  //   const pdfBlob = new Blob([pdfBuffer], { type: "application/pdf" });
-  //   const pdfFile = new File([pdfBlob], name, {
-  //     type: "application/pdf",
-  //   });
-
-  //   // const stream = wkhtmltopdf(html);
-  //   // const pdfBlob = await streamToBlob(stream);
-  //   // await page.setContent(html, { waitUntil: "networkidle0" });
-  //   // const pdfBuffer = await page.pdf();
-  //   //
-
-  //   console.log("pdfBuffer", pdfBuffer);
-  //   console.log(typeof pdfBuffer);
-  //   console.log("html", html);
-  //   const response = await utapi.uploadFiles(pdfFile);
-  //   console.log(response);
   const options = {
     width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
     marginLeft: 0.4, // Margen izquierdo en pulgadas. Usar 0.1 para ticket
@@ -1128,7 +1096,6 @@ export const comprobantesRouter = createTRPCRouter({
           period: input.dateDesde,
           userCreated: user?.id ?? "",
           userApproved: "",
-          number: randomNumberLiq,
           pdv: parseInt(input.pv),
           interest: input.interest,
           logo_url: input.logo_url,
