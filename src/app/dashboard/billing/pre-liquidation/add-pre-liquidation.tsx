@@ -401,9 +401,9 @@ export default function AddPreLiquidation() {
                 type="number"
                 value={interest ?? 0}
                 onChange={(e) => {
-                  Number(e.target.value) === 0
-                    ? setInterest(null)
-                    : setInterest(Number(e.target.value));
+                  Number(e.target.value) >= 0 || e.target.value === ""
+                    ? setInterest(Number(e.target.value))
+                    : null;
                 }}
               />
             </div>
