@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import { CustomGoogleOneTap } from "./google-onetap";
 import { toast } from "sonner";
 import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
-
+import ForgotPasswordPage from "~/components/signin/forgotPassword";
 type Inputs = {
   username: string;
   password: string;
@@ -22,6 +22,7 @@ interface LoginFormProps {
 }
 
 export default function LoginForm({ setShowRegister }: LoginFormProps) {
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   function showGoogle() {
     console.log("showGoogle");
     const params = {
@@ -83,6 +84,9 @@ export default function LoginForm({ setShowRegister }: LoginFormProps) {
     }
   };
 
+  if (showForgotPassword) {
+    return <ForgotPasswordPage />;
+  }
   return (
     <div className="flex flex-col items-center px-10 pt-3 pb-7 bg-white rounded-2xl">
       <Image
@@ -163,7 +167,10 @@ export default function LoginForm({ setShowRegister }: LoginFormProps) {
               </Button>
             )}
           </div>
-          <p className="text-xs font-semibold text-muted-foreground mt-2 hover:cursor-pointer">
+          <p
+            onClick={() => setShowForgotPassword(true)}
+            className="text-xs font-semibold text-muted-foreground mt-2 hover:cursor-pointer"
+          >
             Recupero de contraseña
           </p>
 
