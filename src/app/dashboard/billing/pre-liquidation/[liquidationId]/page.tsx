@@ -49,9 +49,9 @@ export default async function Home(props: {
     preliquidation?.userCreated ?? "user_2iy8lXXdnoa2f5wHjRh5nj3W0fU"
   );
   // if (!preliquidation) return <Title>Preliquidacion no encotrada</Title>;
-  const familyGroups = await api.family_groups.getByLiquidation.query({
-    liquidationId: props.params.liquidationId,
-  });
+  // const familyGroups = await api.family_groups.getByLiquidation.query({
+  //   liquidationId: props.params.liquidationId,
+  // });
 
   const allPlan = await api.plans.list.query();
   const plansOptions = allPlan.map((plan) => ({
@@ -99,101 +99,110 @@ export default async function Home(props: {
   };
   const excelRows: (string | number)[][] = [[...headers]];
   const tableRows: TableRecord[] = [];
-  for (const fg of familyGroups) {
-    const excelRow = [];
-    const billResponsible = fg?.integrants?.find(
-      (integrante) => integrante?.isBillResponsible
-    );
-    const name = billResponsible?.name ?? "";
-    const cuit = billResponsible?.id_number ?? "";
-    excelRow.push(fg?.numericalId ?? "");
-    excelRow.push(name);
-    excelRow.push(cuit);
-    const original_comprobante = fg?.comprobantes?.find(
-      (comprobante) => comprobante?.origin?.toLowerCase() === "factura"
-    );
-    const eventPreComprobante = await api.events.getLastByDateAndCC.query({
-      ccId: fg?.cc?.id ?? "",
-      date: preliquidation?.createdAt ?? new Date(),
-    });
-    // const saldo_anterior = toNumberOrZero(
-    //   original_comprobante?.items.find(
-    //     (item) => item.concept === "Saldo anterior"
-    //   )?.amount
-    // );
-    summary["Saldo anterior"] += eventPreComprobante?.current_amount ?? 0;
-    excelRow.push(eventPreComprobante?.current_amount ?? 0);
-    const cuota_planes = toNumberOrZero(
-      original_comprobante?.items.find((item) => item.concept === "Abono")
-        ?.amount
-    );
-    summary["Cuota Planes"] += cuota_planes;
-    excelRow.push(cuota_planes);
-    const bonificacion = toNumberOrZero(
-      original_comprobante?.items.find(
-        (item) => item.concept === "Bonificación"
-      )?.amount
-    );
-    summary["Bonificación"] += bonificacion;
-    excelRow.push(bonificacion);
-    const diferencial = toNumberOrZero(
-      original_comprobante?.items.find((item) => item.concept === "Diferencial")
-        ?.amount
-    );
-    summary["Diferencial"] += diferencial;
-    excelRow.push(diferencial);
-    const Aporte = toNumberOrZero(
-      original_comprobante?.items.find((item) => item.concept === "Aporte")
-        ?.amount
-    );
-    summary["Aporte"] += Aporte;
-    excelRow.push(Aporte);
-    const interes = toNumberOrZero(
-      original_comprobante?.items.find((item) => item.concept === "Interes")
-        ?.amount
-    );
-    summary["Interés"] += interes;
-    excelRow.push(interes);
-    const total = toNumberOrZero(
-      parseFloat(original_comprobante?.importe?.toFixed(2)!)
-    );
-    summary["Total a facturar"] += total;
-    excelRow.push(total);
-    const subTotal = computeBase(total, Number(original_comprobante?.iva!));
-    summary["Sub Total"] += subTotal;
-    excelRow.push(subTotal);
-    const iva = computeIva(total, Number(original_comprobante?.iva!));
-    summary.IVA += iva;
-    excelRow.push(iva);
-    excelRows.push(excelRow);
-    const lastEvent = await api.events.getLastByDateAndCC.query({
-      ccId: fg?.cc?.id!,
-      date: preliquidation?.createdAt ?? new Date(),
-    });
-    const currentAccountAmount = lastEvent?.current_amount ?? 0;
-    const plan = fg?.plan?.description ?? "";
-    const modo = fg?.modo?.description ?? "";
-    tableRows.push({
-      id: fg?.id!,
-      nroGF: fg?.numericalId ?? "N/A",
-      nombre: name,
-      cuit,
-      "saldo anterior": eventPreComprobante?.current_amount ?? 0,
-      "cuota plan": cuota_planes,
-      bonificacion,
-      diferencial,
-      Aporte,
-      interes,
-      subtotal: subTotal,
-      iva,
-      total,
-      comprobantes: fg?.comprobantes!,
-      currentAccountAmount,
-      Plan: plan,
-      modo,
-    });
-    console.log("comprobantes", fg?.comprobantes);
-  }
+  // for (const fg of familyGroups) {
+  //   const excelRow = [];
+  //   const billResponsible = fg?.integrants?.find(
+  //     (integrante) => integrante?.isBillResponsible
+  //   );
+  //   const name = billResponsible?.name ?? "";
+  //   const cuit = billResponsible?.id_number ?? "";
+  //   excelRow.push(fg?.numericalId ?? "");
+  //   excelRow.push(name);
+  //   excelRow.push(cuit);
+  //   const original_comprobante = fg?.comprobantes?.find(
+  //     (comprobante) => comprobante?.origin?.toLowerCase() === "factura"
+  //   );
+  //   // const eventPreComprobante = await api.events.getLastByDateAndCC.query({
+  //   //   ccId: fg?.cc?.id ?? "",
+  //   //   date: preliquidation?.createdAt ?? new Date(),
+  //   // });
+  //   // const saldo_anterior = toNumberOrZero(
+  //   //   original_comprobante?.items.find(
+  //   //     (item) => item.concept === "Saldo anterior"
+  //   //   )?.amount
+  //   // );
+  //   summary["Saldo anterior"] +=
+  //     // eventPreComprobante?.current_amount ??
+  //     0;
+  //   excelRow.push(
+  //     // eventPreComprobante?.current_amount ??
+  //     0
+  //   );
+  //   const cuota_planes = toNumberOrZero(
+  //     original_comprobante?.items.find((item) => item.concept === "Abono")
+  //       ?.amount
+  //   );
+  //   summary["Cuota Planes"] += cuota_planes;
+  //   excelRow.push(cuota_planes);
+  //   const bonificacion = toNumberOrZero(
+  //     original_comprobante?.items.find(
+  //       (item) => item.concept === "Bonificación"
+  //     )?.amount
+  //   );
+  //   summary["Bonificación"] += bonificacion;
+  //   excelRow.push(bonificacion);
+  //   const diferencial = toNumberOrZero(
+  //     original_comprobante?.items.find((item) => item.concept === "Diferencial")
+  //       ?.amount
+  //   );
+  //   summary["Diferencial"] += diferencial;
+  //   excelRow.push(diferencial);
+  //   const Aporte = toNumberOrZero(
+  //     original_comprobante?.items.find((item) => item.concept === "Aporte")
+  //       ?.amount
+  //   );
+  //   summary["Aporte"] += Aporte;
+  //   excelRow.push(Aporte);
+  //   const interes = toNumberOrZero(
+  //     original_comprobante?.items.find((item) => item.concept === "Interes")
+  //       ?.amount
+  //   );
+  //   summary["Interés"] += interes;
+  //   excelRow.push(interes);
+  //   const total = toNumberOrZero(
+  //     parseFloat(original_comprobante?.importe?.toFixed(2)!)
+  //   );
+  //   summary["Total a facturar"] += total;
+  //   excelRow.push(total);
+  //   const subTotal = computeBase(total, Number(original_comprobante?.iva!));
+  //   summary["Sub Total"] += subTotal;
+  //   excelRow.push(subTotal);
+  //   const iva = computeIva(total, Number(original_comprobante?.iva!));
+  //   summary.IVA += iva;
+  //   excelRow.push(iva);
+  //   excelRows.push(excelRow);
+  //   // const lastEvent = await api.events.getLastByDateAndCC.query({
+  //   //   ccId: fg?.cc?.id!,
+  //   //   date: preliquidation?.createdAt ?? new Date(),
+  //   // });
+  //   const currentAccountAmount =
+  //     // lastEvent?.current_amount ??
+  //     0;
+  //   const plan = fg?.plan?.description ?? "";
+  //   const modo = fg?.modo?.description ?? "";
+  //   tableRows.push({
+  //     id: fg?.id!,
+  //     nroGF: fg?.numericalId ?? "N/A",
+  //     nombre: name,
+  //     cuit,
+  //     "saldo anterior":
+  //       //  eventPreComprobante?.current_amount ??
+  //       0,
+  //     "cuota plan": cuota_planes,
+  //     bonificacion,
+  //     diferencial,
+  //     Aporte,
+  //     interes,
+  //     subtotal: subTotal,
+  //     iva,
+  //     total,
+  //     comprobantes: fg?.comprobantes!,
+  //     currentAccountAmount,
+  //     Plan: plan,
+  //     modo,
+  //   });
+  //   console.log("comprobantes", fg?.comprobantes);
+  // }
 
   console.log("tableRows", tableRows);
   return (

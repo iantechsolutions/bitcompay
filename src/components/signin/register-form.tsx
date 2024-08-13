@@ -279,7 +279,7 @@ export default function RegisterForm({ setShowRegister }: RegisterFormProps) {
             />
             {form.watch().password && (
               <Button
-                className="absolute right-2 bottom-8 rounded-full h-7 w-7"
+                className="absolute right-2 top-9 rounded-full h-7 w-7"
                 onClick={() => setShowPassword(!showPassword)}
                 // variant="outline"
                 variant="ghost"

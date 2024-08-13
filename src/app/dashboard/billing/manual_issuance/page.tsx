@@ -52,6 +52,7 @@ import {
 import { create } from "domain";
 import BarcodeProcedure from "~/components/barcode";
 import { SelectTrigger as SelectTriggerMagnify } from "~/components/selectwithsearchIcon";
+import { channel } from "diagnostics_channel";
 
 function formatDate(date: Date | undefined) {
   if (date) {
@@ -495,6 +496,7 @@ export default function Page() {
             nroComprobante: 0,
             family_group_id: grupoFamiliarId,
           });
+
           const event = createEventFamily({
             family_group_id: grupoFamiliarId,
             type: "REC",
@@ -517,11 +519,53 @@ export default function Page() {
           ?.find((x) => x.id == grupoFamiliarId)
           ?.integrants.find((x) => x.isBillResponsible);
         const obraSocial = obrasSociales?.find((x) => x.id == obraSocialId);
+
+        // let barcodeImage;
+
+        // function BarCode() {
+        //   if (comprobante?.length && products?.length) {
+        //     const pago = comprobante[0]!.payments[0];
+
+        //     return (
+        //       <BarcodeProcedure
+        //         dateVto={pago.first_due_date ?? new Date()}
+        //         amountVto={pago.first_due_amount ?? 0}
+        //         client={pago.fiscal_id_number ?? 0}
+        //         isPagoFacil={true}
+        //         invoiceNumber={pago.invoice_number ?? 0}
+        //       />
+        //     );
+        //   } else {
+        //     return "lol";
+        //   }
+
+        // if (comprobante?.length && products?.length) {
+        //   const pago = comprobante[0]!.payments[0];
+        //   console.log(pago, "------2-------");
+
+        //   if (pago) {
+        //     try {
+        //       barcodeImage = BarcodeProcedure({
+        //         dateVto: pago.first_due_date ?? new Date(),
+        //         amountVto: pago.first_due_amount ?? 0,
+        //         client: pago.fiscal_id_number ?? 0,
+        //         isPagoFacil: true,
+        //         invoiceNumber: pago.invoice_number ?? 0,
+        //       });
+        //     } catch {
+        //       barcodeImage = "lol";
+        //     }
+        //   }
+
+        //   console.log("llegoppp", barcodeImage);
+        // }
+
         if (comprobante && comprobante[0]) {
           const html = htmlBill(
             comprobante[0],
             company,
             undefined,
+
             2,
             marcas?.find((x) => x.id === brandId),
             nombre,
@@ -684,8 +728,7 @@ export default function Page() {
                 className="h-7 bg-[#0DA485] hover:bg-[#0da486e2] text-[#FAFDFD] font-medium-medium text-xs rounded-2xl py-0 px-6 mr-3"
                 // onClick={() => setOpen(true)}
                 disabled={loading}
-                onClick={generateComprobante}
-              >
+                onClick={generateComprobante}>
                 Aprobar
                 {loading ? (
                   <Loader2Icon className="mr-2 animate-spin" size={20} />
@@ -705,8 +748,7 @@ export default function Page() {
           <div className="flex flex-row justify-between gap-8">
             <Select
               onValueChange={(e) => handleGrupoFamilarChange(e)}
-              value={grupoFamiliarId}
-            >
+              value={grupoFamiliarId}>
               <SelectTriggerMagnify className=" font-bold w-full">
                 <SelectValue placeholder="Buscar afiliado" />
               </SelectTriggerMagnify>
@@ -716,8 +758,7 @@ export default function Page() {
                     <SelectItem
                       key={gruposFamiliar?.id}
                       value={gruposFamiliar?.id}
-                      className="rounded-none border-b border-gray-600"
-                    >
+                      className="rounded-none border-b border-gray-600">
                       {gruposFamiliar?.integrants.find((x) => x.isHolder)?.name}
                     </SelectItem>
                   ))}
@@ -726,8 +767,7 @@ export default function Page() {
             <p className="text-lg font-bold mt-1"> O </p>
             <Select
               onValueChange={(e) => handleObraSocialChange(e)}
-              value={obraSocialId}
-            >
+              value={obraSocialId}>
               <SelectTriggerMagnify className="w-full font-bold">
                 <SelectValue placeholder="Buscar obra social" />
               </SelectTriggerMagnify>
@@ -737,8 +777,7 @@ export default function Page() {
                     <SelectItem
                       key={obrasSocial?.id}
                       value={obrasSocial?.id}
-                      className="rounded-none border-b border-gray-600"
-                    >
+                      className="rounded-none border-b border-gray-600">
                       {obrasSocial?.name}
                     </SelectItem>
                   ))}
@@ -791,8 +830,7 @@ export default function Page() {
                     <SelectItem
                       key={option.value}
                       value={option.value}
-                      className="rounded-none border-b border-gray-600"
-                    >
+                      className="rounded-none border-b border-gray-600">
                       {option.label}
                     </SelectItem>
                   ))}
@@ -804,16 +842,14 @@ export default function Page() {
               <br />
               <Popover
                 open={popoverEmisionOpen}
-                onOpenChange={setPopoverEmisionOpen}
-              >
+                onOpenChange={setPopoverEmisionOpen}>
                 <PopoverTrigger asChild={true}>
                   <Button
                     variant={"outline"}
                     className={cn(
                       "justify-start text-left font-normal border-[#0DA485] border w-full",
                       !dateEmision && "text-muted-foreground"
-                    )}
-                  >
+                    )}>
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {dateEmision ? (
                       format(dateEmision, "PPP")
@@ -850,8 +886,7 @@ export default function Page() {
                     <SelectItem
                       key={option.value}
                       value={option.value}
-                      className="rounded-none border-b border-gray-600"
-                    >
+                      className="rounded-none border-b border-gray-600">
                       {option.label}
                     </SelectItem>
                   ))}
@@ -877,8 +912,7 @@ export default function Page() {
                     <SelectItem
                       key={option.value}
                       value={option.value}
-                      className="rounded-none border-b border-gray-600"
-                    >
+                      className="rounded-none border-b border-gray-600">
                       {option.label}
                     </SelectItem>
                   ))}
@@ -902,8 +936,7 @@ export default function Page() {
                     <SelectItem
                       key={option.value}
                       value={option.value}
-                      className="rounded-none border-b border-gray-600"
-                    >
+                      className="rounded-none border-b border-gray-600">
                       {option.label}
                     </SelectItem>
                   ))}
@@ -915,16 +948,14 @@ export default function Page() {
               <br />
               <Popover
                 open={popoverVencimientoOpen}
-                onOpenChange={setPopoverVencimientoOpen}
-              >
+                onOpenChange={setPopoverVencimientoOpen}>
                 <PopoverTrigger asChild={true}>
                   <Button
                     variant={"outline"}
                     className={cn(
                       "justify-start text-left font-normal border-[#0DA485] border w-full",
                       !dateVencimiento && "text-muted-foreground"
-                    )}
-                  >
+                    )}>
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {dateVencimiento ? (
                       format(dateVencimiento, "PPP")
@@ -948,8 +979,7 @@ export default function Page() {
               <br />
               <Popover
                 open={popoverDesdeOpen}
-                onOpenChange={setPopoverDesdeOpen}
-              >
+                onOpenChange={setPopoverDesdeOpen}>
                 <PopoverTrigger asChild={true}>
                   <Button
                     variant={"outline"}
@@ -957,8 +987,7 @@ export default function Page() {
                     className={cn(
                       "justify-start text-left font-normal border-[#0DA485] border w-full",
                       !dateDesde && "text-muted-foreground"
-                    )}
-                  >
+                    )}>
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {dateDesde ? (
                       format(dateDesde, "PPP")
@@ -988,8 +1017,7 @@ export default function Page() {
                     className={cn(
                       "justify-start text-left font-normal border-[#0DA485] border w-full",
                       !dateHasta && "text-muted-foreground"
-                    )}
-                  >
+                    )}>
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {dateHasta ? (
                       format(dateHasta, "PPP")
@@ -1018,8 +1046,7 @@ export default function Page() {
               <br />
               <Select
                 onValueChange={(e) => handleComprobanteChange(e)}
-                disabled={tipoComprobante != "3" && tipoComprobante != "8"}
-              >
+                disabled={tipoComprobante != "3" && tipoComprobante != "8"}>
                 <SelectTrigger className="font-bold border-[#0DA485] border">
                   <SelectValue placeholder="Seleccionar comprobante..." />
                 </SelectTrigger>
@@ -1036,8 +1063,7 @@ export default function Page() {
                         <SelectItem
                           key={comprobante?.id}
                           value={comprobante?.id}
-                          className="rounded-none border-b border-gray-600"
-                        >
+                          className="rounded-none border-b border-gray-600">
                           {comprobante?.nroComprobante}
                         </SelectItem>
                       ))}
@@ -1223,4 +1249,28 @@ export default function Page() {
       </LayoutContainer>
     </>
   );
+}
+
+function svgToBase64(svgElement: SVGSVGElement): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const svgData = new XMLSerializer().serializeToString(svgElement);
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+
+    if (!context) {
+      reject("No context available for canvas");
+      return;
+    }
+
+    const img = new Image();
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      context.drawImage(img, 0, 0);
+      const base64Image = canvas.toDataURL("image/png");
+      resolve(base64Image);
+    };
+    img.onerror = reject;
+    img.src = "data:image/svg+xml;base64," + btoa(svgData);
+  });
 }

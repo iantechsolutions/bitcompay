@@ -35,11 +35,13 @@ export default function TableRowContainer({
     return <TableRow>No existe comprobante original</TableRow>;
   }
   const total = parseFloat(original_comprobante.importe.toFixed(2));
-  const { data: lastEvent } = api.events.getLastByDateAndCC.useQuery({
-    ccId: family_group?.cc?.id!,
-    date: preliquidation?.createdAt ?? new Date(),
-  });
-  const currentAccountAmount = lastEvent?.current_amount ?? 0;
+  // const { data: lastEvent } = api.events.getLastByDateAndCC.useQuery({
+  //   ccId: family_group?.cc?.id!,
+  //   date: preliquidation?.createdAt ?? new Date(),
+  // });
+  const currentAccountAmount =
+    // lastEvent?.current_amount ??
+    0;
   const billResponsible = family_group?.integrants?.find(
     (x) => x.isBillResponsible == true
   );
