@@ -5,10 +5,23 @@ import { eq, lt, and, desc } from "drizzle-orm";
 import { RouterOutputs } from "~/trpc/shared";
 
 export const eventsRouter = createTRPCRouter({
-  list: protectedProcedure.query(async ({}) => {
-    const events = await db.query.events.findMany();
+  list: protectedProcedure.query(async ({ input }) => {
+    const events = await db.query.events.findMany({});
     return events;
   }),
+  getByCC: protectedProcedure
+    .input(
+      z.object({
+        ccId: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      const events = await db.query.events.findMany({
+        where: eq(schema.events.currentAccount_id, input.ccId),
+        orderBy: [desc(schema.events.createdAt)],
+      });
+      return events;
+    }),
   getLastByDateAndCC: protectedProcedure
     .input(
       z.object({

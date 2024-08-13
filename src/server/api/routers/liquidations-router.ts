@@ -91,7 +91,6 @@ export const liquidationsRouter = createTRPCRouter({
         period: input.periodo,
         cuit: input.cuit,
         pdv: input.pdv,
-        number: 1,
         interest: input.interest ?? 0,
         logo_url: input.logo_url,
       });
