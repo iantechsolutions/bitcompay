@@ -4,6 +4,7 @@ import { fi } from "date-fns/locale";
 import { nanoid } from "nanoid";
 import { twMerge } from "tailwind-merge";
 import { number } from "zod";
+import BarcodeProcedure from "~/components/barcode";
 import { api } from "~/trpc/server";
 import { RouterOutputs } from "~/trpc/shared";
 
@@ -98,8 +99,12 @@ export function htmlBill(
   id_number: string,
   afip_status: string
 ) {
+  let canales: any;
   if (producto) {
-    const canales = producto?.channels;
+    canales = producto?.channels;
+  }
+  if (comprobante) {
+    const payment = comprobante.payments;
   }
   function formatNumberAsCurrency(amount: number): string {
     return new Intl.NumberFormat("en-US", {
@@ -134,6 +139,32 @@ export function htmlBill(
       return `<img class="logo" style="width: 30vw;height: auto;margin-bottom: 5px;" src="https://utfs.io/f/f426d7f1-f9c7-437c-a722-f978ab23830d-neiy4q.png" alt="logo" />`;
     }
   }
+
+  function getIimageForBarcode() {
+    const barcode = BarcodeProcedure({
+      dateVto: comprobante.first_due_date ?? new Date(),
+      amountVto: comprobante.first_due_amount ?? 0,
+      client: comprobante.fiscal_id_number ?? 0,
+      isPagoFacil: false,
+      invoiceNumber: comprobante.invoice_number ?? 0,
+    });
+    return barcode;
+
+    // if (barcode != undefined) {
+    //   return `<img
+    //   class="cod-barras"
+    //   src="${barcode}
+    //   alt="barcode"
+    // />`;
+    // } else {
+    //   return `<img
+    //         class="cod-barras"
+    //         src="https://utfs.io/f/73e104e8-fb1f-490f-a30e-7de1608ef3ac-12ad.png"
+    //         alt=""
+    //       />`;
+    // }
+  }
+
   function generateConcepts(
     items: Array<{ concept: string | null; total: number | null }>
   ): string {
@@ -609,11 +640,8 @@ span {
             src="https://utfs.io/f/781ea16d-cac2-46de-9b9a-e59db510e17b-8b1bm4.png"
             alt=""
           />
-          <img
-            class="cod-barras"
-            src="https://utfs.io/f/73e104e8-fb1f-490f-a30e-7de1608ef3ac-12ad.png"
-            alt=""
-          />
+          ${getIimageForBarcode()}
+          
         </div>
       </section>
   

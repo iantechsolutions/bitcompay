@@ -342,7 +342,7 @@ async function approbatecomprobante(liquidationId: string) {
         };
       }
 
-      console.log("7");
+      console.log("7777");
       const html = htmlBill(
         comprobante,
         comprobante.family_group?.businessUnitData!.company,
@@ -720,6 +720,7 @@ export const comprobantesRouter = createTRPCRouter({
             },
           },
           items: true,
+          payments: true,
         },
       });
       console.log("justo antes de crear payments");
