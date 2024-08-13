@@ -419,6 +419,12 @@ async function readExcelFile(
         ")"
     );
   });
+  let brands = await db.query.brands.findMany({
+    with: { company: true },
+  });
+  brands = brands.filter((x) =>
+    x.company.some((x) => x.companyId === ctx.session.orgId)
+  );
   for (let i = 0; i < transformedRows.length; i++) {
     const row = transformedRows[i]!;
     const rowNum = i + 2;
@@ -531,9 +537,11 @@ async function readExcelFile(
     if (!mode) {
       errors.push(`MODO no valido en (fila:${rowNum})`);
     }
-    const plan = await db.query.plans.findFirst({
+    const planes = await db.query.plans.findMany({
       where: eq(schema.plans.plan_code, row.plan!),
     });
+    const plan = planes.filter((x) => brands.some((y) => y.id === x.brand_id));
+
     if (!plan) {
       errors.push(`PLAN no valido en (fila:${rowNum})`);
     }
