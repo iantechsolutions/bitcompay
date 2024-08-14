@@ -117,15 +117,11 @@ export default async function Home(props: {
     const original_comprobante = fg?.comprobantes?.find(
       (comprobante) => comprobante?.origin?.toLowerCase() === "factura"
     );
-    // const eventPreComprobante = await api.events.getLastByDateAndCC.query({
-    //   ccId: fg?.cc?.id ?? "",
-    //   date: preliquidation?.createdAt ?? new Date(),
-    // });
-    const saldo_anterior = toNumberOrZero(
-      original_comprobante?.items.find(
-        (item) => item.concept === "Saldo anterior"
-      )?.amount
-    );
+    // const saldo_anterior = toNumberOrZero(
+    //   original_comprobante?.items.find(
+    //     (item) => item.concept === "Saldo anterior"
+    //   )?.amount
+    // );
     const eventPreComprobante = eventos.find(
       (x) =>
         x.currentAccount_id === fg?.cc?.id &&

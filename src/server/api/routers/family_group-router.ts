@@ -135,44 +135,72 @@ export const family_groupsRouter = createTRPCRouter({
   getByLiquidation: protectedProcedure
     .input(z.object({ liquidationId: z.string() }))
     .query(async ({ input }) => {
-      const liquidation = await db.query.liquidations.findFirst({
-        where: eq(schema.liquidations.id, input.liquidationId),
+      const fg = await db.query.family_groups.findMany({
         with: {
+          plan: true,
+          modo: true,
+          integrants: true,
+          cc: true,
+          businessUnitData: true,
           comprobantes: {
-            where: eq(schema.comprobantes.liquidation_id, input.liquidationId),
-            orderBy: [desc(schema.comprobantes.createdAt)],
             with: {
-              family_group: {
-                with: {
-                  plan: true,
-                  modo: true,
-                  integrants: true,
-                  cc: true,
-                  businessUnitData: true,
-                  comprobantes: {
-                    with: {
-                      items: true,
-                    },
-                  },
-                },
-              },
+              items: true,
             },
           },
         },
       });
+      const fgFiltered = fg.map((x) => {
+        const comprobantes = x.comprobantes.filter(
+          (comprobante) => comprobante.liquidation_id === input.liquidationId
+        );
+        if (comprobantes.length > 0) {
+          return {
+            ...x,
+            comprobantes: comprobantes,
+          };
+        }
+      });
+      // const fgFiltered = fg.filter((family_group)=>{
 
-      if (!liquidation) {
-        return [];
-      }
+      // })
+      // const liquidation = await db.query.liquidations.findFirst({
+      //   where: eq(schema.liquidations.id, input.liquidationId),
+      //   with: {
+      //     comprobantes: {
+      //       where: eq(schema.comprobantes.liquidation_id, input.liquidationId),
+      //       orderBy: [desc(schema.comprobantes.createdAt)],
+      //       with: {
+      //         family_group: {
+      //           with: {
+      //             plan: true,
+      //             modo: true,
+      //             integrants: true,
+      //             cc: true,
+      //             businessUnitData: true,
+      //             comprobantes: {
+      //               with: {
+      //                 items: true,
+      //               },
+      //             },
+      //           },
+      //         },
+      //       },
+      //     },
+      //   },
+      // });
 
-      const family_groups = liquidation.comprobantes.map(
-        (comprobante) => comprobante.family_group
-      );
+      // if (!liquidation) {
+      //   return [];
+      // }
 
-      const uniqueFamilyGroups = family_groups.filter(
-        (family_group, index, self) =>
-          index === self.findIndex((fg) => fg!.id === family_group!.id)
-      );
+      // const family_groups = liquidation.comprobantes.map(
+      //   (comprobante) => comprobante.family_group
+      // );
+
+      // const uniqueFamilyGroups = family_groups.filter(
+      //   (family_group, index, self) =>
+      //     index === self.findIndex((fg) => fg!.id === family_group!.id)
+      // );
 
       // const processedFamilyGroups = uniqueFamilyGroups.map((family_group) => {
       //   const filteredComprobantes = family_group?.comprobantes.filter(
@@ -184,7 +212,7 @@ export const family_groupsRouter = createTRPCRouter({
       //   };
       // });
 
-      return uniqueFamilyGroups;
+      return fgFiltered;
     }),
 
   getbyProcedure: protectedProcedure
