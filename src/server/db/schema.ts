@@ -1223,7 +1223,7 @@ export const postal_code = pgTable("postalcodes", {
 
 export const postal_codeRelations = relations(postal_code, ({ many, one }) => ({
   postal_code: many(integrants),
-  zone: one(zone, {
+  zoneData: one(zone, {
     fields: [postal_code.zone],
     references: [zone.id],
   }),

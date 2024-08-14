@@ -16,10 +16,18 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { asTRPCError } from "~/lib/errors";
 import { api } from "~/trpc/react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 
 export function AddPostalCode() {
   const { mutateAsync: createPostalCode, isLoading } =
     api.postal_code.create.useMutation();
+  // const { data:zonas} = api.zone.list.useQuery();
   const { data: zones } = api.zone.list.useQuery();
 
   const [name, setName] = useState("");
@@ -32,10 +40,10 @@ export function AddPostalCode() {
   const router = useRouter();
 
   async function handleCreate() {
-    if (!zones?.some((zoneItem) => zoneItem.name === zone)) {
-      toast.error("La zona no es válida");
-      return;
-    }
+    // if (!zones?.some((zoneItem) => zoneItem.name === zone)) {
+    //   toast.error("La zona no es válida");
+    //   return;
+    // }
 
     try {
       await createPostalCode({
@@ -67,14 +75,14 @@ export function AddPostalCode() {
     }
   }, [zone, zones]);
 
-  function handleZoneChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setZone(e.target.value);
+  function handleZoneChange(e: string) {
+    setZone(e);
   }
 
-  function handleSuggestionClick(suggestion: string) {
-    setZone(suggestion);
-    setSuggestions([]);
-  }
+  // function handleSuggestionClick(suggestion: string) {
+  //   setZone(suggestion);
+  //   setSuggestions([]);
+  // }
 
   return (
     <>
@@ -100,6 +108,7 @@ export function AddPostalCode() {
             <Label htmlFor="cp">Codigo postal</Label>
             <Input
               id="cp"
+              type="number"
               placeholder="..."
               value={cp}
               onChange={(e) => setCp(e.target.value)}
@@ -107,25 +116,38 @@ export function AddPostalCode() {
           </div>
           <div>
             <Label htmlFor="zone">Zona</Label>
-            <Input
+            <Select value={zone} onValueChange={(e) => handleZoneChange(e)}>
+              <SelectTrigger className="w-[180px] font-bold">
+                <SelectValue placeholder="Seleccionar Zona" />
+              </SelectTrigger>
+              <SelectContent>
+                {zones?.map((zoneItem) => (
+                  <SelectItem key={zoneItem.id} value={zoneItem.id}>
+                    {zoneItem.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {/* <Input
               id="zone"
               type="text"
               placeholder="..."
               value={zone}
               onChange={handleZoneChange}
-            />
-            {suggestions.length > 0 && (
+            /> */}
+            {/* {suggestions.length > 0 && (
               <ul className="bg-white border rounded mt-1 max-h-60 overflow-auto">
                 {suggestions.map((suggestion, index) => (
                   <li
                     key={index}
                     className="p-2 cursor-pointer hover:bg-gray-200"
-                    onClick={() => handleSuggestionClick(suggestion)}>
+                    onClick={() => handleSuggestionClick(suggestion)}
+                  >
                     {suggestion}
                   </li>
                 ))}
               </ul>
-            )}
+            )} */}
           </div>
           <DialogFooter>
             <Button disabled={isLoading} onClick={handleCreate}>
