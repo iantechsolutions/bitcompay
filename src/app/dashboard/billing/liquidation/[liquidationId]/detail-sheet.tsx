@@ -27,8 +27,8 @@ type DetailSheetProps = {
 
 type Comprobante = RouterOutputs["comprobantes"]["getByLiquidation"][number];
 export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
-  const [openFCAccordion, setOpenFCAccordion] = useState(false);
-  const [openNCAccordion, setOpenNCAccordion] = useState(false);
+  const [openFCAccordion, setOpenFCAccordion] = useState(true);
+  const [openNCAccordion, setOpenNCAccordion] = useState(true);
   let comprobanteNCReciente = data.comprobantes.find(
     (comprobante) => comprobante.origin === "Nota de credito"
   );
@@ -85,20 +85,29 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
           {comprobanteNCReciente && (
             <div className="mt-2">
               <div
-                className="flex flex-row justify-between items-center py-2 px-2 mb-3 rounded-md bg-[#c2bebe84] hover:bg-[#cbc7c7ce] transition-all hover:cursor-pointer"
-                onClick={() => setOpenNCAccordion(!openNCAccordion)}
+                className="flex flex-row justify-between items-center py-2 px-2 mb-3 rounded-md bg-[#c2bebe84] hover:bg-[#cbc7c7ce] transition-all"
+                // onClick={() => setOpenNCAccordion(!openNCAccordion)}
               >
                 <p className="text-xl font-medium opacity-70 flex flex-row items-center">
                   {comprobanteNCReciente.billLink &&
                   comprobanteNCReciente.billLink !== "" ? (
                     <div className="items-center justify-center">
-                      <Link href={comprobanteNCReciente.billLink}>
+                      <Button
+                        variant="ghost"
+                        className="margin-right: 10px;"
+                        onClick={() => {
+                          !comprobanteNCReciente?.billLink
+                            ? alert("El archivo no cargo todavia")
+                            : window.open(comprobanteNCReciente?.billLink);
+                          // : router.push(`${comprobante?.billLink}`);
+                        }}
+                      >
                         <FileText></FileText>
-                      </Link>
+                      </Button>
                     </div>
                   ) : null}
                   NC
-                  {openNCAccordion ? (
+                  {/* {openNCAccordion ? (
                     <ChevronDown
                       className="ml-2 transition-transform duration-200"
                       size={12}
@@ -108,7 +117,7 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
                       className="ml-2 transition-transform duration-200"
                       size={12}
                     />
-                  )}
+                  )} */}
                 </p>
                 <p className="text-lg font-semibold text-[#4af0d4]">
                   {NCTotal ? `$ ${NCTotal}` : "N/A"}
@@ -120,20 +129,29 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
             </div>
           )}
           <div
-            className="flex flex-row justify-between items-center py-2 px-2 mb-3 rounded-md bg-[#c2bebe84] hover:bg-[#cbc7c7ce] transition-all hover:cursor-pointer mt-5"
-            onClick={() => setOpenFCAccordion(!openFCAccordion)}
+            className="flex flex-row justify-between items-center py-2 px-2 mb-3 rounded-md bg-[#c2bebe84] hover:bg-[#cbc7c7ce] transition-all mt-5"
+            // onClick={() => setOpenFCAccordion(!openFCAccordion)}
           >
             <p className="text-xl font-medium opacity-70 flex flex-row items-center">
               {comprobanteFCReciente?.billLink &&
               comprobanteFCReciente?.billLink !== "" ? (
                 <div className="items-center justify-center">
-                  <Link href={comprobanteFCReciente?.billLink}>
+                  <Button
+                    variant="ghost"
+                    className="mr-2"
+                    onClick={() => {
+                      !comprobanteFCReciente?.billLink
+                        ? alert("El archivo no cargo todavia")
+                        : window.open(comprobanteFCReciente?.billLink);
+                      // : router.push(`${comprobante?.billLink}`);
+                    }}
+                  >
                     <FileText></FileText>
-                  </Link>
+                  </Button>
                 </div>
               ) : null}
               FC
-              {openFCAccordion ? (
+              {/* {openFCAccordion ? (
                 <ChevronDown
                   className="ml-2 transition-transform duration-200"
                   size={12}
@@ -143,7 +161,7 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
                   className="ml-2 transition-transform duration-200"
                   size={12}
                 />
-              )}
+              )} */}
             </p>
             <p className="text-lg font-semibold text-[#4af0d4]">
               {FCTotal ? `$ ${FCTotal}` : "N/A"}
