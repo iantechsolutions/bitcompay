@@ -69,6 +69,39 @@ export const family_groupsRouter = createTRPCRouter({
     });
     return family_group_reduced;
   }),
+  getWithFilteredComprobantes: protectedProcedure
+    .input(
+      z.object({
+        family_groupId: z.string(),
+        liquidation_id: z.string(),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const family_groups = await db.query.family_groups.findFirst({
+        where: eq(schema.family_groups.id, input.family_groupId),
+        with: {
+          businessUnitData: true,
+          plan: true,
+          modo: true,
+          bonus: true,
+          comprobantes: true,
+          integrants: {
+            with: {
+              contribution: true,
+              differentialsValues: true,
+              pa: true,
+            },
+          },
+        },
+      });
+      family_groups?.comprobantes.filter(
+        (x) => x.liquidation_id === input.liquidation_id
+      );
+
+      if (family_groups?.businessUnitData?.companyId === ctx.session.orgId) {
+        return family_groups;
+      } else null;
+    }),
   get: protectedProcedure
     .input(
       z.object({
@@ -141,17 +174,17 @@ export const family_groupsRouter = createTRPCRouter({
           index === self.findIndex((fg) => fg!.id === family_group!.id)
       );
 
-      const processedFamilyGroups = uniqueFamilyGroups.map((family_group) => {
-        const filteredComprobantes = family_group?.comprobantes.filter(
-          (comprobante) => comprobante.liquidation_id === input.liquidationId
-        );
-        return {
-          ...family_group,
-          comprobantes: filteredComprobantes ?? [],
-        };
-      });
+      // const processedFamilyGroups = uniqueFamilyGroups.map((family_group) => {
+      //   const filteredComprobantes = family_group?.comprobantes.filter(
+      //     (comprobante) => comprobante.liquidation_id === input.liquidationId
+      //   );
+      //   return {
+      //     ...family_group,
+      //     comprobantes: filteredComprobantes ?? [],
+      //   };
+      // });
 
-      return processedFamilyGroups;
+      return uniqueFamilyGroups;
     }),
 
   getbyProcedure: protectedProcedure
