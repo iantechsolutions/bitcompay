@@ -1224,8 +1224,19 @@ export const postal_code = pgTable("postalcodes", {
   zone: varchar("zone", { length: 255 }).notNull(),
 });
 
-export const postal_codeRelations = relations(postal_code, ({ many }) => ({
+export const postal_codeRelations = relations(postal_code, ({ many, one }) => ({
   postal_code: many(integrants),
+  zone: one(zone),
+}));
+
+export const zone = pgTable("zone", {
+  id: columnId,
+  name: varchar("name", { length: 255 }).notNull(),
+  cp: varchar("cp", { length: 255 }).notNull(),
+});
+
+export const zoneRelations = relations(zone, ({ one }) => ({
+  postal_code: one(postal_code),
 }));
 
 export const establishments = pgTable("establishments", {
