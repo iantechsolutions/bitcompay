@@ -29,7 +29,6 @@ export default function ZonePage(props: {
   useEffect(() => {
     if (props.zone) {
       setName(props.zone!.name);
-      setCP(props.zone!.cp);
     }
   }, [props.zone]);
 
@@ -40,7 +39,6 @@ export default function ZonePage(props: {
       await updateZone({
         id: props.zone!.id,
         name: name,
-        cp: cp,
       });
 
       toast.success("Zona actualizada correctamente");
