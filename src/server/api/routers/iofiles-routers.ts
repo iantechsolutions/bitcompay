@@ -174,7 +174,7 @@ export const iofilesRouter = createTRPCRouter({
 
         for (const payment of payments) {
           const product = await db.query.products.findFirst({
-            where: eq(schema.products.number, payment.product_number),
+            where: eq(schema.products.number, payment.product_number!),
             with: {
               channels: {
                 with: {

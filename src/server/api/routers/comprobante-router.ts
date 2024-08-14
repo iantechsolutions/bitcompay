@@ -1592,7 +1592,7 @@ function checkExistingBill(
       du_type: string | null;
       du_number: number | null;
       product: string | null;
-      product_number: number;
+      product_number: number | null;
       invoice_number: number;
       period: Date | null;
       first_due_amount: number | null;

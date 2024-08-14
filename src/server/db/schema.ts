@@ -106,10 +106,7 @@ export const payments = pgTable(
     du_type: varchar("du_type", { length: 255 }),
     du_number: bigint("du_number", { mode: "number" }),
     product: varchar("product", { length: 255 }),
-    product_number: integer("product_number")
-      .notNull()
-      .default(0)
-      .references(() => products.number),
+    product_number: integer("product_number").references(() => products.number),
     //! Can be used as id
     invoice_number: bigint("invoice_number", { mode: "number" }).notNull(),
     //
@@ -194,7 +191,7 @@ export const channels = pgTable(
   {
     id: columnId,
     name: varchar("name", { length: 255 }).notNull(),
-    number: integer("number").notNull().unique(),
+    number: serial("number"),
     description: varchar("description", { length: 255 }).notNull(),
 
     enabled: boolean("enabled").notNull().default(true),
@@ -209,7 +206,7 @@ export const channels = pgTable(
   },
   (channels) => ({
     nameIdx: index("channel_name_idx").on(channels.name),
-    numberIdx: index("number_idx").on(channels.number),
+    // numberIdx: index("number_idx").on(channels.number),
   })
 );
 
@@ -339,7 +336,7 @@ export const products = pgTable(
     id: columnId,
     name: varchar("name", { length: 255 }).notNull(),
     description: varchar("description", { length: 255 }).notNull(),
-    number: integer("number").notNull().unique(),
+    number: serial("number").unique(),
 
     enabled: boolean("enabled").notNull().default(true),
 
