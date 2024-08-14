@@ -19,12 +19,14 @@ export default function Home() {
           {zonas ? (
             zonas.map((zone) => {
               return (
-                <ListTile
-                  key={zone.id}
-                  title={zone.name}
-                  href={`/dashboard/maintenance/tables/bussiness_unit/${zone.id}`}
-                  subtitle={zone.cp}
-                />
+                <div>
+                  <ListTile
+                    key={zone.id}
+                    title={zone.name}
+                    subtitle={`CP: ${zone.cp}`}
+                    href={`/dashboard/maintenance/tables/zone/${zone.id}`}
+                  />
+                </div>
               );
             })
           ) : (
