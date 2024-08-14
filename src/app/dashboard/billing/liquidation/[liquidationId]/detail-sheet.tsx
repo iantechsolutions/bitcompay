@@ -94,7 +94,7 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
                     <div className="items-center justify-center">
                       <Button
                         variant="ghost"
-                        className="margin-right: 10px;"
+                        className="mr-2"
                         onClick={() => {
                           !comprobanteNCReciente?.billLink
                             ? alert("El archivo no cargo todavia")
