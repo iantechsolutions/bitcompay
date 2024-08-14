@@ -40,7 +40,6 @@ export const channelsRouter = createTRPCRouter({
       z.object({
         name: z.string().min(1).max(255),
         description: z.string().min(0).max(1023),
-        number: z.number().min(1).max(255),
       })
     )
     .mutation(async ({ input }) => {
@@ -52,7 +51,6 @@ export const channelsRouter = createTRPCRouter({
         id,
         name: input.name,
         description: input.description,
-        number: input.number,
       });
 
       return { id };
@@ -64,7 +62,6 @@ export const channelsRouter = createTRPCRouter({
         channelId: z.string(),
         name: z.string().min(1).max(255).optional(),
         description: z.string().min(0).max(1023).optional(),
-        number: z.number().min(1).max(255).optional(),
         requiredColumns: z.array(z.string()).optional(),
       })
     )
@@ -74,7 +71,6 @@ export const channelsRouter = createTRPCRouter({
         .set({
           name: input.name,
           description: input.description,
-          number: input.number,
           requiredColumns: input.requiredColumns,
         })
         .where(eq(schema.channels.id, input.channelId));
