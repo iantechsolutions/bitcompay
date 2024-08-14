@@ -757,9 +757,10 @@ export const comprobantes = pgTable("comprobantes", {
   liquidation_id: varchar("liquidation_id", { length: 255 }).references(
     () => liquidations.id
   ),
-  family_group_id: varchar("family_group_id", { length: 255 }).references(
-    () => family_groups.id
-  ),
+  family_group_id: varchar("family_group_id", { length: 255 }),
+  // .references(
+  //   () => family_groups.id
+  // ),
   previous_facturaId: varchar("previous_factura", { length: 255 }),
 });
 
