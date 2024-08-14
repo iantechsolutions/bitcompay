@@ -9,12 +9,16 @@ export const plansRouter = createTRPCRouter({
   get: protectedProcedure
     .input(z.object({ planId: z.string() }))
     .query(async ({ input }) => {
+      console.log("input", input);
+      const planes = await db.query.plans.findMany();
+      console.log("planes", planes);
       const plan_found = await db.query.plans.findFirst({
         where: eq(schema.plans.id, input.planId),
         with: {
           pricesPerCondition: true,
         },
       });
+      console.log("plan_found", plan_found);
       return plan_found;
     }),
   list: protectedProcedure.query(async ({ ctx }) => {
