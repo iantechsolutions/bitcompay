@@ -141,14 +141,14 @@ export function htmlBill(
   }
 
   function getIimageForBarcode() {
-    const barcode = BarcodeProcedure({
-      dateVto: comprobante.first_due_date ?? new Date(),
-      amountVto: comprobante.first_due_amount ?? 0,
-      client: comprobante.fiscal_id_number ?? 0,
-      isPagoFacil: false,
-      invoiceNumber: comprobante.invoice_number ?? 0,
-    });
-    return barcode;
+    // const barcode = BarcodeProcedure({
+    //   dateVto: comprobante.first_due_date ?? new Date(),
+    //   amountVto: comprobante.first_due_amount ?? 0,
+    //   client: comprobante.fiscal_id_number ?? 0,
+    //   isPagoFacil: false,
+    //   invoiceNumber: comprobante.invoice_number ?? 0,
+    // });
+    return "barcode";
 
     // if (barcode != undefined) {
     //   return `<img
@@ -640,7 +640,7 @@ span {
             src="https://utfs.io/f/781ea16d-cac2-46de-9b9a-e59db510e17b-8b1bm4.png"
             alt=""
           />
-          ${getIimageForBarcode()}
+          ${true ? getIimageForBarcode() : null}
           
         </div>
       </section>
