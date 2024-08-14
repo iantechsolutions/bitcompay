@@ -4,6 +4,7 @@ import { createId } from "~/lib/utils";
 import { db, DBTX, schema } from "~/server/db";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { CarTaxiFront } from "lucide-react";
+import { clerkClient } from "@clerk/nextjs/server";
 
 export const companiesRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({}) => {
@@ -173,6 +174,7 @@ export const companiesRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       const companyId = ctx.session.orgId;
+
       await db.transaction(async (db) => {
         await db
           .update(schema.companies)
@@ -188,6 +190,10 @@ export const companiesRouter = createTRPCRouter({
             address: input.address,
           })
           .where(eq(schema.companies.id, companyId!));
+
+        await clerkClient.organizations.updateOrganization(companyId!, {
+          name: input.name,
+        });
 
         const companyProducts = await db.query.companyProducts.findMany({
           where: eq(schema.companyProducts.companyId, input.companyId),

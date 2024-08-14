@@ -193,8 +193,8 @@ export const channels = pgTable(
   "channel",
   {
     id: columnId,
-    number: integer("number").notNull().unique(),
     name: varchar("name", { length: 255 }).notNull(),
+    number: integer("number").notNull().unique(),
     description: varchar("description", { length: 255 }).notNull(),
 
     enabled: boolean("enabled").notNull().default(true),
@@ -1226,18 +1226,16 @@ export const postal_code = pgTable("postalcodes", {
 
 export const postal_codeRelations = relations(postal_code, ({ many, one }) => ({
   postal_code: many(integrants),
-  zone: one(zone),
+  zone: one(zone, {
+    fields: [postal_code.zone],
+    references: [zone.id],
+  }),
 }));
 
 export const zone = pgTable("zone", {
   id: columnId,
-  name: varchar("name", { length: 255 }).notNull(),
-  cp: varchar("cp", { length: 255 }).notNull(),
+  name: varchar("name", { length: 255 }).notNull().unique(),
 });
-
-export const zoneRelations = relations(zone, ({ one }) => ({
-  postal_code: one(postal_code),
-}));
 
 export const establishments = pgTable("establishments", {
   id: columnId,

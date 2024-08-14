@@ -4,7 +4,7 @@ import ZonePage from "./zone-page";
 
 export default async function Page(props: { params: { ZoneId: string } }) {
   const zoneId = props.params.ZoneId;
-  console.log(zoneId, "test");
+
   const zone = await api.zone.get.query({
     zoneId,
   });

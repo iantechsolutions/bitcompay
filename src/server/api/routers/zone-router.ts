@@ -27,7 +27,6 @@ export const zoneRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string(),
-        cp: z.string(),
       })
     )
     .mutation(async ({ input }) => {
@@ -38,7 +37,6 @@ export const zoneRouter = createTRPCRouter({
       z.object({
         id: z.string(),
         name: z.string(),
-        cp: z.string(),
       })
     )
     .mutation(async ({ input: { id, ...input } }) => {

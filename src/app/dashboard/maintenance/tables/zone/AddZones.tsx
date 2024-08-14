@@ -19,25 +19,17 @@ import { api } from "~/trpc/react";
 
 export function AddZones() {
   const { mutateAsync: createZone, isLoading } = api.zone.create.useMutation();
-  const { data: postal_code } = api.postal_code.list.useQuery();
 
   const [name, setName] = useState("");
-  const [cp, setCp] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
 
   const router = useRouter();
 
   async function handleCreate() {
-    if (!postal_code?.some((code) => code.cp === cp)) {
-      toast.error("El código postal no es válido");
-      return;
-    }
-
     try {
       await createZone({
         name: name,
-        cp: cp,
       });
 
       toast.success("Zona creada exitosamente");
@@ -47,26 +39,6 @@ export function AddZones() {
       const error = asTRPCError(e)!;
       toast.error(error.message);
     }
-  }
-
-  function handleCpChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const value = e.target.value;
-    setCp(value);
-
-    if (value) {
-      const filteredSuggestions =
-        postal_code
-          ?.filter((code) => code.cp.toString().startsWith(value))
-          .map((code) => code.cp.toString()) || [];
-      setSuggestions(filteredSuggestions);
-    } else {
-      setSuggestions([]);
-    }
-  }
-
-  function handleSuggestionClick(suggestion: string) {
-    setCp(suggestion);
-    setSuggestions([]);
   }
 
   return (
@@ -89,29 +61,6 @@ export function AddZones() {
               onChange={(e) => setName(e.target.value)}
             />
           </div>
-          <div>
-            <Label htmlFor="cp">Código Postal</Label>
-            <Input
-              id="cp"
-              type="text"
-              placeholder="..."
-              value={cp}
-              onChange={handleCpChange}
-            />
-            {suggestions.length > 0 && (
-              <ul className="bg-white border rounded mt-1">
-                {suggestions.map((suggestion, index) => (
-                  <li
-                    key={index}
-                    className="p-2 cursor-pointer hover:bg-gray-200"
-                    onClick={() => handleSuggestionClick(suggestion)}>
-                    {suggestion}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
           <DialogFooter>
             <Button disabled={isLoading} onClick={handleCreate}>
               {isLoading && (

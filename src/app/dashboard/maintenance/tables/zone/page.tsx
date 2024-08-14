@@ -23,7 +23,6 @@ export default function Home() {
                   <ListTile
                     key={zone.id}
                     title={zone.name}
-                    subtitle={`CP: ${zone.cp}`}
                     href={`/dashboard/maintenance/tables/zone/${zone.id}`}
                   />
                 </div>
