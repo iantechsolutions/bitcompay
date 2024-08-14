@@ -83,7 +83,7 @@ export default function AddPlanInfoComponent({
   const { mutateAsync: updatePlan, isLoading: isUpdating } =
     api.plans.change.useMutation();
   const queryClient = useQueryClient();
-
+  const router = useRouter();
   async function handleSumbit() {
     if (planId) {
       const plan = await updatePlan({
@@ -93,6 +93,7 @@ export default function AddPlanInfoComponent({
         description: descripcion,
       });
       toast.success("Plan actualizado correctamente");
+      router.refresh();
     } else {
       const plan = await createPlan({
         brand_id: brand,
@@ -105,6 +106,7 @@ export default function AddPlanInfoComponent({
       queryClient.invalidateQueries();
 
       toast.success("Plan creado correctamente");
+      router.refresh();
     }
     closeDialog();
   }

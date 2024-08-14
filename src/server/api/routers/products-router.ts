@@ -34,16 +34,22 @@ export const productsChannel = createTRPCRouter({
         number: z.number().min(1).max(255),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const id = createId();
 
-      await db.insert(schema.products).values({
-        id,
-        name: input.name,
-        description: input.description,
-        number: input.number,
+      const product = await db
+        .insert(schema.products)
+        .values({
+          id,
+          name: input.name,
+          description: input.description,
+          number: input.number,
+        })
+        .returning();
+      await db.insert(schema.companyProducts).values({
+        companyId: ctx.session.orgId ?? "",
+        productId: product[0] ? product[0].id : "",
       });
-
       return { id };
     }),
   get: protectedProcedure

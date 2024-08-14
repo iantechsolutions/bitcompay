@@ -175,7 +175,14 @@ export default function PlanPage(props: {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => setOpen(true)}>
+                  <DropdownMenuItem
+                    onClick={() => setOpen(true)}
+                    disabled={
+                      plan?.pricesPerCondition.filter(
+                        (x) => x.validy_date.getTime() <= new Date().getTime()
+                      ).length === 0
+                    }
+                  >
                     <div>Actualizar porcentualmente</div>
                   </DropdownMenuItem>
                   <DropdownMenuItem>
