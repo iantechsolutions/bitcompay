@@ -925,6 +925,7 @@ export const comprobantesRouter = createTRPCRouter({
             },
           },
           items: true,
+          payments: true,
         },
       });
       console.log("justo antes de crear payments");
@@ -972,6 +973,9 @@ export const comprobantesRouter = createTRPCRouter({
           },
         });
         console.log("Encontro family_group");
+        if (family_group){
+
+        
         const billResponsible = await db.query.integrants.findFirst({
           where: and(
             eq(
@@ -1022,6 +1026,8 @@ export const comprobantesRouter = createTRPCRouter({
           })
           .returning();
         console.log("Creo payment");
+
+      }
       }
       return [comprobanteGotten];
     }),
@@ -1074,6 +1080,13 @@ export const comprobantesRouter = createTRPCRouter({
       const brand = await db.query.brands.findFirst({
         where: eq(schema.brands.id, input.brandId),
       });
+      const businessUnit = await db.query.bussinessUnits.findFirst({
+        where: and(
+          eq(schema.bussinessUnits.companyId, companyId ?? ""),
+          eq(schema.bussinessUnits.brandId, input.brandId)
+        ),
+      });
+
       const company = await db.query.companies.findFirst({
         where: eq(schema.companies.id, companyId!),
       });
@@ -1093,6 +1106,7 @@ export const comprobantesRouter = createTRPCRouter({
           pdv: parseInt(input.pv),
           interest: input.interest,
           logo_url: input.logo_url,
+          bussinessUnits_id: businessUnit?.id ?? "",
         })
         .returning();
       await preparateComprobante(
@@ -1591,7 +1605,7 @@ function checkExistingBill(
       du_type: string | null;
       du_number: number | null;
       product: string | null;
-      product_number: number;
+      product_number: number | null;
       invoice_number: number;
       period: Date | null;
       first_due_amount: number | null;

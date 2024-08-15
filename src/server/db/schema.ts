@@ -106,10 +106,7 @@ export const payments = pgTable(
     du_type: varchar("du_type", { length: 255 }),
     du_number: bigint("du_number", { mode: "number" }),
     product: varchar("product", { length: 255 }),
-    product_number: integer("product_number")
-      .notNull()
-      .default(0)
-      .references(() => products.number),
+    product_number: integer("product_number").references(() => products.number),
     //! Can be used as id
     invoice_number: bigint("invoice_number", { mode: "number" }).notNull(),
     //
@@ -193,8 +190,8 @@ export const channels = pgTable(
   "channel",
   {
     id: columnId,
-    number: integer("number").notNull().unique(),
     name: varchar("name", { length: 255 }).notNull(),
+    number: serial("number"),
     description: varchar("description", { length: 255 }).notNull(),
 
     enabled: boolean("enabled").notNull().default(true),
@@ -209,7 +206,7 @@ export const channels = pgTable(
   },
   (channels) => ({
     nameIdx: index("channel_name_idx").on(channels.name),
-    numberIdx: index("number_idx").on(channels.number),
+    // numberIdx: index("number_idx").on(channels.number),
   })
 );
 
@@ -339,7 +336,7 @@ export const products = pgTable(
     id: columnId,
     name: varchar("name", { length: 255 }).notNull(),
     description: varchar("description", { length: 255 }).notNull(),
-    number: integer("number").notNull().unique(),
+    number: serial("number").unique(),
 
     enabled: boolean("enabled").notNull().default(true),
 
@@ -526,6 +523,16 @@ export const healthInsurances = pgTable("health_insurances", {
   postal_code: varchar("postal_code", { length: 255 }),
   afip_status: varchar("afip_status", { length: 255 }),
 });
+
+export const healthInsurancesRelations = relations(
+  healthInsurances,
+  ({ one }) => ({
+    cpData: one(postal_code, {
+      fields: [healthInsurances.postal_code],
+      references: [postal_code.id],
+    }),
+  })
+);
 
 export const clientStatuses = pgTable("client_statuses", {
   id: columnId,
@@ -760,9 +767,10 @@ export const comprobantes = pgTable("comprobantes", {
   liquidation_id: varchar("liquidation_id", { length: 255 }).references(
     () => liquidations.id
   ),
-  family_group_id: varchar("family_group_id", { length: 255 }).references(
-    () => family_groups.id
-  ),
+  family_group_id: varchar("family_group_id", { length: 255 }),
+  // .references(
+  //   () => family_groups.id
+  // ),
   previous_facturaId: varchar("previous_factura", { length: 255 }),
 });
 
@@ -1224,9 +1232,18 @@ export const postal_code = pgTable("postalcodes", {
   zone: varchar("zone", { length: 255 }).notNull(),
 });
 
-export const postal_codeRelations = relations(postal_code, ({ many }) => ({
+export const postal_codeRelations = relations(postal_code, ({ many, one }) => ({
   postal_code: many(integrants),
+  zoneData: one(zone, {
+    fields: [postal_code.zone],
+    references: [zone.id],
+  }),
 }));
+
+export const zone = pgTable("zone", {
+  id: columnId,
+  name: varchar("name", { length: 255 }).notNull().unique(),
+});
 
 export const establishments = pgTable("establishments", {
   id: columnId,

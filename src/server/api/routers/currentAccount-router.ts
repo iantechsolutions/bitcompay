@@ -24,6 +24,20 @@ export const currentAccountRouter = createTRPCRouter({
 
       return currentAccount;
     }),
+  getByFamilyGroup: protectedProcedure
+    .input(
+      z.object({
+        familyGroupId: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      const currentAccount = await db.query.currentAccount.findFirst({
+        where: eq(schema.currentAccount.family_group, input.familyGroupId),
+        with: { events: true },
+      });
+
+      return currentAccount;
+    }),
   create: protectedProcedure
     .input(
       z.object({
@@ -36,6 +50,7 @@ export const currentAccountRouter = createTRPCRouter({
         .insert(schema.currentAccount)
         .values({
           family_group: input.family_group,
+          company_id: input.company_id,
         })
         .returning();
 

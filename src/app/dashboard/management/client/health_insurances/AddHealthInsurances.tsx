@@ -27,7 +27,7 @@ import { api } from "~/trpc/react";
 export function AddHealthInsurances() {
   const { mutateAsync: createProduct, isLoading } =
     api.healthInsurances.create.useMutation();
-
+  const { data: cps } = api.postal_code.list.useQuery();
   const [description, setDescription] = useState("");
   const [IdNumber, setIdNumber] = useState("");
   const [adress, setAdress] = useState("");
@@ -75,7 +75,8 @@ export function AddHealthInsurances() {
     <>
       <Button
         onClick={() => setOpen(true)}
-        className="rounded-full bg-[#0DA485] hover:bg-[#0DA485]">
+        className="rounded-full bg-[#0DA485] hover:bg-[#0DA485]"
+      >
         <PlusCircleIcon className="mr-2" size={20} />
         Agregar obra social como cliente
       </Button>
@@ -166,12 +167,28 @@ export function AddHealthInsurances() {
             </div>
             <div>
               <Label htmlFor="postal_code">Codigo Postal</Label>
-              <Input
+              {/* <Input
                 id="postal_code"
                 placeholder="..."
                 value={postal_code}
                 onChange={(e) => setPostal_code(e.target.value)}
-              />
+              /> */}
+
+              <Select
+                onValueChange={(e) => setPostal_code(e)}
+                value={postal_code}
+              >
+                <SelectTrigger className="w-[180px] font-bold">
+                  <SelectValue placeholder="Seleccionar CP" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cps?.map((cp) => (
+                    <SelectItem key={cp.id} value={cp.id}>
+                      {cp.cp}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label>Estado de AFIP</Label>

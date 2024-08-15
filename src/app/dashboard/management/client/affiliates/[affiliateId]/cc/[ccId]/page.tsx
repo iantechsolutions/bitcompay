@@ -13,6 +13,7 @@ import { api } from "~/trpc/react";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 import LayoutContainer from "~/components/layout-container";
+import { Button } from "~/components/ui/button";
 export default function CCDetail(props: {
   params: { ccId: string; affiliateId: string };
 }) {
@@ -75,14 +76,20 @@ export default function CCDetail(props: {
               <TableCell>${comprobante?.importe}</TableCell>
               <TableCell>{comprobante?.estado}</TableCell>
               <TableCell className="flex justify-center">
-                <FileText
-                  className="cursor-pointer"
+                <Button
+                  disabled={!comprobante?.billLink}
+                  variant="ghost"
                   onClick={() => {
                     !comprobante?.billLink
                       ? alert("No hay link")
-                      : router.push(`${comprobante?.billLink}`);
+                      : window.open(comprobante?.billLink);
+                    // : router.push(`${comprobante?.billLink}`);
                   }}
-                />
+                >
+                  <FileText
+                  // className="cursor-pointer"
+                  />
+                </Button>
               </TableCell>
             </TableRow>
           ))}

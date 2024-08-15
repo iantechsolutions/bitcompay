@@ -209,7 +209,7 @@ export default async function Home(props: {
   return (
     <LayoutContainer>
       <div className="flex flex-row justify-between w-full">
-        <GoBackButton url="/dashboard/billing/pre-liquidation" />
+        <GoBackButton url="/dashboard/billing/liquidation" />
         {preliquidation?.estado === "pendiente" && (
           <>
             <div className="flex flex-row gap-1">

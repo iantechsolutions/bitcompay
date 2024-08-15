@@ -46,6 +46,62 @@ export const family_groupsRouter = createTRPCRouter({
     });
     return family_group_reduced;
   }),
+  listWithIntegrantsPlanAndModo: protectedProcedure.query(async ({ ctx }) => {
+    const family_groups = await db.query.family_groups.findMany({
+      with: {
+        modo: true,
+        plan: true,
+        integrants: {
+          with: {
+            postal_code: true,
+          },
+        },
+        businessUnitData: {
+          with: {
+            brand: true,
+          },
+        },
+      },
+    });
+    console.log("orgId", ctx.session.orgId);
+    const family_group_reduced = family_groups.filter((family_groups) => {
+      return family_groups.businessUnitData?.companyId === ctx.session.orgId!;
+    });
+    return family_group_reduced;
+  }),
+  getWithFilteredComprobantes: protectedProcedure
+    .input(
+      z.object({
+        family_groupId: z.string(),
+        liquidation_id: z.string(),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const family_groups = await db.query.family_groups.findFirst({
+        where: eq(schema.family_groups.id, input.family_groupId),
+        with: {
+          businessUnitData: true,
+          plan: true,
+          modo: true,
+          bonus: true,
+          comprobantes: true,
+          integrants: {
+            with: {
+              contribution: true,
+              differentialsValues: true,
+              pa: true,
+            },
+          },
+        },
+      });
+      family_groups?.comprobantes.filter(
+        (x) => x.liquidation_id === input.liquidation_id
+      );
+
+      if (family_groups?.businessUnitData?.companyId === ctx.session.orgId) {
+        return family_groups;
+      } else null;
+    }),
   get: protectedProcedure
     .input(
       z.object({
@@ -79,56 +135,84 @@ export const family_groupsRouter = createTRPCRouter({
   getByLiquidation: protectedProcedure
     .input(z.object({ liquidationId: z.string() }))
     .query(async ({ input }) => {
-      const liquidation = await db.query.liquidations.findFirst({
-        where: eq(schema.liquidations.id, input.liquidationId),
+      const fg = await db.query.family_groups.findMany({
         with: {
+          plan: true,
+          modo: true,
+          integrants: true,
+          cc: true,
+          businessUnitData: true,
           comprobantes: {
-            where: eq(schema.comprobantes.liquidation_id, input.liquidationId),
-            orderBy: [desc(schema.comprobantes.createdAt)],
             with: {
-              family_group: {
-                with: {
-                  plan: true,
-                  modo: true,
-                  integrants: true,
-                  cc: true,
-                  businessUnitData: true,
-                  comprobantes: {
-                    with: {
-                      items: true,
-                    },
-                  },
-                },
-              },
+              items: true,
             },
           },
         },
       });
-
-      if (!liquidation) {
-        return [];
-      }
-
-      const family_groups = liquidation.comprobantes.map(
-        (comprobante) => comprobante.family_group
-      );
-
-      const uniqueFamilyGroups = family_groups.filter(
-        (family_group, index, self) =>
-          index === self.findIndex((fg) => fg!.id === family_group!.id)
-      );
-
-      const processedFamilyGroups = uniqueFamilyGroups.map((family_group) => {
-        const filteredComprobantes = family_group?.comprobantes.filter(
+      const fgFiltered = fg.map((x) => {
+        const comprobantes = x.comprobantes.filter(
           (comprobante) => comprobante.liquidation_id === input.liquidationId
         );
-        return {
-          ...family_group,
-          comprobantes: filteredComprobantes ?? [],
-        };
+        if (comprobantes.length > 0) {
+          return {
+            ...x,
+            comprobantes: comprobantes,
+          };
+        }
       });
+      // const fgFiltered = fg.filter((family_group)=>{
 
-      return processedFamilyGroups;
+      // })
+      // const liquidation = await db.query.liquidations.findFirst({
+      //   where: eq(schema.liquidations.id, input.liquidationId),
+      //   with: {
+      //     comprobantes: {
+      //       where: eq(schema.comprobantes.liquidation_id, input.liquidationId),
+      //       orderBy: [desc(schema.comprobantes.createdAt)],
+      //       with: {
+      //         family_group: {
+      //           with: {
+      //             plan: true,
+      //             modo: true,
+      //             integrants: true,
+      //             cc: true,
+      //             businessUnitData: true,
+      //             comprobantes: {
+      //               with: {
+      //                 items: true,
+      //               },
+      //             },
+      //           },
+      //         },
+      //       },
+      //     },
+      //   },
+      // });
+
+      // if (!liquidation) {
+      //   return [];
+      // }
+
+      // const family_groups = liquidation.comprobantes.map(
+      //   (comprobante) => comprobante.family_group
+      // );
+
+      // const uniqueFamilyGroups = family_groups.filter(
+      //   (family_group, index, self) =>
+      //     index === self.findIndex((fg) => fg!.id === family_group!.id)
+      // );
+
+      // const processedFamilyGroups = uniqueFamilyGroups.map((family_group) => {
+      //   const filteredComprobantes = family_group?.comprobantes.filter(
+      //     (comprobante) => comprobante.liquidation_id === input.liquidationId
+      //   );
+      //   return {
+      //     ...family_group,
+      //     comprobantes: filteredComprobantes ?? [],
+      //   };
+      // });
+
+      return fgFiltered;
     }),
 
   getbyProcedure: protectedProcedure

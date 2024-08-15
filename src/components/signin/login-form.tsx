@@ -71,13 +71,16 @@ export default function LoginForm({ setShowRegister }: LoginFormProps) {
         clerk.setActive({ session: signInAttempt.createdSessionId });
       } else {
         setError("Los datos proporcionados no son correctos");
+        setLoading(false);
       }
     } catch (err: any) {
       console.error(JSON.stringify(err, null, 2));
       if (isClerkAPIResponseError(err)) {
         setError("Los datos proporcionados no son correctos");
+        setLoading(false);
       } else {
         setError("Los datos proporcionados no son correctos");
+        setLoading(false);
       }
     } finally {
       // setLoading(false);

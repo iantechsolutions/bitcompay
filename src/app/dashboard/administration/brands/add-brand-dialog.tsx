@@ -34,7 +34,7 @@ export function AddBrandDialog() {
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
 
-  const [billType, setBillType] = useState<string>("");
+  // const [billType, setBillType] = useState<string>("");
 
   const [number, setNumber] = useState("");
   const [open, setOpen] = useState(false);
@@ -48,14 +48,7 @@ export function AddBrandDialog() {
 
   async function handleCreate() {
     try {
-      if (
-        !name ||
-        !code ||
-        !description ||
-        !iva ||
-        !billType ||
-        !reducedDescription
-      ) {
+      if (!name || !code || !description || !iva || !reducedDescription) {
         setError("Todos los campos son obligatorios.");
         return;
       }
@@ -65,7 +58,6 @@ export function AddBrandDialog() {
         iva: iva.toString(),
         description,
         name,
-        billType: billType,
         redescription: reducedDescription,
       });
 
@@ -147,23 +139,6 @@ export function AddBrandDialog() {
                     <SelectItem value="6">27%</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-
-              <div className="flex-1">
-                <Label htmlFor="billtype">Tipo de factura</Label>
-                <div>
-                  <ComboboxDemo
-                    title="Seleccionar factura..."
-                    placeholder="Factura X"
-                    options={[
-                      { value: "1", label: "FACTURA A" },
-                      { value: "6", label: "FACTURA B" },
-                      { value: "11", label: "FACTURA C" },
-                      { value: "51", label: "FACTURA M" },
-                    ]}
-                    onSelectionChange={(e) => setBillType(e)}
-                  />
-                </div>
               </div>
             </div>
 

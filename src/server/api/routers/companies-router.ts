@@ -1,9 +1,10 @@
 import { and, eq, inArray } from "drizzle-orm";
-import { z } from "zod";
+import { array, z } from "zod";
 import { createId } from "~/lib/utils";
 import { db, DBTX, schema } from "~/server/db";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { CarTaxiFront } from "lucide-react";
+import { clerkClient } from "@clerk/nextjs/server";
 
 export const companiesRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({}) => {
@@ -173,6 +174,7 @@ export const companiesRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       const companyId = ctx.session.orgId;
+
       await db.transaction(async (db) => {
         await db
           .update(schema.companies)
@@ -188,6 +190,10 @@ export const companiesRouter = createTRPCRouter({
             address: input.address,
           })
           .where(eq(schema.companies.id, companyId!));
+
+        await clerkClient.organizations.updateOrganization(companyId!, {
+          name: input.name,
+        });
 
         const companyProducts = await db.query.companyProducts.findMany({
           where: eq(schema.companyProducts.companyId, input.companyId),
@@ -315,9 +321,14 @@ export const companiesRouter = createTRPCRouter({
           await tx
             .delete(schema.procedure)
             .where(eq(schema.procedure.companyId, input.companyId));
+
+          console.log("suuuur");
+          await tx
+            .delete(schema.companiesToBrands)
+            .where(eq(schema.companiesToBrands.companyId, input.companyId)); //ll
           await tx
             .delete(schema.bussinessUnits)
-            .where(eq(schema.bussinessUnits.companyId, input.companyId));
+            .where(eq(schema.bussinessUnits.companyId, input.companyId)); //ll
           await tx
             .delete(schema.documentUploads)
             .where(eq(schema.documentUploads.companyId, input.companyId));
@@ -418,12 +429,12 @@ export const companiesRouter = createTRPCRouter({
               brands.map((b) => b.id)
             )
           );
-          await tx.delete(schema.brands).where(
-            inArray(
-              schema.brands.id,
-              companiesToBrands.map((cp) => cp.brandId)
-            )
-          );
+          // await tx.delete(schema.brands).where(
+          //   inArray(
+          //     schema.brands.id,
+          //     companiesToBrands.map((cp) => cp.brandId)
+          //   )
+          // );
           await tx
             .delete(schema.companiesToBrands)
             .where(eq(schema.companiesToBrands.companyId, input.companyId));
@@ -440,6 +451,8 @@ export const companiesRouter = createTRPCRouter({
           .delete(schema.companies)
           .where(eq(schema.companies.id, input.companyId));
       });
+
+      await clerkClient.organizations.deleteOrganization(input.companyId);
     }),
 });
 
@@ -456,6 +469,7 @@ async function deleteBasics(db: DBTX, companyId: string) {
     await tx
       .delete(schema.documentUploads)
       .where(eq(schema.documentUploads.companyId, companyId));
+
     const current_accounts = await tx.query.currentAccount.findMany({
       where: eq(schema.currentAccount.company_id, companyId),
     });
@@ -481,18 +495,21 @@ async function deleteComprobantesCircuit(db: DBTX, companyId: string) {
     const bussinessUnits = await tx.query.bussinessUnits.findMany({
       where: eq(schema.bussinessUnits.companyId, companyId),
     });
-    console.log("businessUnits", bussinessUnits);
+    console.log("businessUnits", bussinessUnits.length);
     if (bussinessUnits.length === 0) {
       return null;
     }
+
     const liquidations = await tx.query.liquidations.findMany({
       where: inArray(
         schema.liquidations.bussinessUnits_id,
         bussinessUnits.map((bu) => bu.id)
       ),
     });
-    console.log(liquidations);
+    console.log("Listaliquidaciones", liquidations.length);
     if (liquidations.length === 0) {
+      console.log("ooesteee");
+
       await tx
         .delete(schema.bussinessUnits)
         .where(eq(schema.bussinessUnits.companyId, companyId));
@@ -505,7 +522,7 @@ async function deleteComprobantesCircuit(db: DBTX, companyId: string) {
         liquidations.map((l) => l.id)
       ),
     });
-    console.log(comprobantes);
+    console.log("Comprobantes", comprobantes.length);
     if (comprobantes.length === 0) {
       await tx.delete(schema.liquidations).where(
         inArray(
@@ -513,6 +530,8 @@ async function deleteComprobantesCircuit(db: DBTX, companyId: string) {
           bussinessUnits.map((bu) => bu.id)
         )
       );
+
+      console.log("esteee");
       await tx
         .delete(schema.bussinessUnits)
         .where(eq(schema.bussinessUnits.companyId, companyId));
@@ -525,18 +544,43 @@ async function deleteComprobantesCircuit(db: DBTX, companyId: string) {
         comprobantes.map((f) => f.id)
       )
     );
+
+    console.log("Puta madre");
+    const payments = await tx.query.payments.findMany({
+      where: inArray(
+        schema.payments.comprobante_id,
+        comprobantes.map((x) => x.id)
+      ),
+    });
+
+    console.log("CompanyId utilizado:", companyId);
+    console.log("Cantidad de pagos encontrados:", payments.length);
+    console.log("Pagos encontrados:", payments.length);
+    await tx.delete(schema.payments).where(
+      inArray(
+        schema.payments.comprobante_id,
+        comprobantes.map((x) => x.id)
+      )
+    );
+
+    console.log("lol");
     await tx.delete(schema.comprobantes).where(
       inArray(
         schema.comprobantes.liquidation_id,
         liquidations.map((l) => l.id)
       )
     );
+    console.log("lol");
+
     await tx.delete(schema.liquidations).where(
       inArray(
         schema.liquidations.bussinessUnits_id,
         bussinessUnits.map((bu) => bu.id)
       )
     );
+
+    console.log("Norte");
+
     await tx
       .delete(schema.bussinessUnits)
       .where(eq(schema.bussinessUnits.companyId, companyId));

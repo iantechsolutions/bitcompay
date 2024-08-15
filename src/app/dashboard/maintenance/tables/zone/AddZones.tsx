@@ -17,25 +17,22 @@ import { Label } from "~/components/ui/label";
 import { asTRPCError } from "~/lib/errors";
 import { api } from "~/trpc/react";
 
-export function AddChannelDialog() {
-  const { mutateAsync: createChannel, isLoading } =
-    api.channels.create.useMutation();
+export function AddZones() {
+  const { mutateAsync: createZone, isLoading } = api.zone.create.useMutation();
 
-  const [description, setDescription] = useState("");
   const [name, setName] = useState("");
-
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
 
   const router = useRouter();
 
   async function handleCreate() {
     try {
-      await createChannel({
-        description,
-        name,
+      await createZone({
+        name: name,
       });
 
-      toast.success("Canal creado correctamente");
+      toast.success("Zona creada exitosamente");
       router.refresh();
       setOpen(false);
     } catch (e) {
@@ -48,32 +45,20 @@ export function AddChannelDialog() {
     <>
       <Button onClick={() => setOpen(true)}>
         <PlusCircleIcon className="mr-2" size={20} />
-        Crear canal
+        Agregar zona
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Crear nuevo canal</DialogTitle>
-            {/* <DialogDescription>
-                    
-                </DialogDescription> */}
+            <DialogTitle>Crear Zona</DialogTitle>
           </DialogHeader>
           <div>
-            <Label htmlFor="name">Nombre del canal</Label>
+            <Label htmlFor="name">Nombre</Label>
             <Input
               id="name"
-              placeholder="ej: efectivo"
+              placeholder="..."
               value={name}
               onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-          <div>
-            <Label htmlFor="description">Descripción</Label>
-            <Input
-              id="description"
-              placeholder="..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
             />
           </div>
           <DialogFooter>
@@ -81,7 +66,7 @@ export function AddChannelDialog() {
               {isLoading && (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}
-              Crear canal
+              Crear Zona
             </Button>
           </DialogFooter>
         </DialogContent>

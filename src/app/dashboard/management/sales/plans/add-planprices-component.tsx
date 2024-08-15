@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
+import { toast } from "sonner";
 import { useForm, useFieldArray, type SubmitHandler } from "react-hook-form";
 import { api } from "~/trpc/react";
 import dayjs from "dayjs";
@@ -65,11 +66,10 @@ export default function AddPlanPricesComponent({
   date,
   onPricesChange,
 }: AddPlanDialogProps) {
-  const [anio, setAnio] = useState(date?.getFullYear() ?? 2020);
-  const [mes, setMes] = useState((date?.getMonth() ?? 0) + 1);
+  const [anio, setAnio] = useState<number | null>(2024 ?? null);
+  const [mes, setMes] = useState<number | null>(null);
   const router = useRouter();
   const [working, setWorking] = useState(false);
-
   const form = useForm<FormValues>({
     defaultValues: { prices: initialPrices || [] },
   });
@@ -81,12 +81,22 @@ export default function AddPlanPricesComponent({
 
   const { data: relatives } = api.relative.list.useQuery(undefined);
   const [hasQueried, setHasQueried] = useState(false);
+  const [currentVigency, setCurrentVigency] = useState(new Date());
   const { data: planData } = api.plans.get.useQuery(
     { planId: planId ?? "" },
     {
       enabled: !!planId && !hasQueried,
       onSuccess: () => {
         setHasQueried(true);
+        const futurosVigency = planData?.pricesPerCondition?.filter(
+          (x) => x.validy_date < new Date()
+        );
+        if (futurosVigency) {
+          const currentVigency = futurosVigency?.sort(
+            (a, b) => b.validy_date.getTime() - a.validy_date.getTime()
+          )[0];
+          setCurrentVigency(currentVigency?.validy_date ?? new Date());
+        }
       },
     }
   );
@@ -95,15 +105,10 @@ export default function AddPlanPricesComponent({
     api.pricePerCondition.create.useMutation();
   const { mutateAsync: updatePricePerCondition } =
     api.pricePerCondition.change.useMutation();
-
   // Add logging to check for re-renders
-  useEffect(() => {
-    console.log("Component mounted or updated");
-  });
 
   useEffect(() => {
     if (initialPrices) {
-      console.log("Setting initial prices");
       form.reset({ prices: initialPrices });
     }
   }, [initialPrices]);
@@ -111,7 +116,40 @@ export default function AddPlanPricesComponent({
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     try {
       setWorking(true);
-      const validity_date = new Date(anio, mes - 1, 1);
+
+      let allowed = true;
+      const validity_date = new Date(anio ?? 0, mes ?? 1 - 1, 1);
+      for (let i = 0; i < data.prices.length; i++) {
+        console.log("entra for");
+        const { from_age: fromAge1, to_age: toAge1 } = data.prices[i] ?? {
+          from_age: 0,
+          to_age: 0,
+        };
+        if (fromAge1 !== null && toAge1 !== null) {
+          for (let j = i + 1; j < data.prices.length; j++) {
+            const { from_age: fromAge2, to_age: toAge2 } = data.prices[j] ?? {
+              from_age: 0,
+              to_age: 0,
+            };
+            console.log(fromAge1);
+            console.log(fromAge2);
+            console.log(toAge1);
+            console.log(toAge2);
+            if (fromAge2 !== null && toAge2 !== null) {
+              if (
+                (fromAge1 <= toAge2 && toAge1 >= fromAge2) ||
+                (fromAge2 <= toAge1 && toAge2 >= fromAge1) ||
+                (fromAge2 >= fromAge1 && toAge2 <= toAge1) ||
+                (fromAge1 >= fromAge2 && toAge1 <= toAge2)
+              ) {
+                toast.error("Las edades se superposicionan");
+                allowed = false;
+              }
+            }
+          }
+        }
+      }
+
       for (const item of data.prices) {
         if (edit && item.id !== "") {
           if (item.isAmountByAge) {
@@ -202,7 +240,7 @@ export default function AddPlanPricesComponent({
               <Select
                 disabled={edit}
                 onValueChange={(e) => setMes(Number(e))}
-                value={mes.toString()}
+                value={mes?.toString()}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -210,18 +248,78 @@ export default function AddPlanPricesComponent({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="1">Enero</SelectItem>
-                  <SelectItem value="2">Febrero</SelectItem>
-                  <SelectItem value="3">Marzo</SelectItem>
-                  <SelectItem value="4">Abril</SelectItem>
-                  <SelectItem value="5">Mayo</SelectItem>
-                  <SelectItem value="6">Junio</SelectItem>
-                  <SelectItem value="7">Julio</SelectItem>
-                  <SelectItem value="8">Agosto</SelectItem>
-                  <SelectItem value="9">Septiembre</SelectItem>
-                  <SelectItem value="10">Octubre</SelectItem>
-                  <SelectItem value="11">Noviembre</SelectItem>
-                  <SelectItem value="12">Diciembre</SelectItem>
+                  <SelectItem
+                    value="1"
+                    disabled={new Date(anio ?? 0, 0, 1) < currentVigency}
+                  >
+                    Enero
+                  </SelectItem>
+                  <SelectItem
+                    value="2"
+                    disabled={new Date(anio ?? 0, 1, 1) < currentVigency}
+                  >
+                    Febrero
+                  </SelectItem>
+                  <SelectItem
+                    value="3"
+                    disabled={new Date(anio ?? 0, 2, 1) < currentVigency}
+                  >
+                    Marzo
+                  </SelectItem>
+                  <SelectItem
+                    value="4"
+                    disabled={new Date(anio ?? 0, 3, 1) < currentVigency}
+                  >
+                    Abril
+                  </SelectItem>
+                  <SelectItem
+                    value="5"
+                    disabled={new Date(anio ?? 0, 4, 1) < currentVigency}
+                  >
+                    Mayo
+                  </SelectItem>
+                  <SelectItem
+                    value="6"
+                    disabled={new Date(anio ?? 0, 5, 1) < currentVigency}
+                  >
+                    Junio
+                  </SelectItem>
+                  <SelectItem
+                    value="7"
+                    disabled={new Date(anio ?? 0, 6, 1) < currentVigency}
+                  >
+                    Julio
+                  </SelectItem>
+                  <SelectItem
+                    value="8"
+                    disabled={new Date(anio ?? 0, 7, 1) < currentVigency}
+                  >
+                    Agosto
+                  </SelectItem>
+                  <SelectItem
+                    value="9"
+                    disabled={new Date(anio ?? 0, 8, 1) < currentVigency}
+                  >
+                    Septiembre
+                  </SelectItem>
+                  <SelectItem
+                    value="10"
+                    disabled={new Date(anio ?? 0, 9, 1) < currentVigency}
+                  >
+                    Octubre
+                  </SelectItem>
+                  <SelectItem
+                    value="11"
+                    disabled={new Date(anio ?? 0, 10, 1) < currentVigency}
+                  >
+                    Noviembre
+                  </SelectItem>
+                  <SelectItem
+                    value="12"
+                    disabled={new Date(anio ?? 0, 11, 1) < currentVigency}
+                  >
+                    Diciembre
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </FormItem>
@@ -232,7 +330,7 @@ export default function AddPlanPricesComponent({
                   disabled={edit}
                   className="border-green-300 focus-visible:ring-green-400 w-[100px]"
                   type="number"
-                  value={anio}
+                  value={anio?.toString()}
                   onChange={(e) => setAnio(Number(e.target.value))}
                 />
               </FormControl>

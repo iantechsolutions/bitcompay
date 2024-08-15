@@ -137,7 +137,7 @@ export function AddCompanyDialog() {
               <span className="text-red-600 text-xs">{error}</span>
             </div>
             <DialogFooter>
-              <Button disabled={isLoadingCC} type="submit">
+              <Button disabled={isLoadingCC || isLoading} type="submit">
                 Crear entidad
               </Button>
             </DialogFooter>
