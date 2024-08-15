@@ -1075,6 +1075,13 @@ export const comprobantesRouter = createTRPCRouter({
       const brand = await db.query.brands.findFirst({
         where: eq(schema.brands.id, input.brandId),
       });
+      const businessUnit = await db.query.bussinessUnits.findFirst({
+        where: and(
+          eq(schema.bussinessUnits.companyId, companyId ?? ""),
+          eq(schema.bussinessUnits.brandId, input.brandId)
+        ),
+      });
+
       const company = await db.query.companies.findFirst({
         where: eq(schema.companies.id, companyId!),
       });
@@ -1094,6 +1101,7 @@ export const comprobantesRouter = createTRPCRouter({
           pdv: parseInt(input.pv),
           interest: input.interest,
           logo_url: input.logo_url,
+          bussinessUnits_id: businessUnit?.id ?? "",
         })
         .returning();
       await preparateComprobante(

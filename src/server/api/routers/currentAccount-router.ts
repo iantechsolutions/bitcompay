@@ -36,6 +36,7 @@ export const currentAccountRouter = createTRPCRouter({
         .insert(schema.currentAccount)
         .values({
           family_group: input.family_group,
+          company_id: input.company_id,
         })
         .returning();
 
