@@ -524,6 +524,16 @@ export const healthInsurances = pgTable("health_insurances", {
   afip_status: varchar("afip_status", { length: 255 }),
 });
 
+export const healthInsurancesRelations = relations(
+  healthInsurances,
+  ({ one }) => ({
+    cpData: one(postal_code, {
+      fields: [healthInsurances.postal_code],
+      references: [postal_code.id],
+    }),
+  })
+);
+
 export const clientStatuses = pgTable("client_statuses", {
   id: columnId,
   description: varchar("description", { length: 255 }).notNull(),
