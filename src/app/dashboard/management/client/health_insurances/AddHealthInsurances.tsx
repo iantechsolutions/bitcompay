@@ -27,6 +27,9 @@ import { api } from "~/trpc/react";
 export function AddHealthInsurances() {
   const { mutateAsync: createProduct, isLoading } =
     api.healthInsurances.create.useMutation();
+  const { mutateAsync: startCC } =
+    api.currentAccount.createInitial.useMutation();
+  const { data: company } = api.companies.get.useQuery();
   const { data: cps } = api.postal_code.list.useQuery();
   const [description, setDescription] = useState("");
   const [IdNumber, setIdNumber] = useState("");
@@ -47,7 +50,7 @@ export function AddHealthInsurances() {
 
   async function handleCreate() {
     try {
-      await createProduct({
+      const healthInsurance = await createProduct({
         name: description,
         identificationNumber: IdNumber,
         isClient: true,
@@ -60,7 +63,10 @@ export function AddHealthInsurances() {
         province: province,
         postal_code: postal_code,
       });
-
+      const currentCompany = await startCC({
+        healthInsurance: healthInsurance[0]?.id ?? "",
+        company_id: company?.id ?? "",
+      });
       toast.success("Obra social creada correctamente");
       queryClient.invalidateQueries();
 
