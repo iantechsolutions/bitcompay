@@ -35,8 +35,10 @@ export default function AffiliatePage(props: {
     family_groupsId: grupos!,
   });
 
-  const { data: cuentasCorrientes } = api.currentAccount.list.useQuery();
-  const cc = cuentasCorrientes?.find((cc) => cc.family_group === grupos);
+  const { data: cc } = api.currentAccount.getByFamilyGroup.useQuery({
+    familyGroupId: grupos ?? "",
+  });
+  // const cc = cuentasCorrientes?.find((cc) => cc.family_group === grupos);
   const { data: company } = api.companies.get.useQuery(undefined);
   const lastEvent = cc?.events.reduce((prev, current) => {
     return new Date(prev.createdAt) > new Date(current.createdAt)

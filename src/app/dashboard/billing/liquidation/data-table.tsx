@@ -59,7 +59,7 @@ export function DataTable<TData, TValue>({
 
   const handleRowClick = (row: Row<TData>) => {
     const originalData = row.original as { id: string };
-    router.push(`/dashboard/billing/pre-liquidation/${originalData.id}`);
+    router.push(`/dashboard/billing/liquidation/${originalData.id}`);
   };
 
   const desiredColumns = ["Marca"];

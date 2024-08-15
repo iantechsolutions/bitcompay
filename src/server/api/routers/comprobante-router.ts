@@ -973,6 +973,9 @@ export const comprobantesRouter = createTRPCRouter({
           },
         });
         console.log("Encontro family_group");
+        if (family_group){
+
+        
         const billResponsible = await db.query.integrants.findFirst({
           where: and(
             eq(
@@ -1023,6 +1026,8 @@ export const comprobantesRouter = createTRPCRouter({
           })
           .returning();
         console.log("Creo payment");
+
+      }
       }
       return [comprobanteGotten];
     }),

@@ -6,7 +6,11 @@ import { postal_code } from "~/server/db/schema";
 
 export const postalCodeRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({}) => {
-    const postalCode = await db.query.postal_code.findMany();
+    const postalCode = await db.query.postal_code.findMany({
+      with: {
+        zoneData: true,
+      },
+    });
     return postalCode;
   }),
   get: protectedProcedure
@@ -18,6 +22,9 @@ export const postalCodeRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const postalCode = await db.query.postal_code.findFirst({
         where: eq(schema.postal_code.id, input.postalCodeId),
+        with: {
+          zoneData: true,
+        },
       });
 
       return postalCode;

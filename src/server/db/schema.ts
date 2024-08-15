@@ -757,9 +757,10 @@ export const comprobantes = pgTable("comprobantes", {
   liquidation_id: varchar("liquidation_id", { length: 255 }).references(
     () => liquidations.id
   ),
-  family_group_id: varchar("family_group_id", { length: 255 }).references(
-    () => family_groups.id
-  ),
+  family_group_id: varchar("family_group_id", { length: 255 }),
+  // .references(
+  //   () => family_groups.id
+  // ),
   previous_facturaId: varchar("previous_factura", { length: 255 }),
 });
 
@@ -1223,7 +1224,7 @@ export const postal_code = pgTable("postalcodes", {
 
 export const postal_codeRelations = relations(postal_code, ({ many, one }) => ({
   postal_code: many(integrants),
-  zone: one(zone, {
+  zoneData: one(zone, {
     fields: [postal_code.zone],
     references: [zone.id],
   }),
