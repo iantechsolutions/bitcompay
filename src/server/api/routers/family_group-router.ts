@@ -149,10 +149,12 @@ export const family_groupsRouter = createTRPCRouter({
           },
         },
       });
+
       const fgFiltered = fg.map((x) => {
         const comprobantes = x.comprobantes.filter(
           (comprobante) => comprobante.liquidation_id === input.liquidationId
         );
+
         if (comprobantes.length > 0) {
           return {
             ...x,
@@ -160,6 +162,7 @@ export const family_groupsRouter = createTRPCRouter({
           };
         }
       });
+
       // const fgFiltered = fg.filter((family_group)=>{
 
       // })

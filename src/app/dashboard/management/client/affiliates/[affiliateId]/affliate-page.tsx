@@ -102,8 +102,7 @@ export default function AffiliatePage(props: {
     <div>
       <Link
         className="w-20 h-auto flex justify-between"
-        href={`/dashboard/management/client/affiliates`}
-      >
+        href={`/dashboard/management/client/affiliates`}>
         <ArrowLeftIcon /> Volver
       </Link>
       <LayoutContainer>
@@ -115,19 +114,20 @@ export default function AffiliatePage(props: {
             className="mt-2 border border-[#A7D3C7] p-4 w-1/2 rounded-lg hover:cursor-pointer hover:bg-[#f0f0f0d1]"
             onClick={() => {
               goToCCDetail(cc?.id);
-            }}
-          >
+            }}>
             <p className="text-lg font-semibold">Saldo actual</p>
             <span className="text-[#CD3D3B] text-2xl font-bold">
-              $ {lastEvent?.current_amount}
+              $
+              {lastEvent?.current_amount !== undefined
+                ? lastEvent.current_amount.toFixed(2)
+                : "0.00"}
             </span>
           </div>
           <div>
             <Accordion
               className="w-full"
               defaultValue={["item-1", "item-2", "item-3"]}
-              type="multiple"
-            >
+              type="multiple">
               <AccordionItem value="item-1">
                 <AccordionTrigger>Datos del grupo familiar</AccordionTrigger>
                 <AccordionContent className="pt-6 pl-5">
@@ -148,8 +148,7 @@ export default function AffiliatePage(props: {
                 <AccordionContent className="pt-6 pl-5">
                   <AccordionIntegrant
                     type="multiple"
-                    className="rounded-md overflow-hidden"
-                  >
+                    className="rounded-md overflow-hidden">
                     {integrant?.map((int) => (
                       <AccordionItemIntegrant value={int.id}>
                         <AccordionTriggerIntegrant className="bg-[#e9fcf8]">

@@ -2,7 +2,7 @@ import { and, desc, eq } from "drizzle-orm";
 import Afip from "@afipsdk/afip.js";
 import { z } from "zod";
 import { db, schema } from "~/server/db";
-import { ComprobantesSchemaDB } from "~/server/db/schema";
+import { bussinessUnits, ComprobantesSchemaDB } from "~/server/db/schema";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { Group } from "next/dist/shared/lib/router/utils/route-regex";
 import { Plans } from "./plans-router";
@@ -973,61 +973,58 @@ export const comprobantesRouter = createTRPCRouter({
           },
         });
         console.log("Encontro family_group");
-        if (family_group){
-
-        
-        const billResponsible = await db.query.integrants.findFirst({
-          where: and(
-            eq(
-              schema.integrants.family_group_id,
-              comprobanteGotten?.family_group?.id ?? ""
+        if (family_group) {
+          const billResponsible = await db.query.integrants.findFirst({
+            where: and(
+              eq(
+                schema.integrants.family_group_id,
+                comprobanteGotten?.family_group?.id ?? ""
+              ),
+              eq(schema.integrants.isBillResponsible, true)
             ),
-            eq(schema.integrants.isBillResponsible, true)
-          ),
-          with: {
-            postal_code: true,
-            pa: true,
-          },
-        });
-        const producto = await db.query.products.findFirst({
-          where: eq(
-            schema.products.id,
-            billResponsible?.pa[0]?.product_id ?? ""
-          ),
-        });
-        console.log("Encontro producto");
-        const payment = await db
-          .insert(schema.payments)
-          .values({
-            companyId: ctx.session.orgId ?? "",
-            invoice_number: comprobanteGotten?.nroComprobante ?? 0,
-            userId: user?.id ?? "",
-            g_c: family_group?.businessUnitData?.brand?.number ?? 0,
-            name: billResponsible?.name ?? "",
-            fiscal_id_type: billResponsible?.fiscal_id_type,
-            fiscal_id_number: parseInt(
-              billResponsible?.fiscal_id_number ?? "0"
+            with: {
+              postal_code: true,
+              pa: true,
+            },
+          });
+          const producto = await db.query.products.findFirst({
+            where: eq(
+              schema.products.id,
+              billResponsible?.pa[0]?.product_id ?? ""
             ),
-            du_type: billResponsible?.id_type,
-            du_number: parseInt(billResponsible?.id_number ?? "0"),
-            product: producto?.id,
-            period: comprobanteGotten?.due_date,
-            first_due_amount: comprobanteGotten?.importe,
-            first_due_date: comprobanteGotten?.due_date,
-            cbu: billResponsible?.pa[0]?.CBU,
-            comprobante_id: comprobanteGotten?.id,
-            documentUploadId: "0AspRyw8g4jgDAuNGAeBX",
-            product_number: producto?.number ?? 0,
-            statusId: status?.id,
-            card_number: billResponsible?.pa[0]?.card_number,
-            card_brand: billResponsible?.pa[0]?.card_brand,
-            card_type: billResponsible?.pa[0]?.card_type,
-            // address: billResponsible?.address,
-          })
-          .returning();
-        console.log("Creo payment");
-
-      }
+          });
+          console.log("Encontro producto");
+          const payment = await db
+            .insert(schema.payments)
+            .values({
+              companyId: ctx.session.orgId ?? "",
+              invoice_number: comprobanteGotten?.nroComprobante ?? 0,
+              userId: user?.id ?? "",
+              g_c: family_group?.businessUnitData?.brand?.number ?? 0,
+              name: billResponsible?.name ?? "",
+              fiscal_id_type: billResponsible?.fiscal_id_type,
+              fiscal_id_number: parseInt(
+                billResponsible?.fiscal_id_number ?? "0"
+              ),
+              du_type: billResponsible?.id_type,
+              du_number: parseInt(billResponsible?.id_number ?? "0"),
+              product: producto?.id,
+              period: comprobanteGotten?.due_date,
+              first_due_amount: comprobanteGotten?.importe,
+              first_due_date: comprobanteGotten?.due_date,
+              cbu: billResponsible?.pa[0]?.CBU,
+              comprobante_id: comprobanteGotten?.id,
+              documentUploadId: "0AspRyw8g4jgDAuNGAeBX",
+              product_number: producto?.number ?? 0,
+              statusId: status?.id,
+              card_number: billResponsible?.pa[0]?.card_number,
+              card_brand: billResponsible?.pa[0]?.card_brand,
+              card_type: billResponsible?.pa[0]?.card_type,
+              // address: billResponsible?.address,
+            })
+            .returning();
+          console.log("Creo payment");
+        }
       }
       return [comprobanteGotten];
     }),
@@ -1077,15 +1074,19 @@ export const comprobantesRouter = createTRPCRouter({
       }
 
       const user = await currentUser();
+
       const brand = await db.query.brands.findFirst({
         where: eq(schema.brands.id, input.brandId),
       });
+
       const businessUnit = await db.query.bussinessUnits.findFirst({
         where: and(
           eq(schema.bussinessUnits.companyId, companyId ?? ""),
           eq(schema.bussinessUnits.brandId, input.brandId)
         ),
       });
+
+      // console.log("Estop", bussinessUnits);
 
       const company = await db.query.companies.findFirst({
         where: eq(schema.companies.id, companyId!),
@@ -1109,6 +1110,7 @@ export const comprobantesRouter = createTRPCRouter({
           bussinessUnits_id: businessUnit?.id ?? "",
         })
         .returning();
+
       await preparateComprobante(
         grupos,
         input.dateDesde,

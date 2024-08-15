@@ -122,6 +122,8 @@ export default async function Home(props: {
     //     (item) => item.concept === "Saldo anterior"
     //   )?.amount
     // );
+
+    // console.log("Peste", tableRows);
     const eventPreComprobante = eventos.find(
       (x) =>
         x.currentAccount_id === fg?.cc?.id &&
@@ -202,10 +204,10 @@ export default async function Home(props: {
       Plan: plan,
       modo,
     });
-    console.log("comprobantes", fg?.comprobantes);
+    // console.log("comprobantes", fg?.comprobantes);
   }
 
-  console.log("tableRows", tableRows);
+  // console.log("tableRows", tableRows);
   return (
     <LayoutContainer>
       <div className="flex flex-row justify-between w-full">
