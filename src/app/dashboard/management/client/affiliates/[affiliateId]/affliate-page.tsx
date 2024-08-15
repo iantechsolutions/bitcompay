@@ -129,7 +129,10 @@ export default function AffiliatePage(props: {
             </div>
 
             <span className="text-[#CD3D3B] text-2xl font-bold">
-              $ {lastEvent?.current_amount}
+              $
+              {lastEvent?.current_amount !== undefined
+                ? lastEvent.current_amount.toFixed(2)
+                : "0.00"}
             </span>
           </div>
           <div>

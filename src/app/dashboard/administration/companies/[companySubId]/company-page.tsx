@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckIcon, Loader2, UserCircleIcon } from "lucide-react";
+import { CheckIcon, Loader2, Loader2Icon, UserCircleIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type MouseEventHandler, useState } from "react";
 import { toast } from "sonner";
@@ -257,8 +257,10 @@ function DeleteChannel(props: { companySubId: string }) {
           <AlertDialogAction
             className="bg-red-500 hover:bg-red-600 active:bg-red-700"
             onClick={handleDelete}
-            disabled={isLoading}
-          >
+            disabled={isLoading}>
+            {isLoading && (
+              <Loader2Icon className="mr-2 animate-spin" size={20} />
+            )}
             Eliminar
           </AlertDialogAction>
         </AlertDialogFooter>

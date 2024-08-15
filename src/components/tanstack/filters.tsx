@@ -38,7 +38,7 @@ export default function Filters<TData, TValue>({
   const [popoverOpen, setPopoverOpen] = useState(false);
   const form = useForm();
   // como sacar uniqueValues por cada columna
-  console.log("columns", columns);
+  // console.log("columnaas", columns);
   if (columns) {
     columns.forEach((column) => {
       const uniqueValues = column?.getFacetedUniqueValues();
@@ -61,8 +61,7 @@ export default function Filters<TData, TValue>({
         <Button
           variant={"outline"}
           className="rounded-full px-5 bg-[#0DA485] hover:bg-[#0DA485] h-7 text-white hover:text-white"
-          color="#0DA485"
-        >
+          color="#0DA485">
           <SlidersHorizontal className="mr-2 h-3 w-auto" /> Filtros{" "}
         </Button>
       </PopoverTrigger>
@@ -70,8 +69,7 @@ export default function Filters<TData, TValue>({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="flex flex-col gap-2"
-          >
+            className="flex flex-col gap-2">
             <div className="grid grid-cols-2 gap-2">
               {columns?.map((column) => (
                 <FormField
@@ -85,25 +83,23 @@ export default function Filters<TData, TValue>({
                       </FormLabel>
                       <Select
                         onValueChange={field.onChange}
-                        defaultValue={field.value as string}
-                      >
+                        defaultValue={field.value as string}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {Array.from(
-                            column.getFacetedUniqueValues().keys()
-                          ).map((value) => (
-                            <SelectItem
-                              value={value}
-                              className="text-sm"
-                              key={value}
-                            >
-                              {value}
-                            </SelectItem>
-                          ))}
+                          {Array.from(column.getFacetedUniqueValues().keys())
+                            .filter((value) => value !== "")
+                            .map((value) => (
+                              <SelectItem
+                                value={value}
+                                className="text-sm"
+                                key={value}>
+                                {value}
+                              </SelectItem>
+                            ))}
                         </SelectContent>
                       </Select>
                     </FormItem>
@@ -113,10 +109,9 @@ export default function Filters<TData, TValue>({
             </div>
             <Button
               variant="outline"
-              className="self-end h-7 w-[6rem] bg-[#0DA485] hover:bg-[#0DA485] text-white hover:text-white rounded-full font-light"
-            >
+              className="self-end h-7 w-[6rem] bg-[#0DA485] hover:bg-[#0DA485] text-white hover:text-white rounded-full font-light">
               <Search className="h-4 font-bold" />
-              Buscar
+              Buscarr
             </Button>
           </form>
         </Form>
