@@ -26,7 +26,7 @@ export default function CCDetail(props: {
   const comprobantes = healthInsurance?.comprobantes;
   return (
     <LayoutContainer>
-      <Title>Detalle cuanta corriente</Title>
+      <Title>Detalle cuenta corriente</Title>
       <h2 className=" font-semibold mb-2">Movimientos cuenta corriente</h2>
       <Table>
         <TableHeader>
