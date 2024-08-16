@@ -513,9 +513,9 @@ async function readExcelFile(
           eq(schema.plans.brand_id, business_unit.brandId)
         ),
       });
-      if(!plan){
+      if (!plan) {
         errors.push(
-          `PLAN no valido o no perteneciente a la ma en (fila:${rowNum})`
+          `PLAN no valido o no perteneciente a la marca en (fila:${rowNum})`
         );
       }
     }
