@@ -81,7 +81,7 @@ export default function AddPlanPricesComponent({
 
   const { data: relatives } = api.relative.list.useQuery(undefined);
   const [hasQueried, setHasQueried] = useState(false);
-  const [currentVigency, setCurrentVigency] = useState(new Date());
+  const [currentVigency, setCurrentVigency] = useState(new Date(1, 1, 2000));
   const { data: planData } = api.plans.get.useQuery(
     { planId: planId ?? "" },
     {
