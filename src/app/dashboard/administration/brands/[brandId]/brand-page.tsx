@@ -56,6 +56,8 @@ export default function BrandPage({
 
   const router = useRouter();
   const [name, setName] = useState(brand.name);
+  const [concept, setConcept] = useState(brand.concept!);
+
   const [iva, setIva] = useState<string>(brand.iva!);
   const [billType, setBillType] = useState<string>(brand.bill_type!);
 
@@ -103,6 +105,7 @@ export default function BrandPage({
         reducedDescription,
         companiesId,
         brandId: brand.id,
+        concept,
       });
       toast.success("Se han guardado los cambios");
       router.refresh();
@@ -166,7 +169,14 @@ export default function BrandPage({
                       onChange={(e) => setReducedDescription(e.target.value)}
                     />
                   </div>
-                  <div></div>
+                  <div className="col-span-2">
+                    <Label htmlFor="concept">Concepto</Label>
+                    <Input
+                      id="concept"
+                      value={concept}
+                      onChange={(e) => setConcept(e.target.value)}
+                    />
+                  </div>
                   <div className="col-span-2">
                     <Label htmlFor="iva">IVA</Label>
                     <Select value={iva} onValueChange={(e) => setIva(e)}>
@@ -183,7 +193,7 @@ export default function BrandPage({
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="col-span-2">
+                  {/* <div className="col-span-2">
                     <Label htmlFor="billtype">Tipo de factura</Label>
                     <div>
                       <ComboboxDemo
@@ -200,7 +210,7 @@ export default function BrandPage({
                         onSelectionChange={(e) => setBillType(e)}
                       />
                     </div>
-                  </div>
+                  </div> */}
                   <div>
                     <Label> Actualizar Logo Marca</Label>
                     {brand.logo_url && (

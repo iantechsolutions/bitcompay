@@ -33,6 +33,8 @@ export function AddBrandDialog() {
   const [iva, setIva] = useState<string>("21%");
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
+  const [razonSocial, setRazonSocial] = useState("");
+  const [concept, setConcepto] = useState("");
 
   // const [billType, setBillType] = useState<string>("");
 
@@ -59,6 +61,7 @@ export function AddBrandDialog() {
         description,
         name,
         redescription: reducedDescription,
+        concept,
       });
 
       toast.success("Marca creada correctamente");
@@ -98,6 +101,26 @@ export function AddBrandDialog() {
               />
             </div>
 
+            <div>
+              <Label htmlFor="razonSocial">Razon social la marca</Label>
+              <Input
+                id="razonSocial"
+                placeholder="..."
+                value={razonSocial}
+                onChange={(e) => setRazonSocial(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="concept">Concepto</Label>
+              <Input
+                id="concept"
+                placeholder="..."
+                value={concept}
+                onChange={(e) => setConcepto(e.target.value)}
+                required
+              />
+            </div>
             {/* Código de marca */}
             <div>
               <Label htmlFor="code">Código de marca(max. 4 carac)</Label>
