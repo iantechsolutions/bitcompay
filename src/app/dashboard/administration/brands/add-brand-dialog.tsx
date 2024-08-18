@@ -113,13 +113,19 @@ export function AddBrandDialog() {
             </div>
             <div>
               <Label htmlFor="concept">Concepto</Label>
-              <Input
-                id="concept"
-                placeholder="..."
-                value={concept}
-                onChange={(e) => setConcepto(e.target.value)}
-                required
-              />
+              <Select
+                onValueChange={(e) => setConcepto(e)}
+                value={concept ?? ""}
+              >
+                <SelectTrigger className="w-[180px] font-bold">
+                  <SelectValue placeholder="Seleccionar concepto..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">Productos</SelectItem>
+                  <SelectItem value="2">Servicios</SelectItem>
+                  <SelectItem value="3">Productos y Servicios</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             {/* Código de marca */}
             <div>

@@ -171,11 +171,19 @@ export default function BrandPage({
                   </div>
                   <div className="col-span-2">
                     <Label htmlFor="concept">Concepto</Label>
-                    <Input
-                      id="concept"
-                      value={concept}
-                      onChange={(e) => setConcept(e.target.value)}
-                    />
+                    <Select
+                      onValueChange={(e) => setConcept(e)}
+                      value={concept ?? ""}
+                    >
+                      <SelectTrigger className="w-[180px] font-bold">
+                        <SelectValue placeholder="Seleccionar concepto..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">Productos</SelectItem>
+                        <SelectItem value="2">Servicios</SelectItem>
+                        <SelectItem value="3">Productos y Servicios</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="col-span-2">
                     <Label htmlFor="iva">IVA</Label>
@@ -332,7 +340,8 @@ function Deletebrand(props: { brandId: string }) {
           <AlertDialogAction
             className="bg-red-500 active:bg-red-700 hover:bg-red-600"
             onClick={handleDelete}
-            disabled={isLoading}>
+            disabled={isLoading}
+          >
             Eliminar
           </AlertDialogAction>
         </AlertDialogFooter>
