@@ -250,7 +250,7 @@ function DeleteChannel(props: { companySubId: string }) {
     e.preventDefault();
     deleteChannel({ companyId: props.companySubId })
       .then(() => {
-        toast.success("Se ha eliminado la compañía correctamente");
+        toast.success("Se ha eliminado la entidad correctamente");
         router.push("./");
         router.refresh();
       })
