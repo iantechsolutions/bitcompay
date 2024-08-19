@@ -181,10 +181,6 @@ export const productsChannel = createTRPCRouter({
               return !companies.has(productCompany.companyId);
             }
           );
-
-          // const channelsToDelete = productChannels.filter((productChannel) => {
-          //   return !channels.has(productChannel.channelId);
-          // });
           const companiesToAdd = input.companies.filter((companyId) => {
             return !productCompanies.find(
               (productCompany) => productCompany.companyId === companyId
@@ -212,14 +208,6 @@ export const productsChannel = createTRPCRouter({
               }))
             );
           }
-          // if (channelsToAdd.length > 0) {
-          //   await tx.insert(schema.productChannels).values(
-          //     channelsToAdd.map((channelId) => ({
-          //       productId: input.productId,
-          //       channelId,
-          //     }))
-          //   );
-          // }
         }
       });
     }),

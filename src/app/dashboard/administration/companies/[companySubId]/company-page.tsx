@@ -78,8 +78,8 @@ export default function CompanyPage({
         products: Array.from(companyProducts),
         name,
         description,
-        afipKey,
-        cuit,
+        afipKey: afipKey ?? "",
+        cuit: cuit ?? "",
       });
       toast.success("Se han guardado los cambios");
     } catch (e) {
@@ -280,7 +280,8 @@ function DeleteChannel(props: { companySubId: string }) {
           <AlertDialogAction
             className="bg-red-500 hover:bg-red-600 active:bg-red-700"
             onClick={handleDelete}
-            disabled={isLoading}>
+            disabled={isLoading}
+          >
             {isLoading && (
               <Loader2Icon className="mr-2 animate-spin" size={20} />
             )}
