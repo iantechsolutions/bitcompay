@@ -6,6 +6,7 @@ import { checkRole } from "~/lib/utils/server/roles";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { api } from "~/trpc/server";
 import { UserButton } from "./clerk/user-button";
+import { CustomOrganizationSwitcher } from "./clerk/org-switcher";
 export type AppLayoutProps = {
   children: React.ReactNode;
   title?: React.ReactNode;
@@ -34,10 +35,7 @@ export default async function AppLayout(props: AppLayoutProps) {
         <div className="w-full">{props.title}</div>
         <div className="flex gap-6 px-2">
           {isAdmin && (
-            <OrganizationSwitcher
-              hidePersonal={true}
-              afterSelectOrganizationUrl={""}
-            />
+            <CustomOrganizationSwitcher companyName={company?.name} />
           )}
           <UserButton companyName={company?.name} />
         </div>
