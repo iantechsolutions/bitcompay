@@ -1,6 +1,17 @@
 "use client";
-
-import { Loader2Icon } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
+import { Title } from "~/components/title";
+import { Loader2, CheckIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -8,20 +19,22 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import {
-  SelectItem,
-  Select,
-  SelectContent,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "~/components/ui/accordion";
 import { asTRPCError } from "~/lib/errors";
 import { api } from "~/trpc/react";
 import { RouterOutputs } from "~/trpc/shared";
+import LayoutContainer from "~/components/layout-container";
 
 export default function ZonePage(props: {
   zone: RouterOutputs["zone"]["get"];
 }) {
   const { mutateAsync: updateZone, isLoading } = api.zone.change.useMutation();
+  const { mutateAsync: deleteZone, isLoading: isLoadingDelete } =
+    api.zone.delete.useMutation();
 
   const [name, setName] = useState("");
   const [cp, setCP] = useState("");
@@ -48,32 +61,103 @@ export default function ZonePage(props: {
       toast.error(error.message);
     }
   }
+  async function handleDelete() {
+    try {
+      deleteZone({
+        zoneId: props.zone?.id ?? "",
+      });
+      toast.success("Zona eliminada correctamente");
+      router.push("./");
+    } catch (e) {
+      const error = asTRPCError(e)!;
+      toast.error(error.message);
+    }
+  }
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-xl font-semibold mb-4">Editar zona</h1>
-      <div className="mb-4">
-        <Label htmlFor="description">Nombre</Label>
-        <Input
-          id="name"
-          placeholder="Escriba un nombre"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+    <LayoutContainer>
+      <div className="flex justify-between">
+        <Title>Editar zona</Title>
+        <Button disabled={isLoading} onClick={handleUpdate}>
+          {isLoading ? (
+            <Loader2 className="mr-2 animate-spin" />
+          ) : (
+            <CheckIcon className="mr-2" />
+          )}
+          Aplicar
+        </Button>
       </div>
-      <div className="mb-4">
-        <Label htmlFor="description">Codigo postal</Label>
-        <Input
-          id="cp"
-          placeholder="Escriba el codigo postal"
-          value={cp}
-          onChange={(e) => setCP(e.target.value)}
-        />
+      <div className="container mx-auto p-4">
+        <Accordion type="single" collapsible className="w-full">
+          <AccordionItem value="item-1">
+            <AccordionTrigger>
+              <h2 className="text-md">Informacion de zona</h2>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 border-t border-b pt-3 pl-1">
+                <div className="mb-4 col-span-1">
+                  <Label htmlFor="description ">Nombre</Label>
+                  <Input
+                    id="name"
+                    placeholder="Escriba un nombre"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                </div>
+                <div></div>
+                <div className="mb-4 col-span-1">
+                  <Label htmlFor="description">Codigo postal</Label>
+                  <Input
+                    id="cp"
+                    placeholder="Escriba el codigo postal"
+                    value={cp}
+                    onChange={(e) => setCP(e.target.value)}
+                  />
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="item-2" className="border-none">
+            <AccordionTrigger>
+              <h2 className="text-md">Eliminar zona</h2>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="flex">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" className="w-[160px]">
+                      Eliminar entidad
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        ¿Estás seguro que querés eliminar la entidad?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Eliminar entidad permanentemente.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        className="bg-red-500 hover:bg-red-600 active:bg-red-700"
+                        onClick={handleDelete}
+                        disabled={isLoadingDelete}
+                      >
+                        {isLoadingDelete && (
+                          <Loader2 className="mr-2 animate-spin" size={20} />
+                        )}
+                        Eliminar
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </div>
-      <Button disabled={isLoading} onClick={handleUpdate}>
-        {isLoading && <Loader2Icon className="mr-2 animate-spin" size={20} />}
-        Actualizar
-      </Button>
-    </div>
+    </LayoutContainer>
   );
 }

@@ -23,7 +23,7 @@ export default function PostalCodePage(props: {
 }) {
   const { mutateAsync: updatePostalCode, isLoading } =
     api.postal_code.change.useMutation();
-
+  const { data: zones } = api.zone.list.useQuery();
   const [name, setName] = useState("");
   const [cp, setCP] = useState("");
   const [zone, setZone] = useState("");
@@ -57,7 +57,7 @@ export default function PostalCodePage(props: {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-xl font-semibold mb-4">Editar Unidad de Negocio</h1>
+      <h1 className="text-xl font-semibold mb-4">Editar Codigo postal</h1>
       <div className="mb-4">
         <Label htmlFor="description">Nombre</Label>
         <Input
@@ -69,12 +69,18 @@ export default function PostalCodePage(props: {
       </div>
       <div className="mb-4">
         <Label htmlFor="description">Zona</Label>
-        <Input
-          id="zone"
-          placeholder="Escriba una zona"
-          value={zone}
-          onChange={(e) => setZone(e.target.value)}
-        />
+        <Select value={zone} onValueChange={(e) => setZone(e)}>
+          <SelectTrigger className="w-[180px] font-bold">
+            <SelectValue placeholder="Seleccionar Zona" />
+          </SelectTrigger>
+          <SelectContent>
+            {zones?.map((zoneItem) => (
+              <SelectItem key={zoneItem.id} value={zoneItem.id}>
+                {zoneItem.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       <div className="mb-4">
         <Label htmlFor="description">Codigo postal</Label>
