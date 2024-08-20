@@ -1,6 +1,7 @@
 "use client";
 
-import { CheckIcon, Loader2, UserCircleIcon } from "lucide-react";
+import { af } from "date-fns/locale";
+import { CheckIcon, Loader2, Loader2Icon, UserCircleIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type MouseEventHandler, useState } from "react";
 import { toast } from "sonner";
@@ -57,6 +58,10 @@ export default function CompanyPage({
   userList: User[];
 }) {
   const [name, setName] = useState(company.name);
+
+  const [afipKey, setAfipKey] = useState(company.afipKey!);
+  const [cuit, setCuit] = useState(company.cuit!);
+
   const [description, setDescription] = useState(company.description);
 
   const [companyProducts, setCompanyProducts] = useState<Set<string>>(
@@ -73,6 +78,8 @@ export default function CompanyPage({
         products: Array.from(companyProducts),
         name,
         description,
+        afipKey: afipKey ?? "",
+        cuit: cuit ?? "",
       });
       toast.success("Se han guardado los cambios");
     } catch (e) {
@@ -153,6 +160,22 @@ export default function CompanyPage({
                       id="description"
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="CUIT">CUIT</Label>
+                    <Input
+                      id="CUIT"
+                      value={cuit}
+                      onChange={(e) => setCuit(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="afipKey">Clave fiscal</Label>
+                    <Input
+                      id="afipKey"
+                      value={afipKey}
+                      onChange={(e) => setAfipKey(e.target.value)}
                     />
                   </div>
                 </div>
@@ -259,6 +282,9 @@ function DeleteChannel(props: { companySubId: string }) {
             onClick={handleDelete}
             disabled={isLoading}
           >
+            {isLoading && (
+              <Loader2Icon className="mr-2 animate-spin" size={20} />
+            )}
             Eliminar
           </AlertDialogAction>
         </AlertDialogFooter>

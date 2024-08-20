@@ -12,6 +12,28 @@ export const healthInsurancesRouter = createTRPCRouter({
           eq(schema.healthInsurances.id, input.healthInsuranceId),
           eq(schema.healthInsurances.companyId, ctx.session.orgId!)
         ),
+        with: {
+          cpData: true,
+        },
+      });
+      return healthInsurance_found;
+    }),
+  getWithComprobantes: protectedProcedure
+    .input(z.object({ healthInsuranceId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const healthInsurance_found = await db.query.healthInsurances.findFirst({
+        where: and(
+          eq(schema.healthInsurances.id, input.healthInsuranceId),
+          eq(schema.healthInsurances.companyId, ctx.session.orgId!)
+        ),
+        with: {
+          comprobantes: true,
+          // {
+          // with:{
+          //   items:true
+          // }
+          // }
+        },
       });
       return healthInsurance_found;
     }),
@@ -55,7 +77,8 @@ export const healthInsurancesRouter = createTRPCRouter({
           locality: input.locality,
           province: input.province,
           postal_code: input.postal_code,
-        });
+        })
+        .returning();
       return new_healthInsurance;
     }),
   change: protectedProcedure

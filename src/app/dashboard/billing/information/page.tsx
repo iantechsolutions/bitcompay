@@ -3,7 +3,7 @@ import { Title } from "~/components/title";
 import { List, ListTile } from "~/components/list";
 import LayoutContainer from "~/components/layout-container";
 import { Edit } from "lucide-react";
-import EditCompany from "./edit-information";
+// import EditCompany from "./edit-information";
 
 export default async function Page() {
   const company = await api.companies.get.query();
@@ -12,7 +12,7 @@ export default async function Page() {
       <section className="space-y-2">
         <div className="flex justify-between">
           <Title>Informacion de la compañia</Title>
-          <EditCompany />
+          {/* <EditCompany /> */}
         </div>
         {company && (
           <div>

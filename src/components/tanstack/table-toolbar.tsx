@@ -36,8 +36,7 @@ export default function TableToolbar<TData, TValue>({
                   .getColumn(searchColumn ?? "")
                   ?.setFilterValue(event.target.value)
               }
-              className="w-full h-7 rounded-full border-2 border-[#71EBD4] focus-visible:ring-[#71EBD4]"
-            ></Input>
+              className="w-full h-7 rounded-full border-2 border-[#71EBD4] focus-visible:ring-[#71EBD4]"></Input>
             <Search className="h-5 absolute right-3" color="#71EBD4" />
           </>
         )}
@@ -53,8 +52,7 @@ export default function TableToolbar<TData, TValue>({
                 className="h-3 w-auto ml-2 p-0 border-0 "
                 onClick={() =>
                   table.getColumn(column.id)?.setFilterValue(undefined)
-                }
-              >
+                }>
                 <X className="h-3 w-auto" color="#71EBD4" />
               </Button>
             </div>
@@ -65,8 +63,7 @@ export default function TableToolbar<TData, TValue>({
             <Button
               variant="ghost"
               onClick={() => table.resetColumnFilters()}
-              className="h-8 px-2 lg:px-3 font-semibold text-[#71EBD4] hover:text-[#71EBD4] hover:bg-white"
-            >
+              className="h-8 px-2 lg:px-3 font-semibold text-[#71EBD4] hover:text-[#71EBD4] hover:bg-white">
               Limpiar filtros
             </Button>
           )}

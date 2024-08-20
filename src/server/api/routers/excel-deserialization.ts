@@ -73,7 +73,10 @@ export const excelDeserializationRouter = createTRPCRouter({
           });
 
           const plan = await db.query.plans.findFirst({
-            where: eq(schema.plans.plan_code, row.plan!),
+            where: and(
+              eq(schema.plans.plan_code, row.plan!),
+              eq(schema.plans.brand_id, business_unit?.brandId ?? "")
+            ),
             with: {
               pricesPerCondition: true,
             },
@@ -503,6 +506,18 @@ async function readExcelFile(
       errors.push(
         `UNIDAD DE NEGOCIO no valida o no perteneciente a la organizacion en (fila:${rowNum})`
       );
+    } else {
+      const plan = await db.query.plans.findFirst({
+        where: and(
+          eq(schema.plans.plan_code, row.plan!),
+          eq(schema.plans.brand_id, business_unit.brandId)
+        ),
+      });
+      if (!plan) {
+        errors.push(
+          `PLAN no valido o no perteneciente a la marca en (fila:${rowNum})`
+        );
+      }
     }
     // if (business_unit?.companyId !== ctx.session.orgId) {
     //   errors.push(

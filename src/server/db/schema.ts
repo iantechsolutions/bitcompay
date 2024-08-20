@@ -14,6 +14,7 @@ import {
 import { columnId, createdAt, pgTable, updatedAt } from "./schema/util";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { literal, number, type z } from "zod";
+import { he } from "date-fns/locale";
 
 export { pgTable } from "./schema/util";
 
@@ -526,11 +527,13 @@ export const healthInsurances = pgTable("health_insurances", {
 
 export const healthInsurancesRelations = relations(
   healthInsurances,
-  ({ one }) => ({
+  ({ one, many }) => ({
     cpData: one(postal_code, {
       fields: [healthInsurances.postal_code],
       references: [postal_code.id],
     }),
+    comprobantes: many(comprobantes),
+    cc: one(currentAccount),
   })
 );
 
@@ -768,6 +771,7 @@ export const comprobantes = pgTable("comprobantes", {
     () => liquidations.id
   ),
   family_group_id: varchar("family_group_id", { length: 255 }),
+  health_insurance_id: varchar("health_insurance_id", { length: 255 }),
   // .references(
   //   () => family_groups.id
   // ),
@@ -790,6 +794,10 @@ export const comprobantesRelations = relations(
     anterior: one(comprobantes, {
       fields: [comprobantes.previous_facturaId],
       references: [comprobantes.id],
+    }),
+    healthInsurances: one(healthInsurances, {
+      fields: [comprobantes.health_insurance_id],
+      references: [healthInsurances.id],
     }),
   })
 );
@@ -1191,6 +1199,7 @@ export const currentAccount = pgTable("currentAccount", {
     () => companies.id
   ),
   family_group: varchar("family_group"),
+  health_insurance: varchar("health_insurance"),
 });
 
 export const currentAccountRelations = relations(
@@ -1203,6 +1212,10 @@ export const currentAccountRelations = relations(
     family_groups: one(family_groups, {
       fields: [currentAccount.family_group],
       references: [family_groups.id],
+    }),
+    health_insurance: one(healthInsurances, {
+      fields: [currentAccount.health_insurance],
+      references: [healthInsurances.id],
     }),
     events: many(events),
   })

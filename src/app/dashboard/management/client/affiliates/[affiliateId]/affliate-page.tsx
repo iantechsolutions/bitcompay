@@ -24,6 +24,7 @@ import { getDifferentialAmount, getGroupContribution } from "~/lib/utils";
 import { RouterOutputs } from "~/trpc/shared";
 import { useRouter } from "next/navigation";
 import { router } from "@trpc/server";
+import { SaldoPopoverAffiliates } from "./saldoPopoverAffiliates";
 export default function AffiliatePage(props: {
   params: { affiliateId: string; companyId: string };
 }) {
@@ -112,14 +113,26 @@ export default function AffiliatePage(props: {
             <h2 className="text-xl mt-2">Afiliados</h2>
           </div>
           <div
-            className="mt-2 border border-[#A7D3C7] p-4 w-1/2 rounded-lg hover:cursor-pointer hover:bg-[#f0f0f0d1]"
-            onClick={() => {
-              goToCCDetail(cc?.id);
-            }}
+            className="mt-2 border border-[#A7D3C7] p-4 w-1/2 rounded-lg hover:bg-[#f0f0f0d1]"
+            // onClick={() => {
+            //   goToCCDetail(cc?.id);
+            // }}
           >
-            <p className="text-lg font-semibold">Saldo actual</p>
+            <div className="flex flex-row justify-between">
+              <p className="text-lg font-semibold">
+                Saldo GF Nro.{grupo?.numericalId}
+              </p>
+              <SaldoPopoverAffiliates
+                ccId={cc?.id}
+                healthInsuranceId={props.params.affiliateId}
+              />
+            </div>
+
             <span className="text-[#CD3D3B] text-2xl font-bold">
-              $ {lastEvent?.current_amount}
+              $
+              {lastEvent?.current_amount !== undefined
+                ? lastEvent.current_amount.toFixed(2)
+                : "0.00"}
             </span>
           </div>
           <div>

@@ -173,7 +173,7 @@ export const companiesRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const companyId = ctx.session.orgId;
+      const companyId = input.companyId;
 
       await db.transaction(async (db) => {
         await db
@@ -205,13 +205,14 @@ export const companiesRouter = createTRPCRouter({
           const productsToDelete = companyProducts.filter((companyProduct) => {
             return !products.has(companyProduct.productId);
           });
-
+          console.log(productsToDelete);
           const productsToAdd = input.products.filter((productId) => {
             return !companyProducts.find(
               (companyProduct) => companyProduct.productId === productId
             );
           });
-
+          console.log("productsToAdd", productsToAdd);
+          console.log("companyProducts", companyProducts);
           if (productsToDelete.length > 0) {
             await db.delete(schema.companyProducts).where(
               and(
@@ -229,7 +230,7 @@ export const companiesRouter = createTRPCRouter({
           if (productsToAdd.length > 0) {
             await db.insert(schema.companyProducts).values(
               productsToAdd.map((productId) => ({
-                companyId: companyId!,
+                companyId: companyId ?? "",
                 productId,
               }))
             );
