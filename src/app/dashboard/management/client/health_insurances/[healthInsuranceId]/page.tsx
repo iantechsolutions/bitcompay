@@ -13,7 +13,7 @@ export default async function Page(props: {
   });
 
   if (!healthInsurance) {
-    return <Title>No se encontró el modo</Title>;
+    return <Title>No se encontró el obra social</Title>;
   }
 
   return <HealthInsurancePage healthInsurance={healthInsurance} />;
