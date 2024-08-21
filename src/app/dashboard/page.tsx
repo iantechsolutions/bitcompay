@@ -35,7 +35,7 @@ export default async function page() {
         <Card className="cardDashboard max-w-[1000px]">
           <CardContent className="mt-5 flex w-full flex-wrap items-center justify-between gap-2">
             <Link href={"sdfksdf"} className="h-auto w-auto">
-              <Button className="bg-white text-black shadow-none hover:bg-white">
+              <Button className="bg-white   shadow-none hover:bg-white">
                 <div className="mr-4 box-border rounded-full bg-[#1bdfb7] p-2">
                   <HandCoins className="h-6 w-6" />
                 </div>
@@ -46,7 +46,7 @@ export default async function page() {
               </Button>
             </Link>
             <Link href={"sdfksdf"} className="h-auto w-auto">
-              <Button className="bg-white text-black shadow-none hover:bg-white">
+              <Button className="bg-white   shadow-none hover:bg-white">
                 <div className="mr-4 box-border rounded-full bg-[#1bdfb7] p-2">
                   <ArrowLeftRight className="h-6 w-6" />
                 </div>
@@ -57,7 +57,7 @@ export default async function page() {
               </Button>
             </Link>
             <Link href={"sdfksdf"} className="h-auto w-auto">
-              <Button className="bg-white text-black shadow-none hover:bg-white">
+              <Button className="bg-white   shadow-none hover:bg-white">
                 <div className="mr-4 box-border rounded-full border-none bg-[#1bdfb7] p-2">
                   <LogOut className="h-6 w-6" />
                 </div>
@@ -69,7 +69,7 @@ export default async function page() {
             </Link>
 
             <Link href={"sdfksdf"} className="h-auto w-auto">
-              <Button className="bg-white text-black shadow-none hover:bg-white">
+              <Button className="bg-white   shadow-none hover:bg-white">
                 <div className="mr-4 box-border rounded-full bg-[#1bdfb7] p-2">
                   <Import className="h-6 w-6" />
                 </div>

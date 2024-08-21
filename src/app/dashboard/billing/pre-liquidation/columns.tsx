@@ -17,11 +17,11 @@ export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "number",
     header: () => (
-      <div className="text-center text-black text-medium">Número preliq</div>
+      <div className="text-center   text-medium">Número preliq</div>
     ),
     cell: ({ row }) => {
       return (
-        <div className="text-center text-[#909090]">
+        <div className="text-center  ">
           {row.getValue("number")}
         </div>
       );
@@ -30,11 +30,11 @@ export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "Marca",
     header: () => (
-      <div className="text-center text-black text-medium">Marca</div>
+      <div className="text-center   text-medium">Marca</div>
     ),
     cell: ({ row }) => {
       return (
-        <div className="text-center text-[#909090]">
+        <div className="text-center  ">
           {row.getValue("Marca")}
         </div>
       );
@@ -46,11 +46,11 @@ export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "period",
     header: () => (
-      <div className="text-center text-black text-medium">Periodo</div>
+      <div className="text-center   text-medium">Periodo</div>
     ),
     cell: ({ row }) => {
       return (
-        <div className="text-center text-[#909090]">
+        <div className="text-center  ">
           {row.getValue("period")}
         </div>
       );
@@ -59,24 +59,24 @@ export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "cuit",
     header: () => (
-      <div className="text-center text-black text-medium">CUIL/CUIT</div>
+      <div className="text-center   text-medium">CUIL/CUIT</div>
     ),
     cell: ({ row }) => {
       return (
-        <div className="text-center text-[#909090]">{row.getValue("cuit")}</div>
+        <div className="text-center  ">{row.getValue("cuit")}</div>
       );
     },
   },
   {
     accessorKey: "UN",
     header: () => (
-      <div className="text-center text-black text-medium">
+      <div className="text-center   text-medium">
         Unidad de negocio
       </div>
     ),
     cell: ({ row }) => {
       return (
-        <div className="text-center text-[#909090]">{row.getValue("UN")}</div>
+        <div className="text-center  ">{row.getValue("UN")}</div>
       );
     },
     filterFn: (row, id, value) => {
