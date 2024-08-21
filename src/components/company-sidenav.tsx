@@ -56,7 +56,11 @@ import {
 import { ScrollArea } from "./ui/scroll-area";
 import { usePathname } from "next/navigation";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
-import Sidenav, { SidenavItem, SidenavSeparator } from "./sidenav";
+import Sidenav, {
+  SidenavItem,
+  SidenavSeparator,
+  SideNavTrigger,
+} from "./sidenav";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { checkRole } from "~/lib/utils/react/roles";
 import Inicio from "../../public/sidebar/Frame-1.svg";
@@ -197,15 +201,15 @@ export default function CompanySidenav() {
   };
 
   return (
-    <ScrollArea className="h-[99%]">
-      <Sidenav className="h-full px-3 relative">
-        <div className="sticky top-0 bg-white">
-          <img
-            className="pb-5 pl-5 pr-5 pt-8"
-            src="/public/bitcom-03.png"
-            alt="logo"
-          ></img>
-        </div>
+    <ScrollArea className="h-[99%] w-full relative overflow-x-auto">
+      <div className="sticky top-0 bg-white w-full h-1/6 px-6">
+        <img
+          className="pb-5  pt-6"
+          src="/public/bitcom-03.png"
+          alt="logo"
+        ></img>
+      </div>
+      <Sidenav className="h-5/6 bg-white px-6">
         <SidenavItem
           className="pl-4"
           href={`/dashboard/home`}
@@ -220,9 +224,15 @@ export default function CompanySidenav() {
               <SidenavSeparator>GENERAL </SidenavSeparator>
             </div>
             <SidenavItem
-              icon={<LayoutDashboardIcon strokeWidth={1} />}
+              icon={
+                <LayoutDashboardIcon strokeWidth={1} className="h-7 w-6 " />
+              }
               activeIcon={
-                <LayoutDashboardIcon strokeWidth={1} color="#6952EB" />
+                <LayoutDashboardIcon
+                  strokeWidth={1}
+                  className="h-5 w-6 "
+                  color="#6952EB"
+                />
               }
               href={`/dashboard`}
             >
@@ -243,23 +253,25 @@ export default function CompanySidenav() {
                   <AccordionTrigger
                     className={
                       isActive("Ventas")
-                        ? "rounded-lg bg-[#D9FF9C] px-1 py-1.5 hover:no-underline"
-                        : "rounded-lg px-1 py-1.5 hover:no-underline"
+                        ? "rounded-lg bg-[#BEF0BB] px-1 py-1.5  mb-3 hover:no-underline"
+                        : "rounded-lg px-1 py-1.5  mb-3 hover:no-underline"
                     }
                   >
-                    <SidenavSeparator>
-                      {" "}
-                      <img
-                        src="/public/sidebar/Frame-2.png"
-                        className="mr-2 h-6"
-                      />
+                    <SideNavTrigger
+                      icon={
+                        <img
+                          src="/public/sidebar/Frame-2.png"
+                          className="mr-4 h-7"
+                        />
+                      }
+                    >
                       Ventas{" "}
-                    </SidenavSeparator>
+                    </SideNavTrigger>
                   </AccordionTrigger>
                   <AccordionContent className="pl-3">
                     {canSeeAdvisors && (
                       <SidenavItem
-                        icon={<UserPlus strokeWidth={1} />}
+                        icon={<UserPlus strokeWidth={1} className="h-6 " />}
                         activeIcon={
                           <UserPlus strokeWidth={1} color="#6952EB" />
                         }
@@ -335,17 +347,20 @@ export default function CompanySidenav() {
                   <AccordionTrigger
                     className={
                       isActive("Clientes")
-                        ? "rounded-lg bg-[#D9FF9C] px-1 py-1.5 hover:no-underline"
-                        : "rounded-lg px-1 py-1.5 hover:no-underline"
+                        ? "rounded-lg bg-[#BEF0BB] px-1 py-1.5 mb-3 hover:no-underline"
+                        : "rounded-lg px-1 py-1.5 mb-3 hover:no-underline"
                     }
                   >
-                    <SidenavSeparator>
-                      <img
-                        src="/public/sidebar/Frame-4.png"
-                        className="mr-2 h-6"
-                      />
+                    <SideNavTrigger
+                      icon={
+                        <img
+                          src="/public/sidebar/Frame-4.png"
+                          className="mr-5 h-7"
+                        />
+                      }
+                    >
                       Clientes
-                    </SidenavSeparator>
+                    </SideNavTrigger>
                   </AccordionTrigger>{" "}
                   <AccordionContent className="pl-3">
                     {canSeeAffiliates && (
@@ -381,11 +396,11 @@ export default function CompanySidenav() {
                   <AccordionTrigger
                     className={
                       isActive("Proveedores")
-                        ? "rounded-lg bg-[#D9FF9C] px-1 py-1.5 hover:no-underline"
+                        ? "rounded-lg bg-[#BEF0BB] px-1 py-1.5 mb-3 hover:no-underline"
                         : "rounded-lg px-1 py-1.5 hover:no-underline"
                     }
                   >
-                    <SidenavSeparator>Proveedores</SidenavSeparator>
+                    <SideNavTrigger>Proveedores</SideNavTrigger>
                   </AccordionTrigger>
                   <AccordionContent className="pl-3">
                     <SidenavItem
@@ -438,14 +453,13 @@ export default function CompanySidenav() {
                   <AccordionTrigger
                     className={
                       isActive("Documentos")
-                        ? "rounded-lg bg-[#D9FF9C] px-1 py-1.5 hover:no-underline"
-                        : "rounded-lg px-1 py-1.5 hover:no-underline"
+                        ? "rounded-lg bg-[#BEF0BB] px-1 py-1.5 mb-3 hover:no-underline"
+                        : "rounded-lg px-1 py-1.5 mb-3 hover:no-underline"
                     }
                   >
-                    <SidenavSeparator>
-                      <Files strokeWidth={1} className="h-6 mr-2" />
+                    <SideNavTrigger icon={<Files className=" mr-4" />}>
                       Documentos
-                    </SidenavSeparator>
+                    </SideNavTrigger>
                   </AccordionTrigger>
                   <AccordionContent className="pl-3">
                     {canSeeMasiveUpload && (
@@ -503,14 +517,12 @@ export default function CompanySidenav() {
         {canSeeBilling && (
           <>
             <div>
-              <SidenavSeparator className="opacity-80">
-                FACTURACIÓN
-              </SidenavSeparator>
+              <SidenavSeparator>FACTURACIÓN</SidenavSeparator>
             </div>
 
             {canSeeManualIssuance && (
               <SidenavItem
-                icon={<img src="/public/sidebar/Frame-6.png" />}
+                icon={<img src="/public/sidebar/Frame-6.png" className="" />}
                 activeIcon={<img src="/public/sidebar/Frame-7.png" />}
                 href={`/dashboard/billing/manual_issuance`}
               >
@@ -651,13 +663,7 @@ export default function CompanySidenav() {
 
         {canSeeAudit && (
           <>
-            <div
-              className={
-                isActive("Auditoria")
-                  ? "rounded-lg bg-[#D9FF9C] px-1 py-1.5 hover:no-underline"
-                  : "rounded-lg px-1 py-1.5 hover:no-underline"
-              }
-            >
+            <div>
               <SidenavSeparator>Auditoria</SidenavSeparator>
             </div>
 

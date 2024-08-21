@@ -75,6 +75,7 @@
   body {
     @apply bg-background text-foreground;
     font-family: "Montserrat", sans-serif;
+    background-color: #f7f7f7;
   }
 }
 
@@ -88,4 +89,23 @@
 
 .cardDashboard {
   @apply shadow-custom-dark rounded-lg border-b border-l-0 border-r-0 border-t-0 border-border bg-card text-card-foreground;
+}
+
+/* Works on Firefox */
+* {
+  scrollbar-width: thin;
+}
+
+/* Works on Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 5px;
+}
+
+*::-webkit-scrollbar-track {
+  background: orange;
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: 20px;
+  border: 3px;
 }
