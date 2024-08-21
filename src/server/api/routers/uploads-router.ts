@@ -649,7 +649,7 @@ async function readResponseUploadContents(
       console.log("recordValues", recordValues);
 
       const fiscal_id_number = recordValues[0]?.slice(32, 42);
-      const invoice_number = recordValues[0]?.slice(42, 48);
+      const invoice_number = recordValues[0]?.slice(42, 62);
       const payment_date = recordValues[0]?.slice(0, 8);
 
       const importe_final = recordValues[0]?.slice(9, 23);
@@ -671,7 +671,11 @@ async function readResponseUploadContents(
 
       console.log(date, "ES ESTAAA");
       console.log(importe_final);
-
+      console.log("invoice_number", invoice_number);
+      console.log(
+        " recordValues[0]?.slice(42, 48);",
+        recordValues[0]?.slice(42, 48)
+      );
       if (invoice_number) {
         const original_transaction = await db.query.payments.findFirst({
           where: eq(

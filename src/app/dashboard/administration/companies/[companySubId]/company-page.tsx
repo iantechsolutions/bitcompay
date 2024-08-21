@@ -78,8 +78,8 @@ export default function CompanyPage({
         products: Array.from(companyProducts),
         name,
         description,
-        afipKey,
-        cuit,
+        afipKey: afipKey ?? "",
+        cuit: cuit ?? "",
       });
       toast.success("Se han guardado los cambios");
     } catch (e) {
@@ -114,7 +114,7 @@ export default function CompanyPage({
 
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="item-1">
-            <AccordionTrigger>
+            <AccordionTrigger className="border-b">
               <h2 className="text-md">Productos habilitados</h2>
             </AccordionTrigger>
             <AccordionContent>
@@ -250,7 +250,7 @@ function DeleteChannel(props: { companySubId: string }) {
     e.preventDefault();
     deleteChannel({ companyId: props.companySubId })
       .then(() => {
-        toast.success("Se ha eliminado la compañía correctamente");
+        toast.success("Se ha eliminado la entidad correctamente");
         router.push("./");
         router.refresh();
       })
@@ -280,7 +280,8 @@ function DeleteChannel(props: { companySubId: string }) {
           <AlertDialogAction
             className="bg-red-500 hover:bg-red-600 active:bg-red-700"
             onClick={handleDelete}
-            disabled={isLoading}>
+            disabled={isLoading}
+          >
             {isLoading && (
               <Loader2Icon className="mr-2 animate-spin" size={20} />
             )}
