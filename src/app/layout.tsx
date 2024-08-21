@@ -24,7 +24,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
     <ClerkProvider signInFallbackRedirectUrl={"/dashboard"}>
       <html lang="es">
         {/* biome-ignore lint/nursery/useSortedClasses: <explanation> */}
-        <body className={`font-family ${montserrat.className}`}>
+        <body className={`text-[#3E3E3E] font-family ${montserrat.className}`}>
           <TRPCReactProvider cookies={cookies().toString()}>
             {props.children}
             <Toaster />

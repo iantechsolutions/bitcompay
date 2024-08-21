@@ -27,11 +27,11 @@ export const columns: ColumnDef<AffiliatesTableRecord>[] = [
   {
     accessorKey: "nroGF",
     header: () => (
-      <div className="text-center text-black text-medium">NRO GF</div>
+      <div className="text-center   text-medium">NRO GF</div>
     ),
     cell: ({ row }) => {
       return (
-        <div className="text-center text-[#909090]">
+        <div className="text-center  ">
           {row.getValue("nroGF")}
         </div>
       );
@@ -40,11 +40,11 @@ export const columns: ColumnDef<AffiliatesTableRecord>[] = [
   {
     accessorKey: "nombre",
     header: () => (
-      <div className="text-center text-black text-medium">Apellido, Nombre</div>
+      <div className="text-center   text-medium">Apellido, Nombre</div>
     ),
     cell: ({ row }) => {
       return (
-        <div className="text-center text-[#909090] overflow-hidden whitespace-nowrap text-overflow-ellipsis">
+        <div className="text-center   overflow-hidden whitespace-nowrap text-overflow-ellipsis">
           {row.getValue("nombre")}
         </div>
       );
@@ -53,22 +53,22 @@ export const columns: ColumnDef<AffiliatesTableRecord>[] = [
   {
     accessorKey: "cuil",
     header: () => (
-      <div className="text-center text-black text-medium">CUIL</div>
+      <div className="text-center   text-medium">CUIL</div>
     ),
     cell: ({ row }) => {
       return (
-        <div className="text-center text-[#909090]">{row.getValue("cuil")}</div>
+        <div className="text-center  ">{row.getValue("cuil")}</div>
       );
     },
   },
   {
     accessorKey: "integrantes",
     header: () => (
-      <div className="text-center text-black text-medium">Integrantes</div>
+      <div className="text-center   text-medium">Integrantes</div>
     ),
     cell: ({ row }) => {
       return (
-        <div className="text-center text-[#909090]">
+        <div className="text-center  ">
           {row.getValue("integrantes")}
         </div>
       );
@@ -77,11 +77,11 @@ export const columns: ColumnDef<AffiliatesTableRecord>[] = [
   {
     accessorKey: "Estados GF",
     header: () => (
-      <div className="text-center text-black text-medium">Estado</div>
+      <div className="text-center   text-medium">Estado</div>
     ),
     cell: ({ row }) => {
       return (
-        <div className="text-center text-[#909090]">
+        <div className="text-center  ">
           {row.getValue("Estados GF")}
         </div>
       );
@@ -93,11 +93,11 @@ export const columns: ColumnDef<AffiliatesTableRecord>[] = [
   {
     accessorKey: "fechaEstado",
     header: () => (
-      <div className="text-center text-black text-medium">Fecha Estado</div>
+      <div className="text-center   text-medium">Fecha Estado</div>
     ),
     cell: ({ row }) => {
       return (
-        <div className="text-center text-[#909090]">
+        <div className="text-center  ">
           {dayjs(row.getValue("fechaEstado")).format("DD/MM/YYYY")}
         </div>
       );
