@@ -106,7 +106,7 @@ export const UserButton = ({
     return (
       <Button onClick={() => openSignIn()}>
         {" "}
-        <LogIn className="mr-2 h-6 w-auto" />
+        <LogIn className="mr-4 h-6 w-auto shadow-none" />
         Sign In
       </Button>
     );

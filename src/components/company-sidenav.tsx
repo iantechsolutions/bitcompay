@@ -211,7 +211,7 @@ export default function CompanySidenav() {
       </div>
       <Sidenav className="h-5/6 bg-white px-6">
         <SidenavItem
-          className="pl-4"
+          className="pl-4 text-md"
           href={`/dashboard/home`}
           icon={<img src="/public/sidebar/Frame.png" alt="inicio" />}
           activeIcon={<img src="/public/sidebar/Frame-1.png" alt="inicio" />}
@@ -224,6 +224,7 @@ export default function CompanySidenav() {
               <SidenavSeparator>GENERAL </SidenavSeparator>
             </div>
             <SidenavItem
+              className="text-md"
               icon={
                 <LayoutDashboardIcon strokeWidth={1} className="h-7 w-6 " />
               }
@@ -261,7 +262,7 @@ export default function CompanySidenav() {
                       icon={
                         <img
                           src="/public/sidebar/Frame-2.png"
-                          className="mr-4 h-7"
+                          className="mr-4 h-7 text-md"
                         />
                       }
                     >
@@ -277,6 +278,7 @@ export default function CompanySidenav() {
                         }
                         href={`/dashboard/management/sales/advisors`}
                         IsChild={true}
+                        className="text-md"
                       >
                         Asesores
                       </SidenavItem>
@@ -289,6 +291,7 @@ export default function CompanySidenav() {
                         }
                         href={`/dashboard/management/sales/procedures`}
                         IsChild={true}
+                        className="text-md"
                       >
                         Tramites
                       </SidenavItem>
@@ -299,6 +302,7 @@ export default function CompanySidenav() {
                         activeIcon={<MapPin strokeWidth={1} color="#6952EB" />}
                         href={`/dashboard/management/sales/plans`}
                         IsChild={true}
+                        className="text-md"
                       >
                         Planes
                       </SidenavItem>
@@ -311,6 +315,7 @@ export default function CompanySidenav() {
                         }
                         href={`/dashboard/management/sales/differentials`}
                         IsChild={true}
+                        className="text-md"
                       >
                         Diferenciales
                       </SidenavItem>
@@ -323,6 +328,7 @@ export default function CompanySidenav() {
                         }
                         href={`/dashboard/management/sales/comissions`}
                         IsChild={true}
+                        className="text-md"
                       >
                         Comisiones
                       </SidenavItem>
@@ -333,6 +339,7 @@ export default function CompanySidenav() {
                         activeIcon={<Percent strokeWidth={1} color="#6952EB" />}
                         href={`/dashboard/management/sales/bonuses`}
                         IsChild={true}
+                        className="text-md"
                       >
                         Bonificaciones
                       </SidenavItem>
@@ -358,6 +365,7 @@ export default function CompanySidenav() {
                           className="mr-5 h-7"
                         />
                       }
+                      className="text-md"
                     >
                       Clientes
                     </SideNavTrigger>
@@ -371,6 +379,7 @@ export default function CompanySidenav() {
                         }
                         href={`/dashboard/management/client/affiliates`}
                         IsChild={true}
+                        className="text-md"
                       >
                         Afiliados
                       </SidenavItem>
@@ -381,6 +390,7 @@ export default function CompanySidenav() {
                         activeIcon={<img src="/public/sidebar/Frame-27.png" />}
                         href={`/dashboard/management/client/health_insurances`}
                         IsChild={true}
+                        className="text-md"
                       >
                         Obras sociales
                       </SidenavItem>
@@ -400,7 +410,9 @@ export default function CompanySidenav() {
                         : "rounded-lg px-1 py-1.5 hover:no-underline"
                     }
                   >
-                    <SideNavTrigger>Proveedores</SideNavTrigger>
+                    <SideNavTrigger className="text-md">
+                      Proveedores
+                    </SideNavTrigger>
                   </AccordionTrigger>
                   <AccordionContent className="pl-3">
                     <SidenavItem
@@ -408,6 +420,7 @@ export default function CompanySidenav() {
                       activeIcon={<Bell strokeWidth={1} color="#6952EB" />}
                       href={`/dashboard/management/suppliers/abm`}
                       IsChild={true}
+                      className="text-md"
                     >
                       ABM Proveedores
                     </SidenavItem>
@@ -416,6 +429,7 @@ export default function CompanySidenav() {
                       activeIcon={<Archive strokeWidth={1} color="#6952EB" />}
                       href={`/dashboard/management/suppliers/comprobants-upload`}
                       IsChild={true}
+                      className="text-md"
                     >
                       Alta Comprobantes
                     </SidenavItem>
@@ -424,6 +438,7 @@ export default function CompanySidenav() {
                       activeIcon={<Folder strokeWidth={1} color="#6952EB" />}
                       href={`/dashboard/management/suppliers/currentAcounts`}
                       IsChild={true}
+                      className="text-md"
                     >
                       Cuentas Corrientes de Proveedores
                     </SidenavItem>
@@ -432,6 +447,7 @@ export default function CompanySidenav() {
                       activeIcon={<Globe strokeWidth={1} color="#6952EB" />}
                       href={`/dashboard/management/suppliers/due_dates`}
                       IsChild={true}
+                      className="text-md"
                     >
                       Agenda de vencimientos
                     </SidenavItem>
@@ -440,6 +456,7 @@ export default function CompanySidenav() {
                       activeIcon={<Heart strokeWidth={1} color="#6952EB" />}
                       href={`/dashboard/management/suppliers/orders`}
                       IsChild={true}
+                      className="text-md"
                     >
                       Ordenes de Pago
                     </SidenavItem>
@@ -457,7 +474,10 @@ export default function CompanySidenav() {
                         : "rounded-lg px-1 py-1.5 mb-3 hover:no-underline"
                     }
                   >
-                    <SideNavTrigger icon={<Files className=" mr-4" />}>
+                    <SideNavTrigger
+                      icon={<Files className=" mr-4" />}
+                      className="text-md"
+                    >
                       Documentos
                     </SideNavTrigger>
                   </AccordionTrigger>
@@ -470,6 +490,7 @@ export default function CompanySidenav() {
                         }
                         href={`/dashboard/management/documents/massive-upload`}
                         IsChild={true}
+                        className="text-md"
                       >
                         Carga Masiva
                       </SidenavItem>
@@ -480,6 +501,7 @@ export default function CompanySidenav() {
                         activeIcon={<Cloud strokeWidth={1} color="#6952EB" />}
                         href={`/dashboard/management/documents/rec-upload`}
                         IsChild={true}
+                        className="text-md"
                       >
                         Carga REC
                       </SidenavItem>
@@ -492,6 +514,7 @@ export default function CompanySidenav() {
                         }
                         href={`/dashboard/management/documents/output`}
                         IsChild={true}
+                        className="text-md"
                       >
                         Archivos de salida
                       </SidenavItem>
@@ -504,6 +527,7 @@ export default function CompanySidenav() {
                         }
                         href={`/dashboard/management/documents/response`}
                         IsChild={true}
+                        className="text-md"
                       >
                         Respuesta
                       </SidenavItem>
@@ -517,7 +541,9 @@ export default function CompanySidenav() {
         {canSeeBilling && (
           <>
             <div>
-              <SidenavSeparator>FACTURACIÓN</SidenavSeparator>
+              <SidenavSeparator className="text-md">
+                FACTURACIÓN
+              </SidenavSeparator>
             </div>
 
             {canSeeManualIssuance && (
@@ -525,6 +551,7 @@ export default function CompanySidenav() {
                 icon={<img src="/public/sidebar/Frame-6.png" className="" />}
                 activeIcon={<img src="/public/sidebar/Frame-7.png" />}
                 href={`/dashboard/billing/manual_issuance`}
+                className="text-md"
               >
                 Generar manual
               </SidenavItem>
@@ -534,6 +561,7 @@ export default function CompanySidenav() {
                 icon={<img src="/public/sidebar/Frame-8.png" />}
                 activeIcon={<img src="/public/sidebar/Frame-9.png" />}
                 href={`/dashboard/billing/pre-liquidation`}
+                className="text-md"
               >
                 Pre-Liquidacion
               </SidenavItem>
@@ -543,6 +571,7 @@ export default function CompanySidenav() {
                 icon={<img src="/public/sidebar/Frame-10.png" />}
                 activeIcon={<img src="/public/sidebar/Frame-11.png" />}
                 href={`/dashboard/billing/liquidation`}
+                className="text-md"
               >
                 Liquidacion
               </SidenavItem>
@@ -552,6 +581,7 @@ export default function CompanySidenav() {
                 icon={<HelpCircle strokeWidth={1} />}
                 activeIcon={<HelpCircle strokeWidth={1} color="#6952EB" />}
                 href={`/dashboard/billing/information`}
+                className="text-md"
               >
                 Informacion
               </SidenavItem>
@@ -561,6 +591,7 @@ export default function CompanySidenav() {
                 icon={<Search strokeWidth={1} />}
                 activeIcon={<Search strokeWidth={1} color="#6952EB" />}
                 href={`/dashboard/billing/consults`}
+                className="text-md"
               >
                 Consultas
               </SidenavItem>
@@ -570,7 +601,9 @@ export default function CompanySidenav() {
         {canSeeAdministration && (
           <>
             <div>
-              <SidenavSeparator>ADMINISTRACIÓN</SidenavSeparator>
+              <SidenavSeparator className="text-md">
+                ADMINISTRACIÓN
+              </SidenavSeparator>
             </div>
 
             {canSeeCompanies && (
@@ -580,6 +613,7 @@ export default function CompanySidenav() {
                 activeIcon={
                   <BriefcaseBusiness strokeWidth={1} color="#6952EB" />
                 }
+                className="text-md"
               >
                 Entidades
               </SidenavItem>
@@ -589,6 +623,7 @@ export default function CompanySidenav() {
                 href={`/dashboard/administration/products`}
                 activeIcon={<Package strokeWidth={1} color="#6952EB" />}
                 icon={<Package strokeWidth={1} />}
+                className="text-md"
               >
                 Productos
               </SidenavItem>
@@ -598,6 +633,7 @@ export default function CompanySidenav() {
                 href={`/dashboard/administration/channels`}
                 activeIcon={<Sliders strokeWidth={1} color="#6952EB" />}
                 icon={<Sliders strokeWidth={1} />}
+                className="text-md"
               >
                 Canales
               </SidenavItem>
@@ -607,6 +643,7 @@ export default function CompanySidenav() {
                 href={`/dashboard/administration/brands`}
                 activeIcon={<Tag strokeWidth={1} color="#6952EB" />}
                 icon={<Tag strokeWidth={1} />}
+                className="text-md"
               >
                 Marcas
               </SidenavItem>
@@ -616,6 +653,7 @@ export default function CompanySidenav() {
                 href={`/dashboard/administration/services`}
                 activeIcon={<Wrench strokeWidth={1} color="#6952EB" />}
                 icon={<Wrench strokeWidth={1} />}
+                className="text-md"
               >
                 Servicios
               </SidenavItem>
@@ -625,6 +663,7 @@ export default function CompanySidenav() {
                 href={`/dashboard/administration/quotes`}
                 icon={<FileText strokeWidth={1} />}
                 activeIcon={<FileText strokeWidth={1} color="#6952EB" />}
+                className="text-md"
               >
                 Cotizaciones
               </SidenavItem>
@@ -634,13 +673,16 @@ export default function CompanySidenav() {
         {canSeeMaintenance && (
           <>
             <div>
-              <SidenavSeparator>MANTENIMIENTO</SidenavSeparator>
+              <SidenavSeparator className="text-md">
+                MANTENIMIENTO
+              </SidenavSeparator>
             </div>
 
             <SidenavItem
               icon={<User strokeWidth={1} />}
               activeIcon={<User strokeWidth={1} color="#6952EB" />}
               href={`/dashboard/maintenance/user`}
+              className="text-md"
             >
               Usuarios
             </SidenavItem>
@@ -648,6 +690,7 @@ export default function CompanySidenav() {
               icon={<Shield strokeWidth={1} />}
               href={`/dashboard/maintenance/roles`}
               activeIcon={<Shield strokeWidth={1} color="#6952EB" />}
+              className="text-md"
             >
               Roles
             </SidenavItem>
@@ -655,6 +698,7 @@ export default function CompanySidenav() {
               icon={<Grid strokeWidth={1} />}
               activeIcon={<Grid strokeWidth={1} color="#6952EB" />}
               href={`/dashboard/maintenance/tables`}
+              className="text-md"
             >
               Tablas
             </SidenavItem>
@@ -664,7 +708,7 @@ export default function CompanySidenav() {
         {canSeeAudit && (
           <>
             <div>
-              <SidenavSeparator>Auditoria</SidenavSeparator>
+              <SidenavSeparator className="text-md">Auditoria</SidenavSeparator>
             </div>
 
             <SidenavItem

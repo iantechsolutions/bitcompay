@@ -28,11 +28,11 @@ export const CustomOrganizationSwitcher = ({
         <PopoverTrigger>
           <Button
             variant={"outline"}
-            className="bg-white hover:bg-white rounded-2xl px-7 text-xs font-normal flex items-center border-none shadow-none"
+            className="bg-white hover:bg-white rounded-2xl px-7 text-xs font-normal text-md flex items-center border-none shadow-none"
           >
             <img src="/public/header/Frame-14.png" className="h-6 mr-2" />
             {organization?.name ?? companyName}
-            <ChevronDown strokeWidth={2} />
+            <ChevronDown strokeWidth={2} color="black" width={24} />
           </Button>
         </PopoverTrigger>
         <PopoverContent>
