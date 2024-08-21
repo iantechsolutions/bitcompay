@@ -6,6 +6,8 @@ import { checkRole } from "~/lib/utils/server/roles";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { api } from "~/trpc/server";
 import { UserButton } from "./clerk/user-button";
+import { CustomOrganizationSwitcher } from "./clerk/org-switcher";
+import { ScrollArea } from "./ui/scroll-area";
 export type AppLayoutProps = {
   children: React.ReactNode;
   title?: React.ReactNode;
@@ -21,7 +23,7 @@ export default async function AppLayout(props: AppLayoutProps) {
     <>
       <header
         // biome-ignore lint/nursery/useSortedClasses: <explanation>
-        className={`fixed top-0 right-0 left-0 z-10 flex h-[70px] items-center border-b px-2 backdrop-blur-md md:px-4 ${props.headerClass}`}
+        className={`fixed top-0 right-0 left-0 z-10 flex h-24 items-center border-b px-2 backdrop-blur-md md:px-4 ${props.headerClass}`}
       >
         <SidenavSheet
           trigger={
@@ -32,22 +34,21 @@ export default async function AppLayout(props: AppLayoutProps) {
           content={props.sidenav}
         />
         <div className="w-full">{props.title}</div>
-        <div className="flex gap-6 px-2">
+        <div className="flex gap-6 items-center px-2 ">
           {isAdmin && (
-            <OrganizationSwitcher
-              hidePersonal={true}
-              afterSelectOrganizationUrl={""}
-            />
+            <CustomOrganizationSwitcher companyName={company?.name} />
           )}
           <UserButton companyName={company?.name} />
         </div>
       </header>
+
       <aside
         // biome-ignore lint/nursery/useSortedClasses: <explanation>
-        className={`fixed bottom-0 left-0 z-20 hidden max-h-full w-[250px] overflow-y-hidden border-r md:block ${props.sidenavClass}`}
+        className={`fixed bottom-0 left-0 z-20 hidden max-h-full w-[300px]  bg-white overflow-y-hidden border-r md:block ${props.sidenavClass}`}
       >
         {props.sidenav}
       </aside>
+
       <main className="relative mt-[70px] p-3 md:ml-[250px] md:p-10">
         {props.children}
       </main>

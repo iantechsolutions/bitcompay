@@ -73,7 +73,10 @@ export const excelDeserializationRouter = createTRPCRouter({
           });
 
           const plan = await db.query.plans.findFirst({
-            where: eq(schema.plans.plan_code, row.plan!),
+            where: and(
+              eq(schema.plans.plan_code, row.plan!),
+              eq(schema.plans.brand_id, business_unit?.brandId ?? "")
+            ),
             with: {
               pricesPerCondition: true,
             },
@@ -419,6 +422,12 @@ async function readExcelFile(
         ")"
     );
   });
+  let brands = await db.query.brands.findMany({
+    with: { company: true },
+  });
+  brands = brands.filter((x) =>
+    x.company.some((x) => x.companyId === ctx.session.orgId)
+  );
   for (let i = 0; i < transformedRows.length; i++) {
     const row = transformedRows[i]!;
     const rowNum = i + 2;
@@ -497,6 +506,18 @@ async function readExcelFile(
       errors.push(
         `UNIDAD DE NEGOCIO no valida o no perteneciente a la organizacion en (fila:${rowNum})`
       );
+    } else {
+      const plan = await db.query.plans.findFirst({
+        where: and(
+          eq(schema.plans.plan_code, row.plan!),
+          eq(schema.plans.brand_id, business_unit.brandId)
+        ),
+      });
+      if (!plan) {
+        errors.push(
+          `PLAN no valido o no perteneciente a la marca en (fila:${rowNum})`
+        );
+      }
     }
     // if (business_unit?.companyId !== ctx.session.orgId) {
     //   errors.push(
@@ -531,9 +552,11 @@ async function readExcelFile(
     if (!mode) {
       errors.push(`MODO no valido en (fila:${rowNum})`);
     }
-    const plan = await db.query.plans.findFirst({
+    const planes = await db.query.plans.findMany({
       where: eq(schema.plans.plan_code, row.plan!),
     });
+    const plan = planes.filter((x) => brands.some((y) => y.id === x.brand_id));
+
     if (!plan) {
       errors.push(`PLAN no valido en (fila:${rowNum})`);
     }

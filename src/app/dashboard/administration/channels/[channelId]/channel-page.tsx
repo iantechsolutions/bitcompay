@@ -44,7 +44,6 @@ export default function ChannelPage({
     new Set(channel.requiredColumns)
   );
   const [name, setName] = useState(channel.name);
-  const [number, setNumber] = useState(channel.number.toString());
   const [description, setDescription] = useState(channel.description);
 
   function changeRequiredColumn(key: string, required: boolean) {
@@ -65,7 +64,6 @@ export default function ChannelPage({
         channelId: channel.id,
         requiredColumns: Array.from(requiredColumns),
         name,
-        number: Number.parseInt(number),
         description,
       });
       toast.success("Se han guardado los cambios");
@@ -138,15 +136,7 @@ export default function ChannelPage({
                       onChange={(e) => setName(e.target.value)}
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="number">Número</Label>
-                    <Input
-                      id="number"
-                      type="number"
-                      value={number}
-                      onChange={(e) => setNumber(e.target.value)}
-                    />
-                  </div>
+
                   <div className="col-span-2">
                     <Label htmlFor="description">Descripción</Label>
                     <Input
@@ -232,8 +222,7 @@ function DeleteChannel(props: { channelId: string }) {
           <AlertDialogAction
             className="bg-red-500 active:bg-red-700 hover:bg-red-600"
             onClick={handleDelete}
-            disabled={isLoading}
-          >
+            disabled={isLoading}>
             Eliminar
           </AlertDialogAction>
         </AlertDialogFooter>

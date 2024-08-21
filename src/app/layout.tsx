@@ -1,14 +1,14 @@
 import "~/styles/globals.css";
 
 import { ClerkProvider } from "@clerk/nextjs";
-import { Roboto } from "next/font/google";
+import { Montserrat, Roboto } from "next/font/google";
 import { TRPCReactProvider } from "~/trpc/react";
 import { cookies } from "next/headers";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
 import { Toaster } from "~/components/ui/sonner";
 dayjs.locale("es");
-const roboto = Roboto({
+const montserrat = Montserrat({
   subsets: ["latin-ext"],
   weight: ["400", "500", "700"],
 });
@@ -24,7 +24,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
     <ClerkProvider signInFallbackRedirectUrl={"/dashboard"}>
       <html lang="es">
         {/* biome-ignore lint/nursery/useSortedClasses: <explanation> */}
-        <body className={`font-family ${roboto.className}`}>
+        <body className={`text-[#3E3E3E] font-family ${montserrat.className}`}>
           <TRPCReactProvider cookies={cookies().toString()}>
             {props.children}
             <Toaster />

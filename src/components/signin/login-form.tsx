@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import { CustomGoogleOneTap } from "./google-onetap";
 import { toast } from "sonner";
 import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
-
+import ForgotPasswordPage from "~/components/signin/forgotPassword";
 type Inputs = {
   username: string;
   password: string;
@@ -22,6 +22,7 @@ interface LoginFormProps {
 }
 
 export default function LoginForm({ setShowRegister }: LoginFormProps) {
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   function showGoogle() {
     console.log("showGoogle");
     const params = {
@@ -70,19 +71,25 @@ export default function LoginForm({ setShowRegister }: LoginFormProps) {
         clerk.setActive({ session: signInAttempt.createdSessionId });
       } else {
         setError("Los datos proporcionados no son correctos");
+        setLoading(false);
       }
     } catch (err: any) {
       console.error(JSON.stringify(err, null, 2));
       if (isClerkAPIResponseError(err)) {
         setError("Los datos proporcionados no son correctos");
+        setLoading(false);
       } else {
         setError("Los datos proporcionados no son correctos");
+        setLoading(false);
       }
     } finally {
       // setLoading(false);
     }
   };
 
+  if (showForgotPassword) {
+    return <ForgotPasswordPage />;
+  }
   return (
     <div className="flex flex-col items-center px-10 pt-3 pb-7 bg-white rounded-2xl">
       <Image
@@ -99,7 +106,7 @@ export default function LoginForm({ setShowRegister }: LoginFormProps) {
         <span className="font-bold"> iniciar sesion</span>
       </p>
       <Button
-        className="w-full px-20 py-3 mt-6 mb-3 text-black bg-[#DEDEDE] hover:bg-[#DEDEDE] "
+        className="w-full px-20 py-3 mt-6 mb-3  text-[#3E3E3E] bg-[#DEDEDE] hover:bg-[#DEDEDE] "
         onClick={showGoogle}
       >
         <img src="public/google-icon.svg" alt="google icon" />
@@ -163,12 +170,15 @@ export default function LoginForm({ setShowRegister }: LoginFormProps) {
               </Button>
             )}
           </div>
-          <p className="text-xs font-semibold text-muted-foreground mt-2 hover:cursor-pointer">
+          <p
+            onClick={() => setShowForgotPassword(true)}
+            className="text-xs font-semibold text-muted-foreground mt-2 hover:cursor-pointer"
+          >
             Recupero de contraseña
           </p>
 
           <Button
-            className="w-full px-20 h-8 py-3 my-1 text-black bg-[#1BDFB7] hover:bg-[#1BDFB7] "
+            className="w-full px-20 h-8 py-3 my-1  text-[#3E3E3E] bg-[#1BDFB7] hover:bg-[#1BDFB7] "
             disabled={loading}
           >
             {loading && <Loader2Icon className="mr-2 animate-spin" size={20} />}

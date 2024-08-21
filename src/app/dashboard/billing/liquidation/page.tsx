@@ -18,16 +18,19 @@ export default async function Page() {
   //filter liquidations where companyId is equal to the companyId in the URL and estado: "pendiente"
   const { orgId } = auth();
   const possibleBrands = await api.brands.list.query();
+
   const liquidations = liquidationsFull.filter(
     (liquidation) => liquidation.estado === "aprobada"
   );
   const tableData: TableRecord[] = [];
 
+  // console.log(brandNames, "Ejemplo");
+
   for (const liquidation of liquidations) {
     tableData.push({
       id: liquidation?.id!,
       number: String(liquidation?.number) ?? "NO NUMBER",
-      Marca: liquidation?.brand?.name ?? "NO BRAND",
+      Marca: liquidation.brand?.name ?? "NO BRAND",
       period: dayjs(liquidation?.period).format("MM-YYYY"),
       cuit: liquidation?.cuit ?? "NO CUIT",
       UN: liquidation?.bussinessUnits?.description ?? "NO BU",

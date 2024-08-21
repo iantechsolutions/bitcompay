@@ -4,6 +4,7 @@ import { fi } from "date-fns/locale";
 import { nanoid } from "nanoid";
 import { twMerge } from "tailwind-merge";
 import { number } from "zod";
+import BarcodeProcedure from "~/components/barcode";
 import { api } from "~/trpc/server";
 import { RouterOutputs } from "~/trpc/shared";
 
@@ -98,8 +99,12 @@ export function htmlBill(
   id_number: string,
   afip_status: string
 ) {
+  let canales: any;
   if (producto) {
-    const canales = producto?.channels;
+    canales = producto?.channels;
+  }
+  if (comprobante) {
+    const payment = comprobante.payments;
   }
   function formatNumberAsCurrency(amount: number): string {
     return new Intl.NumberFormat("en-US", {
@@ -109,20 +114,14 @@ export function htmlBill(
     }).format(amount);
   }
   function getImageTagForTipoComprobante(tipoComprobante: string): string {
-    switch (tipoComprobante) {
-      case "6":
-      case "7":
-      case "8":
-        return `<img src="https://utfs.io/f/8ab5059a-71e9-4cb2-8e0c-4743f73c8fe5-kmcofx.png" alt="" />`;
-      case "12":
-      case "13":
-      case "11":
-        return `C`;
-      default:
-        return "X";
+    if (tipoComprobante.includes("A")) {
+      return `<img src="/comprobantes/factura-a.png" alt="factura A" />`;
     }
+    if (tipoComprobante.includes("B")) {
+      return `<img src="/comprobantes/factura-b.png" alt="factura B" />`;
+    }
+    return `<img src="/comprobantes/recibo.png" alt="recibo" />`;
   }
-
   console.log("comprobante info");
   console.log(comprobante);
   // console.log(voucher);
@@ -134,6 +133,32 @@ export function htmlBill(
       return `<img class="logo" style="width: 30vw;height: auto;margin-bottom: 5px;" src="https://utfs.io/f/f426d7f1-f9c7-437c-a722-f978ab23830d-neiy4q.png" alt="logo" />`;
     }
   }
+
+  function getIimageForBarcode() {
+    // const barcode = BarcodeProcedure({
+    //   dateVto: comprobante.first_due_date ?? new Date(),
+    //   amountVto: comprobante.first_due_amount ?? 0,
+    //   client: comprobante.fiscal_id_number ?? 0,
+    //   isPagoFacil: false,
+    //   invoiceNumber: comprobante.invoice_number ?? 0,
+    // });
+    return "barcode";
+
+    // if (barcode != undefined) {
+    //   return `<img
+    //   class="cod-barras"
+    //   src="${barcode}
+    //   alt="barcode"
+    // />`;
+    // } else {
+    //   return `<img
+    //         class="cod-barras"
+    //         src="https://utfs.io/f/73e104e8-fb1f-490f-a30e-7de1608ef3ac-12ad.png"
+    //         alt=""
+    //       />`;
+    // }
+  }
+
   function generateConcepts(
     items: Array<{ concept: string | null; total: number | null }>
   ): string {
@@ -183,303 +208,322 @@ export function htmlBill(
         rel="stylesheet"
       />
       <title>Document</title>
-      <style>
-       * {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: "Roboto", sans-serif;
-}
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Roboto", sans-serif;
+      }
 
-header {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  border-bottom: 1px solid #8fefdc;
-  width: 100%;
-}
+      body {
+        padding: 0 5rem;
+      }
+      header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        border-bottom: 1.6px solid #8fefdc;
+        /* padding-bottom: 1.2rem; */
+        width: 100%;
+      }
 
-.items-1 {
-  margin: 8px;
-}
+      .items-1 {
+        margin: 8px;
+        padding-bottom: 1.2rem;
+      }
 
-.items-1 p {
-  font-size: 10px;
+      .items-1 p {
+        font-size: 16px;
+        font-weight: 400;
+        color: #787878;
+      }
 
-  font-weight: 400;
-  color: #303030;
-}
+      .logo {
+        width: 25vw;
+        height: auto;
+        margin-bottom: 5px;
+      }
 
-.logo {
-  width: 30vw;
-  height: auto;
-  margin-bottom: 5px;
-}
+      .items-2 {
+        position: relative;
+      }
 
-.items-2 {
-  display: flex;
-  align-items: center;
-  margin-top: 39px;
-  margin-bottom: 1px;
-}
+      .items-2 img {
+        width: 60px;
+        top: 0;
+        left: 0;
+      }
 
-.items-2 img {
-  width: 60px;
-}
+      .items-3 {
+        padding-bottom: 1.2rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
 
-.items-3 {
-  margin: 8px;
-}
+      .items-3 h2 {
+        font-size: 1.7rem;
+        font-weight: 500;
+        line-height: 25px;
+      }
 
-.items-3 h2 {
-  font-size: 15px;
+      .items-3 p {
+        font-size: 16px;
+        font-weight: 400;
+        color: #787878;
+        line-height: 20px;
+      }
 
-  font-weight: 500;
-  color: #323232;
-  line-height: 25px;
-}
+      .items-3 div .fecha {
+        font-weight: 200;
+        size: 20px;
+        color: #787878;
+        letter-spacing: 2px;
+      }
 
-.items-3 p {
-  font-size: 10px;
+      .parte-2 {
+        display: flex;
+        justify-content: space-between;
+        border-top: none;
+        border-bottom: 1.6px solid #8fefdc;
+      }
 
-  font-weight: 400;
-  color: #303030;
-  line-height: 20px;
-}
+      .datos-1 {
+        font-size: 16px;
+        margin: 10px 10px 10px 0;
+        list-style-type: none;
+        line-height: 30px;
+        color: #303030;
+      }
+      .datos-1 li p span {
+        font-weight: 600;
+        opacity: 70;
+      }
+      .datos-2 {
+        font-size: 16px;
+        list-style-type: none;
+        line-height: 30px;
+        margin: 10px 10px 10px 0;
+        color: #303030;
+      }
 
-.items-3 span {
-  font-size: 13px;
+      .datos-2 li p span {
+        font-weight: 600;
+        opacity: 70;
+      }
 
-}
+      .parte-3 {
+        display: flex;
+        justify-content: space-between;
+        border-top: none;
+        border-bottom: 1.6px solid #8fefdc;
+      }
 
-.parte-2 {
-  display: flex;
-  justify-content: space-between;
-  border-top: none;
-  border-bottom: 1px solid #8fefdc;
-}
+      .parte-3 p {
+        font-size: 18px;
+        font-weight: 500;
+        margin: 7px;
+      }
 
-.datos-1 {
-  font-size: 10px;
+      .parte-5 {
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1.6px solid #8fefdc;
+        padding-bottom: 20px;
+      }
 
-  font-weight: 480;
-  margin: 10px 10px 10px 0;
-  list-style-type: none;
-  line-height: 30px;
-}
+      .parte-5 p {
+        font-size: 16px;
+        color: #303030;
+        font-weight: 600;
+        line-height: 20px;
+        margin: 10px 0 0 0;
+      }
 
-.datos-2 {
-  font-size: 13px;
+      .parte-4 {
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1.6px solid #8fefdc;
+      }
 
-  font-weight: 480;
-  list-style-type: none;
-  line-height: 30px;
-  margin: 10px 10px 10px 0;
-}
+      .parte-4 p {
+        font-size: 13px;
 
-span {
-  font-weight: 400;
-  color: rgb(173, 171, 171);
-}
+        font-weight: 500;
+        color: #323232;
+        margin: 5px 0 5px 0;
+      }
 
-.parte-3 {
-  display: flex;
-  justify-content: space-between;
-  border-top: none;
-  border-bottom: 1px solid #8fefdc;
-}
+      .parte-4 p span {
+        text-decoration: none;
+        font-weight: 600;
+      }
 
-.parte-3 p {
-  font-size: 12px;
+      .parte-6 h2 {
+        margin-top: 10px;
+        font-size: 18px;
 
-  font-weight: 600;
-  margin: 7px;
-  color: #323232;
-}
+        font-weight: 500;
+      }
 
-.parte-5 {
-  display: flex;
-  justify-content: space-between;
-  border-bottom: 1px solid #8fefdc;
-  padding-bottom: 20px;
-}
+      .parte-6 p {
+        font-style: oblique;
+        margin-top: 10px;
+        font-style: bold;
+      }
 
-.parte-5 p {
-  font-size: 13px;
+      .logos {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+        padding: 6px 12px;
+        border: 2px dashed #8fefdc;
+      }
 
-  line-height: 20px;
-  margin: 10px 0 0 0;
-}
+      .pago-facil {
+        height: 63px;
+        width: 65px;
+      }
 
-.parte-4 {
-  display: flex;
-  justify-content: space-between;
-  border-bottom: 1px solid #8fefdc;
-}
+      .rapi-pago {
+        width: 110px;
+      }
 
-.parte-4 p {
-  font-size: 13px;
+      .mercado-pago {
+        height: 60px;
+        width: 65px;
+      }
 
-  font-weight: 500;
-  color: #323232;
-  margin: 5px 0 5px 0;
-}
+      .cod-barras {
+        width: 270px;
+      }
 
-.parte-4 p span {
-  text-decoration: none;
-  font-weight: 600;
-}
+      .cbu-section h2 {
+        margin-top: 10px;
+        margin-bottom: 5px;
+        font-weight: 400;
+        font-size: 12px;
 
-.parte-6 h2 {
-  margin-top: 10px;
-  font-size: 13px;
+        font-style: oblique;
+      }
 
-  font-weight: 500;
-}
+      .cbu-section-2 {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border: 2px dashed #8fefdc;
+        padding: 10px;
+      }
 
-.parte-6 p {
-  font-style: oblique;
-  margin-top: 10px;
-}
+      .cbu-section-2 p {
+        font-size: 18px;
+        font-weight: 700;
+        margin-right: 50px;
+        text-align: right;
+      }
 
-.logos {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 10px;
-  padding: 2px;
-  border: 2px dashed #8fefdc;
-}
+      .pago-mis {
+        height: 30px;
+        width: 200px;
+      }
 
-.pago-facil {
-  height: 63px;
-  width: 65px;
-}
+      .cards h2 {
+        margin-top: 10px;
+        margin-bottom: 5px;
+        font-weight: 400;
+        font-size: 12px;
 
-.rapi-pago {
-  width: 110px;
-}
+        font-style: oblique;
+      }
 
-.mercado-pago {
-  height: 60px;
-  width: 65px;
-}
+      .cards-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 2px dashed #8fefdc;
+        padding: 8px 16px;
+      }
 
-.cod-barras {
-  width: 270px;
-}
+      .visa {
+        height: 45px;
+        width: 95px;
+      }
 
-.cbu-section h2 {
-  margin-top: 10px;
-  margin-bottom: 5px;
-  font-weight: 400;
-  font-size: 12px;
+      .visa-debit {
+        height: 45px;
+        width: 93px;
+      }
 
-  font-style: oblique;
-}
+      .mastercard {
+        height: 45px;
+        width: 70px;
+      }
 
-.cbu-section-2 {
-  display: flex;
-  justify-content: space-between;
-  border: 2px dashed #8fefdc;
-  padding: 10px;
-}
+      .master-debit {
+        height: 45px;
+        width: 70px;
+      }
 
-.cbu-section-2 p {
-  font-size: 17px;
+      .cbu {
+      }
 
-  font-weight: 550;
-  margin-right: 50px;
-}
+      .factura-vencimiento {
+        margin-top: 10px;
+        border: 2px dashed #8fefdc;
+        padding: 2px 12px;
+      }
 
-.pago-mis {
-  height: 30px;
-  width: 200px;
-}
+      .factura-vencimiento p {
+        font-style: oblique;
+        font-size: 13px;
+        font-weight: 700;
+        color: #303030;
+      }
 
-.cards h2 {
-  margin-top: 10px;
-  margin-bottom: 5px;
-  font-weight: 400;
-  font-size: 12px;
+      .qr-section {
+        font-size: 12px;
 
-  font-style: oblique;
-}
+        line-height: 20px;
+        gap: 10px;
+        display: flex;
+        margin-top: 20px;
+      }
 
-.cards-section {
-  display: flex;
-  justify-content: space-between;
-  border: 2px dashed #8fefdc;
-  padding: 8px;
-}
+      .qr {
+        width: 150px;
+      }
 
-.visa {
-  height: 45px;
-  width: 95px;
-}
+      .cae-section {
+        flex-direction: column;
+        gap: 10px;
+      }
+      .cae-section p {
+        font-size: 15px;
+        font-weight: 600;
+        color: #303030;
+      }
 
-.visa-debit {
-  height: 45px;
-  width: 93px;
-}
+      .cae-section span{
+        font-size: 13px;
+        font-style: oblique;
+        color: #303030;
+      }
 
-.mastercard {
-  height: 45px;
-  width: 70px;
-}
+      .bold {
+        font-weight: 500;
+      }
 
-.master-debit {
-  height: 45px;
-  width: 70px;
-}
+      .afip {
+        width: 150px;
+      }
 
-.cbu {
-}
-
-.factura-vencimiento {
-  margin-top: 10px;
-  border: 2px dashed #8fefdc;
-  padding: 2px;
-}
-
-.factura-vencimiento p {
-  font-style: oblique;
-  font-size: 12px;
-
-  font-weight: 550;
-}
-
-.qr-section {
-  font-size: 12px;
-
-  line-height: 20px;
-  gap: 10px;
-  display: flex;
-  margin-top: 20px;
-}
-
-.qr {
-  width: 150px;
-}
-
-.cae-section {
-  flex-direction: column;
-}
-
-.bold {
-  font-weight: 500;
-}
-
-.afip {
-  width: 150px;
-}
-
-.bp-logo {
-  width: 80px;
-  vertical-align: middle;
-}
-
-      </style>
+      .bp-logo {
+        width: 80px;
+        vertical-align: middle;
+      }
+    </style>
     </head>
     <body>
       <header>
@@ -502,16 +546,16 @@ span {
         </div>
   
         <div class="items-3">
+          <div>
           <h2>
-            ${getTextoForTipoComprobante(
-              comprobante?.tipoComprobante ?? ""
-            )} <br />
+            ${comprobante?.tipoComprobante ?? ""} <br />
             N° ${comprobante?.ptoVenta.toString().padStart(4, "0")}-${voucher
     .toString()
     .padStart(8, "0")}
           </h2>
+          <span class="fecha"> Fecha: ${dateNormalFormat(new Date())}</span>
+          </div>
           <p>
-            Fecha: ${dateNormalFormat(new Date())} <br />
             C.U.I.T: ${company.cuit} <br />
             Ing. Brutos Conv.Multil: ${company.cuit} <br />
             Fecha de Inicio de Actividad: ${dateNormalFormat(
@@ -524,39 +568,39 @@ span {
       <section class="parte-2">
         <ul class="datos-1">
           <li>
-            <p>Cliente: ${name}</p>
+            <p><span>Cliente: </span>${name}</p>
           </li>
           <li>
-            <p>Domicilio: ${domicilio}</p>
+            <p><span>Domicilio: </span>${domicilio}</p>
           </li>
           <li>
-            <p>Localidad: ${localidad}</p>
+            <p><span>Localidad: </span>${localidad}</p>
           </li>
           <li>
-            <p>Provincia: ${provincia}</p>
+            <p><span>Provincia: </span>${provincia}</p>
           </li>
           <li>
-            <p>CP: ${cp}</p>
+            <p><span>CP: </span>${cp}</p>
           </li>
         </ul>
   
         <ul class="datos-2">
           <li>
-            <p>${id_type}: ${id_number}</p>
+            <p><span>${id_type}: </span>${id_number}</p>
           </li>
           <li>
-            <p>Categoria I.V.A: ${afip_status}</p>
+            <p><span>Categoria I.V.A: </span>${afip_status}</p>
           </li>
           <li>
-            <p>Condicion de Venta: ---</p>
+            <p><span>Condicion de Venta: </span>---</p>
           </li>
           <li>
-            <p>Periodo facturado:${dateNormalFormat(
+            <p><span>Periodo facturado: </span>${dateNormalFormat(
               comprobante?.fromPeriod
             )}</p>
           </li>
           <li>
-            <p>Fecha de vencimiento:${dateNormalFormat(
+            <p><span>Fecha de vencimiento: </span>${dateNormalFormat(
               comprobante?.due_date
             )}</p>
           </li>
@@ -588,7 +632,11 @@ span {
           comprobante?.importe ?? 0
         )}</p>
       </section>
-  
+      
+      <section class="factura-vencimiento">
+        <p>Esta factura se debitara en fecha de vencimiento en CBU ###########</p>
+      </section>
+
       <section class="parte-6">
         <h2>Canales de Pago Habilitados</h2>
         <p>Mediante lectura del codigo de barras:</p>
@@ -609,11 +657,8 @@ span {
             src="https://utfs.io/f/781ea16d-cac2-46de-9b9a-e59db510e17b-8b1bm4.png"
             alt=""
           />
-          <img
-            class="cod-barras"
-            src="https://utfs.io/f/73e104e8-fb1f-490f-a30e-7de1608ef3ac-12ad.png"
-            alt=""
-          />
+          ${true ? getIimageForBarcode() : null}
+          
         </div>
       </section>
   
@@ -660,10 +705,6 @@ span {
         </div>
       </section>
   
-      <section class="factura-vencimiento">
-        <p>Esta factura se debitara en fecha de vencimiento en CBU ###########</p>
-      </section>
-  
       <section class="qr-section">
         <div>
           <img
@@ -675,7 +716,7 @@ span {
         <div class="cae-section">
           <img
             class="afip"
-            src="https://utfs.io/f/ef966741-623a-4972-a11e-0b0c6b099a76-t0whb5.png"
+            src="/comprobantes/logo-afip.png"
             alt=""
           />
           <p>CAE N° ####</p>
@@ -738,8 +779,8 @@ export async function ingresarAfip() {
     key: key,
     // production: true,
   });
-  const serSer = await afip.CreateWSAuth(_username, _password, alias, wsid);
-  console.log(serSer);
+  // const serSer = await afip.CreateWSAuth(_username, _password, alias, wsid);
+  // console.log(serSer);
   // const salesPoints = await afip.ElectronicBilling.getSalesPoints();
   // console.log(salesPoints);
   // const serSer = await afip.CreateWSAuth(username, password, alias, wsid);

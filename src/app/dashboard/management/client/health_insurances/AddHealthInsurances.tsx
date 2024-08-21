@@ -27,7 +27,10 @@ import { api } from "~/trpc/react";
 export function AddHealthInsurances() {
   const { mutateAsync: createProduct, isLoading } =
     api.healthInsurances.create.useMutation();
-
+  const { mutateAsync: startCC } =
+    api.currentAccount.createInitial.useMutation();
+  const { data: company } = api.companies.get.useQuery();
+  const { data: cps } = api.postal_code.list.useQuery();
   const [description, setDescription] = useState("");
   const [IdNumber, setIdNumber] = useState("");
   const [adress, setAdress] = useState("");
@@ -44,10 +47,23 @@ export function AddHealthInsurances() {
   const [open, setOpen] = useState(false);
 
   const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
 
   async function handleCreate() {
     try {
-      await createProduct({
+      if (
+        !description ||
+        !IdNumber ||
+        !afip_status ||
+        !id_number ||
+        !id_type ||
+        !responsible_name ||
+        !company
+      ) {
+        setError("Todos los campos son obligatorios.");
+        return;
+      }
+      const healthInsurance = await createProduct({
         name: description,
         identificationNumber: IdNumber,
         isClient: true,
@@ -60,7 +76,10 @@ export function AddHealthInsurances() {
         province: province,
         postal_code: postal_code,
       });
-
+      const currentCompany = await startCC({
+        healthInsurance: healthInsurance[0]?.id ?? "",
+        company_id: company?.id ?? "",
+      });
       toast.success("Obra social creada correctamente");
       queryClient.invalidateQueries();
 
@@ -75,7 +94,8 @@ export function AddHealthInsurances() {
     <>
       <Button
         onClick={() => setOpen(true)}
-        className="rounded-full bg-[#0DA485] hover:bg-[#0DA485]">
+        className="rounded-full text-[#3E3E3E] bg-[#C8FF6D] hover:bg-[#C8FF6D]"
+      >
         <PlusCircleIcon className="mr-2" size={20} />
         Agregar obra social como cliente
       </Button>
@@ -166,12 +186,27 @@ export function AddHealthInsurances() {
             </div>
             <div>
               <Label htmlFor="postal_code">Codigo Postal</Label>
-              <Input
+              {/* <Input
                 id="postal_code"
                 placeholder="..."
                 value={postal_code}
                 onChange={(e) => setPostal_code(e.target.value)}
-              />
+              /> */}
+
+              <Select
+                onValueChange={(e) => setPostal_code(e)}
+                value={postal_code}>
+                <SelectTrigger className="w-[180px] font-bold">
+                  <SelectValue placeholder="Seleccionar CP" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cps?.map((cp) => (
+                    <SelectItem key={cp.id} value={cp.id}>
+                      {cp.cp}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label>Estado de AFIP</Label>
@@ -195,10 +230,17 @@ export function AddHealthInsurances() {
                 </SelectContent>
               </Select>
             </div>
+            <div className="flex items-center justify-center">
+              {error && (
+                <span className="text-red-600 text-xs text-center">
+                  {error}
+                </span>
+              )}
+            </div>
           </div>
           <DialogFooter>
             <Button disabled={isLoading} onClick={handleCreate}>
-              {isLoading && (
+              {isLoading ?? (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}
               Crear

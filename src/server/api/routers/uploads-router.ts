@@ -382,10 +382,12 @@ export const uploadsRouter = createTRPCRouter({
               confirmedAt: new Date(),
             })
             .where(eq(schema.documentUploads.id, input.id));
-
+          console.log("aca 15");
           const defaultStatus = await tx.query.paymentStatus.findFirst({
             where: eq(schema.paymentStatus.code, "91"),
           });
+          console.log("aca 16");
+          console.log(rows[0]);
           await tx.insert(schema.payments).values(
             rows.map((row) => ({
               id: createId(),
@@ -647,7 +649,7 @@ async function readResponseUploadContents(
       console.log("recordValues", recordValues);
 
       const fiscal_id_number = recordValues[0]?.slice(32, 42);
-      const invoice_number = recordValues[0]?.slice(42, 48);
+      const invoice_number = recordValues[0]?.slice(42, 62);
       const payment_date = recordValues[0]?.slice(0, 8);
 
       const importe_final = recordValues[0]?.slice(9, 23);
@@ -669,7 +671,11 @@ async function readResponseUploadContents(
 
       console.log(date, "ES ESTAAA");
       console.log(importe_final);
-
+      console.log("invoice_number", invoice_number);
+      console.log(
+        " recordValues[0]?.slice(42, 48);",
+        recordValues[0]?.slice(42, 48)
+      );
       if (invoice_number) {
         const original_transaction = await db.query.payments.findFirst({
           where: eq(
@@ -873,7 +879,7 @@ async function readUploadContents(
   const productsMap = Object.fromEntries(
     products.map((product) => [product.number, product])
   );
-
+  console.log("aca 1");
   const errors: string[] = [];
 
   const productsBatch = Object.fromEntries(
@@ -886,6 +892,7 @@ async function readUploadContents(
       },
     ])
   );
+  console.log("aca 2");
   // verificar si empresa tiene productos y marcas
   if (products.length === 0) {
     throw new TRPCError({
@@ -899,6 +906,7 @@ async function readUploadContents(
       message: "esta empresa no tiene ninguna marca asociada",
     });
   }
+  console.log("aca 3");
   /// verificacion si hay columna producto o marca en excel
 
   let productColumnExist = false;
@@ -911,6 +919,7 @@ async function readUploadContents(
       productColumnExist = true;
     }
   }
+  console.log("aca 4");
 
   if (!productColumnExist && products.length > 1) {
     throw new TRPCError({
@@ -924,6 +933,7 @@ async function readUploadContents(
       message: "Error: la columna Marca no existe en el documento",
     });
   }
+  console.log("aca 5");
   const transactionsDB = await db.query.payments.findMany({
     where: eq(schema.payments.companyId, companyId),
   });
@@ -934,6 +944,7 @@ async function readUploadContents(
     });
   let auxiliarInvoiceNumber =
     invoice_number_array.length > 0 ? Math.max(...invoice_number_array) : 0;
+  console.log("aca 6");
   for (let i = 0; i < transformedRows.length; i++) {
     const row = transformedRows[i]!;
     const rowNum = i + 2;
@@ -960,6 +971,7 @@ async function readUploadContents(
       errors.push(`Producto invalido en fila: ${rowNum}`);
     }
     // verificar marca
+    console.log("aca 7");
     if (row.g_c) {
       let isInBrands = false;
       for (const brand of brands) {
@@ -978,6 +990,7 @@ async function readUploadContents(
     } else {
       errors.push(`No existe columna marca en (fila:${rowNum})`);
     }
+    console.log("aca 8");
     // asignar numero de factura si no tiene
     if (!row.invoice_number) {
       auxiliarInvoiceNumber++;
@@ -1011,6 +1024,7 @@ async function readUploadContents(
             `La columna ${columnName} es obligatoria y no esta en el archivo(fila:${rowNum})`
           );
         }
+        console.log("aca 10");
         if (column === "card_number") {
           const response = await fetch(
             `https://data.handyapi.com/bin/${row.card_number
@@ -1040,6 +1054,7 @@ async function readUploadContents(
       }
     }
     // recolectar info. cabeza de lote
+    console.log("aca 11");
     if (product) {
       if (productsBatch[product.number]) {
         const temp = productsBatch[product.number];
@@ -1055,7 +1070,7 @@ async function readUploadContents(
       }
     }
   }
-
+  console.log("aca 12");
   //descartar encabezados no requeridos
   const companyReqColumns = new Set();
   // Iterar sobre cada objeto en el array products

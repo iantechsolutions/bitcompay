@@ -15,7 +15,7 @@ export default async function Layout(props: { children?: React.ReactNode }) {
     return (
       <>
         <AppLayout
-          headerClass="bg-[#e9fcf8]"
+          headerClass="bg-white"
           sidenavClass="top-0"
           sidenav={<CompanySidenav />}
         >

@@ -33,8 +33,10 @@ export function AddBrandDialog() {
   const [iva, setIva] = useState<string>("21%");
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
+  const [razonSocial, setRazonSocial] = useState("");
+  const [concept, setConcepto] = useState("");
 
-  const [billType, setBillType] = useState<string>("");
+  // const [billType, setBillType] = useState<string>("");
 
   const [number, setNumber] = useState("");
   const [open, setOpen] = useState(false);
@@ -48,14 +50,7 @@ export function AddBrandDialog() {
 
   async function handleCreate() {
     try {
-      if (
-        !name ||
-        !code ||
-        !description ||
-        !iva ||
-        !billType ||
-        !reducedDescription
-      ) {
+      if (!name || !code || !description || !iva || !reducedDescription) {
         setError("Todos los campos son obligatorios.");
         return;
       }
@@ -65,8 +60,8 @@ export function AddBrandDialog() {
         iva: iva.toString(),
         description,
         name,
-        billType: billType,
         redescription: reducedDescription,
+        concept,
       });
 
       toast.success("Marca creada correctamente");
@@ -106,6 +101,32 @@ export function AddBrandDialog() {
               />
             </div>
 
+            <div>
+              <Label htmlFor="razonSocial">Razon social la marca</Label>
+              <Input
+                id="razonSocial"
+                placeholder="..."
+                value={razonSocial}
+                onChange={(e) => setRazonSocial(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="concept">Concepto</Label>
+              <Select
+                onValueChange={(e) => setConcepto(e)}
+                value={concept ?? ""}
+              >
+                <SelectTrigger className="w-[180px] font-bold">
+                  <SelectValue placeholder="Seleccionar concepto..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">Productos</SelectItem>
+                  <SelectItem value="2">Servicios</SelectItem>
+                  <SelectItem value="3">Productos y Servicios</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             {/* Código de marca */}
             <div>
               <Label htmlFor="code">Código de marca(max. 4 carac)</Label>
@@ -147,23 +168,6 @@ export function AddBrandDialog() {
                     <SelectItem value="6">27%</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-
-              <div className="flex-1">
-                <Label htmlFor="billtype">Tipo de factura</Label>
-                <div>
-                  <ComboboxDemo
-                    title="Seleccionar factura..."
-                    placeholder="Factura X"
-                    options={[
-                      { value: "1", label: "FACTURA A" },
-                      { value: "6", label: "FACTURA B" },
-                      { value: "11", label: "FACTURA C" },
-                      { value: "51", label: "FACTURA M" },
-                    ]}
-                    onSelectionChange={(e) => setBillType(e)}
-                  />
-                </div>
               </div>
             </div>
 

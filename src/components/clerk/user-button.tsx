@@ -33,16 +33,20 @@ const UserButtonAndMenu = ({
         {/* Render a button using the image and email from `user` */}
         <Button
           onClick={() => setActive(!active)}
-          className="flex flex-row rounded-3xl border items-center border-gray-200 bg-white px-3 py-5 hover:bg-white text-black drop-shadow-md"
+          className="flex rounded-3xl border-none items-center border-gray-200 bg-[#ECFFCF] px-7 py-6 hover:bg-[#ECFFCF]  text-[#3E3E3E] "
         >
-          <CircleUserRound className="w-6 h-6 mr-2" color="#8140FF" />
-          <div className="flex flex-col justify-center">
-            <div>
+          <img
+            src="/public/header/Frame-12.png"
+            alt="user logo"
+            className="h-8  mr-2"
+          />
+          <div className="flex-1 flex flex-col justify-center">
+            <div className="text-[0.8rem] leading-4 font-medium">
               {user?.fullName
                 ? trimName(user.fullName)
                 : user?.primaryEmailAddress?.emailAddress!}
             </div>
-            <div className="text-xs text-left color-[#b5b5b5] opacity-50 -mt-0.5">
+            <div className="text-[0.7rem] text-left color-[#b5b5b5] opacity-50 -mt-0.5">
               {companyName ?? " "}
             </div>
           </div>
@@ -53,7 +57,7 @@ const UserButtonAndMenu = ({
         </Button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
-        <DropdownMenu.Content className="mt-4 w-52 rounded-2xl border border-gray-200 bg-white px-4 py-2 pb-5 pt-3 text-black drop-shadow-2xl">
+        <DropdownMenu.Content className="mt-4 w-52 rounded-2xl border border-gray-200 bg-white px-4 py-2 pb-5 pt-3  text-[#3E3E3E] drop-shadow-2xl">
           <DropdownMenu.Label />
           <DropdownMenu.Group>
             <DropdownMenu.Item asChild>
@@ -65,10 +69,10 @@ const UserButtonAndMenu = ({
                   </p>
                 </div>
                 <div className="flex flex-row justify-between mb-2 mt-2">
-                  <Button className="w-[48%] h-6 text-[0.6rem] rounded-2xl px-5 bg-[#EAEAEA] hover:bg-[#EAEAEA] text-black">
+                  <Button className="w-[48%] h-6 text-[0.6rem] rounded-2xl px-5 bg-[#EAEAEA] hover:bg-[#EAEAEA]  text-[#3E3E3E]">
                     Administración
                   </Button>
-                  <Button className="w-[48%] h-6 text-[0.6rem]  rounded-2xl px-5 bg-[#EAEAEA] hover:bg-[#EAEAEA]  text-black">
+                  <Button className="w-[48%] h-6 text-[0.6rem]  rounded-2xl px-5 bg-[#EAEAEA] hover:bg-[#EAEAEA]   text-[#3E3E3E]">
                     I AN TECH
                   </Button>
                 </div>
@@ -102,7 +106,7 @@ export const UserButton = ({
     return (
       <Button onClick={() => openSignIn()}>
         {" "}
-        <LogIn className="mr-2 h-6 w-auto" />
+        <LogIn className="mr-4 h-6 w-auto shadow-none" />
         Sign In
       </Button>
     );

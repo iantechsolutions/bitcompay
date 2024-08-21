@@ -31,6 +31,7 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "~/components/ui/accordion";
+import { SaldoPopover } from "./saldoPopover";
 dayjs.extend(utc);
 dayjs.locale("es");
 
@@ -49,6 +50,18 @@ export default function HealthInsurancePage(props: {
   );
 
   const [isPending, setIsLoading] = useState<boolean>(false);
+  const { data: cc } = api.currentAccount.getByHealthInsurance.useQuery({
+    healthInsuranceId: props.healthInsurance?.id ?? "",
+  });
+  let currentAmount = 0;
+  if (cc?.events) {
+    const lastEvent = cc?.events.reduce((prev, current) => {
+      return new Date(prev.createdAt) > new Date(current.createdAt)
+        ? prev
+        : current;
+    });
+    currentAmount = lastEvent?.current_amount ?? 0;
+  }
   const [openPopover, setOpenPopover] = useState<boolean>(false);
 
   const { mutateAsync: updateHealthInsurance, isLoading } =
@@ -89,36 +102,46 @@ export default function HealthInsurancePage(props: {
   }
 
   const basicData = {
-    Código: "123123",
-    Sigla: "1232",
-    "Razón Social": "23123",
-    CUIT: "44398273",
-    "Condición AFIP": "asdfdf",
-    "Condición IIBB": "asdfsdf",
-    "Nro. IIBB": "dasdf",
-    "Domicilio Comercial": "cordoba 233",
-    Piso: "1",
-    Oficina: "3",
-    Localidad: "tigre",
-    Provincia: "Buenos Aires",
-    "Código Postal": "1133",
-    Teléfono: "1123232",
-    "E-mail": "fulanito@gmail.com",
-    Estado: "Gran provinvia de Bs As",
-    "Fecha de Estado": "12/12/12",
-    "Motivo de baja": "Ninguno",
-    "Usuario baja": "fulanito",
+    Nombre: props.healthInsurance?.name,
+    Código: props.healthInsurance?.identificationNumber,
+    "Razón Social": props.healthInsurance?.responsibleName,
+    "Tipo Documento Fiscal": props.healthInsurance?.fiscal_id_type,
+    "Nro Documento Fiscal": props.healthInsurance?.fiscal_id_number,
+    "Condición AFIP": props.healthInsurance?.afip_status,
+    // "Nro. IIBB": "dasdf",
+    "Domicilio Comercial": props.healthInsurance?.adress,
+    // Piso: "1",
+    // Oficina: "3",
+    // Localidad: "tigre",
+    Localidad: props.healthInsurance?.locality,
+    Provincia: props.healthInsurance?.province,
+    "Codigo Postal": props.healthInsurance?.cpData?.cp,
+    // "Código Postal": "1133",
+    // Teléfono: "1123232",
+    // "E-mail": "fulanito@gmail.com",
+    // Estado: "Gran provinvia de Bs As",
+    // "Fecha de Estado": "12/12/12",
+    // "Motivo de baja": "Ninguno",
+    // "Usuario baja": "fulanito",
   };
 
   const facturacion = {
-    "Unidad de negocio": "Cristal Salud",
-    Provincia: "Buenos Aires",
-    Oficina: "123",
-    "Domicilio Fiscal": "Entre rios 123",
-    Piso: "1",
-    "Condicion de venta": "Mixto",
-    "Codigo postal": "1233",
-    Localidad: "Jose C Paz",
+    // "Unidad de negocio": "Cristal Salud",
+    // Provincia: "Buenos Aires",
+    // Oficina: "123",
+    // "Domicilio Fiscal": "Entre rios 123",
+    // Piso: "1",
+    // "Condicion de venta": "Mixto",
+    // "Codigo postal": "1233",
+    // Localidad: "Jose C Paz",
+    "Unidad de negocio": "-",
+    Provincia: "-",
+    Oficina: "-",
+    "Domicilio Fiscal": "-",
+    Piso: "-",
+    "Condicion de venta": "-",
+    "Codigo postal": "-",
+    Localidad: "-",
   };
   return (
     <div>
@@ -134,8 +157,16 @@ export default function HealthInsurancePage(props: {
             <h2 className="text-xl mt-2">Cuadro de saldo en Cta. Cte.:</h2>
           </div>
           <div className="border rounded-lg border-[#20E0B9] mt-2 p-4 w-1/4">
-            <p className="text-lg font-semibold">Saldo O.S Nro.</p>
-            <span className="text-[#CD3D3B] text-2xl font-bold">-$10000</span>
+            <div className="flex flex-row justify-between">
+              <p className="text-lg font-semibold">Saldo O.S.</p>
+              <SaldoPopover
+                ccId={cc?.id}
+                healthInsuranceId={props.healthInsurance?.id}
+              />
+            </div>
+            <span className="text-[#CD3D3B] text-2xl font-bold">
+              $ {currentAmount}
+            </span>
           </div>
           <div className="w-full border-b-2 border-[#20E0B9]">
             <h2 className="text-xl mt-2">Datos Básicos:</h2>

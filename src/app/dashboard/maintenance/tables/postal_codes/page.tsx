@@ -22,7 +22,9 @@ export default function Home() {
           postalCodes.data.map((postalCode) => (
             <ListTile
               key={postalCode.id}
-              title={postalCode.zone}
+              title={
+                postalCode.zoneData ? postalCode.zoneData.name : postalCode.zone
+              }
               href={`/dashboard/maintenance/tables/postal_codes/${postalCode.id}`}
               leading={postalCode.cp}
             />

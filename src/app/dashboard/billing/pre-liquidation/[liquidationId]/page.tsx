@@ -41,6 +41,7 @@ export default async function Home(props: {
 }) {
   const userActual = await currentUser();
   const companyData = await api.companies.get.query();
+  const eventos = await api.events.list.query();
   const preliquidation = await api.liquidations.get.query({
     id: props.params.liquidationId,
   });
@@ -48,21 +49,25 @@ export default async function Home(props: {
   const user = await clerkClient.users.getUser(
     preliquidation?.userCreated ?? "user_2iy8lXXdnoa2f5wHjRh5nj3W0fU"
   );
-  // if (!preliquidation) return <Title>Preliquidacion no encotrada</Title>;
+  if (!preliquidation) return <Title>Preliquidacion no encotrada</Title>;
   const familyGroups = await api.family_groups.getByLiquidation.query({
     liquidationId: props.params.liquidationId,
   });
 
-  const allPlan = await api.plans.list.query();
-  const plansOptions = allPlan.map((plan) => ({
-    value: plan.id,
-    label: plan.plan_code ?? "plan sin nombre",
-  })) || [{ value: "", label: "" }];
-  const allModos = await api.modos.list.query();
-  const modosOptions = allModos.map((modo) => ({
-    value: modo?.id,
-    label: modo?.description ?? "modo sin nombre",
-  })) || [{ value: "", label: "" }];
+  // const fg = await api.family_groups.getWithFilteredComprobantes.query({
+
+  // })
+
+  // const allPlan = await api.plans.list.query();
+  // const plansOptions = allPlan.map((plan) => ({
+  //   value: plan.id,
+  //   label: plan.plan_code ?? "plan sin nombre",
+  // })) || [{ value: "", label: "" }];
+  // const allModos = await api.modos.list.query();
+  // const modosOptions = allModos.map((modo) => ({
+  //   value: modo?.id,
+  //   label: modo?.description ?? "modo sin nombre",
+  // })) || [{ value: "", label: "" }];
 
   const periodo =
     dayjs.utc(preliquidation?.period).format("MMMM [de] YYYY") ?? "-";
@@ -112,15 +117,18 @@ export default async function Home(props: {
     const original_comprobante = fg?.comprobantes?.find(
       (comprobante) => comprobante?.origin?.toLowerCase() === "factura"
     );
-    const eventPreComprobante = await api.events.getLastByDateAndCC.query({
-      ccId: fg?.cc?.id ?? "",
-      date: preliquidation?.createdAt ?? new Date(),
-    });
     // const saldo_anterior = toNumberOrZero(
     //   original_comprobante?.items.find(
     //     (item) => item.concept === "Saldo anterior"
     //   )?.amount
     // );
+
+    // console.log("Peste", tableRows);
+    const eventPreComprobante = eventos.find(
+      (x) =>
+        x.currentAccount_id === fg?.cc?.id &&
+        x.createdAt < preliquidation?.createdAt
+    );
     summary["Saldo anterior"] += eventPreComprobante?.current_amount ?? 0;
     excelRow.push(eventPreComprobante?.current_amount ?? 0);
     const cuota_planes = toNumberOrZero(
@@ -166,11 +174,13 @@ export default async function Home(props: {
     summary.IVA += iva;
     excelRow.push(iva);
     excelRows.push(excelRow);
-    const lastEvent = await api.events.getLastByDateAndCC.query({
-      ccId: fg?.cc?.id!,
-      date: preliquidation?.createdAt ?? new Date(),
-    });
-    const currentAccountAmount = lastEvent?.current_amount ?? 0;
+    // const lastEvent = await api.events.getLastByDateAndCC.query({
+    //   ccId: fg?.cc?.id!,
+    //   date: preliquidation?.createdAt ?? new Date(),
+    // });
+    const currentAccountAmount =
+      // lastEvent?.current_amount ??
+      0;
     const plan = fg?.plan?.description ?? "";
     const modo = fg?.modo?.description ?? "";
     tableRows.push({
@@ -178,7 +188,9 @@ export default async function Home(props: {
       nroGF: fg?.numericalId ?? "N/A",
       nombre: name,
       cuit,
-      "saldo anterior": eventPreComprobante?.current_amount ?? 0,
+      "saldo anterior":
+        //  eventPreComprobante?.current_amount ??
+        0,
       "cuota plan": cuota_planes,
       bonificacion,
       diferencial,
@@ -192,10 +204,10 @@ export default async function Home(props: {
       Plan: plan,
       modo,
     });
-    console.log("comprobantes", fg?.comprobantes);
+    // console.log("comprobantes", fg?.comprobantes);
   }
 
-  console.log("tableRows", tableRows);
+  // console.log("tableRows", tableRows);
   return (
     <LayoutContainer>
       <div className="flex flex-row justify-between w-full">

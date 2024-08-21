@@ -6,44 +6,57 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const productsChannel = createTRPCRouter({
   list: protectedProcedure.query(async ({ ctx }) => {
-    const company = await db.query.companies.findFirst({
-      where: eq(schema.companies.id, ctx.session.orgId ?? ""),
+    // const company = await db.query.companies.findFirst({
+    //   where: eq(schema.companies.id, ctx.session.orgId ?? ""),
+    //   with: {
+    //     products: {
+    //       with: {
+    //         product: {
+    //           with: {
+    //             channels: {
+    //               with: {
+    //                 channel: true,
+    //               },
+    //             },
+    //           },
+    //         },
+    //       },
+    //     },
+    //   },
+    // });
+    const products = await db.query.products.findMany({
       with: {
-        products: {
+        channels: {
           with: {
-            product: {
-              with: {
-                channels: {
-                  with: {
-                    channel: true,
-                  },
-                },
-              },
-            },
+            channel: true,
           },
         },
       },
     });
-    return company?.products.map((product) => product.product);
+    return products;
   }),
   create: protectedProcedure
     .input(
       z.object({
         name: z.string().min(1).max(255),
         description: z.string().min(0).max(1023),
-        number: z.number().min(1).max(255),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const id = createId();
 
-      await db.insert(schema.products).values({
-        id,
-        name: input.name,
-        description: input.description,
-        number: input.number,
+      const product = await db
+        .insert(schema.products)
+        .values({
+          id,
+          name: input.name,
+          description: input.description,
+        })
+        .returning();
+      await db.insert(schema.companyProducts).values({
+        companyId: ctx.session.orgId ?? "",
+        productId: product[0] ? product[0].id : "",
       });
-
       return { id };
     }),
   get: protectedProcedure
@@ -168,10 +181,6 @@ export const productsChannel = createTRPCRouter({
               return !companies.has(productCompany.companyId);
             }
           );
-
-          // const channelsToDelete = productChannels.filter((productChannel) => {
-          //   return !channels.has(productChannel.channelId);
-          // });
           const companiesToAdd = input.companies.filter((companyId) => {
             return !productCompanies.find(
               (productCompany) => productCompany.companyId === companyId
@@ -199,14 +208,6 @@ export const productsChannel = createTRPCRouter({
               }))
             );
           }
-          // if (channelsToAdd.length > 0) {
-          //   await tx.insert(schema.productChannels).values(
-          //     channelsToAdd.map((channelId) => ({
-          //       productId: input.productId,
-          //       channelId,
-          //     }))
-          //   );
-          // }
         }
       });
     }),

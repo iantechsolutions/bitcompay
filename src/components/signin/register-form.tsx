@@ -279,7 +279,7 @@ export default function RegisterForm({ setShowRegister }: RegisterFormProps) {
             />
             {form.watch().password && (
               <Button
-                className="absolute right-2 bottom-8 rounded-full h-7 w-7"
+                className="absolute right-2 top-9 rounded-full h-7 w-7"
                 onClick={() => setShowPassword(!showPassword)}
                 // variant="outline"
                 variant="ghost"
@@ -298,7 +298,7 @@ export default function RegisterForm({ setShowRegister }: RegisterFormProps) {
             <Button
               type="submit"
               className="w-full px-32 h-8 py-3 my-1 mt-4
-               text-black bg-[#1BDFB7] hover:bg-[#1BDFB7] "
+                text-[#3E3E3E] bg-[#1BDFB7] hover:bg-[#1BDFB7] "
             >
               Continuar <ChevronRight className=" h-4" />
             </Button>
