@@ -86,6 +86,10 @@ export const plansRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(z.object({ planId: z.string() }))
     .mutation(async ({ input }) => {
+      const delete_price = await db
+        .delete(schema.pricePerCondition)
+        .where(eq(schema.pricePerCondition.plan_id, input.planId));
+
       const deleted_plan = await db
         .delete(schema.plans)
         .where(eq(schema.plans.id, input.planId));

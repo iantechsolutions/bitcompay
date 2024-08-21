@@ -47,9 +47,22 @@ export function AddHealthInsurances() {
   const [open, setOpen] = useState(false);
 
   const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
 
   async function handleCreate() {
     try {
+      if (
+        !description ||
+        !IdNumber ||
+        !afip_status ||
+        !id_number ||
+        !id_type ||
+        !responsible_name ||
+        !company
+      ) {
+        setError("Todos los campos son obligatorios.");
+        return;
+      }
       const healthInsurance = await createProduct({
         name: description,
         identificationNumber: IdNumber,
@@ -182,8 +195,7 @@ export function AddHealthInsurances() {
 
               <Select
                 onValueChange={(e) => setPostal_code(e)}
-                value={postal_code}
-              >
+                value={postal_code}>
                 <SelectTrigger className="w-[180px] font-bold">
                   <SelectValue placeholder="Seleccionar CP" />
                 </SelectTrigger>
@@ -218,10 +230,17 @@ export function AddHealthInsurances() {
                 </SelectContent>
               </Select>
             </div>
+            <div className="flex items-center justify-center">
+              {error && (
+                <span className="text-red-600 text-xs text-center">
+                  {error}
+                </span>
+              )}
+            </div>
           </div>
           <DialogFooter>
             <Button disabled={isLoading} onClick={handleCreate}>
-              {isLoading && (
+              {isLoading ?? (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}
               Crear

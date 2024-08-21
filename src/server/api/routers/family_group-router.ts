@@ -134,7 +134,7 @@ export const family_groupsRouter = createTRPCRouter({
 
   getByLiquidation: protectedProcedure
     .input(z.object({ liquidationId: z.string() }))
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
       const fg = await db.query.family_groups.findMany({
         with: {
           plan: true,
@@ -149,8 +149,11 @@ export const family_groupsRouter = createTRPCRouter({
           },
         },
       });
+      const fgCompany = fg.filter(
+        (x) => x.businessUnitData?.companyId === ctx.session.orgId ?? ""
+      );
 
-      const fgFiltered = fg.map((x) => {
+      const fgFiltered = fgCompany.map((x) => {
         const comprobantes = x.comprobantes.filter(
           (comprobante) => comprobante.liquidation_id === input.liquidationId
         );
