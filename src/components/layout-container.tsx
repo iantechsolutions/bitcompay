@@ -10,7 +10,7 @@ export default function LayoutContainer({
   return (
     <div
       className={cn(
-        `w-[71.8rem] space-y-5 overflow-visible ml-9 bg-white rounded-3xl p-7`,
+        `space-y-5 overflow-visible ml-9 bg-white rounded-3xl p-7`,
         className
       )}
     >
