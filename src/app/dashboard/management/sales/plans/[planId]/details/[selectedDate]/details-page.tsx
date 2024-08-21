@@ -256,14 +256,14 @@ export default function DetailsPage(props: {
             <TabsList>
               <TabsTrigger
                 value="perAge"
-                className="data-[state=active]:bg-[#71EBD4]"
+                className="data-[state=active]:bg-[#F7F7F7]"
               >
                 Precios Por Edad
               </TabsTrigger>
 
               <TabsTrigger
                 value="conditional"
-                className="data-[state=active]:bg-[#71EBD4]"
+                className="data-[state=active]:bg-[#F7F7F7]"
               >
                 Precios por relacion
               </TabsTrigger>
@@ -271,7 +271,7 @@ export default function DetailsPage(props: {
             <TabsContent value="conditional">
               <Table className="w-1/2 overflow-x-hidden">
                 <TableHeader>
-                  <TableRow className="bg-[#71EBD4] hover:bg-[#71EBD4] rounded-lg">
+                  <TableRow className="bg-[#F7F7F7] hover:bg-[#F7F7F7] rounded-lg">
                     <TableHead className="h-7 text-left">Relacion</TableHead>
                     <TableHead className="h-7 text-left">Monto</TableHead>
                   </TableRow>
@@ -285,10 +285,10 @@ export default function DetailsPage(props: {
                     )
                     .map((price) => (
                       <TableRow key={price.id}>
-                        <TableCell className="text-left pl-4 text-[#909090]">
+                        <TableCell className="text-left pl-4  ">
                           {price.condition}
                         </TableCell>
-                        <TableCell className="text-left pl-4 text-[#909090]">
+                        <TableCell className="text-left pl-4  ">
                           {price.amount}
                         </TableCell>
                       </TableRow>
@@ -299,7 +299,7 @@ export default function DetailsPage(props: {
             <TabsContent value="perAge">
               <Table className="w-1/2">
                 <TableHeader>
-                  <TableRow className="bg-[#71EBD4] hover:bg-[#71EBD4] rounded-lg">
+                  <TableRow className="bg-[#F7F7F7] hover:bg-[#F7F7F7] rounded-lg">
                     <TableHead className="h-7 text-left">Desde edad</TableHead>
                     <TableHead className="h-7 text-left">Hasta edad</TableHead>
                     <TableHead className="h-7 text-left">Monto</TableHead>
@@ -314,13 +314,13 @@ export default function DetailsPage(props: {
                     )
                     .map((price) => (
                       <TableRow key={price.id} className="py-2">
-                        <TableCell className="text-left pl-4 text-[#909090]">
+                        <TableCell className="text-left pl-4  ">
                           {price.from_age}
                         </TableCell>
-                        <TableCell className="text-left pl-4 text-[#909090]">
+                        <TableCell className="text-left pl-4  ">
                           {price.to_age}
                         </TableCell>
-                        <TableCell className="text-left pl-4 text-[#909090]">
+                        <TableCell className="text-left pl-4  ">
                           ${price.amount}
                         </TableCell>
                       </TableRow>

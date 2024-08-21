@@ -33,7 +33,7 @@ const UserButtonAndMenu = ({
         {/* Render a button using the image and email from `user` */}
         <Button
           onClick={() => setActive(!active)}
-          className="flex rounded-3xl border-none items-center border-gray-200 bg-[#ECFFCF] px-7 py-6 hover:bg-[#ECFFCF] text-black "
+          className="flex rounded-3xl border-none items-center border-gray-200 bg-[#ECFFCF] px-7 py-6 hover:bg-[#ECFFCF]  text-[#3E3E3E] "
         >
           <img
             src="/public/header/Frame-12.png"
@@ -57,7 +57,7 @@ const UserButtonAndMenu = ({
         </Button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
-        <DropdownMenu.Content className="mt-4 w-52 rounded-2xl border border-gray-200 bg-white px-4 py-2 pb-5 pt-3 text-black drop-shadow-2xl">
+        <DropdownMenu.Content className="mt-4 w-52 rounded-2xl border border-gray-200 bg-white px-4 py-2 pb-5 pt-3  text-[#3E3E3E] drop-shadow-2xl">
           <DropdownMenu.Label />
           <DropdownMenu.Group>
             <DropdownMenu.Item asChild>
@@ -69,10 +69,10 @@ const UserButtonAndMenu = ({
                   </p>
                 </div>
                 <div className="flex flex-row justify-between mb-2 mt-2">
-                  <Button className="w-[48%] h-6 text-[0.6rem] rounded-2xl px-5 bg-[#EAEAEA] hover:bg-[#EAEAEA] text-black">
+                  <Button className="w-[48%] h-6 text-[0.6rem] rounded-2xl px-5 bg-[#EAEAEA] hover:bg-[#EAEAEA]  text-[#3E3E3E]">
                     Administración
                   </Button>
-                  <Button className="w-[48%] h-6 text-[0.6rem]  rounded-2xl px-5 bg-[#EAEAEA] hover:bg-[#EAEAEA]  text-black">
+                  <Button className="w-[48%] h-6 text-[0.6rem]  rounded-2xl px-5 bg-[#EAEAEA] hover:bg-[#EAEAEA]   text-[#3E3E3E]">
                     I AN TECH
                   </Button>
                 </div>
@@ -106,7 +106,7 @@ export const UserButton = ({
     return (
       <Button onClick={() => openSignIn()}>
         {" "}
-        <LogIn className="mr-2 h-6 w-auto" />
+        <LogIn className="mr-4 h-6 w-auto shadow-none" />
         Sign In
       </Button>
     );

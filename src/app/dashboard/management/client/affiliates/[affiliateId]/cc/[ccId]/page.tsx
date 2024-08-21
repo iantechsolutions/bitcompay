@@ -29,7 +29,7 @@ export default function CCDetail(props: {
       <h2 className=" font-semibold mb-2">Movimientos cuenta corriente</h2>
       <Table>
         <TableHeader>
-          <TableRow className="bg-[#71EBD4] hover:bg-[#71EBD4] rounded-lg ">
+          <TableRow className="bg-[#F7F7F7] hover:bg-[#F7F7F7] rounded-lg ">
             <TableHead className="w-[4rem]">Fecha</TableHead>
             <TableHead>Descripción</TableHead>
             <TableHead>Tipo</TableHead>
@@ -40,7 +40,7 @@ export default function CCDetail(props: {
           {events.data?.map((event) => (
             <TableRow
               key={event.id}
-              className=" border-b-2 border-gray-200 border-x-0 text-center text-[#909090]"
+              className=" border-b-2 border-gray-200 border-x-0 text-center  "
             >
               <TableCell className="w-[15rem]">
                 {dayjs(event?.createdAt).format("YYYY-MM-DD HH:mm")}
@@ -55,7 +55,7 @@ export default function CCDetail(props: {
       <h2 className="font-semibold mb-2">Comprobantes</h2>
       <Table>
         <TableHeader>
-          <TableRow className="bg-[#71EBD4] hover:bg-[#71EBD4] rounded-lg ">
+          <TableRow className="bg-[#F7F7F7] hover:bg-[#F7F7F7] rounded-lg ">
             <TableHead>Fecha</TableHead>
             <TableHead>Tipo</TableHead>
             <TableHead>Importe</TableHead>
@@ -69,7 +69,7 @@ export default function CCDetail(props: {
             .map((comprobante) => (
               <TableRow
                 key={comprobante.id}
-                className="border-b-2 border-gray-200 border-x-0 text-center text-[#909090]"
+                className="border-b-2 border-gray-200 border-x-0 text-center  "
               >
                 <TableCell>
                   {dayjs(comprobante?.createdAt).format("YYYY-MM-DD hh:mm")}

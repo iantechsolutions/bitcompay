@@ -5,6 +5,7 @@ import {
   DoubleArrowRightIcon,
 } from "@radix-ui/react-icons";
 import { Table } from "@tanstack/react-table";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "~/components/ui/button";
@@ -86,7 +87,7 @@ export function DataTablePagination<TData>({
             table.setPageSize(Number(value));
           }}
         >
-          <SelectTrigger className="h-4 w-[70px]">
+          <SelectTrigger className="border-2 border-[#C8FF6D] h-4 w-[70px] rounded-full">
             <SelectValue placeholder={table.getState().pagination.pageSize} />
           </SelectTrigger>
           <SelectContent side="top">
@@ -110,18 +111,20 @@ export function DataTablePagination<TData>({
       <div className="flex items-center gap-2">
         <Button
           variant="outline"
-          className="h-8 w-auto p-0"
+          size="sm"
+          className="border-2 border-[#C8FF6D]"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
+          <ChevronLeft className="h-3.5 w-3.5" />
           Previo
         </Button>
         {pages.map((page, index) =>
           typeof page === "number" ? (
             <button
               key={index}
-              className={`px-3 h-5 w-auto text-[0.6rem] rounded-md text-muted-foreground ${
-                pageIndex === page - 1 ? "bg-[#71EBD4] " : "bg-gray-200"
+              className={`px-3 h-5 w-auto text-[0.6rem] rounded-full text-muted-foreground ${
+                pageIndex === page - 1 ? "bg-[#C8FF6D] " : "bg-gray-200"
               }`}
               onClick={() => goToPage(page - 1)}
             >
@@ -139,11 +142,13 @@ export function DataTablePagination<TData>({
 
         <Button
           variant="outline"
-          className="h-8 w-auto p-0"
+          size="sm"
+          className="border-2 border-[#C8FF6D]"
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >
           Siguiente
+          <ChevronRight className="h-3.5 w-3.5" />
         </Button>
       </div>
     </div>

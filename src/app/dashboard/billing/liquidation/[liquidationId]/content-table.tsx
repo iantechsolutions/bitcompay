@@ -24,19 +24,19 @@ function ContentTable(props: propsContentTable) {
   return (
     <Table>
       <TableRow className="">
-        <TableHead className="text-black text-sm opacity-70  pl-0 border-b border-[#4af0d4] text-left">
+        <TableHead className="  text-sm opacity-70  pl-0 border-b border-[#4af0d4] text-left">
           {" "}
           Concepto{" "}
         </TableHead>
-        <TableHead className="text-black  text-sm opacity-70  border-b border-[#4af0d4] ">
+        <TableHead className="   text-sm opacity-70  border-b border-[#4af0d4] ">
           {" "}
           Importe{" "}
         </TableHead>
-        <TableHead className="text-black   text-sm opacity-70  border-b border-[#4af0d4]">
+        <TableHead className="    text-sm opacity-70  border-b border-[#4af0d4]">
           {" "}
           IVA
         </TableHead>
-        <TableHead className="text-black  text-sm opacity-70  border-b border-[#4af0d4]">
+        <TableHead className="   text-sm opacity-70  border-b border-[#4af0d4]">
           TOTAL
         </TableHead>
       </TableRow>{" "}
