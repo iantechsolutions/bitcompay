@@ -806,6 +806,7 @@ export const ComprobantesSchemaDB = insertComprobantesSchema.pick({
   generated: true,
   estado: true,
   health_insurance_id: true,
+  createdAt: true,
   billLink: true,
   concepto: true,
   tipoComprobante: true,
@@ -820,7 +821,6 @@ export const ComprobantesSchemaDB = insertComprobantesSchema.pick({
   iva: true,
   ptoVenta: true,
   nroComprobante: true,
-
   liquidation_id: true,
   family_group_id: true,
   origin: true,
@@ -900,9 +900,11 @@ export const family_groupsSchemaDB = insertfamily_groupsSchema.pick({
   validity: true,
   plan: true,
   modo: true,
+  bonus: true,
+  procedureId: true,
+  numericalId: true,
   state: true,
   payment_status: true,
-  bonus: true,
   receipt: true,
 });
 export type FamilyGroup = z.infer<typeof selectfamily_groupsSchema>;
@@ -960,10 +962,10 @@ export const ProcedureRelations = relations(procedure, ({ many }) => ({
 export const insertProcedureSchema = createInsertSchema(procedure);
 export const selectProcedureSchema = createSelectSchema(procedure);
 export const ProcedureSchemaDB = insertProcedureSchema.pick({
-  estado: true,
-  family_group: true,
   type: true,
   companyId: true,
+  estado: true,
+  family_group: true,
 });
 export type Procedure = z.infer<typeof selectProcedureSchema>;
 
