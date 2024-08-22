@@ -326,7 +326,7 @@ export const excelDeserializationRouter = createTRPCRouter({
             });
             console.log("lectura prod");
             const product = companyProducts.find(
-              (x) => x.product.name ?? "" === row.product
+              (x) => (x.product && x.product.name) ?? "" === row.product
             )?.product;
             console.log("post lectura prod");
             await db.insert(schema.pa).values({
