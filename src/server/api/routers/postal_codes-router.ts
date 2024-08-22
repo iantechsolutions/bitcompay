@@ -29,7 +29,19 @@ export const postalCodeRouter = createTRPCRouter({
 
       return postalCode;
     }),
+  getByZone: protectedProcedure
+    .input(
+      z.object({
+        zoneId: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      const postalCode = await db.query.postal_code.findMany({
+        where: eq(schema.postal_code.zone, input.zoneId),
+      });
 
+      return postalCode;
+    }),
   create: protectedProcedure
     .input(
       z.object({

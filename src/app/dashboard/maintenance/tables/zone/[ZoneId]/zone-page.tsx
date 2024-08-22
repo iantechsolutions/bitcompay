@@ -28,6 +28,7 @@ import { asTRPCError } from "~/lib/errors";
 import { api } from "~/trpc/react";
 import { RouterOutputs } from "~/trpc/shared";
 import LayoutContainer from "~/components/layout-container";
+import { List, ListTile } from "~/components/list";
 
 export default function ZonePage(props: {
   zone: RouterOutputs["zone"]["get"];
@@ -38,6 +39,11 @@ export default function ZonePage(props: {
 
   const [name, setName] = useState("");
   const [cp, setCP] = useState("");
+
+  const zoneId = props!.zone!.id ?? "";
+  const postalCodes = api.postal_code.getByZone.useQuery({
+    zoneId: zoneId,
+  });
 
   useEffect(() => {
     if (props.zone) {
@@ -64,7 +70,7 @@ export default function ZonePage(props: {
   async function handleDelete() {
     try {
       deleteZone({
-        zoneId: props.zone?.id ?? "",
+        zoneId: zoneId,
       });
       toast.success("Zona eliminada correctamente");
       router.push("./");
@@ -117,7 +123,30 @@ export default function ZonePage(props: {
               </div>
             </AccordionContent>
           </AccordionItem>
-          <AccordionItem value="item-2" className="border-none">
+
+          <AccordionItem value="item-2">
+            <AccordionTrigger>
+              <h2 className="text-md">Codigo postales</h2>
+            </AccordionTrigger>
+            <AccordionContent>
+              <List>
+                {postalCodes.data && postalCodes.data.length > 0 ? (
+                  postalCodes.data.map((postalCode) => (
+                    <ListTile
+                      key={postalCode.id}
+                      title={postalCode.cp ? postalCode.name : postalCode.zone}
+                      href={`/dashboard/maintenance/tables/postal_codes/${postalCode.id}`}
+                      leading={postalCode.cp}
+                    />
+                  ))
+                ) : (
+                  <Title>No hay códigos postales subidos</Title>
+                )}
+              </List>
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="item-3" className="border-none">
             <AccordionTrigger>
               <h2 className="text-md">Eliminar zona</h2>
             </AccordionTrigger>
@@ -143,8 +172,7 @@ export default function ZonePage(props: {
                       <AlertDialogAction
                         className="bg-red-500 hover:bg-red-600 active:bg-red-700"
                         onClick={handleDelete}
-                        disabled={isLoadingDelete}
-                      >
+                        disabled={isLoadingDelete}>
                         {isLoadingDelete && (
                           <Loader2 className="mr-2 animate-spin" size={20} />
                         )}

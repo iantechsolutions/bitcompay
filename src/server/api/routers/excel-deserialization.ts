@@ -63,18 +63,18 @@ export const excelDeserializationRouter = createTRPCRouter({
         for (const row of contents) {
           const business_unit = await db.query.bussinessUnits.findFirst({
             where: and(
-              eq(schema.bussinessUnits.description, row.business_unit!),
-              eq(schema.bussinessUnits.companyId, ctx.session.orgId!)
+              eq(schema.bussinessUnits.description, row.business_unit ?? ""),
+              eq(schema.bussinessUnits.companyId, ctx.session.orgId ?? "")
             ),
           });
 
           const mode = await db.query.modos.findFirst({
-            where: eq(schema.modos.description, row.mode!),
+            where: eq(schema.modos.description, row.mode ?? ""),
           });
 
           const plan = await db.query.plans.findFirst({
             where: and(
-              eq(schema.plans.plan_code, row.plan!),
+              eq(schema.plans.plan_code, row.plan ?? ""),
               eq(schema.plans.brand_id, business_unit?.brandId ?? "")
             ),
             with: {
@@ -83,14 +83,17 @@ export const excelDeserializationRouter = createTRPCRouter({
           });
 
           const health_insurance = await db.query.healthInsurances.findFirst({
-            where: eq(schema.healthInsurances.identificationNumber, row.os!),
+            where: eq(
+              schema.healthInsurances.identificationNumber,
+              row.os ?? ""
+            ),
           });
 
           const health_insurance_origin =
             await db.query.healthInsurances.findMany({
               where: eq(
                 schema.healthInsurances.identificationNumber,
-                row["originating os"]!
+                row["originating os"] ?? ""
               ),
             });
 
@@ -104,7 +107,7 @@ export const excelDeserializationRouter = createTRPCRouter({
               .values({
                 type: "alta",
                 estado: "finalizado",
-                companyId: ctx.session.orgId!,
+                companyId: ctx.session.orgId ?? "",
               })
               .returning();
             console.log("creando grupo familiar");
@@ -117,11 +120,11 @@ export const excelDeserializationRouter = createTRPCRouter({
                 modo: mode?.id,
                 receipt: " ",
                 state: "ACTIVO",
-                procedureId: procedure[0]!.id,
+                procedureId: procedure[0]?.id ?? "",
               })
               .returning();
             familyGroupMap.set(row.holder_id_number, familygroup[0]!.id);
-            familyGroupId = familygroup[0]!.id;
+            familyGroupId = familygroup[0]?.id ?? "";
             const bonus = await db
               .insert(schema.bonuses)
               .values({
@@ -154,16 +157,16 @@ export const excelDeserializationRouter = createTRPCRouter({
               const new_differential = await db
                 .insert(schema.differentials)
                 .values({
-                  codigo: row.differential_code!,
+                  codigo: row.differential_code ?? "",
                 })
                 .returning();
-              differentialId = new_differential[0]!.id;
+              differentialId = new_differential[0]?.id ?? "";
             } else {
-              differentialId = check_differential[0]!.id;
+              differentialId = check_differential[0]?.id ?? "";
             }
           }
 
-          const birthDate = new Date(row.birth_date!);
+          const birthDate = new Date(row.birth_date ?? "");
           const today = new Date();
           let age = today.getFullYear() - birthDate.getFullYear();
           if (
@@ -174,7 +177,7 @@ export const excelDeserializationRouter = createTRPCRouter({
             age--;
           }
           const relativeExist = await db.query.relative.findMany({
-            where: eq(schema.relative.relation, row.relationship!),
+            where: eq(schema.relative.relation, row.relationship ?? ""),
           });
           if (!relativeExist || relativeExist.length == 0) {
             await db.insert(schema.relative).values({
@@ -187,7 +190,7 @@ export const excelDeserializationRouter = createTRPCRouter({
             .values({
               affiliate_type: "type",
               relationship: row.relationship,
-              name: row.name,
+              name: row.name ?? "",
               id_type: row.own_id_type,
               id_number: row.du_number,
               birth_date: row.birth_date,
@@ -220,7 +223,7 @@ export const excelDeserializationRouter = createTRPCRouter({
               health_insuranceId: health_insurance?.id,
               originating_health_insuranceId:
                 health_insurance_origin.length > 0
-                  ? health_insurance_origin[0]!.id
+                  ? health_insurance_origin[0]?.id ?? ""
                   : null,
             })
             .returning();
@@ -231,24 +234,24 @@ export const excelDeserializationRouter = createTRPCRouter({
             const cc = await db
               .insert(schema.currentAccount)
               .values({
-                family_group: new_integrant[0]!.family_group_id,
+                family_group: new_integrant[0]?.family_group_id ?? "",
               })
               .returning();
             const event = await db.insert(schema.events).values({
               current_amount: parseFloat(row.balance ?? "0"),
               description: "Apertura",
               event_amount: parseFloat(row.balance ?? "0"),
-              currentAccount_id: cc[0]!.id,
+              currentAccount_id: cc[0]?.id ?? "",
               type: "REC",
             });
             console.log("Llego Llego");
 
-            const tipoDocumento = idDictionary[new_integrant[0]!.id_type ?? ""];
+            const tipoDocumento = idDictionary[new_integrant[0]?.id_type ?? ""];
             const factura = await db.insert(schema.comprobantes).values({
               origin: "Factura",
               importe: parseFloat(row.balance ?? "0") * -1,
               iva: "0",
-              family_group_id: new_integrant[0]!.family_group_id,
+              family_group_id: new_integrant[0]?.family_group_id ?? "",
               billLink: "",
               concepto: 0,
               nroComprobante: 0,
@@ -301,32 +304,36 @@ export const excelDeserializationRouter = createTRPCRouter({
             console.log(row.differential_value);
             console.log(precioIntegrante);
             const precioDiferencial =
-              parseFloat(row.differential_value!) / precioIntegrante;
+              parseFloat(row.differential_value ?? "") / precioIntegrante;
             console.log("precioDiferencial", precioDiferencial);
             const differentialValue = await db
               .insert(schema.differentialsValues)
               .values({
                 amount: precioDiferencial,
                 differentialId: differentialId,
-                integrant_id: new_integrant[0]!.id,
+                integrant_id: new_integrant[0]?.id ?? "",
               });
           }
           if (row.isPaymentResponsible) {
             const companyProducts = await db.query.companyProducts.findMany({
-              where: eq(schema.companyProducts.companyId, ctx.session.orgId!),
+              where: eq(
+                schema.companyProducts.companyId,
+                ctx.session.orgId ?? ""
+              ),
               with: {
                 product: true,
               },
             });
+            console.log("lectura prod");
             const product = companyProducts.find(
-              (x) => x.product.name === row.product
+              (x) => x.product.name ?? "" === row.product
             )?.product;
-
+            console.log("post lectura prod");
             await db.insert(schema.pa).values({
               card_number: row.card_number?.toString() ?? null,
               CBU: row.cbu,
               new_registration: row.is_new ?? false,
-              integrant_id: new_integrant[0]!.id,
+              integrant_id: new_integrant[0]?.id ?? "",
               product_id: product?.id,
               // CBU: row.cbu_number!,
               card_brand: row.card_brand ?? null,
@@ -336,13 +343,13 @@ export const excelDeserializationRouter = createTRPCRouter({
               // product: product?.id,
             });
           }
-          const contribution = parseFloat(row.contribution!);
+          const contribution = parseFloat(row.contribution ?? "");
           console.log("creando aportes");
           await db.insert(schema.contributions).values({
             employeeContribution: 0,
             employerContribution: contribution,
             amount: contribution,
-            integrant_id: new_integrant[0]!.id,
+            integrant_id: new_integrant[0]?.id ?? "",
             cuitEmployer: " ", //a rellenar
           });
         }
@@ -437,9 +444,12 @@ async function readExcelFile(
         product: true,
       },
     });
+    console.log("companyProducts", companyProducts);
+    console.log("product", row.product);
     const product = companyProducts.find(
-      (x) => x.product.name === row.product
+      (x) => x.product && x.product.name === row.product
     )?.product;
+
     // await db.query.products.findFirst({
     //   where: eq(schema.products.name, row.product!),
     // });
