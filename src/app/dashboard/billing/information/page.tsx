@@ -4,7 +4,7 @@ import { List, ListTile } from "~/components/list";
 import LayoutContainer from "~/components/layout-container";
 import { Edit } from "lucide-react";
 // import EditCompany from "./edit-information";
-
+//delete?
 export default async function Page() {
   const company = await api.companies.get.query();
   return (

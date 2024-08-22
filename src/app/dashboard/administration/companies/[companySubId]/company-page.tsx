@@ -59,10 +59,15 @@ export default function CompanyPage({
 }) {
   const [name, setName] = useState(company.name);
 
-  const [afipKey, setAfipKey] = useState(company.afipKey!);
-  const [cuit, setCuit] = useState(company.cuit!);
+  const [afipKey, setAfipKey] = useState(company.afipKey ?? "");
+  const [cuit, setCuit] = useState(company.cuit ?? "");
+  const [afipCondition, setAfipCondition] = useState(
+    company.afip_condition ?? ""
+  );
+  const [address, setAddress] = useState(company.address ?? "");
+  const [razonSocial, setRazonSocial] = useState(company.razon_social ?? "");
 
-  const [description, setDescription] = useState(company.description);
+  const [description, setDescription] = useState(company.description ?? "");
 
   const [companyProducts, setCompanyProducts] = useState<Set<string>>(
     new Set(company.products.map((c) => c.productId))
@@ -80,6 +85,9 @@ export default function CompanyPage({
         description,
         afipKey: afipKey ?? "",
         cuit: cuit ?? "",
+        afip_condition: afipCondition ?? "",
+        razon_social: razonSocial ?? "",
+        address: address ?? "",
       });
       toast.success("Se han guardado los cambios");
     } catch (e) {
@@ -163,6 +171,41 @@ export default function CompanyPage({
                     />
                   </div>
                   <div>
+                    <Label htmlFor="razonSocial">Razon social</Label>
+                    <Input
+                      id="razonSocial"
+                      value={razonSocial}
+                      onChange={(e) => setRazonSocial(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="address">Direccion</Label>
+                    <Input
+                      id="address"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </Card>
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="item-3">
+            <AccordionTrigger>
+              <Label htmlFor="Info de facturacion">Info. de facturacion</Label>
+            </AccordionTrigger>
+            <AccordionContent>
+              <Card className="p-5">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="col-span-2">
+                    <Label htmlFor="afipCondition">Condicion ante afip</Label>
+                    <Input
+                      id="afipCondition"
+                      value={afipCondition}
+                      onChange={(e) => setAfipCondition(e.target.value)}
+                    />
+                  </div>
+                  <div>
                     <Label htmlFor="CUIT">CUIT</Label>
                     <Input
                       id="CUIT"
@@ -181,11 +224,6 @@ export default function CompanyPage({
                 </div>
               </Card>
             </AccordionContent>
-          </AccordionItem>
-          <AccordionItem value="item-3">
-            <AccordionTrigger>
-              <h2 className="text-md">Info de facturacion</h2>
-            </AccordionTrigger>
           </AccordionItem>
           <AccordionItem value="item-4">
             <AccordionTrigger>
@@ -280,8 +318,7 @@ function DeleteChannel(props: { companySubId: string }) {
           <AlertDialogAction
             className="bg-red-500 hover:bg-red-600 active:bg-red-700"
             onClick={handleDelete}
-            disabled={isLoading}
-          >
+            disabled={isLoading}>
             {isLoading && (
               <Loader2Icon className="mr-2 animate-spin" size={20} />
             )}
