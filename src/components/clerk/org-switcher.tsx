@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Button } from "../ui/button";
 import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
 import { ChevronDown } from "lucide-react";
+import { ButtonWithoutSize } from "../ui/buttonWithoutSize";
 interface CustomOrganizationSwitcherProps {
   companyName: string | undefined;
 }
@@ -26,14 +27,17 @@ export const CustomOrganizationSwitcher = ({
     <>
       <Popover>
         <PopoverTrigger>
-          <Button
-            variant={"outline"}
-            className="bg-white hover:bg-white rounded-2xl px-7 text-xs font-normal text-md flex items-center border-none shadow-none"
+          <ButtonWithoutSize
+            // variant={"outline"}
+            className="bg-white hover:bg-white rounded-2xl px-7 font-normal text-startP flex items-center border-none shadow-none"
           >
-            <img src="/public/header/Frame-14.png" className="h-6 mr-2" />
+            <img
+              src="/public/header/Frame-14.png"
+              className="h-[3.5vh] mr-[0.6vw]"
+            />
             {organization?.name ?? companyName}
-            <ChevronDown strokeWidth={2} color="black" width={24} />
-          </Button>
+            <ChevronDown strokeWidth={2} color="black" width="1vw" />
+          </ButtonWithoutSize>
         </PopoverTrigger>
         <PopoverContent>
           <h1>Cambiar entre organizaciones</h1>

@@ -23,7 +23,7 @@ export default async function AppLayout(props: AppLayoutProps) {
     <>
       <header
         // biome-ignore lint/nursery/useSortedClasses: <explanation>
-        className={`fixed top-0 right-0 left-0 z-10 flex h-24 items-center border-b px-2 backdrop-blur-md md:px-4 ${props.headerClass}`}
+        className={`fixed top-0 right-0 left-0 z-10 flex h-[15vh] items-center px-2 backdrop-blur-md md:px-4 ${props.headerClass}`}
       >
         <SidenavSheet
           trigger={
@@ -44,14 +44,12 @@ export default async function AppLayout(props: AppLayoutProps) {
 
       <aside
         // biome-ignore lint/nursery/useSortedClasses: <explanation>
-        className={`fixed bottom-0 left-0 z-20 hidden max-h-full w-[300px]  bg-white overflow-y-hidden border-r md:block ${props.sidenavClass}`}
+        className={`fixed bottom-0 left-0 z-20 hidden max-h-full w-[25%]  bg-white overflow-y-hidden md:block ${props.sidenavClass}`}
       >
         {props.sidenav}
       </aside>
 
-      <main className="relative mt-[70px] p-3 md:ml-[250px] md:p-10">
-        {props.children}
-      </main>
+      <main className="relative">{props.children}</main>
     </>
   );
 }
