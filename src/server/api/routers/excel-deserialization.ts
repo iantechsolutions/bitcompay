@@ -304,7 +304,7 @@ export const excelDeserializationRouter = createTRPCRouter({
             console.log(row.differential_value);
             console.log(precioIntegrante);
             const precioDiferencial =
-              parseFloat(row.differential_value ?? "") / precioIntegrante;
+              parseFloat(row.differential_value ?? "0") / precioIntegrante;
             console.log("precioDiferencial", precioDiferencial);
             const differentialValue = await db
               .insert(schema.differentialsValues)
@@ -534,7 +534,11 @@ async function readExcelFile(
     //     `UNIDAD DE NEGOCIO no pertenece a la organizacion (fila:${rowNum}) `
     //   );
     // }
-    if (row.differential_value && !row.differential_code) {
+    if (
+      row.differential_value &&
+      row.differential_value !== "0" &&
+      !row.differential_code
+    ) {
       errors.push(`CODIGO DIFERENCIAL requerido en (fila:${rowNum})`);
     }
     const health_insurance = await db.query.healthInsurances.findFirst({

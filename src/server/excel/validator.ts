@@ -407,7 +407,7 @@ export const recDocumentValidator = z
       isPaymentResponsible: value["ES RESP PAGADOR"] ?? null,
       contribution: value["APORTE TOTAL"] ?? null,
       differential_code: value["DIFERENCIAL CODIGO"] ?? null,
-      differential_value: value["DIFERENCIAL VALOR"],
+      differential_value: value["DIFERENCIAL VALOR"] ?? "0",
       balance: value["SALDO CUENTA CORRIENTE"] ?? null,
       plan: value.PLAN ?? null,
       product: value["PRODUCTO (MEDIO DE PAGO)"] ?? null,
