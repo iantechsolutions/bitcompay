@@ -36,7 +36,7 @@ export default function TableToolbar<TData, TValue>({
                   .getColumn(searchColumn ?? "")
                   ?.setFilterValue(event.target.value)
               }
-              className="w-full h-7 p-5 rounded-full border-2 border-[#C8FF6D] focus-visible:ring-[#C8FF6D]"
+              className="w-full h-7 p-5 rounded-full border-2 border-[#BEF0BB] focus-visible:ring-[#BEF0BB]"
             ></Input>
             <div className="rounded-full h-6 w-6 place-content-center absolute right-5">
               <svg
@@ -45,7 +45,7 @@ export default function TableToolbar<TData, TValue>({
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="#3E3E3E"
-                className="size-1"
+                className=""
               >
                 <path
                   strokeLinecap="round"

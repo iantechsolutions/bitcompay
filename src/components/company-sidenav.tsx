@@ -299,7 +299,7 @@ export default function CompanySidenav() {
                         IsChild={true}
                         className="text-sideNav"
                       >
-                        Tramites
+                        Trámites
                       </SidenavItem>
                     )}
                     {canSeePlans && (
@@ -731,14 +731,14 @@ export default function CompanySidenav() {
               icon={<Activity strokeWidth={1} />}
               activeIcon={<Activity strokeWidth={1} color="#6952EB" />}
             >
-              Medico
+              Médico
             </SidenavItem>
             <SidenavItem
               href={`/dashboard/audit/telefonica`}
               icon={<Phone strokeWidth={1} />}
               activeIcon={<Phone strokeWidth={1} color="#6952EB" />}
             >
-              Telefonica
+              Telefónica
             </SidenavItem>
             <SidenavItem
               href={`/dashboard/audit/benefits`}
@@ -768,7 +768,7 @@ export default function CompanySidenav() {
           <>
             <div>
               <SidenavSeparator className="text-sideNav">
-                TESORERIA
+                TESORERÍA
               </SidenavSeparator>
             </div>
 

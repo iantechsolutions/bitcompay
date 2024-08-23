@@ -31,7 +31,7 @@ export function DataTablePagination<TData>({
   useEffect(() => {
     const getPageNumbers = () => {
       const pages: (number | string)[] = [];
-      const maxButtons = 10;
+      const maxButtons = 5;
 
       const half = Math.floor(maxButtons / 2);
       const currentIndex = pageIndex + 1;
@@ -86,7 +86,7 @@ export function DataTablePagination<TData>({
           }}
         >
           <SelectTrigger
-            className="border-2 border-[#C8FF6D] h-4 w-[70px] rounded-full"
+            className="border-2 border-[#BEF0BB] h-4 w-[70px] rounded-full"
             rightIcon={<ChevronDown className="h-4 w-3" strokeWidth={1} />}
           >
             <SelectValue placeholder={table.getState().pagination.pageSize} />
@@ -113,7 +113,7 @@ export function DataTablePagination<TData>({
         <Button
           variant="outline"
           size="sm"
-          className="border-2 border-[#C8FF6D]"
+          className="border-2 border-[#BEF0BB]"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
@@ -125,7 +125,7 @@ export function DataTablePagination<TData>({
             <button
               key={index}
               className={`px-3 h-5 w-auto text-[0.6rem] rounded-full text-muted-foreground ${
-                pageIndex === page - 1 ? "bg-[#C8FF6D] " : "bg-gray-200"
+                pageIndex === page - 1 ? "bg-[#BEF0BB] " : "bg-gray-200"
               }`}
               onClick={() => goToPage(page - 1)}
             >
@@ -144,7 +144,7 @@ export function DataTablePagination<TData>({
         <Button
           variant="outline"
           size="sm"
-          className="border-2 border-[#C8FF6D]"
+          className="border-2 border-[#BEF0BB]"
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >
