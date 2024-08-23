@@ -96,7 +96,7 @@ export default function BrandPage({
     if (!reducedDescription) errors.push("Descripción Reducida");
     if (!concept) errors.push("Concepto");
     if (!iva) errors.push("IVA");
-    if (!billType) errors.push("Tipo de Factura");
+    // if (!billType) errors.push("Tipo de Factura");
 
     return errors;
   }
@@ -195,7 +195,8 @@ export default function BrandPage({
                     <Label htmlFor="concept">Concepto</Label>
                     <Select
                       onValueChange={(e) => setConcept(e)}
-                      value={concept ?? ""}>
+                      value={concept ?? ""}
+                    >
                       <SelectTrigger className="w-[180px] font-bold">
                         <SelectValue placeholder="Seleccionar concepto..." />
                       </SelectTrigger>
@@ -361,7 +362,8 @@ function Deletebrand(props: { brandId: string }) {
           <AlertDialogAction
             className="bg-red-500 active:bg-red-700 hover:bg-red-600"
             onClick={handleDelete}
-            disabled={isLoading}>
+            disabled={isLoading}
+          >
             Eliminar
           </AlertDialogAction>
         </AlertDialogFooter>
