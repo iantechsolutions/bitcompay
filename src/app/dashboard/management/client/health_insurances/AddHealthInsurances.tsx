@@ -23,6 +23,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { asTRPCError } from "~/lib/errors";
 import { api } from "~/trpc/react";
+import AddElementButton from "~/components/add-element";
 
 export function AddHealthInsurances() {
   const { mutateAsync: createProduct, isLoading } =
@@ -92,13 +93,7 @@ export function AddHealthInsurances() {
 
   return (
     <>
-      <Button
-        onClick={() => setOpen(true)}
-        className="rounded-full text-[#3E3E3E] bg-[#C8FF6D] hover:bg-[#C8FF6D]"
-      >
-        <PlusCircleIcon className="mr-2" size={20} />
-        Agregar obra social como cliente
-      </Button>
+      <AddElementButton>Agregar Obra social como cliente</AddElementButton>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[800px]">
           <DialogHeader>
@@ -195,7 +190,8 @@ export function AddHealthInsurances() {
 
               <Select
                 onValueChange={(e) => setPostal_code(e)}
-                value={postal_code}>
+                value={postal_code}
+              >
                 <SelectTrigger className="w-[180px] font-bold">
                   <SelectValue placeholder="Seleccionar CP" />
                 </SelectTrigger>

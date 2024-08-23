@@ -32,7 +32,9 @@ export const CustomOrganizationSwitcher = ({
           >
             <img src="/public/header/Frame-14.png" className="h-6 mr-2" />
             {organization?.name ?? companyName}
-            <ChevronDown strokeWidth={2} />
+            <div className="ml-3">
+              <ChevronDown className="h-4 w-auto" strokeWidth={1} />
+            </div>
           </Button>
         </PopoverTrigger>
         <PopoverContent>

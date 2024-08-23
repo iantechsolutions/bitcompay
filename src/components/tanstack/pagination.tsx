@@ -5,7 +5,7 @@ import {
   DoubleArrowRightIcon,
 } from "@radix-ui/react-icons";
 import { Table } from "@tanstack/react-table";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "~/components/ui/button";
@@ -75,8 +75,6 @@ export function DataTablePagination<TData>({
     table.setPageIndex(pageNumber);
   };
 
-  console.log(pages);
-  console.log(pageIndex);
   return (
     <div className="flex items-center justify-between px-2 mt-2 w-full">
       <div className="flex items-center space-x-2">
@@ -87,7 +85,10 @@ export function DataTablePagination<TData>({
             table.setPageSize(Number(value));
           }}
         >
-          <SelectTrigger className="border-2 border-[#C8FF6D] h-4 w-[70px] rounded-full">
+          <SelectTrigger
+            className="border-2 border-[#C8FF6D] h-4 w-[70px] rounded-full"
+            rightIcon={<ChevronDown className="h-4 w-3" strokeWidth={1} />}
+          >
             <SelectValue placeholder={table.getState().pagination.pageSize} />
           </SelectTrigger>
           <SelectContent side="top">

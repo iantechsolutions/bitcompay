@@ -457,7 +457,7 @@ export default function CompanySidenav() {
                         : "rounded-lg px-1 py-1.5 mb-3 hover:no-underline"
                     }
                   >
-                    <SideNavTrigger icon={<Files className=" mr-4" />}>
+                    <SideNavTrigger icon={<Files className="h-5 mr-4" />}>
                       Documentos
                     </SideNavTrigger>
                   </AccordionTrigger>
