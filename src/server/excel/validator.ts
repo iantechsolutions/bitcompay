@@ -238,6 +238,8 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
   return { finishedArray, errors };
 };
 
+const customEmailRegex = /^[\wñÑ._%+-]+@[a-zñÑ0-9.-]+\.[a-z]{2,}$/i;
+
 export const recDocumentValidator = z
   .object({
     "UNIDAD DE NEGOCIO": z
@@ -334,9 +336,7 @@ export const recDocumentValidator = z
     CELULAR: numberAsString.nullable().optional(),
     EMAIL: z
       .string()
-      .email({ message: "Ingrese un email valido" })
-      .nullable()
-      .optional(),
+      .regex(customEmailRegex, { message: "Correo electrónico no válido" }),
     "ES AFILIADO": stringAsBoolean.nullable().optional(),
     "ES TITULAR": stringAsBoolean.nullable().optional(),
     "ES TITULAR DEL PAGO": stringAsBoolean.nullable().optional(),
