@@ -223,13 +223,22 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
               </div>
             </Card>
             {error && <p className="font-semibold text-red-500">{error}</p>}
-            <Button
-              className="w-full py-6"
-              variant="outline"
-              disabled={!documentType || isLoading}
-              onClick={handleContinue}>
-              Leer datos
-            </Button>
+            <div className="flex gap-1">
+              <Button
+                disabled={!documentType || isLoading}
+                onClick={handleContinue}>
+                Leer datos
+              </Button>
+              <Button variant="destructive" onClick={handleDelete}>
+                Cancelar y eliminar
+              </Button>
+
+              {data && (
+                <Button onClick={handlerConfirm}>
+                  Confirmar y escribir a la base de datos
+                </Button>
+              )}
+            </div>
 
             {dataError && (
               <pre className="mt-5 overflow-auto rounded-md border border-dashed p-4">
@@ -271,22 +280,10 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
                 </TableBody>
               </Table>
             )}
-
-            <div className="flex gap-2">
-              <Button variant="destructive" onClick={handleDelete}>
-                Cancelar y eliminar
-              </Button>
-
-              {data && (
-                <Button onClick={handlerConfirm}>
-                  Confirmar y escribir a la base de datos
-                </Button>
-              )}
+            <div className="mt-5">
+              {data && <LargeTable rows={tableRows} headers={data.headers} />}
             </div>
           </LayoutContainer>
-          <div className="mt-5">
-            {data && <LargeTable rows={tableRows} headers={data.headers} />}
-          </div>
         </>
       )}
     </>

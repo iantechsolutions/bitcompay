@@ -130,7 +130,7 @@ export const ProviderSchema = z.object({
     },
   }),
   nationality: z.string().max(255),
-  address: z.string().max(255),
+  address: z.string().max(140),
   phone_number: z
     .string()
     .max(255)

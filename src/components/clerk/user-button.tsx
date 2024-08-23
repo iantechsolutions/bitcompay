@@ -33,12 +33,12 @@ const UserButtonAndMenu = ({
         {/* Render a button using the image and email from `user` */}
         <Button
           onClick={() => setActive(!active)}
-          className="flex rounded-3xl border-none items-center border-gray-200 bg-[#ECFFCF] px-[3vw] py-[0.7vh] hover:bg-[#ECFFCF]  text-[#3E3E3E] h-[7vh] "
+          className="flex rounded-[6vh] border-none items-center border-gray-200 bg-[#ECFFCF] px-[3vw] py-[0.7vh] hover:bg-[#ECFFCF]  text-[#3E3E3E] h-[7vh] "
         >
           <img
             src="/public/header/Frame-12.png"
             alt="user logo"
-            className="h-[4.5vh]  mr-2"
+            className="h-[4.5vh]  mr-[1vw]"
           />
           <div className="flex-1 flex flex-col justify-center">
             <div className="text-startP font-medium mb-[0.4vh]">
@@ -50,9 +50,9 @@ const UserButtonAndMenu = ({
               {companyName ?? " "}
             </div>
           </div>
-          <div className="ml-3 border-none">
-            {active && <ChevronDown className="h-4 w-auto self-end" />}
-            {!active && <ChevronUp className="h-4 w-auto self-end" />}
+          <div className="ml-[2vw] border-none">
+            {active && <ChevronDown className="h-[2vh] w-auto self-end" />}
+            {!active && <ChevronUp className="h-[2vh] w-auto self-end" />}
           </div>
         </Button>
       </DropdownMenu.Trigger>

@@ -4,6 +4,7 @@ import AddPlanPricesComponent from "../../add-planprices-component";
 import { api } from "~/trpc/react";
 import { GoBackArrow } from "~/components/goback-arrow";
 import { useRouter } from "next/navigation";
+import LayoutContainer from "~/components/layout-container";
 
 export default function AddPlanPage(props: { params: { planId: string } }) {
   const [planId, setPlanId] = useState<string | undefined>(props.params.planId);
@@ -38,15 +39,17 @@ export default function AddPlanPage(props: { params: { planId: string } }) {
     router.refresh();
   }
   return (
-    <div>
-      <GoBackArrow />
-      <AddPlanPricesComponent
-        planId={props.params.planId}
-        initialPrices={priceList}
-        edit={false}
-        date={firstCorrectPrice?.validy_date}
-        onPricesChange={() => handleChange()}
-      ></AddPlanPricesComponent>
-    </div>
+    <LayoutContainer>
+      <div>
+        <GoBackArrow />
+        <AddPlanPricesComponent
+          planId={props.params.planId}
+          initialPrices={priceList}
+          edit={false}
+          date={firstCorrectPrice?.validy_date}
+          onPricesChange={() => handleChange()}
+        ></AddPlanPricesComponent>
+      </div>
+    </LayoutContainer>
   );
 }
