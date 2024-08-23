@@ -6,11 +6,14 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
+
 const ForgotPasswordPage: NextPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
   const [code, setCode] = useState("");
   const [successfulCreation, setSuccessfulCreation] = useState(false);
+  const [codeVerified, setCodeVerified] = useState(false);
   const [secondFactor, setSecondFactor] = useState(false);
   const [error, setError] = useState("");
 
@@ -21,19 +24,17 @@ const ForgotPasswordPage: NextPage = () => {
   const messageError: { [key: string]: string } = {
     "Couldn't find your account.": "No se pudo encontrar su cuenta.",
     "You're currently in single session mode. You can only be signed into one account at a time.":
-      "Actualmente estas en modo de sesión unica. Solo puedes estar logeado en una cuenta a la vez.",
+      "Actualmente estas en modo de sesión única. Solo puedes estar logueado en una cuenta a la vez.",
   };
+
   if (!isLoaded) {
     return null;
   }
 
-  // If the user is already signed in,
-  // redirect them to the home page
   if (isSignedIn) {
     router.push("/");
   }
 
-  // Send the password reset code to the user's email
   async function create(e: React.FormEvent) {
     e.preventDefault();
     await signIn
@@ -41,7 +42,7 @@ const ForgotPasswordPage: NextPage = () => {
         strategy: "reset_password_email_code",
         identifier: email,
       })
-      .then((_) => {
+      .then(() => {
         setSuccessfulCreation(true);
         setError("");
       })
@@ -51,11 +52,41 @@ const ForgotPasswordPage: NextPage = () => {
       });
   }
 
-  // Reset the user's password.
-  // Upon successful reset, the user will be
-  // signed in and redirected to the home page
-  async function reset(e: React.FormEvent) {
+  // Verifica el código ingresado por el usuario.
+  async function verifyCode(e: React.FormEvent) {
     e.preventDefault();
+    setSecondFactor(true);
+    await signIn
+      ?.attemptFirstFactor({
+        strategy: "reset_password_email_code",
+        code,
+      })
+      .then((result) => {
+        if (result.status === "needs_second_factor") {
+          setSecondFactor(true);
+          setError("");
+        } else if (result.status === "complete") {
+          setCodeVerified(true);
+          setError("");
+        } else {
+          console.log(result);
+        }
+      })
+      .catch((err) => {
+        console.error("error", err.errors[0].longMessage);
+        setError(err.errors[0].longMessage);
+      });
+  }
+
+  // Restablece la contraseña después de verificar el código
+  async function resetPassword(e: React.FormEvent) {
+    e.preventDefault();
+
+    if (password !== passwordConfirm) {
+      setError("Las contraseñas no coinciden.");
+      return;
+    }
+
     await signIn
       ?.attemptFirstFactor({
         strategy: "reset_password_email_code",
@@ -63,13 +94,7 @@ const ForgotPasswordPage: NextPage = () => {
         password,
       })
       .then((result) => {
-        // Check if 2FA is required
-        if (result.status === "needs_second_factor") {
-          setSecondFactor(true);
-          setError("");
-        } else if (result.status === "complete") {
-          // Set the active session to
-          // the newly created session (user is now signed in)
+        if (result.status === "complete") {
           setActive({ session: result.createdSessionId });
           setError("");
         } else {
@@ -94,9 +119,8 @@ const ForgotPasswordPage: NextPage = () => {
         style={{
           margin: "auto",
           maxWidth: "500px",
-        }}
-      >
-        <h1 className="text-2xl font-semibold">¿Olvido su contraseña?</h1>
+        }}>
+        <h1 className="text-2xl font-semibold">¿Olvidó su contraseña?</h1>
         <form
           style={{
             display: "flex",
@@ -104,8 +128,13 @@ const ForgotPasswordPage: NextPage = () => {
             alignItems: "center",
             gap: "1em",
           }}
-          onSubmit={!successfulCreation ? create : reset}
-        >
+          onSubmit={
+            !successfulCreation
+              ? create
+              : codeVerified
+              ? resetPassword
+              : verifyCode
+          }>
           {!successfulCreation && (
             <>
               <label htmlFor="email" className="text-lg text-muted-foreground">
@@ -127,16 +156,9 @@ const ForgotPasswordPage: NextPage = () => {
             </>
           )}
 
-          {successfulCreation && (
+          {successfulCreation && !codeVerified && (
             <>
-              <label htmlFor="password">Ingrese su nueva contraseña</label>
-              <Input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-
-              <label htmlFor="password">
+              <label htmlFor="code">
                 Ingrese el código de verificación enviado a su correo
               </label>
               <Input
@@ -145,9 +167,35 @@ const ForgotPasswordPage: NextPage = () => {
                 onChange={(e) => setCode(e.target.value)}
               />
 
-              <Button className="w-full"> Reset</Button>
+              <Button className="w-full">Verificar Código</Button>
               {error && (
-                <p className="text-red text-sm">
+                <p className="text-red-600 text-sm">
+                  {messageError[error as string] ?? error}
+                </p>
+              )}
+            </>
+          )}
+
+          {codeVerified && (
+            <>
+              <label htmlFor="password">Ingrese su nueva contraseña</label>
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <label htmlFor="passwordConfirm">
+                Confirme su nueva contraseña
+              </label>
+              <Input
+                type="password"
+                value={passwordConfirm}
+                onChange={(e) => setPasswordConfirm(e.target.value)}
+              />
+
+              <Button className="w-full">Restablecer Contraseña</Button>
+              {error && (
+                <p className="text-red-600 text-sm">
                   {messageError[error as string] ?? error}
                 </p>
               )}
@@ -156,8 +204,8 @@ const ForgotPasswordPage: NextPage = () => {
 
           {secondFactor && (
             <p>
-              veficacion de dos pasos (2FA) es requirida pero la UI no lo puedo
-              manejar
+              La verificación de dos pasos (2FA) es requerida, pero la UI no
+              puede manejarla.
             </p>
           )}
         </form>

@@ -686,10 +686,12 @@ async function PDFFromHtml(
     file_name: name,
     options: options,
   });
+  const upload = await utapi.uploadFilesFromUrl(res.file);
+  console.log(upload);
   await db
     .update(schema.comprobantes)
     .set({
-      billLink: res.file,
+      billLink: upload.data?.url ?? res.file ?? "",
       estado: "pendiente",
       nroComprobante: voucher,
     })

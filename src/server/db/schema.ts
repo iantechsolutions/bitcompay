@@ -658,7 +658,7 @@ export const integrantSchemaDB = insertintegrantSchema.pick({
   email: true,
   floor: true,
   department: true,
-  lacality: true,
+  locality: true,
   partido: true,
   state: true,
   cp: true,
@@ -667,10 +667,8 @@ export const integrantSchemaDB = insertintegrantSchema.pick({
   isPaymentHolder: true,
   isAffiliate: true,
   isBillResponsible: true,
-  procedure_id: true,
-  paymentHolder_id: true,
-  billResponsible_id: true,
-  postal_code: true,
+  postal_codeId: true,
+  province: true,
   age: true,
   extention: true,
   family_group_id: true,
@@ -806,8 +804,9 @@ export const insertComprobantesSchema = createInsertSchema(comprobantes);
 export const selectComprobantesSchema = createSelectSchema(comprobantes);
 export const ComprobantesSchemaDB = insertComprobantesSchema.pick({
   generated: true,
-  payment_date: true,
-  link: true,
+  estado: true,
+  health_insurance_id: true,
+  createdAt: true,
   billLink: true,
   concepto: true,
   tipoComprobante: true,
@@ -822,7 +821,6 @@ export const ComprobantesSchemaDB = insertComprobantesSchema.pick({
   iva: true,
   ptoVenta: true,
   nroComprobante: true,
-  items_id: true,
   liquidation_id: true,
   family_group_id: true,
   origin: true,
@@ -902,9 +900,11 @@ export const family_groupsSchemaDB = insertfamily_groupsSchema.pick({
   validity: true,
   plan: true,
   modo: true,
-  cuit: true,
-  healthInsurances: true,
-  employerContribution: true,
+  bonus: true,
+  procedureId: true,
+  numericalId: true,
+  state: true,
+  payment_status: true,
   receipt: true,
 });
 export type FamilyGroup = z.infer<typeof selectfamily_groupsSchema>;
@@ -962,8 +962,8 @@ export const ProcedureRelations = relations(procedure, ({ many }) => ({
 export const insertProcedureSchema = createInsertSchema(procedure);
 export const selectProcedureSchema = createSelectSchema(procedure);
 export const ProcedureSchemaDB = insertProcedureSchema.pick({
-  code: true,
-  procedureNumber: true,
+  type: true,
+  companyId: true,
   estado: true,
   family_group: true,
 });
