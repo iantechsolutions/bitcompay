@@ -213,8 +213,20 @@ export default function CompanySidenav() {
         <SidenavItem
           className="pl-[2vw] text-sideNav"
           href={`/dashboard/home`}
-          icon={<img src="/public/sidebar/Frame.png" alt="inicio" />}
-          activeIcon={<img src="/public/sidebar/Frame-1.png" alt="inicio" />}
+          icon={
+            <img
+              src="/public/sidebar/Frame.png"
+              alt="inicio"
+              className="h-[3vh] w-[3vh]"
+            />
+          }
+          activeIcon={
+            <img
+              src="/public/sidebar/Frame-1.png"
+              alt="inicio"
+              className="h-[3vh] w-[3vh]"
+            />
+          }
         >
           Inicio
         </SidenavItem>
@@ -259,15 +271,15 @@ export default function CompanySidenav() {
                   <AccordionTrigger
                     className={
                       isActive("Ventas")
-                        ? "rounded-lg bg-[#BEF0BB] px-[1vw] py-[1vh]  mb-[1.5vh] hover:no-underline"
-                        : "rounded-lg px-[1vw] py-[1vh]  mb-[1.5vh] hover:no-underline"
+                        ? "bg-[#BEF0BB] px-[1vw] py-[1vh]  mb-[1.5vh] hover:no-underline"
+                        : "px-[1vw] py-[1vh]  mb-[1.5vh] hover:no-underline"
                     }
                   >
                     <SideNavTrigger
                       icon={
                         <img
                           src="/public/sidebar/Frame-2.png"
-                          className="mr-[1vw] h-[3.5%] text-sideNav"
+                          className="mr-[1vw] text-sideNav h-[3vh] w-[3vh]"
                         />
                       }
                       className="text-sideNav"
@@ -368,7 +380,7 @@ export default function CompanySidenav() {
                       icon={
                         <img
                           src="/public/sidebar/Frame-4.png"
-                          className=" mr-[1vw] h-[3.5%]"
+                          className=" mr-[1vw] h-[3vh] w-[3vh]"
                         />
                       }
                       className="text-sideNav"
@@ -392,8 +404,18 @@ export default function CompanySidenav() {
                     )}
                     {canSeeHealthInsurances && (
                       <SidenavItem
-                        icon={<img src="/public/sidebar/Frame-26.png" />}
-                        activeIcon={<img src="/public/sidebar/Frame-27.png" />}
+                        icon={
+                          <img
+                            src="/public/sidebar/Frame-26.png"
+                            className="h-[3vh] w-[3vh]"
+                          />
+                        }
+                        activeIcon={
+                          <img
+                            src="/public/sidebar/Frame-27.png"
+                            className="h-[3vh] w-[3vh]"
+                          />
+                        }
                         href={`/dashboard/management/client/health_insurances`}
                         IsChild={true}
                         className="text-sideNav"
@@ -554,8 +576,18 @@ export default function CompanySidenav() {
 
             {canSeeManualIssuance && (
               <SidenavItem
-                icon={<img src="/public/sidebar/Frame-6.png" className="" />}
-                activeIcon={<img src="/public/sidebar/Frame-7.png" />}
+                icon={
+                  <img
+                    src="/public/sidebar/Frame-6.png"
+                    className="h-[3vh] w-[3vh]"
+                  />
+                }
+                activeIcon={
+                  <img
+                    src="/public/sidebar/Frame-7.png"
+                    className="h-[3vh] w-[3vh]"
+                  />
+                }
                 href={`/dashboard/billing/manual_issuance`}
                 className="text-sideNav"
               >
@@ -564,8 +596,18 @@ export default function CompanySidenav() {
             )}
             {canSeePreLiquidation && (
               <SidenavItem
-                icon={<img src="/public/sidebar/Frame-8.png" />}
-                activeIcon={<img src="/public/sidebar/Frame-9.png" />}
+                icon={
+                  <img
+                    src="/public/sidebar/Frame-8.png"
+                    className="h-[3vh] w-[3vh]"
+                  />
+                }
+                activeIcon={
+                  <img
+                    src="/public/sidebar/Frame-9.png"
+                    className="h-[3vh] w-[3vh]"
+                  />
+                }
                 href={`/dashboard/billing/pre-liquidation`}
                 className="text-sideNav"
               >
@@ -574,8 +616,18 @@ export default function CompanySidenav() {
             )}
             {canSeeLiquidation && (
               <SidenavItem
-                icon={<img src="/public/sidebar/Frame-10.png" />}
-                activeIcon={<img src="/public/sidebar/Frame-11.png" />}
+                icon={
+                  <img
+                    src="/public/sidebar/Frame-10.png"
+                    className="h-[3vh] w-[3vh]"
+                  />
+                }
+                activeIcon={
+                  <img
+                    src="/public/sidebar/Frame-11.png"
+                    className="h-[3vh] w-[3vh]"
+                  />
+                }
                 href={`/dashboard/billing/liquidation`}
                 className="text-sideNav"
               >
