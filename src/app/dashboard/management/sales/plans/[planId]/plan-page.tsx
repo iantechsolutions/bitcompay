@@ -143,14 +143,17 @@ export default function PlanPage(props: {
             <div className="flex items-center space-x-2">
               <Button
                 onClick={() => setOpenDelete(true)}
-                className="bg-[#b12b2b] hover:bg-[#b12b2b] rounded-full text-white text-sm">
+                className="bg-[#b12b2b] hover:bg-[#b12b2b] rounded-full text-white text-sm"
+              >
                 <Trash2 className="mr-1 h-4" /> Eliminar plan
               </Button>
 
               <Dialog open={openDelete} onOpenChange={setOpenDelete}>
                 <DialogContent className="sm:max-w-[425px]">
                   <DialogHeader>
-                    <DialogTitle>Seguro que desea elimnar el plan?</DialogTitle>
+                    <DialogTitle>
+                      Seguro que desea eliminar el plan?
+                    </DialogTitle>
                   </DialogHeader>
 
                   <DialogFooter>
@@ -169,7 +172,8 @@ export default function PlanPage(props: {
                 <DropdownMenuTrigger asChild>
                   <Button
                     onClick={() => setOpen(true)}
-                    className="bg-[#727272] hover:bg-[#727272] rounded-full text-white">
+                    className="bg-[#727272] hover:bg-[#727272] rounded-full text-white"
+                  >
                     <Pencil className="mr-1 h-4" /> Actualizar precio{" "}
                   </Button>
                 </DropdownMenuTrigger>
@@ -180,12 +184,14 @@ export default function PlanPage(props: {
                       plan?.pricesPerCondition.filter(
                         (x) => x.validy_date.getTime() <= new Date().getTime()
                       ).length === 0
-                    }>
+                    }
+                  >
                     <div>Actualizar porcentualmente</div>
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <Link
-                      href={`/dashboard/management/sales/plans/${plan?.id}/editPrice`}>
+                      href={`/dashboard/management/sales/plans/${plan?.id}/editPrice`}
+                    >
                       Actualizar manualmente
                     </Link>
                   </DropdownMenuItem>
@@ -225,7 +231,8 @@ export default function PlanPage(props: {
           <Label htmlFor="validy_date">Mes de vigencia</Label>
           <Select
             onValueChange={(e) => setMes(Number(e))}
-            defaultValue={mes.toString()}>
+            defaultValue={mes.toString()}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Seleccione un mes" />
             </SelectTrigger>
