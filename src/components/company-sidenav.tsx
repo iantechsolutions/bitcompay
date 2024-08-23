@@ -228,13 +228,13 @@ export default function CompanySidenav() {
               icon={
                 <LayoutDashboardIcon
                   strokeWidth={1}
-                  className="h-[5%] w-[3vw] "
+                  className="h-[4vh] w-[3vw] "
                 />
               }
               activeIcon={
                 <LayoutDashboardIcon
                   strokeWidth={1}
-                  className="h-[2.5vh] w-[3vw] "
+                  className="h-[4vh] w-[3vw] "
                   color="#6952EB"
                 />
               }
@@ -481,7 +481,7 @@ export default function CompanySidenav() {
                     }
                   >
                     <SideNavTrigger
-                      icon={<Files className=" mr-[2vw]" />}
+                      icon={<Files className=" h-7 mr-[2vw]" />}
                       className="text-sideNav"
                     >
                       Documentos

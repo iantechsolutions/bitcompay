@@ -19,7 +19,7 @@ export default function ElementCard(props: ElementCardProps) {
     content = props.children;
   }
   return (
-    <div className="flex flex-col px-6 py-2 border-b-2  text-[#747474] text-sm ">
+    <div className="flex flex-col pl-0 pr-4 py-2 border-b-2  text-[#747474] text-sm ">
       <p>{props.element.key}</p>
       {content}
     </div>
