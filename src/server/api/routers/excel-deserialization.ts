@@ -232,7 +232,7 @@ export const excelDeserializationRouter = createTRPCRouter({
               affiliate_number: row.affiliate_number?.toString(),
               extention: " ",
               postal_codeId: postal_code_schema?.id,
-              health_insuranceId: health_insurance?.id,
+              health_insuranceId: health_insurance?.id ?? null,
               originating_health_insuranceId:
                 health_insurance_origin.length > 0
                   ? health_insurance_origin[0]?.id ?? ""
@@ -553,12 +553,16 @@ async function readExcelFile(
     ) {
       errors.push(`CODIGO DIFERENCIAL requerido en (fila:${rowNum})`);
     }
-    const health_insurance = await db.query.healthInsurances.findFirst({
-      where: eq(schema.healthInsurances.identificationNumber, row.os!),
-    });
+    if (row.mode?.toUpperCase() === "MIXTO") {
+      const health_insurance = await db.query.healthInsurances.findFirst({
+        where: eq(schema.healthInsurances.identificationNumber, row.os!),
+      });
 
-    if (!health_insurance) {
-      errors.push(`OBRA SOCIAL no valida en (fila:${rowNum})`);
+      if (!health_insurance) {
+        errors.push(
+          `OBRA SOCIAL no valida en (fila:${rowNum}) para integrante MIXTO`
+        );
+      }
     }
     const mode = await db.query.modos.findFirst({
       where: eq(schema.modos.description, row.mode!),
