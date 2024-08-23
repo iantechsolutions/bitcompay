@@ -69,8 +69,11 @@ export default function BrandPage({
 
   const { mutateAsync: changeBrand, isLoading } =
     api.brands.change.useMutation();
+
   function changeCompany(company: Company, required: boolean) {
     const newRelCompanies = new Set(relCompanies); // Crear una copia del conjunto actual
+
+    console.log(newRelCompanies, company, "Test");
 
     if (required) {
       newRelCompanies.add(company); // Agregar la empresa al conjunto copiado
@@ -86,7 +89,26 @@ export default function BrandPage({
     setRelCompanies(newRelCompanies); // Establecer la copia actualizada como el nuevo estado
   }
 
+  function validateFields() {
+    const errors: string[] = [];
+    if (!name) errors.push("Nombre");
+    if (!description) errors.push("Descripción");
+    if (!reducedDescription) errors.push("Descripción Reducida");
+    if (!concept) errors.push("Concepto");
+    if (!iva) errors.push("IVA");
+    if (!billType) errors.push("Tipo de Factura");
+
+    return errors;
+  }
+
   async function handleChange() {
+    const validationErrors = validateFields();
+    if (validationErrors.length > 0) {
+      toast.error(
+        `Los siguientes campos están vacíos: ${validationErrors.join(", ")}`
+      );
+      return;
+    }
     try {
       const companiesIdArray = Array.from(relCompanies)
         .map((company) => company?.id)
@@ -173,8 +195,7 @@ export default function BrandPage({
                     <Label htmlFor="concept">Concepto</Label>
                     <Select
                       onValueChange={(e) => setConcept(e)}
-                      value={concept ?? ""}
-                    >
+                      value={concept ?? ""}>
                       <SelectTrigger className="w-[180px] font-bold">
                         <SelectValue placeholder="Seleccionar concepto..." />
                       </SelectTrigger>
@@ -340,8 +361,7 @@ function Deletebrand(props: { brandId: string }) {
           <AlertDialogAction
             className="bg-red-500 active:bg-red-700 hover:bg-red-600"
             onClick={handleDelete}
-            disabled={isLoading}
-          >
+            disabled={isLoading}>
             Eliminar
           </AlertDialogAction>
         </AlertDialogFooter>
