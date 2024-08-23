@@ -143,9 +143,21 @@ export const excelDeserializationRouter = createTRPCRouter({
           }
 
           const postal_code = row["postal code"];
-          const postal_code_schema = await db.query.postal_code.findFirst({
+          let postal_code_schema = await db.query.postal_code.findFirst({
             where: eq(schema.postal_code.cp, postal_code ?? " "),
           });
+
+          if (!postal_code_schema) {
+            const response = await db
+              .insert(schema.postal_code)
+              .values({
+                cp: postal_code ?? "",
+                name: postal_code ?? "",
+                zone: "",
+              })
+              .returning();
+            postal_code_schema = response[0];
+          }
 
           let differentialId;
           if (row.differential_code) {
@@ -220,7 +232,7 @@ export const excelDeserializationRouter = createTRPCRouter({
               affiliate_number: row.affiliate_number?.toString(),
               extention: " ",
               postal_codeId: postal_code_schema?.id,
-              health_insuranceId: health_insurance?.id,
+              health_insuranceId: health_insurance?.id ?? null,
               originating_health_insuranceId:
                 health_insurance_origin.length > 0
                   ? health_insurance_origin[0]?.id ?? ""
@@ -304,7 +316,7 @@ export const excelDeserializationRouter = createTRPCRouter({
             console.log(row.differential_value);
             console.log(precioIntegrante);
             const precioDiferencial =
-              parseFloat(row.differential_value ?? "") / precioIntegrante;
+              parseFloat(row.differential_value ?? "0") / precioIntegrante;
             console.log("precioDiferencial", precioDiferencial);
             const differentialValue = await db
               .insert(schema.differentialsValues)
@@ -534,15 +546,23 @@ async function readExcelFile(
     //     `UNIDAD DE NEGOCIO no pertenece a la organizacion (fila:${rowNum}) `
     //   );
     // }
-    if (row.differential_value && !row.differential_code) {
+    if (
+      row.differential_value &&
+      row.differential_value !== "0" &&
+      !row.differential_code
+    ) {
       errors.push(`CODIGO DIFERENCIAL requerido en (fila:${rowNum})`);
     }
-    const health_insurance = await db.query.healthInsurances.findFirst({
-      where: eq(schema.healthInsurances.identificationNumber, row.os!),
-    });
+    if (row.mode?.toUpperCase() === "MIXTO") {
+      const health_insurance = await db.query.healthInsurances.findFirst({
+        where: eq(schema.healthInsurances.identificationNumber, row.os!),
+      });
 
-    if (!health_insurance) {
-      errors.push(`OBRA SOCIAL no valida en (fila:${rowNum})`);
+      if (!health_insurance) {
+        errors.push(
+          `OBRA SOCIAL no valida en (fila:${rowNum}) para integrante MIXTO`
+        );
+      }
     }
     const mode = await db.query.modos.findFirst({
       where: eq(schema.modos.description, row.mode!),
@@ -572,13 +592,13 @@ async function readExcelFile(
     }
 
     const postal_code = row["postal code"];
-    const check_postal_code = await db.query.postal_code.findMany({
-      where: eq(schema.postal_code.cp, postal_code ?? " "),
-    });
+    // const check_postal_code = await db.query.postal_code.findMany({
+    //   where: eq(schema.postal_code.cp, postal_code ?? " "),
+    // });
 
-    if (check_postal_code.length == 0) {
-      errors.push(`CODIGO POSTAL no valido en (fila:${rowNum})`);
-    }
+    // if (check_postal_code.length == 0) {
+    //   errors.push(`CODIGO POSTAL no valido en (fila:${rowNum})`);
+    // }
     if (!product) {
       errors.push(`PRODUCTO no valido en (fila:${rowNum})`);
     }

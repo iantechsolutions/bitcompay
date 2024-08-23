@@ -341,7 +341,9 @@ export const recDocumentValidator = z
     CELULAR: numberAsString.nullable().optional(),
     EMAIL: z
       .string()
-      .regex(customEmailRegex, { message: "Correo electrónico no válido" }),
+      // .regex(customEmailRegex, { message: "Correo electrónico no válido" })
+      .nullable()
+      .optional(),
     "ES AFILIADO": stringAsBoolean.nullable().optional(),
     "ES TITULAR": stringAsBoolean.nullable().optional(),
     "ES TITULAR DEL PAGO": stringAsBoolean.nullable().optional(),
@@ -407,7 +409,7 @@ export const recDocumentValidator = z
       isPaymentResponsible: value["ES RESP PAGADOR"] ?? null,
       contribution: value["APORTE TOTAL"] ?? null,
       differential_code: value["DIFERENCIAL CODIGO"] ?? null,
-      differential_value: value["DIFERENCIAL VALOR"],
+      differential_value: value["DIFERENCIAL VALOR"] ?? "0",
       balance: value["SALDO CUENTA CORRIENTE"] ?? null,
       plan: value.PLAN ?? null,
       product: value["PRODUCTO (MEDIO DE PAGO)"] ?? null,
@@ -470,7 +472,7 @@ export const recHeaders: TableHeaders = [
 
 export const requiredColumns = [
   { key: "business_unit", label: "UNIDAD DE NEGOCIO" },
-  { key: "os", label: "OS" },
+  // { key: "os", label: "OS" },
   { key: "validity", label: "VIGENCIA" },
   { key: "mode", label: "MODO" },
   { key: "state", label: "ESTADO" },
@@ -491,7 +493,7 @@ export const requiredColumns = [
   { key: "district", label: "PARTIDO" },
   { key: "address", label: "DIRECCION" },
   { key: "postal code", label: "CP" },
-  { key: "cellphone", label: "CELULAR" },
+  // { key: "cellphone", label: "CELULAR" },
   { key: "email", label: "EMAIL" },
   { key: "plan", label: "PLAN" },
   { key: "product", label: "PRODUCTO" },

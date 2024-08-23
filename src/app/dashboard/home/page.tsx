@@ -3,8 +3,8 @@ import LayoutContainer from "~/components/layout-container";
 export default function Home() {
   return (
     <LayoutContainer className="flex justify-center items-center">
-      <div className="card text-center m-5 pb-2">
-        <div className="flex flex-col justify-center items-center gap-7 mt-[3vh]">
+      <div className="card text-center m-[3vh] pb-[2vh]">
+        <div className="flex flex-col justify-center items-center gap-[5vh] mt-[3vh]">
           <h1 className="text-[#6952EB] text-startH2 font-extrabold">
             ¡Bienvenido/a a nuestra plataforma!
           </h1>
