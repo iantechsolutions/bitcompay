@@ -143,9 +143,21 @@ export const excelDeserializationRouter = createTRPCRouter({
           }
 
           const postal_code = row["postal code"];
-          const postal_code_schema = await db.query.postal_code.findFirst({
+          let postal_code_schema = await db.query.postal_code.findFirst({
             where: eq(schema.postal_code.cp, postal_code ?? " "),
           });
+
+          if (!postal_code_schema) {
+            const response = await db
+              .insert(schema.postal_code)
+              .values({
+                cp: postal_code ?? "",
+                name: postal_code ?? "",
+                zone: "",
+              })
+              .returning();
+            postal_code_schema = response[0];
+          }
 
           let differentialId;
           if (row.differential_code) {
@@ -576,13 +588,13 @@ async function readExcelFile(
     }
 
     const postal_code = row["postal code"];
-    const check_postal_code = await db.query.postal_code.findMany({
-      where: eq(schema.postal_code.cp, postal_code ?? " "),
-    });
+    // const check_postal_code = await db.query.postal_code.findMany({
+    //   where: eq(schema.postal_code.cp, postal_code ?? " "),
+    // });
 
-    if (check_postal_code.length == 0) {
-      errors.push(`CODIGO POSTAL no valido en (fila:${rowNum})`);
-    }
+    // if (check_postal_code.length == 0) {
+    //   errors.push(`CODIGO POSTAL no valido en (fila:${rowNum})`);
+    // }
     if (!product) {
       errors.push(`PRODUCTO no valido en (fila:${rowNum})`);
     }
