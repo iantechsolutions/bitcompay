@@ -16,7 +16,7 @@ export function SidenavSeparator(props: {
 }) {
   return (
     <li
-      className={`flex items-center px-4 py-1 mt-3 mb-2 text-lg font-thin text-[#838383] ${props.className}`}
+      className={`flex items-center px-4 py-1 mt-3 mb-2 font-thin text-[#838383] ${props.className}`}
     >
       {props.children}
     </li>
@@ -43,7 +43,7 @@ export function SidenavItem(props: {
         {isActive ? props.activeIcon : props.icon}
       </div>
       <p
-        className={`text block w-full text-left text-lg  ${
+        className={`text block w-full text-left  ${
           isActive ? "font-medium text-[#6952EB]" : ""
         }`}
       >
@@ -78,7 +78,7 @@ export function SideNavTrigger(props: {
 }) {
   return (
     <li
-      className={`flex items-center w-1/2 text-left px-4 py-1  text-lg font-thin ${props.className}`}
+      className={`flex items-center w-1/2 text-left px-4 py-1  font-thin ${props.className}`}
     >
       {props.icon}
       {props.children}

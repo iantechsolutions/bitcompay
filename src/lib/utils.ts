@@ -1005,3 +1005,63 @@ export const reverseConceptDictionary: { [key: number]: string } = {
   3: "Productos y Servicios",
   0: "",
 };
+
+export async function ingresarAfipServer() {
+  //CUIT QUE QUEREMOS QUE COBRE
+  const company = await api.companies.get.query();
+
+  // const afipCuit = new Afip({
+  //   CUIT: taxId,
+  //   access_token:
+  //     "sjqzE9JPiq9EtrWQR0MSYjehQHlYGPLn7vdAEun9ucUQQiZ6gWV9xMJVwJd5aaSy",
+  //   production: true,
+  // });
+
+  // const afipCuit = new Afip({
+  //   CUIT: taxId,
+  // });
+
+  // const res = await afipCuit.CreateCert(_username, _password, alias);
+  // console.log("Certificado creado");
+  // console.log(res);
+  const wsid = "wsfe";
+
+  // // //ESTO CREA LA AUTORIZACION
+  // const cert = res.cert;
+  // const key = res.key;
+  let taxId = 0;
+  let cert = "";
+  let key = "";
+  if (
+    company?.cuit &&
+    company?.cuit != "" &&
+    company?.afipKey &&
+    company?.afipKey != ""
+  ) {
+    // taxId = company.cuit;
+    taxId = 30717555410;
+    cert = company.afipKey;
+    key =
+      "-----BEGIN RSA PRIVATE KEY-----\r\nMIIEowIBAAKCAQEAneC9D8sOIKFtaV+c+4zdwhQx5t5/ChdyFKqXpnwaVBrGIpG2\r\nCtGlueVS/2wZNAkiUerRvfI+mNtaiNIXwS9i2XAamj+E+hmeAJqE964cycKVt4hS\r\n07diThnC9+YXFIX3sF8yubX+bJwHB26NLDzDtVRZobBw5dDP0QAYDS4Cuz+vX/lt\r\nsgMTlPYbMWDZEL2AqXx5BT66nh9Q22iscOOnFmuOjMpCklJhOdP4EeOMlMvLggh9\r\n7vBdA60CzwjwWdWSyOdxSuNRHd35gf4A/Xo0DS6Zy+g6rWN+ekZG7SPUDjLIOB8i\r\nvB8NCmOORi3sURw5KzQgmAZPRIFoA3jsFT92SQIDAQABAoIBAATk1Ad6zF/PkTQs\r\nfhHAHpmnBZr596co7eTdGuFSxIAp6k1lBecU85WtGaMIR0m5JMK0TDcenLkhR4+p\r\nL4pR/TbvRivU3zrfc2niYE/LKmJIsVpkk+izLQ1tuAD2NW3x7ykc8lYWYaIdPgyJ\r\nbT/bTFfBGxwre3xsOhzo61XxQK1sMfzOnzE80DxfeMhB+e7Ossz7XFWCZBffkoXc\r\nwnRRMYxdBbVcAnoJoeuC5Ga4CY5HzkGS8V9wSTjBQtS0nxzECxtM9tjeM895cu4I\r\nYM5wH7CweOdUcVmz1Rg5MCduTJo0hOIQxqFbmlrDfvQSQiv3vjLbDpGD1me+M21L\r\nXPPXQ3kCgYEAxZL/RmqZtjSVBZZGqR1koeLey2/OEc+SdgitYxhlrqaSL5iaCnLb\r\nB3qaJ81Tc9XtfeabzmCO/8u1Q5icNGE9TtdR0FpiKz7Y+zXKfTDjiygiAgz9YQgc\r\n/htr8d9YLGlUcMsxSp3qoFTPjQ60Qtv3AifiLR9z9Qdly1sgCBkh9d0CgYEAzJCa\r\nIT94zhLaiyYwyHTPsGEnPzX0hX0/314x49SpVi9iJsQWB1lbQSfnucKV/Bmd55zp\r\nYnMkGbt3g/1YiCFHMM8cQeHRRWpsNkAw44frQ0l2fzKeZjKD9Z7lX8AMzPGo1j/L\r\nq12fw0xv7+GRs0IetEJ8DLpdDt8WTEKt63T/6V0CgYB0/clJUiA5A0Pm7ghjZbNM\r\nJQIWZtsYMtigKh05m53CYIIZyvwUCdTmxdN4lB3BbsDVl3NVLloe3+oy37BHV/ks\r\nsVWR0aNlxi5H+p8vqH5kzVvt6PE0vtAkK+qsa7tTeP92VuuWKpJfZDkOZtGY8ZV/\r\nYkyMuZ45TqsZUplSEkfIxQKBgQCYrnkLxccR8EqDv05734vAdtMHP+sw0yogOrr7\r\n9JcrR5R3oLVcaNpOiE1RfaXakvgjjh83pv7T4fMzZZ11hXkQOhU6KyS6LdN0rnaO\r\n7Lyw7RzvlUVau+t4IU/MJpinQtukhdsrHWcIKn4FyhOoevpVyqWyDks0tVd8Nex/\r\nqET11QKBgAyaT833vcH2I0LVoJPelPbDyDe/++iNwyXosZ/d/KlYyy/QwvMJ77HR\r\n4Lxs1Uy5yBlb9+2Mg8+FjPwQE50Rcae8fhqUR+wM7e5DTbr5fQw7CI9KSK6JxTdh\r\nuxydZsQvRlpctQF2u9eRGfSYJWUHLaFcp4nm7BmN88P6pej0xpSQ\r\n-----END RSA PRIVATE KEY-----\r\n";
+  } else {
+    taxId = 23439214619;
+    cert =
+      "-----BEGIN CERTIFICATE-----\nMIIDSDCCAjCgAwIBAgIINW8P8tjDO30wDQYJKoZIhvcNAQENBQAwODEaMBgGA1UEAwwRQ29tcHV0\nYWRvcmVzIFRlc3QxDTALBgNVBAoMBEFGSVAxCzAJBgNVBAYTAkFSMB4XDTI0MDYyNzE3MDM1MloX\nDTI2MDYyNzE3MDM1MlowLjERMA8GA1UEAwwIYWZpcHNkazIxGTAXBgNVBAUTEENVSVQgMjM0Mzky\nMTQ2MTkwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC/E7NK4NM5k/KCl7Miuu2BAEby\n1D6aSyqL8IRKBA7kWgu+fDXW2RoCJocqzVUimooze0xXnLGcoBwd39ynBH/tANgxrJIie5Ej1YFB\nPNJdMKvV/UdmTjMD0hg/H+e0OsK7cffmQEDvBY1a+HADGbp/j3RnhU0aDD0ZO2lXQxCD6FEPkq/z\nVSKDxDty8GlDwRslgzljaT92upFeoMokgD0vA5tsr3+L2kpqqSDMh8utaY4Sfdyo2qNQhPMgimQA\nZZAsBUzsAuOhSKgs7Z3kNdlMAdqFJUy7qqOOIdqEdALsXxFIGxs2vYss1yLXF8rYUqg0Eab77UTT\nDHYco8drtDSpAgMBAAGjYDBeMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUs7LT//3put7eja8R\nIZzWIH3yT28wHQYDVR0OBBYEFCNehzQ1I5CvmOsqpKzrcTdY+MrxMA4GA1UdDwEB/wQEAwIF4DAN\nBgkqhkiG9w0BAQ0FAAOCAQEAoldnbMx/KTn0i/kHMUrG/+fTcjb428O1ofxv19qHPf2IHGTzUXRw\n+/fnei15xzLGMNAu5rKgdJ4OwmopVCUkMW+nw4hV3wG7sO2OSuduSNNmMZsVJUBnMobc+BIhpPPW\n2Xswuy2vD0NWgMdkoPtV9b0lGX3Z6jWexxKpf8d0OFkt8eQY7f5EWsCQQONfq25z8phzS6Bsj4/Z\nWCgnJUzyIeg1D1Lq3kGbTjgCAe2QP+zctw3tpWFLBQQHmGnJOxrdTI9xl+IcLqAg2z39a8FtRNhl\nr8R2o293M+zkM0eKbEGhJcnyXNF3aNAjACborQdDQGxDcrjDg1lX07r44SlTaA==\n-----END CERTIFICATE-----";
+    key =
+      "-----BEGIN RSA PRIVATE KEY-----\r\nMIIEpAIBAAKCAQEAvxOzSuDTOZPygpezIrrtgQBG8tQ+mksqi/CESgQO5FoLvnw1\r\n1tkaAiaHKs1VIpqKM3tMV5yxnKAcHd/cpwR/7QDYMaySInuRI9WBQTzSXTCr1f1H\r\nZk4zA9IYPx/ntDrCu3H35kBA7wWNWvhwAxm6f490Z4VNGgw9GTtpV0MQg+hRD5Kv\r\n81Uig8Q7cvBpQ8EbJYM5Y2k/drqRXqDKJIA9LwObbK9/i9pKaqkgzIfLrWmOEn3c\r\nqNqjUITzIIpkAGWQLAVM7ALjoUioLO2d5DXZTAHahSVMu6qjjiHahHQC7F8RSBsb\r\nNr2LLNci1xfK2FKoNBGm++1E0wx2HKPHa7Q0qQIDAQABAoIBAATXvfqO2iuiaUoQ\r\nCDVAIZbcZ+/tmyyT7R8g2Gl70tjMw3FvennYhMU7Lr/R9m9rFUeav2OVEBdVI4FK\r\nVDBTd96M3+3aXtXK5fHPjngVz4sXGbPRuIaKQta882peJ6Q0vQy9JbhLNpoYPO3q\r\nUAR0GXr0KtIY2cxoNQA3tkLE6108ceMC+UqcGH/XrFTdKx0DqeBQA9PoXhfNGAML\r\nl1tMIMHDIsOrnB6MM2TAZT8ZtrwlBmmgLgKf2mlbYUlljMm+9xjg3StjJklZ8l9/\r\nnxZfSyeUxJFDXNeVVTYtknyAUOzUQJIBeyEdrn5gn4q2H9pmzgXvdhl5MKWt9gyk\r\n6SmBc7UCgYEA4TxTWzRZgTowWgAPaoSa1bY//X/Y6MNDJ/9ILJuUgmy33T5jWw3P\r\nDyP9+TKnVXTI5K6Fbwxi8bRqqNUsjoP7+EvVg1frMtqQt5m1PNQ1aMwRqoLEwX76\r\nTLc1TBnFShjnDIIhfZqjxjpyuMiI4uU996lbJEhA6laoAR0ynmrOB1MCgYEA2Sz4\r\nFDt0mb6vcSnms4GIxfpMnScxtNhF93QPWDI6eoGUj/k4mekcWS73StGtAn7x9ApV\r\nRFYNzhcgM6wufUgMX1YY+D1FhADJjWeanraNEs/JU0yFhHbEQLiYTV11UncfBwuh\r\nlwtoR1OgYYdJ7PRd1UNu1ma4grt9UBGignxCAJMCgYBTXMB9QSLfcWnz5ZHPGsUz\r\n1ABbErZ1b8+rPhC4cdzFaPekKzMawEGimO+nC9hjCJZSDUXVlAAK9XuEgWG8XZ0k\r\niOy9cAzdBYgKbBloKiKaZu0i7sNj2ltJiYVwZRlgE1dwiblbg6CZ/Yf4XEBNugr1\r\nXvkctKFSGkCUKPpTJ7SZgQKBgQCsc+oW3tOLVoEoQlagykaat1RpInt1GJwOkImy\r\nxkfricQ3w3YvuY06QHI8Zl2U8ssct6vX1OGnenOmtJ5B+5lfhxXS4Yy28o0aDWAZ\r\nkepaOseqrsQDWPAkWLEQFhuYvWDVDmZlc7h9kyly6KRKVg3A0IhOFkmD/m/Wyfoa\r\n1aLvowKBgQCBe/ukvw2xiS81LAIkKZPogUwKiYY/tGVtjVGrwvuEiSu0k3TN/7FL\r\njlsOJeyLqmx2GIwuXnQXGFjn06GAbzHprlG5+pW7q48xuEkuM7gAAY0BYYJSurPE\r\naazPGk3fFPEaYX1HtGN5CTbdBLEA45fXxxuA+Ea3rsQQ7Uhs03aRVg==\r\n-----END RSA PRIVATE KEY-----\r\n";
+  }
+  const afip = new Afip({
+    // access_token: 'sjqzE9JPiq9EtrWQR0MSYjehQHlYGPLn7vdAEun9ucUQQiZ6gWV9xMJVwJd5aaSy',
+    CUIT: taxId,
+    cert: cert,
+    key: key,
+    // production: true,
+  });
+  // const serSer = await afip.CreateWSAuth(_username, _password, alias, wsid);
+  // console.log(serSer);
+  // const salesPoints = await afip.ElectronicBilling.getSalesPoints();
+  // console.log(salesPoints);
+  // const serSer = await afip.CreateWSAuth(username, password, alias, wsid);
+
+  return afip;
+}

@@ -37,7 +37,7 @@ export default function Page() {
       });
     }
   }
-  console.log("liquidationsFull", liquidationsFull);
+  console.log("liquidationsTable", tableData);
   return (
     <LayoutContainer>
       <section className="space-y-2">
