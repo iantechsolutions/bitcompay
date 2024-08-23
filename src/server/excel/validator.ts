@@ -341,7 +341,9 @@ export const recDocumentValidator = z
     CELULAR: numberAsString.nullable().optional(),
     EMAIL: z
       .string()
-      .regex(customEmailRegex, { message: "Correo electrónico no válido" }),
+      // .regex(customEmailRegex, { message: "Correo electrónico no válido" })
+      .nullable()
+      .optional(),
     "ES AFILIADO": stringAsBoolean.nullable().optional(),
     "ES TITULAR": stringAsBoolean.nullable().optional(),
     "ES TITULAR DEL PAGO": stringAsBoolean.nullable().optional(),
@@ -491,7 +493,7 @@ export const requiredColumns = [
   { key: "district", label: "PARTIDO" },
   { key: "address", label: "DIRECCION" },
   { key: "postal code", label: "CP" },
-  { key: "cellphone", label: "CELULAR" },
+  // { key: "cellphone", label: "CELULAR" },
   { key: "email", label: "EMAIL" },
   { key: "plan", label: "PLAN" },
   { key: "product", label: "PRODUCTO" },
