@@ -328,7 +328,12 @@ export const recDocumentValidator = z
     "NRO DOC FISCAL": allToString.nullable().optional(),
     LOCALIDAD: z.string().min(0).max(140).nullable().optional(),
     PARTIDO: z.string().min(0).max(140).nullable().optional(),
-    DIRECCION: z.string().min(0).max(140).nullable().optional(),
+    DIRECCION: z.union([z.string(), z.number()]).transform((value) => {
+      console.log("DIRECCION antes de transformar:", value);
+      const stringValue = value.toString();
+      console.log("DIRECCION después de transformar:", stringValue);
+      return stringValue;
+    }),
     PISO: numberAsString.optional().nullable(),
     DEPTO: numberAsString.nullable().optional(),
     CP: numberAsString.nullable().optional(),
