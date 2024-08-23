@@ -696,8 +696,8 @@ async function PDFFromHtml(
       nroComprobante: voucher,
     })
     .where(eq(schema.comprobantes.id, comprobanteId));
+
   console.log("termino la funcion");
-  // });
 }
 async function createcomprobanteItem(
   ivaFloat: number,
