@@ -39,7 +39,7 @@ export const CustomOrganizationSwitcher = ({
             <div className="ml-3">
               <ChevronDown className="h-4 w-auto" strokeWidth={1} />
             </div>
-          </Button>
+          </ButtonWithoutSize>
         </PopoverTrigger>
         <PopoverContent>
           <h1>Cambiar entre organizaciones</h1>
