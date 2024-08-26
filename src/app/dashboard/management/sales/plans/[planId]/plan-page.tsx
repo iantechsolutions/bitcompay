@@ -240,6 +240,12 @@ export default function PlanPage(props: {
           <Select
             onValueChange={(e) => setMes(Number(e))}
             defaultValue={mes.toString()}
+            disabled={
+              plan?.pricesPerCondition?.filter(
+                (x) =>
+                  x.validy_date.getTime() === new Date(anio, mes, 1).getTime()
+              ).length === 0
+            }
           >
             <SelectTrigger>
               <SelectValue placeholder="Seleccione un mes" />
