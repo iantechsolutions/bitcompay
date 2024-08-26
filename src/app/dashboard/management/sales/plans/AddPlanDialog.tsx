@@ -28,16 +28,16 @@ export default function AddPlanDialog(props: { planId?: string }) {
     <div>
       <Button
         onClick={() => setOpen(true)}
-        className=" bg-[#209d84] hover:bg-[#209d84]  rounded-full"
+        className=" bg-[#BEF0BB] hover:bg-[#BEF0BB]  rounded-full text-[#3E3E3E] hover:text-[#3E3E3E]"
       >
         {planId ? (
           <>
-            <Pencil className="mr-2" size={20} />
+            <Pencil className="mr-2" size={20} strokeWidth={1} />
             Actualizar info
           </>
         ) : (
           <>
-            <PlusCircleIcon className="mr-2" size={20} />
+            <PlusCircleIcon className="mr-2" size={20} strokeWidth={1} />
             Agregar plan
           </>
         )}
