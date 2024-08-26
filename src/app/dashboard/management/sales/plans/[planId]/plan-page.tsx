@@ -251,7 +251,7 @@ export default function PlanPage(props: {
                   plan?.pricesPerCondition?.filter(
                     (x) =>
                       x.validy_date.getTime() === new Date(anio, 0, 1).getTime()
-                  ).length === 0
+                  ).length !== 0
                 }
               >
                 Enero
@@ -262,7 +262,7 @@ export default function PlanPage(props: {
                   plan?.pricesPerCondition?.filter(
                     (x) =>
                       x.validy_date.getTime() === new Date(anio, 1, 1).getTime()
-                  ).length === 0
+                  ).length !== 0
                 }
               >
                 Febrero
@@ -273,7 +273,7 @@ export default function PlanPage(props: {
                   plan?.pricesPerCondition?.filter(
                     (x) =>
                       x.validy_date.getTime() === new Date(anio, 2, 1).getTime()
-                  ).length === 0
+                  ).length !== 0
                 }
               >
                 Marzo
@@ -284,7 +284,7 @@ export default function PlanPage(props: {
                   plan?.pricesPerCondition?.filter(
                     (x) =>
                       x.validy_date.getTime() === new Date(anio, 3, 1).getTime()
-                  ).length === 0
+                  ).length !== 0
                 }
               >
                 Abril
@@ -295,7 +295,7 @@ export default function PlanPage(props: {
                   plan?.pricesPerCondition?.filter(
                     (x) =>
                       x.validy_date.getTime() === new Date(anio, 4, 1).getTime()
-                  ).length === 0
+                  ).length !== 0
                 }
               >
                 Mayo
@@ -306,7 +306,7 @@ export default function PlanPage(props: {
                   plan?.pricesPerCondition?.filter(
                     (x) =>
                       x.validy_date.getTime() === new Date(anio, 5, 1).getTime()
-                  ).length === 0
+                  ).length !== 0
                 }
               >
                 Junio
@@ -317,7 +317,7 @@ export default function PlanPage(props: {
                   plan?.pricesPerCondition?.filter(
                     (x) =>
                       x.validy_date.getTime() === new Date(anio, 6, 1).getTime()
-                  ).length === 0
+                  ).length !== 0
                 }
               >
                 Julio
@@ -328,7 +328,7 @@ export default function PlanPage(props: {
                   plan?.pricesPerCondition?.filter(
                     (x) =>
                       x.validy_date.getTime() === new Date(anio, 7, 1).getTime()
-                  ).length === 0
+                  ).length !== 0
                 }
               >
                 Agosto
@@ -339,7 +339,7 @@ export default function PlanPage(props: {
                   plan?.pricesPerCondition?.filter(
                     (x) =>
                       x.validy_date.getTime() === new Date(anio, 8, 1).getTime()
-                  ).length === 0
+                  ).length !== 0
                 }
               >
                 Septiembre
@@ -350,7 +350,7 @@ export default function PlanPage(props: {
                   plan?.pricesPerCondition?.filter(
                     (x) =>
                       x.validy_date.getTime() === new Date(anio, 9, 1).getTime()
-                  ).length === 0
+                  ).length !== 0
                 }
               >
                 Octubre
@@ -362,7 +362,7 @@ export default function PlanPage(props: {
                     (x) =>
                       x.validy_date.getTime() ===
                       new Date(anio, 10, 1).getTime()
-                  ).length === 0
+                  ).length !== 0
                 }
               >
                 Noviembre
@@ -374,7 +374,7 @@ export default function PlanPage(props: {
                     (x) =>
                       x.validy_date.getTime() ===
                       new Date(anio, 11, 1).getTime()
-                  ).length === 0
+                  ).length !== 0
                 }
               >
                 Diciembre
