@@ -57,24 +57,8 @@ export default function TableToolbar<TData, TValue>({
           </>
         )}
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-1 items-center">
         <Filters table={table} columns={columns} />
-        {/* <div className="flex gap-2">
-          {table.getState().columnFilters.map((column) => (
-            <div className="rounded-full h-7 border-2 border-[#71EBD4] px-2 text-muted-foreground text-sm flex items-center">
-              {column.id}{" "}
-              <Button
-                variant="outline"
-                className="h-3 w-auto ml-2 p-0 border-0 "
-                onClick={() =>
-                  table.getColumn(column.id)?.setFilterValue(undefined)
-                }
-              >
-                <X className="h-3 w-auto" color="#71EBD4" />
-              </Button>
-            </div>
-          ))}
-        </div> */}
         <div>
           {table.getState().columnFilters.length > 0 && (
             <Button
