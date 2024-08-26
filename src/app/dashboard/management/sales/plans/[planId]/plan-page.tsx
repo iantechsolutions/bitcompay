@@ -99,22 +99,30 @@ export default function PlanPage(props: {
   async function handleUpdatePrice() {
     setLoading(true);
     if (plan?.pricesPerCondition) {
-      const validPrices = plan.pricesPerCondition.filter(
-        (x) => x.validy_date.getTime() === vigente?.getTime()
-      );
-      for (const price of validPrices) {
-        await createPricePerAge({
-          plan_id: plan.id ?? "",
-          amount: price.amount * (1 + parseFloat(percent) / 100),
-          from_age: price.from_age ?? 0,
-          to_age: price.to_age ?? 0,
-          condition: price.condition ?? "",
-          isAmountByAge: price.isAmountByAge,
-          validy_date: new Date(anio, mes, 1),
-        });
+      if (
+        plan?.pricesPerCondition.filter(
+          (x) => x.validy_date.getTime() === new Date(anio, mes, 1).getTime()
+        ).length === 0
+      ) {
+        const validPrices = plan.pricesPerCondition.filter(
+          (x) => x.validy_date.getTime() === vigente?.getTime()
+        );
+        for (const price of validPrices) {
+          await createPricePerAge({
+            plan_id: plan.id ?? "",
+            amount: price.amount * (1 + parseFloat(percent) / 100),
+            from_age: price.from_age ?? 0,
+            to_age: price.to_age ?? 0,
+            condition: price.condition ?? "",
+            isAmountByAge: price.isAmountByAge,
+            validy_date: new Date(anio, mes, 1),
+          });
+        }
+      } else {
+        toast.error("Ya existe un listado de precios para el mes seleccionado");
       }
     }
-    setLoading(false);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     setOpen(false);
     router.refresh();
   }
