@@ -28,6 +28,7 @@ export const healthInsurancesRouter = createTRPCRouter({
         ),
         with: {
           comprobantes: true,
+          cc: true,
           // {
           // with:{
           //   items:true
