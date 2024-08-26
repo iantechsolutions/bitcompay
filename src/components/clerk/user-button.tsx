@@ -33,7 +33,7 @@ const UserButtonAndMenu = ({
         {/* Render a button using the image and email from `user` */}
         <Button
           onClick={() => setActive(!active)}
-          className="flex rounded-full border-none items-center bg-[#ECFFCF] px-8 lg:px-[3vw] py-[0.7vh] hover:bg-[#ECFFCF] text-[#3E3E3E] h-[7vh] "
+          className="flex rounded-full border-none items-center bg-[#DEF5DD] px-8 lg:px-[3vw] py-[0.7vh] hover:bg-[#DEF5DD] text-[#3E3E3E] h-[7vh] "
         >
           <img
             src="/public/header/Frame-12.png"

@@ -1,18 +1,14 @@
 "use client";
 import { useState, useEffect } from "react";
 import { api } from "~/trpc/react";
-import { ArrowLeftIcon } from "lucide-react";
-
+import { Landmark } from "lucide-react";
 import LayoutContainer from "~/components/layout-container";
-import Link from "next/link";
-
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "~/components/affiliate-page/affiliate-accordion";
-
 import {
   Accordion as AccordionIntegrant,
   AccordionContent as AccordionContentIntegrant,
@@ -27,10 +23,9 @@ import dayjs from "dayjs";
 import { getDifferentialAmount, getGroupContribution } from "~/lib/utils";
 import { RouterOutputs } from "~/trpc/shared";
 import { useRouter } from "next/navigation";
-import { router } from "@trpc/server";
 import { SaldoPopoverAffiliates } from "./saldoPopoverAffiliates";
 import ElementCard from "~/components/affiliate-page/element-card";
-import { int } from "drizzle-orm/mysql-core";
+
 export default function AffiliatePage(props: {
   params: { affiliateId: string; companyId: string };
 }) {
@@ -159,8 +154,16 @@ export default function AffiliatePage(props: {
   }
 
   const bankLogoMap = {
+    default: <Landmark />,
     "Banco Industrial y Comercial de China": (
       <img src="/public/affiliates/icbcLogo.png" className="h-4 w-auto mr-2" />
+    ),
+  };
+
+  const cardLogoMap = {
+    Visa: <img src="/landing_images/VISA.png" className="h-9 w-auto ml-2" />,
+    Mastercard: (
+      <img src="/landing_images/MASTERCARD.png" className="h-4 w-auto ml-2" />
     ),
   };
   const paymentMethod: Record<string, React.ReactNode> = {
@@ -189,8 +192,53 @@ export default function AffiliatePage(props: {
         </div>
       </>
     ),
-    Voluntario: <div></div>,
-    "Débito Automático": <div></div>,
+    Voluntario: (
+      <div className="p-0">
+        <h2 className="font-bold text-base mb-2">Redes Habilitadas: </h2>
+        <div className="flex gap-4 items-center justify-start">
+          <div className="flex gap-2 items-center">
+            <img src="/public/affiliates/rapipago.png" className="h-5" />{" "}
+            Rapipago
+          </div>
+          <div className="flex gap-2">
+            <img src="/public/affiliates/pagofacil.png" className="h-5" />
+            Pago Fácil
+          </div>
+          <div className="flex gap-2">
+            <img src="/public/affiliates/pagomiscuentas.png" className="h-5" />{" "}
+            Pagomiscuentas
+          </div>
+        </div>
+      </div>
+    ),
+    "Débito Automático": (
+      <div className="pl-4">
+        <div className="flex justify-between">
+          <ElementCard
+            element={{
+              key: "NOMBRE DE LA TARJETA",
+              value: "Claudia Alejandra Perea",
+            }}
+          />
+          <ElementCard
+            element={{
+              key: "NÚMERO DE TARJETA",
+              value: (
+                <div className="flex justify-between items-center">
+                  **** **** **** 1234 {cardLogoMap["Visa"]}
+                </div>
+              ),
+            }}
+          />
+        </div>
+        <div className="flex justify-start gap-3 mt-3">
+          <ElementCard element={{ key: "TIPO DE TARJETA", value: "Débito" }} />
+          <ElementCard
+            element={{ key: "FECHA DE VENC.", value: "01/12/2024" }}
+          />
+        </div>
+      </div>
+    ),
   };
 
   const goToCCDetail = (id: string | undefined) => {
@@ -324,7 +372,7 @@ export default function AffiliatePage(props: {
               <AccordionTrigger>Datos de facturación</AccordionTrigger>
               <AccordionContent className="pt-8 pl-8">
                 <div className="flex gap-2">
-                  <div className="flex flex-col gap-1 bg-[#DEF5DD] px-5 pt-5 pb-14 w-1/3 rounded-lg">
+                  <div className="flex flex-col gap-1 bg-[#DEF5DD] pl-5 pr-6 pt-5 pb-14 w-1/3 rounded-lg">
                     <div className="flex items-center gap-2">
                       <img
                         src="/public/affiliates/billingType.png"
@@ -358,9 +406,11 @@ export default function AffiliatePage(props: {
                       Debito Directo
                     </p>
                   </div>
-                  <div className="w-2/3 bg-[#DEF5DD] px-5 pt-5 pb-14 rounded-lg">
-                    <h2 className="mb-3">Detalles del pago</h2>
-                    {paymentMethod["Débito Directo"]}
+                  <div className="w-2/3 bg-[#DEF5DD] px-6 pt-5 pb-10 rounded-lg">
+                    <h2 className="mb-3 text-lg font-normal">
+                      Detalles del pago
+                    </h2>
+                    {paymentMethod["Voluntario"]}
                   </div>
                 </div>
 
