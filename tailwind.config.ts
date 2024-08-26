@@ -19,10 +19,10 @@ export default withUt({
     },
     extend: {
       fontSize: {
-        sideNav: "2.4vh",
+        sideNav: "",
         startH2: "5.2vh",
         startH3: "3.5vh",
-        startP: "2.5vh",
+        startP: "md",
         orgHeader: "1.8vh",
         accountHeader: "2.2",
         responsiveSM: "1.8vh",
