@@ -137,12 +137,11 @@ export default function AddPlanPricesComponent({
             console.log(toAge1);
             console.log(toAge2);
             if (fromAge2 !== null && toAge2 !== null) {
-              if (
-                (fromAge1 <= toAge2 && toAge1 >= fromAge2) ||
-                (fromAge2 <= toAge1 && toAge2 >= fromAge1) ||
-                (fromAge2 >= fromAge1 && toAge2 <= toAge1) ||
-                (fromAge1 >= fromAge2 && toAge1 <= toAge2)
-              ) {
+              console.log(fromAge1 <= toAge2 && toAge1 >= fromAge2);
+              console.log(fromAge2 <= toAge1 && toAge2 >= fromAge1);
+              console.log(fromAge2 <= fromAge1 && toAge2 <= toAge1);
+              console.log(fromAge1 <= fromAge2 && toAge1 <= toAge2);
+              if (fromAge1 <= toAge2 && fromAge2 <= toAge1) {
                 toast.error("Las edades se superposicionan");
                 allowed = false;
               }
