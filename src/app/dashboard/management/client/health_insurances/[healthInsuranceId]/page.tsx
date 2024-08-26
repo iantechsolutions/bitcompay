@@ -8,7 +8,7 @@ export default async function Page(props: {
   const { healthInsuranceId } = props.params;
 
   // Fetch the plan using the companyId and planId
-  const healthInsurance = await api.healthInsurances.get.query({
+  const healthInsurance = await api.healthInsurances.getWithComprobantes.query({
     healthInsuranceId,
   });
 
@@ -16,5 +16,11 @@ export default async function Page(props: {
     return <Title>No se encontró el obra social</Title>;
   }
 
-  return <HealthInsurancePage healthInsurance={healthInsurance} />;
+  return (
+    <HealthInsurancePage
+      healthInsurance={healthInsurance}
+      ccId={healthInsurance?.cc?.id}
+      healthInsuranceId={healthInsuranceId}
+    />
+  );
 }
