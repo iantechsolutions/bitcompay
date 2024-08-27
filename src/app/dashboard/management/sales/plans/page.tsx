@@ -20,10 +20,11 @@ export default async function Page() {
         <List>
           {planes.map((planes) => (
             <ListTile
+              className="pl-10 pr-5 "
               key={planes.id}
               href={`/dashboard/management/sales/plans/${planes.id}`}
-              leading={<Badge>{planes.description}</Badge>}
               title={planes.plan_code}
+              trailing={<p>prueba</p>}
             />
           ))}
         </List>
