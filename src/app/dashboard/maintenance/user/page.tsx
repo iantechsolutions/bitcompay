@@ -9,6 +9,7 @@ import { Button } from "~/components/ui/button";
 import { checkRole } from "~/lib/utils/server/roles";
 import { getServerAuthSession } from "~/server/auth";
 import { useOrganization, useOrganizationList } from "@clerk/nextjs";
+import LayoutContainer from "~/components/layout-container";
 
 export type UsersType = Awaited<
   ReturnType<typeof clerkClient.users.getUserList>
@@ -31,16 +32,45 @@ export default async function AdminDashboard(params: {
   const user = usersList.find((users) => users.id === session!.user.id);
 
   const organization = organizations.find((x) => x.id === session?.orgId);
-
+  //org_2lDB0DtERtQTBZGCEA8GJCvoc8H
   // const users = usersList.filter((x) => x.);
+  // const organizations = clerkClient.organizations.getOrganizationList({});
 
   const isAdmin = checkRole("admin");
   return (
-    <>
-      <Title>Usuarios</Title>
-      {isAdmin ? (
-        usersList.map((user) => (
-          <List key={user.id}>
+    <LayoutContainer>
+      <>
+        <Title>Usuarios</Title>
+        {isAdmin ? (
+          usersList.map((user) => (
+            <List key={user.id}>
+              <ListTile
+                href={`./user/${user.id}`}
+                title={
+                  <>
+                    {user.firstName} {user.lastName}
+                  </>
+                }
+                subtitle={
+                  user.emailAddresses.find(
+                    (email) => email.id === user.primaryEmailAddressId
+                  )?.emailAddress
+                }
+                leading={
+                  <div>
+                    <img
+                      className="h-10 rounded-full"
+                      src={user.imageUrl}
+                      alt="User Profile"
+                    />
+                  </div>
+                }
+                // trailing={<Badge>{user.}</Badge>}
+              />
+            </List>
+          ))
+        ) : user ? (
+          <List>
             <ListTile
               href={`./user/${user.id}`}
               title={
@@ -62,39 +92,13 @@ export default async function AdminDashboard(params: {
                   />
                 </div>
               }
-              // trailing={<Badge>{user.}</Badge>}
             />
           </List>
-        ))
-      ) : user ? (
-        <List>
-          <ListTile
-            href={`./user/${user.id}`}
-            title={
-              <>
-                {user.firstName} {user.lastName}
-              </>
-            }
-            subtitle={
-              user.emailAddresses.find(
-                (email) => email.id === user.primaryEmailAddressId
-              )?.emailAddress
-            }
-            leading={
-              <div>
-                <img
-                  className="h-10 rounded-full"
-                  src={user.imageUrl}
-                  alt="User Profile"
-                />
-              </div>
-            }
-          />
-        </List>
-      ) : (
-        <h1>No existe</h1>
-      )}
-    </>
+        ) : (
+          <h1>No existe</h1>
+        )}
+      </>
+    </LayoutContainer>
   );
 }
 

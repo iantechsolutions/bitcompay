@@ -2,6 +2,7 @@ import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { db, schema } from "~/server/db";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { api } from "~/trpc/server";
 
 export const healthInsurancesRouter = createTRPCRouter({
   get: protectedProcedure
@@ -29,6 +30,7 @@ export const healthInsurancesRouter = createTRPCRouter({
         with: {
           comprobantes: true,
           cc: true,
+          cpData: true,
           // {
           // with:{
           //   items:true
@@ -42,6 +44,7 @@ export const healthInsurancesRouter = createTRPCRouter({
     const companyId = ctx.session.orgId;
     const healthInsurances = await db.query.healthInsurances.findMany({
       where: eq(schema.healthInsurances.companyId, companyId!),
+      with: { cpData: true },
     });
     return healthInsurances;
   }),
@@ -59,6 +62,7 @@ export const healthInsurancesRouter = createTRPCRouter({
         locality: z.string().optional(),
         province: z.string().optional(),
         postal_code: z.string().optional(),
+        initialValue: z.string().optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -80,6 +84,23 @@ export const healthInsurancesRouter = createTRPCRouter({
           postal_code: input.postal_code,
         })
         .returning();
+
+      console.log("Tortuga", input.initialValue);
+      const cc = await db
+        .insert(schema.currentAccount)
+        .values({
+          company_id: companyId,
+          family_group: "",
+          health_insurance: new_healthInsurance[0]?.id ?? "",
+        })
+        .returning();
+      const firstEvent = await db.insert(schema.events).values({
+        current_amount: parseInt(input?.initialValue ?? "0"),
+        description: "Apertura",
+        event_amount: parseInt(input?.initialValue ?? "0"),
+        currentAccount_id: cc[0]?.id,
+        type: "REC",
+      });
       return new_healthInsurance;
     }),
   change: protectedProcedure

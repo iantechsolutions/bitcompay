@@ -79,6 +79,7 @@ export const currentAccountRouter = createTRPCRouter({
         company_id: z.string().nullable().optional(),
         family_group: z.string().nullable().optional(),
         healthInsurance: z.string().nullable().optional(),
+        initialValue: z.string().nullable().optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -108,9 +109,9 @@ export const currentAccountRouter = createTRPCRouter({
           .returning();
       }
       const firstEvent = await db.insert(schema.events).values({
-        current_amount: 0,
+        current_amount: parseInt(input?.initialValue ?? "2"),
         description: "Apertura",
-        event_amount: 0,
+        event_amount: parseInt(input?.initialValue ?? "2"),
         currentAccount_id: currentAccount[0]?.id,
         type: "REC",
       });

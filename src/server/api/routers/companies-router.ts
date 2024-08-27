@@ -452,8 +452,10 @@ export const companiesRouter = createTRPCRouter({
           .delete(schema.companies)
           .where(eq(schema.companies.id, input.companyId));
       });
-
+      console.log("LLego creo", input.companyId);
       await clerkClient.organizations.deleteOrganization(input.companyId);
+
+      return "Entidad eliminada con exito";
     }),
 });
 
