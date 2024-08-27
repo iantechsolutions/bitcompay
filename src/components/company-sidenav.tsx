@@ -217,14 +217,14 @@ export default function CompanySidenav() {
             <img
               src="/public/sidebar/Frame.png"
               alt="inicio"
-              className="h-[3.5vh] w-[5vh] min-w-5 "
+              className="w-[2vw] h-auto  "
             />
           }
           activeIcon={
             <img
               src="/public/sidebar/Frame-1.png"
               alt="inicio"
-              className="h-[3.5vh] w-[5vh] min-w-5"
+              className="w-[2vw] h-auto "
             />
           }
         >
