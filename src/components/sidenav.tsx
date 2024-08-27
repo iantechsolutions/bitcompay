@@ -35,15 +35,16 @@ export function SidenavItem(props: {
   const pathname = usePathname();
   const isActive = pathname === props.href;
   const activeColor = props.IsChild ? "bg-[#DEF5DD]" : "bg-[#BEF0BB]";
-  const className = `w-full flex gap-[0.5vw] px-[2vw] py-[1vh] items-center rounded-full
-     ${isActive ? activeColor : ""} ${props.className}`;
+  const className = `flex w-fit min-w-32 max-w-48 gap-[0.3vw] px-[1vw] py-[1vh] items-center rounded-full
+                    md:text-base lg:text-lg 
+                    ${isActive ? activeColor : ""} ${props.className}`;
   const content = (
     <>
-      <div className="items-center justify-center p-[1vh] mr-[1vw] ">
+      <div className="items-center justify-center p-[0.5vh] w-fit ">
         {isActive ? props.activeIcon : props.icon}
       </div>
       <p
-        className={`text block w-full text-left  ${
+        className={`text-sideNav block w-full text-left  ${
           isActive ? "font-medium text-[#6952EB]" : ""
         }`}
       >
@@ -78,7 +79,7 @@ export function SideNavTrigger(props: {
 }) {
   return (
     <li
-      className={`flex items-center w-1/2 text-left px-[2vw] py-[1vh]  font-thin ${props.className}`}
+      className={`flex items-center text-left px-[1vw] py-[1vh] font-thin ${props.className}`}
     >
       {props.icon}
       {props.children}

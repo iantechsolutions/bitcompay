@@ -56,12 +56,12 @@ export default function Filters<TData, TValue>({
     });
   };
   return (
-    <div className="flex items-center p-0">
+    <div className="flex items-center p-0 bg-[#DEF5DD] rounded-full">
       <div
-        className={`transition-all duration-500 ease-in-out overflow-hidden ${
+        className={`transition-all duration-700 ease-in-out overflow-hidden ${
           showFilters
-            ? "opacity-100 max-h-[500px]"
-            : "opacity-0 max-h-0 max-w-0"
+            ? "opacity-100 max-h-[500px] "
+            : "opacity-0 max-h-0 max-w-[0px]"
         }`}
       >
         <Form {...form}>
@@ -129,7 +129,7 @@ export default function Filters<TData, TValue>({
       </div>
       <Button
         variant={"outline"}
-        className="rounded-full px-5 py-5 bg-[#D9FF9C] hover:bg-[#D9FF9C] h-7 text-black hover:text-black "
+        className="rounded-full px-5 py-5 bg-[#c0f4bc] hover:bg-[#c0f4bc] h-7 text-black hover:text-black "
         color="#0DA485"
         onClick={() => setShowFilters(!showFilters)}
       >

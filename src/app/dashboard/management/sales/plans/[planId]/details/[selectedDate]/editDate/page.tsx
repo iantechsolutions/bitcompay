@@ -38,7 +38,6 @@ export default function AddPlanPage(props: {
           initialPrices={priceList}
           edit={true}
           date={date}
-          onPricesChange={() => router.push("./")}
         ></AddPlanPricesComponent>
       </div>
     </LayoutContainer>

@@ -30,7 +30,7 @@ export default async function page() {
     <LayoutContainer>
       <main>
         <Title>
-          Hola, <span className="text-[#8fefdc]"> {user.firstName!}!</span>
+          Hola<span className="text-[#8fefdc]"> {user.firstName!}!</span>
         </Title>
 
         <section>

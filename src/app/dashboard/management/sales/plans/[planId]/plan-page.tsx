@@ -99,23 +99,33 @@ export default function PlanPage(props: {
   async function handleUpdatePrice() {
     setLoading(true);
     if (plan?.pricesPerCondition) {
-      const validPrices = plan.pricesPerCondition.filter(
-        (x) => x.validy_date.getTime() === vigente?.getTime()
-      );
-      for (const price of validPrices) {
-        await createPricePerAge({
-          plan_id: plan.id ?? "",
-          amount: price.amount * (1 + parseFloat(percent) / 100),
-          from_age: price.from_age ?? 0,
-          to_age: price.to_age ?? 0,
-          condition: price.condition ?? "",
-          isAmountByAge: price.isAmountByAge,
-          validy_date: new Date(anio, mes, 1),
-        });
+      if (
+        plan?.pricesPerCondition.filter(
+          (x) => x.validy_date.getTime() === new Date(anio, mes, 1).getTime()
+        ).length === 0
+      ) {
+        const validPrices = plan.pricesPerCondition.filter(
+          (x) => x.validy_date.getTime() === vigente?.getTime()
+        );
+        for (const price of validPrices) {
+          await createPricePerAge({
+            plan_id: plan.id ?? "",
+            amount: price.amount * (1 + parseFloat(percent) / 100),
+            from_age: price.from_age ?? 0,
+            to_age: price.to_age ?? 0,
+            condition: price.condition ?? "",
+            isAmountByAge: price.isAmountByAge,
+            validy_date: new Date(anio, mes, 1),
+          });
+        }
+        setOpen(false);
+      } else {
+        toast.error("Ya existe un listado de precios para el mes seleccionado");
+        setLoading(false);
       }
     }
-    setLoading(false);
-    setOpen(false);
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
     router.refresh();
   }
 
@@ -237,18 +247,140 @@ export default function PlanPage(props: {
               <SelectValue placeholder="Seleccione un mes" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="0">Enero</SelectItem>
-              <SelectItem value="1">Febrero</SelectItem>
-              <SelectItem value="2">Marzo</SelectItem>
-              <SelectItem value="3">Abril</SelectItem>
-              <SelectItem value="4">Mayo</SelectItem>
-              <SelectItem value="5">Junio</SelectItem>
-              <SelectItem value="6">Julio</SelectItem>
-              <SelectItem value="7">Agosto</SelectItem>
-              <SelectItem value="8">Septiembre</SelectItem>
-              <SelectItem value="9">Octubre</SelectItem>
-              <SelectItem value="10">Noviembre</SelectItem>
-              <SelectItem value="11">Diciembre</SelectItem>
+              <SelectItem
+                value="0"
+                disabled={
+                  plan?.pricesPerCondition?.filter(
+                    (x) =>
+                      x.validy_date.getTime() === new Date(anio, 0, 1).getTime()
+                  ).length !== 0
+                }
+              >
+                Enero
+              </SelectItem>
+              <SelectItem
+                value="1"
+                disabled={
+                  plan?.pricesPerCondition?.filter(
+                    (x) =>
+                      x.validy_date.getTime() === new Date(anio, 1, 1).getTime()
+                  ).length !== 0
+                }
+              >
+                Febrero
+              </SelectItem>
+              <SelectItem
+                value="2"
+                disabled={
+                  plan?.pricesPerCondition?.filter(
+                    (x) =>
+                      x.validy_date.getTime() === new Date(anio, 2, 1).getTime()
+                  ).length !== 0
+                }
+              >
+                Marzo
+              </SelectItem>
+              <SelectItem
+                value="3"
+                disabled={
+                  plan?.pricesPerCondition?.filter(
+                    (x) =>
+                      x.validy_date.getTime() === new Date(anio, 3, 1).getTime()
+                  ).length !== 0
+                }
+              >
+                Abril
+              </SelectItem>
+              <SelectItem
+                value="4"
+                disabled={
+                  plan?.pricesPerCondition?.filter(
+                    (x) =>
+                      x.validy_date.getTime() === new Date(anio, 4, 1).getTime()
+                  ).length !== 0
+                }
+              >
+                Mayo
+              </SelectItem>
+              <SelectItem
+                value="5"
+                disabled={
+                  plan?.pricesPerCondition?.filter(
+                    (x) =>
+                      x.validy_date.getTime() === new Date(anio, 5, 1).getTime()
+                  ).length !== 0
+                }
+              >
+                Junio
+              </SelectItem>
+              <SelectItem
+                value="6"
+                disabled={
+                  plan?.pricesPerCondition?.filter(
+                    (x) =>
+                      x.validy_date.getTime() === new Date(anio, 6, 1).getTime()
+                  ).length !== 0
+                }
+              >
+                Julio
+              </SelectItem>
+              <SelectItem
+                value="7"
+                disabled={
+                  plan?.pricesPerCondition?.filter(
+                    (x) =>
+                      x.validy_date.getTime() === new Date(anio, 7, 1).getTime()
+                  ).length !== 0
+                }
+              >
+                Agosto
+              </SelectItem>
+              <SelectItem
+                value="8"
+                disabled={
+                  plan?.pricesPerCondition?.filter(
+                    (x) =>
+                      x.validy_date.getTime() === new Date(anio, 8, 1).getTime()
+                  ).length !== 0
+                }
+              >
+                Septiembre
+              </SelectItem>
+              <SelectItem
+                value="9"
+                disabled={
+                  plan?.pricesPerCondition?.filter(
+                    (x) =>
+                      x.validy_date.getTime() === new Date(anio, 9, 1).getTime()
+                  ).length !== 0
+                }
+              >
+                Octubre
+              </SelectItem>
+              <SelectItem
+                value="10"
+                disabled={
+                  plan?.pricesPerCondition?.filter(
+                    (x) =>
+                      x.validy_date.getTime() ===
+                      new Date(anio, 10, 1).getTime()
+                  ).length !== 0
+                }
+              >
+                Noviembre
+              </SelectItem>
+              <SelectItem
+                value="11"
+                disabled={
+                  plan?.pricesPerCondition?.filter(
+                    (x) =>
+                      x.validy_date.getTime() ===
+                      new Date(anio, 11, 1).getTime()
+                  ).length !== 0
+                }
+              >
+                Diciembre
+              </SelectItem>
             </SelectContent>
           </Select>
           <div>
