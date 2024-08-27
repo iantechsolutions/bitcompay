@@ -521,8 +521,10 @@ export const healthInsurances = pgTable("health_insurances", {
   adress: varchar("adress", { length: 255 }),
   locality: varchar("locality", { length: 255 }),
   province: varchar("province", { length: 255 }),
-  postal_code: varchar("postal_code", { length: 255 }),
   afip_status: varchar("afip_status", { length: 255 }),
+  postal_code: varchar("postal_code", { length: 255 }).references(
+    () => postal_code.id
+  ),
 });
 
 export const healthInsurancesRelations = relations(
