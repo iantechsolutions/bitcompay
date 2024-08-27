@@ -202,9 +202,9 @@ export default function CompanySidenav() {
 
   return (
     <ScrollArea className="h-[99vh] w-full relative overflow-x-auto">
-      <div className="sticky top-0 bg-white w-full h-[11vh] px-[1vw] place-content-center">
+      <div className="sticky top-0 bg-white w-full h-[11vh] px-[1vw] items-center justify-center content-center text-center">
         <img
-          className="w-[20vw] min-w-44 max-w-52 pb-[1vh] pt-[2vh]"
+          className="h-[10vh] pb-[1vh] pt-[2vh] mx-auto my-auto"
           src="/public/bitcom-03.png"
           alt="logo"
         />
@@ -217,14 +217,14 @@ export default function CompanySidenav() {
             <img
               src="/public/sidebar/Frame.png"
               alt="inicio"
-              className="h-[3.5vh] w-[5vh] min-w-5 "
+              className="w-[2vw] h-auto  "
             />
           }
           activeIcon={
             <img
               src="/public/sidebar/Frame-1.png"
               alt="inicio"
-              className="h-[3.5vh] w-[5vh] min-w-5"
+              className="w-[2vw] h-auto "
             />
           }
         >
@@ -233,15 +233,14 @@ export default function CompanySidenav() {
         {canSeeGeneral && (
           <>
             <div>
-              <SidenavSeparator className="text-sideNav">GENERAL </SidenavSeparator>
+              <SidenavSeparator className="text-sideNav">
+                GENERAL{" "}
+              </SidenavSeparator>
             </div>
             <SidenavItem
-              className="flex max-w-52 text-sideNav gap-[0vw] "
+              className="flex text-sideNav gap-[0vw] "
               icon={
-                <LayoutDashboardIcon
-                  strokeWidth={1}
-                  className="h-7 w-[3vw]"
-                />
+                <LayoutDashboardIcon strokeWidth={1} className="h-7 w-[3vw]" />
               }
               activeIcon={
                 <LayoutDashboardIcon
@@ -252,7 +251,7 @@ export default function CompanySidenav() {
               }
               href={`/dashboard`}
             >
-            Dashboard
+              Dashboard
             </SidenavItem>
           </>
         )}
@@ -271,15 +270,15 @@ export default function CompanySidenav() {
                   <AccordionTrigger
                     className={
                       isActive("Ventas")
-                        ? "bg-[#BEF0BB]  pl-[1vw] py-[1vh] mb-[1.5vh]  hover:no-underline"
-                        : " pl-[1vw] py-[1vh] mb-[1.5vh]  hover:no-underline"
+                        ? "bg-[#BEF0BB]  py-[1vh] mb-[1.5vh]  hover:no-underline"
+                        : " py-[1vh] mb-[1.5vh]  hover:no-underline"
                     }
                   >
                     <SideNavTrigger
                       icon={
                         <img
                           src="/public/sidebar/Frame-2.png"
-                          className="mr-[1vw] text-sideNav h-[3vh] w-[3vh]"
+                          className="text-sideNav h-[3vh] w-[3vh]"
                         />
                       }
                       className="text-sideNav"
@@ -372,15 +371,15 @@ export default function CompanySidenav() {
                   <AccordionTrigger
                     className={
                       isActive("Clientes")
-                        ? "bg-[#BEF0BB]  pl-[1vw] py-[1vh] mb-[1.5vh]  hover:no-underline"
-                        : " pl-[1vw] py-[1vh] mb-[1.5vh]  hover:no-underline"
+                        ? "bg-[#BEF0BB]  py-[1vh] mb-[1.5vh]  hover:no-underline"
+                        : " py-[1vh] mb-[1.5vh]  hover:no-underline"
                     }
                   >
                     <SideNavTrigger
                       icon={
                         <img
                           src="/public/sidebar/Frame-4.png"
-                          className=" mr-[1vw] h-[3vh] w-[3vh]"
+                          className=" h-[3vh] w-[3vh]"
                         />
                       }
                       className="text-sideNav"
@@ -407,13 +406,13 @@ export default function CompanySidenav() {
                         icon={
                           <img
                             src="/public/sidebar/Frame-26.png"
-                            className="h-[3vh] w-[3vh]"
+                            className=" w-[2vw] h-auto"
                           />
                         }
                         activeIcon={
                           <img
                             src="/public/sidebar/Frame-27.png"
-                            className="h-[3vh] w-[3vh]"
+                            className=" w-[2vw] h-auto"
                           />
                         }
                         href={`/dashboard/management/client/health_insurances`}
@@ -434,8 +433,8 @@ export default function CompanySidenav() {
                   <AccordionTrigger
                     className={
                       isActive("Proveedores")
-                        ? " bg-[#BEF0BB]  pl-[1vw] py-[1vh] mb-[1.5vh]  hover:no-underline"
-                        : " px-[1vw] py-[1vh] hover:no-underline"
+                        ? " bg-[#BEF0BB]  py-[1vh] mb-[1.5vh]  hover:no-underline"
+                        : " py-[1vh] hover:no-underline"
                     }
                   >
                     <SideNavTrigger className="text-sideNav">
@@ -498,12 +497,12 @@ export default function CompanySidenav() {
                   <AccordionTrigger
                     className={
                       isActive("Documentos")
-                        ? " bg-[#BEF0BB]  pl-[1vw] py-[1vh] mb-[1.5vh]  hover:no-underline"
-                        : "  pl-[1vw] py-[1vh] mb-[1.5vh]  hover:no-underline"
+                        ? " bg-[#BEF0BB]  py-[1vh] mb-[1.5vh]  hover:no-underline"
+                        : "   py-[1vh] mb-[1.5vh]  hover:no-underline"
                     }
                   >
                     <SideNavTrigger
-                      icon={<Files className=" mr-[1vw]" />}
+                      icon={<Files strokeWidth={1} />}
                       className="text-sideNav"
                     >
                       Documentos
@@ -579,13 +578,13 @@ export default function CompanySidenav() {
                 icon={
                   <img
                     src="/public/sidebar/Frame-6.png"
-                    className="h-[3vh] w-[3vh]"
+                    className="w-[2vw] h-auto"
                   />
                 }
                 activeIcon={
                   <img
                     src="/public/sidebar/Frame-7.png"
-                    className="h-[3vh] w-[3vh]"
+                    className="w-[2vw] h-auto"
                   />
                 }
                 href={`/dashboard/billing/manual_issuance`}
@@ -599,13 +598,13 @@ export default function CompanySidenav() {
                 icon={
                   <img
                     src="/public/sidebar/Frame-8.png"
-                    className="h-[3vh] w-[3vh]"
+                    className="w-[2vw] h-auto"
                   />
                 }
                 activeIcon={
                   <img
                     src="/public/sidebar/Frame-9.png"
-                    className="h-[3vh] w-[3vh]"
+                    className="w-[2vw] h-auto"
                   />
                 }
                 href={`/dashboard/billing/pre-liquidation`}
@@ -619,13 +618,13 @@ export default function CompanySidenav() {
                 icon={
                   <img
                     src="/public/sidebar/Frame-10.png"
-                    className="h-[2vh] w-[3vh]"
+                    className="w-[2vw] h-auto"
                   />
                 }
                 activeIcon={
                   <img
                     src="/public/sidebar/Frame-11.png"
-                    className="h-[2vh] w-[3vh]"
+                    className="w-[2vw] h-auto"
                   />
                 }
                 href={`/dashboard/billing/liquidation`}
@@ -636,8 +635,16 @@ export default function CompanySidenav() {
             )}
             {canSeeInformation && (
               <SidenavItem
-                icon={<HelpCircle strokeWidth={1} />}
-                activeIcon={<HelpCircle strokeWidth={1} color="#6952EB" />}
+                icon={
+                  <HelpCircle strokeWidth={1} className="w-[1.5vw] h-auto" />
+                }
+                activeIcon={
+                  <HelpCircle
+                    strokeWidth={1}
+                    color="#6952EB"
+                    className="w-[1.5vw] h-auto"
+                  />
+                }
                 href={`/dashboard/billing/information`}
                 className="text-sideNav"
               >
@@ -646,8 +653,14 @@ export default function CompanySidenav() {
             )}
             {canSeeConsults && (
               <SidenavItem
-                icon={<Search strokeWidth={1} />}
-                activeIcon={<Search strokeWidth={1} color="#6952EB" />}
+                icon={<Search strokeWidth={1} className="w-[1.5vw] h-auto" />}
+                activeIcon={
+                  <Search
+                    strokeWidth={1}
+                    color="#6952EB"
+                    className="w-[1.5vw] h-auto"
+                  />
+                }
                 href={`/dashboard/billing/consults`}
                 className="text-sideNav"
               >
@@ -667,9 +680,18 @@ export default function CompanySidenav() {
             {canSeeCompanies && (
               <SidenavItem
                 href={`/dashboard/administration/companies`}
-                icon={<BriefcaseBusiness strokeWidth={1} />}
+                icon={
+                  <BriefcaseBusiness
+                    strokeWidth={1}
+                    className="w-[1.5vw] h-auto"
+                  />
+                }
                 activeIcon={
-                  <BriefcaseBusiness strokeWidth={1} color="#6952EB" />
+                  <BriefcaseBusiness
+                    strokeWidth={1}
+                    color="#6952EB"
+                    className="w-[1.5vw] h-auto"
+                  />
                 }
                 className="text-sideNav"
               >
@@ -679,8 +701,14 @@ export default function CompanySidenav() {
             {canSeeProducts && (
               <SidenavItem
                 href={`/dashboard/administration/products`}
-                activeIcon={<Package strokeWidth={1} color="#6952EB" />}
-                icon={<Package strokeWidth={1} />}
+                activeIcon={
+                  <Package
+                    strokeWidth={1}
+                    color="#6952EB"
+                    className="w-[1.5vw] h-auto"
+                  />
+                }
+                icon={<Package strokeWidth={1} className="w-[1.5vw] h-auto" />}
                 className="text-sideNav"
               >
                 Productos
@@ -689,8 +717,14 @@ export default function CompanySidenav() {
             {canSeeChannels && (
               <SidenavItem
                 href={`/dashboard/administration/channels`}
-                activeIcon={<Sliders strokeWidth={1} color="#6952EB" />}
-                icon={<Sliders strokeWidth={1} />}
+                activeIcon={
+                  <Sliders
+                    strokeWidth={1}
+                    color="#6952EB"
+                    className="w-[1.5vw] h-auto"
+                  />
+                }
+                icon={<Sliders strokeWidth={1} className="w-[1.5vw] h-auto" />}
                 className="text-sideNav"
               >
                 Canales
@@ -699,8 +733,14 @@ export default function CompanySidenav() {
             {canSeeBrands && (
               <SidenavItem
                 href={`/dashboard/administration/brands`}
-                activeIcon={<Tag strokeWidth={1} color="#6952EB" />}
-                icon={<Tag strokeWidth={1} />}
+                activeIcon={
+                  <Tag
+                    strokeWidth={1}
+                    color="#6952EB"
+                    className="w-[1.5vw] h-auto"
+                  />
+                }
+                icon={<Tag strokeWidth={1} className="w-[1.5vw] h-auto" />}
                 className="text-sideNav"
               >
                 Marcas
@@ -709,8 +749,14 @@ export default function CompanySidenav() {
             {canSeeServices && (
               <SidenavItem
                 href={`/dashboard/administration/services`}
-                activeIcon={<Wrench strokeWidth={1} color="#6952EB" />}
-                icon={<Wrench strokeWidth={1} />}
+                activeIcon={
+                  <Wrench
+                    strokeWidth={1}
+                    color="#6952EB"
+                    className="w-[1.5vw] h-auto"
+                  />
+                }
+                icon={<Wrench strokeWidth={1} className="w-[1.5vw] h-auto" />}
                 className="text-sideNav"
               >
                 Servicios
@@ -719,8 +765,14 @@ export default function CompanySidenav() {
             {canSeeQuotes && (
               <SidenavItem
                 href={`/dashboard/administration/quotes`}
-                icon={<FileText strokeWidth={1} />}
-                activeIcon={<FileText strokeWidth={1} color="#6952EB" />}
+                icon={<FileText strokeWidth={1} className="w-[1.5vw] h-auto" />}
+                activeIcon={
+                  <FileText
+                    strokeWidth={1}
+                    color="#6952EB"
+                    className="w-[1.5vw] h-auto"
+                  />
+                }
                 className="text-sideNav"
               >
                 Cotizaciones
@@ -737,24 +789,42 @@ export default function CompanySidenav() {
             </div>
 
             <SidenavItem
-              icon={<User strokeWidth={1} />}
-              activeIcon={<User strokeWidth={1} color="#6952EB" />}
+              icon={<User strokeWidth={1} className="w-[1.5vw] h-auto" />}
+              activeIcon={
+                <User
+                  strokeWidth={1}
+                  color="#6952EB"
+                  className="w-[1.5vw] h-auto"
+                />
+              }
               href={`/dashboard/maintenance/user`}
               className="text-sideNav"
             >
               Usuarios
             </SidenavItem>
             <SidenavItem
-              icon={<Shield strokeWidth={1} />}
+              icon={<Shield strokeWidth={1} className="w-[1.5vw] h-auto" />}
               href={`/dashboard/maintenance/roles`}
-              activeIcon={<Shield strokeWidth={1} color="#6952EB" />}
+              activeIcon={
+                <Shield
+                  strokeWidth={1}
+                  color="#6952EB"
+                  className="w-[1.5vw] h-auto"
+                />
+              }
               className="text-sideNav"
             >
               Roles
             </SidenavItem>
             <SidenavItem
-              icon={<Grid strokeWidth={1} />}
-              activeIcon={<Grid strokeWidth={1} color="#6952EB" />}
+              icon={<Grid strokeWidth={1} className="w-[1.5vw] h-auto" />}
+              activeIcon={
+                <Grid
+                  strokeWidth={1}
+                  color="#6952EB"
+                  className="w-[1.5vw] h-auto"
+                />
+              }
               href={`/dashboard/maintenance/tables`}
               className="text-sideNav"
             >
@@ -773,43 +843,75 @@ export default function CompanySidenav() {
 
             <SidenavItem
               href={`/dashboard/audit/administrative`}
-              icon={<Clipboard />}
-              activeIcon={<Clipboard color="#6952EB" />}
+              icon={<Clipboard className="w-[1.5vw] h-auto" />}
+              activeIcon={
+                <Clipboard color="#6952EB" className="w-[1.5vw] h-auto" />
+              }
             >
               Administrativo
             </SidenavItem>
             <SidenavItem
               href={`/dashboard/audit/medical`}
-              icon={<Activity strokeWidth={1} />}
-              activeIcon={<Activity strokeWidth={1} color="#6952EB" />}
+              icon={<Activity strokeWidth={1} className="w-[1.5vw] h-auto" />}
+              activeIcon={
+                <Activity
+                  strokeWidth={1}
+                  className="w-[1.5vw] h-auto"
+                  color="#6952EB"
+                />
+              }
             >
               Médico
             </SidenavItem>
             <SidenavItem
               href={`/dashboard/audit/telefonica`}
-              icon={<Phone strokeWidth={1} />}
-              activeIcon={<Phone strokeWidth={1} color="#6952EB" />}
+              icon={<Phone strokeWidth={1} className="w-[1.5vw] h-auto" />}
+              activeIcon={
+                <Phone
+                  strokeWidth={1}
+                  className="w-[1.5vw] h-auto"
+                  color="#6952EB"
+                />
+              }
             >
               Telefónica
             </SidenavItem>
             <SidenavItem
               href={`/dashboard/audit/benefits`}
-              icon={<Gift strokeWidth={1} />}
-              activeIcon={<Gift strokeWidth={1} color="#6952EB" />}
+              icon={<Gift strokeWidth={1} className="w-[1.5vw] h-auto" />}
+              activeIcon={
+                <Gift
+                  strokeWidth={1}
+                  className="w-[1.5vw] h-auto"
+                  color="#6952EB"
+                />
+              }
             >
               Prestaciones
             </SidenavItem>
             <SidenavItem
               href={`/dashboard/audit/fixed_eventual`}
-              icon={<Calendar strokeWidth={1} />}
-              activeIcon={<Calendar strokeWidth={1} color="#6952EB" />}
+              icon={<Calendar strokeWidth={1} className="w-[1.5vw] h-auto" />}
+              activeIcon={
+                <Calendar
+                  strokeWidth={1}
+                  className="w-[1.5vw] h-auto"
+                  color="#6952EB"
+                />
+              }
             >
               Eventuales/Fijos
             </SidenavItem>
             <SidenavItem
               href={`/dashboard/audit/operations`}
-              icon={<Settings strokeWidth={1} />}
-              activeIcon={<Settings strokeWidth={1} color="#6952EB" />}
+              icon={<Settings strokeWidth={1} className="w-[1.5vw] h-auto" />}
+              activeIcon={
+                <Settings
+                  strokeWidth={1}
+                  className="w-[1.5vw] h-auto"
+                  color="#6952EB"
+                />
+              }
             >
               Operaciones
             </SidenavItem>
@@ -826,8 +928,14 @@ export default function CompanySidenav() {
 
             {canSeeCC && (
               <SidenavItem
-                icon={<Database strokeWidth={1} />}
-                activeIcon={<Database strokeWidth={1} color="#6952EB" />}
+                icon={<Database strokeWidth={1} className="w-[1.5vw] h-auto" />}
+                activeIcon={
+                  <Database
+                    strokeWidth={1}
+                    className="w-[1.5vw] h-auto"
+                    color="#6952EB"
+                  />
+                }
                 href={`/dashboard/treasury/current_count`}
               >
                 Cuenta Corriente
@@ -835,8 +943,14 @@ export default function CompanySidenav() {
             )}
             {canSeeCollections && (
               <SidenavItem
-                icon={<Hand strokeWidth={1} />}
-                activeIcon={<Hand strokeWidth={1} color="#6952EB" />}
+                icon={<Hand strokeWidth={1} className="w-[1.5vw] h-auto" />}
+                activeIcon={
+                  <Hand
+                    strokeWidth={1}
+                    className="w-[1.5vw] h-auto"
+                    color="#6952EB"
+                  />
+                }
                 href={`/dashboard/treasury/collection`}
               >
                 Cobranzas
@@ -844,8 +958,14 @@ export default function CompanySidenav() {
             )}
             {canSeePayments && (
               <SidenavItem
-                icon={<Wallet strokeWidth={1} />}
-                activeIcon={<Wallet strokeWidth={1} color="#6952EB" />}
+                icon={<Wallet strokeWidth={1} className="w-[1.5vw] h-auto" />}
+                activeIcon={
+                  <Wallet
+                    strokeWidth={1}
+                    className="w-[1.5vw] h-auto"
+                    color="#6952EB"
+                  />
+                }
                 href={`/dashboard/treasury/payments`}
               >
                 Pagos
