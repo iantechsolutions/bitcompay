@@ -240,12 +240,12 @@ export default function CompanySidenav() {
             <SidenavItem
               className="flex text-sideNav gap-[0vw] "
               icon={
-                <LayoutDashboardIcon strokeWidth={1} className="h-7 w-[3vw]" />
+                <LayoutDashboardIcon strokeWidth={1} className="w-[1.5vw] h-auto" />
               }
               activeIcon={
                 <LayoutDashboardIcon
                   strokeWidth={1}
-                  className="h-7 w-[3vw]"
+                  className="w-[1.5vw] h-auto"
                   color="#6952EB"
                 />
               }
@@ -289,9 +289,9 @@ export default function CompanySidenav() {
                   <AccordionContent className="pl-[1.5vw]">
                     {canSeeAdvisors && (
                       <SidenavItem
-                        icon={<UserPlus strokeWidth={1} className="h-[3vh] " />}
+                        icon={<UserPlus strokeWidth={1} className="w-[1.5vw] h-auto" />}
                         activeIcon={
-                          <UserPlus strokeWidth={1} color="#6952EB" />
+                          <UserPlus strokeWidth={1} color="#6952EB" className="w-[1.5vw] h-auto" />
                         }
                         href={`/dashboard/management/sales/advisors`}
                         IsChild={true}
@@ -302,9 +302,9 @@ export default function CompanySidenav() {
                     )}
                     {canSeeProcedures && (
                       <SidenavItem
-                        icon={<FilePlus strokeWidth={1} />}
+                        icon={<FilePlus strokeWidth={1} className="w-[1.5vw] h-auto" />}
                         activeIcon={
-                          <FilePlus strokeWidth={1} color="#6952EB" />
+                          <FilePlus strokeWidth={1} color="#6952EB" className="w-[1.5vw] h-auto" />
                         }
                         href={`/dashboard/management/sales/procedures`}
                         IsChild={true}
@@ -315,8 +315,8 @@ export default function CompanySidenav() {
                     )}
                     {canSeePlans && (
                       <SidenavItem
-                        icon={<MapPin strokeWidth={1} />}
-                        activeIcon={<MapPin strokeWidth={1} color="#6952EB" />}
+                        icon={<MapPin strokeWidth={1} className="w-[1.5vw] h-auto"/>}
+                        activeIcon={<MapPin strokeWidth={1} color="#6952EB" className="w-[1.5vw] h-auto"/>}
                         href={`/dashboard/management/sales/plans`}
                         IsChild={true}
                         className="text-sideNav"
@@ -326,9 +326,9 @@ export default function CompanySidenav() {
                     )}
                     {canSeeDifferentials && (
                       <SidenavItem
-                        icon={<BarChart2 strokeWidth={1} />}
+                        icon={<BarChart2 strokeWidth={1} className="w-[1.5vw] h-auto"/>}
                         activeIcon={
-                          <BarChart2 strokeWidth={1} color="#6952EB" />
+                          <BarChart2 strokeWidth={1} color="#6952EB" className="w-[1.5vw] h-auto"/>
                         }
                         href={`/dashboard/management/sales/differentials`}
                         IsChild={true}
@@ -339,9 +339,9 @@ export default function CompanySidenav() {
                     )}
                     {canSeeComissions && (
                       <SidenavItem
-                        icon={<DollarSign strokeWidth={1} />}
+                        icon={<DollarSign strokeWidth={1} className="w-[1.5vw] h-auto"/>}
                         activeIcon={
-                          <DollarSign strokeWidth={1} color="#6952EB" />
+                          <DollarSign strokeWidth={1} color="#6952EB" className="w-[1.5vw] h-auto" />
                         }
                         href={`/dashboard/management/sales/comissions`}
                         IsChild={true}
@@ -352,8 +352,8 @@ export default function CompanySidenav() {
                     )}
                     {canSeeBonuses && (
                       <SidenavItem
-                        icon={<Percent strokeWidth={1} />}
-                        activeIcon={<Percent strokeWidth={1} color="#6952EB" />}
+                        icon={<Percent strokeWidth={1} className="w-[1.5vw] h-auto"/>}
+                        activeIcon={<Percent strokeWidth={1} color="#6952EB" className="w-[1.5vw] h-auto"/>}
                         href={`/dashboard/management/sales/bonuses`}
                         IsChild={true}
                         className="text-sideNav"
@@ -390,9 +390,9 @@ export default function CompanySidenav() {
                   <AccordionContent className="pl-[1.5vw]">
                     {canSeeAffiliates && (
                       <SidenavItem
-                        icon={<UserRound strokeWidth={1} />}
+                        icon={<UserRound strokeWidth={1} className="w-[1.5vw] h-auto"/>}
                         activeIcon={
-                          <UserRound strokeWidth={1} color="#6952EB" />
+                          <UserRound strokeWidth={1} color="#6952EB" className="w-[1.5vw] h-auto" />
                         }
                         href={`/dashboard/management/client/affiliates`}
                         IsChild={true}
@@ -502,7 +502,7 @@ export default function CompanySidenav() {
                     }
                   >
                     <SideNavTrigger
-                      icon={<Files strokeWidth={1} />}
+                      icon={<Files strokeWidth={1} className="w-[1.5vw] h-auto"/>}
                       className="text-sideNav"
                     >
                       Documentos
@@ -511,9 +511,9 @@ export default function CompanySidenav() {
                   <AccordionContent className="pl-[1.5vw]">
                     {canSeeMasiveUpload && (
                       <SidenavItem
-                        icon={<CloudUpload strokeWidth={1} />}
+                        icon={<CloudUpload strokeWidth={1} className="w-[1.5vw] h-auto"/>}
                         activeIcon={
-                          <CloudUpload strokeWidth={1} color="#6952EB" />
+                          <CloudUpload strokeWidth={1} color="#6952EB" className="w-[1.5vw] h-auto"/>
                         }
                         href={`/dashboard/management/documents/massive-upload`}
                         IsChild={true}
@@ -524,8 +524,8 @@ export default function CompanySidenav() {
                     )}
                     {canSeeRecUpload && (
                       <SidenavItem
-                        icon={<Cloud strokeWidth={1} />}
-                        activeIcon={<Cloud strokeWidth={1} color="#6952EB" />}
+                        icon={<Cloud strokeWidth={1} className="w-[1.5vw] h-auto"/>}
+                        activeIcon={<Cloud strokeWidth={1} color="#6952EB" className="w-[1.5vw] h-auto" />}
                         href={`/dashboard/management/documents/rec-upload`}
                         IsChild={true}
                         className="text-sideNav"
@@ -535,9 +535,9 @@ export default function CompanySidenav() {
                     )}
                     {canSeeOutput && (
                       <SidenavItem
-                        icon={<CloudDownload strokeWidth={1} />}
+                        icon={<CloudDownload strokeWidth={1} className="w-[1.5vw] h-auto"/>}
                         activeIcon={
-                          <CloudDownload strokeWidth={1} color="#6952EB" />
+                          <CloudDownload strokeWidth={1} color="#6952EB" className="w-[1.5vw] h-auto"/>
                         }
                         href={`/dashboard/management/documents/output`}
                         IsChild={true}
@@ -548,9 +548,9 @@ export default function CompanySidenav() {
                     )}
                     {canSeeResponse && (
                       <SidenavItem
-                        icon={<MessageCircle strokeWidth={1} />}
+                        icon={<MessageCircle strokeWidth={1} className="w-[1.5vw] h-auto"/>}
                         activeIcon={
-                          <MessageCircle strokeWidth={1} color="#6952EB" />
+                          <MessageCircle strokeWidth={1} color="#6952EB" className="w-[1.5vw] h-auto"/>
                         }
                         href={`/dashboard/management/documents/response`}
                         IsChild={true}
