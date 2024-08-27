@@ -118,12 +118,14 @@ export default function PlanPage(props: {
             validy_date: new Date(anio, mes, 1),
           });
         }
+        setOpen(false);
       } else {
         toast.error("Ya existe un listado de precios para el mes seleccionado");
+        setLoading(false);
       }
     }
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setOpen(false);
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
     router.refresh();
   }
 
