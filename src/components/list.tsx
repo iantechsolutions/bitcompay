@@ -54,8 +54,7 @@ export function ListTile(props: ListTileProps) {
     </>
   );
 
-  const containerClassName =
-    "flex gap-3 py-3 hover:bg-stone-100 active:bg-stone-200 rounded-lg";
+  const containerClassName = "flex gap-3 py-3 ";
 
   if (props.href) {
     content = (
@@ -80,7 +79,7 @@ export function ListTile(props: ListTileProps) {
 
   return (
     <li
-      className="border-b last:border-none hover:border-none"
+      className=" last:border-none hover:border-none rounded-lg border-b border-b-stone-100 hover:bg-stone-100"
       role="button"
       onClick={props.onClick}
     >
