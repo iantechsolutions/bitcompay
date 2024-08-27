@@ -1445,10 +1445,10 @@ async function calculateAmount(
   let ivaCodigo = null;
   const { modo } = grupo;
 
-  if (differentials) {
+  if (!diferencial) {
     diferencial = 0;
   }
-  if (previous_bill) {
+  if (!previous_bill) {
     previous_bill = 0;
   }
 
