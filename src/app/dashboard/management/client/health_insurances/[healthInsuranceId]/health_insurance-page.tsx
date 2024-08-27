@@ -124,7 +124,7 @@ export default function HealthInsurancePage(props: {
     Provincia: "-",
     "Codigo postal": props.healthInsurance?.cpData?.cp ?? "-",
     Telefono: "-",
-    "E-mail": "fulanito@gmail.com",
+    "E-mail": "example@gmail.com",
   };
 
   const basicData = { ...fiscalData, ...contactData };

@@ -2,7 +2,11 @@ import { and, desc, eq } from "drizzle-orm";
 import Afip from "@afipsdk/afip.js";
 import { z } from "zod";
 import { db, schema } from "~/server/db";
-import { bussinessUnits, ComprobantesSchemaDB } from "~/server/db/schema";
+import {
+  bussinessUnits,
+  ComprobantesSchemaDB,
+  differentials,
+} from "~/server/db/schema";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { Group } from "next/dist/shared/lib/router/utils/route-regex";
 import { Plans } from "./plans-router";
@@ -1290,6 +1294,7 @@ export async function preparateComprobante(
           previous_bill,
           saldo
         );
+
       if (ivaPostFiltro && ivaPostFiltro == "3") {
         ivaFloat = 1;
       }
@@ -1334,6 +1339,7 @@ export async function preparateComprobante(
       }
 
       //creamos FC nueva
+      console.log("fiorela importe", importe);
 
       const comprobante = await db
         .insert(schema.comprobantes)
@@ -1438,6 +1444,13 @@ async function calculateAmount(
   let amount = 0;
   let ivaCodigo = null;
   const { modo } = grupo;
+
+  if (differentials) {
+    diferencial = 0;
+  }
+  if (previous_bill) {
+    previous_bill = 0;
+  }
 
   if (modo?.description == "MIXTO") {
     iva = 1;
