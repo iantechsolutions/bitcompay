@@ -14,9 +14,10 @@ import { api } from "~/trpc/react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { asTRPCError } from "~/lib/errors";
-const router = useRouter();
+
 export default function DeleteButton(props: { id: string }) {
   async function handleDelete() {
+    const router = useRouter();
     try {
       await deletePlan({
         planId: props.id ?? "",
