@@ -135,10 +135,6 @@ export default function AddPlanPricesComponent({
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     try {
-      // for (const id of pricesToDelete) {
-      //   await deletePricePerCondition({ id });
-      // }
-      // console.log(pricesToDelete);
       setWorking(true);
 
       let allowed = true;
@@ -230,20 +226,24 @@ export default function AddPlanPricesComponent({
     console.log("pricesToDelete", pricesToDelete);
   }, [pricesToDelete]);
 
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+
   const handleDelete = async (index: number) => {
+    if (isButtonDisabled) {
+      return null;
+    }
+    setIsButtonDisabled(true);
     try {
       const price = initialPrices?.[index];
       if (price?.id) {
-        // setPricesToDelete((prevPrices) => [...prevPrices, price.id]);
-
-        // console.log(price!.id);
         await deletePricePerCondition({ id: price.id ?? "" });
         toast.success("Precio eliminado de la base de datos.");
         remove(index);
       }
-      // console.log(pricesToDelete);
     } catch {
       toast.error("No se pudo eliminar el precio");
+    } finally {
+      setTimeout(() => setIsButtonDisabled(false), 2000);
     }
   };
 
@@ -522,13 +522,18 @@ export default function AddPlanPricesComponent({
                     )}
                   />
                   {edit ? (
-                    <Button
-                      variant="ghost"
-                      type="button"
-                      className="relative top-3"
-                      onClick={() => handleDelete(index)}>
-                      <CircleX className="text-red-500 left-0" size={20} />
-                    </Button>
+                    isButtonDisabled ? (
+                      <Loader2Icon className="mr-2 animate-spin" size={20} />
+                    ) : (
+                      <Button
+                        disabled={isButtonDisabled}
+                        variant="ghost"
+                        type="button"
+                        className="relative top-3"
+                        onClick={() => handleDelete(index)}>
+                        <CircleX className="text-red-500 left-0" size={20} />
+                      </Button>
+                    )
                   ) : (
                     <Button
                       variant="ghost"
@@ -548,7 +553,7 @@ export default function AddPlanPricesComponent({
               <h1 className="font-bold text-xl">Cargando...</h1>
             </div>
           )}
-          <Button type="submit" disabled={working}>
+          <Button type="submit" disabled={working || isButtonDisabled}>
             {" "}
             {working && (
               <Loader2Icon className="mr-2 animate-spin" size={20} />
