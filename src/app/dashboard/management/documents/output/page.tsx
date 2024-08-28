@@ -1,3 +1,4 @@
+import LayoutContainer from "~/components/layout-container";
 import { List, ListTile } from "~/components/list";
 import { Title } from "~/components/title";
 import { api } from "~/trpc/server";
@@ -7,6 +8,7 @@ export default async function PageGenerate() {
 
   return (
     <>
+    <LayoutContainer>
       <Title>Generar archivos de salida</Title>
       <List>
         {channels.map((channel) => {
@@ -20,6 +22,7 @@ export default async function PageGenerate() {
           );
         })}
       </List>
+      </LayoutContainer>
     </>
   );
 }
