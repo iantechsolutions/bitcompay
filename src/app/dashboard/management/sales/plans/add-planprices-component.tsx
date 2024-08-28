@@ -136,7 +136,7 @@ export default function AddPlanPricesComponent({
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     try {
       setWorking(true);
-      if (!mes) {
+      if (!mes && !edit) {
         toast.error("ingrese el mes correspondiente");
         setWorking(false);
       } else {
