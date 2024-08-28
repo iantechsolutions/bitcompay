@@ -24,7 +24,8 @@ type DetailSheetProps = {
   open: boolean;
   setOpen: (open: boolean) => void;
 };
-
+import Download02Icon from "~/components/icons/download-02-stroke-rounded";
+  
 type Comprobante = RouterOutputs["comprobantes"]["getByLiquidation"][number];
 export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
   const [openFCAccordion, setOpenFCAccordion] = useState(true);
@@ -65,27 +66,29 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
           </SheetTitle>
           <SheetDescription>
             <ul className="mt-2">
-              <li>
-                <span className="font-medium text-[1rem]"> Receptor </span>
-              </li>
-              <li className="font-medium-medium"> {data.nombre}</li>
-              <li className="">{data.cuit}</li>
+              <li className="text-xs"> RECEPTOR </li>
+              <li className="font-medium text-[#3e3e3e]"> {data.nombre}</li>
+              <br /> 
+              <li className="text-xs"> CUIL/CUIT </li>
+              <li className="font-medium text-[#3e3e3e]">{data.cuit}</li>
+              <br /> 
             </ul>
           </SheetDescription>
         </SheetHeader>
 
-        <div className="bg-[#b7f3e8] flex flex-row justify-between items-center px-1.5 py-2 rounded-md mt-3">
-          <p className=" text-sm font-semibold opacity-70">Saldo actual: </p>
-          <p className="text-[#9b9a9a] text-xs">
+        <div className="flex flex-row border justify-between items-center p-5 rounded-md mt-3">
+          <p className="text-lg font-medium-medium">Saldo actual </p>
+          <p className="text-[#6952EB] font-semibold text-xl">
             $ {data.currentAccountAmount}
           </p>
         </div>
 
-        <div className="mt-2">
-          {comprobanteNCReciente && (
+        <div className="mt-5">
+          {/* {comprobanteNCReciente && (
             <div className="mt-2">
               <div
-                className="flex flex-row justify-between items-center py-2 px-2 mb-3 rounded-md bg-[#c2bebe84] hover:bg-[#cbc7c7ce] transition-all"
+                className="flex flex-row justify-between items-center py-2 px-2 mb-3 rounded-md bg-[#c2bebe84] 
+                hover:bg-[#cbc7c7ce] transition-all"
                 // onClick={() => setOpenNCAccordion(!openNCAccordion)}
               >
                 <p className="text-xl font-medium opacity-70 flex flex-row items-center">
@@ -106,7 +109,7 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
                       </Button>
                     </div>
                   ) : null}
-                  NC
+                  NC */}
                   {/* {openNCAccordion ? (
                     <ChevronDown
                       className="ml-2 transition-transform duration-200"
@@ -118,7 +121,7 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
                       size={12}
                     />
                   )} */}
-                </p>
+                {/* </p>
                 <p className="text-lg font-semibold text-[#4af0d4]">
                   {NCTotal ? `$ ${NCTotal}` : "N/A"}
                 </p>
@@ -127,8 +130,8 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
                 <ContentTable comprobante={comprobanteNCReciente} />
               )}
             </div>
-          )}
-          <div
+          )} */}
+          {/* <div
             className="flex flex-row justify-between items-center py-2 px-2 mb-3 rounded-md bg-[#c2bebe84] hover:bg-[#cbc7c7ce] transition-all mt-5"
             // onClick={() => setOpenFCAccordion(!openFCAccordion)}
           >
@@ -136,21 +139,10 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
               {comprobanteFCReciente?.billLink &&
               comprobanteFCReciente?.billLink !== "" ? (
                 <div className="items-center justify-center">
-                  <Button
-                    variant="ghost"
-                    className="mr-2"
-                    onClick={() => {
-                      !comprobanteFCReciente?.billLink
-                        ? alert("El archivo no cargo todavia")
-                        : window.open(comprobanteFCReciente?.billLink);
-                      // : router.push(`${comprobante?.billLink}`);
-                    }}
-                  >
-                    <FileText></FileText>
-                  </Button>
+                  
                 </div>
               ) : null}
-              FC
+              FC */}
               {/* {openFCAccordion ? (
                 <ChevronDown
                   className="ml-2 transition-transform duration-200"
@@ -162,21 +154,36 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
                   size={12}
                 />
               )} */}
-            </p>
+            {/* </p>
             <p className="text-lg font-semibold text-[#4af0d4]">
               {FCTotal ? `$ ${FCTotal}` : "N/A"}
             </p>
-          </div>
+          </div> */}
           {openFCAccordion && comprobanteFCReciente && (
             <ContentTable comprobante={comprobanteFCReciente} />
           )}
         </div>
         <div className="mt-3">
-          <div className="bg-[#b7f3e8] flex flex-row justify-between items-center px-1.5 py-2 rounded-md mt-2">
-            <p className=" text-sm font-semibold opacity-70">Saldo a pagar: </p>
-            <p className="text-[#9b9a9a] text-xs">
+          <div className="bg-[#DEF5DD] flex flex-row justify-between items-center p-3 rounded-md mt-2">
+            <p className=" text-[#4E9F1D] font-semibold opacity-60">Saldo a pagar: </p>
+            <p className="text-[#4E9F1D] font-semibold opacity-60">
               {saldo_a_pagar ? `$ ${saldo_a_pagar}` : "N/A"}
             </p>
+          </div>
+          <div className="flex flex-auto justify-end">
+                <Button
+                    variant="bitcompay"
+                    className=" text-lg px-8 py-6 mt-5 gap-3 text-[#3e3e3e] rounded-full font-medium"
+                    onClick={() => {
+                      !comprobanteFCReciente?.billLink
+                        ? alert("El archivo no cargo todavia")
+                        : window.open(comprobanteFCReciente?.billLink);
+                      // : router.push(`${comprobante?.billLink}`);
+                    }}
+                  >
+                   <Download02Icon />
+                    Descargar Factura
+                  </Button>
           </div>
         </div>
       </SheetContent>
