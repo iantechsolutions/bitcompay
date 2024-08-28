@@ -54,7 +54,7 @@ export function ListTile(props: ListTileProps) {
     </>
   );
 
-  const containerClassName = "flex gap-3 py-3 ";
+  const containerClassName = "flex items-center gap-3 py-3 ";
 
   if (props.href) {
     content = (
