@@ -35,7 +35,6 @@ export default function Filters<TData, TValue>({
   table,
   columns,
 }: FiltersProps<TData, TValue>) {
-  const [popoverOpen, setPopoverOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const form = useForm();
   // como sacar uniqueValues por cada columna
@@ -57,23 +56,21 @@ export default function Filters<TData, TValue>({
     });
   };
   return (
-    <div className="flex items-center">
-      <Button
-        variant={"outline"}
-        className="rounded-full px-5 py-5 mr-2 bg-[#D9FF9C] hover:bg-[#D9FF9C] h-7 text-black hover:text-black "
-        color="#0DA485"
-        onClick={() => setShowFilters(!showFilters)}
+    <div className="flex items-center p-0 bg-[#DEF5DD] rounded-full">
+      <div
+        className={`transition-all duration-700 ease-in-out overflow-hidden ${
+          showFilters
+            ? "opacity-100 max-h-[500px] "
+            : "opacity-0 max-h-0 max-w-[0px]"
+        }`}
       >
-        <img src="/public/tables/Frame-22.png" className="h-5 w-auto mr-2" />{" "}
-        Filtros{" "}
-      </Button>
-
-      {showFilters && (
-        <>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-              <div className="flex gap-3">
-                {columns?.map((column) => (
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <div className="flex gap-3">
+              {columns?.map((column) => {
+                console.log(column);
+                const columnTable = table.getColumn(column.id);
+                return (
                   <FormField
                     key={column.id}
                     control={form.control}
@@ -81,7 +78,10 @@ export default function Filters<TData, TValue>({
                     render={({ field }) => (
                       <FormItem>
                         <Select
-                          onValueChange={field.onChange}
+                          onValueChange={(value) => {
+                            console.log(value);
+                            columnTable?.setFilterValue(value);
+                          }}
                           defaultValue={field.value as string}
                         >
                           <FormControl>
@@ -100,29 +100,45 @@ export default function Filters<TData, TValue>({
                           <SelectContent>
                             {Array.from(column.getFacetedUniqueValues().keys())
                               .filter((value) => value !== "")
-                              .map((value) => (
-                                <SelectItem
-                                  value={value}
-                                  className="text-sm"
-                                  key={value}
-                                  onClick={(value) =>
-                                    column.setFilterValue(value)
-                                  }
-                                >
-                                  {value}
-                                </SelectItem>
-                              ))}
+                              .map((value) => {
+                                return (
+                                  <SelectItem
+                                    value={value}
+                                    className="text-sm"
+                                    key={value}
+                                    onClick={() => {
+                                      if (columnTable) {
+                                        columnTable?.setFilterValue(value);
+                                      }
+                                    }}
+                                  >
+                                    {value}
+                                  </SelectItem>
+                                );
+                              })}
                           </SelectContent>
                         </Select>
                       </FormItem>
                     )}
                   />
-                ))}
-              </div>
-            </form>
-          </Form>
-        </>
-      )}
+                );
+              })}
+            </div>
+          </form>
+        </Form>
+      </div>
+      <Button
+        variant={"outline"}
+        className="rounded-full px-5 py-5 bg-[#c0f4bc] hover:bg-[#c0f4bc] h-7 text-black hover:text-black "
+        color="#0DA485"
+        onClick={() => setShowFilters(!showFilters)}
+      >
+        <img
+          src="/public/tables/Frame-22.png"
+          className={`h-5 w-auto ${showFilters ? "mr-2" : ""}`}
+        />
+        {showFilters && "Filtros"}
+      </Button>
     </div>
   );
 }

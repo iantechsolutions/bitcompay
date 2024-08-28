@@ -29,14 +29,16 @@ export const CustomOrganizationSwitcher = ({
         <PopoverTrigger>
           <ButtonWithoutSize
             // variant={"outline"}
-            className="bg-white hover:bg-white rounded-2xl px-7 font-normal text-startP flex items-center border-none shadow-none"
+            className="bg-white hover:bg-white rounded-2xl px-7 font-normal text-#3E3E3E text-md flex items-center border-none shadow-none"
           >
             <img
               src="/public/header/Frame-14.png"
               className="h-[3.5vh] mr-[0.6vw]"
             />
             {organization?.name ?? companyName}
-            <ChevronDown strokeWidth={2} color="black" width="1vw" />
+            <div className="ml-3">
+              <ChevronDown className="h-4 w-auto" strokeWidth={1} />
+            </div>
           </ButtonWithoutSize>
         </PopoverTrigger>
         <PopoverContent>
@@ -45,7 +47,7 @@ export const CustomOrganizationSwitcher = ({
             {userMemberships.data?.map((mem) => (
               <li key={mem.id}>
                 <div
-                  className="hover:bg-gray-200 cursor-pointer flex items-center px-3 py-2 rounded-full"
+                  className="hover:bg-gray-200 cursor-pointer text-10 flex items-center px-3 py-2 rounded-full"
                   onClick={() =>
                     setActive({ organization: mem.organization.id })
                   }

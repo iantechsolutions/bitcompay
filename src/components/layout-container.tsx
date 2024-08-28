@@ -1,4 +1,5 @@
 import { cn } from "~/lib/utils";
+import BreadcrumbComp from "./breadcrumb";
 interface LayoutContainerProps {
   children: React.ReactNode;
   className?: string;
@@ -10,10 +11,13 @@ export default function LayoutContainer({
   return (
     <div
       className={cn(
-        `space-y-5 overflow-visible bg-white rounded-3xl p-7 mt-[19vh] md:ml-[30vw] mr-[3vw] sm:ml-[3vw]`,
+        `space-y-[2vh] overflow-visible bg-white rounded-3xl p-[3vh] mt-[16vh] mr-[3vw] ml-[3vw] md:ml-[23vw] sm:ml-[3vw] `,
         className
       )}
     >
+      <div>
+        <BreadcrumbComp />
+      </div>
       {children}
     </div>
   );

@@ -16,7 +16,7 @@ export function SidenavSeparator(props: {
 }) {
   return (
     <li
-      className={`flex items-center px-4 py-1 mt-3 mb-2 font-thin text-[#838383] ${props.className}`}
+      className={`flex items-center px-[2vw] pl-[1.5vw] py-[1vh] mt-[1vh] mb-[1vh] font-thin text-[#838383] ${props.className}`}
     >
       {props.children}
     </li>
@@ -35,15 +35,17 @@ export function SidenavItem(props: {
   const pathname = usePathname();
   const isActive = pathname === props.href;
   const activeColor = props.IsChild ? "bg-[#DEF5DD]" : "bg-[#BEF0BB]";
-  const className = `w-full flex gap-2 px-3 py-2 items-center rounded-full
-     ${isActive ? activeColor : ""} ${props.className}`;
+  const className = `flex w-fit 
+   gap-[0.3vw] px-[1vw] py-[1vh] items-center rounded-full
+                    md:text-base lg:text-lg w-full mr-[1vw]
+                    ${isActive ? activeColor : ""} ${props.className}`;
   const content = (
     <>
-      <div className="items-center justify-center p-1 mr-2 ">
+      <div className="items-center justify-center p-[0.5vw] w-fit ">
         {isActive ? props.activeIcon : props.icon}
       </div>
       <p
-        className={`text block w-full text-left  ${
+        className={`text-sideNav block w-full text-left  ${
           isActive ? "font-medium text-[#6952EB]" : ""
         }`}
       >
@@ -54,7 +56,7 @@ export function SidenavItem(props: {
 
   if (props.href) {
     return (
-      <li className={`flex items-center rounded-lg py-2`}>
+      <li className={`flex items-center rounded-lg py-[1vh]`}>
         <Link href={props.href} className={className}>
           {content}
         </Link>
@@ -78,9 +80,9 @@ export function SideNavTrigger(props: {
 }) {
   return (
     <li
-      className={`flex items-center w-1/2 text-left px-4 py-1  font-thin ${props.className}`}
+      className={`flex items-center text-left px-[1vw] py-[1vh] font-thin ${props.className}`}
     >
-      {props.icon}
+      <div className="px-[0.5vw]">{props.icon}</div>
       {props.children}
     </li>
   );

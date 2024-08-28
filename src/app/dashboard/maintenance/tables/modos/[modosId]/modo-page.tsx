@@ -94,7 +94,7 @@ export default function ModoPage(props: {
   });
 
   return (
-    <div>
+    <LayoutContainer>
       <h1 className=" m-3 text-lg">Actualizar Modo</h1>
       <form onSubmit={handleSubmit(handleUpdate)} className="m-3">
         <div>
@@ -112,6 +112,6 @@ export default function ModoPage(props: {
           Actualizar Modo
         </Button>
       </form>
-    </div>
+    </LayoutContainer>
   );
 }

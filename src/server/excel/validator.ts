@@ -238,6 +238,8 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
   return { finishedArray, errors };
 };
 
+const customEmailRegex = /^[\wñÑ._%+-]+@[a-zñÑ0-9.-]+\.[a-z]{2,}$/i;
+
 export const recDocumentValidator = z
   .object({
     "UNIDAD DE NEGOCIO": z
@@ -326,7 +328,12 @@ export const recDocumentValidator = z
     "NRO DOC FISCAL": allToString.nullable().optional(),
     LOCALIDAD: z.string().min(0).max(140).nullable().optional(),
     PARTIDO: z.string().min(0).max(140).nullable().optional(),
-    DIRECCION: z.string().min(0).max(140).nullable().optional(),
+    DIRECCION: z.union([z.string(), z.number()]).transform((value) => {
+      console.log("DIRECCION antes de transformar:", value);
+      const stringValue = value.toString();
+      console.log("DIRECCION después de transformar:", stringValue);
+      return stringValue;
+    }),
     PISO: numberAsString.optional().nullable(),
     DEPTO: numberAsString.nullable().optional(),
     CP: numberAsString.nullable().optional(),
@@ -334,7 +341,7 @@ export const recDocumentValidator = z
     CELULAR: numberAsString.nullable().optional(),
     EMAIL: z
       .string()
-      .email({ message: "Ingrese un email valido" })
+      // .regex(customEmailRegex, { message: "Correo electrónico no válido" })
       .nullable()
       .optional(),
     "ES AFILIADO": stringAsBoolean.nullable().optional(),
@@ -402,7 +409,7 @@ export const recDocumentValidator = z
       isPaymentResponsible: value["ES RESP PAGADOR"] ?? null,
       contribution: value["APORTE TOTAL"] ?? null,
       differential_code: value["DIFERENCIAL CODIGO"] ?? null,
-      differential_value: value["DIFERENCIAL VALOR"],
+      differential_value: value["DIFERENCIAL VALOR"] ?? "0",
       balance: value["SALDO CUENTA CORRIENTE"] ?? null,
       plan: value.PLAN ?? null,
       product: value["PRODUCTO (MEDIO DE PAGO)"] ?? null,
@@ -465,7 +472,7 @@ export const recHeaders: TableHeaders = [
 
 export const requiredColumns = [
   { key: "business_unit", label: "UNIDAD DE NEGOCIO" },
-  { key: "os", label: "OS" },
+  // { key: "os", label: "OS" },
   { key: "validity", label: "VIGENCIA" },
   { key: "mode", label: "MODO" },
   { key: "state", label: "ESTADO" },
@@ -486,7 +493,7 @@ export const requiredColumns = [
   { key: "district", label: "PARTIDO" },
   { key: "address", label: "DIRECCION" },
   { key: "postal code", label: "CP" },
-  { key: "cellphone", label: "CELULAR" },
+  // { key: "cellphone", label: "CELULAR" },
   { key: "email", label: "EMAIL" },
   { key: "plan", label: "PLAN" },
   { key: "product", label: "PRODUCTO" },

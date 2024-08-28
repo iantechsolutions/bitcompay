@@ -22,7 +22,12 @@ export default function Home() {
     window.location.href = link;
   };
 
-  if (isLoading) return <div>Cargando...</div>;
+  if (isLoading)
+    return (
+      <LayoutContainer>
+        <div>Cargando...</div>{" "}
+      </LayoutContainer>
+    );
   if (!grupos) return <div>no hay grupos familiares para mostrar</div>;
   const tableRecords: AffiliatesTableRecord[] = [];
   for (const grupo of grupos) {

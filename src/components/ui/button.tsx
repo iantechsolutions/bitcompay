@@ -20,7 +20,7 @@ const buttonVariants = cva(
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         bitcompay:
-          "h-7 bg-[#0DA485] hover:bg-[#0da486e2] text-[#FAFDFD] font-medium-medium text-xs rounded-2xl py-0 px-6",
+          "h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#FAFDFD] font-medium-medium text-xs rounded-2xl py-0 px-6",
       },
       size: {
         default: "h-9 px-4 py-2",

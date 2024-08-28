@@ -23,65 +23,66 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { asTRPCError } from "~/lib/errors";
 import { api } from "~/trpc/react";
+import AddElementButton from "~/components/add-element";
 
 export function AddHealthInsurances() {
-  const { mutateAsync: createProduct, isLoading } =
+  const { mutateAsync: createHealtinsurances, isLoading } =
     api.healthInsurances.create.useMutation();
   const { mutateAsync: startCC } =
     api.currentAccount.createInitial.useMutation();
   const { data: company } = api.companies.get.useQuery();
   const { data: cps } = api.postal_code.list.useQuery();
+
+  // State management for the form fields
   const [description, setDescription] = useState("");
-  const [IdNumber, setIdNumber] = useState("");
-  const [adress, setAdress] = useState("");
-  const [afip_status, setAfip_status] = useState("");
-  const [id_number, setId_number] = useState("");
-  const [id_type, setId_type] = useState("");
-  const [responsible_name, setResponsible_name] = useState("");
+  const [idNumber, setIdNumber] = useState("");
+  const [address, setAddress] = useState("");
+  const [afipStatus, setAfipStatus] = useState("monotributista");
+  const [fiscalIdNumber, setFiscalIdNumber] = useState("");
+  const [fiscalIdType, setFiscalIdType] = useState("CUIT");
+  const [responsibleName, setResponsibleName] = useState("");
   const [locality, setLocality] = useState("");
   const [province, setProvince] = useState("");
-  const [postal_code, setPostal_code] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+  const [initialValue, setInitialValue] = useState("0");
 
   const queryClient = useQueryClient();
-
   const [open, setOpen] = useState(false);
-
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
   async function handleCreate() {
     try {
       if (
         !description ||
-        !IdNumber ||
-        !afip_status ||
-        !id_number ||
-        !id_type ||
-        !responsible_name ||
+        !idNumber ||
+        !afipStatus ||
+        !fiscalIdNumber ||
+        !fiscalIdType ||
+        !responsibleName ||
         !company
       ) {
         setError("Todos los campos son obligatorios.");
         return;
       }
-      const healthInsurance = await createProduct({
+
+      // Creating a health insurance product
+      const healthInsurance = await createHealtinsurances({
         name: description,
-        identificationNumber: IdNumber,
+        identificationNumber: idNumber,
         isClient: true,
-        adress: adress,
-        afip_status: afip_status,
-        fiscal_id_number: id_number,
-        fiscal_id_type: id_type,
-        responsibleName: responsible_name,
+        adress: address,
+        afip_status: afipStatus,
+        fiscal_id_number: fiscalIdNumber,
+        fiscal_id_type: fiscalIdType,
+        responsibleName: responsibleName,
         locality: locality,
         province: province,
-        postal_code: postal_code,
+        postal_code: postalCode,
+        initialValue: initialValue,
       });
-      const currentCompany = await startCC({
-        healthInsurance: healthInsurance[0]?.id ?? "",
-        company_id: company?.id ?? "",
-      });
+
       toast.success("Obra social creada correctamente");
-      queryClient.invalidateQueries();
+      queryClient.invalidateQueries(["healthInsurances"]); // Specify the key to invalidate
 
       setOpen(false);
     } catch (e) {
@@ -92,13 +93,9 @@ export function AddHealthInsurances() {
 
   return (
     <>
-      <Button
-        onClick={() => setOpen(true)}
-        className="rounded-full text-[#3E3E3E] bg-[#C8FF6D] hover:bg-[#C8FF6D]"
-      >
-        <PlusCircleIcon className="mr-2" size={20} />
-        Agregar obra social como cliente
-      </Button>
+      <AddElementButton onClick={() => setOpen(true)}>
+        Agregar Obra social como cliente
+      </AddElementButton>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[800px]">
           <DialogHeader>
@@ -110,7 +107,7 @@ export function AddHealthInsurances() {
               <Input
                 id="IdNumber"
                 placeholder="..."
-                value={IdNumber}
+                value={idNumber}
                 onChange={(e) => setIdNumber(e.target.value)}
               />
             </div>
@@ -128,17 +125,13 @@ export function AddHealthInsurances() {
               <Input
                 id="facturationName"
                 placeholder="..."
-                value={responsible_name}
-                onChange={(e) => setResponsible_name(e.target.value)}
+                value={responsibleName}
+                onChange={(e) => setResponsibleName(e.target.value)}
               />
             </div>
             <div>
               <Label>Seleccione tipo de documento fiscal</Label>
-              <Select
-                onValueChange={setId_type}
-                defaultValue={id_type}
-                // disabled={isBillingResponsible}
-              >
+              <Select onValueChange={setFiscalIdType} value={fiscalIdType}>
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccione un tipo de ID" />
                 </SelectTrigger>
@@ -153,17 +146,17 @@ export function AddHealthInsurances() {
               <Input
                 id="idNumber"
                 placeholder="..."
-                value={id_number}
-                onChange={(e) => setId_number(e.target.value)}
+                value={fiscalIdNumber}
+                onChange={(e) => setFiscalIdNumber(e.target.value)}
               />
             </div>
             <div>
-              <Label htmlFor="adress">Direccion de facturacion</Label>
+              <Label htmlFor="address">Direccion de facturacion</Label>
               <Input
-                id="adress"
+                id="address"
                 placeholder="..."
-                value={adress}
-                onChange={(e) => setAdress(e.target.value)}
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
               />
             </div>
             <div>
@@ -186,16 +179,7 @@ export function AddHealthInsurances() {
             </div>
             <div>
               <Label htmlFor="postal_code">Codigo Postal</Label>
-              {/* <Input
-                id="postal_code"
-                placeholder="..."
-                value={postal_code}
-                onChange={(e) => setPostal_code(e.target.value)}
-              /> */}
-
-              <Select
-                onValueChange={(e) => setPostal_code(e)}
-                value={postal_code}>
+              <Select onValueChange={setPostalCode} value={postalCode}>
                 <SelectTrigger className="w-[180px] font-bold">
                   <SelectValue placeholder="Seleccionar CP" />
                 </SelectTrigger>
@@ -210,11 +194,7 @@ export function AddHealthInsurances() {
             </div>
             <div>
               <Label>Estado de AFIP</Label>
-              <Select
-                onValueChange={setAfip_status}
-                defaultValue={afip_status}
-                // disabled={isBillingResponsible}
-              >
+              <Select onValueChange={setAfipStatus} value={afipStatus}>
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccione un estado de AFIP" />
                 </SelectTrigger>
@@ -230,6 +210,15 @@ export function AddHealthInsurances() {
                 </SelectContent>
               </Select>
             </div>
+            <div>
+              <Label htmlFor="initialValue">Saldo inicial</Label>
+              <Input
+                id="initialValue"
+                placeholder="..."
+                value={initialValue}
+                onChange={(e) => setInitialValue(e.target.value)}
+              />
+            </div>
             <div className="flex items-center justify-center">
               {error && (
                 <span className="text-red-600 text-xs text-center">
@@ -240,10 +229,11 @@ export function AddHealthInsurances() {
           </div>
           <DialogFooter>
             <Button disabled={isLoading} onClick={handleCreate}>
-              {isLoading ?? (
+              {isLoading ? (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
+              ) : (
+                "Crear"
               )}
-              Crear
             </Button>
           </DialogFooter>
         </DialogContent>

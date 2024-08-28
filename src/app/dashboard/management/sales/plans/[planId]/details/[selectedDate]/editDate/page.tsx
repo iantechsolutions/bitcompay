@@ -4,7 +4,7 @@ import AddPlanPricesComponent from "../../../../add-planprices-component";
 import { api } from "~/trpc/react";
 import { GoBackArrow } from "~/components/goback-arrow";
 import { useRouter } from "next/navigation";
-
+import LayoutContainer from "~/components/layout-container";
 export default function AddPlanPage(props: {
   params: { planId: string; selectedDate: string };
 }) {
@@ -30,15 +30,16 @@ export default function AddPlanPage(props: {
     );
   }, [planData]);
   return (
-    <div>
-      <GoBackArrow />
-      <AddPlanPricesComponent
-        planId={props.params.planId}
-        initialPrices={priceList}
-        edit={true}
-        date={date}
-        onPricesChange={() => router.push("./")}
-      ></AddPlanPricesComponent>
-    </div>
+    <LayoutContainer>
+      <div>
+        <GoBackArrow />
+        <AddPlanPricesComponent
+          planId={props.params.planId}
+          initialPrices={priceList}
+          edit={true}
+          date={date}
+        ></AddPlanPricesComponent>
+      </div>
+    </LayoutContainer>
   );
 }

@@ -1,9 +1,9 @@
 "use client";
 
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
-import { ChevronDownIcon } from "@radix-ui/react-icons";
+import { CircleChevronDown } from "lucide-react";
 import * as React from "react";
-
+import { Card } from "../ui/card";
 import { cn } from "~/lib/utils";
 
 const Accordion = AccordionPrimitive.Root;
@@ -14,9 +14,11 @@ const AccordionItem = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AccordionPrimitive.Item
     ref={ref}
-    className={cn("border-b", className)}
+    className={cn("mb-5", className)}
     {...props}
-  />
+  >
+    <Card className="px-6 py-2">{props.children}</Card>
+  </AccordionPrimitive.Item>
 ));
 AccordionItem.displayName = "AccordionItem";
 
@@ -29,13 +31,16 @@ const AccordionTrigger = React.forwardRef<
       <AccordionPrimitive.Trigger
         ref={ref}
         className={cn(
-          "flex flex-1 items-center justify-between py-3 pb-[0.2rem] text-xl opacity-70 font-bold border-b-4 border-[#A7D3C7] transition-all [&[data-state=open]>svg]:rotate-180 ",
+          "flex flex-1 items-center justify-between py-3 text-lg  font-medium  transition-all [&[data-state=open]>svg]:rotate-180 ",
           className
         )}
         {...props}
       >
         {children}
-        <ChevronDownIcon className="h-5 w-5 shrink-0 text-[#67debf] transition-transform duration-200" />
+        <CircleChevronDown
+          className="h-5 w-7 shrink-0 transition-transform duration-200"
+          strokeWidth={1.3}
+        />
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
   );
@@ -51,7 +56,7 @@ const AccordionContent = React.forwardRef<
     className="overflow-hidden text-sm data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
     {...props}
   >
-    <div className={cn("pt-3 pb-3", className)}>{children}</div>
+    <div className={cn("pb-3 -mt-3 -ml-5", className)}>{children}</div>
   </AccordionPrimitive.Content>
 ));
 AccordionContent.displayName = AccordionPrimitive.Content.displayName;
