@@ -241,7 +241,6 @@ export default function AddPlanPricesComponent({
       const price = initialPrices?.[index];
       if (price?.id) {
         await deletePricePerCondition({ id: price?.id ?? "" });
-        toast.success("Precio eliminado de la base de datos.");
         remove(index);
       }
     } catch {

@@ -14,8 +14,9 @@ import { api } from "~/trpc/react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { asTRPCError } from "~/lib/errors";
-const router = useRouter();
+
 export default function DeleteButton(props: { id: string }) {
+  const router = useRouter();
   async function handleDelete() {
     try {
       await deletePlan({
@@ -37,28 +38,25 @@ export default function DeleteButton(props: { id: string }) {
       <Button
         variant="bitcompay"
         className="text-[#3e3e3e] bg-stone-100 hover:bg-stone-200"
-        onClick={()=>setOpenDelete(true)}
-      >
+        onClick={() => setOpenDelete(true)}>
         <Delete02Icon className="mr-2" /> Eliminar
       </Button>
       <Dialog open={openDelete} onOpenChange={setOpenDelete}>
-                <DialogContent className="sm:max-w-[425px]">
-                  <DialogHeader>
-                    <DialogTitle>
-                      Seguro que desea eliminar el plan?
-                    </DialogTitle>
-                  </DialogHeader>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Seguro que desea eliminar el plan?</DialogTitle>
+          </DialogHeader>
 
-                  <DialogFooter>
-                    <Button disabled={isLoading} onClick={handleDelete}>
-                      {isLoading && (
-                        <Loader2Icon className="mr-2 animate-spin" size={20} />
-                      )}
-                      Eliminar plan
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+          <DialogFooter>
+            <Button disabled={isLoading} onClick={handleDelete}>
+              {isLoading && (
+                <Loader2Icon className="mr-2 animate-spin" size={20} />
+              )}
+              Eliminar plan
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
