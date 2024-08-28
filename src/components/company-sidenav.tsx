@@ -209,7 +209,7 @@ export default function CompanySidenav() {
           alt="logo"
         />
       </div>
-      <Sidenav className="w-[20vw] bg-white px-[1vw]">
+      <Sidenav className="w-[20vw] bg-white px-[1vw] pl-[2vw]">
         <SidenavItem
           className="w-[11vw]  pl-[1vw] text-sideNav"
           href={`/dashboard/home`}
@@ -270,8 +270,8 @@ export default function CompanySidenav() {
                   <AccordionTrigger
                     className={
                       isActive("Ventas")
-                        ? "bg-[#BEF0BB]  py-[1vh] mb-[1.5vh]  hover:no-underline"
-                        : " py-[1vh] mb-[1.5vh]  hover:no-underline"
+                        ? "bg-[#BEF0BB]  py-[1vh] mb-[0vh]  hover:no-underline"
+                        : " py-[1vh] mb-[0vh]  hover:no-underline"
                     }
                   >
                     <SideNavTrigger
@@ -371,8 +371,8 @@ export default function CompanySidenav() {
                   <AccordionTrigger
                     className={
                       isActive("Clientes")
-                        ? "bg-[#BEF0BB]  py-[1vh] mb-[1.5vh]  hover:no-underline"
-                        : " py-[1vh] mb-[1.5vh]  hover:no-underline"
+                        ? "bg-[#BEF0BB]  py-[1vh] mb-[0vh]  hover:no-underline"
+                        : " py-[1vh] mb-[0vh]  hover:no-underline"
                     }
                   >
                     <SideNavTrigger
@@ -433,8 +433,8 @@ export default function CompanySidenav() {
                   <AccordionTrigger
                     className={
                       isActive("Proveedores")
-                        ? " bg-[#BEF0BB]  py-[1vh] mb-[1.5vh]  hover:no-underline"
-                        : " py-[1vh] hover:no-underline"
+                        ? " bg-[#BEF0BB]  py-[1vh] mb-[0vh]  hover:no-underline"
+                        : " py-[1vh] mb-[0vh] hover:no-underline"
                     }
                   >
                     <SideNavTrigger className="text-sideNav">
@@ -497,8 +497,8 @@ export default function CompanySidenav() {
                   <AccordionTrigger
                     className={
                       isActive("Documentos")
-                        ? " bg-[#BEF0BB]  py-[1vh] mb-[1.5vh]  hover:no-underline"
-                        : "   py-[1vh] mb-[1.5vh]  hover:no-underline"
+                        ? " bg-[#BEF0BB]  py-[1vh] mb-[0vh]  hover:no-underline"
+                        : "   py-[1vh] mb-[0vh]  hover:no-underline"
                     }
                   >
                     <SideNavTrigger

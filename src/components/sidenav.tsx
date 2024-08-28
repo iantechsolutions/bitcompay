@@ -16,7 +16,7 @@ export function SidenavSeparator(props: {
 }) {
   return (
     <li
-      className={`flex items-center px-[2vw] py-[1vh] mt-[1vh] mb-[1vh] font-thin text-[#838383] ${props.className}`}
+      className={`flex items-center px-[2vw] pl-[1.5vw] py-[1vh] mt-[1vh] mb-[1vh] font-thin text-[#838383] ${props.className}`}
     >
       {props.children}
     </li>
@@ -37,11 +37,11 @@ export function SidenavItem(props: {
   const activeColor = props.IsChild ? "bg-[#DEF5DD]" : "bg-[#BEF0BB]";
   const className = `flex w-fit 
    gap-[0.3vw] px-[1vw] py-[1vh] items-center rounded-full
-                    md:text-base lg:text-lg 
+                    md:text-base lg:text-lg w-full mr-[1vw]
                     ${isActive ? activeColor : ""} ${props.className}`;
   const content = (
     <>
-      <div className="items-center justify-center p-[0.5vh] w-fit ">
+      <div className="items-center justify-center p-[0.5vw] w-fit ">
         {isActive ? props.activeIcon : props.icon}
       </div>
       <p
@@ -82,9 +82,7 @@ export function SideNavTrigger(props: {
     <li
       className={`flex items-center text-left px-[1vw] py-[1vh] font-thin ${props.className}`}
     >
-      <div className="px-[0.5vw]">
-      {props.icon}
-        </div>
+      <div className="px-[0.5vw]">{props.icon}</div>
       {props.children}
     </li>
   );
