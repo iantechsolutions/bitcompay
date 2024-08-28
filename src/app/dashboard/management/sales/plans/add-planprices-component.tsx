@@ -553,7 +553,7 @@ export default function AddPlanPricesComponent({
               <h1 className="font-bold text-xl">Cargando...</h1>
             </div>
           )}
-          <Button type="submit" disabled={working}>
+          <Button type="submit" disabled={working || isButtonDisabled}>
             {" "}
             {working && (
               <Loader2Icon className="mr-2 animate-spin" size={20} />
