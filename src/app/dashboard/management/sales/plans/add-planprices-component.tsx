@@ -135,10 +135,10 @@ export default function AddPlanPricesComponent({
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     try {
-      for (const id of pricesToDelete) {
-        await deletePricePerCondition({ id });
-      }
-      console.log(pricesToDelete);
+      // for (const id of pricesToDelete) {
+      //   await deletePricePerCondition({ id });
+      // }
+      // console.log(pricesToDelete);
       setWorking(true);
 
       let allowed = true;
@@ -234,12 +234,14 @@ export default function AddPlanPricesComponent({
     try {
       const price = initialPrices?.[index];
       if (price?.id) {
-        setPricesToDelete((prevPrices) => [...prevPrices, price.id]);
+        // setPricesToDelete((prevPrices) => [...prevPrices, price.id]);
+
+        // console.log(price!.id);
+        await deletePricePerCondition({ id: price.id ?? "" });
         toast.success("Precio eliminado de la base de datos.");
         remove(index);
       }
-      console.log(price!.id);
-      console.log(pricesToDelete);
+      // console.log(pricesToDelete);
     } catch {
       toast.error("No se pudo eliminar el precio");
     }
