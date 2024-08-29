@@ -162,21 +162,6 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
               {saldo_a_pagar ? `$ ${saldo_a_pagar}` : "N/A"}
             </p>
           </div>
-          <div className="flex flex-auto justify-end">
-                <Button
-                    variant="bitcompay"
-                    className=" text-lg px-8 py-6 mt-5 gap-3 text-[#3e3e3e] rounded-full font-medium"
-                    onClick={() => {
-                      !comprobanteFCReciente?.billLink
-                        ? alert("El archivo no cargo todavia")
-                        : window.open(comprobanteFCReciente?.billLink);
-                      // : router.push(`${comprobante?.billLink}`);
-                    }}
-                  >
-                   <Download02Icon />
-                    Descargar Factura
-                  </Button>
-          </div>
         </div>
       </SheetContent>
     </Sheet>

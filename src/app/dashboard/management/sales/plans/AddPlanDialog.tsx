@@ -28,8 +28,7 @@ export default function AddPlanDialog(props: { planId?: string }) {
     <div>
       <Button
         onClick={() => setOpen(true)}
-        className=" bg-[#BEF0BB] hover:bg-[#BEF0BB]  rounded-full text-[#3E3E3E] hover:text-[#3E3E3E]"
-      >
+        className=" bg-[#BEF0BB] hover:bg-[#BEF0BB]  rounded-full text-[#3E3E3E] hover:text-[#3E3E3E]">
         {planId ? (
           <>
             <Pencil className="mr-2" size={20} strokeWidth={1} />
@@ -52,8 +51,7 @@ export default function AddPlanDialog(props: { planId?: string }) {
           <AddPlanInfoComponent
             planId={planId}
             onPlanIdChange={() => handleChange()}
-            closeDialog={() => handleChange()}
-          ></AddPlanInfoComponent>
+            closeDialog={() => handleChange()}></AddPlanInfoComponent>
         </DialogContent>
       </Dialog>
     </div>

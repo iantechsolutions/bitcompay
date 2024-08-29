@@ -136,87 +136,91 @@ export default function AddPlanPricesComponent({
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     try {
       setWorking(true);
-
-      let allowed = true;
-      const validity_date = new Date(anio ?? 0, (mes ?? 1) - 1, 1);
-      console.log("validity_date", validity_date);
-      for (let i = 0; i < data.prices.length; i++) {
-        console.log("entra for");
-        const { from_age: fromAge1, to_age: toAge1 } = data.prices[i] ?? {
-          from_age: 0,
-          to_age: 0,
-        };
-        if (fromAge1 !== null && toAge1 !== null) {
-          for (let j = i + 1; j < data.prices.length; j++) {
-            const { from_age: fromAge2, to_age: toAge2 } = data.prices[j] ?? {
-              from_age: 0,
-              to_age: 0,
-            };
-            console.log(fromAge1);
-            console.log(fromAge2);
-            console.log(toAge1);
-            console.log(toAge2);
-            if (fromAge2 !== null && toAge2 !== null) {
-              if (fromAge1 <= toAge2 && fromAge2 <= toAge1) {
-                toast.error("Las edades se superposicionan");
-                allowed = false;
+      if (!mes && !edit) {
+        toast.error("ingrese el mes correspondiente");
+        setWorking(false);
+      } else {
+        let allowed = true;
+        const validity_date = new Date(anio ?? 0, (mes ?? 1) - 1, 1);
+        console.log("validity_date", validity_date);
+        for (let i = 0; i < data.prices.length; i++) {
+          console.log("entra for");
+          const { from_age: fromAge1, to_age: toAge1 } = data.prices[i] ?? {
+            from_age: 0,
+            to_age: 0,
+          };
+          if (fromAge1 !== null && toAge1 !== null) {
+            for (let j = i + 1; j < data.prices.length; j++) {
+              const { from_age: fromAge2, to_age: toAge2 } = data.prices[j] ?? {
+                from_age: 0,
+                to_age: 0,
+              };
+              console.log(fromAge1);
+              console.log(fromAge2);
+              console.log(toAge1);
+              console.log(toAge2);
+              if (fromAge2 !== null && toAge2 !== null) {
+                if (fromAge1 <= toAge2 && fromAge2 <= toAge1) {
+                  toast.error("Las edades se superposicionan");
+                  allowed = false;
+                }
               }
             }
           }
         }
-      }
-      if (allowed) {
-        for (const item of data.prices) {
-          console.log(item.id);
-          if (edit && item.id !== "") {
-            // if (!pricesToDelete.includes(item.id)) {
-            if (item.isAmountByAge) {
-              await updatePricePerCondition({
-                id: item.id,
-                from_age: Number(item.from_age),
-                to_age: Number(item.to_age),
-                amount: Number(item.amount),
-                plan_id: planId ?? "",
-                isAmountByAge: true,
-                validy_date: dayjs.utc(validity_date).toDate(),
-              });
+        if (allowed) {
+          for (const item of data.prices) {
+            console.log(item.id);
+            if (edit && item.id !== "") {
+              // if (!pricesToDelete.includes(item.id)) {
+              if (item.isAmountByAge) {
+                await updatePricePerCondition({
+                  id: item.id,
+                  from_age: Number(item.from_age),
+                  to_age: Number(item.to_age),
+                  amount: Number(item.amount),
+                  plan_id: planId ?? "",
+                  isAmountByAge: true,
+                  validy_date: dayjs.utc(validity_date).toDate(),
+                });
+              } else {
+                await updatePricePerCondition({
+                  id: item.id,
+                  condition: item.condition ?? "",
+                  amount: Number(item.amount),
+                  plan_id: planId ?? "",
+                  isAmountByAge: false,
+                  validy_date: dayjs.utc(validity_date).toDate(),
+                });
+              }
             } else {
-              await updatePricePerCondition({
-                id: item.id,
-                condition: item.condition ?? "",
-                amount: Number(item.amount),
-                plan_id: planId ?? "",
-                isAmountByAge: false,
-                validy_date: dayjs.utc(validity_date).toDate(),
-              });
+              if (item.isAmountByAge) {
+                await createPricePerCondition({
+                  from_age: Number(item.from_age),
+                  to_age: Number(item.to_age),
+                  amount: Number(item.amount),
+                  plan_id: planId ?? "",
+                  isAmountByAge: true,
+                  validy_date: dayjs.utc(validity_date).toDate(),
+                });
+              } else {
+                await createPricePerCondition({
+                  condition: item.condition ?? "",
+                  amount: Number(item.amount),
+                  plan_id: planId ?? "",
+                  isAmountByAge: false,
+                  validy_date: dayjs.utc(validity_date).toDate(),
+                });
+              }
+              // }
             }
-          } else {
-            if (item.isAmountByAge) {
-              await createPricePerCondition({
-                from_age: Number(item.from_age),
-                to_age: Number(item.to_age),
-                amount: Number(item.amount),
-                plan_id: planId ?? "",
-                isAmountByAge: true,
-                validy_date: dayjs.utc(validity_date).toDate(),
-              });
-            } else {
-              await createPricePerCondition({
-                condition: item.condition ?? "",
-                amount: Number(item.amount),
-                plan_id: planId ?? "",
-                isAmountByAge: false,
-                validy_date: dayjs.utc(validity_date).toDate(),
-              });
-            }
-            // }
+          }
+          if (onPricesChange) {
+            onPricesChange();
           }
         }
-        if (onPricesChange) {
-          onPricesChange();
-        }
+        setWorking(false);
       }
-      setWorking(false);
     } catch (error) {
       console.error(error);
       setWorking(false);
@@ -236,8 +240,7 @@ export default function AddPlanPricesComponent({
     try {
       const price = initialPrices?.[index];
       if (price?.id) {
-        await deletePricePerCondition({ id: price.id ?? "" });
-        toast.success("Precio eliminado de la base de datos.");
+        await deletePricePerCondition({ id: price?.id ?? "" });
         remove(index);
       }
     } catch {
@@ -522,18 +525,21 @@ export default function AddPlanPricesComponent({
                     )}
                   />
                   {edit ? (
-                    isButtonDisabled ? (
-                      <Loader2Icon className="mr-2 animate-spin" size={20} />
-                    ) : (
-                      <Button
-                        disabled={isButtonDisabled}
-                        variant="ghost"
-                        type="button"
-                        className="relative top-3"
-                        onClick={() => handleDelete(index)}>
+                    <Button
+                      disabled={isButtonDisabled}
+                      variant="ghost"
+                      type="button"
+                      className="relative top-3"
+                      onClick={() => handleDelete(index)}>
+                      {isButtonDisabled ? (
+                        <Loader2Icon
+                          className="left-0 animate-spin"
+                          size={20}
+                        />
+                      ) : (
                         <CircleX className="text-red-500 left-0" size={20} />
-                      </Button>
-                    )
+                      )}
+                    </Button>
                   ) : (
                     <Button
                       variant="ghost"
