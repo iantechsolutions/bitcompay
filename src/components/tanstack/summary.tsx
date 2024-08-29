@@ -8,43 +8,43 @@ export default function DataTableSummary<TData>({
   table,
 }: DataTableSummaryProps<TData>) {
   const summary = {
-    "Saldo anterior": 0,
-    "Cuota Planes": 0,
-    Bonificación: 0,
-    Diferencial: 0,
-    Aportes: 0,
-    Interés: 0,
-    "Sub Total": 0,
+    "SALDO ANTERIOR": 0,
+    "CUOTA PLANES": 0,
+    BONIFICACIÓN: 0,
+    DIFERENCIAL: 0,
+    APORTES: 0,
+    INTERÉS: 0,
+    SUBTOTAL: 0,
     IVA: 0,
-    "Total a facturar": 0,
+    "TOTAL A FACTURAR": 0,
   };
 
   const filteredRows = table.getFilteredRowModel().rows;
   for (const row of filteredRows) {
-    summary["Saldo anterior"] += row.getValue("saldo anterior") as number;
-    summary["Cuota Planes"] += row.getValue("cuota plan") as number;
-    summary.Bonificación += row.getValue("bonificacion") as number;
-    summary.Diferencial += row.getValue("diferencial") as number;
-    summary.Aportes += row.getValue("Aporte") as number;
-    summary.Interés += row.getValue("interes") as number;
-    summary["Total a facturar"] += row.getValue("total") as number;
-    summary["Sub Total"] += row.getValue("subtotal") as number;
+    summary["SALDO ANTERIOR"] += row.getValue("saldo anterior") as number;
+    summary["CUOTA PLANES"] += row.getValue("cuota plan") as number;
+    summary.BONIFICACIÓN += row.getValue("bonificacion") as number;
+    summary.DIFERENCIAL += row.getValue("diferencial") as number;
+    summary.APORTES += row.getValue("Aporte") as number;
+    summary.INTERÉS += row.getValue("interes") as number;
+    summary["TOTAL A FACTURAR"] += row.getValue("total") as number;
+    summary.SUBTOTAL += row.getValue("subtotal") as number;
     summary.IVA += row.getValue("iva") as number;
   }
 
   return (
-    <div className="bg-[#EBFFFB] flex flex-row justify-stretch w-full pt-5 pb-1">
+    <div className="flex flex-row border h-20 border-[#f2f2f2] overflow-x-scroll rounded-lg justify-stretch w-full p-4 ">
       {Object.entries(summary).map(([key, value], index, array) => (
         <div
           className={`${
             index != array.length - 1
-              ? "border-r border-[#4af0d4] border-dashed grow"
+              ? "border-r border-[#f2f2f2] border-dashed px-4"
               : ""
           } px-2`}
           key={key}
         >
-          <p className="font-medium text-sm">{key}</p>
-          <p className="text-[#4af0d4] font-bold text-[0.8rem]">$ {value}</p>
+          <p className="font-medium whitespace-nowrap text-xs text-opacity-60 text-[#3e3e3e] uppercase">{(key)}</p>
+          <p className="text-[#85CE81] whitespace-nowrap font-bold text-xs">$ {value}</p>
         </div>
       ))}
     </div>
