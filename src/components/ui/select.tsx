@@ -7,6 +7,7 @@ import {
   ChevronUpIcon,
 } from "@radix-ui/react-icons";
 import * as SelectPrimitive from "@radix-ui/react-select";
+import { ChevronDown, ChevronUp, CircleChevronDown, CircleChevronUp } from "lucide-react";
 import * as React from "react";
 
 import { cn } from "~/lib/utils";
@@ -25,21 +26,32 @@ const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> &
     CustomSelectTriggerProps
->(({ className, children, rightIcon = null, ...props }, ref) => (
+>(({ className, children, rightIcon = null, ...props }, ref) =>  {
+  const [open, setOpen] = React.useState(false);
+  return (
+
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      "flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background [&>span]:line-clamp-1 disabled:cursor-not-allowed placeholder:text-muted-foreground disabled:opacity-50 focus:outline-none focus:ring-1 focus:ring-ring",
+      "flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md  bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background [&>span]:line-clamp-1 disabled:cursor-not-allowed placeholder:text-muted-foreground disabled:opacity-50 focus:outline-none ",
       className
     )}
+    onClick={() => setOpen(!open)}
     {...props}
   >
     {children}
     <SelectPrimitive.Icon asChild={true} className="ml-1">
-      {rightIcon ? rightIcon : <CaretSortIcon className="h-4 w-4 opacity-50" />}
+    {rightIcon ? (
+          rightIcon
+        ) : open ? (
+          <ChevronUp className="h-4 w-4 opacity-50" />
+        ) : (
+          <ChevronDown className="h-4 w-4 opacity-50" />
+        )}
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
-));
+)
+});
 SelectTrigger.displayName = SelectPrimitive.Trigger.displayName;
 
 const SelectScrollUpButton = React.forwardRef<
@@ -128,7 +140,7 @@ const SelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pr-8 pl-2 text-sm outline-none data-[disabled]:pointer-events-none focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50",
+      "relative flex w-full select-none items-center rounded-sm py-1.5 pr-8 pl-2 text-sm outline-none data-[disabled]:pointer-events-none focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50",
       className
     )}
     {...props}
