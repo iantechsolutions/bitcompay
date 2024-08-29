@@ -31,7 +31,9 @@ export default function DataTableSummary<TData>({
     summary["Sub Total"] += row.getValue("subtotal") as number;
     summary.IVA += row.getValue("iva") as number;
   }
-
+  Object.keys(summary).forEach((key) => {
+    summary[key as keyof typeof summary] = parseFloat(summary[key as keyof typeof summary].toFixed(2));
+  });
   return (
     <div className="bg-[#EBFFFB] flex flex-row justify-stretch w-full pt-5 pb-1">
       {Object.entries(summary).map(([key, value], index, array) => (

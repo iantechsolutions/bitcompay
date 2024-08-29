@@ -14,6 +14,7 @@ import ContentTable from "./content-table";
 import { RouterOutputs } from "~/trpc/shared";
 import { useState } from "react";
 import { api } from "~/trpc/react";
+import Download02Icon from "~/components/icons/download-02-stroke-rounded";
 type DetailSheetProps = {
   data: {
     comprobantes: RouterOutputs["comprobantes"]["getByLiquidation"];
@@ -65,24 +66,25 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
           </SheetTitle>
           <SheetDescription>
             <ul className="mt-2">
-              <li>
-                <span className="font-medium text-[1rem]"> Receptor </span>
-              </li>
-              <li className="font-medium-medium"> {data.nombre}</li>
-              <li className="">{data.cuit}</li>
+            <li className="text-xs"> RECEPTOR </li>
+              <li className="font-medium text-[#3e3e3e]"> {data.nombre}</li>
+              <br /> 
+              <li className="text-xs"> CUIL/CUIT </li>
+              <li className="font-medium text-[#3e3e3e]">{data.cuit}</li>
+              <br /> 
             </ul>
           </SheetDescription>
         </SheetHeader>
 
-        <div className="bg-[#b7f3e8] flex flex-row justify-between items-center px-1.5 py-2 rounded-md mt-3">
-          <p className=" text-sm font-semibold opacity-70">Saldo actual: </p>
-          <p className="text-[#9b9a9a] text-xs">
+        <div className="flex flex-row border justify-between items-center p-5 rounded-md mt-3">
+          <p className="text-lg font-medium-medium">Saldo actual </p>
+          <p className="text-[#6952EB] font-semibold text-xl">
             $ {data.currentAccountAmount}
           </p>
         </div>
 
-        <div className="mt-2">
-          {comprobanteNCReciente && (
+        <div className="mt-5">
+          {/* {comprobanteNCReciente && (
             <div className="mt-2">
               <div
                 className="flex flex-row justify-between items-center py-2 px-2 mb-3 rounded-md bg-[#c2bebe84] hover:bg-[#cbc7c7ce] transition-all hover:cursor-pointer"
@@ -148,15 +150,15 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
             <p className="text-lg font-semibold text-[#4af0d4]">
               {FCTotal ? `$ ${FCTotal}` : "N/A"}
             </p>
-          </div>
+          </div> */}
           {openFCAccordion && comprobanteFCReciente && (
             <ContentTable comprobante={comprobanteFCReciente} />
           )}
         </div>
         <div className="mt-3">
-          <div className="bg-[#b7f3e8] flex flex-row justify-between items-center px-1.5 py-2 rounded-md mt-2">
-            <p className=" text-sm font-semibold opacity-70">Saldo a pagar: </p>
-            <p className="text-[#9b9a9a] text-xs">
+        <div className="bg-[#DEF5DD] flex flex-row justify-between items-center p-3 rounded-md mt-2">
+            <p className=" text-[#4E9F1D] font-semibold opacity-60">Saldo a pagar: </p>
+            <p className="text-[#4E9F1D] font-semibold opacity-60">
               {saldo_a_pagar ? `$ ${saldo_a_pagar}` : "N/A"}
             </p>
           </div>

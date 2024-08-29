@@ -72,7 +72,6 @@ export default function AddPlanPricesComponent({
     defaultValues: { prices: initialPrices || [] },
   });
   function onPricesChange() {
-    const router = useRouter();
     router.push("./");
     router.refresh();
   }
@@ -108,6 +107,10 @@ export default function AddPlanPricesComponent({
     api.pricePerCondition.create.useMutation();
   const { mutateAsync: updatePricePerCondition } =
     api.pricePerCondition.change.useMutation();
+  const { mutateAsync: deletePricePerCondition } =
+    api.pricePerCondition.delete.useMutation();
+
+  const [pricesToDelete, setPricesToDelete] = useState<string[]>([]);
   // Add logging to check for re-renders
 
   useEffect(() => {
@@ -133,87 +136,117 @@ export default function AddPlanPricesComponent({
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     try {
       setWorking(true);
-
-      let allowed = true;
-      const validity_date = new Date(anio ?? 0, (mes ?? 1) - 1, 1);
-      console.log("validity_date", validity_date);
-      for (let i = 0; i < data.prices.length; i++) {
-        console.log("entra for");
-        const { from_age: fromAge1, to_age: toAge1 } = data.prices[i] ?? {
-          from_age: 0,
-          to_age: 0,
-        };
-        if (fromAge1 !== null && toAge1 !== null) {
-          for (let j = i + 1; j < data.prices.length; j++) {
-            const { from_age: fromAge2, to_age: toAge2 } = data.prices[j] ?? {
-              from_age: 0,
-              to_age: 0,
-            };
-            console.log(fromAge1);
-            console.log(fromAge2);
-            console.log(toAge1);
-            console.log(toAge2);
-            if (fromAge2 !== null && toAge2 !== null) {
-              if (fromAge1 <= toAge2 && fromAge2 <= toAge1) {
-                toast.error("Las edades se superposicionan");
-                allowed = false;
+      if (!mes && !edit) {
+        toast.error("ingrese el mes correspondiente");
+        setWorking(false);
+      } else {
+        let allowed = true;
+        const validity_date = new Date(anio ?? 0, (mes ?? 1) - 1, 1);
+        console.log("validity_date", validity_date);
+        for (let i = 0; i < data.prices.length; i++) {
+          console.log("entra for");
+          const { from_age: fromAge1, to_age: toAge1 } = data.prices[i] ?? {
+            from_age: 0,
+            to_age: 0,
+          };
+          if (fromAge1 !== null && toAge1 !== null) {
+            for (let j = i + 1; j < data.prices.length; j++) {
+              const { from_age: fromAge2, to_age: toAge2 } = data.prices[j] ?? {
+                from_age: 0,
+                to_age: 0,
+              };
+              console.log(fromAge1);
+              console.log(fromAge2);
+              console.log(toAge1);
+              console.log(toAge2);
+              if (fromAge2 !== null && toAge2 !== null) {
+                if (fromAge1 <= toAge2 && fromAge2 <= toAge1) {
+                  toast.error("Las edades se superposicionan");
+                  allowed = false;
+                }
               }
             }
           }
         }
-      }
-      if (allowed) {
-        for (const item of data.prices) {
-          if (edit && item.id !== "") {
-            if (item.isAmountByAge) {
-              await updatePricePerCondition({
-                id: item.id,
-                from_age: Number(item.from_age),
-                to_age: Number(item.to_age),
-                amount: Number(item.amount),
-                plan_id: planId ?? "",
-                isAmountByAge: true,
-                validy_date: dayjs.utc(validity_date).toDate(),
-              });
+        if (allowed) {
+          for (const item of data.prices) {
+            console.log(item.id);
+            if (edit && item.id !== "") {
+              // if (!pricesToDelete.includes(item.id)) {
+              if (item.isAmountByAge) {
+                await updatePricePerCondition({
+                  id: item.id,
+                  from_age: Number(item.from_age),
+                  to_age: Number(item.to_age),
+                  amount: Number(item.amount),
+                  plan_id: planId ?? "",
+                  isAmountByAge: true,
+                  validy_date: dayjs.utc(validity_date).toDate(),
+                });
+              } else {
+                await updatePricePerCondition({
+                  id: item.id,
+                  condition: item.condition ?? "",
+                  amount: Number(item.amount),
+                  plan_id: planId ?? "",
+                  isAmountByAge: false,
+                  validy_date: dayjs.utc(validity_date).toDate(),
+                });
+              }
             } else {
-              await updatePricePerCondition({
-                id: item.id,
-                condition: item.condition ?? "",
-                amount: Number(item.amount),
-                plan_id: planId ?? "",
-                isAmountByAge: false,
-                validy_date: dayjs.utc(validity_date).toDate(),
-              });
-            }
-          } else {
-            if (item.isAmountByAge) {
-              await createPricePerCondition({
-                from_age: Number(item.from_age),
-                to_age: Number(item.to_age),
-                amount: Number(item.amount),
-                plan_id: planId ?? "",
-                isAmountByAge: true,
-                validy_date: dayjs.utc(validity_date).toDate(),
-              });
-            } else {
-              await createPricePerCondition({
-                condition: item.condition ?? "",
-                amount: Number(item.amount),
-                plan_id: planId ?? "",
-                isAmountByAge: false,
-                validy_date: dayjs.utc(validity_date).toDate(),
-              });
+              if (item.isAmountByAge) {
+                await createPricePerCondition({
+                  from_age: Number(item.from_age),
+                  to_age: Number(item.to_age),
+                  amount: Number(item.amount),
+                  plan_id: planId ?? "",
+                  isAmountByAge: true,
+                  validy_date: dayjs.utc(validity_date).toDate(),
+                });
+              } else {
+                await createPricePerCondition({
+                  condition: item.condition ?? "",
+                  amount: Number(item.amount),
+                  plan_id: planId ?? "",
+                  isAmountByAge: false,
+                  validy_date: dayjs.utc(validity_date).toDate(),
+                });
+              }
+              // }
             }
           }
+          if (onPricesChange) {
+            onPricesChange();
+          }
         }
-        if (onPricesChange) {
-          onPricesChange();
-        }
+        setWorking(false);
       }
-      setWorking(false);
     } catch (error) {
       console.error(error);
       setWorking(false);
+    }
+  };
+  useEffect(() => {
+    console.log("pricesToDelete", pricesToDelete);
+  }, [pricesToDelete]);
+
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+
+  const handleDelete = async (index: number) => {
+    if (isButtonDisabled) {
+      return null;
+    }
+    setIsButtonDisabled(true);
+    try {
+      const price = initialPrices?.[index];
+      if (price?.id) {
+        await deletePricePerCondition({ id: price?.id ?? "" });
+        remove(index);
+      }
+    } catch {
+      toast.error("No se pudo eliminar el precio");
+    } finally {
+      setTimeout(() => setIsButtonDisabled(false), 2000);
     }
   };
 
@@ -222,8 +255,7 @@ export default function AddPlanPricesComponent({
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex-col items-center justify-center gap-2 space-y-8"
-        >
+          className="flex-col items-center justify-center gap-2 space-y-8">
           <div className="mb-1">
             <Button
               type="button"
@@ -240,8 +272,7 @@ export default function AddPlanPricesComponent({
                   plan_id: "",
                   amount: 0,
                 })
-              }
-            >
+              }>
               <PlusCircle className="mr-2" size={20} />
               Agregar Precio
             </Button>
@@ -254,8 +285,7 @@ export default function AddPlanPricesComponent({
               <Select
                 disabled={edit}
                 onValueChange={(e) => setMes(Number(e))}
-                value={mes?.toString()}
-              >
+                value={mes?.toString()}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccione un mes" />
@@ -264,74 +294,62 @@ export default function AddPlanPricesComponent({
                 <SelectContent className="max-h-[45vh]">
                   <SelectItem
                     value="1"
-                    disabled={new Date(anio ?? 0, 0, 1) <= currentVigency}
-                  >
+                    disabled={new Date(anio ?? 0, 0, 1) <= currentVigency}>
                     Enero
                   </SelectItem>
                   <SelectItem
                     value="2"
-                    disabled={new Date(anio ?? 0, 1, 1) <= currentVigency}
-                  >
+                    disabled={new Date(anio ?? 0, 1, 1) <= currentVigency}>
                     Febrero
                   </SelectItem>
                   <SelectItem
                     value="3"
-                    disabled={new Date(anio ?? 0, 2, 1) <= currentVigency}
-                  >
+                    disabled={new Date(anio ?? 0, 2, 1) <= currentVigency}>
                     Marzo
                   </SelectItem>
                   <SelectItem
                     value="4"
-                    disabled={new Date(anio ?? 0, 3, 1) <= currentVigency}
-                  >
+                    disabled={new Date(anio ?? 0, 3, 1) <= currentVigency}>
                     Abril
                   </SelectItem>
                   <SelectItem
                     value="5"
-                    disabled={new Date(anio ?? 0, 4, 1) <= currentVigency}
-                  >
+                    disabled={new Date(anio ?? 0, 4, 1) <= currentVigency}>
                     Mayo
                   </SelectItem>
                   <SelectItem
                     value="6"
-                    disabled={new Date(anio ?? 0, 5, 1) <= currentVigency}
-                  >
+                    disabled={new Date(anio ?? 0, 5, 1) <= currentVigency}>
                     Junio
                   </SelectItem>
                   <SelectItem
                     value="7"
-                    disabled={new Date(anio ?? 0, 6, 1) <= currentVigency}
-                  >
+                    disabled={new Date(anio ?? 0, 6, 1) <= currentVigency}>
                     Julio
                   </SelectItem>
                   <SelectItem
                     value="8"
-                    disabled={new Date(anio ?? 0, 7, 1) <= currentVigency}
-                  >
+                    disabled={new Date(anio ?? 0, 7, 1) <= currentVigency}>
                     Agosto
                   </SelectItem>
                   <SelectItem
                     value="9"
-                    disabled={new Date(anio ?? 0, 8, 1) <= currentVigency}
-                  >
+                    disabled={new Date(anio ?? 0, 8, 1) <= currentVigency}>
                     Septiembre
                   </SelectItem>
                   <SelectItem
                     value="10"
-                    disabled={new Date(anio ?? 0, 9, 1) <= currentVigency}
-                  >
+                    disabled={new Date(anio ?? 0, 9, 1) <= currentVigency}>
                     Octubre
                   </SelectItem>
                   <SelectItem
                     value="11"
-                    disabled={new Date(anio ?? 0, 10, 1) <= currentVigency}
-                  >
+                    disabled={new Date(anio ?? 0, 10, 1) <= currentVigency}>
                     Noviembre
                   </SelectItem>
                   <SelectItem
                     value="12"
-                    disabled={new Date(anio ?? 0, 11, 1) <= currentVigency}
-                  >
+                    disabled={new Date(anio ?? 0, 11, 1) <= currentVigency}>
                     Diciembre
                   </SelectItem>
                 </SelectContent>
@@ -366,8 +384,7 @@ export default function AddPlanPricesComponent({
                       <FormItem>
                         <FormLabel
                           htmlFor={`prices.${index}.isAmountByAge`}
-                          className="font-bold"
-                        >
+                          className="font-bold">
                           Tipo
                         </FormLabel>
                         <Select
@@ -388,8 +405,7 @@ export default function AddPlanPricesComponent({
                             form.getValues(`prices.${index}.isAmountByAge`)
                               ? "true"
                               : "false"
-                          }
-                        >
+                          }>
                           <FormControl>
                             <SelectTrigger className="w-[150px] font-bold">
                               <SelectValue placeholder="Seleccione una opción" />
@@ -398,14 +414,12 @@ export default function AddPlanPricesComponent({
                           <SelectContent>
                             <SelectItem
                               value="true"
-                              className="rounded-none border-b border-gray-600"
-                            >
+                              className="rounded-none border-b border-gray-600">
                               Rango de edad
                             </SelectItem>
                             <SelectItem
                               value="false"
-                              className="rounded-none border-b border-gray-600"
-                            >
+                              className="rounded-none border-b border-gray-600">
                               Parentesco
                             </SelectItem>
                           </SelectContent>
@@ -427,8 +441,7 @@ export default function AddPlanPricesComponent({
                           <FormControl>
                             <Select
                               onValueChange={field.onChange}
-                              value={field.value ?? ""}
-                            >
+                              value={field.value ?? ""}>
                               <SelectTrigger>
                                 <SelectValue placeholder="Seleccione una opción" />
                               </SelectTrigger>
@@ -436,8 +449,7 @@ export default function AddPlanPricesComponent({
                                 {relatives?.map((relative) => (
                                   <SelectItem
                                     key={relative.relation}
-                                    value={relative.relation ?? ""}
-                                  >
+                                    value={relative.relation ?? ""}>
                                     {relative.relation}
                                   </SelectItem>
                                 ))}
@@ -512,14 +524,32 @@ export default function AddPlanPricesComponent({
                       </FormItem>
                     )}
                   />
-                  <Button
-                    variant="ghost"
-                    type="button"
-                    className="relative top-3"
-                    onClick={() => remove(index)}
-                  >
-                    <CircleX className="text-red-500 left-0" size={20} />
-                  </Button>
+                  {edit ? (
+                    <Button
+                      disabled={isButtonDisabled}
+                      variant="ghost"
+                      type="button"
+                      className="relative top-3"
+                      onClick={() => handleDelete(index)}>
+                      {isButtonDisabled ? (
+                        <Loader2Icon
+                          className="left-0 animate-spin"
+                          size={20}
+                        />
+                      ) : (
+                        <CircleX className="text-red-500 left-0" size={20} />
+                      )}
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      type="button"
+                      className="relative top-3"
+                      onClick={() => remove(index)}>
+                      Borrar
+                      <CircleX className="text-red-500 left-0" size={20} />
+                    </Button>
+                  )}
                 </div>
               );
             })
@@ -529,7 +559,7 @@ export default function AddPlanPricesComponent({
               <h1 className="font-bold text-xl">Cargando...</h1>
             </div>
           )}
-          <Button type="submit" disabled={working}>
+          <Button type="submit" disabled={working || isButtonDisabled}>
             {" "}
             {working && (
               <Loader2Icon className="mr-2 animate-spin" size={20} />

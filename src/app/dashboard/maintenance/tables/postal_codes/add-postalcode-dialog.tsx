@@ -52,8 +52,8 @@ export function AddPostalCode() {
         zone: zone,
       });
 
-      toast.success("Código postal creado exitosamente");
       router.refresh();
+      toast.success("Código postal creado exitosamente");
       setOpen(false);
     } catch (e) {
       const error = asTRPCError(e)!;

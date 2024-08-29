@@ -204,8 +204,7 @@ export default async function Home(props: {
     });
     console.log("comprobantes", fg?.comprobantes);
   }
-
-  console.log("tableRows", tableRows);
+  console.log("summary", summary);
   return (
     <LayoutContainer>
       <div className="flex flex-row justify-between w-full">

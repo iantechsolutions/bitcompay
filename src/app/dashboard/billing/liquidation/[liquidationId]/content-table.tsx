@@ -3,6 +3,7 @@ import {
   Table,
   TableCell,
   TableHead,
+  TableHeader,
   TableRow,
 } from "~/components/ui/tablePreliq";
 
@@ -15,48 +16,54 @@ import {
 import { Router } from "next/router";
 import { RouterOutputs } from "~/trpc/shared";
 import { computeIva, computeBase, computeTotal } from "~/lib/utils";
+import { Separator } from "~/components/ui/separator";
 type propsContentTable = {
   comprobante: RouterOutputs["comprobantes"]["getByLiquidation"][number];
 };
 
 function ContentTable(props: propsContentTable) {
   const { comprobante } = props;
+
+
+
   return (
-    <Table>
-      <TableRow className="">
-        <TableHead className="  text-sm opacity-70  pl-0 border-b border-[#4af0d4] text-left">
+    <Table className="">
+      <TableHeader className="bg-[#F7F7F7] rounded-lg">
+        <TableHead className="pl-4 ">
           {" "}
           Concepto{" "}
         </TableHead>
-        <TableHead className="   text-sm opacity-70  border-b border-[#4af0d4] ">
+        <TableHead className=" ">
           {" "}
           Importe{" "}
         </TableHead>
-        <TableHead className="    text-sm opacity-70  border-b border-[#4af0d4]">
+        <TableHead className=" ">
           {" "}
           IVA
         </TableHead>
-        <TableHead className="   text-sm opacity-70  border-b border-[#4af0d4]">
+        <TableHead className="">
           TOTAL
         </TableHead>
-      </TableRow>{" "}
+      </TableHeader>{" "}
       {comprobante?.items
         .filter((item) => item.concept != "Total factura")
         .map((item) => (
-          <TableRow key={item.id}>
-            <TableCell className=" border-b border-[#4af0d4] py-[0.25rem]  text-[#737171] text-left italic opacity-70 ">
+          <>
+          <TableRow key={item.id} className="border-b last:border-none">
+            <TableCell className="pl-4 ">
               {item.concept}
             </TableCell>
-            <TableCell className=" border-b border-[#4af0d4] py-[0.25rem] text-[#737171] font-semibold opacity-70 ">
-              {item.amount}
+            <TableCell className=" ">
+              ${item.amount}
             </TableCell>
-            <TableCell className=" border-b border-[#4af0d4] py-[0.25rem] text-[#737171] font-semibold opacity-70">
-              {item.iva}
+            <TableCell className=" ">
+              ${item.iva}
             </TableCell>
-            <TableCell className=" border-b border-[#4af0d4] py-[0.25rem] text-[#737171] font-semibold opacity-70">
-              {item.total}
+            <TableCell className=" ">
+              ${item.total}
             </TableCell>
           </TableRow>
+          </>
         ))}
     </Table>
   );

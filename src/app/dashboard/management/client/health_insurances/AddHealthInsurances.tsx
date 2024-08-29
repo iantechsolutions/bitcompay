@@ -24,36 +24,53 @@ import { Label } from "~/components/ui/label";
 import { asTRPCError } from "~/lib/errors";
 import { api } from "~/trpc/react";
 import AddElementButton from "~/components/add-element";
+import { router } from "@trpc/server";
 
-export function AddHealthInsurances() {
+export function AddHealthInsurances(props: { OSId?: string }) {
+  const OSId = props?.OSId;
+
+  const { data: OS } = api.healthInsurances.get.useQuery({
+    healthInsuranceId: OSId ?? "",
+  });
   const { mutateAsync: createHealtinsurances, isLoading } =
     api.healthInsurances.create.useMutation();
+
+  const { mutateAsync: UploadhealthInsurances, isLoading: isPending } =
+    api.healthInsurances.change.useMutation();
   const { mutateAsync: startCC } =
     api.currentAccount.createInitial.useMutation();
   const { data: company } = api.companies.get.useQuery();
   const { data: cps } = api.postal_code.list.useQuery();
 
   // State management for the form fields
-  const [description, setDescription] = useState("");
-  const [idNumber, setIdNumber] = useState("");
-  const [address, setAddress] = useState("");
-  const [afipStatus, setAfipStatus] = useState("monotributista");
-  const [fiscalIdNumber, setFiscalIdNumber] = useState("");
-  const [fiscalIdType, setFiscalIdType] = useState("CUIT");
-  const [responsibleName, setResponsibleName] = useState("");
-  const [locality, setLocality] = useState("");
-  const [province, setProvince] = useState("");
-  const [postalCode, setPostalCode] = useState("");
+  const [name, setName] = useState(OS?.name ?? "");
+  const [idNumber, setIdNumber] = useState(OS?.identificationNumber ?? "");
+  const [address, setAddress] = useState(OS?.adress ?? "");
+  const [afipStatus, setAfipStatus] = useState(
+    OS?.afip_status ?? "monotributista"
+  );
+  const [fiscalIdNumber, setFiscalIdNumber] = useState(
+    OS?.fiscal_id_number ?? ""
+  );
+  const [fiscalIdType, setFiscalIdType] = useState(
+    OS?.fiscal_id_number ?? "CUIT"
+  );
+  const [responsibleName, setResponsibleName] = useState(
+    OS?.responsibleName ?? ""
+  );
+  const [locality, setLocality] = useState(OS?.locality ?? "");
+  const [province, setProvince] = useState(OS?.province ?? "");
+  const [postalCode, setPostalCode] = useState(OS?.postal_code ?? "");
   const [initialValue, setInitialValue] = useState("0");
 
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+  const router = useRouter();
   async function handleCreate() {
     try {
       if (
-        !description ||
+        !name ||
         !idNumber ||
         !afipStatus ||
         !fiscalIdNumber ||
@@ -61,13 +78,13 @@ export function AddHealthInsurances() {
         !responsibleName ||
         !company
       ) {
-        setError("Todos los campos son obligatorios.");
+        setError("Todos los campos son obligatoriOS?.");
         return;
       }
 
       // Creating a health insurance product
       const healthInsurance = await createHealtinsurances({
-        name: description,
+        name: name,
         identificationNumber: idNumber,
         isClient: true,
         adress: address,
@@ -82,7 +99,50 @@ export function AddHealthInsurances() {
       });
 
       toast.success("Obra social creada correctamente");
-      queryClient.invalidateQueries(["healthInsurances"]); // Specify the key to invalidate
+      router.refresh();
+      queryClient.invalidateQueries();
+
+      setOpen(false);
+    } catch (e) {
+      const error = asTRPCError(e)!;
+      toast.error(error.message);
+    }
+  }
+
+  async function handleEdit() {
+    try {
+      if (
+        !name ||
+        !idNumber ||
+        !afipStatus ||
+        !fiscalIdNumber ||
+        !fiscalIdType ||
+        !responsibleName ||
+        !company
+      ) {
+        setError("Todos los campos son obligatoriOS?.");
+        return;
+      }
+
+      // Creating a health insurance product
+      const healthInsurance = await UploadhealthInsurances({
+        healthInsuranceId: OSId ?? "",
+        name: name,
+        identificationNumber: idNumber,
+        adress: address,
+        afip_status: afipStatus,
+        fiscal_id_number: fiscalIdNumber,
+        fiscal_id_type: fiscalIdType,
+        responsibleName: responsibleName,
+        locality: locality,
+        province: province,
+        postal_code: postalCode,
+      });
+
+      toast.success("Datos actualizados");
+      router.refresh();
+
+      queryClient.invalidateQueries();
 
       setOpen(false);
     } catch (e) {
@@ -94,12 +154,17 @@ export function AddHealthInsurances() {
   return (
     <>
       <AddElementButton onClick={() => setOpen(true)}>
-        Agregar Obra social como cliente
+        {OSId ? <>Editar datos</> : <>Agregar Obra social como cliente</>}
       </AddElementButton>
+
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[800px]">
           <DialogHeader>
-            <DialogTitle>Agregar obra social</DialogTitle>
+            {OSId ? (
+              <DialogTitle>Editar obra social</DialogTitle>
+            ) : (
+              <DialogTitle>Agregar obra social</DialogTitle>
+            )}
           </DialogHeader>
           <div className="grid grid-cols-3 gap-5">
             <div>
@@ -112,12 +177,12 @@ export function AddHealthInsurances() {
               />
             </div>
             <div>
-              <Label htmlFor="description">Nombre</Label>
+              <Label htmlFor="name">Nombre</Label>
               <Input
-                id="description"
+                id="name"
                 placeholder="..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
               />
             </div>
             <div>
@@ -210,15 +275,17 @@ export function AddHealthInsurances() {
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label htmlFor="initialValue">Saldo inicial</Label>
-              <Input
-                id="initialValue"
-                placeholder="..."
-                value={initialValue}
-                onChange={(e) => setInitialValue(e.target.value)}
-              />
-            </div>
+            {OSId ? null : (
+              <div>
+                <Label htmlFor="initialValue">Saldo inicial</Label>
+                <Input
+                  id="initialValue"
+                  placeholder="..."
+                  value={initialValue}
+                  onChange={(e) => setInitialValue(e.target.value)}
+                />
+              </div>
+            )}
             <div className="flex items-center justify-center">
               {error && (
                 <span className="text-red-600 text-xs text-center">
@@ -228,13 +295,23 @@ export function AddHealthInsurances() {
             </div>
           </div>
           <DialogFooter>
-            <Button disabled={isLoading} onClick={handleCreate}>
-              {isLoading ? (
-                <Loader2Icon className="mr-2 animate-spin" size={20} />
-              ) : (
-                "Crear"
-              )}
-            </Button>
+            {OSId ? (
+              <Button disabled={isPending} onClick={handleEdit}>
+                {isPending ? (
+                  <Loader2Icon className="mr-2 animate-spin" size={20} />
+                ) : (
+                  "Actualizar"
+                )}
+              </Button>
+            ) : (
+              <Button disabled={isLoading} onClick={handleCreate}>
+                {isLoading ? (
+                  <Loader2Icon className="mr-2 animate-spin" size={20} />
+                ) : (
+                  "Crear"
+                )}
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -19,7 +19,7 @@ export default withUt({
     },
     extend: {
       fontSize: {
-        sideNav: "2.6vh",
+        sideNav: "2vh",
         startH2: "5.2vh",
         startH3: "3.5vh",
         startP: "md",
