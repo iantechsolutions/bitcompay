@@ -57,6 +57,18 @@ export default function Filters<TData, TValue>({
   };
   return (
     <div className="flex items-center p-0 bg-[#DEF5DD] rounded-full">
+      <Button
+        variant={"outline"}
+        className="rounded-full px-5 py-5 bg-[#c0f4bc] hover:bg-[#c0f4bc] h-7 text-black shadow-none hover:text-black "
+        color="#0DA485"
+        onClick={() => setShowFilters(!showFilters)}
+      >
+        <img
+          src="/public/tables/Frame-22.png"
+          className={`h-5 w-auto ${showFilters ? "mr-2" : ""}`}
+        />
+        {showFilters && "Filtros"}
+      </Button>
       <div
         className={`transition-all duration-700 ease-in-out overflow-hidden ${
           showFilters
@@ -127,18 +139,7 @@ export default function Filters<TData, TValue>({
           </form>
         </Form>
       </div>
-      <Button
-        variant={"outline"}
-        className="rounded-full px-5 py-5 bg-[#c0f4bc] hover:bg-[#c0f4bc] h-7 text-black hover:text-black "
-        color="#0DA485"
-        onClick={() => setShowFilters(!showFilters)}
-      >
-        <img
-          src="/public/tables/Frame-22.png"
-          className={`h-5 w-auto ${showFilters ? "mr-2" : ""}`}
-        />
-        {showFilters && "Filtros"}
-      </Button>
+      
     </div>
   );
 }
