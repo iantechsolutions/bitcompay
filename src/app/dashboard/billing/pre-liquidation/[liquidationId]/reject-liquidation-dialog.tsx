@@ -34,10 +34,10 @@ export default function RejectLiquidationDialog({
   return (
     <>
       <Button
-        className="  h-7 bg-[#D9D7D8] hover:bg-[#d9d7d8dc] text-[#4B4B4B]  text-xs rounded-2xl py-0 px-6"
+        className="h-7 bg-[#eb272753] hover:bg-[#eb272753] text-[#3e3e3e] font-medium text-base rounded-full py-5 px-6"
         onClick={() => setOpen(true)}>
+        <CircleX className="h-5 stroke-1 mr-2" />
         Anular
-        <CircleX className="h-4 w-auto ml-2" />
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[425px] p-4">

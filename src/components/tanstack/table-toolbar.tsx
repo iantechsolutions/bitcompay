@@ -1,9 +1,8 @@
 "use client";
+import React, { useRef } from "react";
 import { Table } from "@tanstack/react-table";
 import { Input } from "../ui/input";
-import { Search } from "lucide-react";
 import { Button } from "../ui/button";
-import { X } from "lucide-react";
 import Filters from "./filters";
 import { Column } from "@tanstack/react-table";
 
@@ -13,12 +12,27 @@ interface DataTableToolbarProps<TData, TValue> {
   columns?: Column<TData, TValue>[];
 }
 
+// Definimos el tipo de ref que vamos a usar con Filters
+interface FiltersRef {
+  clearFilters: () => void;
+}
+
 export default function TableToolbar<TData, TValue>({
   table,
   columns,
   searchColumn,
 }: DataTableToolbarProps<TData, TValue>) {
+  const filtersRef = useRef<FiltersRef>(null); // Ref para el componente Filters
+
   console.log(table.getState().columnFilters);
+
+  const handleClearFilters = () => {
+    if (filtersRef.current) {
+      filtersRef.current.clearFilters(); // Llamamos a la función clearFilters del componente Filters
+    }
+    table.resetColumnFilters(); // Reseteamos también los filtros de la tabla
+  };
+
   return (
     <div className="flex flex-row justify-between items-center w-full">
       <div className="w-full max-w-sm flex items-center place-content-center py-4 relative">
@@ -37,7 +51,7 @@ export default function TableToolbar<TData, TValue>({
                   ?.setFilterValue(event.target.value)
               }
               className="w-full h-7 p-5 rounded-full border-2 border-[#BEF0BB] focus-visible:ring-[#BEF0BB]"
-            ></Input>
+            />
             <div className="rounded-full h-6 w-6 place-content-center absolute right-5">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -58,12 +72,18 @@ export default function TableToolbar<TData, TValue>({
         )}
       </div>
       <div className="flex gap-1 items-center">
-        <Filters table={table} columns={columns} />
+        {/* Pasamos la prop onClearFilters al componente Filters */}
+        <Filters
+          ref={filtersRef} // Pasamos la referencia al componente Filters
+          table={table}
+          columns={columns}
+          onClearFilters={handleClearFilters}
+        />
         <div>
           {table.getState().columnFilters.length > 0 && (
             <Button
               variant="ghost"
-              onClick={() => table.resetColumnFilters()}
+              onClick={handleClearFilters} // Llamamos a handleClearFilters aquí
               className="h-8 px-2 lg:px-3 font-semibold text-[#bef0bb] hover:text-[#bef0bb] hover:bg-white"
             >
               Limpiar filtros

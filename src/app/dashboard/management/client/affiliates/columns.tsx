@@ -27,7 +27,7 @@ export const columns: ColumnDef<AffiliatesTableRecord>[] = [
   {
     accessorKey: "nroGF",
     header: () => (
-      <div className="text-center   text-medium">NRO GF</div>
+      <div className="text-center   whitespace-nowrap text-medium">N° GF</div>
     ),
     cell: ({ row }) => {
       return (
@@ -40,7 +40,7 @@ export const columns: ColumnDef<AffiliatesTableRecord>[] = [
   {
     accessorKey: "nombre",
     header: () => (
-      <div className="text-center   text-medium">Apellido, Nombre</div>
+      <div className="text-center whitespace-nowrap text-medium">Apellido, Nombre</div>
     ),
     cell: ({ row }) => {
       return (
@@ -53,7 +53,7 @@ export const columns: ColumnDef<AffiliatesTableRecord>[] = [
   {
     accessorKey: "cuil",
     header: () => (
-      <div className="text-center   text-medium">CUIL</div>
+      <div className="text-center whitespace-nowrap text-medium">CUIL</div>
     ),
     cell: ({ row }) => {
       return (
@@ -64,7 +64,7 @@ export const columns: ColumnDef<AffiliatesTableRecord>[] = [
   {
     accessorKey: "integrantes",
     header: () => (
-      <div className="text-center   text-medium">Integrantes</div>
+      <div className="text-center whitespace-nowrap text-medium">Integrantes</div>
     ),
     cell: ({ row }) => {
       return (
@@ -77,7 +77,7 @@ export const columns: ColumnDef<AffiliatesTableRecord>[] = [
   {
     accessorKey: "Estados GF",
     header: () => (
-      <div className="text-center   text-medium">Estado</div>
+      <div className="text-center whitespace-nowrap text-medium">Estado</div>
     ),
     cell: ({ row }) => {
       return (
@@ -93,7 +93,7 @@ export const columns: ColumnDef<AffiliatesTableRecord>[] = [
   {
     accessorKey: "fechaEstado",
     header: () => (
-      <div className="text-center   text-medium">Fecha Estado</div>
+      <div className="text-center whitespace-nowrap text-medium">Fecha Estado</div>
     ),
     cell: ({ row }) => {
       return (

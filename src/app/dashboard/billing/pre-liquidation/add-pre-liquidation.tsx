@@ -4,7 +4,7 @@ import "dayjs/locale/es";
 import { Input } from "~/components/ui/input";
 import utc from "dayjs/plugin/utc";
 import { useState } from "react";
-import { PlusCircleIcon, Loader2Icon, Loader2, Plus } from "lucide-react";
+import { PlusCircleIcon, Loader2Icon, Loader2, Plus, CirclePlus } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { toast } from "sonner";
 import {
@@ -73,16 +73,16 @@ export default function AddPreLiquidation() {
         toast.error(liquidation.error);
       } else if (liquidation) {
         queryClient.invalidateQueries();
-        toast.success("Pre-liquidacion creada correctamente");
+        toast.success("Pre-Liquidación creada correctamente");
         setOpen(false);
       } else {
-        toast.error("Error al crear la pre-liquidacion");
+        toast.error("Error al crear la Pre-Liquidación");
       }
     }
     if (!mes) {
       toast.error("Seleccione un mes");
     } else if (!anio || anio < new Date().getFullYear()) {
-      toast.error("El año seleccionado no es valido");
+      toast.error("El año seleccionado no es válido");
     }
     //TODO CORREGIR ESTO
     // await new Promise((resolve) => setTimeout(resolve, 500));
@@ -106,19 +106,20 @@ export default function AddPreLiquidation() {
         <PlusCircleIcon className="mr-2" /> Crear Pre liquidacion
       </Button> */}
       <AddElementButton onClick={() => setOpen(true)}>
-        Agregar Pre liquidación
+        Agregar Pre-Liquidación
       </AddElementButton>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Crear Pre liquidacion</DialogTitle>
+            <DialogTitle>Crear Pre-Liquidación</DialogTitle>
           </DialogHeader>
-          <div className="w-full">
-            <Label>Marca</Label>
+          <div className="w-flex flex-auto text-gray-500 m-3 pr-2 ">
+            <Label className="text-xs">MARCA</Label>
             <Select onValueChange={handleBrandChange}>
-              <SelectTrigger className="w-full font-bold">
-                <SelectValue placeholder="Seleccione una marca" />
+              <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right">
+                <SelectValue placeholder="Seleccione una marca"/>
               </SelectTrigger>
               <SelectContent>
                 {marcas &&
@@ -126,7 +127,7 @@ export default function AddPreLiquidation() {
                     <SelectItem
                       key={marca?.id}
                       value={marca?.id}
-                      className="rounded-none border-b border-gray-600"
+                      className="rounded-none hover:focus:bg-green-300"
                     >
                       {marca?.name}
                     </SelectItem>
@@ -134,20 +135,20 @@ export default function AddPreLiquidation() {
               </SelectContent>
             </Select>
           </div>
-          <div className="w-full flex flex-row gap-2">
-            <div className="w-1/2">
-              <Label>1er Fecha de vencimiento</Label>
+          <div className="w-full flex flex-row gap-2 text-gray-500" >
+            <div className="w-1/2 m-3 mr-3">
+              <Label className="text-xs">1° FECHA DE VENCIMIENTO</Label>
               <br />
               <Popover open={popover1Open} onOpenChange={setPopover1Open}>
                 <PopoverTrigger asChild>
                   <Button
-                    variant={"outline"}
+                    variant={"form"}
                     className={cn(
-                      "w-full border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
+                      "w-full border-b-2 border-green-200 pl-3 text-left font-normal hover:bg-none hover:bg-transparent shadow-none",
                       !fechaVencimiento1 && "text-muted-foreground"
                     )}
                   >
-                    <p className="overflow-hidden text-ellipsis whitespace-nowrap">
+                    <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[#3E3E3E]">
                       {fechaVencimiento1 ? (
                         dayjs(fechaVencimiento1).format("D [de] MMMM [de] YYYY")
                       ) : (
@@ -172,19 +173,19 @@ export default function AddPreLiquidation() {
                 </PopoverContent>
               </Popover>
             </div>
-            <div className="w-1/2">
-              <Label>2da Fecha de vencimiento</Label>
+            <div className="w-1/2 text-gray-500 m-3 ml-3 ">
+              <Label className="text-xs">2° FECHA DE VENCIMIENTO</Label>
               <br />
               <Popover open={popover2Open} onOpenChange={setPopover2Open}>
                 <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
+                <Button
+                    variant={"form"}
                     className={cn(
-                      "w-full border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
+                      "w-full border-b-2 border-green-200 pl-3 text-left font-normal hover:bg-none hover:bg-transparent",
                       !fechaVencimiento2 && "text-muted-foreground"
                     )}
                   >
-                    <p className="overflow-hidden text-ellipsis whitespace-nowrap">
+                    <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[#3E3E3E]">
                       {fechaVencimiento2 ? (
                         dayjs(fechaVencimiento2).format("D [de] MMMM [de] YYYY")
                       ) : (
@@ -212,7 +213,7 @@ export default function AddPreLiquidation() {
             <Popover>
               <PopoverTrigger asChild>
                 <Button
-                  variant={"outline"}
+                  variant={"form"}
                   className={cn(
                     "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
                     !fechaDesde && "text-muted-foreground"
@@ -244,7 +245,7 @@ export default function AddPreLiquidation() {
             <Popover>
               <PopoverTrigger asChild>
                 <Button
-                  variant={"outline"}
+                  variant={"form"}
                   className={cn(
                     "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
                     !fechaHasta && "text-muted-foreground"
@@ -270,18 +271,18 @@ export default function AddPreLiquidation() {
               </PopoverContent>
             </Popover>
           </div> */}
-          <div className="w-full flex flex-row  gap-2 ">
-            <div className="w-1/2">
-              <Label htmlFor="validy_date">Mes de vigencia</Label>
+          <div className="w-full flex flex-row gap-2 text-gray-500">
+            <div className="w-1/2 m-3 mr-3">
+              <Label htmlFor="validy_date" className="text-xs">MES DE VIGENCIA</Label>
               <Select
                 onValueChange={(e) => setMes(Number(e))}
                 defaultValue={mes?.toString()}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none focus-visible:ring-green-400">
                   <SelectValue placeholder="Seleccione un mes" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem
+                <SelectItem
                     value="1"
                     disabled={new Date(anio, 1, 1) < new Date()}
                   >
@@ -356,10 +357,10 @@ export default function AddPreLiquidation() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="w-1/2">
-              <Label>Año de Vigencia</Label>
+            <div className="w-1/2 m-3 ml-3">
+              <Label className="text-xs">AÑO DE VIGENCIA</Label>
               <Input
-                className="border-green-300 focus-visible:ring-green-400 w-full"
+                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 type="number"
                 min={new Date().getFullYear()}
                 value={anio}
@@ -367,13 +368,14 @@ export default function AddPreLiquidation() {
               />
             </div>
           </div>
-          <div className="w-full flex flex-row  gap-2">
-            <div className="w-1/2">
-              <Label htmlFor="name">Punto de venta a utilizar</Label>
+          <div className="w-full flex flex-row  gap-2 text-gray-500">
+            <div className="m-3 ml-2 mr-3 mb-3">
+              <Label htmlFor="name" className="text-xs">PUNTO DE VENTA A UTILIZAR</Label>
               <br />
               <ComboboxDemo
                 title="Seleccionar PV..."
-                classNameButton="w-full"
+                classNameButton="w-full gap-10 p-4 border-green-300 border-0 border-b text-[#3E3E3E] justify-self-right whitespace-nowrap
+              hover:none"
                 placeholder="_"
                 options={[
                   { value: "1", label: "1" },
@@ -384,10 +386,10 @@ export default function AddPreLiquidation() {
                 }}
               />
             </div>
-            <div className="w-1/2">
-              <label htmlFor="interest"> Interes (%) </label>
+            <div className="w-2/4 text-gray-500 m-3 ml-3 pr-">
+              <Label htmlFor="interest" className="text-xs"> INTERÉS (%) </Label>
               <Input
-                className="border-green-300 focus-visible:ring-green-400 w-full"
+                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 type="number"
                 value={interest ?? 0}
                 onChange={(e) => {
@@ -400,15 +402,15 @@ export default function AddPreLiquidation() {
           </div>
           <Button
             type="submit"
-            className="mt-2 bg-[#0DA485] hover:bg-[#0DA485]  flex items-center"
+            className="m-5 mb-2 rounded-full w-fit justify-self-center bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#DEF5DD]"
             disabled={isLoading}
             onClick={handleCreate}
           >
             {isLoading && (
               <Loader2Icon className="mr-2 animate-spin" size={20} />
             )}
-            <Plus className="mr-2" />
-            Crear Pre-liquidacion
+            <CirclePlus className="mr-2" />
+            Crear Pre-Liquidación
           </Button>
         </DialogContent>
       </Dialog>

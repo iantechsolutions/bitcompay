@@ -85,7 +85,7 @@ export default function EstablishmentPage({
       <section className="space-y-2">
         <div className="flex justify-between">
           <Title>Editar Establecimiento</Title>
-          <Button>
+          <Button disabled={isLoading} onClick={handleUpdate}>
             <CheckIcon className="mr-2" />
             Aplicar
           </Button>
@@ -114,8 +114,7 @@ export default function EstablishmentPage({
                     <Label htmlFor="flag">Bandera</Label>
                     <Select
                       defaultValue={flag}
-                      onValueChange={(value) => setFlag(value)}
-                    >
+                      onValueChange={(value) => setFlag(value)}>
                       <SelectTrigger>
                         <SelectValue>{flag}</SelectValue>
                       </SelectTrigger>
@@ -169,9 +168,7 @@ function DeleteEstablishment(props: { establishmentId: string }) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild={true}>
-        <Button variant="destructive" className="w-[160px]">
-          Eliminar Establecimiento
-        </Button>
+        <Button variant="destructive">Eliminar Establecimiento</Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
@@ -184,13 +181,12 @@ function DeleteEstablishment(props: { establishmentId: string }) {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction
+          <Button
             className="bg-red-500 active:bg-red-700 hover:bg-red-600"
             onClick={handleDelete}
-            disabled={isLoading}
-          >
+            disabled={isLoading}>
             Eliminar
-          </AlertDialogAction>
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

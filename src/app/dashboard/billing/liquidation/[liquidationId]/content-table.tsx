@@ -23,7 +23,6 @@ type propsContentTable = {
 
 function ContentTable(props: propsContentTable) {
   const { comprobante } = props;
-
   return (
     <Table className="">
       <TableHeader className="bg-[#F7F7F7] rounded-lg">

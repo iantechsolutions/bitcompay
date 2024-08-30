@@ -100,13 +100,14 @@ export function DataTable<TData, TValue>({
         columns={filteredColumns}
       />
 
-      <div className="rounded-md border">
+      <div className="rounded-md ">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow
-                className="bg-[#F7F7F7] hover:bg-[#F7F7F7] first:rounded-tl-2xl last:rounded-tr-2xl "
-                key={headerGroup.id}>
+                className="bg-[#f6f6f6] hover:bg-[#f6f6f6] p-4"
+                key={headerGroup.id}
+              >
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead key={header.id} className="">
@@ -129,7 +130,8 @@ export function DataTable<TData, TValue>({
                   <TableRow
                     key={row.id}
                     onClick={() => handleRowClick(row)}
-                    className="border-b-2 border-gray-200 border-x-0 hover:bg-[#d7d3d395] hover:cursor-pointer">
+                    className="border-b-2 border-[#f6f6f6] hover:bg-[#f6f6f6] hover:cursor-pointer"
+                  >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
                         {flexRender(
@@ -152,7 +154,8 @@ export function DataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center">
+                  className="h-24 text-center"
+                >
                   No results.
                 </TableCell>
               </TableRow>

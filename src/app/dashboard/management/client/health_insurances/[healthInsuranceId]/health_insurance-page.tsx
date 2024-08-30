@@ -12,6 +12,13 @@ import { api } from "~/trpc/react";
 import { toast } from "sonner";
 import { type RouterOutputs } from "~/trpc/shared";
 import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "~/components/ui/dialog";
+import {
   ArrowLeftIcon,
   ChevronDown,
   CircleChevronDown,
@@ -40,6 +47,7 @@ import {
 } from "~/components/ui/accordion";
 import { SaldoPopover } from "./saldoPopover";
 import { Separator } from "~/components/ui/separator";
+import { AddHealthInsurances } from "../AddHealthInsurances";
 dayjs.extend(utc);
 dayjs.locale("es");
 
@@ -72,7 +80,7 @@ export default function HealthInsurancePage(props: {
   const { mutateAsync: updateHealthInsurance, isLoading } =
     api.healthInsurances.change.useMutation();
 
-  const { mutateAsync: deleteHealthInsurance } =
+  const { mutateAsync: deleteHealthInsurance, isLoading: isDeleting } =
     api.healthInsurances.delete.useMutation();
 
   async function handleUpdate() {
@@ -90,6 +98,7 @@ export default function HealthInsurancePage(props: {
       toast.error(error.message);
     }
   }
+  const [openDelete, setOpenDelete] = useState<boolean>(false);
 
   async function handleDelete() {
     try {
@@ -151,10 +160,19 @@ export default function HealthInsurancePage(props: {
       </Link>
       <LayoutContainer>
         <section className="space-y-2">
-          <div>
+          <div className="flex w-full justify-between">
             <h2 className="text-lg font-monserrat font-semibold mt-2">
               Obra Social
             </h2>
+            <div>
+              <AddHealthInsurances OSId={props.healthInsuranceId} />
+              <Button
+                variant={"destructive"}
+                className="ml-10"
+                onClick={() => setOpenDelete(true)}>
+                Eliminar
+              </Button>
+            </div>
           </div>
           <div className="border rounded-lg border-gray-200 mt-2 p-4 w-1/2">
             <div className="flex flex-row justify-between items-center">
@@ -257,6 +275,23 @@ export default function HealthInsurancePage(props: {
               </div>
             )}
           </div>
+          <Dialog open={openDelete} onOpenChange={setOpenDelete}>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Seguro que desea la obra social?</DialogTitle>
+              </DialogHeader>
+
+              <DialogFooter>
+                <Button onClick={() => setOpenDelete(false)}>Cancelar</Button>
+                <Button disabled={isDeleting} onClick={handleDelete}>
+                  {isDeleting && (
+                    <Loader2Icon className="mr-2 animate-spin" size={20} />
+                  )}
+                  Eliminar obra social
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </section>
       </LayoutContainer>
     </div>
