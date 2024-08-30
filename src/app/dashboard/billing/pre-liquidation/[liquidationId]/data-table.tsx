@@ -105,11 +105,11 @@ export function DataTable<TData, TValue>({
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow
-                className="bg-[#F7F7F7] hover:bg-[#F7F7F7] rounded-lg "
+                className="bg-[#F7F7F7] hover:bg-[#F7F7F7] first:rounded-tl-2xl last:rounded-tr-2xl "
                 key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead key={header.id} className="">
                       {header.isPlaceholder
                         ? null
                         : flexRender(
