@@ -44,7 +44,7 @@ export default function AddPlanDialog(props: { planId?: string }) {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="ml-2">
               {planId ? "Actualizar plan" : "Crear un plan"}
             </DialogTitle>
           </DialogHeader>

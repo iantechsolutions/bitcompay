@@ -28,7 +28,7 @@ type DetailSheetProps = {
 
 type Comprobante = RouterOutputs["comprobantes"]["getByLiquidation"][number];
 export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
-  const [openFCAccordion, setOpenFCAccordion] = useState(false);
+  const [openFCAccordion, setOpenFCAccordion] = useState(true); // Qué es esto??
   const [openNCAccordion, setOpenNCAccordion] = useState(false);
   let comprobanteNCReciente = data.comprobantes.find(
     (comprobante) => comprobante.origin === "Nota de credito"

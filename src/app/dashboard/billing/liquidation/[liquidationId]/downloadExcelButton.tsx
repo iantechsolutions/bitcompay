@@ -7,6 +7,7 @@ import { computeBase, computeIva } from "~/lib/utils";
 import { formatDate } from "~/lib/utils";
 import { RouterOutputs } from "~/trpc/shared";
 import { api } from "~/trpc/react";
+import Download02Icon from "~/components/icons/download-02-stroke-rounded";
 type DownloadExcelButtonProps = {
   rows: (string | number | null | undefined)[][];
   period: Date | null | undefined;
@@ -30,16 +31,18 @@ export default function DownloadExcelButton({
     saveAs(blob, `pre-liquidación - ${formatDate(period!)}.xlsx`);
   }
   return (
+    <div className="flex flex-auto justify-end">
     <Button
-      className="mt-4 px-6 py-0 bg-[#0DA485] hover:bg-[#0da486e2] 
-       rounded-2xl  h-7  text-xs absolute right-0"
+      variant="bitcompay"
+      className=" text-base px-16 py-6 mt-5 gap-3 text-[#3e3e3e] rounded-full font-medium"
       onClick={async () => {
         alert("Descargando Excel Pre liquidación");
         await handleGenerate(rows);
       }}
     >
-      <ExternalLink className="mr-1 h-4 w-auto" />
+      <Download02Icon />
       Exportar
     </Button>
+    </div>
   );
 }

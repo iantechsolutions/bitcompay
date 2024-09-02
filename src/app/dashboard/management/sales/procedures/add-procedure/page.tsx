@@ -166,15 +166,15 @@ export default function Page() {
           <ArrowLeftIcon /> Volver
         </Link>
         <div className="flex justify-between">
-          <Title>Agregar un tramites</Title>
+          <Title>Agregar un trámite</Title>
         </div>
 
         <Tabs>
           <TabsList>
-            <TabsTrigger value="general_info">Informacion General</TabsTrigger>
+            <TabsTrigger value="general_info">Información General</TabsTrigger>
             <TabsTrigger value="members">Integrantes</TabsTrigger>
             <TabsTrigger value="billing">
-              Informacion de Facturacion
+              Información de Facturación
             </TabsTrigger>
           </TabsList>
           <TabsContent value="general_info">
@@ -199,7 +199,7 @@ export default function Page() {
           </TabsContent>
         </Tabs>
         <section className="flex justify-between">
-          <Button onClick={() => handleload("pre cargado")}>Pre carga </Button>
+          <Button onClick={() => handleload("pre cargado")}>Pre-carga </Button>
           <Button onClick={() => handleload("cargado")}>Cargar</Button>
         </section>
       </section>
