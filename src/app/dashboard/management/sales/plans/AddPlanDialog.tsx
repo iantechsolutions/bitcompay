@@ -48,7 +48,7 @@ export default function AddPlanDialog(props: { planId?: string }) {
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="ml-2">
               {planId ? "Actualizar plan" : "Crear un plan"}
             </DialogTitle>
           </DialogHeader>

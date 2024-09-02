@@ -1,5 +1,6 @@
 "use client";
 import { Table } from "@tanstack/react-table";
+import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 interface DataTableSummaryProps<TData> {
   table: Table<TData>;
 }
@@ -35,12 +36,13 @@ export default function DataTableSummary<TData>({
     summary[key as keyof typeof summary] = parseFloat(summary[key as keyof typeof summary].toFixed(2));
   });
   return (
-    <div className="flex flex-row border h-20 border-[#f2f2f2] overflow-x-scroll rounded-lg justify-stretch w-full p-4 ">
-      {Object.entries(summary).map(([key, value], index, array) => (
+    <ScrollArea className="border h-20 p-0 border-[#f0f0f0] rounded-lg">
+      <div className="flex flex-auto flex-row justify-center pt-5 px-2 pb-0 h-full">
+       {Object.entries(summary).map(([key, value], index, array) => (
         <div
           className={`${
             index != array.length - 1
-              ? "border-r border-[#f2f2f2] border-dashed px-4"
+              ? "flex flex-auto flex-col border-r border-[#f0f0f0] border-dashed px-6 last:pr-0 "
               : ""
           } px-2`}
           key={key}
@@ -49,6 +51,8 @@ export default function DataTableSummary<TData>({
           <p className="text-[#85CE81] whitespace-nowrap font-bold text-xs">$ {value}</p>
         </div>
       ))}
-    </div>
+      </div>
+    <ScrollBar orientation="horizontal" />
+    </ScrollArea>
   );
 }

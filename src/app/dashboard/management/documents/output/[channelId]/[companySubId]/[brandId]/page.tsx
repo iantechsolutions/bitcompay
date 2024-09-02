@@ -4,6 +4,7 @@ import { getBrandAndChannel } from "~/server/api/routers/iofiles-routers";
 import { db, schema } from "~/server/db";
 import { api } from "~/trpc/server";
 import GenerateChannelOutputPage from "./generate-channel-output";
+import LayoutContainer from "~/components/layout-container";
 export default async function page({
   params,
 }: {
@@ -75,7 +76,7 @@ export default async function page({
   }
 
   return (
-    <>
+    <LayoutContainer>
       {channel ? (
         <GenerateChannelOutputPage
           channel={channel}
@@ -87,6 +88,6 @@ export default async function page({
       ) : (
         <Title>Channel not found</Title>
       )}
-    </>
+    </LayoutContainer>
   );
 }

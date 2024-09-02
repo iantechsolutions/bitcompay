@@ -46,10 +46,10 @@ import { Input } from "~/components/ui/input";
 import AddPlanDialog from "../AddPlanDialog";
 import { asTRPCError } from "~/lib/errors";
 import { toast } from "sonner";
+import CreditCardPosIcon from "~/components/icons/credit-card-pos-stroke-rounded";
 import ViewIcon from "~/components/icons/view-stroke-rounded";
 import Delete02Icon from "~/components/icons/delete-02-stroke-rounded";
 import Edit02Icon from "~/components/icons/edit-02-stroke-rounded";
-import CreditCardPosIcon from "~/components/icons/credit-card-pos-stroke-rounded";
 import DeletePrice from "~/components/plan/delete-price";
 import EditPrice from "~/components/plan/edit-price";
 
@@ -164,20 +164,27 @@ export default function PlanPage(props: {
               </span>
             </Title>
             <div className="flex items-center space-x-2">
-              <Dialog open={openDelete} onOpenChange={setOpenDelete}>
-                <DialogContent className="sm:max-w-[425px]">
+
+              <Dialog 
+              open={openDelete} onOpenChange={setOpenDelete}>
+                <DialogContent className="p-4 rounded-2xl">
                   <DialogHeader>
-                    <DialogTitle>
-                      Seguro que desea eliminar el plan?
+                  <DialogTitle className="m-2 font-medium text-center pr-6">
+                  ¿Seguro que desea eliminar el plan?
                     </DialogTitle>
                   </DialogHeader>
 
                   <DialogFooter>
-                    <Button disabled={isLoading} onClick={handleDelete}>
+                  <Button
+                  type="submit"
+                  className="m-2 mb-2 pl-4 pr-6 rounded-full w-fit mr-36 ml-32 justify-normal bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#DEF5DD]"
+                  disabled={isLoading}
+                  onClick={handleDelete}>
                       {isLoading && (
                         <Loader2Icon className="mr-2 animate-spin" size={20} />
                       )}
-                      Eliminar plan
+                      <Trash2 className="m-3 font-medium place-content-center" />
+                      <h1 className="font-medium-medium p-1">Eliminar</h1>
                     </Button>
                   </DialogFooter>
                 </DialogContent>
@@ -256,17 +263,17 @@ export default function PlanPage(props: {
       </section>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-[600px] overflow-y-visible">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-[600px] overflow-y-visible m-3 rounded-2xl">
+          <DialogHeader className="p-2 ml-2">
             <DialogTitle>Actualizar porcentualmente precio de plan</DialogTitle>
           </DialogHeader>
-          <Label htmlFor="validy_date">Mes de vigencia</Label>
-          <Select
-            onValueChange={(e) => setMes(Number(e))}
-            defaultValue={mes.toString()}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Seleccione un mes" />
+          <div className="w-1/4 text-gray-500 mb-2 ml-3">
+          <Label htmlFor="validy_date" className="text-xs">MES DE VIGENCIA</Label>
+              <Select
+                onValueChange={(e) => setMes(Number(e))}
+                defaultValue={mes?.toString()} >
+                <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none focus-visible:ring-green-400">
+                  <SelectValue placeholder="Seleccione un mes" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem
@@ -405,30 +412,37 @@ export default function PlanPage(props: {
               </SelectItem>
             </SelectContent>
           </Select>
-          <div>
-            <Label>Año de Vigencia</Label>
-            <Input
-              className="border-green-300 focus-visible:ring-green-400 w-[100px]"
-              type="number"
-              value={anio}
-              onChange={(e) => setAnio(Number(e.target.value))}
-            />
           </div>
+          <div className="w-1/4 text-gray-500 mb-2 ml-3">
+              <Label className="text-xs">AÑO DE VIGENCIA</Label>
+              <Input
+                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                type="number"
+                min={new Date().getFullYear()}
+                value={anio}
+                onChange={(e) => setAnio(Number(e.target.value))}
+              />
+            </div>
 
-          <div>
-            <Label htmlFor="number">Porcentaje de aumento</Label>
+          <div className="w-1/4 text-gray-500 mb-2 ml-3">
+            <Label className="text-xs text-nowrap" htmlFor="number">PORCENTAJE DE AUMENTO (EJ: 30%) </Label>
             <Input
+              className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none"
               id="number"
-              placeholder="Ej: 30%"
               value={percent}
               onChange={(e) => setPercent(e.target.value)}
             />
           </div>
+
           <div>
-            <Button disabled={loading} onClick={handleUpdatePrice}>
+            <Button
+            disabled={loading}
+            onClick={handleUpdatePrice}
+            className="bg-[#BEF0BB] hover:bg-[#BEF0BB] ml-3 rounded-full mr-4 px-6 text-black font-normal hover:text-[#3E3E3E]">
               {loading && (
-                <Loader2Icon className="mr-2 animate-spin" size={20} />
+              <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}
+              <CreditCardPosIcon className="mr-2 font-medium"/>
               Actualizar precio
             </Button>
           </div>
