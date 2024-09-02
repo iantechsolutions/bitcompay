@@ -275,6 +275,23 @@ export default function Page() {
     if (marcas) {
       setLogo(marcas[0]!.logo_url!);
     }
+
+    if (
+      !puntoVenta ||
+      !dateEmision ||
+      !tipoComprobante ||
+      !concepto ||
+      !iva ||
+      !dateVencimiento ||
+      !importe
+    ) {
+      toast.error("Ingrese todos los valores");
+      return null;
+    }
+    if (concepto !== "1" && (!dateDesde || !dateHasta)) {
+      toast.error("Ingrese todos los valores");
+      return null;
+    }
     try {
       (async () => {
         setLoading(true);
@@ -345,7 +362,7 @@ export default function Page() {
             CbteTipo: Number(tipoComprobante),
             Concepto: Number(comprobante[0]?.concepto),
             DocTipo: Number(comprobante[0]?.tipoDocumento),
-            DocNro: comprobante[0]?.nroDocumento,
+            DocNro: comprobante[0]?.nroDocumento ?? "0",
             CbteDesde: last_voucher + 1,
             CbteHasta: last_voucher + 1,
             CbteFch: parseInt(fecha?.replace(/-/g, "") ?? ""),
@@ -666,8 +683,8 @@ export default function Page() {
     let grupo = gruposFamiliar?.find((x) => x.id == value);
     let billResponsible = grupo?.integrants.find((x) => x.isBillResponsible);
     setComprobantes(grupo?.comprobantes ?? []);
-    setNroDocumento(billResponsible?.fiscal_id_number ?? "");
-    setNroDocumentoDNI(billResponsible?.id_number ?? "");
+    setNroDocumento(billResponsible?.fiscal_id_number ?? "0");
+    setNroDocumentoDNI(billResponsible?.id_number ?? "0");
     setNombre(billResponsible?.name ?? "");
     setTipoDocumento(billResponsible?.fiscal_id_type ?? "");
     setBrandId(grupo?.businessUnitData?.brandId ?? "");
@@ -676,7 +693,7 @@ export default function Page() {
     setGrupoFamiliarId("");
     setObraSocialId(value);
     let obra = obrasSociales?.find((x) => x.id == value);
-    setNroDocumento(obra?.fiscal_id_number?.toString() ?? "");
+    setNroDocumento(obra?.fiscal_id_number?.toString() ?? "0");
     setNroDocumentoDNI("0" ?? "");
     setNombre(obra?.responsibleName ?? "");
     setTipoDocumento(obra?.fiscal_id_type ?? "");
@@ -730,8 +747,7 @@ export default function Page() {
                 className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 mr-3 shadow-none"
                 // onClick={() => setOpen(true)}
                 disabled={loading}
-                onClick={generateComprobante}
-              >
+                onClick={generateComprobante}>
                 {loading ? (
                   <Loader2Icon className="mr-2 animate-spin" size={20} />
                 ) : (
@@ -752,8 +768,7 @@ export default function Page() {
           <div className="flex flex-row justify-between gap-8 ">
             <Select
               onValueChange={(e) => handleGrupoFamilarChange(e)}
-              value={grupoFamiliarId}
-            >
+              value={grupoFamiliarId}>
               <SelectTriggerMagnify className=" w-full bg-[#FAFAFA] font-normal text-[#747474]">
                 <SelectValue placeholder="Buscar afiliado.." />
               </SelectTriggerMagnify>
@@ -763,8 +778,7 @@ export default function Page() {
                     <SelectItem
                       key={gruposFamiliar?.id}
                       value={gruposFamiliar?.id}
-                      className="rounded-none"
-                    >
+                      className="rounded-none">
                       {gruposFamiliar?.integrants.find((x) => x.isHolder)?.name}
                     </SelectItem>
                   ))}
@@ -772,8 +786,7 @@ export default function Page() {
             </Select>
             <Select
               onValueChange={(e) => handleObraSocialChange(e)}
-              value={obraSocialId}
-            >
+              value={obraSocialId}>
               <SelectTriggerMagnify className="w-full bg-[#FAFAFA] font-normal text-[#747474]">
                 <SelectValue placeholder="Buscar por obra social.." />
               </SelectTriggerMagnify>
@@ -783,8 +796,7 @@ export default function Page() {
                     <SelectItem
                       key={obrasSocial?.id}
                       value={obrasSocial?.id}
-                      className="rounded-none"
-                    >
+                      className="rounded-none">
                       {obrasSocial?.name}
                     </SelectItem>
                   ))}
@@ -794,17 +806,14 @@ export default function Page() {
           <div className="bg-[#F7F7F7] rounded-lg py-4 px-24 flex flex-row justify-between ">
             <ElementCard
               element={{ key: "NOMBRE", value: nombre }}
-              className="pr-24 "
-            ></ElementCard>
+              className="pr-24 "></ElementCard>
             <div className="flex gap-20">
               <ElementCard
                 element={{ key: "DNI", value: nroDocumentoDNI }}
-                className="pr-8 "
-              ></ElementCard>
+                className="pr-8 "></ElementCard>
               <ElementCard
                 element={{ key: "CUIT", value: nroDocumento }}
-                className="pr-11 "
-              ></ElementCard>
+                className="pr-11 "></ElementCard>
             </div>
           </div>
 
@@ -828,8 +837,7 @@ export default function Page() {
                           <SelectItem
                             key={option.value}
                             value={option.value}
-                            className="rounded-none "
-                          >
+                            className="rounded-none ">
                             {option.label}
                           </SelectItem>
                         ))}
@@ -845,16 +853,14 @@ export default function Page() {
                   value: (
                     <Popover
                       open={popoverEmisionOpen}
-                      onOpenChange={setPopoverEmisionOpen}
-                    >
+                      onOpenChange={setPopoverEmisionOpen}>
                       <PopoverTrigger asChild={true}>
                         <Button
                           variant={"outline"}
                           className={cn(
                             "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                             !dateEmision && "text-muted-foreground"
-                          )}
-                        >
+                          )}>
                           {dateEmision ? (
                             format(dateEmision, "PPP")
                           ) : (
@@ -895,8 +901,7 @@ export default function Page() {
                           <SelectItem
                             key={option.value}
                             value={option.value}
-                            className="rounded-none "
-                          >
+                            className="rounded-none ">
                             {option.label}
                           </SelectItem>
                         ))}
@@ -926,8 +931,7 @@ export default function Page() {
                           <SelectItem
                             key={option.value}
                             value={option.value}
-                            className="rounded-none "
-                          >
+                            className="rounded-none ">
                             {option.label}
                           </SelectItem>
                         ))}
@@ -954,8 +958,7 @@ export default function Page() {
                           <SelectItem
                             key={option.value}
                             value={option.value}
-                            className="rounded-none "
-                          >
+                            className="rounded-none ">
                             {option.label}
                           </SelectItem>
                         ))}
@@ -971,16 +974,14 @@ export default function Page() {
                   value: (
                     <Popover
                       open={popoverVencimientoOpen}
-                      onOpenChange={setPopoverVencimientoOpen}
-                    >
+                      onOpenChange={setPopoverVencimientoOpen}>
                       <PopoverTrigger asChild={true}>
                         <Button
                           variant={"outline"}
                           className={cn(
                             "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                             !dateVencimiento && "text-muted-foreground"
-                          )}
-                        >
+                          )}>
                           {dateVencimiento ? (
                             format(dateVencimiento, "PPP")
                           ) : (
@@ -1008,8 +1009,7 @@ export default function Page() {
                   value: (
                     <Popover
                       open={popoverDesdeOpen}
-                      onOpenChange={setPopoverDesdeOpen}
-                    >
+                      onOpenChange={setPopoverDesdeOpen}>
                       <PopoverTrigger asChild={true}>
                         <Button
                           variant={"outline"}
@@ -1017,8 +1017,7 @@ export default function Page() {
                           className={cn(
                             "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                             !dateDesde && "text-muted-foreground"
-                          )}
-                        >
+                          )}>
                           {dateDesde ? (
                             format(dateDesde, "PPP")
                           ) : (
@@ -1046,8 +1045,7 @@ export default function Page() {
                   value: (
                     <Popover
                       open={popoverFinOpen}
-                      onOpenChange={setPopoverFinOpen}
-                    >
+                      onOpenChange={setPopoverFinOpen}>
                       <PopoverTrigger asChild={true}>
                         <Button
                           variant={"outline"}
@@ -1055,8 +1053,7 @@ export default function Page() {
                           className={cn(
                             "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                             !dateHasta && "text-muted-foreground"
-                          )}
-                        >
+                          )}>
                           {dateHasta ? (
                             format(dateHasta, "PPP")
                           ) : (
@@ -1095,8 +1092,7 @@ export default function Page() {
                       onValueChange={(e) => handleComprobanteChange(e)}
                       disabled={
                         tipoComprobante != "3" && tipoComprobante != "8"
-                      }
-                    >
+                      }>
                       <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8">
                         <SelectValue placeholder="Seleccionar comprobante..." />
                       </SelectTrigger>
@@ -1113,8 +1109,7 @@ export default function Page() {
                               <SelectItem
                                 key={comprobante?.id}
                                 value={comprobante?.id}
-                                className="rounded-none "
-                              >
+                                className="rounded-none ">
                                 {comprobante?.nroComprobante}
                               </SelectItem>
                             ))}

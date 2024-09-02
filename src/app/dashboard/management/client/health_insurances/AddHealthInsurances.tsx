@@ -25,13 +25,16 @@ import { asTRPCError } from "~/lib/errors";
 import { api } from "~/trpc/react";
 import AddElementButton from "~/components/add-element";
 import { router } from "@trpc/server";
+import { RouterOutputs } from "~/trpc/shared";
 
-export function AddHealthInsurances(props: { OSId?: string }) {
-  const OSId = props?.OSId;
+export function AddHealthInsurances(props: {
+  healthInsurance: RouterOutputs["healthInsurances"]["get"] | null;
+}) {
+  const OS = props?.healthInsurance;
 
-  const { data: OS } = api.healthInsurances.get.useQuery({
-    healthInsuranceId: OSId ?? "",
-  });
+  // const { data: OS } = api.healthInsurances.get.useQuery({
+  //   healthInsuranceId: OSId ?? "",
+  // });
   const { mutateAsync: createHealtinsurances, isLoading } =
     api.healthInsurances.create.useMutation();
 
@@ -50,7 +53,7 @@ export function AddHealthInsurances(props: { OSId?: string }) {
     OS?.afip_status ?? "monotributista"
   );
   const [fiscalIdNumber, setFiscalIdNumber] = useState(
-    OS?.fiscal_id_number ?? ""
+    OS?.fiscal_id_number ?? 0
   );
   const [fiscalIdType, setFiscalIdType] = useState(
     OS?.fiscal_id_number ?? "CUIT"
@@ -89,7 +92,7 @@ export function AddHealthInsurances(props: { OSId?: string }) {
         isClient: true,
         adress: address,
         afip_status: afipStatus,
-        fiscal_id_number: fiscalIdNumber,
+        fiscal_id_number: fiscalIdNumber.toString(),
         fiscal_id_type: fiscalIdType,
         responsibleName: responsibleName,
         locality: locality,
@@ -126,12 +129,12 @@ export function AddHealthInsurances(props: { OSId?: string }) {
 
       // Creating a health insurance product
       const healthInsurance = await UploadhealthInsurances({
-        healthInsuranceId: OSId ?? "",
+        healthInsuranceId: OS?.id ?? "",
         name: name,
         identificationNumber: idNumber,
         adress: address,
         afip_status: afipStatus,
-        fiscal_id_number: fiscalIdNumber,
+        fiscal_id_number: fiscalIdNumber.toString(),
         fiscal_id_type: fiscalIdType,
         responsibleName: responsibleName,
         locality: locality,
@@ -154,13 +157,13 @@ export function AddHealthInsurances(props: { OSId?: string }) {
   return (
     <>
       <AddElementButton onClick={() => setOpen(true)}>
-        {OSId ? <>Editar datos</> : <>Agregar Obra social como cliente</>}
+        {OS ? <>Editar datos</> : <>Agregar Obra social como cliente</>}
       </AddElementButton>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[800px]">
           <DialogHeader>
-            {OSId ? (
+            {OS ? (
               <DialogTitle>Editar obra social</DialogTitle>
             ) : (
               <DialogTitle>Agregar obra social</DialogTitle>
@@ -211,6 +214,7 @@ export function AddHealthInsurances(props: { OSId?: string }) {
               <Input
                 id="idNumber"
                 placeholder="..."
+                type="number"
                 value={fiscalIdNumber}
                 onChange={(e) => setFiscalIdNumber(e.target.value)}
               />
@@ -275,7 +279,7 @@ export function AddHealthInsurances(props: { OSId?: string }) {
                 </SelectContent>
               </Select>
             </div>
-            {OSId ? null : (
+            {OS ? null : (
               <div>
                 <Label htmlFor="initialValue">Saldo inicial</Label>
                 <Input
@@ -295,7 +299,7 @@ export function AddHealthInsurances(props: { OSId?: string }) {
             </div>
           </div>
           <DialogFooter>
-            {OSId ? (
+            {OS ? (
               <Button disabled={isPending} onClick={handleEdit}>
                 {isPending ? (
                   <Loader2Icon className="mr-2 animate-spin" size={20} />

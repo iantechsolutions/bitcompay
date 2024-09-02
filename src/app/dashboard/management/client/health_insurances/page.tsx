@@ -29,7 +29,7 @@ export default function Home() {
       <section className="space-y-2">
         <div className="flex justify-between">
           <Title>Obras sociales</Title>
-          <AddHealthInsurances />
+          <AddHealthInsurances healthInsurance={null} />
         </div>
         <DataTable columns={columns} data={tableRecords} />
       </section>

@@ -1,4 +1,5 @@
 import { Eye } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -27,23 +28,17 @@ export function SaldoPopoverAffiliates(props: {
         </div>
         <div className="items-center justify-center">
           <div className=" p-1 w-44">
-            <Button
-              className="bg-[#0DA485] hover:bg-[#0da486e2] text-[#FAFDFD] font-medium-medium text-xs rounded-2xl py-0 px-6"
-              onClick={() => {
-                if (!props.ccId) return;
-                window.open(
-                  `/dashboard/management/client/affiliates/${props.healthInsuranceId}/cc/${props.ccId}`
-                );
-              }}
-            >
-              Consulta de movimientos
+            <Button className="bg-[#0DA485] hover:bg-[#0da486e2] text-[#FAFDFD] font-medium-medium text-xs rounded-2xl py-0 px-6">
+              <Link
+                href={`/dashboard/management/client/affiliates/${props.healthInsuranceId}/cc/${props.ccId}`}>
+                Consulta de movimientos
+              </Link>
             </Button>
           </div>
           <div className=" p-1 w-44">
             <Button
               disabled={true}
-              className="pr-8 bg-[#0DA485] hover:bg-[#0da486e2] text-[#FAFDFD] font-medium-medium text-xs rounded-2xl py-0 px-6"
-            >
+              className="pr-8 bg-[#0DA485] hover:bg-[#0da486e2] text-[#FAFDFD] font-medium-medium text-xs rounded-2xl py-0 px-6">
               Simulación de Factura
             </Button>
           </div>

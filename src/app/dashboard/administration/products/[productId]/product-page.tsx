@@ -1,5 +1,5 @@
 "use client";
-import { CheckIcon, Loader2 } from "lucide-react";
+import { CheckIcon, Loader2, Loader2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type MouseEventHandler, useState } from "react";
 import { toast } from "sonner";
@@ -25,6 +25,13 @@ import {
 } from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
@@ -48,6 +55,11 @@ export default function ProductPage({
   const [productCompanies, setProductCompanies] = useState<Set<string>>(
     new Set(product.company.map((c) => c.companyId))
   );
+
+  const [openDelete, setOpenDelete] = useState<boolean>(false);
+
+  const { mutateAsync: deleteProduct, isLoading: isDeleating } =
+    api.products.delete.useMutation();
 
   const { mutateAsync: changeProduct, isLoading } =
     api.products.change.useMutation();
@@ -90,6 +102,19 @@ export default function ProductPage({
     setProductCompanies(new Set(productCompanies));
   }
 
+  async function handleDelete() {
+    try {
+      await deleteProduct({ productId: product.id });
+
+      toast.success("Se ha eliminado el producto");
+      router.refresh();
+      router.push("../products");
+    } catch (e) {
+      const error = asTRPCError(e)!;
+      toast.error(error.message);
+    }
+  }
+
   return (
     <LayoutContainer>
       <section className="space-y-2">
@@ -104,6 +129,7 @@ export default function ProductPage({
             Aplicar
           </Button>
         </div>
+
         <Accordion type="single" collapsible={true} className="w-full">
           <AccordionItem value="item-1">
             <AccordionTrigger>
@@ -111,55 +137,25 @@ export default function ProductPage({
             </AccordionTrigger>
             <AccordionContent>
               <List>
-                {channels.map((channel) => {
-                  return (
-                    <ListTile
-                      key={channel.id}
-                      leading={channel.number}
-                      title={channel.name}
-                      trailing={
-                        <Switch
-                          checked={productChannels.has(channel.id)}
-                          onCheckedChange={(checked) =>
-                            changeProductChannel(channel.id, checked)
-                          }
-                        />
-                      }
-                    />
-                  );
-                })}
+                {channels.map((channel) => (
+                  <ListTile
+                    key={channel.id}
+                    leading={channel.number}
+                    title={channel.name}
+                    trailing={
+                      <Switch
+                        checked={productChannels.has(channel.id)}
+                        onCheckedChange={(checked) =>
+                          changeProductChannel(channel.id, checked)
+                        }
+                      />
+                    }
+                  />
+                ))}
               </List>
             </AccordionContent>
           </AccordionItem>
-          <AccordionItem value="item-3">
-            <AccordionTrigger>
-              <h2 className="text-md">Agregar entidad</h2>
-            </AccordionTrigger>
-            <AccordionContent>
-              <List>
-                {companies?.map((company) => {
-                  const isChecked = productCompanies.has(company.id);
-                  // const isChecked = Array.from(productCompanies).some(
-                  //   (c) => c?.id === company?.id
-                  // );
-                  return (
-                    <ListTile
-                      key={company?.id}
-                      title={company?.name}
-                      trailing={
-                        <Switch
-                          checked={isChecked}
-                          onCheckedChange={(required) =>
-                            changeProductCompany(company.id, required)
-                          }
-                        />
-                      }
-                    />
-                  );
-                })}
-              </List>
-            </AccordionContent>
-          </AccordionItem>
+
           <AccordionItem value="item-2">
             <AccordionTrigger>
               <h2 className="text-md">Info. de la producto</h2>
@@ -187,67 +183,73 @@ export default function ProductPage({
               </Card>
             </AccordionContent>
           </AccordionItem>
+
+          <AccordionItem value="item-3">
+            <AccordionTrigger>
+              <h2 className="text-md">Agregar entidad</h2>
+            </AccordionTrigger>
+            <AccordionContent>
+              <List>
+                {companies?.map((company) => {
+                  const isChecked = productCompanies.has(company.id);
+                  return (
+                    <ListTile
+                      key={company?.id}
+                      title={company?.name}
+                      trailing={
+                        <Switch
+                          checked={isChecked}
+                          onCheckedChange={(required) =>
+                            changeProductCompany(company.id, required)
+                          }
+                        />
+                      }
+                    />
+                  );
+                })}
+              </List>
+            </AccordionContent>
+          </AccordionItem>
+
           <AccordionItem value="item-4" className="border-none">
             <AccordionTrigger>
               <h2 className="text-md">Eliminar producto</h2>
             </AccordionTrigger>
             <AccordionContent>
               <div className="flex justify-end">
-                <DeleteProduct productId={product.id} />
+                <Button
+                  variant={"destructive"}
+                  className="ml-10"
+                  onClick={() => setOpenDelete(true)}>
+                  Eliminar
+                </Button>
               </div>
             </AccordionContent>
           </AccordionItem>
         </Accordion>
       </section>
+
+      <AlertDialog open={openDelete} onOpenChange={setOpenDelete}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              ¿Estás seguro que querés eliminar el producto?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Eliminar producto permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-500 active:bg-red-700 hover:bg-red-600"
+              onClick={handleDelete}
+              disabled={isLoading}>
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </LayoutContainer>
-  );
-}
-
-function DeleteProduct(props: { productId: string }) {
-  const { mutateAsync: deleteProduct, isLoading } =
-    api.products.delete.useMutation();
-
-  const router = useRouter();
-
-  const handleDelete: MouseEventHandler<HTMLButtonElement> = (e) => {
-    e.preventDefault();
-    deleteProduct({ productId: props.productId })
-      .then(() => {
-        toast.success("Se ha eliminado el producto");
-        router.push("../products");
-      })
-      .catch((e) => {
-        const error = asTRPCError(e)!;
-        toast.error(error.message);
-      });
-  };
-  return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild={true}>
-        <Button variant="destructive" className="w-[160px]">
-          Eliminar producto
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>
-            ¿Estás seguro que querés eliminar el producto?
-          </AlertDialogTitle>
-          <AlertDialogDescription>
-            Eliminar producto permanentemente.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            className="bg-red-500 active:bg-red-700 hover:bg-red-600"
-            onClick={handleDelete}
-            disabled={isLoading}
-          >
-            Eliminar
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
   );
 }

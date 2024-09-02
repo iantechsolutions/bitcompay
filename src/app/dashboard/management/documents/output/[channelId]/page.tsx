@@ -1,5 +1,6 @@
 import { Building2Icon } from "lucide-react";
 import { ChevronRight } from "lucide-react";
+import LayoutContainer from "~/components/layout-container";
 import { List, ListTile } from "~/components/list";
 import { Title } from "~/components/title";
 import { api } from "~/trpc/server";
@@ -47,7 +48,7 @@ export default async function Page(props: { params: { channelId: string } }) {
   }
 
   return (
-    <>
+    <LayoutContainer>
       <div className="flex items-center font-semibold text-sm opacity-80">
         {channel.name} <ChevronRight />{" "}
       </div>
@@ -68,6 +69,6 @@ export default async function Page(props: { params: { channelId: string } }) {
       ) : (
         <Title>No se encontro ninguna entidad para este canal de pago</Title>
       )}
-    </>
+    </LayoutContainer>
   );
 }

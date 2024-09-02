@@ -165,7 +165,7 @@ export default function HealthInsurancePage(props: {
               Obra Social
             </h2>
             <div>
-              <AddHealthInsurances OSId={props.healthInsuranceId} />
+              <AddHealthInsurances healthInsurance={props?.healthInsurance} />
               <Button
                 variant={"destructive"}
                 className="ml-10"
