@@ -25,40 +25,34 @@ function ContentTable(props: propsContentTable) {
   return (
     <Table>
       <TableHeader className="bg-[#F7F7F7] rounded-lg">
-        <TableHead className="pl-4 ">
-          {" "}
-          Concepto{" "}
-        </TableHead>
-        <TableHead className=" ">
-          {" "}
-          Importe{" "}
-        </TableHead>
-        <TableHead className=" ">
-          {" "}
-          IVA
-        </TableHead>
-        <TableHead className="">
-          TOTAL
-        </TableHead>
+        <TableHead className="pl-4 "> Concepto </TableHead>
+        <TableHead className=" "> Importe </TableHead>
+        <TableHead className=" "> IVA</TableHead>
+        <TableHead className="">TOTAL</TableHead>
       </TableHeader>{" "}
       {comprobante?.items
         .filter((item) => item.concept != "Total factura")
-        .map((item) => (
-          <TableRow key={item.id} className="border-b last:border-none">
+        .map((item) => {
+          const amount= item.amount ?? 0;
+          const iva= item.iva ?? 0;
+          const total= item.total ?? 0;
+          return (
+            <TableRow key={item.id} className="border-b last:border-none">
             <TableCell className="pl-4 ">
               {item.concept}
             </TableCell>
             <TableCell className=" ">
-              ${item.amount}
+              ${amount <0 ? "$" : "-$"}{Math.abs(amount)}
             </TableCell>
             <TableCell className=" ">
-              ${item.iva}
+              ${iva < 0 ? "$" : "-$"}{Math.abs(iva)}
             </TableCell>
             <TableCell className=" ">
-              ${item.total}
+            ${total <0 ? "$" : "-$"}{Math.abs(total)}
             </TableCell>
           </TableRow>
-        ))}
+          )
+        })}
     </Table>
   );
 }

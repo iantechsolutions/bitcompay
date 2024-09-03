@@ -1,5 +1,6 @@
 import { Building2Icon } from "lucide-react";
 import { ChevronRight } from "lucide-react";
+import LayoutContainer from "~/components/layout-container";
 import { List, ListTile } from "~/components/list";
 import { Title } from "~/components/title";
 import { api } from "~/trpc/server";
@@ -19,7 +20,7 @@ export default async function Page(props: {
 
   console.log(brands);
   return (
-    <>
+    <LayoutContainer>
       <div className="flex items-center text-sm font-semibold opacity-80">
         {channel?.name} <ChevronRight /> {company?.name}
       </div>
@@ -36,6 +37,6 @@ export default async function Page(props: {
           );
         })}
       </List>
-    </>
+    </LayoutContainer>
   );
 }

@@ -80,6 +80,13 @@ export const postalCodeRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       await db
+        .update(schema.healthInsurances)
+        .set({
+          postal_code: null,
+        })
+        .where(eq(schema.healthInsurances.postal_code, input.postalCodeId));
+
+      await db
         .delete(schema.postal_code)
         .where(eq(schema.postal_code.id, input.postalCodeId));
     }),

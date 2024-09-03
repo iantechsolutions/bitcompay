@@ -25,7 +25,7 @@ type DetailSheetProps = {
   setOpen: (open: boolean) => void;
 };
 import Download02Icon from "~/components/icons/download-02-stroke-rounded";
-  
+
 type Comprobante = RouterOutputs["comprobantes"]["getByLiquidation"][number];
 export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
   const [openFCAccordion, setOpenFCAccordion] = useState(true);
@@ -67,11 +67,14 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
           <SheetDescription>
             <ul className="mt-2">
               <li className="text-xs"> RECEPTOR </li>
-              <li className="font-medium text-[#3e3e3e]"> {data.nombre}</li>
-              <br /> 
+              <li className="font-medium text-[#3e3e3e]">
+                {" "}
+                {data.nombre ?? "-"}
+              </li>
+              <br />
               <li className="text-xs"> CUIL/CUIT </li>
-              <li className="font-medium text-[#3e3e3e]">{data.cuit}</li>
-              <br /> 
+              <li className="font-medium text-[#3e3e3e]">{data.cuit ?? "-"}</li>
+              <br />
             </ul>
           </SheetDescription>
         </SheetHeader>
@@ -110,7 +113,7 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
                     </div>
                   ) : null}
                   NC */}
-                  {/* {openNCAccordion ? (
+          {/* {openNCAccordion ? (
                     <ChevronDown
                       className="ml-2 transition-transform duration-200"
                       size={12}
@@ -121,7 +124,7 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
                       size={12}
                     />
                   )} */}
-                {/* </p>
+          {/* </p>
                 <p className="text-lg font-semibold text-[#4af0d4]">
                   {NCTotal ? `$ ${NCTotal}` : "N/A"}
                 </p>
@@ -143,7 +146,7 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
                 </div>
               ) : null}
               FC */}
-              {/* {openFCAccordion ? (
+          {/* {openFCAccordion ? (
                 <ChevronDown
                   className="ml-2 transition-transform duration-200"
                   size={12}
@@ -154,7 +157,7 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
                   size={12}
                 />
               )} */}
-            {/* </p>
+          {/* </p>
             <p className="text-lg font-semibold text-[#4af0d4]">
               {FCTotal ? `$ ${FCTotal}` : "N/A"}
             </p>
@@ -165,25 +168,27 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
         </div>
         <div className="mt-3">
           <div className="bg-[#DEF5DD] flex flex-row justify-between items-center p-3 rounded-md mt-2">
-            <p className=" text-[#4E9F1D] font-semibold opacity-60">Saldo a pagar: </p>
+            <p className=" text-[#4E9F1D] font-semibold opacity-60">
+              Saldo a pagar:{" "}
+            </p>
             <p className="text-[#4E9F1D] font-semibold opacity-60">
               {saldo_a_pagar ? `$ ${saldo_a_pagar}` : "N/A"}
             </p>
           </div>
           <div className="flex flex-auto justify-end">
-                <Button
-                    variant="bitcompay"
-                    className=" text-lg px-8 py-6 mt-5 gap-3 text-[#3e3e3e] rounded-full font-medium"
-                    onClick={() => {
-                      !comprobanteFCReciente?.billLink
-                        ? alert("El archivo no cargo todavia")
-                        : window.open(comprobanteFCReciente?.billLink);
-                      // : router.push(`${comprobante?.billLink}`);
-                    }}
-                  >
-                   <Download02Icon />
-                    Descargar Factura
-                  </Button>
+            <Button
+              variant="bitcompay"
+              className=" text-lg px-8 py-6 mt-5 gap-3 text-[#3e3e3e] rounded-full font-medium"
+              onClick={() => {
+                !comprobanteFCReciente?.billLink
+                  ? alert("El archivo no cargo todavia")
+                  : window.open(comprobanteFCReciente?.billLink);
+                // : router.push(`${comprobante?.billLink}`);
+              }}
+            >
+              <Download02Icon />
+              Descargar Factura
+            </Button>
           </div>
         </div>
       </SheetContent>

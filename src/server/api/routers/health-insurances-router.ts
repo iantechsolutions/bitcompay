@@ -109,6 +109,15 @@ export const healthInsurancesRouter = createTRPCRouter({
         name: z.string(),
         identificationNumber: z.string(),
         healthInsuranceId: z.string(),
+        adress: z.string().optional(),
+        afip_status: z.string().optional(),
+        fiscal_id_number: z.string().optional(),
+        fiscal_id_type: z.string().optional(),
+        isClient: z.boolean().optional(),
+        responsibleName: z.string().optional(),
+        locality: z.string().optional(),
+        province: z.string().optional(),
+        postal_code: z.string().optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -117,6 +126,15 @@ export const healthInsurancesRouter = createTRPCRouter({
         .set({
           name: input.name,
           identificationNumber: input.identificationNumber,
+          adress: input.adress,
+          afip_status: input.afip_status,
+          fiscal_id_number: input.fiscal_id_number,
+          fiscal_id_type: input.fiscal_id_type,
+          isClient: input.isClient,
+          responsibleName: input.responsibleName,
+          locality: input.locality,
+          province: input.province,
+          postal_code: input.postal_code,
         })
         .where(eq(schema.healthInsurances.id, input.healthInsuranceId));
       return healthInsurance_changed;
