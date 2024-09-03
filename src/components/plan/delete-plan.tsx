@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { Loader2Icon } from "lucide-react";
+import { Loader2Icon, Trash2 } from "lucide-react";
 import Delete02Icon from "~/components/icons/delete-02-stroke-rounded";
 import { useState } from "react";
 import { api } from "~/trpc/react";
@@ -38,23 +38,34 @@ export default function DeleteButton(props: { id: string }) {
       <Button
         variant="bitcompay"
         className="text-[#3e3e3e] bg-stone-100 hover:bg-stone-200"
-        onClick={() => setOpenDelete(true)}>
+        onClick={() => setOpenDelete(true)}
+      >
         <Delete02Icon className="mr-2" /> Eliminar
       </Button>
       <Dialog open={openDelete} onOpenChange={setOpenDelete}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="p-4 rounded-2xl">
           <DialogHeader>
-            <DialogTitle>Seguro que desea eliminar el plan?</DialogTitle>
+            <DialogTitle className="m-2 font-medium text-center pr-6">
+              ¿Seguro que desea eliminar el plan?
+            </DialogTitle>
           </DialogHeader>
 
-          <DialogFooter>
-            <Button disabled={isLoading} onClick={handleDelete}>
+          <div className="w-full flex justify-center">
+
+            <Button
+              type="submit"
+              className="rounded-full bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#BEF0BB]"
+              disabled={isLoading}
+              onClick={handleDelete}
+            >
               {isLoading && (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}
-              Eliminar plan
+              <Delete02Icon className="m-2 font-medium place-content-center" />
+              <h1 className="font-medium-medium p-1">Eliminar</h1>
             </Button>
-          </DialogFooter>
+          </div>
+      
         </DialogContent>
       </Dialog>
     </>

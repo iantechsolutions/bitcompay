@@ -66,12 +66,15 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
           </SheetTitle>
           <SheetDescription>
             <ul className="mt-2">
-            <li className="text-xs"> RECEPTOR </li>
-              <li className="font-medium text-[#3e3e3e]"> {data.nombre}</li>
-              <br /> 
+              <li className="text-xs"> RECEPTOR </li>
+              <li className="font-medium text-[#3e3e3e]">
+                {" "}
+                {data.nombre ?? "-"}
+              </li>
+              <br />
               <li className="text-xs"> CUIL/CUIT </li>
-              <li className="font-medium text-[#3e3e3e]">{data.cuit}</li>
-              <br /> 
+              <li className="font-medium text-[#3e3e3e]">{data.cuit ?? "-"}</li>
+              <br />
             </ul>
           </SheetDescription>
         </SheetHeader>
@@ -156,8 +159,10 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
           )}
         </div>
         <div className="mt-3">
-        <div className="bg-[#DEF5DD] flex flex-row justify-between items-center p-3 rounded-md mt-2">
-            <p className=" text-[#4E9F1D] font-semibold opacity-60">Saldo a pagar: </p>
+          <div className="bg-[#DEF5DD] flex flex-row justify-between items-center p-3 rounded-md mt-2">
+            <p className=" text-[#4E9F1D] font-semibold opacity-60">
+              Saldo a pagar:{" "}
+            </p>
             <p className="text-[#4E9F1D] font-semibold opacity-60">
               {saldo_a_pagar ? `$ ${saldo_a_pagar}` : "N/A"}
             </p>

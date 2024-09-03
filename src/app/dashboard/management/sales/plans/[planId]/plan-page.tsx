@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { Pencil, Trash2, CirclePlus } from "lucide-react";
+import { Pencil, Trash2, CirclePlus, ChevronDown } from "lucide-react";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
 import {
@@ -23,6 +23,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "~/components/ui/dropdown-menu";
 import {
   Popover,
@@ -46,6 +47,11 @@ import AddPlanDialog from "../AddPlanDialog";
 import { asTRPCError } from "~/lib/errors";
 import { toast } from "sonner";
 import CreditCardPosIcon from "~/components/icons/credit-card-pos-stroke-rounded";
+import ViewIcon from "~/components/icons/view-stroke-rounded";
+import Delete02Icon from "~/components/icons/delete-02-stroke-rounded";
+import Edit02Icon from "~/components/icons/edit-02-stroke-rounded";
+import DeletePrice from "~/components/plan/delete-price";
+import EditPrice from "~/components/plan/edit-price";
 
 dayjs.extend(utc);
 dayjs.locale("es");
@@ -150,13 +156,14 @@ export default function PlanPage(props: {
       <section className="space-y-2">
         <div className="flex-col justify-between mb-5">
           <div className="flex justify-between">
-            <Title>{plan!.description}</Title>
+            <Title>
+              Planes
+              <span className="text-[#3e3e3e] font-medium text-xl">
+                {" "}
+                | {plan!.description}
+              </span>
+            </Title>
             <div className="flex items-center space-x-2">
-              <Button
-                onClick={() => setOpenDelete(true)}
-                className="bg-[#b12b2b] hover:bg-[#b12b2b] rounded-full text-white text-sm">
-                <Trash2 className="mr-1 h-4" /> Eliminar plan
-              </Button>
 
               <Dialog 
               open={openDelete} onOpenChange={setOpenDelete}>
@@ -182,51 +189,72 @@ export default function PlanPage(props: {
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
-
-              <AddPlanDialog planId={plan?.id}></AddPlanDialog>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    onClick={() => setOpen(true)}
-                    className="bg-[#727272] hover:bg-[#727272] rounded-full text-white">
-                    <Pencil className="mr-1 h-4" /> Actualizar precio{" "}
-                  </Button>
-                </DropdownMenuTrigger>
-
-                <DropdownMenuContent>
-                  <DropdownMenuItem
-                    onClick={() => setOpen(true)}
-                    disabled={false}>
-                    <div>Actualizar porcentualmente</div>
-                  </DropdownMenuItem>
-                  
-                  <DropdownMenuItem>
-                    <Link
-                      href={`/dashboard/management/sales/plans/${plan?.id}/editPrice`}>
-                      Actualizar manualmente
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+             
             </div>
           </div>
           <List>
             {arrayFechas.map((fecha) => {
               return (
                 <ListTile
+                  className="pl-7 hover:cursor-default"
                   leading={
-                    <Badge variant={fecha === vigente ? "default" : "outline"}>
+                    <Badge
+                      className={`w-24 ${
+                        fecha === vigente
+                          ? "bg-[#DDF9CC] text-[#4E9F1D]"
+                          : "bg-[#f9bcbc] text-[#ec3c3c]"
+                      }`}
+                    >
                       {fecha === vigente ? "Vigente" : "No Vigente"}
                     </Badge>
                   }
                   key={fecha.toISOString().split("T")[0]}
-                  href={`/dashboard/management/sales/plans/${
-                    plan?.id
-                  }/details/${fecha.getTime()}`}
                   title={`Vigente desde: ${
                     formatter.format(fecha).charAt(0).toUpperCase() +
                     formatter.format(fecha).slice(1)
                   }`}
+                  trailing={
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          size={"icon"}
+                          className="bg-transparent hover:bg-transparent p-0 text-[#3e3e3e] shadow-none mr-4"
+                        >
+                          <ChevronDown className="h-5" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuItem>
+                          <Button
+                            onClick={() =>
+                              router.push(
+                                `/dashboard/management/sales/plans/${
+                                  plan?.id
+                                }/details/${fecha.getTime()}`
+                              )
+                            }
+                            className="bg-transparent hover:bg-transparent p-0 text-[#3e3e3e] shadow-none h-5"
+                          >
+                            <ViewIcon className="mr-1 h-4" /> Ver
+                          </Button>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                          <AddPlanDialog planId={plan?.id} />
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onSelect={(e) => e.preventDefault()}
+                        >
+                          <EditPrice plan={plan} />
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                          <DeletePrice />
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  }
                 />
               );
             })}
@@ -255,7 +283,8 @@ export default function PlanPage(props: {
                     (x) =>
                       x.validy_date.getTime() === new Date(anio, 0, 1).getTime()
                   ).length !== 0
-                }>
+                }
+              >
                 Enero
               </SelectItem>
               <SelectItem
@@ -265,7 +294,8 @@ export default function PlanPage(props: {
                     (x) =>
                       x.validy_date.getTime() === new Date(anio, 1, 1).getTime()
                   ).length !== 0
-                }>
+                }
+              >
                 Febrero
               </SelectItem>
               <SelectItem
@@ -275,7 +305,8 @@ export default function PlanPage(props: {
                     (x) =>
                       x.validy_date.getTime() === new Date(anio, 2, 1).getTime()
                   ).length !== 0
-                }>
+                }
+              >
                 Marzo
               </SelectItem>
               <SelectItem
@@ -285,7 +316,8 @@ export default function PlanPage(props: {
                     (x) =>
                       x.validy_date.getTime() === new Date(anio, 3, 1).getTime()
                   ).length !== 0
-                }>
+                }
+              >
                 Abril
               </SelectItem>
               <SelectItem
@@ -295,7 +327,8 @@ export default function PlanPage(props: {
                     (x) =>
                       x.validy_date.getTime() === new Date(anio, 4, 1).getTime()
                   ).length !== 0
-                }>
+                }
+              >
                 Mayo
               </SelectItem>
               <SelectItem
@@ -305,7 +338,8 @@ export default function PlanPage(props: {
                     (x) =>
                       x.validy_date.getTime() === new Date(anio, 5, 1).getTime()
                   ).length !== 0
-                }>
+                }
+              >
                 Junio
               </SelectItem>
               <SelectItem
@@ -315,7 +349,8 @@ export default function PlanPage(props: {
                     (x) =>
                       x.validy_date.getTime() === new Date(anio, 6, 1).getTime()
                   ).length !== 0
-                }>
+                }
+              >
                 Julio
               </SelectItem>
               <SelectItem
@@ -325,7 +360,8 @@ export default function PlanPage(props: {
                     (x) =>
                       x.validy_date.getTime() === new Date(anio, 7, 1).getTime()
                   ).length !== 0
-                }>
+                }
+              >
                 Agosto
               </SelectItem>
               <SelectItem
@@ -335,7 +371,8 @@ export default function PlanPage(props: {
                     (x) =>
                       x.validy_date.getTime() === new Date(anio, 8, 1).getTime()
                   ).length !== 0
-                }>
+                }
+              >
                 Septiembre
               </SelectItem>
               <SelectItem
@@ -345,7 +382,8 @@ export default function PlanPage(props: {
                     (x) =>
                       x.validy_date.getTime() === new Date(anio, 9, 1).getTime()
                   ).length !== 0
-                }>
+                }
+              >
                 Octubre
               </SelectItem>
               <SelectItem
@@ -356,7 +394,8 @@ export default function PlanPage(props: {
                       x.validy_date.getTime() ===
                       new Date(anio, 10, 1).getTime()
                   ).length !== 0
-                }>
+                }
+              >
                 Noviembre
               </SelectItem>
               <SelectItem
@@ -367,7 +406,8 @@ export default function PlanPage(props: {
                       x.validy_date.getTime() ===
                       new Date(anio, 11, 1).getTime()
                   ).length !== 0
-                }>
+                }
+              >
                 Diciembre
               </SelectItem>
             </SelectContent>

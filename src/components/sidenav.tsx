@@ -75,14 +75,20 @@ export function SidenavItem(props: {
 
 export function SideNavTrigger(props: {
   icon?: React.ReactNode;
+  activeIcon?: React.ReactNode;
+  isActive?: Boolean;
   children: React.ReactNode;
   className?: string;
 }) {
   return (
     <li
-      className={`flex items-center text-left px-[1vw] py-[1vh] font-thin ${props.className}`}
+      className={`flex items-center text-left px-[1vw] py-[1vh] font-thin ${
+        props.className
+      } ${props.isActive ? "text-[#6952EB] font-semibold" : ""}`}
     >
-      <div className="px-[0.5vw]">{props.icon}</div>
+      <div className="px-[0.5vw]">
+        {props.isActive ? props.activeIcon : props.icon}
+      </div>
       {props.children}
     </li>
   );

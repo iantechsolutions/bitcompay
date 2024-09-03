@@ -263,14 +263,6 @@ export default function DetailsPage(props: {
                 </DialogContent>
               </Dialog>
             </div>
-            {/* <div>
-            <AddPlanDialog
-              openExterior={openAdd}
-              setOpenExterior={setOpenAdd}
-              planId={props.plan?.id}
-              initialPrices={groupByAge}
-            ></AddPlanDialog>
-          </div> */}
             {editable && (
               <Button
                 onClick={() => handleUpdatePrice("edit")}

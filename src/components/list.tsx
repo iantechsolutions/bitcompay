@@ -79,7 +79,7 @@ export function ListTile(props: ListTileProps) {
 
   return (
     <li
-      className=" last:border-none hover:border-none rounded-lg border-b border-b-stone-100 hover:bg-stone-100"
+      className=" last:border-none hover:border-none rounded-lg border-b border-b-stone-100 hover:bg-stone-100 active:bg-stone-100"
       role="button"
       onClick={props.onClick}
     >

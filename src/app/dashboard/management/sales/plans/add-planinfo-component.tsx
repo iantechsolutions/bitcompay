@@ -40,6 +40,7 @@ import { Label } from "~/components/ui/label";
 import { RouterOutputs } from "~/trpc/shared";
 import { GoBackArrow } from "~/components/goback-arrow";
 import { useQueryClient } from "@tanstack/react-query";
+import Edit02Icon from "~/components/icons/edit-02-stroke-rounded";
 
 dayjs.extend(utc);
 dayjs.locale("es");
@@ -158,12 +159,13 @@ export default function AddPlanInfoComponent({
       <Button
         onClick={handleSumbit}
         disabled={isCreating || isUpdating}
-        className="m-5 mt-7 font-medium mb-2 rounded-full w-fit justify-self-right bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#DEF5DD]"
+        className=" mt-7 font-medium mb-2 rounded-full w-fit justify-self-right bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3E3E3E]"
       >
         {(isCreating || isUpdating) && (
           <Loader2Icon className="mr-2 animate-spin" size={20} />
         )}
-        <CirclePlus className="mr-2" />
+        {planId ? <Edit02Icon className="mr-2 h-4"/> : <CirclePlus className="mr-2" /> }
+       
         {planId ? "Actualizar plan" : "Agregar Plan"}
       </Button>
     </div>
