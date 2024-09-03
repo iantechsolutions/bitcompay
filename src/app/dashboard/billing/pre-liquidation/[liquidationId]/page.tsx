@@ -165,15 +165,15 @@ export default async function Home(props: {
     const total = toNumberOrZero(
       parseFloat(original_comprobante?.importe?.toFixed(2)!)
     );
-    summary["Total a facturar"] += total;
-    excelRow.push(total);
+    excelRows.push(excelRow);
     const subTotal = computeBase(total, Number(original_comprobante?.iva!));
     summary["Sub Total"] += subTotal;
-    excelRow.push(subTotal);
     const iva = computeIva(total, Number(original_comprobante?.iva!));
     summary.IVA += iva;
+    summary["Total a facturar"] += total;
+    excelRow.push(subTotal);
     excelRow.push(iva);
-    excelRows.push(excelRow);
+    excelRow.push(total);
     // const lastEvent = await api.events.getLastByDateAndCC.query({
     //   ccId: fg?.cc?.id!,
     //   date: preliquidation?.createdAt ?? new Date(),
@@ -230,28 +230,42 @@ export default async function Home(props: {
       <div className="bg-[#f6f6f6] rounded-lg text-base">
         <ul className="grid grid-cols-3 gap-x-2 list-none px-8 py-5">
           <li className="">
-            <span className=" text-xs">RAZÓN SOCIAL</span><br />
-            <p className="font-medium text-md">{companyData?.razon_social ?? "-"}</p>
+            <span className=" text-xs">RAZÓN SOCIAL</span>
+            <br />
+            <p className="font-medium text-md">
+              {companyData?.razon_social ?? "-"}
+            </p>
           </li>
           <li>
-            <span className=" text-xs">CUIT</span><br />
+            <span className=" text-xs">CUIT</span>
+            <br />
             <p className="font-medium text-md">{companyData?.cuit ?? "-"}</p>
           </li>
           <li>
-            <span className=" text-xs">GERENCIADOR</span><br />
-            <p className="font-medium text-md">{businessUnit?.description ?? "-"}</p>
+            <span className=" text-xs">GERENCIADOR</span>
+            <br />
+            <p className="font-medium text-md">
+              {businessUnit?.description ?? "-"}
+            </p>
           </li>
           <li>
-            <span className=" text-xs">PERÍODO</span><br />
+            <span className=" text-xs">PERÍODO</span>
+            <br />
             <p className="font-medium text-md">{periodo}</p>
           </li>
           <li>
-            <span className=" text-xsopacity-100">N° PRE-LIQUIDACIÓN</span><br />
-            <p className="font-medium text-md">{preliquidation?.number ?? "-"}</p>
+            <span className=" text-xsopacity-100">N° PRE-LIQUIDACIÓN</span>
+            <br />
+            <p className="font-medium text-md">
+              {preliquidation?.number ?? "-"}
+            </p>
           </li>
           <li>
-            <span className=" text-xsopacity-100">FECHA</span><br />
-            <p className="font-medium text-md">{dayjs.utc(preliquidation?.createdAt).format("DD/MM/YYYY") ?? "-"}</p>
+            <span className=" text-xsopacity-100">FECHA</span>
+            <br />
+            <p className="font-medium text-md">
+              {dayjs.utc(preliquidation?.createdAt).format("DD/MM/YYYY") ?? "-"}
+            </p>
           </li>
         </ul>
       </div>

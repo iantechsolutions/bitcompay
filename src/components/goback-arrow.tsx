@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "./ui/button";
 import { ArrowLeftIcon } from "lucide-react";
 
-export function GoBackArrow() {
+export function GoBackArrow() { 
   const router = useRouter();
   return (
     <Button
