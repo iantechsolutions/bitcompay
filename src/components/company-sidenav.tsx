@@ -227,8 +227,7 @@ export default function CompanySidenav() {
               alt="inicio"
               className="w-[2vw] h-auto "
             />
-          }
-        >
+          }>
           Inicio
         </SidenavItem>
         {canSeeGeneral && (
@@ -253,8 +252,7 @@ export default function CompanySidenav() {
                   color="#6952EB"
                 />
               }
-              href={`/dashboard`}
-            >
+              href={`/dashboard`}>
               Dashboard
             </SidenavItem>
           </>
@@ -283,8 +281,7 @@ export default function CompanySidenav() {
                     className="w-[1.5vw] h-auto"
                   />
                 }
-                className="text-sideNav"
-              >
+                className="text-sideNav">
                 Entidades
               </SidenavItem>
             )}
@@ -299,8 +296,7 @@ export default function CompanySidenav() {
                   />
                 }
                 icon={<Package strokeWidth={1} className="w-[1.5vw] h-auto" />}
-                className="text-sideNav"
-              >
+                className="text-sideNav">
                 Productos
               </SidenavItem>
             )}
@@ -315,8 +311,7 @@ export default function CompanySidenav() {
                   />
                 }
                 icon={<Sliders strokeWidth={1} className="w-[1.5vw] h-auto" />}
-                className="text-sideNav"
-              >
+                className="text-sideNav">
                 Canales
               </SidenavItem>
             )}
@@ -331,8 +326,7 @@ export default function CompanySidenav() {
                   />
                 }
                 icon={<Tag strokeWidth={1} className="w-[1.5vw] h-auto" />}
-                className="text-sideNav"
-              >
+                className="text-sideNav">
                 Marcas
               </SidenavItem>
             )}
@@ -347,8 +341,7 @@ export default function CompanySidenav() {
                   />
                 }
                 icon={<Wrench strokeWidth={1} className="w-[1.5vw] h-auto" />}
-                className="text-sideNav"
-              >
+                className="text-sideNav">
                 Servicios
               </SidenavItem>
             )}
@@ -363,8 +356,7 @@ export default function CompanySidenav() {
                     className="w-[1.5vw] h-auto"
                   />
                 }
-                className="text-sideNav"
-              >
+                className="text-sideNav">
                 Cotizaciones
               </SidenavItem>
             )}
@@ -388,8 +380,7 @@ export default function CompanySidenav() {
                 />
               }
               href={`/dashboard/maintenance/user`}
-              className="text-sideNav"
-            >
+              className="text-sideNav">
               Usuarios
             </SidenavItem>
             <SidenavItem
@@ -402,8 +393,7 @@ export default function CompanySidenav() {
                   className="w-[1.5vw] h-auto"
                 />
               }
-              className="text-sideNav"
-            >
+              className="text-sideNav">
               Roles
             </SidenavItem>
             <SidenavItem
@@ -416,8 +406,7 @@ export default function CompanySidenav() {
                 />
               }
               href={`/dashboard/maintenance/tables`}
-              className="text-sideNav"
-            >
+              className="text-sideNav">
               Tablas
             </SidenavItem>
           </>
@@ -438,8 +427,7 @@ export default function CompanySidenav() {
                       isActive("Ventas")
                         ? "bg-[#BEF0BB]  py-[1vh] mb-[0vh]  hover:no-underline"
                         : " py-[1vh] mb-[0vh]  hover:no-underline"
-                    }
-                  >
+                    }>
                     <SideNavTrigger
                       icon={
                         <img
@@ -450,11 +438,11 @@ export default function CompanySidenav() {
                       activeIcon={
                         <img
                           src="/public/sidebar/Frame-3.png"
-                          className="text-sideNav h-[3vh] w-[3vh]"/>
+                          className="text-sideNav h-[3vh] w-[3vh]"
+                        />
                       }
                       isActive={isActive("Ventas")}
-                      className="text-sideNav"
-                    >
+                      className="text-sideNav">
                       Ventas{" "}
                     </SideNavTrigger>
                   </AccordionTrigger>
@@ -476,8 +464,7 @@ export default function CompanySidenav() {
                         }
                         href={`/dashboard/management/sales/advisors`}
                         IsChild={true}
-                        className="text-sideNav"
-                      >
+                        className="text-sideNav">
                         Asesores
                       </SidenavItem>
                     )}
@@ -498,29 +485,27 @@ export default function CompanySidenav() {
                         }
                         href={`/dashboard/management/sales/procedures`}
                         IsChild={true}
-                        className="text-sideNav"
-                      >
+                        className="text-sideNav">
                         Trámites
                       </SidenavItem>
                     )}
                     {canSeePlans && (
                       <SidenavItem
                         icon={
-                          <img 
-                          src="/public/sidebar/Frame-28.png"
-                          className="h-auto w-auto"
+                          <img
+                            src="/public/sidebar/Frame-28.png"
+                            className="h-auto w-auto"
                           />
                         }
                         activeIcon={
-                          <img 
-                          src="/public/sidebar/Frame-29.png"
-                          className="h-auto w-auto"
+                          <img
+                            src="/public/sidebar/Frame-29.png"
+                            className="h-auto w-auto"
                           />
                         }
                         href={`/dashboard/management/sales/plans`}
                         IsChild={true}
-                        className="text-sideNav"
-                      >
+                        className="text-sideNav">
                         Planes
                       </SidenavItem>
                     )}
@@ -541,8 +526,7 @@ export default function CompanySidenav() {
                         }
                         href={`/dashboard/management/sales/differentials`}
                         IsChild={true}
-                        className="text-sideNav"
-                      >
+                        className="text-sideNav">
                         Diferenciales
                       </SidenavItem>
                     )}
@@ -563,8 +547,7 @@ export default function CompanySidenav() {
                         }
                         href={`/dashboard/management/sales/comissions`}
                         IsChild={true}
-                        className="text-sideNav"
-                      >
+                        className="text-sideNav">
                         Comisiones
                       </SidenavItem>
                     )}
@@ -585,8 +568,7 @@ export default function CompanySidenav() {
                         }
                         href={`/dashboard/management/sales/bonuses`}
                         IsChild={true}
-                        className="text-sideNav"
-                      >
+                        className="text-sideNav">
                         Bonificaciones
                       </SidenavItem>
                     )}
@@ -602,8 +584,7 @@ export default function CompanySidenav() {
                       isActive("Clientes")
                         ? "bg-[#BEF0BB]  py-[1vh] mb-[0vh]  hover:no-underline"
                         : " py-[1vh] mb-[0vh]  hover:no-underline"
-                    }
-                  >
+                    }>
                     <SideNavTrigger
                       icon={
                         <img
@@ -618,8 +599,7 @@ export default function CompanySidenav() {
                         />
                       }
                       isActive={isActive("Clientes")}
-                      className="text-sideNav"
-                    >
+                      className="text-sideNav">
                       Clientes
                     </SideNavTrigger>
                   </AccordionTrigger>{" "}
@@ -641,8 +621,7 @@ export default function CompanySidenav() {
                         }
                         href={`/dashboard/management/client/affiliates`}
                         IsChild={true}
-                        className="text-sideNav"
-                      >
+                        className="text-sideNav">
                         Afiliados
                       </SidenavItem>
                     )}
@@ -662,8 +641,7 @@ export default function CompanySidenav() {
                         }
                         href={`/dashboard/management/client/health_insurances`}
                         IsChild={true}
-                        className="text-sideNav"
-                      >
+                        className="text-sideNav">
                         Obras sociales
                       </SidenavItem>
                     )}
@@ -680,8 +658,7 @@ export default function CompanySidenav() {
                       isActive("Proveedores")
                         ? " bg-[#BEF0BB]  py-[1vh] mb-[0vh]  hover:no-underline"
                         : " py-[1vh] mb-[0vh] hover:no-underline"
-                    }
-                  >
+                    }>
                     <SideNavTrigger className="text-sideNav">
                       Proveedores
                     </SideNavTrigger>
@@ -692,8 +669,7 @@ export default function CompanySidenav() {
                       activeIcon={<Bell strokeWidth={1} color="#6952EB" />}
                       href={`/dashboard/management/suppliers/abm`}
                       IsChild={true}
-                      className="text-sideNav"
-                    >
+                      className="text-sideNav">
                       ABM Proveedores
                     </SidenavItem>
                     <SidenavItem
@@ -701,8 +677,7 @@ export default function CompanySidenav() {
                       activeIcon={<Archive strokeWidth={1} color="#6952EB" />}
                       href={`/dashboard/management/suppliers/comprobants-upload`}
                       IsChild={true}
-                      className="text-sideNav"
-                    >
+                      className="text-sideNav">
                       Alta Comprobantes
                     </SidenavItem>
                     <SidenavItem
@@ -710,8 +685,7 @@ export default function CompanySidenav() {
                       activeIcon={<Folder strokeWidth={1} color="#6952EB" />}
                       href={`/dashboard/management/suppliers/currentAcounts`}
                       IsChild={true}
-                      className="text-sideNav"
-                    >
+                      className="text-sideNav">
                       Cuentas Corrientes de Proveedores
                     </SidenavItem>
                     <SidenavItem
@@ -719,8 +693,7 @@ export default function CompanySidenav() {
                       activeIcon={<Globe strokeWidth={1} color="#6952EB" />}
                       href={`/dashboard/management/suppliers/due_dates`}
                       IsChild={true}
-                      className="text-sideNav"
-                    >
+                      className="text-sideNav">
                       Agenda de vencimientos
                     </SidenavItem>
                     <SidenavItem
@@ -728,8 +701,7 @@ export default function CompanySidenav() {
                       activeIcon={<Heart strokeWidth={1} color="#6952EB" />}
                       href={`/dashboard/management/suppliers/orders`}
                       IsChild={true}
-                      className="text-sideNav"
-                    >
+                      className="text-sideNav">
                       Ordenes de Pago
                     </SidenavItem>
                   </AccordionContent>
@@ -744,8 +716,7 @@ export default function CompanySidenav() {
                       isActive("Documentos")
                         ? " bg-[#BEF0BB]  py-[1vh] mb-[0vh]  hover:no-underline"
                         : "   py-[1vh] mb-[0vh]  hover:no-underline"
-                    }
-                  >
+                    }>
                     <SideNavTrigger
                       icon={
                         <Files strokeWidth={1} className="w-[1.5vw] h-auto" />
@@ -758,8 +729,7 @@ export default function CompanySidenav() {
                         />
                       }
                       isActive={isActive("Documentos")}
-                      className="text-sideNav"
-                    >
+                      className="text-sideNav">
                       Documentos
                     </SideNavTrigger>
                   </AccordionTrigger>
@@ -781,8 +751,7 @@ export default function CompanySidenav() {
                         }
                         href={`/dashboard/management/documents/massive-upload`}
                         IsChild={true}
-                        className="text-sideNav"
-                      >
+                        className="text-sideNav">
                         Carga Masiva
                       </SidenavItem>
                     )}
@@ -800,8 +769,7 @@ export default function CompanySidenav() {
                         }
                         href={`/dashboard/management/documents/rec-upload`}
                         IsChild={true}
-                        className="text-sideNav"
-                      >
+                        className="text-sideNav">
                         Carga REC
                       </SidenavItem>
                     )}
@@ -822,8 +790,7 @@ export default function CompanySidenav() {
                         }
                         href={`/dashboard/management/documents/output`}
                         IsChild={true}
-                        className="text-sideNav"
-                      >
+                        className="text-sideNav">
                         Archivos de salida
                       </SidenavItem>
                     )}
@@ -844,8 +811,7 @@ export default function CompanySidenav() {
                         }
                         href={`/dashboard/management/documents/response`}
                         IsChild={true}
-                        className="text-sideNav"
-                      >
+                        className="text-sideNav">
                         Respuesta
                       </SidenavItem>
                     )}
@@ -868,8 +834,7 @@ export default function CompanySidenav() {
               icon={<Clipboard className="w-[1.5vw] h-auto" />}
               activeIcon={
                 <Clipboard color="#6952EB" className="w-[1.5vw] h-auto" />
-              }
-            >
+              }>
               Administrativo
             </SidenavItem>
             <SidenavItem
@@ -881,8 +846,7 @@ export default function CompanySidenav() {
                   className="w-[1.5vw] h-auto"
                   color="#6952EB"
                 />
-              }
-            >
+              }>
               Médico
             </SidenavItem>
             <SidenavItem
@@ -894,8 +858,7 @@ export default function CompanySidenav() {
                   className="w-[1.5vw] h-auto"
                   color="#6952EB"
                 />
-              }
-            >
+              }>
               Telefónica
             </SidenavItem>
             <SidenavItem
@@ -907,8 +870,7 @@ export default function CompanySidenav() {
                   className="w-[1.5vw] h-auto"
                   color="#6952EB"
                 />
-              }
-            >
+              }>
               Prestaciones
             </SidenavItem>
             <SidenavItem
@@ -920,8 +882,7 @@ export default function CompanySidenav() {
                   className="w-[1.5vw] h-auto"
                   color="#6952EB"
                 />
-              }
-            >
+              }>
               Eventuales/Fijos
             </SidenavItem>
             <SidenavItem
@@ -933,8 +894,7 @@ export default function CompanySidenav() {
                   className="w-[1.5vw] h-auto"
                   color="#6952EB"
                 />
-              }
-            >
+              }>
               Operaciones
             </SidenavItem>
           </>
@@ -962,8 +922,7 @@ export default function CompanySidenav() {
                   />
                 }
                 href={`/dashboard/billing/manual_issuance`}
-                className="text-sideNav"
-              >
+                className="text-sideNav">
                 Generar manual
               </SidenavItem>
             )}
@@ -982,8 +941,7 @@ export default function CompanySidenav() {
                   />
                 }
                 href={`/dashboard/billing/pre-liquidation`}
-                className="text-sideNav"
-              >
+                className="text-sideNav">
                 Pre-Liquidacion
               </SidenavItem>
             )}
@@ -1002,8 +960,7 @@ export default function CompanySidenav() {
                   />
                 }
                 href={`/dashboard/billing/liquidation`}
-                className="text-sideNav"
-              >
+                className="text-sideNav">
                 Liquidacion
               </SidenavItem>
             )}
@@ -1020,8 +977,7 @@ export default function CompanySidenav() {
                   />
                 }
                 href={`/dashboard/billing/information`}
-                className="text-sideNav"
-              >
+                className="text-sideNav">
                 Informacion
               </SidenavItem>
             )}
@@ -1036,8 +992,7 @@ export default function CompanySidenav() {
                   />
                 }
                 href={`/dashboard/billing/consults`}
-                className="text-sideNav"
-              >
+                className="text-sideNav">
                 Consultas
               </SidenavItem>
             )}
@@ -1061,8 +1016,7 @@ export default function CompanySidenav() {
                     color="#6952EB"
                   />
                 }
-                href={`/dashboard/treasury/current_count`}
-              >
+                href={`/dashboard/treasury/current_count`}>
                 Cuenta Corriente
               </SidenavItem>
             )}
@@ -1076,8 +1030,7 @@ export default function CompanySidenav() {
                     color="#6952EB"
                   />
                 }
-                href={`/dashboard/treasury/collection`}
-              >
+                href={`/dashboard/treasury/collection`}>
                 Cobranzas
               </SidenavItem>
             )}
@@ -1091,8 +1044,7 @@ export default function CompanySidenav() {
                     color="#6952EB"
                   />
                 }
-                href={`/dashboard/treasury/payments`}
-              >
+                href={`/dashboard/treasury/payments`}>
                 Pagos
               </SidenavItem>
             )}

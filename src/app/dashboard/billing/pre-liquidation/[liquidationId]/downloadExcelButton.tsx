@@ -32,17 +32,16 @@ export default function DownloadExcelButton({
   }
   return (
     <div className="flex flex-auto justify-end">
-    <Button
-    variant="bitcompay"
-    className=" text-base px-16 py-6 mt-5 gap-3 text-[#3e3e3e] rounded-full font-medium"
-    onClick={async () => {
-        alert("Descargando Excel Pre liquidación");
-        await handleGenerate(rows);
-      }}
-    >
-      <Download02Icon />
-      Exportar
-    </Button>
+      <Button
+        variant="bitcompay"
+        className=" text-base px-16 py-6 mt-5 gap-3 text-[#3e3e3e] rounded-full font-medium"
+        onClick={async () => {
+          alert("Descargando Excel Pre liquidación");
+          await handleGenerate(rows);
+        }}>
+        <Download02Icon />
+        Exportar
+      </Button>
     </div>
   );
 }
