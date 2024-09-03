@@ -190,13 +190,11 @@ export default function CompanySidenav() {
   // const canSeeBilling = has!({ permission: "org:management:sales" });
 
   const pathname = usePathname();
-  console.log(pathname)
   const isActive = (href: keyof typeof menu) => {
     if (href !== undefined) {
       if (href in menu) {
         const menuValue = menu[href];
         if (menuValue !== undefined) {
-          console.log(pathname.includes(menuValue));
           return pathname.includes(menuValue);
         }
       }
