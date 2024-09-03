@@ -33,6 +33,7 @@ import DetailSheet from "./detail-sheet";
 import { RouterOutputs } from "~/trpc/shared";
 import { TableRecord } from "./columns";
 import DataTableSummary from "~/components/tanstack/summary";
+import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
@@ -98,12 +99,12 @@ export function DataTable<TData, TValue>({
         columns={filteredColumns}
       />
 
-      <div className="rounded-md border">
+      <ScrollArea className="pb-7">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow
-                className="bg-[#F7F7F7] hover:bg-[#F7F7F7] rounded-lg "
+                className="bg-[#f7f7f7] first:rounded-s-lg last:rounded-e-lg"
                 key={headerGroup.id}
               >
                 {headerGroup.headers.map((header) => {
@@ -160,7 +161,8 @@ export function DataTable<TData, TValue>({
             )}
           </TableBody>
         </Table>
-      </div>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
 
       <DataTablePagination table={table} />
     </>
