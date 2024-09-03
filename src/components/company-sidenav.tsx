@@ -64,6 +64,7 @@ import Sidenav, {
 import { useAuth, useUser } from "@clerk/nextjs";
 import { checkRole } from "~/lib/utils/react/roles";
 import Inicio from "../../public/sidebar/Frame-1.svg";
+import path from "path";
 export default function CompanySidenav() {
   const menu: Record<string, string> = {
     Administracion: "administration/",
@@ -189,11 +190,13 @@ export default function CompanySidenav() {
   // const canSeeBilling = has!({ permission: "org:management:sales" });
 
   const pathname = usePathname();
+  console.log(pathname)
   const isActive = (href: keyof typeof menu) => {
     if (href !== undefined) {
       if (href in menu) {
         const menuValue = menu[href];
         if (menuValue !== undefined) {
+          console.log(pathname.includes(menuValue));
           return pathname.includes(menuValue);
         }
       }
@@ -446,6 +449,12 @@ export default function CompanySidenav() {
                           className="text-sideNav h-[3vh] w-[3vh]"
                         />
                       }
+                      activeIcon={
+                        <img
+                          src="/public/sidebar/Frame-3.png"
+                          className="text-sideNav h-[3vh] w-[3vh]"/>
+                      }
+                      isActive={isActive("Ventas")}
                       className="text-sideNav"
                     >
                       Ventas{" "}
@@ -499,16 +508,15 @@ export default function CompanySidenav() {
                     {canSeePlans && (
                       <SidenavItem
                         icon={
-                          <MapPin
-                            strokeWidth={1}
-                            className="w-[1.5vw] h-auto"
+                          <img 
+                          src="/public/sidebar/Frame-28.png"
+                          className="h-auto w-auto"
                           />
                         }
                         activeIcon={
-                          <MapPin
-                            strokeWidth={1}
-                            color="#6952EB"
-                            className="w-[1.5vw] h-auto"
+                          <img 
+                          src="/public/sidebar/Frame-29.png"
+                          className="h-auto w-auto"
                           />
                         }
                         href={`/dashboard/management/sales/plans`}
@@ -605,6 +613,13 @@ export default function CompanySidenav() {
                           className=" h-[3vh] w-[3vh]"
                         />
                       }
+                      activeIcon={
+                        <img
+                          src="/public/sidebar/Frame-5.png"
+                          className=" h-[3vh] w-[3vh]"
+                        />
+                      }
+                      isActive={isActive("Clientes")}
                       className="text-sideNav"
                     >
                       Clientes
@@ -737,6 +752,14 @@ export default function CompanySidenav() {
                       icon={
                         <Files strokeWidth={1} className="w-[1.5vw] h-auto" />
                       }
+                      activeIcon={
+                        <Files
+                          strokeWidth={1}
+                          color="#6952EB"
+                          className="w-[1.5vw] h-auto"
+                        />
+                      }
+                      isActive={isActive("Documentos")}
                       className="text-sideNav"
                     >
                       Documentos
