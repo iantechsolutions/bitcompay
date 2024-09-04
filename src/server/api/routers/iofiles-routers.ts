@@ -128,13 +128,17 @@ export const iofilesRouter = createTRPCRouter({
           //     message: `card_brand, card_type and presentation_date are required for DEBITO AUTOMATICO`,
           //   });
           // }
+          let card_brand = input.card_brand ?? "Visa";
 
+          console.log("testttt", card_brand, brand.id);
           const establishment = await db.query.establishments.findFirst({
             where: and(
-              eq(schema.establishments.brandId, "OC_f8Ci-Z2nmxivdWmWiZ"),
-              eq(schema.establishments.flag, "Visa")
+              eq(schema.establishments.brandId, brand.id),
+              eq(schema.establishments.flag, card_brand ?? "")
             ),
           });
+          console.log("testttt", establishment);
+
           if (!establishment) {
             throw new TRPCError({
               code: "BAD_REQUEST",
@@ -143,7 +147,7 @@ export const iofilesRouter = createTRPCRouter({
           }
           text = generateDebitoAutomatico({
             payments,
-            EstablishmentNumber: establishment.establishment_number,
+            EstablishmentNumber: establishment.establishment_number ?? 0,
             cardType: input.card_type ?? "",
             flag: input.card_brand ?? "",
             // presentationDate: input.presentation_date,
