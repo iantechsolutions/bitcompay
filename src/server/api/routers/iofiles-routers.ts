@@ -72,13 +72,14 @@ export const iofilesRouter = createTRPCRouter({
 
         if (payments.length === 0) {
           text = "No existen payments disponibles";
-        } else if (channel.name.includes("DEBITO DIRECTO")) {
+        } else if (channel.name.includes("DEBITO DIRECTO CBU")) {
           const generateInput = {
             channelId: channel.id,
             companyId: companyId!,
             fileName: input.fileName!,
             concept: input.concept,
             redescription: brand.redescription,
+            brand_name: brand.name,
           };
           text = generateDebitoDirecto(generateInput, payments);
         } else if (channel.name.includes("PAGOMISCUENTAS")) {
@@ -88,6 +89,7 @@ export const iofilesRouter = createTRPCRouter({
             fileName: input.fileName!,
             concept: input.concept,
             redescription: brand.redescription,
+            brand_name: brand.name,
           };
           text = generatePagomiscuentas(
             generateInput,
@@ -265,9 +267,13 @@ function generateDebitoDirecto(
     fileName: string;
     concept: string;
     redescription: string;
+    brand_name: string;
   },
   transactions: RouterOutputs["transactions"]["list"]
 ) {
+  let register_code = "4110";
+  let brand_code = "02513";
+
   let currentDate = dayjs().utc().tz("America/Argentina/Buenos_Aires");
   const currentHour = currentDate.hour();
   const currentMinutes = currentDate.minute();
@@ -275,11 +281,22 @@ function generateDebitoDirecto(
     currentDate = currentDate.add(1, "day");
   }
   const dateYYYYMMDD = currentDate.format("YYYYMMDD");
+
+  let banco_emisor = "0017";
+  let sucursal_number = "0356";
+  let account_digit = "73";
+  let account_number = "0103179945";
+  let divisa = "ARS0";
+
   const fileName = formatString(" ", input.fileName, 12, true);
   const redDescription = formatString(" ", input.redescription, 10, true);
-  let text = `411002513${dateYYYYMMDD}${dateYYYYMMDD}00170356730103179945${redDescription}ARS0${fileName}BITCOM SRL${" ".repeat(
-    26
-  )}20${" ".repeat(141)}\r\n`;
+
+  let brand_name = formatString(" ", input.brand_name, 36, true);
+  let account_type = "20";
+  let text = `${register_code}${brand_code}${dateYYYYMMDD}${dateYYYYMMDD}${banco_emisor}${sucursal_number}${account_digit}${account_number}${redDescription}${divisa}${fileName}${brand_name}${account_type}${" ".repeat(
+    141
+  )}\r\n`;
+
   let total_records = 1;
   let total_operations = 0;
   let total_collected = 0;
@@ -348,12 +365,7 @@ function generateDebitoDirecto(
       transaction.collected_amount ?? transaction.first_due_amount ?? 0;
   }
 
-  const total_collected_string = formatString(
-    "0",
-    total_collected?.toString(),
-    15,
-    false
-  );
+  const total_collected_string = formatAmount(total_collected, 13);
   const total_operations_string = formatString(
     "0",
     total_operations?.toString(),
