@@ -103,6 +103,7 @@ export const iofilesRouter = createTRPCRouter({
             companyId: companyId!,
             fileName: input.fileName!,
             concept: input.concept,
+            brandName: brand.name,
             redescription: brand.redescription,
             prisma_code: brand.prisma_code ?? "0000",
           };
@@ -113,6 +114,7 @@ export const iofilesRouter = createTRPCRouter({
             companyId: companyId!,
             fileName: input.fileName!,
             concept: input.concept,
+            brandName: brand.name,
             redescription: brand.redescription,
             prisma_code: brand.prisma_code,
           };
@@ -506,6 +508,7 @@ async function generatePagoFacil(
     companyId: string;
     fileName: string;
     concept: string;
+    brandName: string;
     redescription: string;
     prisma_code: string;
   },
@@ -538,6 +541,14 @@ async function generatePagoFacil(
 
   for (const transaction of transactions) {
     let register_type = "02";
+    let brandCode;
+    if (_input.brandName === "RED ARGENTINA DE SANATORIOS") {
+      brandCode = "002";
+    } else if (_input.brandName === "Cristal Salud") {
+      brandCode = "002";
+    } else {
+      brandCode = "000";
+    }
 
     const fiscal_id_number = formatString(
       " ",
@@ -548,7 +559,7 @@ async function generatePagoFacil(
     const invoice_number = formatString(
       "0",
       transaction.invoice_number.toString(),
-      21,
+      18,
       false
     );
     const seq_number = `${dayjs(transaction.first_due_date).year()}01`;
@@ -617,7 +628,7 @@ async function generatePagoFacil(
       true
     );
 
-    text += `${register_type}${invoice_number}${fiscal_id_number}${seq_number}${message}${name}${barcode}${validity_date}${first_due_date}${payment_type}${" ".repeat(
+    text += `${register_type}${brandCode}${invoice_number}${fiscal_id_number}${seq_number}${message}${name}${barcode}${validity_date}${first_due_date}${payment_type}${" ".repeat(
       9
     )}\r\n`;
     // detalle;
@@ -632,9 +643,9 @@ async function generatePagoFacil(
     false
   );
   const total_collected_string = formatAmount(total_collected!, 10);
-  text += `${triller_register}${"0".repeat(8)}${"0".repeat(12)}${"0".repeat(
-    7
-  )}${total_records_string}${total_collected_string}${"0".repeat(143)}`;
+  // text += `${triller_register}${"0".repeat(8)}${"0".repeat(12)}${"0".repeat(
+  //   7
+  // )}${total_records_string}${total_collected_string}${"0".repeat(143)}`;
   return text;
 }
 function generateRapiPago(
