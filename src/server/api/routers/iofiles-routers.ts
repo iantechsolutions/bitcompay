@@ -524,7 +524,7 @@ async function generatePagoFacil(
     const first_due_date = dayjs(transaction.first_due_date).format("YYYYMMDD");
     const first_codebar = dayjs(transaction.first_due_date).format("DD");
 
-    const second_due_date = "00000000";
+    const second_due_date = first_due_date;
     const validity_date = dayjs(transaction.period).format("YYYYMMDD");
 
     const first_due_amount = formatString(
@@ -609,8 +609,12 @@ function generateRapiPago(
   transactions: RouterOutputs["transactions"]["list"]
 ) {
   const currentDate = dayjs().format("YYYYMMDD");
+  let register_type = "0";
+  let rapipago_code = "814";
 
-  let text = `081400${currentDate}${"0".repeat(76)}\n`;
+  let text = `${register_type}${rapipago_code}${"0".repeat(
+    2
+  )}${currentDate}${"0".repeat(76)}\n`;
   // let text = `${"0".repeat(8)}BITCOM SRL${" ".repeat(
   //   10
   // )}${currentDate}Cobranzas Rapipago${" ".repeat(19)}\n`;
@@ -618,9 +622,10 @@ function generateRapiPago(
   let total_collected = 0;
 
   for (const transaction of transactions) {
+    let register_type = "5";
     const fiscal_id_number = formatString(
       "0",
-      transaction.fiscal_id_number!.toString(),
+      transaction.affiliate_number!.toString(),
       19,
       false
     );
@@ -630,23 +635,26 @@ function generateRapiPago(
       20,
       false
     );
+    let moneda = "0";
     const first_due_date = dayjs(transaction.first_due_date).format("YYYYMMDD");
 
     const first_due_amount_test = formatAmount(
       transaction.first_due_amount!,
       9
     );
-    const second_due_amount_test = formatAmount(
-      transaction.first_due_amount!,
-      9
-    );
+    let second_due_amount;
+    if (transaction.second_due_amount) {
+      second_due_amount = formatAmount(transaction.second_due_amount, 9);
+    } else {
+      second_due_amount = "0".repeat(11);
+    }
     const second_due_date = dayjs(
       transaction.second_due_date
         ? transaction.second_due_date
         : transaction.first_due_date
     ).format("YYYYMMDD");
 
-    text += `5${fiscal_id_number}${invoice_number}0${first_due_date}${first_due_amount_test}${second_due_date}${second_due_amount_test}${"0".repeat(
+    text += `${register_type}${fiscal_id_number}${invoice_number}${moneda}${first_due_date}${first_due_amount_test}${second_due_date}${second_due_amount}${"0".repeat(
       11
     )}\n`;
     // text += `${currentDate}${" ".repeat(
@@ -657,17 +665,20 @@ function generateRapiPago(
     total_records++;
     total_collected += transaction.first_due_amount ?? 0;
   }
+  let type_register = "9";
   const total_records_string = formatString(
     "0",
     total_records.toString(),
     7,
     false
   );
+  let dollarRecords = "0".repeat(7);
+  let dollarAmount = "0".repeat(11);
 
   const total_collected_string_test = formatAmount(total_collected, 9);
-  text += `981400${currentDate}${total_records_string}${"0".repeat(
-    7
-  )}${total_collected_string_test}${"0".repeat(51)}`;
+  text += `${type_register}${rapipago_code}00${currentDate}${total_records_string}${dollarRecords}${total_collected_string_test}${dollarAmount}${"0".repeat(
+    40
+  )}`;
   // text += `${"9".repeat(
   //   8
   // )}${total_records_string}${total_collected_string_test}${" ".repeat(39)}`;
