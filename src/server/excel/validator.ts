@@ -120,10 +120,10 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     state: "ACTIVO" | "INACTIVO" | null;
     holder_id_number: string | null;
     name: string | null;
+    own_id_type: "DNI" | "PASAPORTE" | null;
+    own_id_number: string | null;
     affiliate_number: string | number | null;
     extension: string | null;
-    own_id_type: "DNI" | "PASAPORTE" | null;
-    du_number: string | null;
     relationship: string | null;
     birth_date: Date | null;
     gender: "MASCULINO" | "FEMENINO" | "OTRO" | null;
@@ -382,10 +382,11 @@ export const recDocumentValidator = z
       state: value.ESTADO ?? null,
       holder_id_number: value["NRO DOC TITULAR"] ?? null,
       name: value.NOMBRE ?? null,
+      own_id_number: value["NRO DOC PROPIO"] ?? null,
+      own_id_type: value["TIPO DOC PROPIO"] ?? null,
       affiliate_number: value["NRO AFILIADO"] ?? null,
       extension: value.EXTENSION ?? null,
-      own_id_type: value["TIPO DOC PROPIO"] ?? null,
-      du_number: value["NRO DOC PROPIO"] ?? null,
+      // du_number: value["NRO DOC PROPIO"] ?? null,
       relationship: value.PAR ?? null,
       birth_date: value["FECHA NACIMIENTO"] ?? null,
       gender: value.GENERO ?? null,
@@ -435,8 +436,8 @@ export const recHeaders: TableHeaders = [
   { key: "name", label: "NOMBRE", width: 140 },
   { key: "affiliate_number", label: "NRO AFILIADO", width: 140 },
   { key: "extension", label: "EXTENSION", width: 140 },
-  { key: "du_type", label: "TIPO DOC PROPIO", width: 140 },
-  { key: "du_number", label: "NRO DOC PROPIO", width: 140 },
+  { key: "own_id_type", label: "TIPO DOC PROPIO", width: 140 },
+  { key: "own_id_number", label: "NRO DOC PROPIO", width: 140 },
   { key: "relationship", label: "PAR", width: 140 },
   { key: "birth_date", label: "FECHA NACIMIENTO", width: 140 },
   { key: "gender", label: "GENERO", width: 140 },
@@ -462,7 +463,7 @@ export const recHeaders: TableHeaders = [
   { key: "differential_value", label: "DIFERENCIAL VALOR", width: 140 },
   { key: "balance", label: "SALDO CUENTA CORRIENTE", width: 140 },
   { key: "plan", label: "PLAN", width: 140 },
-  { key: "product_number", label: "PRODUCTO", width: 140 },
+  { key: "product", label: "PRODUCTO", width: 140 },
   { key: "cbu", label: "NRO CBU", width: 140 },
   { key: "card_brand", label: "TC MARCA", width: 140 },
   { key: "is_new", label: "ALTA NUEVA", width: 140 },
@@ -478,10 +479,10 @@ export const requiredColumns = [
   { key: "state", label: "ESTADO" },
   { key: "holder_id_number", label: "NRO DOC TITULAR" },
   { key: "name", label: "NOMBRE" },
-  { key: "affiliate_number", label: "NRO AFILIADO" },
-  { key: "extension", label: "EXTENSION" },
   { key: "own_id_type", label: "TIPO DOC PROPIO" },
-  { key: "du_number", label: "NRO DOC PROPIO" },
+  { key: "own_id_number", label: "NRO DOC PROPIO" },
+  // { key: "affiliate_number", label: "NRO AFILIADO" },
+  { key: "extension", label: "EXTENSION" },
   { key: "relationship", label: "PAR" },
   { key: "birth_date", label: "FECHA NACIMIENTO" },
   { key: "gender", label: "GENERO" },
@@ -494,7 +495,6 @@ export const requiredColumns = [
   { key: "address", label: "DIRECCION" },
   { key: "postal code", label: "CP" },
   // { key: "cellphone", label: "CELULAR" },
-  { key: "email", label: "EMAIL" },
   { key: "plan", label: "PLAN" },
   { key: "product", label: "PRODUCTO" },
 ];

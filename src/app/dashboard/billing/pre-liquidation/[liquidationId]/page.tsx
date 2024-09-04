@@ -165,15 +165,15 @@ export default async function Home(props: {
     const total = toNumberOrZero(
       parseFloat(original_comprobante?.importe?.toFixed(2)!)
     );
-    summary["Total a facturar"] += total;
-    excelRow.push(total);
+    excelRows.push(excelRow);
     const subTotal = computeBase(total, Number(original_comprobante?.iva!));
     summary["Sub Total"] += subTotal;
-    excelRow.push(subTotal);
     const iva = computeIva(total, Number(original_comprobante?.iva!));
     summary.IVA += iva;
+    summary["Total a facturar"] += total;
+    excelRow.push(subTotal);
     excelRow.push(iva);
-    excelRows.push(excelRow);
+    excelRow.push(total);
     // const lastEvent = await api.events.getLastByDateAndCC.query({
     //   ccId: fg?.cc?.id!,
     //   date: preliquidation?.createdAt ?? new Date(),
@@ -211,10 +211,11 @@ export default async function Home(props: {
   return (
     <LayoutContainer>
       <div className="flex flex-row justify-between w-full">
-        <GoBackButton url="/dashboard/billing/pre-liquidation" />
+        {/* <GoBackButton url="/dashboard/billing/pre-liquidation" /> */}
+        <Title>Pre-Liquidación</Title>
         {preliquidation?.estado === "pendiente" && (
           <>
-            <div className="flex flex-row gap-1">
+            <div className="flex flex-row gap-4 mr-8">
               <UpdateLiquidationEstadoDialog
                 liquidationId={props.params.liquidationId}
                 userId={userActual?.id ? userActual?.id : ""}
@@ -226,35 +227,45 @@ export default async function Home(props: {
           </>
         )}
       </div>
-      <div className="grid grid-cols-3 gap-x-2 gap-y-2 ml-3 text-base opacity-50">
-        <ul className="list-disc">
-          <li>
-            <span className="font-bold "> CUIT: </span>
-            {companyData?.cuit ?? "-"}
-          </li>
-          <li className="opacity-70">
-            <span className="font-bold ">Razon social: </span>
-            {companyData?.razon_social ?? "-"}
-          </li>
-        </ul>
-        <ul className="list-disc">
-          <li>
-            <span className="font-bold ">Gerenciador: </span>
-            {businessUnit?.description ?? "-"}
+      <div className="bg-[#f6f6f6] rounded-lg text-base">
+        <ul className="grid grid-cols-3 gap-x-2 list-none px-8 py-5">
+          <li className="">
+            <span className=" text-xs">RAZÓN SOCIAL</span>
+            <br />
+            <p className="font-medium text-md">
+              {companyData?.razon_social ?? "-"}
+            </p>
           </li>
           <li>
-            <span className="font-bold ">Periodo: </span>
-            {periodo}
-          </li>
-        </ul>
-        <ul className="list-disc">
-          <li>
-            <span className="font-bold opacity-100">Nro. Pre-liq: </span>
-            {preliquidation?.number ?? "-"}
+            <span className=" text-xs">CUIT</span>
+            <br />
+            <p className="font-medium text-md">{companyData?.cuit ?? "-"}</p>
           </li>
           <li>
-            <span className="font-bold opacity-100">Fecha: </span>
-            {dayjs.utc(preliquidation?.createdAt).format("DD/MM/YYYY") ?? "-"}
+            <span className=" text-xs">GERENCIADOR</span>
+            <br />
+            <p className="font-medium text-md">
+              {businessUnit?.description ?? "-"}
+            </p>
+          </li>
+          <li>
+            <span className=" text-xs">PERÍODO</span>
+            <br />
+            <p className="font-medium text-md">{periodo}</p>
+          </li>
+          <li>
+            <span className=" text-xsopacity-100">N° PRE-LIQUIDACIÓN</span>
+            <br />
+            <p className="font-medium text-md">
+              {preliquidation?.number ?? "-"}
+            </p>
+          </li>
+          <li>
+            <span className=" text-xsopacity-100">FECHA</span>
+            <br />
+            <p className="font-medium text-md">
+              {dayjs.utc(preliquidation?.createdAt).format("DD/MM/YYYY") ?? "-"}
+            </p>
           </li>
         </ul>
       </div>

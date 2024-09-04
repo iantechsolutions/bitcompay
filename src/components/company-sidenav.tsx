@@ -64,6 +64,7 @@ import Sidenav, {
 import { useAuth, useUser } from "@clerk/nextjs";
 import { checkRole } from "~/lib/utils/react/roles";
 import Inicio from "../../public/sidebar/Frame-1.svg";
+import path from "path";
 export default function CompanySidenav() {
   const menu: Record<string, string> = {
     Administracion: "administration/",
@@ -226,8 +227,7 @@ export default function CompanySidenav() {
               alt="inicio"
               className="w-[2vw] h-auto "
             />
-          }
-        >
+          }>
           Inicio
         </SidenavItem>
         {canSeeGeneral && (
@@ -240,7 +240,10 @@ export default function CompanySidenav() {
             <SidenavItem
               className="flex text-sideNav gap-[0vw] "
               icon={
-                <LayoutDashboardIcon strokeWidth={1} className="w-[1.5vw] h-auto" />
+                <LayoutDashboardIcon
+                  strokeWidth={1}
+                  className="w-[1.5vw] h-auto"
+                />
               }
               activeIcon={
                 <LayoutDashboardIcon
@@ -249,424 +252,9 @@ export default function CompanySidenav() {
                   color="#6952EB"
                 />
               }
-              href={`/dashboard`}
-            >
+              href={`/dashboard`}>
               Dashboard
             </SidenavItem>
-          </>
-        )}
-
-        {canSeeManagement && (
-          <>
-            <div>
-              <SidenavSeparator className="text-sideNav">
-                GESTIÓN
-              </SidenavSeparator>
-            </div>
-
-            {canSeeSales && (
-              <Accordion type="single" collapsible>
-                <AccordionItem value="item-1" className="border-none">
-                  <AccordionTrigger
-                    className={
-                      isActive("Ventas")
-                        ? "bg-[#BEF0BB]  py-[1vh] mb-[0vh]  hover:no-underline"
-                        : " py-[1vh] mb-[0vh]  hover:no-underline"
-                    }
-                  >
-                    <SideNavTrigger
-                      icon={
-                        <img
-                          src="/public/sidebar/Frame-2.png"
-                          className="text-sideNav h-[3vh] w-[3vh]"
-                        />
-                      }
-                      className="text-sideNav"
-                    >
-                      Ventas{" "}
-                    </SideNavTrigger>
-                  </AccordionTrigger>
-                  <AccordionContent className="pl-[1.5vw]">
-                    {canSeeAdvisors && (
-                      <SidenavItem
-                        icon={<UserPlus strokeWidth={1} className="w-[1.5vw] h-auto" />}
-                        activeIcon={
-                          <UserPlus strokeWidth={1} color="#6952EB" className="w-[1.5vw] h-auto" />
-                        }
-                        href={`/dashboard/management/sales/advisors`}
-                        IsChild={true}
-                        className="text-sideNav"
-                      >
-                        Asesores
-                      </SidenavItem>
-                    )}
-                    {canSeeProcedures && (
-                      <SidenavItem
-                        icon={<FilePlus strokeWidth={1} className="w-[1.5vw] h-auto" />}
-                        activeIcon={
-                          <FilePlus strokeWidth={1} color="#6952EB" className="w-[1.5vw] h-auto" />
-                        }
-                        href={`/dashboard/management/sales/procedures`}
-                        IsChild={true}
-                        className="text-sideNav"
-                      >
-                        Trámites
-                      </SidenavItem>
-                    )}
-                    {canSeePlans && (
-                      <SidenavItem
-                        icon={<MapPin strokeWidth={1} className="w-[1.5vw] h-auto"/>}
-                        activeIcon={<MapPin strokeWidth={1} color="#6952EB" className="w-[1.5vw] h-auto"/>}
-                        href={`/dashboard/management/sales/plans`}
-                        IsChild={true}
-                        className="text-sideNav"
-                      >
-                        Planes
-                      </SidenavItem>
-                    )}
-                    {canSeeDifferentials && (
-                      <SidenavItem
-                        icon={<BarChart2 strokeWidth={1} className="w-[1.5vw] h-auto"/>}
-                        activeIcon={
-                          <BarChart2 strokeWidth={1} color="#6952EB" className="w-[1.5vw] h-auto"/>
-                        }
-                        href={`/dashboard/management/sales/differentials`}
-                        IsChild={true}
-                        className="text-sideNav"
-                      >
-                        Diferenciales
-                      </SidenavItem>
-                    )}
-                    {canSeeComissions && (
-                      <SidenavItem
-                        icon={<DollarSign strokeWidth={1} className="w-[1.5vw] h-auto"/>}
-                        activeIcon={
-                          <DollarSign strokeWidth={1} color="#6952EB" className="w-[1.5vw] h-auto" />
-                        }
-                        href={`/dashboard/management/sales/comissions`}
-                        IsChild={true}
-                        className="text-sideNav"
-                      >
-                        Comisiones
-                      </SidenavItem>
-                    )}
-                    {canSeeBonuses && (
-                      <SidenavItem
-                        icon={<Percent strokeWidth={1} className="w-[1.5vw] h-auto"/>}
-                        activeIcon={<Percent strokeWidth={1} color="#6952EB" className="w-[1.5vw] h-auto"/>}
-                        href={`/dashboard/management/sales/bonuses`}
-                        IsChild={true}
-                        className="text-sideNav"
-                      >
-                        Bonificaciones
-                      </SidenavItem>
-                    )}
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            )}
-            {canSeeClient && (
-              <Accordion type="single" collapsible className="">
-                <AccordionItem value="item-1" className="border-none">
-                  <AccordionTrigger
-                    className={
-                      isActive("Clientes")
-                        ? "bg-[#BEF0BB]  py-[1vh] mb-[0vh]  hover:no-underline"
-                        : " py-[1vh] mb-[0vh]  hover:no-underline"
-                    }
-                  >
-                    <SideNavTrigger
-                      icon={
-                        <img
-                          src="/public/sidebar/Frame-4.png"
-                          className=" h-[3vh] w-[3vh]"
-                        />
-                      }
-                      className="text-sideNav"
-                    >
-                      Clientes
-                    </SideNavTrigger>
-                  </AccordionTrigger>{" "}
-                  <AccordionContent className="pl-[1.5vw]">
-                    {canSeeAffiliates && (
-                      <SidenavItem
-                        icon={<UserRound strokeWidth={1} className="w-[1.5vw] h-auto"/>}
-                        activeIcon={
-                          <UserRound strokeWidth={1} color="#6952EB" className="w-[1.5vw] h-auto" />
-                        }
-                        href={`/dashboard/management/client/affiliates`}
-                        IsChild={true}
-                        className="text-sideNav"
-                      >
-                        Afiliados
-                      </SidenavItem>
-                    )}
-                    {canSeeHealthInsurances && (
-                      <SidenavItem
-                        icon={
-                          <img
-                            src="/public/sidebar/Frame-26.png"
-                            className=" w-[2vw] h-auto"
-                          />
-                        }
-                        activeIcon={
-                          <img
-                            src="/public/sidebar/Frame-27.png"
-                            className=" w-[2vw] h-auto"
-                          />
-                        }
-                        href={`/dashboard/management/client/health_insurances`}
-                        IsChild={true}
-                        className="text-sideNav"
-                      >
-                        Obras sociales
-                      </SidenavItem>
-                    )}
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            )}
-
-            {canSeeSupliers && (
-              <Accordion type="single" collapsible className="">
-                <AccordionItem value="item-1" className="border-none">
-                  <AccordionTrigger
-                    className={
-                      isActive("Proveedores")
-                        ? " bg-[#BEF0BB]  py-[1vh] mb-[0vh]  hover:no-underline"
-                        : " py-[1vh] mb-[0vh] hover:no-underline"
-                    }
-                  >
-                    <SideNavTrigger className="text-sideNav">
-                      Proveedores
-                    </SideNavTrigger>
-                  </AccordionTrigger>
-                  <AccordionContent className="pl-[1.5vw]">
-                    <SidenavItem
-                      icon={<Bell strokeWidth={1} />}
-                      activeIcon={<Bell strokeWidth={1} color="#6952EB" />}
-                      href={`/dashboard/management/suppliers/abm`}
-                      IsChild={true}
-                      className="text-sideNav"
-                    >
-                      ABM Proveedores
-                    </SidenavItem>
-                    <SidenavItem
-                      icon={<Archive strokeWidth={1} />}
-                      activeIcon={<Archive strokeWidth={1} color="#6952EB" />}
-                      href={`/dashboard/management/suppliers/comprobants-upload`}
-                      IsChild={true}
-                      className="text-sideNav"
-                    >
-                      Alta Comprobantes
-                    </SidenavItem>
-                    <SidenavItem
-                      icon={<Folder strokeWidth={1} />}
-                      activeIcon={<Folder strokeWidth={1} color="#6952EB" />}
-                      href={`/dashboard/management/suppliers/currentAcounts`}
-                      IsChild={true}
-                      className="text-sideNav"
-                    >
-                      Cuentas Corrientes de Proveedores
-                    </SidenavItem>
-                    <SidenavItem
-                      icon={<Globe strokeWidth={1} />}
-                      activeIcon={<Globe strokeWidth={1} color="#6952EB" />}
-                      href={`/dashboard/management/suppliers/due_dates`}
-                      IsChild={true}
-                      className="text-sideNav"
-                    >
-                      Agenda de vencimientos
-                    </SidenavItem>
-                    <SidenavItem
-                      icon={<Heart strokeWidth={1} />}
-                      activeIcon={<Heart strokeWidth={1} color="#6952EB" />}
-                      href={`/dashboard/management/suppliers/orders`}
-                      IsChild={true}
-                      className="text-sideNav"
-                    >
-                      Ordenes de Pago
-                    </SidenavItem>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            )}
-            {canSeeDocuments && (
-              <Accordion type="single" collapsible className="">
-                <AccordionItem value="item-1" className="border-none">
-                  <AccordionTrigger
-                    className={
-                      isActive("Documentos")
-                        ? " bg-[#BEF0BB]  py-[1vh] mb-[0vh]  hover:no-underline"
-                        : "   py-[1vh] mb-[0vh]  hover:no-underline"
-                    }
-                  >
-                    <SideNavTrigger
-                      icon={<Files strokeWidth={1} className="w-[1.5vw] h-auto"/>}
-                      className="text-sideNav"
-                    >
-                      Documentos
-                    </SideNavTrigger>
-                  </AccordionTrigger>
-                  <AccordionContent className="pl-[1.5vw]">
-                    {canSeeMasiveUpload && (
-                      <SidenavItem
-                        icon={<CloudUpload strokeWidth={1} className="w-[1.5vw] h-auto"/>}
-                        activeIcon={
-                          <CloudUpload strokeWidth={1} color="#6952EB" className="w-[1.5vw] h-auto"/>
-                        }
-                        href={`/dashboard/management/documents/massive-upload`}
-                        IsChild={true}
-                        className="text-sideNav"
-                      >
-                        Carga Masiva
-                      </SidenavItem>
-                    )}
-                    {canSeeRecUpload && (
-                      <SidenavItem
-                        icon={<Cloud strokeWidth={1} className="w-[1.5vw] h-auto"/>}
-                        activeIcon={<Cloud strokeWidth={1} color="#6952EB" className="w-[1.5vw] h-auto" />}
-                        href={`/dashboard/management/documents/rec-upload`}
-                        IsChild={true}
-                        className="text-sideNav"
-                      >
-                        Carga REC
-                      </SidenavItem>
-                    )}
-                    {canSeeOutput && (
-                      <SidenavItem
-                        icon={<CloudDownload strokeWidth={1} className="w-[1.5vw] h-auto"/>}
-                        activeIcon={
-                          <CloudDownload strokeWidth={1} color="#6952EB" className="w-[1.5vw] h-auto"/>
-                        }
-                        href={`/dashboard/management/documents/output`}
-                        IsChild={true}
-                        className="text-sideNav"
-                      >
-                        Archivos de salida
-                      </SidenavItem>
-                    )}
-                    {canSeeResponse && (
-                      <SidenavItem
-                        icon={<MessageCircle strokeWidth={1} className="w-[1.5vw] h-auto"/>}
-                        activeIcon={
-                          <MessageCircle strokeWidth={1} color="#6952EB" className="w-[1.5vw] h-auto"/>
-                        }
-                        href={`/dashboard/management/documents/response`}
-                        IsChild={true}
-                        className="text-sideNav"
-                      >
-                        Respuesta
-                      </SidenavItem>
-                    )}
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            )}
-          </>
-        )}
-        {canSeeBilling && (
-          <>
-            <div>
-              <SidenavSeparator className="text-sideNav">
-                FACTURACIÓN
-              </SidenavSeparator>
-            </div>
-
-            {canSeeManualIssuance && (
-              <SidenavItem
-                icon={
-                  <img
-                    src="/public/sidebar/Frame-6.png"
-                    className="w-[2vw] h-auto"
-                  />
-                }
-                activeIcon={
-                  <img
-                    src="/public/sidebar/Frame-7.png"
-                    className="w-[2vw] h-auto"
-                  />
-                }
-                href={`/dashboard/billing/manual_issuance`}
-                className="text-sideNav"
-              >
-                Generar manual
-              </SidenavItem>
-            )}
-            {canSeePreLiquidation && (
-              <SidenavItem
-                icon={
-                  <img
-                    src="/public/sidebar/Frame-8.png"
-                    className="w-[2vw] h-auto"
-                  />
-                }
-                activeIcon={
-                  <img
-                    src="/public/sidebar/Frame-9.png"
-                    className="w-[2vw] h-auto"
-                  />
-                }
-                href={`/dashboard/billing/pre-liquidation`}
-                className="text-sideNav"
-              >
-                Pre-Liquidacion
-              </SidenavItem>
-            )}
-            {canSeeLiquidation && (
-              <SidenavItem
-                icon={
-                  <img
-                    src="/public/sidebar/Frame-10.png"
-                    className="w-[2vw] h-auto"
-                  />
-                }
-                activeIcon={
-                  <img
-                    src="/public/sidebar/Frame-11.png"
-                    className="w-[2vw] h-auto"
-                  />
-                }
-                href={`/dashboard/billing/liquidation`}
-                className="text-sideNav"
-              >
-                Liquidacion
-              </SidenavItem>
-            )}
-            {canSeeInformation && (
-              <SidenavItem
-                icon={
-                  <HelpCircle strokeWidth={1} className="w-[1.5vw] h-auto" />
-                }
-                activeIcon={
-                  <HelpCircle
-                    strokeWidth={1}
-                    color="#6952EB"
-                    className="w-[1.5vw] h-auto"
-                  />
-                }
-                href={`/dashboard/billing/information`}
-                className="text-sideNav"
-              >
-                Informacion
-              </SidenavItem>
-            )}
-            {canSeeConsults && (
-              <SidenavItem
-                icon={<Search strokeWidth={1} className="w-[1.5vw] h-auto" />}
-                activeIcon={
-                  <Search
-                    strokeWidth={1}
-                    color="#6952EB"
-                    className="w-[1.5vw] h-auto"
-                  />
-                }
-                href={`/dashboard/billing/consults`}
-                className="text-sideNav"
-              >
-                Consultas
-              </SidenavItem>
-            )}
           </>
         )}
         {canSeeAdministration && (
@@ -693,8 +281,7 @@ export default function CompanySidenav() {
                     className="w-[1.5vw] h-auto"
                   />
                 }
-                className="text-sideNav"
-              >
+                className="text-sideNav">
                 Entidades
               </SidenavItem>
             )}
@@ -709,8 +296,7 @@ export default function CompanySidenav() {
                   />
                 }
                 icon={<Package strokeWidth={1} className="w-[1.5vw] h-auto" />}
-                className="text-sideNav"
-              >
+                className="text-sideNav">
                 Productos
               </SidenavItem>
             )}
@@ -725,8 +311,7 @@ export default function CompanySidenav() {
                   />
                 }
                 icon={<Sliders strokeWidth={1} className="w-[1.5vw] h-auto" />}
-                className="text-sideNav"
-              >
+                className="text-sideNav">
                 Canales
               </SidenavItem>
             )}
@@ -741,8 +326,7 @@ export default function CompanySidenav() {
                   />
                 }
                 icon={<Tag strokeWidth={1} className="w-[1.5vw] h-auto" />}
-                className="text-sideNav"
-              >
+                className="text-sideNav">
                 Marcas
               </SidenavItem>
             )}
@@ -757,8 +341,7 @@ export default function CompanySidenav() {
                   />
                 }
                 icon={<Wrench strokeWidth={1} className="w-[1.5vw] h-auto" />}
-                className="text-sideNav"
-              >
+                className="text-sideNav">
                 Servicios
               </SidenavItem>
             )}
@@ -773,8 +356,7 @@ export default function CompanySidenav() {
                     className="w-[1.5vw] h-auto"
                   />
                 }
-                className="text-sideNav"
-              >
+                className="text-sideNav">
                 Cotizaciones
               </SidenavItem>
             )}
@@ -798,8 +380,7 @@ export default function CompanySidenav() {
                 />
               }
               href={`/dashboard/maintenance/user`}
-              className="text-sideNav"
-            >
+              className="text-sideNav">
               Usuarios
             </SidenavItem>
             <SidenavItem
@@ -812,8 +393,7 @@ export default function CompanySidenav() {
                   className="w-[1.5vw] h-auto"
                 />
               }
-              className="text-sideNav"
-            >
+              className="text-sideNav">
               Roles
             </SidenavItem>
             <SidenavItem
@@ -826,13 +406,421 @@ export default function CompanySidenav() {
                 />
               }
               href={`/dashboard/maintenance/tables`}
-              className="text-sideNav"
-            >
+              className="text-sideNav">
               Tablas
             </SidenavItem>
           </>
         )}
+        {canSeeManagement && (
+          <>
+            <div>
+              <SidenavSeparator className="text-sideNav">
+                GESTIÓN
+              </SidenavSeparator>
+            </div>
 
+            {canSeeSales && (
+              <Accordion type="single" collapsible>
+                <AccordionItem value="item-1" className="border-none">
+                  <AccordionTrigger
+                    className={
+                      isActive("Ventas")
+                        ? "bg-[#BEF0BB]  py-[1vh] mb-[0vh]  hover:no-underline"
+                        : " py-[1vh] mb-[0vh]  hover:no-underline"
+                    }>
+                    <SideNavTrigger
+                      icon={
+                        <img
+                          src="/public/sidebar/Frame-2.png"
+                          className="text-sideNav h-[3vh] w-[3vh]"
+                        />
+                      }
+                      activeIcon={
+                        <img
+                          src="/public/sidebar/Frame-3.png"
+                          className="text-sideNav h-[3vh] w-[3vh]"
+                        />
+                      }
+                      isActive={isActive("Ventas")}
+                      className="text-sideNav">
+                      Ventas{" "}
+                    </SideNavTrigger>
+                  </AccordionTrigger>
+                  <AccordionContent className="pl-[1.5vw]">
+                    {canSeeAdvisors && (
+                      <SidenavItem
+                        icon={
+                          <UserPlus
+                            strokeWidth={1}
+                            className="w-[1.5vw] h-auto"
+                          />
+                        }
+                        activeIcon={
+                          <UserPlus
+                            strokeWidth={1}
+                            color="#6952EB"
+                            className="w-[1.5vw] h-auto"
+                          />
+                        }
+                        href={`/dashboard/management/sales/advisors`}
+                        IsChild={true}
+                        className="text-sideNav">
+                        Asesores
+                      </SidenavItem>
+                    )}
+                    {canSeeProcedures && (
+                      <SidenavItem
+                        icon={
+                          <FilePlus
+                            strokeWidth={1}
+                            className="w-[1.5vw] h-auto"
+                          />
+                        }
+                        activeIcon={
+                          <FilePlus
+                            strokeWidth={1}
+                            color="#6952EB"
+                            className="w-[1.5vw] h-auto"
+                          />
+                        }
+                        href={`/dashboard/management/sales/procedures`}
+                        IsChild={true}
+                        className="text-sideNav">
+                        Trámites
+                      </SidenavItem>
+                    )}
+                    {canSeePlans && (
+                      <SidenavItem
+                        icon={
+                          <img
+                            src="/public/sidebar/Frame-28.png"
+                            className="h-auto w-auto"
+                          />
+                        }
+                        activeIcon={
+                          <img
+                            src="/public/sidebar/Frame-29.png"
+                            className="h-auto w-auto"
+                          />
+                        }
+                        href={`/dashboard/management/sales/plans`}
+                        IsChild={true}
+                        className="text-sideNav">
+                        Planes
+                      </SidenavItem>
+                    )}
+                    {canSeeDifferentials && (
+                      <SidenavItem
+                        icon={
+                          <BarChart2
+                            strokeWidth={1}
+                            className="w-[1.5vw] h-auto"
+                          />
+                        }
+                        activeIcon={
+                          <BarChart2
+                            strokeWidth={1}
+                            color="#6952EB"
+                            className="w-[1.5vw] h-auto"
+                          />
+                        }
+                        href={`/dashboard/management/sales/differentials`}
+                        IsChild={true}
+                        className="text-sideNav">
+                        Diferenciales
+                      </SidenavItem>
+                    )}
+                    {canSeeComissions && (
+                      <SidenavItem
+                        icon={
+                          <DollarSign
+                            strokeWidth={1}
+                            className="w-[1.5vw] h-auto"
+                          />
+                        }
+                        activeIcon={
+                          <DollarSign
+                            strokeWidth={1}
+                            color="#6952EB"
+                            className="w-[1.5vw] h-auto"
+                          />
+                        }
+                        href={`/dashboard/management/sales/comissions`}
+                        IsChild={true}
+                        className="text-sideNav">
+                        Comisiones
+                      </SidenavItem>
+                    )}
+                    {canSeeBonuses && (
+                      <SidenavItem
+                        icon={
+                          <Percent
+                            strokeWidth={1}
+                            className="w-[1.5vw] h-auto"
+                          />
+                        }
+                        activeIcon={
+                          <Percent
+                            strokeWidth={1}
+                            color="#6952EB"
+                            className="w-[1.5vw] h-auto"
+                          />
+                        }
+                        href={`/dashboard/management/sales/bonuses`}
+                        IsChild={true}
+                        className="text-sideNav">
+                        Bonificaciones
+                      </SidenavItem>
+                    )}
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            )}
+            {canSeeClient && (
+              <Accordion type="single" collapsible className="">
+                <AccordionItem value="item-1" className="border-none">
+                  <AccordionTrigger
+                    className={
+                      isActive("Clientes")
+                        ? "bg-[#BEF0BB]  py-[1vh] mb-[0vh]  hover:no-underline"
+                        : " py-[1vh] mb-[0vh]  hover:no-underline"
+                    }>
+                    <SideNavTrigger
+                      icon={
+                        <img
+                          src="/public/sidebar/Frame-4.png"
+                          className=" h-[3vh] w-[3vh]"
+                        />
+                      }
+                      activeIcon={
+                        <img
+                          src="/public/sidebar/Frame-5.png"
+                          className=" h-[3vh] w-[3vh]"
+                        />
+                      }
+                      isActive={isActive("Clientes")}
+                      className="text-sideNav">
+                      Clientes
+                    </SideNavTrigger>
+                  </AccordionTrigger>{" "}
+                  <AccordionContent className="pl-[1.5vw]">
+                    {canSeeAffiliates && (
+                      <SidenavItem
+                        icon={
+                          <UserRound
+                            strokeWidth={1}
+                            className="w-[1.5vw] h-auto"
+                          />
+                        }
+                        activeIcon={
+                          <UserRound
+                            strokeWidth={1}
+                            color="#6952EB"
+                            className="w-[1.5vw] h-auto"
+                          />
+                        }
+                        href={`/dashboard/management/client/affiliates`}
+                        IsChild={true}
+                        className="text-sideNav">
+                        Afiliados
+                      </SidenavItem>
+                    )}
+                    {canSeeHealthInsurances && (
+                      <SidenavItem
+                        icon={
+                          <img
+                            src="/public/sidebar/Frame-26.png"
+                            className=" w-[2vw] h-auto"
+                          />
+                        }
+                        activeIcon={
+                          <img
+                            src="/public/sidebar/Frame-27.png"
+                            className=" w-[2vw] h-auto"
+                          />
+                        }
+                        href={`/dashboard/management/client/health_insurances`}
+                        IsChild={true}
+                        className="text-sideNav">
+                        Obras sociales
+                      </SidenavItem>
+                    )}
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            )}
+
+            {canSeeSupliers && (
+              <Accordion type="single" collapsible className="">
+                <AccordionItem value="item-1" className="border-none">
+                  <AccordionTrigger
+                    className={
+                      isActive("Proveedores")
+                        ? " bg-[#BEF0BB]  py-[1vh] mb-[0vh]  hover:no-underline"
+                        : " py-[1vh] mb-[0vh] hover:no-underline"
+                    }>
+                    <SideNavTrigger className="text-sideNav">
+                      Proveedores
+                    </SideNavTrigger>
+                  </AccordionTrigger>
+                  <AccordionContent className="pl-[1.5vw]">
+                    <SidenavItem
+                      icon={<Bell strokeWidth={1} />}
+                      activeIcon={<Bell strokeWidth={1} color="#6952EB" />}
+                      href={`/dashboard/management/suppliers/abm`}
+                      IsChild={true}
+                      className="text-sideNav">
+                      ABM Proveedores
+                    </SidenavItem>
+                    <SidenavItem
+                      icon={<Archive strokeWidth={1} />}
+                      activeIcon={<Archive strokeWidth={1} color="#6952EB" />}
+                      href={`/dashboard/management/suppliers/comprobants-upload`}
+                      IsChild={true}
+                      className="text-sideNav">
+                      Alta Comprobantes
+                    </SidenavItem>
+                    <SidenavItem
+                      icon={<Folder strokeWidth={1} />}
+                      activeIcon={<Folder strokeWidth={1} color="#6952EB" />}
+                      href={`/dashboard/management/suppliers/currentAcounts`}
+                      IsChild={true}
+                      className="text-sideNav">
+                      Cuentas Corrientes de Proveedores
+                    </SidenavItem>
+                    <SidenavItem
+                      icon={<Globe strokeWidth={1} />}
+                      activeIcon={<Globe strokeWidth={1} color="#6952EB" />}
+                      href={`/dashboard/management/suppliers/due_dates`}
+                      IsChild={true}
+                      className="text-sideNav">
+                      Agenda de vencimientos
+                    </SidenavItem>
+                    <SidenavItem
+                      icon={<Heart strokeWidth={1} />}
+                      activeIcon={<Heart strokeWidth={1} color="#6952EB" />}
+                      href={`/dashboard/management/suppliers/orders`}
+                      IsChild={true}
+                      className="text-sideNav">
+                      Ordenes de Pago
+                    </SidenavItem>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            )}
+            {canSeeDocuments && (
+              <Accordion type="single" collapsible className="">
+                <AccordionItem value="item-1" className="border-none">
+                  <AccordionTrigger
+                    className={
+                      isActive("Documentos")
+                        ? " bg-[#BEF0BB]  py-[1vh] mb-[0vh]  hover:no-underline"
+                        : "   py-[1vh] mb-[0vh]  hover:no-underline"
+                    }>
+                    <SideNavTrigger
+                      icon={
+                        <Files strokeWidth={1} className="w-[1.5vw] h-auto" />
+                      }
+                      activeIcon={
+                        <Files
+                          strokeWidth={1}
+                          color="#6952EB"
+                          className="w-[1.5vw] h-auto"
+                        />
+                      }
+                      isActive={isActive("Documentos")}
+                      className="text-sideNav">
+                      Documentos
+                    </SideNavTrigger>
+                  </AccordionTrigger>
+                  <AccordionContent className="pl-[1.5vw]">
+                    {canSeeMasiveUpload && (
+                      <SidenavItem
+                        icon={
+                          <CloudUpload
+                            strokeWidth={1}
+                            className="w-[1.5vw] h-auto"
+                          />
+                        }
+                        activeIcon={
+                          <CloudUpload
+                            strokeWidth={1}
+                            color="#6952EB"
+                            className="w-[1.5vw] h-auto"
+                          />
+                        }
+                        href={`/dashboard/management/documents/massive-upload`}
+                        IsChild={true}
+                        className="text-sideNav">
+                        Carga Masiva
+                      </SidenavItem>
+                    )}
+                    {canSeeRecUpload && (
+                      <SidenavItem
+                        icon={
+                          <Cloud strokeWidth={1} className="w-[1.5vw] h-auto" />
+                        }
+                        activeIcon={
+                          <Cloud
+                            strokeWidth={1}
+                            color="#6952EB"
+                            className="w-[1.5vw] h-auto"
+                          />
+                        }
+                        href={`/dashboard/management/documents/rec-upload`}
+                        IsChild={true}
+                        className="text-sideNav">
+                        Carga REC
+                      </SidenavItem>
+                    )}
+                    {canSeeOutput && (
+                      <SidenavItem
+                        icon={
+                          <CloudDownload
+                            strokeWidth={1}
+                            className="w-[1.5vw] h-auto"
+                          />
+                        }
+                        activeIcon={
+                          <CloudDownload
+                            strokeWidth={1}
+                            color="#6952EB"
+                            className="w-[1.5vw] h-auto"
+                          />
+                        }
+                        href={`/dashboard/management/documents/output`}
+                        IsChild={true}
+                        className="text-sideNav">
+                        Archivos de salida
+                      </SidenavItem>
+                    )}
+                    {canSeeResponse && (
+                      <SidenavItem
+                        icon={
+                          <MessageCircle
+                            strokeWidth={1}
+                            className="w-[1.5vw] h-auto"
+                          />
+                        }
+                        activeIcon={
+                          <MessageCircle
+                            strokeWidth={1}
+                            color="#6952EB"
+                            className="w-[1.5vw] h-auto"
+                          />
+                        }
+                        href={`/dashboard/management/documents/response`}
+                        IsChild={true}
+                        className="text-sideNav">
+                        Respuesta
+                      </SidenavItem>
+                    )}
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            )}
+          </>
+        )}
         {canSeeAudit && (
           <>
             <div>
@@ -846,8 +834,7 @@ export default function CompanySidenav() {
               icon={<Clipboard className="w-[1.5vw] h-auto" />}
               activeIcon={
                 <Clipboard color="#6952EB" className="w-[1.5vw] h-auto" />
-              }
-            >
+              }>
               Administrativo
             </SidenavItem>
             <SidenavItem
@@ -859,8 +846,7 @@ export default function CompanySidenav() {
                   className="w-[1.5vw] h-auto"
                   color="#6952EB"
                 />
-              }
-            >
+              }>
               Médico
             </SidenavItem>
             <SidenavItem
@@ -872,8 +858,7 @@ export default function CompanySidenav() {
                   className="w-[1.5vw] h-auto"
                   color="#6952EB"
                 />
-              }
-            >
+              }>
               Telefónica
             </SidenavItem>
             <SidenavItem
@@ -885,8 +870,7 @@ export default function CompanySidenav() {
                   className="w-[1.5vw] h-auto"
                   color="#6952EB"
                 />
-              }
-            >
+              }>
               Prestaciones
             </SidenavItem>
             <SidenavItem
@@ -898,8 +882,7 @@ export default function CompanySidenav() {
                   className="w-[1.5vw] h-auto"
                   color="#6952EB"
                 />
-              }
-            >
+              }>
               Eventuales/Fijos
             </SidenavItem>
             <SidenavItem
@@ -911,13 +894,110 @@ export default function CompanySidenav() {
                   className="w-[1.5vw] h-auto"
                   color="#6952EB"
                 />
-              }
-            >
+              }>
               Operaciones
             </SidenavItem>
           </>
         )}
+        {canSeeBilling && (
+          <>
+            <div>
+              <SidenavSeparator className="text-sideNav">
+                FACTURACIÓN
+              </SidenavSeparator>
+            </div>
 
+            {canSeeManualIssuance && (
+              <SidenavItem
+                icon={
+                  <img
+                    src="/public/sidebar/Frame-6.png"
+                    className="w-[2vw] h-auto"
+                  />
+                }
+                activeIcon={
+                  <img
+                    src="/public/sidebar/Frame-7.png"
+                    className="w-[2vw] h-auto"
+                  />
+                }
+                href={`/dashboard/billing/manual_issuance`}
+                className="text-sideNav">
+                Generar manual
+              </SidenavItem>
+            )}
+            {canSeePreLiquidation && (
+              <SidenavItem
+                icon={
+                  <img
+                    src="/public/sidebar/Frame-8.png"
+                    className="w-[2vw] h-auto"
+                  />
+                }
+                activeIcon={
+                  <img
+                    src="/public/sidebar/Frame-9.png"
+                    className="w-[2vw] h-auto"
+                  />
+                }
+                href={`/dashboard/billing/pre-liquidation`}
+                className="text-sideNav">
+                Pre-Liquidacion
+              </SidenavItem>
+            )}
+            {canSeeLiquidation && (
+              <SidenavItem
+                icon={
+                  <img
+                    src="/public/sidebar/Frame-10.png"
+                    className="w-[2vw] h-auto"
+                  />
+                }
+                activeIcon={
+                  <img
+                    src="/public/sidebar/Frame-11.png"
+                    className="w-[2vw] h-auto"
+                  />
+                }
+                href={`/dashboard/billing/liquidation`}
+                className="text-sideNav">
+                Liquidacion
+              </SidenavItem>
+            )}
+            {canSeeInformation && (
+              <SidenavItem
+                icon={
+                  <HelpCircle strokeWidth={1} className="w-[1.5vw] h-auto" />
+                }
+                activeIcon={
+                  <HelpCircle
+                    strokeWidth={1}
+                    color="#6952EB"
+                    className="w-[1.5vw] h-auto"
+                  />
+                }
+                href={`/dashboard/billing/information`}
+                className="text-sideNav">
+                Informacion
+              </SidenavItem>
+            )}
+            {canSeeConsults && (
+              <SidenavItem
+                icon={<Search strokeWidth={1} className="w-[1.5vw] h-auto" />}
+                activeIcon={
+                  <Search
+                    strokeWidth={1}
+                    color="#6952EB"
+                    className="w-[1.5vw] h-auto"
+                  />
+                }
+                href={`/dashboard/billing/consults`}
+                className="text-sideNav">
+                Consultas
+              </SidenavItem>
+            )}
+          </>
+        )}
         {canSeeTreasury && (
           <>
             <div>
@@ -936,8 +1016,7 @@ export default function CompanySidenav() {
                     color="#6952EB"
                   />
                 }
-                href={`/dashboard/treasury/current_count`}
-              >
+                href={`/dashboard/treasury/current_count`}>
                 Cuenta Corriente
               </SidenavItem>
             )}
@@ -951,8 +1030,7 @@ export default function CompanySidenav() {
                     color="#6952EB"
                   />
                 }
-                href={`/dashboard/treasury/collection`}
-              >
+                href={`/dashboard/treasury/collection`}>
                 Cobranzas
               </SidenavItem>
             )}
@@ -966,8 +1044,7 @@ export default function CompanySidenav() {
                     color="#6952EB"
                   />
                 }
-                href={`/dashboard/treasury/payments`}
-              >
+                href={`/dashboard/treasury/payments`}>
                 Pagos
               </SidenavItem>
             )}

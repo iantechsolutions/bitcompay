@@ -136,7 +136,7 @@ export default function AddPlanPricesComponent({
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     try {
       setWorking(true);
-      if (!mes) {
+      if (!mes && !edit) {
         toast.error("ingrese el mes correspondiente");
         setWorking(false);
       } else {
@@ -241,7 +241,6 @@ export default function AddPlanPricesComponent({
       const price = initialPrices?.[index];
       if (price?.id) {
         await deletePricePerCondition({ id: price?.id ?? "" });
-        toast.success("Precio eliminado de la base de datos.");
         remove(index);
       }
     } catch {
@@ -278,7 +277,7 @@ export default function AddPlanPricesComponent({
               Agregar Precio
             </Button>
 
-            <h1 className="font-bold text-2xl">Editar Precio Manualmente</h1>
+            <h1 className="font-bold text-2xl">{edit? "Editar Precio Manualmente" : "Agregar Precio manualmente"}</h1>
           </div>
           <div className="flex flex-row gap-5">
             <FormItem>

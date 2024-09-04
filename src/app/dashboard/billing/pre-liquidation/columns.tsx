@@ -17,7 +17,7 @@ export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "number",
     header: () => (
-      <div className="text-center   text-medium">Número preliq</div>
+      <div className="text-center whitespace-nowrap text-medium">Número preliq</div>
     ),
     cell: ({ row }) => {
       return (
@@ -30,7 +30,7 @@ export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "Marca",
     header: () => (
-      <div className="text-center   text-medium">Marca</div>
+      <div className="text-center whitespace-nowrap text-medium">Marca</div>
     ),
     cell: ({ row }) => {
       return (
@@ -46,7 +46,7 @@ export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "period",
     header: () => (
-      <div className="text-center   text-medium">Periodo</div>
+      <div className="text-center whitespace-nowrap text-medium">Periodo</div>
     ),
     cell: ({ row }) => {
       return (
@@ -59,7 +59,7 @@ export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "cuit",
     header: () => (
-      <div className="text-center   text-medium">CUIL/CUIT</div>
+      <div className="text-center whitespace-nowrap text-medium">CUIL/CUIT</div>
     ),
     cell: ({ row }) => {
       return (
@@ -70,7 +70,7 @@ export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "UN",
     header: () => (
-      <div className="text-center   text-medium">
+      <div className="text-center whitespace-nowrap text-medium">
         Unidad de negocio
       </div>
     ),

@@ -197,6 +197,11 @@ export const excelDeserializationRouter = createTRPCRouter({
             });
           }
           console.log("creando integrante");
+          let affiliateNumber = row?.plan ?? "" + row?.own_id_number ?? "";
+          if (row.own_id_type === "PASAPORTE") {
+            affiliateNumber = "00" + affiliateNumber;
+          }
+          console.log("testigo", row.own_id_type);
           const new_integrant = await db
             .insert(schema.integrants)
             .values({
@@ -204,7 +209,7 @@ export const excelDeserializationRouter = createTRPCRouter({
               relationship: row.relationship,
               name: row.name ?? "",
               id_type: row.own_id_type,
-              id_number: row.du_number,
+              id_number: row.own_id_number,
               birth_date: row.birth_date,
               gender: row.gender,
               civil_status: row["marital status"],
@@ -229,7 +234,7 @@ export const excelDeserializationRouter = createTRPCRouter({
               isBillResponsible: row.isPaymentResponsible == true,
               age: age,
               family_group_id: familyGroupId,
-              affiliate_number: row.affiliate_number?.toString(),
+              affiliate_number: affiliateNumber,
               extention: " ",
               postal_codeId: postal_code_schema?.id,
               health_insuranceId: health_insurance?.id ?? null,
@@ -398,7 +403,6 @@ async function readExcelFile(
   if (!upload) {
     throw new TRPCError({ code: "NOT_FOUND" });
   }
-
   if (!type) {
     type = upload.documentType ?? undefined;
   }
@@ -546,6 +550,8 @@ async function readExcelFile(
     //     `UNIDAD DE NEGOCIO no pertenece a la organizacion (fila:${rowNum}) `
     //   );
     // }
+    console.log("testigo", row.own_id_type);
+
     if (
       row.differential_value &&
       row.differential_value !== "0" &&
@@ -623,7 +629,7 @@ async function readExcelFile(
   if (errors.length > 0) {
     throw new TRPCError({ code: "BAD_REQUEST", message: errors.join("\n") });
   }
-
+  console.log("Testimonio", transformedRows[0]?.own_id_type);
   return transformedRows;
 }
 

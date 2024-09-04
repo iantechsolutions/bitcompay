@@ -273,7 +273,24 @@ export default function Page() {
 
   function generateComprobante() {
     if (marcas) {
-      setLogo(marcas[0]!.logo_url!);
+      setLogo(marcas[0]?.logo_url ?? "");
+    }
+
+    if (
+      !puntoVenta ||
+      !dateEmision ||
+      !tipoComprobante ||
+      !concepto ||
+      !iva ||
+      !dateVencimiento ||
+      !importe
+    ) {
+      toast.error("Ingrese todos los valores");
+      return null;
+    }
+    if (concepto !== "1" && (!dateDesde || !dateHasta)) {
+      toast.error("Ingrese todos los valores");
+      return null;
     }
     try {
       (async () => {
@@ -345,7 +362,7 @@ export default function Page() {
             CbteTipo: Number(tipoComprobante),
             Concepto: Number(comprobante[0]?.concepto),
             DocTipo: Number(comprobante[0]?.tipoDocumento),
-            DocNro: comprobante[0]?.nroDocumento,
+            DocNro: comprobante[0]?.nroDocumento ?? "0",
             CbteDesde: last_voucher + 1,
             CbteHasta: last_voucher + 1,
             CbteFch: parseInt(fecha?.replace(/-/g, "") ?? ""),
@@ -666,8 +683,8 @@ export default function Page() {
     let grupo = gruposFamiliar?.find((x) => x.id == value);
     let billResponsible = grupo?.integrants.find((x) => x.isBillResponsible);
     setComprobantes(grupo?.comprobantes ?? []);
-    setNroDocumento(billResponsible?.fiscal_id_number ?? "");
-    setNroDocumentoDNI(billResponsible?.id_number ?? "");
+    setNroDocumento(billResponsible?.fiscal_id_number ?? "0");
+    setNroDocumentoDNI(billResponsible?.id_number ?? "0");
     setNombre(billResponsible?.name ?? "");
     setTipoDocumento(billResponsible?.fiscal_id_type ?? "");
     setBrandId(grupo?.businessUnitData?.brandId ?? "");
@@ -676,7 +693,7 @@ export default function Page() {
     setGrupoFamiliarId("");
     setObraSocialId(value);
     let obra = obrasSociales?.find((x) => x.id == value);
-    setNroDocumento(obra?.fiscal_id_number?.toString() ?? "");
+    setNroDocumento(obra?.fiscal_id_number?.toString() ?? "0");
     setNroDocumentoDNI("0" ?? "");
     setNombre(obra?.responsibleName ?? "");
     setTipoDocumento(obra?.fiscal_id_type ?? "");
@@ -727,11 +744,10 @@ export default function Page() {
             <p className=" text-lg font-semibold">Receptor</p>
             <div className="pb-2">
               <Button
-                className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 mr-3"
+                className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 mr-3 shadow-none"
                 // onClick={() => setOpen(true)}
                 disabled={loading}
-                onClick={generateComprobante}
-              >
+                onClick={generateComprobante}>
                 {loading ? (
                   <Loader2Icon className="mr-2 animate-spin" size={20} />
                 ) : (
@@ -740,7 +756,7 @@ export default function Page() {
                 Aprobar
               </Button>
               <Button
-                className="  h-7 bg-[#f9c3c3] hover:bg-[#f9c3c3] text-[#4B4B4B]  text-sm rounded-2xl py-4 px-4 "
+                className="  h-7 bg-[#f9c3c3] hover:bg-[#f9c3c3] text-[#4B4B4B]  text-sm rounded-2xl py-4 px-4 shadow-none "
                 // onClick={() => setOpen(true)}
               >
                 <CircleX className="h-4 w-auto mr-2" />
@@ -752,8 +768,7 @@ export default function Page() {
           <div className="flex flex-row justify-between gap-8 ">
             <Select
               onValueChange={(e) => handleGrupoFamilarChange(e)}
-              value={grupoFamiliarId}
-            >
+              value={grupoFamiliarId}>
               <SelectTriggerMagnify className=" w-full bg-[#FAFAFA] font-normal text-[#747474]">
                 <SelectValue placeholder="Buscar afiliado.." />
               </SelectTriggerMagnify>
@@ -763,8 +778,7 @@ export default function Page() {
                     <SelectItem
                       key={gruposFamiliar?.id}
                       value={gruposFamiliar?.id}
-                      className="rounded-none"
-                    >
+                      className="rounded-none">
                       {gruposFamiliar?.integrants.find((x) => x.isHolder)?.name}
                     </SelectItem>
                   ))}
@@ -772,8 +786,7 @@ export default function Page() {
             </Select>
             <Select
               onValueChange={(e) => handleObraSocialChange(e)}
-              value={obraSocialId}
-            >
+              value={obraSocialId}>
               <SelectTriggerMagnify className="w-full bg-[#FAFAFA] font-normal text-[#747474]">
                 <SelectValue placeholder="Buscar por obra social.." />
               </SelectTriggerMagnify>
@@ -783,8 +796,7 @@ export default function Page() {
                     <SelectItem
                       key={obrasSocial?.id}
                       value={obrasSocial?.id}
-                      className="rounded-none"
-                    >
+                      className="rounded-none">
                       {obrasSocial?.name}
                     </SelectItem>
                   ))}
@@ -794,254 +806,275 @@ export default function Page() {
           <div className="bg-[#F7F7F7] rounded-lg py-4 px-24 flex flex-row justify-between ">
             <ElementCard
               element={{ key: "NOMBRE", value: nombre }}
-              className="pr-24 "
-            ></ElementCard>
+              className="pr-24 "></ElementCard>
             <div className="flex gap-20">
               <ElementCard
                 element={{ key: "DNI", value: nroDocumentoDNI }}
-                className="pr-8 "
-              ></ElementCard>
+                className="pr-8 "></ElementCard>
               <ElementCard
                 element={{ key: "CUIT", value: nroDocumento }}
-                className="pr-11 "
-              ></ElementCard>
+                className="pr-11 "></ElementCard>
             </div>
           </div>
 
-          <div className="border rounded-lg px-4 pt-5 pb-8">
+          <div className="border rounded-lg px-6 pt-7 pb-8">
             <p className=" text-lg font-semibold">Datos del Comprobante</p>
-            <div className="grid grid-cols-2 gap-4 mt-3">
-              <div>
-                <Label htmlFor="name">Punto de venta</Label>
-                <br />
-                <Select onValueChange={(e) => setPuntoVenta(e)}>
-                  <SelectTrigger className="border-none focus:ring-transparent">
-                    <SelectValue placeholder="Seleccionar PV..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[
-                      { value: "1", label: "1" },
-                      { value: "2", label: "2" },
-                    ].map((option) => (
-                      <SelectItem
-                        key={option.value}
-                        value={option.value}
-                        className="rounded-none "
-                      >
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="emition">Fecha de emisión</Label>
-                <br />
-                <Popover
-                  open={popoverEmisionOpen}
-                  onOpenChange={setPopoverEmisionOpen}
-                >
-                  <PopoverTrigger asChild={true}>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "text-left flex justify-between font-normal w-full border-0 shadow-none",
-                        !dateEmision && "text-muted-foreground"
-                      )}
-                    >
-                      {dateEmision ? (
-                        format(dateEmision, "PPP")
-                      ) : (
-                        <span>Seleccionar fecha</span>
-                      )}
-                      <Calendar01Icon className="h-4 w-4" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={dateEmision}
-                      onSelect={(e) => FechasCreateEmision(e)}
-                      initialFocus={true}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div>
-                <Label htmlFor="factura">Tipo Comprobante</Label>
-                <br />
-                <Select onValueChange={(e) => setTipoComprobante(e)}>
-                  <SelectTrigger className="border-none focus:ring-transparent">
-                    <SelectValue placeholder="Seleccionar comprobante..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[
-                      { value: "1", label: "FACTURA A" },
-                      { value: "6", label: "FACTURA B" },
-                      { value: "3", label: "NOTA DE CREDITO A" },
-                      { value: "8", label: "NOTA DE CREDITO B" },
-                      { value: "0", label: "RECIBO" },
-                    ].map((option) => (
-                      <SelectItem
-                        key={option.value}
-                        value={option.value}
-                        className="rounded-none "
-                      >
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="iva">Alicuota</Label>
-                <br />
-                <Select onValueChange={(e) => setIva(e)}>
-                  <SelectTrigger className="border-none focus:ring-transparent ">
-                    <SelectValue placeholder="Seleccionar alicuota" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[
-                      { value: "3", label: "0%" },
-                      { value: "4", label: "10.5%" },
-                      { value: "5", label: "21%" },
-                      { value: "6", label: "27%" },
-                      { value: "8", label: "5%" },
-                      { value: "9", label: "2.5%" },
-                    ].map((option) => (
-                      <SelectItem
-                        key={option.value}
-                        value={option.value}
-                        className="rounded-none "
-                      >
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="concepto">Tipo de concepto</Label>
-                <br />
-                <Select onValueChange={(e) => setConcepto(e)}>
-                  <SelectTrigger className="border-none focus:ring-transparent">
-                    <SelectValue placeholder="Seleccionar concepto" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[
-                      { value: "1", label: "Productos" },
-                      { value: "2", label: "Servicios" },
-                      { value: "3", label: "Productos y Servicios" },
-                    ].map((option) => (
-                      <SelectItem
-                        key={option.value}
-                        value={option.value}
-                        className="rounded-none "
-                      >
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="emition">Fecha de vencimiento</Label>
-                <br />
-                <Popover
-                  open={popoverVencimientoOpen}
-                  onOpenChange={setPopoverVencimientoOpen}
-                >
-                  <PopoverTrigger asChild={true}>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "flex justify-between text-left font-normal w-full border-0 shadow-none",
-                        !dateVencimiento && "text-muted-foreground"
-                      )}
-                    >
-                      {dateVencimiento ? (
-                        format(dateVencimiento, "PPP")
-                      ) : (
-                        <span>Seleccionar fecha</span>
-                      )}
-                      <Calendar01Icon className=" h-4 w-4" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={dateVencimiento}
-                      onSelect={(e) => FechasCreateVencimiento(e)}
-                      initialFocus={true}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div>
-                <Label htmlFor="emition">Fecha inicio de servicio</Label>
-                <br />
-                <Popover
-                  open={popoverDesdeOpen}
-                  onOpenChange={setPopoverDesdeOpen}
-                >
-                  <PopoverTrigger asChild={true}>
-                    <Button
-                      variant={"outline"}
-                      disabled={concepto == "" || concepto == "1"}
-                      className={cn(
-                        "flex justify-between text-left font-normal w-full border-0 shadow-none",
-                        !dateDesde && "text-muted-foreground"
-                      )}
-                    >
-                      {dateDesde ? (
-                        format(dateDesde, "PPP")
-                      ) : (
-                        <span>Seleccionar fecha</span>
-                      )}
-                      <Calendar01Icon className="h-4 w-4" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={dateDesde}
-                      onSelect={(e) => FechasCreateDesde(e)}
-                      initialFocus={true}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div>
-                <Label htmlFor="emition">Fecha fin de servicio</Label>
-                <br />
-                <Popover open={popoverFinOpen} onOpenChange={setPopoverFinOpen}>
-                  <PopoverTrigger asChild={true}>
-                    <Button
-                      variant={"outline"}
-                      disabled={concepto == "" || concepto == "1"}
-                      className={cn(
-                        "flex justify-between text-left font-normal w-full border-0 shadow-none",
-                        !dateHasta && "text-muted-foreground"
-                      )}
-                    >
-                      {dateHasta ? (
-                        format(dateHasta, "PPP")
-                      ) : (
-                        <span>Seleccionar fecha</span>
-                      )}
-                      <Calendar01Icon className="h-4 w-4" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={dateHasta}
-                      onSelect={(e) => FechasCreateFin(e)}
-                      initialFocus={true}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
+            <div className="grid grid-cols-2 gap-4 gap-x-10 mt-3">
+              <ElementCard
+                className="pr-1 pb-0 border-[#bef0bb]"
+                element={{
+                  key: "Punto de venta",
+                  value: (
+                    <Select onValueChange={(e) => setPuntoVenta(e)}>
+                      <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8">
+                        <SelectValue placeholder="Seleccionar PV..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[
+                          { value: "1", label: "1" },
+                          { value: "2", label: "2" },
+                        ].map((option) => (
+                          <SelectItem
+                            key={option.value}
+                            value={option.value}
+                            className="rounded-none ">
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ),
+                }}
+              />
+              <ElementCard
+                className="pr-1 pb-0 border-[#bef0bb]"
+                element={{
+                  key: "Fecha de emisión",
+                  value: (
+                    <Popover
+                      open={popoverEmisionOpen}
+                      onOpenChange={setPopoverEmisionOpen}>
+                      <PopoverTrigger asChild={true}>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
+                            !dateEmision && "text-muted-foreground"
+                          )}>
+                          {dateEmision ? (
+                            format(dateEmision, "PPP")
+                          ) : (
+                            <span>Seleccionar fecha</span>
+                          )}
+                          <Calendar01Icon className="h-4 w-4" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={dateEmision}
+                          onSelect={(e) => FechasCreateEmision(e)}
+                          initialFocus={true}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  ),
+                }}
+              />
+              <ElementCard
+                className="pr-1 pb-0 border-[#bef0bb]"
+                element={{
+                  key: "Tipo Comprobante",
+                  value: (
+                    <Select onValueChange={(e) => setTipoComprobante(e)}>
+                      <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8">
+                        <SelectValue placeholder="Seleccionar comprobante..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[
+                          { value: "1", label: "FACTURA A" },
+                          { value: "6", label: "FACTURA B" },
+                          { value: "3", label: "NOTA DE CREDITO A" },
+                          { value: "8", label: "NOTA DE CREDITO B" },
+                          { value: "0", label: "RECIBO" },
+                        ].map((option) => (
+                          <SelectItem
+                            key={option.value}
+                            value={option.value}
+                            className="rounded-none ">
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ),
+                }}
+              />
+              <ElementCard
+                className="pr-1 pb-0 border-[#bef0bb]"
+                element={{
+                  key: "Alicuota",
+                  value: (
+                    <Select onValueChange={(e) => setIva(e)}>
+                      <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8 ">
+                        <SelectValue placeholder="Seleccionar alicuota" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[
+                          { value: "3", label: "0%" },
+                          { value: "4", label: "10.5%" },
+                          { value: "5", label: "21%" },
+                          { value: "6", label: "27%" },
+                          { value: "8", label: "5%" },
+                          { value: "9", label: "2.5%" },
+                        ].map((option) => (
+                          <SelectItem
+                            key={option.value}
+                            value={option.value}
+                            className="rounded-none ">
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ),
+                }}
+              />
+              <ElementCard
+                className="pr-1 pb-0 border-[#bef0bb]"
+                element={{
+                  key: "Tipo de concepto",
+                  value: (
+                    <Select onValueChange={(e) => setConcepto(e)}>
+                      <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8">
+                        <SelectValue placeholder="Seleccionar concepto" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[
+                          { value: "1", label: "Productos" },
+                          { value: "2", label: "Servicios" },
+                          { value: "3", label: "Productos y Servicios" },
+                        ].map((option) => (
+                          <SelectItem
+                            key={option.value}
+                            value={option.value}
+                            className="rounded-none ">
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ),
+                }}
+              />
+              <ElementCard
+                className="pr-1 pb-0 border-[#bef0bb]"
+                element={{
+                  key: "Fecha de vencimiento",
+                  value: (
+                    <Popover
+                      open={popoverVencimientoOpen}
+                      onOpenChange={setPopoverVencimientoOpen}>
+                      <PopoverTrigger asChild={true}>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
+                            !dateVencimiento && "text-muted-foreground"
+                          )}>
+                          {dateVencimiento ? (
+                            format(dateVencimiento, "PPP")
+                          ) : (
+                            <span>Seleccionar fecha</span>
+                          )}
+                          <Calendar01Icon className=" h-4 w-4" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={dateVencimiento}
+                          onSelect={(e) => FechasCreateVencimiento(e)}
+                          initialFocus={true}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  ),
+                }}
+              />
+              <ElementCard
+                className="pr-1 pb-0 border-[#bef0bb]"
+                element={{
+                  key: "Fecha inicio de servicio",
+                  value: (
+                    <Popover
+                      open={popoverDesdeOpen}
+                      onOpenChange={setPopoverDesdeOpen}>
+                      <PopoverTrigger asChild={true}>
+                        <Button
+                          variant={"outline"}
+                          disabled={concepto == "" || concepto == "1"}
+                          className={cn(
+                            "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
+                            !dateDesde && "text-muted-foreground"
+                          )}>
+                          {dateDesde ? (
+                            format(dateDesde, "PPP")
+                          ) : (
+                            <span>Seleccionar fecha</span>
+                          )}
+                          <Calendar01Icon className="h-4 w-4" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={dateDesde}
+                          onSelect={(e) => FechasCreateDesde(e)}
+                          initialFocus={true}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  ),
+                }}
+              />
+              <ElementCard
+                className="pr-1 pb-0 border-[#bef0bb]"
+                element={{
+                  key: "Fecha fin de servicio",
+                  value: (
+                    <Popover
+                      open={popoverFinOpen}
+                      onOpenChange={setPopoverFinOpen}>
+                      <PopoverTrigger asChild={true}>
+                        <Button
+                          variant={"outline"}
+                          disabled={concepto == "" || concepto == "1"}
+                          className={cn(
+                            "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
+                            !dateHasta && "text-muted-foreground"
+                          )}>
+                          {dateHasta ? (
+                            format(dateHasta, "PPP")
+                          ) : (
+                            <span>Seleccionar fecha</span>
+                          )}
+                          <Calendar01Icon className="h-4 w-4" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={dateHasta}
+                          onSelect={(e) => FechasCreateFin(e)}
+                          initialFocus={true}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  ),
+                }}
+              />
+              <div></div>
             </div>
           </div>
 
@@ -1049,122 +1082,178 @@ export default function Page() {
             <p className="text-lg font-semibold">
               Datos del Comprobante Asociado
             </p>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="factura">Comprobante Asociado</Label>
-                <br />
-                <Select
-                  onValueChange={(e) => handleComprobanteChange(e)}
-                  disabled={tipoComprobante != "3" && tipoComprobante != "8"}
-                >
-                  <SelectTrigger className="border-none">
-                    <SelectValue placeholder="Seleccionar comprobante..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {gruposFamiliar?.find((x) => x.id == grupoFamiliarId) &&
-                      gruposFamiliar
-                        ?.find((x) => x.id == grupoFamiliarId)
-                        ?.comprobantes.filter(
-                          (x) =>
-                            x.estado != "generada" &&
-                            x.ptoVenta.toString() === puntoVenta
-                        )
-                        .map((comprobante) => (
-                          <SelectItem
-                            key={comprobante?.id}
-                            value={comprobante?.id}
-                            className="rounded-none "
-                          >
-                            {comprobante?.nroComprobante}
-                          </SelectItem>
-                        ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <ElementCard
+                className="pr-1 pb-0 border-[#bef0bb]"
+                element={{
+                  key: "COMPROBANTE ASOCIADO",
+                  value: (
+                    <Select
+                      onValueChange={(e) => handleComprobanteChange(e)}
+                      disabled={
+                        tipoComprobante != "3" && tipoComprobante != "8"
+                      }>
+                      <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8">
+                        <SelectValue placeholder="Seleccionar comprobante..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {gruposFamiliar?.find((x) => x.id == grupoFamiliarId) &&
+                          gruposFamiliar
+                            ?.find((x) => x.id == grupoFamiliarId)
+                            ?.comprobantes.filter(
+                              (x) =>
+                                x.estado != "generada" &&
+                                x.ptoVenta.toString() === puntoVenta
+                            )
+                            .map((comprobante) => (
+                              <SelectItem
+                                key={comprobante?.id}
+                                value={comprobante?.id}
+                                className="rounded-none ">
+                                {comprobante?.nroComprobante}
+                              </SelectItem>
+                            ))}
+                      </SelectContent>
+                    </Select>
+                  ),
+                }}
+              />
             </div>
           </div>
           <div className="p-0 flex gap-2 ">
             <div className="bg-[#F7F7F7] rounded-lg p-4 flex flex-row justify-between gap-4 w-1/2">
-              <div className="flex flex-col gap-2">
-                <Label>Punto de venta</Label>
-                <Input
-                  disabled={true}
-                  value={selectedComprobante ? puntoVenta : "-"}
-                  className="bg-white opacity-100 border-none "
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label>Nro factura</Label>
-                <Input
-                  disabled={true}
-                  value={
-                    selectedComprobante
-                      ? selectedComprobante.nroComprobante
-                      : "-"
-                  }
-                  className="bg-white opacity-100 "
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label>Fecha emision</Label>
-                <Input
-                  disabled={true}
-                  value={
-                    selectedComprobante
-                      ? dateNormalFormat(selectedComprobante.createdAt)
-                      : "-"
-                  }
-                  className="bg-white opacity-100 "
-                />
-              </div>
+              <ElementCard
+                keyClassName="mb-3"
+                contentClassName="pl-0 pr-0"
+                className="pr-0 pt-0"
+                element={{
+                  key: "PUNTO DE VENTA",
+                  value: (
+                    <Input
+                      disabled={true}
+                      value={selectedComprobante ? puntoVenta : "-"}
+                      className="bg-[#f7f7f7] h-6 border-none focus:ring-transparent py-0 pl-0 pb-0 "
+                    />
+                  ),
+                }}
+              />
+              <ElementCard
+                keyClassName="mb-3 "
+                contentClassName="pl-0 pr-0 "
+                className="pr-0 pt-0"
+                element={{
+                  key: "Nº FACTURA",
+                  value: (
+                    <Input
+                      disabled={true}
+                      value={
+                        selectedComprobante
+                          ? selectedComprobante.nroComprobante
+                          : "-"
+                      }
+                      className="bg-[#f7f7f7] h-6 border-none focus:ring-transparent py-0 pl-0 pb-0 "
+                    />
+                  ),
+                }}
+              />
+              <ElementCard
+                keyClassName="mb-3"
+                contentClassName="pl-0 pr-0"
+                className="pr-0 pt-0"
+                element={{
+                  key: "FECHA EMISION",
+                  value: (
+                    <Input
+                      disabled={true}
+                      value={
+                        selectedComprobante
+                          ? dateNormalFormat(selectedComprobante.createdAt)
+                          : "-"
+                      }
+                      className="bg-[#f7f7f7] h-6 border-none focus:ring-transparent py-0 pl-0 pb-0"
+                    />
+                  ),
+                }}
+              />
+              <div className="flex flex-col gap-2"></div>
             </div>
             <div className="bg-[#F7F7F7] rounded-lg p-4 flex flex-row justify-between gap-4 w-1/2">
-              <div className="flex flex-col gap-2">
-                <Label>Desde</Label>
-                <Input
-                  disabled={true}
-                  value={
-                    selectedComprobante
-                      ? dateNormalFormat(selectedComprobante.fromPeriod)
-                      : "-"
-                  }
-                  className="bg-white opacity-100 "
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label>Hasta</Label>
-                <Input
-                  disabled={true}
-                  value={
-                    selectedComprobante
-                      ? dateNormalFormat(selectedComprobante.toPeriod)
-                      : "-"
-                  }
-                  className="bg-white opacity-100 "
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label>Concepto</Label>
-                <Input
-                  disabled={true}
-                  value={
-                    selectedComprobante
-                      ? reverseConceptDictionary[selectedComprobante.concepto]
-                      : "-"
-                  }
-                  className="bg-white opacity-100 "
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label>Importe</Label>
-                <Input
-                  disabled={true}
-                  value={
-                    selectedComprobante ? selectedComprobante.importe : "-"
-                  }
-                  className="bg-white opacity-100 "
-                />
-              </div>
+              <ElementCard
+                keyClassName="mb-3 "
+                contentClassName="pl-0 pr-0 "
+                className="pr-0 pt-0"
+                element={{
+                  key: "DESDE",
+                  value: (
+                    <Input
+                      disabled={true}
+                      value={
+                        selectedComprobante
+                          ? dateNormalFormat(selectedComprobante.fromPeriod)
+                          : "-"
+                      }
+                      className="bg-[#f7f7f7] h-6 border-none focus:ring-transparent py-0 pl-0 pb-0"
+                    />
+                  ),
+                }}
+              />
+              <ElementCard
+                keyClassName="mb-3 "
+                contentClassName="pl-0 pr-0 "
+                className="pr-0 pt-0"
+                element={{
+                  key: "HASTA",
+                  value: (
+                    <Input
+                      disabled={true}
+                      value={
+                        selectedComprobante
+                          ? dateNormalFormat(selectedComprobante.toPeriod)
+                          : "-"
+                      }
+                      className="bg-[#f7f7f7] h-6 border-none focus:ring-transparent py-0 pl-0 pb-0"
+                    />
+                  ),
+                }}
+              />
+              <ElementCard
+                keyClassName="mb-3 "
+                contentClassName="pl-0 pr-0 "
+                className="pr-0 pt-0"
+                element={{
+                  key: "CONCEPTO",
+                  value: (
+                    <Input
+                      disabled={true}
+                      value={
+                        selectedComprobante
+                          ? reverseConceptDictionary[
+                              selectedComprobante.concepto
+                            ]
+                          : "-"
+                      }
+                      className="bg-[#f7f7f7] h-6 border-none focus:ring-transparent py-0 pl-0 pb-0"
+                    />
+                  ),
+                }}
+              />
+              <ElementCard
+                keyClassName="mb-3 "
+                contentClassName="pl-0 pr-0 "
+                className="pr-0 pt-0"
+                element={{
+                  key: "IMPORTE",
+                  value: (
+                    <Input
+                      disabled={true}
+                      value={
+                        selectedComprobante ? selectedComprobante.importe : "-"
+                      }
+                      className="bg-[#f7f7f7] h-6 border-none focus:ring-transparent py-0 pl-0 pb-0"
+                    />
+                  ),
+                }}
+              />
             </div>
           </div>
 
@@ -1172,7 +1261,7 @@ export default function Page() {
             <p className=" text-lg font-semibold">Totales</p>
             <div className="flex flex-row justify-between pb-2">
               <div className="flex flex-col gap-2">
-                <Label>Sub-total factura</Label>
+                <Label className="text-[#747474]">SUB-TOTAL FACTURA</Label>
                 <Input
                   // disabled={true}
                   value={
@@ -1190,7 +1279,7 @@ export default function Page() {
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <Label>Importe IVA</Label>
+                <Label className="text-[#747474]">IMPORTE IVA</Label>
                 <Input
                   // disabled={true}
                   value={
@@ -1212,7 +1301,7 @@ export default function Page() {
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <Label>Otros tributos</Label>
+                <Label className="text-[#747474]">OTROS ATRIBUTOS</Label>
                 <Input
                   // disabled={true}
                   value={"$ " + !selectedComprobante ? tributos : "0"}
@@ -1221,7 +1310,7 @@ export default function Page() {
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <Label>Total</Label>
+                <Label className="text-[#747474]">TOTAL</Label>
                 <Input
                   // disabled={true}
                   value={
