@@ -13,6 +13,7 @@ import { Payment } from "~/server/db/schema";
 import { Repeat } from "lucide-react";
 import dayOfYear from "dayjs/plugin/dayOfYear";
 import timezone from "dayjs/plugin/timezone";
+import { Console } from "console";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(dayOfYear);
@@ -101,6 +102,7 @@ export const iofilesRouter = createTRPCRouter({
             fileName: input.fileName!,
             concept: input.concept,
             redescription: brand.redescription,
+            prisma_code: brand.prisma_code ?? "0000",
           };
           text = await generatePagoFacil(generateInput, payments);
         } else if (channel.name.includes("RAPIPAGO")) {
@@ -110,6 +112,7 @@ export const iofilesRouter = createTRPCRouter({
             fileName: input.fileName!,
             concept: input.concept,
             redescription: brand.redescription,
+            prisma_code: brand.prisma_code,
           };
           text = generateRapiPago(generateInput, payments);
         } else if (channel.name.includes("DEBITO AUTOMATICO")) {
@@ -203,35 +206,35 @@ export const iofilesRouter = createTRPCRouter({
             !processedPayment &&
             !payment.genChannels.includes(channel?.id!)
           ) {
-            const newGenChannles = [...payment.genChannels, channel.id];
-            console.log("updating gen Channels");
-            try {
-              if (payment.genChannels.length === channelsList?.length! - 1) {
-                // update statuses
-                await db
-                  .update(schema.payments)
-                  .set({
-                    genChannels: newGenChannles,
-                    statusId: genFileStatus?.id,
-                  })
-                  .where(eq(schema.payments.id, payment.id));
-              } else {
-                await db
-                  .update(schema.payments)
-                  .set({
-                    genChannels: newGenChannles,
-                  })
-                  .where(eq(schema.payments.id, payment.id));
-                console.log(
-                  "gen channes updated",
-                  // updated_payment,
-                  "old: ",
-                  payment.genChannels
-                );
-              }
-            } catch (e) {
-              console.log(e);
-            }
+            // const newGenChannles = [...payment.genChannels, channel.id];
+            // console.log("updating gen Channels");
+            // try {
+            //   if (payment.genChannels.length === channelsList?.length! - 1) {
+            //     // update statuses
+            //     await db
+            //       .update(schema.payments)
+            //       .set({
+            //         genChannels: newGenChannles,
+            //         statusId: genFileStatus?.id,
+            //       })
+            //       .where(eq(schema.payments.id, payment.id));
+            //   } else {
+            //     await db
+            //       .update(schema.payments)
+            //       .set({
+            //         genChannels: newGenChannles,
+            //       })
+            //       .where(eq(schema.payments.id, payment.id));
+            //     console.log(
+            //       "gen channes updated",
+            //       // updated_payment,
+            //       "old: ",
+            //       payment.genChannels
+            //     );
+            //   }
+            // } catch (e) {
+            //   console.log(e);
+            // }
           }
         }
       });
@@ -465,30 +468,41 @@ async function generatePagoFacil(
     fileName: string;
     concept: string;
     redescription: string;
+    prisma_code: string;
   },
   transactions: RouterOutputs["transactions"]["list"]
 ): Promise<string> {
   let text = "";
-  //header
-  const todayDate = dayjs().format("DDMMYYYY");
-  const date = dayjs().format("DDMMYYYY");
-  const hours = dayjs().format("HHmmss");
-  const companyName = formatString(" ", "BITCOM SRL", 40, true);
-  const originName = formatString(" ", "PAGO FACIL", 10, true);
+
+  let registeR_type = "01";
   const records_number = formatString(
-    " ",
+    "0",
     transactions.length.toString(),
     9,
-    true
+    false
   );
-  const utility = formatString(" ", "Bitcom", 8, true);
-  text += `01${records_number}A${utility}${todayDate}${" ".repeat(172)}\r\n`;
+  let action = "A";
+  const utility = formatString(" ", _input.redescription, 8, true);
+
+  const todayDate = dayjs().format("YYYYMMDD");
+  // const date = dayjs().format("DDMMYYYY");
+  // const hours = dayjs().format("HHmmss");
+  // const companyName = formatString(" ", "BITCOM SRL", 40, true);
+  // const originName = formatString(" ", "PAGO FACIL", 10, true);
+
+  text += `${registeR_type}${records_number}${action}${utility}${todayDate}${" ".repeat(
+    172
+  )}\r\n`;
+
   let total_records = 0;
   let total_collected = 0;
+
   for (const transaction of transactions) {
+    let register_type = "02";
+
     const fiscal_id_number = formatString(
       " ",
-      transaction.fiscal_id_number!.toString(),
+      transaction.affiliate_number ?? "",
       30,
       true
     );
@@ -499,6 +513,7 @@ async function generatePagoFacil(
       false
     );
     const seq_number = `${dayjs(transaction.first_due_date).year()}01`;
+    console.log("testos", seq_number);
     const message = formatString(
       " ",
       transaction.additional_info ?? "",
@@ -525,7 +540,7 @@ async function generatePagoFacil(
     const seq_terminal = "1234";
     const payment_time = dayjs(transaction.first_due_date).format("HHmmss");
     // codigo de barras
-    const service_company = "3509"; // ultimos 4 digitos del ID de entidad
+    const service_company = _input.prisma_code;
     const dayOfYear = dayjs(transaction.first_due_date).dayOfYear();
     const first_due_date_bar_code_YY = dayjs(transaction.first_due_date).format(
       "YY"
@@ -536,37 +551,41 @@ async function generatePagoFacil(
       .padStart(3, "0");
 
     const fiscal_id_number_bar_code = formatString(
-      " ",
-      transaction.fiscal_id_number!.toString(),
+      "0",
+      transaction.affiliate_number!.toString(),
       14,
-      true
+      false
     );
-    const second_due_date_barcode = "00";
+
     const first_due_amount_bar_code = formatAmount(
       transaction.first_due_amount!,
       6
     );
 
-    const second_due_amount_charge = "000000";
+    let payment_type = "T";
+    let moneda = "0";
+    const second_due_amount_charge = "0".repeat(6);
+    const second_due_date_barcode = "0".repeat(2);
     // codigo de barras
-    const bar_code = `${service_company}${first_due_amount_bar_code}${first_due_date_bar_code_YY}${first_due_date_bar_code_DDD}${fiscal_id_number_bar_code}0${second_due_amount_charge}${second_due_date_barcode}00${" ".repeat(
-      12
-    )}`;
-    console.log(
-      "first_due_date",
-      first_due_date_bar_code_YY,
-      first_due_date_bar_code_DDD
-    );
-    const barcode = formatString(" ", bar_code, 60, true);
+    const bar_code = `${service_company}${first_due_amount_bar_code}${first_due_date_bar_code_YY}${first_due_date_bar_code_DDD}${fiscal_id_number_bar_code}${moneda}${second_due_amount_charge}${second_due_date_barcode}`;
 
-    text += `02${invoice_number}${fiscal_id_number}${seq_number}${message}${name}${bar_code}${validity_date}${first_due_date}T${" ".repeat(
+    let verifier_digit = modulo11Verifier(bar_code);
+
+    const barcode = formatString(
+      " ",
+      bar_code + verifier_digit.toString(),
+      55,
+      true
+    );
+
+    text += `${register_type}${invoice_number}${fiscal_id_number}${seq_number}${message}${name}${barcode}${validity_date}${first_due_date}${payment_type}${" ".repeat(
       9
     )}\r\n`;
     // detalle;
     total_records++;
     total_collected += transaction.first_due_amount!;
   }
-
+  let triller_register = "9";
   const total_records_string = formatString(
     "0",
     total_records.toString(),
@@ -574,7 +593,7 @@ async function generatePagoFacil(
     false
   );
   const total_collected_string = formatAmount(total_collected!, 10);
-  text += `9${"0".repeat(8)}${"0".repeat(12)}${"0".repeat(
+  text += `${triller_register}${"0".repeat(8)}${"0".repeat(12)}${"0".repeat(
     7
   )}${total_records_string}${total_collected_string}${"0".repeat(143)}`;
   return text;
@@ -819,4 +838,24 @@ function generateDebitoAutomatico(props: generateDAprops) {
   )}*`;
 
   return header + body + footer;
+}
+
+function modulo11Verifier(code: string) {
+  let sum = 0;
+  let weight = 2;
+
+  for (let i = code.length - 1; i >= 0; i--) {
+    sum += parseInt(code[i]!) * weight;
+    weight = weight === 7 ? 2 : weight + 1;
+  }
+
+  const remainder = sum % 11;
+  let verifierDigit = 11 - remainder;
+
+  // Asegúrate de que el dígito verificador sea de dos dígitos
+  if (verifierDigit >= 10) {
+    return verifierDigit.toString().padStart(2, "0");
+  } else {
+    return "0" + verifierDigit;
+  }
 }

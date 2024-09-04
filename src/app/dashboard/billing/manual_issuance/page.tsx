@@ -273,7 +273,7 @@ export default function Page() {
 
   function generateComprobante() {
     if (marcas) {
-      setLogo(marcas[0]!.logo_url!);
+      setLogo(marcas[0]?.logo_url ?? "");
     }
 
     if (

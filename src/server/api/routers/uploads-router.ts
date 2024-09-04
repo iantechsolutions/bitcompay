@@ -703,7 +703,7 @@ async function readResponseUploadContents(
       recordIndex++;
     }
   }
-  if (channelName === "DEBITO AUTOMATICO EN TARJETAS") {
+  if (channelName === "DEBITO AUTOMATICO") {
     for (const line of lines) {
       const recordValues = line.trim().split(/\s{2,}/);
       console.log("recordValues", recordValues);
@@ -818,6 +818,8 @@ async function readResponseUploadContents(
       total_rows++;
       recordIndex++;
     }
+  } else {
+    throw Error("El canal no se encuentra habilitado");
   }
   return { upload, records, total_rows, header: recHeaders };
 }
