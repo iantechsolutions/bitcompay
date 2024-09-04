@@ -308,6 +308,9 @@ async function approbatecomprobante(liquidationId: string) {
               du_type: billResponsible?.id_type,
               du_number: parseInt(billResponsible?.id_number ?? "0"),
               product: producto?.id,
+              affiliate_number:
+                (comprobante.family_group?.plan.plan_code ?? "") +
+                (billResponsible?.id_number ?? ""),
               period: comprobante.due_date,
               first_due_amount: comprobante?.importe,
               first_due_date: comprobante.due_date,
@@ -976,6 +979,7 @@ export const comprobantesRouter = createTRPCRouter({
                 brand: true,
               },
             },
+            plan: true,
           },
         });
         console.log("Encontro family_group");
@@ -1014,6 +1018,9 @@ export const comprobantesRouter = createTRPCRouter({
               ),
               du_type: billResponsible?.id_type,
               du_number: parseInt(billResponsible?.id_number ?? "0"),
+              affiliate_number:
+                (family_group?.plan?.plan_code ?? "") +
+                (billResponsible?.id_number ?? ""),
               product: producto?.id,
               period: comprobanteGotten?.due_date,
               first_due_amount: comprobanteGotten?.importe,

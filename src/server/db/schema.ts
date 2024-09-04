@@ -106,6 +106,7 @@ export const payments = pgTable(
     fiscal_id_number: bigint("fiscal_id_number", { mode: "number" }),
     du_type: varchar("du_type", { length: 255 }),
     du_number: bigint("du_number", { mode: "number" }),
+    affiliate_number: varchar("affiliate_number", { length: 255 }),
     product: varchar("product", { length: 255 }),
     product_number: integer("product_number").references(() => products.number),
     //! Can be used as id
@@ -264,7 +265,8 @@ export const brands = pgTable(
     createdAt,
     updatedAt,
     logo_url: varchar("logo_url"),
-    prisma_code: varchar("prisma_code"),
+    prisma_code: varchar("prisma_code", { length: 4 }),
+    utility: varchar("utility", { length: 8 }),
     number: serial("number"),
   },
   (brands) => ({
