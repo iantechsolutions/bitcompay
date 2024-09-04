@@ -103,6 +103,7 @@ export const iofilesRouter = createTRPCRouter({
             companyId: companyId!,
             fileName: input.fileName!,
             concept: input.concept,
+            brandName: brand.name,
             redescription: brand.redescription,
             prisma_code: brand.prisma_code ?? "0000",
           };
@@ -113,6 +114,7 @@ export const iofilesRouter = createTRPCRouter({
             companyId: companyId!,
             fileName: input.fileName!,
             concept: input.concept,
+            brandName: brand.name,
             redescription: brand.redescription,
             prisma_code: brand.prisma_code,
           };
@@ -128,13 +130,17 @@ export const iofilesRouter = createTRPCRouter({
           //     message: `card_brand, card_type and presentation_date are required for DEBITO AUTOMATICO`,
           //   });
           // }
+          let card_brand = input.card_brand ?? "Visa";
 
+          console.log("testttt", card_brand, brand.id);
           const establishment = await db.query.establishments.findFirst({
             where: and(
-              eq(schema.establishments.brandId, "OC_f8Ci-Z2nmxivdWmWiZ"),
-              eq(schema.establishments.flag, "Visa")
+              eq(schema.establishments.brandId, brand.id),
+              eq(schema.establishments.flag, card_brand ?? "")
             ),
           });
+          console.log("testttt", establishment);
+
           if (!establishment) {
             throw new TRPCError({
               code: "BAD_REQUEST",
@@ -143,7 +149,7 @@ export const iofilesRouter = createTRPCRouter({
           }
           text = generateDebitoAutomatico({
             payments,
-            EstablishmentNumber: establishment.establishment_number,
+            EstablishmentNumber: establishment.establishment_number ?? 0,
             cardType: input.card_type ?? "",
             flag: input.card_brand ?? "",
             // presentationDate: input.presentation_date,
@@ -208,35 +214,35 @@ export const iofilesRouter = createTRPCRouter({
             !processedPayment &&
             !payment.genChannels.includes(channel?.id!)
           ) {
-            // const newGenChannles = [...payment.genChannels, channel.id];
-            // console.log("updating gen Channels");
-            // try {
-            //   if (payment.genChannels.length === channelsList?.length! - 1) {
-            //     // update statuses
-            //     await db
-            //       .update(schema.payments)
-            //       .set({
-            //         genChannels: newGenChannles,
-            //         statusId: genFileStatus?.id,
-            //       })
-            //       .where(eq(schema.payments.id, payment.id));
-            //   } else {
-            //     await db
-            //       .update(schema.payments)
-            //       .set({
-            //         genChannels: newGenChannles,
-            //       })
-            //       .where(eq(schema.payments.id, payment.id));
-            //     console.log(
-            //       "gen channes updated",
-            //       // updated_payment,
-            //       "old: ",
-            //       payment.genChannels
-            //     );
-            //   }
-            // } catch (e) {
-            //   console.log(e);
-            // }
+            const newGenChannles = [...payment.genChannels, channel.id];
+            console.log("updating gen Channels");
+            try {
+              if (payment.genChannels.length === channelsList?.length! - 1) {
+                // update statuses
+                await db
+                  .update(schema.payments)
+                  .set({
+                    genChannels: newGenChannles,
+                    statusId: genFileStatus?.id,
+                  })
+                  .where(eq(schema.payments.id, payment.id));
+              } else {
+                await db
+                  .update(schema.payments)
+                  .set({
+                    genChannels: newGenChannles,
+                  })
+                  .where(eq(schema.payments.id, payment.id));
+                console.log(
+                  "gen channes updated",
+                  // updated_payment,
+                  "old: ",
+                  payment.genChannels
+                );
+              }
+            } catch (e) {
+              console.log(e);
+            }
           }
         }
       });
@@ -502,6 +508,7 @@ async function generatePagoFacil(
     companyId: string;
     fileName: string;
     concept: string;
+    brandName: string;
     redescription: string;
     prisma_code: string;
   },
@@ -534,6 +541,14 @@ async function generatePagoFacil(
 
   for (const transaction of transactions) {
     let register_type = "02";
+    let brandCode;
+    if (_input.brandName === "RED ARGENTINA DE SANATORIOS") {
+      brandCode = "002";
+    } else if (_input.brandName === "Cristal Salud") {
+      brandCode = "002";
+    } else {
+      brandCode = "000";
+    }
 
     const fiscal_id_number = formatString(
       " ",
@@ -544,7 +559,7 @@ async function generatePagoFacil(
     const invoice_number = formatString(
       "0",
       transaction.invoice_number.toString(),
-      21,
+      18,
       false
     );
     const seq_number = `${dayjs(transaction.first_due_date).year()}01`;
@@ -613,7 +628,7 @@ async function generatePagoFacil(
       true
     );
 
-    text += `${register_type}${invoice_number}${fiscal_id_number}${seq_number}${message}${name}${barcode}${validity_date}${first_due_date}${payment_type}${" ".repeat(
+    text += `${register_type}${brandCode}${invoice_number}${fiscal_id_number}${seq_number}${message}${name}${barcode}${validity_date}${first_due_date}${payment_type}${" ".repeat(
       9
     )}\r\n`;
     // detalle;
@@ -628,9 +643,9 @@ async function generatePagoFacil(
     false
   );
   const total_collected_string = formatAmount(total_collected!, 10);
-  text += `${triller_register}${"0".repeat(8)}${"0".repeat(12)}${"0".repeat(
-    7
-  )}${total_records_string}${total_collected_string}${"0".repeat(143)}`;
+  // text += `${triller_register}${"0".repeat(8)}${"0".repeat(12)}${"0".repeat(
+  //   7
+  // )}${total_records_string}${total_collected_string}${"0".repeat(143)}`;
   return text;
 }
 function generateRapiPago(
