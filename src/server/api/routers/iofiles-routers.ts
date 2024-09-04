@@ -401,13 +401,21 @@ function generatePagomiscuentas(
   if (prismaCode.length != 4) {
     prismaCode = "ERROR";
   }
-  let text = `0400${prismaCode}${dateAAAAMMDD}${"0".repeat(264)}\n`;
+
+  let register_code = "0";
+  let prisma_code = "400";
+  let text = `${register_code}${prisma_code}${prismaCode}${dateAAAAMMDD}${"0".repeat(
+    264
+  )}\n`;
   let total_collected = 0;
   for (const transaction of transactions) {
     // registro
-    const fiscal_id_number = formatString(
+
+    let register_code = "5";
+
+    const affiliate_number = formatString(
       " ",
-      transaction.fiscal_id_number!.toString(),
+      transaction.affiliate_number!.toString(),
       19,
       true
     );
@@ -417,12 +425,25 @@ function generatePagomiscuentas(
       20,
       true
     );
+
+    let moneda = "0";
+
     const first_due_date = dayjs(transaction.first_due_date).format("YYYYMMDD");
     const first_due_amount = formatAmount(transaction.first_due_amount!, 9);
 
-    const second_due_date = "00000000";
+    let second_due_amount;
+    if (transaction.second_due_amount) {
+      second_due_amount = formatAmount(transaction.second_due_amount, 9);
+    } else {
+      second_due_amount = "0".repeat(11);
+    }
+    const second_due_date = dayjs(
+      transaction.second_due_date
+        ? transaction.second_due_date
+        : transaction.first_due_date
+    ).format("YYYYMMDD");
 
-    const second_due_amount = "000000000";
+    let third_due_amount = "0".repeat(19);
     const ticketMessage = formatString(
       " ",
       transaction.additional_info ?? "",
@@ -438,11 +459,12 @@ function generatePagomiscuentas(
       9,
       true
     );
-    text += `5${fiscal_id_number}${invoice_number}0${first_due_date}${first_due_amount}${"0".repeat(
-      57
-    )}${fiscal_id_number}${ticketMessage}ABONO ${displayMessage}${" ".repeat(
-      60
-    )}${"0".repeat(29)}\n`;
+
+    let barcode = "0".repeat(60);
+    let filler2 = "0".repeat(29);
+    let filler = "0".repeat(19);
+
+    text += `${register_code}${affiliate_number}${invoice_number}${moneda}${first_due_date}${first_due_amount}${second_due_date}${second_due_amount}${third_due_amount}${filler}${affiliate_number}${ticketMessage}ABONO ${displayMessage}${barcode}${filler2}\n`;
 
     total_collected += transaction.first_due_amount!;
   }
@@ -454,7 +476,8 @@ function generatePagomiscuentas(
     7,
     false
   );
-  text += `9400${prismaCode}${dateAAAAMMDD}${total_records_string}${"0".repeat(
+
+  text += `${register_code}${prisma_code}${prismaCode}${dateAAAAMMDD}${total_records_string}${"0".repeat(
     7
   )}${total_collected_string}${"0".repeat(234)}\n`;
 
