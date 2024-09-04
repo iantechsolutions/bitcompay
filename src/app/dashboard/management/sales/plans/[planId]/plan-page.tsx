@@ -1,6 +1,13 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { Pencil, Trash2, CirclePlus, ChevronDown } from "lucide-react";
+import {
+  Pencil,
+  Trash2,
+  CirclePlus,
+  ChevronDown,
+  PlusCircleIcon,
+  PlusCircle,
+} from "lucide-react";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
 import {
@@ -163,23 +170,23 @@ export default function PlanPage(props: {
                 | {plan!.description}
               </span>
             </Title>
-            <div className="flex items-center space-x-2">
 
-              <Dialog 
-              open={openDelete} onOpenChange={setOpenDelete}>
+            <div className="flex items-center space-x-2">
+              <Dialog open={openDelete} onOpenChange={setOpenDelete}>
                 <DialogContent className="p-4 rounded-2xl">
                   <DialogHeader>
-                  <DialogTitle className="m-2 font-medium text-center pr-6">
-                  ¿Seguro que desea eliminar el plan?
+                    <DialogTitle className="m-2 font-medium text-center pr-6">
+                      ¿Seguro que desea eliminar el plan?
                     </DialogTitle>
                   </DialogHeader>
 
                   <DialogFooter>
-                  <Button
-                  type="submit"
-                  className="m-2 mb-2 pl-4 pr-6 rounded-full w-fit mr-36 ml-32 justify-normal bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#DEF5DD]"
-                  disabled={isLoading}
-                  onClick={handleDelete}>
+                    <Button
+                      type="submit"
+                      className="m-2 mb-2 pl-4 pr-6 rounded-full w-fit mr-36 ml-32 justify-normal bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#DEF5DD]"
+                      disabled={isLoading}
+                      onClick={handleDelete}
+                    >
                       {isLoading && (
                         <Loader2Icon className="mr-2 animate-spin" size={20} />
                       )}
@@ -189,8 +196,32 @@ export default function PlanPage(props: {
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
-             
             </div>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className=" bg-[#BEF0BB] hover:bg-[#BEF0BB]  rounded-full text-[#3E3E3E] hover:text-[#3E3E3E]">
+                  <PlusCircleIcon className="mr-2" size={20} strokeWidth={1} />
+                  Agregar precio
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <AddPlanDialog planId={plan?.id} />
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <DropdownMenuItem>
+                    <Link
+                      href={`/dashboard/management/sales/plans/${plan?.id}/editPrice`}
+                      className="p-0 text-[#3e3e3e] font-medium shadow-none h-5 flex"
+                    >
+                      Agregar manualmente
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           <List>
             {arrayFechas.map((fecha) => {
@@ -240,12 +271,6 @@ export default function PlanPage(props: {
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                          <AddPlanDialog planId={plan?.id} />
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onSelect={(e) => e.preventDefault()}
-                        >
                           <EditPrice plan={plan} />
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
@@ -268,164 +293,179 @@ export default function PlanPage(props: {
             <DialogTitle>Actualizar porcentualmente precio de plan</DialogTitle>
           </DialogHeader>
           <div className="w-1/4 text-gray-500 mb-2 ml-3">
-          <Label htmlFor="validy_date" className="text-xs">MES DE VIGENCIA</Label>
-              <Select
-                onValueChange={(e) => setMes(Number(e))}
-                defaultValue={mes?.toString()} >
-                <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none focus-visible:ring-green-400">
-                  <SelectValue placeholder="Seleccione un mes" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem
-                value="0"
-                disabled={
-                  plan?.pricesPerCondition?.filter(
-                    (x) =>
-                      x.validy_date.getTime() === new Date(anio, 0, 1).getTime()
-                  ).length !== 0
-                }
-              >
-                Enero
-              </SelectItem>
-              <SelectItem
-                value="1"
-                disabled={
-                  plan?.pricesPerCondition?.filter(
-                    (x) =>
-                      x.validy_date.getTime() === new Date(anio, 1, 1).getTime()
-                  ).length !== 0
-                }
-              >
-                Febrero
-              </SelectItem>
-              <SelectItem
-                value="2"
-                disabled={
-                  plan?.pricesPerCondition?.filter(
-                    (x) =>
-                      x.validy_date.getTime() === new Date(anio, 2, 1).getTime()
-                  ).length !== 0
-                }
-              >
-                Marzo
-              </SelectItem>
-              <SelectItem
-                value="3"
-                disabled={
-                  plan?.pricesPerCondition?.filter(
-                    (x) =>
-                      x.validy_date.getTime() === new Date(anio, 3, 1).getTime()
-                  ).length !== 0
-                }
-              >
-                Abril
-              </SelectItem>
-              <SelectItem
-                value="4"
-                disabled={
-                  plan?.pricesPerCondition?.filter(
-                    (x) =>
-                      x.validy_date.getTime() === new Date(anio, 4, 1).getTime()
-                  ).length !== 0
-                }
-              >
-                Mayo
-              </SelectItem>
-              <SelectItem
-                value="5"
-                disabled={
-                  plan?.pricesPerCondition?.filter(
-                    (x) =>
-                      x.validy_date.getTime() === new Date(anio, 5, 1).getTime()
-                  ).length !== 0
-                }
-              >
-                Junio
-              </SelectItem>
-              <SelectItem
-                value="6"
-                disabled={
-                  plan?.pricesPerCondition?.filter(
-                    (x) =>
-                      x.validy_date.getTime() === new Date(anio, 6, 1).getTime()
-                  ).length !== 0
-                }
-              >
-                Julio
-              </SelectItem>
-              <SelectItem
-                value="7"
-                disabled={
-                  plan?.pricesPerCondition?.filter(
-                    (x) =>
-                      x.validy_date.getTime() === new Date(anio, 7, 1).getTime()
-                  ).length !== 0
-                }
-              >
-                Agosto
-              </SelectItem>
-              <SelectItem
-                value="8"
-                disabled={
-                  plan?.pricesPerCondition?.filter(
-                    (x) =>
-                      x.validy_date.getTime() === new Date(anio, 8, 1).getTime()
-                  ).length !== 0
-                }
-              >
-                Septiembre
-              </SelectItem>
-              <SelectItem
-                value="9"
-                disabled={
-                  plan?.pricesPerCondition?.filter(
-                    (x) =>
-                      x.validy_date.getTime() === new Date(anio, 9, 1).getTime()
-                  ).length !== 0
-                }
-              >
-                Octubre
-              </SelectItem>
-              <SelectItem
-                value="10"
-                disabled={
-                  plan?.pricesPerCondition?.filter(
-                    (x) =>
-                      x.validy_date.getTime() ===
-                      new Date(anio, 10, 1).getTime()
-                  ).length !== 0
-                }
-              >
-                Noviembre
-              </SelectItem>
-              <SelectItem
-                value="11"
-                disabled={
-                  plan?.pricesPerCondition?.filter(
-                    (x) =>
-                      x.validy_date.getTime() ===
-                      new Date(anio, 11, 1).getTime()
-                  ).length !== 0
-                }
-              >
-                Diciembre
-              </SelectItem>
-            </SelectContent>
-          </Select>
+            <Label htmlFor="validy_date" className="text-xs">
+              MES DE VIGENCIA
+            </Label>
+            <Select
+              onValueChange={(e) => setMes(Number(e))}
+              defaultValue={mes?.toString()}
+            >
+              <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none focus-visible:ring-green-400">
+                <SelectValue placeholder="Seleccione un mes" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  value="0"
+                  disabled={
+                    plan?.pricesPerCondition?.filter(
+                      (x) =>
+                        x.validy_date.getTime() ===
+                        new Date(anio, 0, 1).getTime()
+                    ).length !== 0
+                  }
+                >
+                  Enero
+                </SelectItem>
+                <SelectItem
+                  value="1"
+                  disabled={
+                    plan?.pricesPerCondition?.filter(
+                      (x) =>
+                        x.validy_date.getTime() ===
+                        new Date(anio, 1, 1).getTime()
+                    ).length !== 0
+                  }
+                >
+                  Febrero
+                </SelectItem>
+                <SelectItem
+                  value="2"
+                  disabled={
+                    plan?.pricesPerCondition?.filter(
+                      (x) =>
+                        x.validy_date.getTime() ===
+                        new Date(anio, 2, 1).getTime()
+                    ).length !== 0
+                  }
+                >
+                  Marzo
+                </SelectItem>
+                <SelectItem
+                  value="3"
+                  disabled={
+                    plan?.pricesPerCondition?.filter(
+                      (x) =>
+                        x.validy_date.getTime() ===
+                        new Date(anio, 3, 1).getTime()
+                    ).length !== 0
+                  }
+                >
+                  Abril
+                </SelectItem>
+                <SelectItem
+                  value="4"
+                  disabled={
+                    plan?.pricesPerCondition?.filter(
+                      (x) =>
+                        x.validy_date.getTime() ===
+                        new Date(anio, 4, 1).getTime()
+                    ).length !== 0
+                  }
+                >
+                  Mayo
+                </SelectItem>
+                <SelectItem
+                  value="5"
+                  disabled={
+                    plan?.pricesPerCondition?.filter(
+                      (x) =>
+                        x.validy_date.getTime() ===
+                        new Date(anio, 5, 1).getTime()
+                    ).length !== 0
+                  }
+                >
+                  Junio
+                </SelectItem>
+                <SelectItem
+                  value="6"
+                  disabled={
+                    plan?.pricesPerCondition?.filter(
+                      (x) =>
+                        x.validy_date.getTime() ===
+                        new Date(anio, 6, 1).getTime()
+                    ).length !== 0
+                  }
+                >
+                  Julio
+                </SelectItem>
+                <SelectItem
+                  value="7"
+                  disabled={
+                    plan?.pricesPerCondition?.filter(
+                      (x) =>
+                        x.validy_date.getTime() ===
+                        new Date(anio, 7, 1).getTime()
+                    ).length !== 0
+                  }
+                >
+                  Agosto
+                </SelectItem>
+                <SelectItem
+                  value="8"
+                  disabled={
+                    plan?.pricesPerCondition?.filter(
+                      (x) =>
+                        x.validy_date.getTime() ===
+                        new Date(anio, 8, 1).getTime()
+                    ).length !== 0
+                  }
+                >
+                  Septiembre
+                </SelectItem>
+                <SelectItem
+                  value="9"
+                  disabled={
+                    plan?.pricesPerCondition?.filter(
+                      (x) =>
+                        x.validy_date.getTime() ===
+                        new Date(anio, 9, 1).getTime()
+                    ).length !== 0
+                  }
+                >
+                  Octubre
+                </SelectItem>
+                <SelectItem
+                  value="10"
+                  disabled={
+                    plan?.pricesPerCondition?.filter(
+                      (x) =>
+                        x.validy_date.getTime() ===
+                        new Date(anio, 10, 1).getTime()
+                    ).length !== 0
+                  }
+                >
+                  Noviembre
+                </SelectItem>
+                <SelectItem
+                  value="11"
+                  disabled={
+                    plan?.pricesPerCondition?.filter(
+                      (x) =>
+                        x.validy_date.getTime() ===
+                        new Date(anio, 11, 1).getTime()
+                    ).length !== 0
+                  }
+                >
+                  Diciembre
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="w-1/4 text-gray-500 mb-2 ml-3">
-              <Label className="text-xs">AÑO DE VIGENCIA</Label>
-              <Input
-                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
-                type="number"
-                min={new Date().getFullYear()}
-                value={anio}
-                onChange={(e) => setAnio(Number(e.target.value))}
-              />
-            </div>
+            <Label className="text-xs">AÑO DE VIGENCIA</Label>
+            <Input
+              className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+              type="number"
+              min={new Date().getFullYear()}
+              value={anio}
+              onChange={(e) => setAnio(Number(e.target.value))}
+            />
+          </div>
 
           <div className="w-1/4 text-gray-500 mb-2 ml-3">
-            <Label className="text-xs text-nowrap" htmlFor="number">PORCENTAJE DE AUMENTO (EJ: 30%) </Label>
+            <Label className="text-xs text-nowrap" htmlFor="number">
+              PORCENTAJE DE AUMENTO (EJ: 30%){" "}
+            </Label>
             <Input
               className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none"
               id="number"
@@ -436,13 +476,14 @@ export default function PlanPage(props: {
 
           <div>
             <Button
-            disabled={loading}
-            onClick={handleUpdatePrice}
-            className="bg-[#BEF0BB] hover:bg-[#BEF0BB] ml-3 rounded-full mr-4 px-6 text-black font-normal hover:text-[#3E3E3E]">
+              disabled={loading}
+              onClick={handleUpdatePrice}
+              className="bg-[#BEF0BB] hover:bg-[#BEF0BB] ml-3 rounded-full mr-4 px-6 text-black font-normal hover:text-[#3E3E3E]"
+            >
               {loading && (
-              <Loader2Icon className="mr-2 animate-spin" size={20} />
+                <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}
-              <CreditCardPosIcon className="mr-2 font-medium"/>
+              <CreditCardPosIcon className="mr-2 font-medium" />
               Actualizar precio
             </Button>
           </div>
