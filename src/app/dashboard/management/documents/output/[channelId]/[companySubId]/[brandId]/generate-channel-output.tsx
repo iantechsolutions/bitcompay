@@ -197,7 +197,7 @@ export default function GenerateChannelOutputPage(props: {
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className=" items-center gap-4">
-                  {props.channel.name !== "DEBITO AUTOMATICO EN TARJETAS" ? (
+                  {props.channel.name !== "DEBITO AUTOMATICO" ? (
                     <>
                       <Label htmlFor="fileName" className="text-right">
                         Nombre del archivo

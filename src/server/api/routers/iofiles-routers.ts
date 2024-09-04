@@ -212,35 +212,35 @@ export const iofilesRouter = createTRPCRouter({
             !processedPayment &&
             !payment.genChannels.includes(channel?.id!)
           ) {
-            // const newGenChannles = [...payment.genChannels, channel.id];
-            // console.log("updating gen Channels");
-            // try {
-            //   if (payment.genChannels.length === channelsList?.length! - 1) {
-            //     // update statuses
-            //     await db
-            //       .update(schema.payments)
-            //       .set({
-            //         genChannels: newGenChannles,
-            //         statusId: genFileStatus?.id,
-            //       })
-            //       .where(eq(schema.payments.id, payment.id));
-            //   } else {
-            //     await db
-            //       .update(schema.payments)
-            //       .set({
-            //         genChannels: newGenChannles,
-            //       })
-            //       .where(eq(schema.payments.id, payment.id));
-            //     console.log(
-            //       "gen channes updated",
-            //       // updated_payment,
-            //       "old: ",
-            //       payment.genChannels
-            //     );
-            //   }
-            // } catch (e) {
-            //   console.log(e);
-            // }
+            const newGenChannles = [...payment.genChannels, channel.id];
+            console.log("updating gen Channels");
+            try {
+              if (payment.genChannels.length === channelsList?.length! - 1) {
+                // update statuses
+                await db
+                  .update(schema.payments)
+                  .set({
+                    genChannels: newGenChannles,
+                    statusId: genFileStatus?.id,
+                  })
+                  .where(eq(schema.payments.id, payment.id));
+              } else {
+                await db
+                  .update(schema.payments)
+                  .set({
+                    genChannels: newGenChannles,
+                  })
+                  .where(eq(schema.payments.id, payment.id));
+                console.log(
+                  "gen channes updated",
+                  // updated_payment,
+                  "old: ",
+                  payment.genChannels
+                );
+              }
+            } catch (e) {
+              console.log(e);
+            }
           }
         }
       });
