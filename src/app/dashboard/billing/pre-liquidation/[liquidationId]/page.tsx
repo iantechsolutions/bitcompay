@@ -166,9 +166,12 @@ export default async function Home(props: {
       parseFloat(original_comprobante?.importe?.toFixed(2)!)
     );
     excelRows.push(excelRow);
-    const subTotal = computeBase(total, Number(original_comprobante?.iva!));
+    const subTotal = computeBase(
+      total,
+      Number(original_comprobante?.iva ?? "0")
+    );
     summary["Sub Total"] += subTotal;
-    const iva = computeIva(total, Number(original_comprobante?.iva!));
+    const iva = computeIva(total, Number(original_comprobante?.iva ?? "0"));
     summary.IVA += iva;
     summary["Total a facturar"] += total;
     excelRow.push(subTotal);
@@ -183,6 +186,7 @@ export default async function Home(props: {
       0;
     const plan = fg?.plan?.description ?? "";
     const modo = fg?.modo?.description ?? "";
+
     tableRows.push({
       id: fg?.id!,
       nroGF: fg?.numericalId ?? "N/A",
@@ -232,9 +236,7 @@ export default async function Home(props: {
           <li className="">
             <span className="">RAZÓN SOCIAL</span>
             <br />
-            <p className="font-medium">
-              {companyData?.razon_social ?? "-"}
-            </p>
+            <p className="font-medium">{companyData?.razon_social ?? "-"}</p>
           </li>
           <li>
             <span className="">CUIT</span>
@@ -244,9 +246,7 @@ export default async function Home(props: {
           <li>
             <span className="">MARCA</span>
             <br />
-            <p className="font-medium">
-              XXXX
-            </p>
+            <p className="font-medium">XXXX</p>
           </li>
           <li>
             <span className="">PERÍODO</span>
@@ -256,9 +256,7 @@ export default async function Home(props: {
           <li>
             <span className="">N° PRE-LIQUIDACIÓN</span>
             <br />
-            <p className="font-medium">
-              {preliquidation?.number ?? "-"}
-            </p>
+            <p className="font-medium">{preliquidation?.number ?? "-"}</p>
           </li>
           <li>
             <span className="">FECHA DE PROCESO</span>
@@ -268,15 +266,18 @@ export default async function Home(props: {
             </p>
           </li>
           <li className="">
-            <span className="">UNIDAD DE NEGOCIOS</span><br />
+            <span className="">UNIDAD DE NEGOCIOS</span>
+            <br />
             <p className="font-medium">XXXX</p>
           </li>
           <li>
-            <span className="">FECHA DE EMISIÓN</span><br />
+            <span className="">FECHA DE EMISIÓN</span>
+            <br />
             <p className="font-medium">XXXX</p>
           </li>
           <li>
-            <span className="">VENCIMIENTOS</span><br />
+            <span className="">VENCIMIENTOS</span>
+            <br />
             <p className="font-medium">XXXX</p>
           </li>
           <li>

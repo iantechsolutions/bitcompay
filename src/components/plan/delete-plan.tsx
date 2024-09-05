@@ -17,18 +17,28 @@ import { asTRPCError } from "~/lib/errors";
 
 export default function DeleteButton(props: { id: string }) {
   const router = useRouter();
+  const planId = props?.id;
+  const [error, setError] = useState<boolean>(false);
+  const { data: familiGroups } = api.family_groups.getbyPlans.useQuery({
+    planId: planId,
+  });
   async function handleDelete() {
-    try {
-      await deletePlan({
-        planId: props.id ?? "",
-      });
+    if (familiGroups) {
+      setError(true);
+      return toast.error("No se pudo eliminar el plan");
+    } else {
+      try {
+        await deletePlan({
+          planId: props.id ?? "",
+        });
 
-      toast.success("El plan se eliminado correctamente");
-      router.push("/dashboard/management/sales/plans");
-      router.refresh();
-    } catch (e) {
-      const error = asTRPCError(e)!;
-      toast.error(error.message);
+        toast.success("El plan se eliminado correctamente");
+        router.push("/dashboard/management/sales/plans");
+        router.refresh();
+      } catch (e) {
+        const error = asTRPCError(e)!;
+        toast.error(error.message);
+      }
     }
   }
   const { mutateAsync: deletePlan, isLoading } = api.plans.delete.useMutation();
@@ -38,8 +48,7 @@ export default function DeleteButton(props: { id: string }) {
       <Button
         variant="bitcompay"
         className="text-[#3e3e3e] bg-stone-100 hover:bg-stone-200"
-        onClick={() => setOpenDelete(true)}
-      >
+        onClick={() => setOpenDelete(true)}>
         <Delete02Icon className="mr-2" /> Eliminar
       </Button>
       <Dialog open={openDelete} onOpenChange={setOpenDelete}>
@@ -50,14 +59,18 @@ export default function DeleteButton(props: { id: string }) {
             </DialogTitle>
           </DialogHeader>
 
+          {error && (
+            <p className="text-red-500 text-center">
+              {" "}
+              Hay grupos familiares relacionados a este plan
+            </p>
+          )}
           <div className="w-full flex justify-center">
-
             <Button
               type="submit"
               className="rounded-full bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#BEF0BB]"
-              disabled={isLoading}
-              onClick={handleDelete}
-            >
+              disabled={isLoading || error}
+              onClick={handleDelete}>
               {isLoading && (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}
@@ -65,7 +78,6 @@ export default function DeleteButton(props: { id: string }) {
               <h1 className="font-medium-medium p-1">Eliminar</h1>
             </Button>
           </div>
-      
         </DialogContent>
       </Dialog>
     </>
