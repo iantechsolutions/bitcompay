@@ -32,7 +32,6 @@ export default function AddPlanPage(props: {
   return (
     <LayoutContainer>
       <div>
-        <GoBackArrow />
         <AddPlanPricesComponent
           planId={props.params.planId}
           initialPrices={priceList}

@@ -227,45 +227,67 @@ export default async function Home(props: {
           </>
         )}
       </div>
-      <div className="bg-[#f6f6f6] rounded-lg text-base">
+      <div className="bg-[#f6f6f6] rounded-lg text-sm">
         <ul className="grid grid-cols-3 gap-x-2 list-none px-8 py-5">
           <li className="">
-            <span className=" text-xs">RAZÓN SOCIAL</span>
+            <span className="">RAZÓN SOCIAL</span>
             <br />
-            <p className="font-medium text-md">
+            <p className="font-medium">
               {companyData?.razon_social ?? "-"}
             </p>
           </li>
           <li>
-            <span className=" text-xs">CUIT</span>
+            <span className="">CUIT</span>
             <br />
             <p className="font-medium text-md">{companyData?.cuit ?? "-"}</p>
           </li>
           <li>
-            <span className=" text-xs">GERENCIADOR</span>
+            <span className="">MARCA</span>
             <br />
-            <p className="font-medium text-md">
-              {businessUnit?.description ?? "-"}
+            <p className="font-medium">
+              XXXX
             </p>
           </li>
           <li>
-            <span className=" text-xs">PERÍODO</span>
+            <span className="">PERÍODO</span>
             <br />
-            <p className="font-medium text-md">{periodo}</p>
+            <p className="font-medium">{periodo}</p>
           </li>
           <li>
-            <span className=" text-xsopacity-100">N° PRE-LIQUIDACIÓN</span>
+            <span className="">N° PRE-LIQUIDACIÓN</span>
             <br />
-            <p className="font-medium text-md">
+            <p className="font-medium">
               {preliquidation?.number ?? "-"}
             </p>
           </li>
           <li>
-            <span className=" text-xsopacity-100">FECHA</span>
+            <span className="">FECHA DE PROCESO</span>
             <br />
-            <p className="font-medium text-md">
+            <p className="font-medium">
               {dayjs.utc(preliquidation?.createdAt).format("DD/MM/YYYY") ?? "-"}
             </p>
+          </li>
+          <li className="">
+            <span className="">UNIDAD DE NEGOCIOS</span><br />
+            <p className="font-medium">XXXX</p>
+          </li>
+          <li>
+            <span className="">FECHA DE EMISIÓN</span><br />
+            <p className="font-medium">XXXX</p>
+          </li>
+          <li>
+            <span className="">VENCIMIENTOS</span><br />
+            <p className="font-medium">XXXX</p>
+          </li>
+          <li>
+            <span className="">PDV</span>
+            <br />
+            <p className="font-medium">{preliquidation?.pdv ?? "-"}</p>
+          </li>
+          <li>
+            <span className="">INTERÉS (%)</span>
+            <br />
+            <p className="font-medium">{preliquidation?.interest ?? "-"}</p>
           </li>
         </ul>
       </div>

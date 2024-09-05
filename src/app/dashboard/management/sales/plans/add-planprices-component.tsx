@@ -33,6 +33,8 @@ import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { RouterOutputs } from "~/trpc/shared";
 import { CircleX, Loader2Icon, PlusCircle } from "lucide-react";
+import Edit02Icon from "~/components/icons/edit-02-stroke-rounded";
+import { GoBackButton } from "~/components/goback-button";
 
 dayjs.extend(utc);
 dayjs.locale("es");
@@ -101,6 +103,12 @@ export default function AddPlanPricesComponent({
         router.refresh();
       },
     }
+  );
+  
+  const Bookmark02Icon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={24} height={24} color={"#000000"} fill={"none"} {...props}>
+      <path d="M4 17.9808V9.70753C4 6.07416 4 4.25748 5.17157 3.12874C6.34315 2 8.22876 2 12 2C15.7712 2 17.6569 2 18.8284 3.12874C20 4.25748 20 6.07416 20 9.70753V17.9808C20 20.2867 20 21.4396 19.2272 21.8523C17.7305 22.6514 14.9232 19.9852 13.59 19.1824C12.8168 18.7168 12.4302 18.484 12 18.484C11.5698 18.484 11.1832 18.7168 10.41 19.1824C9.0768 19.9852 6.26947 22.6514 4.77285 21.8523C4 21.4396 4 20.2867 4 17.9808Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   );
 
   const { mutateAsync: createPricePerCondition } =
@@ -252,46 +260,25 @@ export default function AddPlanPricesComponent({
 
   return (
     <>
+    <GoBackButton url={"./"} />
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex-col items-center justify-center gap-2 space-y-8">
-          <div className="mb-1">
-            <Button
-              type="button"
-              className="float-right bg-[#1bdfb7] hover:bg-[#1bdfb7] rounded-full"
-              onClick={() =>
-                append({
-                  id: "",
-                  createdAt: new Date(),
-                  validy_date: new Date(),
-                  from_age: null,
-                  to_age: null,
-                  condition: "",
-                  isAmountByAge: false,
-                  plan_id: "",
-                  amount: 0,
-                })
-              }>
-              <PlusCircle className="mr-2" size={20} />
-              Agregar Precio
-            </Button>
-
-            <h1 className="font-bold text-2xl">{edit? "Editar Precio Manualmente" : "Agregar Precio manualmente"}</h1>
+          className="flex-col items-center justify-center gap-2 space-y-4">
+          <div className="p-0.5">
+            <h1 className="flex-col items-center justify-center gap-2 space-y-2 font-bold text-2xl">Editar Precio Manualmente</h1>
           </div>
-          <div className="flex flex-row gap-5">
+          <div className="flex flex-row w-full text-gray-500 p-2 gap-4">
+          <div className="w-1/4 whitespace-nowrap ">
             <FormItem>
-              <FormLabel htmlFor="validy_date">Mes de vigencia</FormLabel>
-              <Select
-                disabled={edit}
+            <Label htmlFor="validy_date" className="text-xs">MES DE VIGENCIA</Label>
+            <Select
                 onValueChange={(e) => setMes(Number(e))}
-                value={mes?.toString()}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione un mes" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent className="max-h-[45vh]">
+                defaultValue={mes?.toString()} >
+                <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none hover:bg-transparent">
+                  <SelectValue placeholder="Seleccione un mes" />
+            </SelectTrigger>
+                <SelectContent className="max-h-[45vh] mb-2">
                   <SelectItem
                     value="1"
                     disabled={new Date(anio ?? 0, 0, 1) <= currentVigency}>
@@ -355,8 +342,10 @@ export default function AddPlanPricesComponent({
                 </SelectContent>
               </Select>
             </FormItem>
-            <FormItem>
-              <FormLabel>Año de Vigencia</FormLabel>
+            </div>
+            <div className="w-1/4 ml-3 mt-2 whitespace-nowrap max-w-fit">
+            <Label className="text-xs">AÑO DE VIGENCIA</Label>
+            <FormItem className="w-full max-w-24 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none hover:bg-transparent">
               <FormControl>
                 <Input
                   disabled={edit}
@@ -369,8 +358,10 @@ export default function AddPlanPricesComponent({
               <FormMessage />
             </FormItem>
           </div>
+          </div>
+
           {fields.length > 0 && (
-            <h1 className="font-bold text-2xl">Condicion</h1>
+            <h1 className="flex-col items-center justify-center gap-2 space-y-4 font-bold text-2xl p-0.5 mb-2">Condición</h1>
           )}
           {hasQueried ? (
             fields.map((item, index) => {
@@ -384,8 +375,8 @@ export default function AddPlanPricesComponent({
                       <FormItem>
                         <FormLabel
                           htmlFor={`prices.${index}.isAmountByAge`}
-                          className="font-bold">
-                          Tipo
+                          className="text-xs text-gray-500">
+                          TIPO
                         </FormLabel>
                         <Select
                           onValueChange={(value: "true" | "false") => {
@@ -407,19 +398,19 @@ export default function AddPlanPricesComponent({
                               : "false"
                           }>
                           <FormControl>
-                            <SelectTrigger className="w-[150px] font-bold">
-                              <SelectValue placeholder="Seleccione una opción" />
+                          <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none hover:bg-transparent">
+                          <SelectValue placeholder="Seleccione una opción" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             <SelectItem
                               value="true"
-                              className="rounded-none border-b border-gray-600">
+                              className="rounded-none ">
                               Rango de edad
                             </SelectItem>
                             <SelectItem
                               value="false"
-                              className="rounded-none border-b border-gray-600">
+                              className="rounded-none">
                               Parentesco
                             </SelectItem>
                           </SelectContent>
@@ -435,15 +426,15 @@ export default function AddPlanPricesComponent({
                       name={`prices.${index}.condition`}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel htmlFor={`prices.${index}.condition`}>
-                            Relacion
+                          <FormLabel htmlFor={`prices.${index}.condition`} className="text-xs text-gray-500">
+                            RELACIÓN
                           </FormLabel>
                           <FormControl>
                             <Select
                               onValueChange={field.onChange}
                               value={field.value ?? ""}>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Seleccione una opción" />
+                              <SelectTrigger className="w-full px-3 max-w-fit border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none hover:bg-transparent">
+                                <SelectValue placeholder="Seleccione una opción"/>
                               </SelectTrigger>
                               <SelectContent>
                                 {relatives?.map((relative) => (
@@ -466,13 +457,13 @@ export default function AddPlanPricesComponent({
                         control={form.control}
                         name={`prices.${index}.from_age`}
                         render={({ field }) => (
-                          <FormItem>
-                            <FormLabel htmlFor={`prices.${index}.from_age`}>
-                              Edad Desde
+                          <FormItem className="max-w-fit p-3">
+                            <FormLabel htmlFor={`prices.${index}.from_age`} className="text-xs text-gray-500">
+                              EDAD DESDE
                             </FormLabel>
                             <FormControl>
                               <Input
-                                className="border-green-300 focus-visible:ring-green-400"
+                                className="w-full max-w-24 border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none hover:bg-transparent"
                                 type="number"
                                 {...field}
                                 value={field.value ?? ""}
@@ -486,13 +477,13 @@ export default function AddPlanPricesComponent({
                         control={form.control}
                         name={`prices.${index}.to_age`}
                         render={({ field }) => (
-                          <FormItem>
-                            <FormLabel htmlFor={`prices.${index}.to_age`}>
-                              Edad Hasta
+                          <FormItem className="max-w-fit p-3">
+                            <FormLabel htmlFor={`prices.${index}.to_age`} className="text-xs text-gray-500 max-w-fit">
+                              EDAD HASTA
                             </FormLabel>
                             <FormControl>
                               <Input
-                                className="border-green-300 focus-visible:ring-green-400"
+                                className="w-full max-w-24 border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none hover:bg-transparent"
                                 type="number"
                                 {...field}
                                 value={field.value ?? ""}
@@ -509,12 +500,13 @@ export default function AddPlanPricesComponent({
                     name={`prices.${index}.amount`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel htmlFor={`prices.${index}.amount`}>
-                          Precio
+                        <FormLabel htmlFor={`prices.${index}.amount`} className="text-xs text-gray-500">
+                          PRECIO
                         </FormLabel>
                         <FormControl>
                           <Input
-                            className="border-green-300 focus-visible:ring-green-400 w-[100px]"
+                            className="w-full max-w-24 border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none
+              hover:none justify-self-right pr-0 hover:bg-transparent"
                             type="number"
                             {...field}
                             value={field.value?.toString()}
@@ -524,32 +516,40 @@ export default function AddPlanPricesComponent({
                       </FormItem>
                     )}
                   />
-                  {edit ? (
-                    <Button
-                      disabled={isButtonDisabled}
-                      variant="ghost"
-                      type="button"
-                      className="relative top-3"
-                      onClick={() => handleDelete(index)}>
-                      {isButtonDisabled ? (
-                        <Loader2Icon
-                          className="left-0 animate-spin"
-                          size={20}
-                        />
-                      ) : (
-                        <CircleX className="text-red-500 left-0" size={20} />
-                      )}
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="ghost"
-                      type="button"
-                      className="relative top-3"
-                      onClick={() => remove(index)}>
-                      Borrar
-                      <CircleX className="text-red-500 left-0" size={20} />
-                    </Button>
-                  )}
+                  <div className="flex gap-2">
+ 
+                <Button
+                  variant="ghost"
+                  type="button"
+                  className="relative top-3 hover:bg-transparent"
+                  onClick={() =>
+                    append({
+                      id: "",
+                      createdAt: new Date(),
+                      validy_date: new Date(),
+                      from_age: null,
+                      to_age: null,
+                      condition: "",              
+                      isAmountByAge: false,
+                      plan_id: "",
+                      amount: 0,
+                   })
+                 }>
+                 {isButtonDisabled ? (
+                   <Loader2Icon className="left-0 animate-spin" size={20} />
+                 ) : (
+                   <PlusCircle className="text-green-500 left-0" size={20} />
+                 )}
+               </Button>
+
+                <Button
+                  variant="ghost"
+                  type="button"
+                  className="relative top-3 hover:bg-transparent"
+                  onClick={() => remove(index)}>
+                  <CircleX className="text-red-500 left-0" size={20} />
+                </Button>
+              </div>
                 </div>
               );
             })
@@ -559,11 +559,16 @@ export default function AddPlanPricesComponent({
               <h1 className="font-bold text-xl">Cargando...</h1>
             </div>
           )}
-          <Button type="submit" disabled={working || isButtonDisabled}>
+          <Button
+          type="submit"
+          disabled={working || isButtonDisabled}
+          className="mr-7 mt-15 pl-16 pr-16 font-medium rounded-full w-fit justify-self-right
+          text-lg bg-[#BEF0BB] hover:bg-[#DDF9CC] text-[#3E3E3E]">
             {" "}
             {working && (
-              <Loader2Icon className="mr-2 animate-spin" size={20} />
-            )}{" "}
+              <Loader2Icon className="mr-2 animate-spin" size={16}/>
+            )}
+            {edit ? <Edit02Icon className="h-4"/> : <Bookmark02Icon className="mr-2 font-light h-4 color:text-gray-500"/> }
             {edit ? "Actualizar" : "Guardar"}
           </Button>
         </form>

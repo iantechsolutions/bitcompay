@@ -2,6 +2,7 @@ import { api } from "~/trpc/server";
 import AddPlanPricesComponent from "../../add-planprices-component";
 import { GoBackArrow } from "~/components/goback-arrow";
 import LayoutContainer from "~/components/layout-container";
+import { GoBackButton } from "~/components/goback-button";
 
 export default async function AddPlanPage(props: {
   params: { planId: string };
@@ -30,7 +31,6 @@ export default async function AddPlanPage(props: {
   return (
     <LayoutContainer>
       <div>
-        <GoBackArrow />
         <AddPlanPricesComponent
           planId={planId}
           initialPrices={priceList}
