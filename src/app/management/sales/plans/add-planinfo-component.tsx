@@ -96,10 +96,7 @@ export default function AddPlanInfoComponent({
 
   async function handleSumbit() {
     if (
-      plans?.some(
-        (plan) =>
-          plan.plan_code === planData?.plan_code || codigo === plan.plan_code
-      )
+      plans?.some((plan) => plan.plan_code === codigo && plan.id !== planId)
     ) {
       return toast.error("No se pueden repetir los codigos de los planes");
     } else {

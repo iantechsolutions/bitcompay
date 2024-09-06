@@ -136,15 +136,10 @@ export default function AddPlanPricesComponent({
   // Add logging to check for re-renders
 
   useEffect(() => {
-    console.log("se updatea");
     if (initialPrices) {
-      console.log("entra");
       form.reset({ prices: initialPrices });
       const givenDate = initialPrices[0]?.validy_date;
-      console.log("givenDate", givenDate?.getTime() ?? 0);
-      console.log("new Date().getTime()", new Date().getTime());
       if ((givenDate?.getTime() ?? 0) > new Date().getTime()) {
-        console.log("entra");
         if (initialPrices[0]?.validy_date.getMonth()) {
           setMes(initialPrices[0]?.validy_date.getMonth() + 1);
         } else {
@@ -164,9 +159,7 @@ export default function AddPlanPricesComponent({
       } else {
         let allowed = true;
         const validity_date = new Date(anio ?? 0, (mes ?? 1) - 1, 1);
-        console.log("validity_date", validity_date);
         for (let i = 0; i < data.prices.length; i++) {
-          console.log("entra for");
           const { from_age: fromAge1, to_age: toAge1 } = data.prices[i] ?? {
             from_age: 0,
             to_age: 0,
@@ -177,10 +170,7 @@ export default function AddPlanPricesComponent({
                 from_age: 0,
                 to_age: 0,
               };
-              console.log(fromAge1);
-              console.log(fromAge2);
-              console.log(toAge1);
-              console.log(toAge2);
+
               if (fromAge2 !== null && toAge2 !== null) {
                 if (fromAge1 <= toAge2 && fromAge2 <= toAge1) {
                   toast.error("Las edades se superposicionan");
@@ -192,7 +182,6 @@ export default function AddPlanPricesComponent({
         }
         if (allowed) {
           for (const item of data.prices) {
-            console.log(item.id);
             if (edit && item.id !== "") {
               // if (!pricesToDelete.includes(item.id)) {
               if (item.isAmountByAge) {
@@ -244,13 +233,10 @@ export default function AddPlanPricesComponent({
         setWorking(false);
       }
     } catch (error) {
-      console.error(error);
       setWorking(false);
     }
   };
-  useEffect(() => {
-    console.log("pricesToDelete", pricesToDelete);
-  }, [pricesToDelete]);
+  useEffect(() => {}, [pricesToDelete]);
 
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 

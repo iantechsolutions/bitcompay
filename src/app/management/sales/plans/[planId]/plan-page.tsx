@@ -265,16 +265,24 @@ export default function PlanPage(props: {
                           </Button>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        {vigente && fecha >= vigente ? (
-                          <DropdownMenuItem
-                            onSelect={(e) => e.preventDefault()}>
-                            <EditPrice plan={plan} fecha={fecha.getTime()} />
-                          </DropdownMenuItem>
+                        {vigente ? (
+                          <div>
+                            <DropdownMenuItem
+                              disabled={vigente > fecha}
+                              onSelect={(e) => e.preventDefault()}>
+                              <EditPrice plan={plan} fecha={fecha.getTime()} />
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onSelect={(e) => e.preventDefault()}
+                              disabled={vigente === fecha || vigente > fecha}>
+                              <DeletePrice
+                                planId={plan?.id ?? ""}
+                                currentVigency={vigente}
+                              />
+                            </DropdownMenuItem>
+                          </div>
                         ) : null}
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                          <DeletePrice />
-                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   }

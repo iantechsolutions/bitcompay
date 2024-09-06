@@ -45,6 +45,7 @@ import {
   TableRow,
 } from "~/components/ui/tablePreliq";
 import { GoBackButton } from "~/components/goback-button";
+import DeletePrice from "~/components/plan/delete-price";
 // import AddPlanDialogPerPrice from "./AddPlanDialog";
 
 dayjs.extend(utc);
@@ -83,10 +84,10 @@ export default function DetailsPage(props: {
 
   const { mutateAsync: deletePricePerCondition, isLoading: isDeleting } =
     api.pricePerCondition.delete.useMutation();
-
+  const plaId = props.plan?.id ?? "";
   const { data, error, isLoading } =
     api.pricePerCondition.getByCreatedAt.useQuery({
-      planId: props.plan?.id,
+      planId: plaId,
       createdAt: props.date,
     });
   console.log(data);
@@ -176,21 +177,6 @@ export default function DetailsPage(props: {
     setGroupByAge(groupByAge);
   }, []);
 
-  async function handleDelete() {
-    try {
-      // setIsLoading(true);
-      await deletePricePerCondition({
-        id: "",
-      });
-
-      // toast.success("Obra social eliminada correctamente");
-      router.push("./");
-    } catch (e) {
-      // const error = asTRPCError(e)!;
-      // toast.error(error.message);
-    }
-  }
-
   return (
     <LayoutContainer>
       <GoBackButton url={"../"} />
@@ -198,15 +184,13 @@ export default function DetailsPage(props: {
         <section className="space-y-2">
           <div className="flex justify-between">
             <div className="flex-col">
-                <Title>Planes
-                  <span className="text-[#3e3e3e] font-medium text-xl">
+              <Title>
+                Planes
+                <span className="text-[#3e3e3e] font-medium text-xl">
                   {" "}
                   | {props.plan!.description}
-                  </span>
-                </Title>
-              
-              
-              
+                </span>
+              </Title>
             </div>
             <div>
               <Dialog open={open} onOpenChange={setOpen}>
@@ -278,11 +262,7 @@ export default function DetailsPage(props: {
 
             {deleteable && (
               <div className="flex items-center">
-                <Button
-                  variant={"destructive"}
-                  onClick={() => setOpenDelete(true)}>
-                  Eliminar
-                </Button>
+                <DeletePrice planId={plaId} currentVigency={validity_date} />
                 <Button
                   onClick={() => handleUpdatePrice("edit")}
                   className="ml-10">
@@ -293,33 +273,33 @@ export default function DetailsPage(props: {
             )}
           </div>
           <h2 className="flex flex-auto mb-3 justify-end">
-                {formatter.format(props.date).charAt(0).toUpperCase() +
-                  formatter.format(props.date).slice(1)}
+            {formatter.format(props.date).charAt(0).toUpperCase() +
+              formatter.format(props.date).slice(1)}
           </h2>
           {!isLoading && (
             <Tabs defaultValue="perAge">
               <TabsList>
-                <TabsTrigger
-                  value="perAge"
-                  className="">
+                <TabsTrigger value="perAge" className="">
                   Precios por edad
                 </TabsTrigger>
 
-                <TabsTrigger
-                  value="conditional"
-                  className="">
+                <TabsTrigger value="conditional" className="">
                   Precios por relacion
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="conditional">
-              <Table className="w-5/6">
+                <Table className="w-5/6">
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="pl-3 pr-[7vw] font-medium text-center">Relacion</TableHead>
-                      <TableHead className="px-[7vw] font-medium text-center">Monto</TableHead>
+                      <TableHead className="pl-3 pr-[7vw] font-medium text-center">
+                        Relacion
+                      </TableHead>
+                      <TableHead className="px-[7vw] font-medium text-center">
+                        Monto
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
-                  <TableBody >
+                  <TableBody>
                     {data
                       ?.filter(
                         (precio) =>
@@ -327,12 +307,14 @@ export default function DetailsPage(props: {
                           precio.validy_date.getTime() == props.date.getTime()
                       )
                       .map((price) => (
-                        <TableRow key={price.id} className="border-b last:border-0">
+                        <TableRow
+                          key={price.id}
+                          className="border-b last:border-0">
                           <TableCell className="pl-3 whitespace-nowrap pr-[7vw] text-center font-medium opacity-60">
                             {price.condition}
                           </TableCell>
                           <TableCell className="text-center font-medium opacity-60">
-                          ${price.amount}
+                            ${price.amount}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -349,7 +331,9 @@ export default function DetailsPage(props: {
                       <TableHead className=" px-[7vw] whitespace-nowrap font-medium text-center">
                         Hasta edad
                       </TableHead>
-                      <TableHead className=" px-[7vw] font-medium text-center">Monto</TableHead>
+                      <TableHead className=" px-[7vw] font-medium text-center">
+                        Monto
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -360,12 +344,15 @@ export default function DetailsPage(props: {
                           precio.validy_date.getTime() == props.date.getTime()
                       )
                       .map((price) => (
-                        <TableRow key={price.id} className=" items-start border-b last:border-0">
+                        <TableRow
+                          key={price.id}
+                          className=" items-start border-b last:border-0">
                           <TableCell className="pl-3 pr-[7vw] text-center font-medium opacity-60">
-                            {price.from_age}  {(price.from_age==1)? ("año"):("años")}
+                            {price.from_age}{" "}
+                            {price.from_age == 1 ? "año" : "años"}
                           </TableCell>
                           <TableCell className="px-[7vw] text-center font-medium opacity-60">
-                            {price.to_age}  {(price.to_age==1)? ("año"):("años")}
+                            {price.to_age} {price.to_age == 1 ? "año" : "años"}
                           </TableCell>
                           <TableCell className="px-[7vw] text-center font-medium opacity-60">
                             ${price.amount}
@@ -377,7 +364,7 @@ export default function DetailsPage(props: {
               </TabsContent>
             </Tabs>
           )}
-          <Dialog open={openDelete} onOpenChange={setOpenDelete}>
+          {/* <Dialog open={openDelete} onOpenChange={setOpenDelete}>
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
                 <DialogTitle>Seguro que borrar esta vigencia?</DialogTitle>
@@ -393,7 +380,7 @@ export default function DetailsPage(props: {
                 </Button>
               </DialogFooter>
             </DialogContent>
-          </Dialog>
+          </Dialog> */}
         </section>
       </div>
     </LayoutContainer>
