@@ -66,8 +66,9 @@ export default function AddPlanPricesComponent({
   edit,
   date,
 }: AddPlanDialogProps) {
-  const [anio, setAnio] = useState<number | null>(2024 ?? null);
-  const [mes, setMes] = useState<number | null>(null);
+  const [anio, setAnio] = useState<number | null>(date?.getFullYear() ?? 2024);
+  const [mes, setMes] = useState<number | null>(date ? date.getMonth() + 1 : 1);
+
   const router = useRouter();
   const [working, setWorking] = useState(false);
   const form = useForm<FormValues>({
@@ -104,10 +105,23 @@ export default function AddPlanPricesComponent({
       },
     }
   );
-  
+
   const Bookmark02Icon = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={24} height={24} color={"#000000"} fill={"none"} {...props}>
-      <path d="M4 17.9808V9.70753C4 6.07416 4 4.25748 5.17157 3.12874C6.34315 2 8.22876 2 12 2C15.7712 2 17.6569 2 18.8284 3.12874C20 4.25748 20 6.07416 20 9.70753V17.9808C20 20.2867 20 21.4396 19.2272 21.8523C17.7305 22.6514 14.9232 19.9852 13.59 19.1824C12.8168 18.7168 12.4302 18.484 12 18.484C11.5698 18.484 11.1832 18.7168 10.41 19.1824C9.0768 19.9852 6.26947 22.6514 4.77285 21.8523C4 21.4396 4 20.2867 4 17.9808Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      width={24}
+      height={24}
+      color={"#000000"}
+      fill={"none"}
+      {...props}>
+      <path
+        d="M4 17.9808V9.70753C4 6.07416 4 4.25748 5.17157 3.12874C6.34315 2 8.22876 2 12 2C15.7712 2 17.6569 2 18.8284 3.12874C20 4.25748 20 6.07416 20 9.70753V17.9808C20 20.2867 20 21.4396 19.2272 21.8523C17.7305 22.6514 14.9232 19.9852 13.59 19.1824C12.8168 18.7168 12.4302 18.484 12 18.484C11.5698 18.484 11.1832 18.7168 10.41 19.1824C9.0768 19.9852 6.26947 22.6514 4.77285 21.8523C4 21.4396 4 20.2867 4 17.9808Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 
@@ -260,108 +274,136 @@ export default function AddPlanPricesComponent({
 
   return (
     <>
-    <GoBackButton url={"./"} />
+      <GoBackButton url={"./"} />
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="flex-col items-center justify-center gap-2 space-y-4">
           <div className="p-0.5">
-            <h1 className="flex-col items-center justify-center gap-2 space-y-2 font-bold text-2xl">Editar Precio Manualmente</h1>
+            <h1 className="flex-col items-center justify-center gap-2 space-y-2 font-bold text-2xl">
+              Editar Precio Manualmente
+            </h1>
+            {fields.length === 0 && (
+              <Button
+                type="button"
+                className="float-right bg-[#1bdfb7] hover:bg-[#1bdfb7] rounded-full"
+                onClick={() =>
+                  append({
+                    id: "",
+                    createdAt: new Date(),
+                    validy_date: new Date(),
+                    from_age: null,
+                    to_age: null,
+                    condition: "",
+                    isAmountByAge: false,
+                    plan_id: "",
+                    amount: 0,
+                  })
+                }>
+                <PlusCircle className="text-green-500 left-0" size={20} />
+                Agregar Precio
+              </Button>
+            )}
           </div>
           <div className="flex flex-row w-full text-gray-500 p-2 gap-4">
-          <div className="w-1/4 whitespace-nowrap ">
-            <FormItem>
-            <Label htmlFor="validy_date" className="text-xs">MES DE VIGENCIA</Label>
-            <Select
-                onValueChange={(e) => setMes(Number(e))}
-                defaultValue={mes?.toString()} >
-                <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none hover:bg-transparent">
-                  <SelectValue placeholder="Seleccione un mes" />
-            </SelectTrigger>
-                <SelectContent className="max-h-[45vh] mb-2">
-                  <SelectItem
-                    value="1"
-                    disabled={new Date(anio ?? 0, 0, 1) <= currentVigency}>
-                    Enero
-                  </SelectItem>
-                  <SelectItem
-                    value="2"
-                    disabled={new Date(anio ?? 0, 1, 1) <= currentVigency}>
-                    Febrero
-                  </SelectItem>
-                  <SelectItem
-                    value="3"
-                    disabled={new Date(anio ?? 0, 2, 1) <= currentVigency}>
-                    Marzo
-                  </SelectItem>
-                  <SelectItem
-                    value="4"
-                    disabled={new Date(anio ?? 0, 3, 1) <= currentVigency}>
-                    Abril
-                  </SelectItem>
-                  <SelectItem
-                    value="5"
-                    disabled={new Date(anio ?? 0, 4, 1) <= currentVigency}>
-                    Mayo
-                  </SelectItem>
-                  <SelectItem
-                    value="6"
-                    disabled={new Date(anio ?? 0, 5, 1) <= currentVigency}>
-                    Junio
-                  </SelectItem>
-                  <SelectItem
-                    value="7"
-                    disabled={new Date(anio ?? 0, 6, 1) <= currentVigency}>
-                    Julio
-                  </SelectItem>
-                  <SelectItem
-                    value="8"
-                    disabled={new Date(anio ?? 0, 7, 1) <= currentVigency}>
-                    Agosto
-                  </SelectItem>
-                  <SelectItem
-                    value="9"
-                    disabled={new Date(anio ?? 0, 8, 1) <= currentVigency}>
-                    Septiembre
-                  </SelectItem>
-                  <SelectItem
-                    value="10"
-                    disabled={new Date(anio ?? 0, 9, 1) <= currentVigency}>
-                    Octubre
-                  </SelectItem>
-                  <SelectItem
-                    value="11"
-                    disabled={new Date(anio ?? 0, 10, 1) <= currentVigency}>
-                    Noviembre
-                  </SelectItem>
-                  <SelectItem
-                    value="12"
-                    disabled={new Date(anio ?? 0, 11, 1) <= currentVigency}>
-                    Diciembre
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </FormItem>
+            <div className="w-1/4 whitespace-nowrap ">
+              <FormItem>
+                <Label htmlFor="validy_date" className="text-xs">
+                  MES DE VIGENCIA
+                </Label>
+                <Select
+                  disabled={edit}
+                  onValueChange={(e) => setMes(Number(e))}
+                  defaultValue={mes?.toString()}>
+                  <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none hover:bg-transparent">
+                    <SelectValue placeholder="Seleccione un mes" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[45vh] mb-2">
+                    <SelectItem
+                      value="1"
+                      disabled={new Date(anio ?? 0, 0, 1) <= currentVigency}>
+                      Enero
+                    </SelectItem>
+                    <SelectItem
+                      value="2"
+                      disabled={new Date(anio ?? 0, 1, 1) <= currentVigency}>
+                      Febrero
+                    </SelectItem>
+                    <SelectItem
+                      value="3"
+                      disabled={new Date(anio ?? 0, 2, 1) <= currentVigency}>
+                      Marzo
+                    </SelectItem>
+                    <SelectItem
+                      value="4"
+                      disabled={new Date(anio ?? 0, 3, 1) <= currentVigency}>
+                      Abril
+                    </SelectItem>
+                    <SelectItem
+                      value="5"
+                      disabled={new Date(anio ?? 0, 4, 1) <= currentVigency}>
+                      Mayo
+                    </SelectItem>
+                    <SelectItem
+                      value="6"
+                      disabled={new Date(anio ?? 0, 5, 1) <= currentVigency}>
+                      Junio
+                    </SelectItem>
+                    <SelectItem
+                      value="7"
+                      disabled={new Date(anio ?? 0, 6, 1) <= currentVigency}>
+                      Julio
+                    </SelectItem>
+                    <SelectItem
+                      value="8"
+                      disabled={new Date(anio ?? 0, 7, 1) <= currentVigency}>
+                      Agosto
+                    </SelectItem>
+                    <SelectItem
+                      value="9"
+                      disabled={new Date(anio ?? 0, 8, 1) <= currentVigency}>
+                      Septiembre
+                    </SelectItem>
+                    <SelectItem
+                      value="10"
+                      disabled={new Date(anio ?? 0, 9, 1) <= currentVigency}>
+                      Octubre
+                    </SelectItem>
+                    <SelectItem
+                      value="11"
+                      disabled={new Date(anio ?? 0, 10, 1) <= currentVigency}>
+                      Noviembre
+                    </SelectItem>
+                    <SelectItem
+                      value="12"
+                      disabled={new Date(anio ?? 0, 11, 1) <= currentVigency}>
+                      Diciembre
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormItem>
             </div>
             <div className="w-1/4 ml-3 mt-2 whitespace-nowrap max-w-fit">
-            <Label className="text-xs">AÑO DE VIGENCIA</Label>
-            <FormItem className="w-full max-w-24 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none hover:bg-transparent">
-              <FormControl>
-                <Input
-                  disabled={edit}
-                  className="border-green-300 focus-visible:ring-green-400 w-[100px]"
-                  type="number"
-                  value={anio?.toString()}
-                  onChange={(e) => setAnio(Number(e.target.value))}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          </div>
+              <Label className="text-xs">AÑO DE VIGENCIA</Label>
+              <FormItem className="w-full max-w-24 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none hover:bg-transparent">
+                <FormControl>
+                  <Input
+                    disabled={edit}
+                    className="border-green-300 focus-visible:ring-green-400 w-[100px]"
+                    type="number"
+                    value={anio?.toString()}
+                    onChange={(e) => setAnio(Number(e.target.value))}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </div>
           </div>
 
           {fields.length > 0 && (
-            <h1 className="flex-col items-center justify-center gap-2 space-y-4 font-bold text-2xl p-0.5 mb-2">Condición</h1>
+            <h1 className="flex-col items-center justify-center gap-2 space-y-4 font-bold text-2xl p-0.5 mb-2">
+              Condición
+            </h1>
           )}
           {hasQueried ? (
             fields.map((item, index) => {
@@ -398,19 +440,15 @@ export default function AddPlanPricesComponent({
                               : "false"
                           }>
                           <FormControl>
-                          <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none hover:bg-transparent">
-                          <SelectValue placeholder="Seleccione una opción" />
+                            <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none hover:bg-transparent">
+                              <SelectValue placeholder="Seleccione una opción" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem
-                              value="true"
-                              className="rounded-none ">
+                            <SelectItem value="true" className="rounded-none ">
                               Rango de edad
                             </SelectItem>
-                            <SelectItem
-                              value="false"
-                              className="rounded-none">
+                            <SelectItem value="false" className="rounded-none">
                               Parentesco
                             </SelectItem>
                           </SelectContent>
@@ -426,7 +464,9 @@ export default function AddPlanPricesComponent({
                       name={`prices.${index}.condition`}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel htmlFor={`prices.${index}.condition`} className="text-xs text-gray-500">
+                          <FormLabel
+                            htmlFor={`prices.${index}.condition`}
+                            className="text-xs text-gray-500">
                             RELACIÓN
                           </FormLabel>
                           <FormControl>
@@ -434,7 +474,7 @@ export default function AddPlanPricesComponent({
                               onValueChange={field.onChange}
                               value={field.value ?? ""}>
                               <SelectTrigger className="w-full px-3 max-w-fit border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none hover:bg-transparent">
-                                <SelectValue placeholder="Seleccione una opción"/>
+                                <SelectValue placeholder="Seleccione una opción" />
                               </SelectTrigger>
                               <SelectContent>
                                 {relatives?.map((relative) => (
@@ -458,7 +498,9 @@ export default function AddPlanPricesComponent({
                         name={`prices.${index}.from_age`}
                         render={({ field }) => (
                           <FormItem className="max-w-fit p-3">
-                            <FormLabel htmlFor={`prices.${index}.from_age`} className="text-xs text-gray-500">
+                            <FormLabel
+                              htmlFor={`prices.${index}.from_age`}
+                              className="text-xs text-gray-500">
                               EDAD DESDE
                             </FormLabel>
                             <FormControl>
@@ -478,7 +520,9 @@ export default function AddPlanPricesComponent({
                         name={`prices.${index}.to_age`}
                         render={({ field }) => (
                           <FormItem className="max-w-fit p-3">
-                            <FormLabel htmlFor={`prices.${index}.to_age`} className="text-xs text-gray-500 max-w-fit">
+                            <FormLabel
+                              htmlFor={`prices.${index}.to_age`}
+                              className="text-xs text-gray-500 max-w-fit">
                               EDAD HASTA
                             </FormLabel>
                             <FormControl>
@@ -500,7 +544,9 @@ export default function AddPlanPricesComponent({
                     name={`prices.${index}.amount`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel htmlFor={`prices.${index}.amount`} className="text-xs text-gray-500">
+                        <FormLabel
+                          htmlFor={`prices.${index}.amount`}
+                          className="text-xs text-gray-500">
                           PRECIO
                         </FormLabel>
                         <FormControl>
@@ -517,39 +563,51 @@ export default function AddPlanPricesComponent({
                     )}
                   />
                   <div className="flex gap-2">
- 
-                <Button
-                  variant="ghost"
-                  type="button"
-                  className="relative top-3 hover:bg-transparent"
-                  onClick={() =>
-                    append({
-                      id: "",
-                      createdAt: new Date(),
-                      validy_date: new Date(),
-                      from_age: null,
-                      to_age: null,
-                      condition: "",              
-                      isAmountByAge: false,
-                      plan_id: "",
-                      amount: 0,
-                   })
-                 }>
-                 {isButtonDisabled ? (
-                   <Loader2Icon className="left-0 animate-spin" size={20} />
-                 ) : (
-                   <PlusCircle className="text-green-500 left-0" size={20} />
-                 )}
-               </Button>
+                    <Button
+                      variant="ghost"
+                      type="button"
+                      className="relative top-3 hover:bg-transparent"
+                      onClick={() =>
+                        append({
+                          id: "",
+                          createdAt: new Date(),
+                          validy_date: new Date(),
+                          from_age: null,
+                          to_age: null,
+                          condition: "",
+                          isAmountByAge: false,
+                          plan_id: "",
+                          amount: 0,
+                        })
+                      }>
+                      {isButtonDisabled ? (
+                        <Loader2Icon
+                          className="left-0 animate-spin"
+                          size={20}
+                        />
+                      ) : (
+                        <PlusCircle
+                          className="text-green-500 left-0"
+                          size={20}
+                        />
+                      )}
+                    </Button>
 
-                <Button
-                  variant="ghost"
-                  type="button"
-                  className="relative top-3 hover:bg-transparent"
-                  onClick={() => remove(index)}>
-                  <CircleX className="text-red-500 left-0" size={20} />
-                </Button>
-              </div>
+                    <Button
+                      variant="ghost"
+                      type="button"
+                      className="relative top-3 hover:bg-transparent"
+                      onClick={() => handleDelete(index)}>
+                      {isButtonDisabled ? (
+                        <Loader2Icon
+                          className="left-0 animate-spin"
+                          size={20}
+                        />
+                      ) : (
+                        <CircleX className="text-red-500 left-0" size={20} />
+                      )}
+                    </Button>
+                  </div>
                 </div>
               );
             })
@@ -560,15 +618,17 @@ export default function AddPlanPricesComponent({
             </div>
           )}
           <Button
-          type="submit"
-          disabled={working || isButtonDisabled}
-          className="mr-7 mt-15 pl-16 pr-16 font-medium rounded-full w-fit justify-self-right
+            type="submit"
+            disabled={working || isButtonDisabled}
+            className="mr-7 mt-15 pl-16 pr-16 font-medium rounded-full w-fit justify-self-right
           text-lg bg-[#BEF0BB] hover:bg-[#DDF9CC] text-[#3E3E3E]">
             {" "}
-            {working && (
-              <Loader2Icon className="mr-2 animate-spin" size={16}/>
+            {working && <Loader2Icon className="mr-2 animate-spin" size={16} />}
+            {edit ? (
+              <Edit02Icon className="h-4" />
+            ) : (
+              <Bookmark02Icon className="mr-2 font-light h-4 color:text-gray-500" />
             )}
-            {edit ? <Edit02Icon className="h-4"/> : <Bookmark02Icon className="mr-2 font-light h-4 color:text-gray-500"/> }
             {edit ? "Actualizar" : "Guardar"}
           </Button>
         </form>

@@ -185,8 +185,7 @@ export default function PlanPage(props: {
                       type="submit"
                       className="m-2 mb-2 pl-4 pr-6 rounded-full w-fit mr-36 ml-32 justify-normal bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#DEF5DD]"
                       disabled={isLoading}
-                      onClick={handleDelete}
-                    >
+                      onClick={handleDelete}>
                       {isLoading && (
                         <Loader2Icon className="mr-2 animate-spin" size={20} />
                       )}
@@ -214,8 +213,7 @@ export default function PlanPage(props: {
                   <DropdownMenuItem>
                     <Link
                       href={`/management/sales/plans/${plan?.id}/editPrice`}
-                      className="p-0 text-[#3e3e3e] font-medium shadow-none h-5 flex"
-                    >
+                      className="p-0 text-[#3e3e3e] font-medium shadow-none h-5 flex">
                       Agregar manualmente
                     </Link>
                   </DropdownMenuItem>
@@ -234,8 +232,7 @@ export default function PlanPage(props: {
                         fecha === vigente
                           ? "bg-[#DDF9CC] text-[#4E9F1D]"
                           : "bg-[#f9bcbc] text-[#ec3c3c]"
-                      }`}
-                    >
+                      }`}>
                       {fecha === vigente ? "Vigente" : "No Vigente"}
                     </Badge>
                   }
@@ -249,8 +246,7 @@ export default function PlanPage(props: {
                       <DropdownMenuTrigger asChild>
                         <Button
                           size={"icon"}
-                          className="bg-transparent hover:bg-transparent p-0 text-[#3e3e3e] shadow-none mr-4"
-                        >
+                          className="bg-transparent hover:bg-transparent p-0 text-[#3e3e3e] shadow-none mr-4">
                           <ChevronDown className="h-5" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -264,15 +260,17 @@ export default function PlanPage(props: {
                                 }/details/${fecha.getTime()}`
                               )
                             }
-                            className="bg-transparent hover:bg-transparent p-0 text-[#3e3e3e] shadow-none h-5"
-                          >
+                            className="bg-transparent hover:bg-transparent p-0 text-[#3e3e3e] shadow-none h-5">
                             <ViewIcon className="mr-1 h-4" /> Ver
                           </Button>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                          <EditPrice plan={plan} />
-                        </DropdownMenuItem>
+                        {vigente && fecha >= vigente ? (
+                          <DropdownMenuItem
+                            onSelect={(e) => e.preventDefault()}>
+                            <EditPrice plan={plan} fecha={fecha.getTime()} />
+                          </DropdownMenuItem>
+                        ) : null}
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                           <DeletePrice />
@@ -298,8 +296,7 @@ export default function PlanPage(props: {
             </Label>
             <Select
               onValueChange={(e) => setMes(Number(e))}
-              defaultValue={mes?.toString()}
-            >
+              defaultValue={mes?.toString()}>
               <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none focus-visible:ring-green-400">
                 <SelectValue placeholder="Seleccione un mes" />
               </SelectTrigger>
@@ -312,8 +309,7 @@ export default function PlanPage(props: {
                         x.validy_date.getTime() ===
                         new Date(anio, 0, 1).getTime()
                     ).length !== 0
-                  }
-                >
+                  }>
                   Enero
                 </SelectItem>
                 <SelectItem
@@ -324,8 +320,7 @@ export default function PlanPage(props: {
                         x.validy_date.getTime() ===
                         new Date(anio, 1, 1).getTime()
                     ).length !== 0
-                  }
-                >
+                  }>
                   Febrero
                 </SelectItem>
                 <SelectItem
@@ -336,8 +331,7 @@ export default function PlanPage(props: {
                         x.validy_date.getTime() ===
                         new Date(anio, 2, 1).getTime()
                     ).length !== 0
-                  }
-                >
+                  }>
                   Marzo
                 </SelectItem>
                 <SelectItem
@@ -348,8 +342,7 @@ export default function PlanPage(props: {
                         x.validy_date.getTime() ===
                         new Date(anio, 3, 1).getTime()
                     ).length !== 0
-                  }
-                >
+                  }>
                   Abril
                 </SelectItem>
                 <SelectItem
@@ -360,8 +353,7 @@ export default function PlanPage(props: {
                         x.validy_date.getTime() ===
                         new Date(anio, 4, 1).getTime()
                     ).length !== 0
-                  }
-                >
+                  }>
                   Mayo
                 </SelectItem>
                 <SelectItem
@@ -372,8 +364,7 @@ export default function PlanPage(props: {
                         x.validy_date.getTime() ===
                         new Date(anio, 5, 1).getTime()
                     ).length !== 0
-                  }
-                >
+                  }>
                   Junio
                 </SelectItem>
                 <SelectItem
@@ -384,8 +375,7 @@ export default function PlanPage(props: {
                         x.validy_date.getTime() ===
                         new Date(anio, 6, 1).getTime()
                     ).length !== 0
-                  }
-                >
+                  }>
                   Julio
                 </SelectItem>
                 <SelectItem
@@ -396,8 +386,7 @@ export default function PlanPage(props: {
                         x.validy_date.getTime() ===
                         new Date(anio, 7, 1).getTime()
                     ).length !== 0
-                  }
-                >
+                  }>
                   Agosto
                 </SelectItem>
                 <SelectItem
@@ -408,8 +397,7 @@ export default function PlanPage(props: {
                         x.validy_date.getTime() ===
                         new Date(anio, 8, 1).getTime()
                     ).length !== 0
-                  }
-                >
+                  }>
                   Septiembre
                 </SelectItem>
                 <SelectItem
@@ -420,8 +408,7 @@ export default function PlanPage(props: {
                         x.validy_date.getTime() ===
                         new Date(anio, 9, 1).getTime()
                     ).length !== 0
-                  }
-                >
+                  }>
                   Octubre
                 </SelectItem>
                 <SelectItem
@@ -432,8 +419,7 @@ export default function PlanPage(props: {
                         x.validy_date.getTime() ===
                         new Date(anio, 10, 1).getTime()
                     ).length !== 0
-                  }
-                >
+                  }>
                   Noviembre
                 </SelectItem>
                 <SelectItem
@@ -444,8 +430,7 @@ export default function PlanPage(props: {
                         x.validy_date.getTime() ===
                         new Date(anio, 11, 1).getTime()
                     ).length !== 0
-                  }
-                >
+                  }>
                   Diciembre
                 </SelectItem>
               </SelectContent>
@@ -478,8 +463,7 @@ export default function PlanPage(props: {
             <Button
               disabled={loading}
               onClick={handleUpdatePrice}
-              className="bg-[#BEF0BB] hover:bg-[#BEF0BB] ml-3 rounded-full mr-4 px-6 text-black font-normal hover:text-[#3E3E3E]"
-            >
+              className="bg-[#BEF0BB] hover:bg-[#BEF0BB] ml-3 rounded-full mr-4 px-6 text-black font-normal hover:text-[#3E3E3E]">
               {loading && (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}

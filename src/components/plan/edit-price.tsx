@@ -26,8 +26,10 @@ import { Loader2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";
 export default function EditPrice({
   plan,
+  fecha,
 }: {
   plan?: RouterOutputs["plans"]["get"];
+  fecha?: number;
 }) {
   const [anio, setAnio] = useState(2020);
   const [mes, setMes] = useState(0);
@@ -37,6 +39,9 @@ export default function EditPrice({
   const { mutateAsync: createPricePerAge, isLoading } =
     api.pricePerCondition.create.useMutation();
   const router = useRouter();
+
+  console.log("fechitas", fecha);
+
   async function handleUpdatePrice() {
     if (plan?.pricesPerCondition) {
       if (
@@ -82,14 +87,20 @@ export default function EditPrice({
               plan?.pricesPerCondition.filter(
                 (x) => x.validy_date.getTime() <= new Date().getTime()
               ).length === 0
-            }
-          >
+            }>
             <div>Actualizar porcentualmente</div>
           </DropdownMenuItem>
           <DropdownMenuItem>
-            <Link href={`/management/sales/plans/${plan?.id}/editPrice`}>
-              Actualizar manualmente
-            </Link>
+            {fecha ? (
+              <Link
+                href={`/management/sales/plans/${plan?.id}/details/${fecha}/editDate`}>
+                Actualizar manualmente
+              </Link>
+            ) : (
+              <Link href={`/management/sales/plans/${plan?.id}/editPrice`}>
+                Actualizar manualmente
+              </Link>
+            )}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -102,8 +113,7 @@ export default function EditPrice({
             <Label htmlFor="validy_date">Mes de vigencia</Label>
             <Select
               onValueChange={(e) => setMes(Number(e))}
-              defaultValue={mes.toString()}
-            >
+              defaultValue={mes.toString()}>
               <SelectTrigger className="w-full border-[#BEF0BB] border-0 border-b text-[#3E3E3E] bg-background rounded-none focus-visible:ring-green-400">
                 <SelectValue placeholder="Seleccione un mes" />
               </SelectTrigger>
@@ -116,8 +126,7 @@ export default function EditPrice({
                         x.validy_date.getTime() ===
                         new Date(anio, 0, 1).getTime()
                     ).length !== 0
-                  }
-                >
+                  }>
                   Enero
                 </SelectItem>
                 <SelectItem
@@ -128,8 +137,7 @@ export default function EditPrice({
                         x.validy_date.getTime() ===
                         new Date(anio, 1, 1).getTime()
                     ).length !== 0
-                  }
-                >
+                  }>
                   Febrero
                 </SelectItem>
                 <SelectItem
@@ -140,8 +148,7 @@ export default function EditPrice({
                         x.validy_date.getTime() ===
                         new Date(anio, 2, 1).getTime()
                     ).length !== 0
-                  }
-                >
+                  }>
                   Marzo
                 </SelectItem>
                 <SelectItem
@@ -152,8 +159,7 @@ export default function EditPrice({
                         x.validy_date.getTime() ===
                         new Date(anio, 3, 1).getTime()
                     ).length !== 0
-                  }
-                >
+                  }>
                   Abril
                 </SelectItem>
                 <SelectItem
@@ -164,8 +170,7 @@ export default function EditPrice({
                         x.validy_date.getTime() ===
                         new Date(anio, 4, 1).getTime()
                     ).length !== 0
-                  }
-                >
+                  }>
                   Mayo
                 </SelectItem>
                 <SelectItem
@@ -176,8 +181,7 @@ export default function EditPrice({
                         x.validy_date.getTime() ===
                         new Date(anio, 5, 1).getTime()
                     ).length !== 0
-                  }
-                >
+                  }>
                   Junio
                 </SelectItem>
                 <SelectItem
@@ -188,8 +192,7 @@ export default function EditPrice({
                         x.validy_date.getTime() ===
                         new Date(anio, 6, 1).getTime()
                     ).length !== 0
-                  }
-                >
+                  }>
                   Julio
                 </SelectItem>
                 <SelectItem
@@ -200,8 +203,7 @@ export default function EditPrice({
                         x.validy_date.getTime() ===
                         new Date(anio, 7, 1).getTime()
                     ).length !== 0
-                  }
-                >
+                  }>
                   Agosto
                 </SelectItem>
                 <SelectItem
@@ -212,8 +214,7 @@ export default function EditPrice({
                         x.validy_date.getTime() ===
                         new Date(anio, 8, 1).getTime()
                     ).length !== 0
-                  }
-                >
+                  }>
                   Septiembre
                 </SelectItem>
                 <SelectItem
@@ -224,8 +225,7 @@ export default function EditPrice({
                         x.validy_date.getTime() ===
                         new Date(anio, 9, 1).getTime()
                     ).length !== 0
-                  }
-                >
+                  }>
                   Octubre
                 </SelectItem>
                 <SelectItem
@@ -236,8 +236,7 @@ export default function EditPrice({
                         x.validy_date.getTime() ===
                         new Date(anio, 10, 1).getTime()
                     ).length !== 0
-                  }
-                >
+                  }>
                   Noviembre
                 </SelectItem>
                 <SelectItem
@@ -248,8 +247,7 @@ export default function EditPrice({
                         x.validy_date.getTime() ===
                         new Date(anio, 11, 1).getTime()
                     ).length !== 0
-                  }
-                >
+                  }>
                   Diciembre
                 </SelectItem>
               </SelectContent>
@@ -280,8 +278,7 @@ export default function EditPrice({
             <Button
               disabled={isLoading}
               onClick={handleUpdatePrice}
-              className="bg-[#BEF0BB] hover:bg-[#BEF0BB] ml-3 rounded-full mr-4 px-6 text-black font-normal hover:text-[#3E3E3E]"
-            >
+              className="bg-[#BEF0BB] hover:bg-[#BEF0BB] ml-3 rounded-full mr-4 px-6 text-black font-normal hover:text-[#3E3E3E]">
               {isLoading && (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}

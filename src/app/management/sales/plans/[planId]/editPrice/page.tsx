@@ -28,6 +28,7 @@ export default async function AddPlanPage(props: {
         x.validy_date.getTime() === firstCorrectPrice?.validy_date.getTime()
     ) ?? [];
 
+  console.log("testamento", firstCorrectPrice?.validy_date);
   return (
     <LayoutContainer>
       <div>
