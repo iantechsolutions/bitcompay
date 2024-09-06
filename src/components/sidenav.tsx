@@ -33,12 +33,17 @@ export function SidenavItem(props: {
   onClick?: () => void;
 }) {
   const pathname = usePathname();
-  const isActive = pathname === props.href;
+  
+  const isActive = props.href === "/dashboard"
+  ? pathname === "/dashboard"
+  : props.href
+  ? pathname.includes(props.href)
+  : false;
+
   const activeColor = props.IsChild ? "bg-[#DEF5DD]" : "bg-[#BEF0BB]";
-  const className = `flex w-fit 
-   gap-[0.3vw] px-[1vw] py-[1vh] items-center rounded-full
-                    md:text-base lg:text-lg w-full mr-[1vw]
-                    ${isActive ? activeColor : ""} ${props.className}`;
+  const className = `flex w-fit gap-[0.3vw] px-[1vw] py-[1vh] items-center rounded-full
+  md:text-base lg:text-lg w-full mr-[1vw] ${isActive ? activeColor : ""} ${props.className}`;
+    
   const content = (
     <>
       <div className="items-center justify-center p-[0.5vw] w-fit ">
