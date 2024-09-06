@@ -87,9 +87,7 @@ export default function EditPrice({
             <div>Actualizar porcentualmente</div>
           </DropdownMenuItem>
           <DropdownMenuItem>
-            <Link
-              href={`/dashboard/management/sales/plans/${plan?.id}/editPrice`}
-            >
+            <Link href={`/management/sales/plans/${plan?.id}/editPrice`}>
               Actualizar manualmente
             </Link>
           </DropdownMenuItem>
@@ -287,7 +285,7 @@ export default function EditPrice({
               {isLoading && (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}
-              <CreditCardPosIcon className="mr-2 h-5 font-medium-medium"/>
+              <CreditCardPosIcon className="mr-2 h-5 font-medium-medium" />
               Actualizar precio
             </Button>
           </div>
