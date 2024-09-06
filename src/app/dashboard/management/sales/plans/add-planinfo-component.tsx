@@ -1,5 +1,11 @@
 "use client";
-import { CircleX, PlusCircle, PlusCircleIcon, Loader2Icon, CirclePlus } from "lucide-react";
+import {
+  CircleX,
+  PlusCircle,
+  PlusCircleIcon,
+  Loader2Icon,
+  CirclePlus,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
@@ -79,60 +85,75 @@ export default function AddPlanInfoComponent({
   }, [planData]);
 
   const { data: brands } = api.brands.list.useQuery(undefined);
+  const { data: plans } = api.plans.list.useQuery();
+
   const { mutateAsync: createPlan, isLoading: isCreating } =
     api.plans.create.useMutation();
   const { mutateAsync: updatePlan, isLoading: isUpdating } =
     api.plans.change.useMutation();
   const queryClient = useQueryClient();
   const router = useRouter();
-  async function handleSumbit() {
-    if (planId) {
-      const plan = await updatePlan({
-        planId: planId,
-        brand_id: brand,
-        plan_code: codigo,
-        description: descripcion,
-      });
-      toast.success("Plan actualizado correctamente");
-      router.refresh();
-    } else {
-      const plan = await createPlan({
-        brand_id: brand,
-        plan_code: codigo,
-        description: descripcion,
-      });
-      if (onPlanIdChange) {
-        onPlanIdChange(plan[0]!.id);
-      }
-      queryClient.invalidateQueries();
 
-      toast.success("Plan creado correctamente");
-      router.refresh();
+  async function handleSumbit() {
+    if (
+      plans?.some(
+        (plan) =>
+          plan.plan_code === planData?.plan_code || codigo === plan.plan_code
+      )
+    ) {
+      return toast.error("No se pueden repetir los codigos de los planes");
+    } else {
+      if (!brand || !codigo || !descripcion) {
+        return toast.error("Ingrese la informacion de todos los campos");
+      }
+      if (planId) {
+        const plan = await updatePlan({
+          planId: planId,
+          brand_id: brand,
+          plan_code: codigo,
+          description: descripcion,
+        });
+        toast.success("Plan actualizado correctamente");
+        router.refresh();
+      } else {
+        const plan = await createPlan({
+          brand_id: brand,
+          plan_code: codigo,
+          description: descripcion,
+        });
+        if (onPlanIdChange) {
+          onPlanIdChange(plan[0]!.id);
+        }
+        queryClient.invalidateQueries();
+
+        toast.success("Plan creado correctamente");
+        router.refresh();
+      }
+      closeDialog();
     }
-    closeDialog();
   }
 
   return (
     <div className="ml-2">
-       <div className="w-full flex flex-row gap-2 text-gray-500">
-       <div className="w-3/4 mb-2">
-       <Label className="text-xs">MARCA</Label>
-        <Select
-          onValueChange={(value: string) => setBrand(value)}
-          value={brand}
-        >
-          <SelectTrigger className="w-full mb-3 gap-3 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+      <div className="w-full flex flex-row gap-2 text-gray-500">
+        <div className="w-3/4 mb-2">
+          <Label className="text-xs">MARCA</Label>
+          <Select
+            onValueChange={(value: string) => setBrand(value)}
+            value={brand}>
+            <SelectTrigger
+              className="w-full mb-3 gap-3 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right">
-                <SelectValue placeholder="Seleccione una marca"/>
-          </SelectTrigger>
-          <SelectContent>
-            {brands?.map((item) => (
-              <SelectItem key={item?.id} value={item?.id}>
-                {item?.description}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+              <SelectValue placeholder="Seleccione una marca" />
+            </SelectTrigger>
+            <SelectContent>
+              {brands?.map((item) => (
+                <SelectItem key={item?.id} value={item?.id}>
+                  {item?.description}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
       <div className="w-1/4 text-gray-500 mb-2">
@@ -159,13 +180,16 @@ export default function AddPlanInfoComponent({
       <Button
         onClick={handleSumbit}
         disabled={isCreating || isUpdating}
-        className=" mt-7 font-medium mb-2 rounded-full w-fit justify-self-right bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3E3E3E]"
-      >
+        className=" mt-7 font-medium mb-2 rounded-full w-fit justify-self-right bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3E3E3E]">
         {(isCreating || isUpdating) && (
           <Loader2Icon className="mr-2 animate-spin" size={20} />
         )}
-        {planId ? <Edit02Icon className="mr-2 h-4"/> : <CirclePlus className="mr-2" /> }
-       
+        {planId ? (
+          <Edit02Icon className="mr-2 h-4" />
+        ) : (
+          <CirclePlus className="mr-2" />
+        )}
+
         {planId ? "Actualizar plan" : "Agregar Plan"}
       </Button>
     </div>

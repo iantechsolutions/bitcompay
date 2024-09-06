@@ -101,16 +101,16 @@ export function DataTable<TData, TValue>({
         columns={filteredColumns}
       />
 
-        <ScrollArea className="pb-7">
+      <ScrollArea className="pb-7">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow
-                key={headerGroup.id}
-              >
+              <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id} className="bg-[#f7f7f7] first:rounded-s-lg last:rounded-e-lg">
+                    <TableHead
+                      key={header.id}
+                      className="bg-[#f7f7f7] first:rounded-s-lg last:rounded-e-lg">
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -130,8 +130,7 @@ export function DataTable<TData, TValue>({
                   <TableRow
                     key={row.id}
                     onClick={() => handleRowClick(row)}
-                    className="border-b-2 border-[#f6f6f6] hover:bg-[#f6f6f6] hover:cursor-pointer"
-                  >
+                    className="border-b-2 border-[#f6f6f6] hover:bg-[#f6f6f6] hover:cursor-pointer">
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
                         {flexRender(
@@ -154,17 +153,15 @@ export function DataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center"
-                >
+                  className="h-24 text-center">
                   No results.
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
-        <ScrollBar orientation="horizontal"/>
-        </ScrollArea>
-     
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
 
       <DataTablePagination table={table} />
     </>

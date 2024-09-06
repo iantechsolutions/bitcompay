@@ -228,70 +228,22 @@ export const family_groupsRouter = createTRPCRouter({
         (x) => x.businessUnitData?.companyId === ctx.session.orgId ?? ""
       );
 
-      const fgFiltered = fgCompany.map((x) => {
-        const comprobantes = x.comprobantes.filter(
-          (comprobante) => comprobante.liquidation_id === input.liquidationId
-        );
-
-        if (comprobantes.length > 0) {
-          return {
-            ...x,
-            comprobantes: comprobantes,
-          };
-        }
-      });
-
-      // const fgFiltered = fg.filter((family_group)=>{
-
-      // })
-      // const liquidation = await db.query.liquidations.findFirst({
-      //   where: eq(schema.liquidations.id, input.liquidationId),
-      //   with: {
-      //     comprobantes: {
-      //       where: eq(schema.comprobantes.liquidation_id, input.liquidationId),
-      //       orderBy: [desc(schema.comprobantes.createdAt)],
-      //       with: {
-      //         family_group: {
-      //           with: {
-      //             plan: true,
-      //             modo: true,
-      //             integrants: true,
-      //             cc: true,
-      //             businessUnitData: true,
-      //             comprobantes: {
-      //               with: {
-      //                 items: true,
-      //               },
-      //             },
-      //           },
-      //         },
-      //       },
-      //     },
-      //   },
-      // });
-
-      // if (!liquidation) {
-      //   return [];
-      // }
-
-      // const family_groups = liquidation.comprobantes.map(
-      //   (comprobante) => comprobante.family_group
-      // );
-
-      // const uniqueFamilyGroups = family_groups.filter(
-      //   (family_group, index, self) =>
-      //     index === self.findIndex((fg) => fg!.id === family_group!.id)
-      // );
-
-      // const processedFamilyGroups = uniqueFamilyGroups.map((family_group) => {
-      //   const filteredComprobantes = family_group?.comprobantes.filter(
-      //     (comprobante) => comprobante.liquidation_id === input.liquidationId
-      //   );
-      //   return {
-      //     ...family_group,
-      //     comprobantes: filteredComprobantes ?? [],
-      //   };
-      // });
+      // Filtra los comprobantes por `liquidationId` dentro de cada grupo familiar
+      const fgFiltered = fgCompany
+        .map((group) => {
+          const filteredComprobantes = group.comprobantes.filter(
+            (comprobante) => comprobante.liquidation_id === input.liquidationId
+          );
+          // Si hay comprobantes filtrados, devuelve el grupo con los comprobantes filtrados
+          if (filteredComprobantes.length > 0) {
+            return {
+              ...group,
+              comprobantes: filteredComprobantes,
+            };
+          }
+          return null;
+        })
+        .filter((group) => group !== null); // Filtra los grupos nulos
 
       return fgFiltered;
     }),
@@ -305,6 +257,18 @@ export const family_groupsRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const family_group = await db.query.family_groups.findFirst({
         where: eq(schema.family_groups.procedureId, input.procedureId),
+      });
+      return family_group;
+    }),
+  getbyPlans: protectedProcedure
+    .input(
+      z.object({
+        planId: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      const family_group = await db.query.family_groups.findFirst({
+        where: eq(schema.family_groups.plan, input.planId),
       });
       return family_group;
     }),
@@ -420,3 +384,54 @@ export const family_groupsRouter = createTRPCRouter({
         .where(eq(schema.family_groups.id, input.family_groupsId));
     }),
 });
+// const fgFiltered = fg.filter((family_group)=>{
+
+// })
+// const liquidation = await db.query.liquidations.findFirst({
+//   where: eq(schema.liquidations.id, input.liquidationId),
+//   with: {
+//     comprobantes: {
+//       where: eq(schema.comprobantes.liquidation_id, input.liquidationId),
+//       orderBy: [desc(schema.comprobantes.createdAt)],
+//       with: {
+//         family_group: {
+//           with: {
+//             plan: true,
+//             modo: true,
+//             integrants: true,
+//             cc: true,
+//             businessUnitData: true,
+//             comprobantes: {
+//               with: {
+//                 items: true,
+//               },
+//             },
+//           },
+//         },
+//       },
+//     },
+//   },
+// });
+
+// if (!liquidation) {
+//   return [];
+// }
+
+// const family_groups = liquidation.comprobantes.map(
+//   (comprobante) => comprobante.family_group
+// );
+
+// const uniqueFamilyGroups = family_groups.filter(
+//   (family_group, index, self) =>
+//     index === self.findIndex((fg) => fg!.id === family_group!.id)
+// );
+
+// const processedFamilyGroups = uniqueFamilyGroups.map((family_group) => {
+//   const filteredComprobantes = family_group?.comprobantes.filter(
+//     (comprobante) => comprobante.liquidation_id === input.liquidationId
+//   );
+//   return {
+//     ...family_group,
+//     comprobantes: filteredComprobantes ?? [],
+//   };
+// });

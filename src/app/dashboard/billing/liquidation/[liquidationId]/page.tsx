@@ -165,10 +165,13 @@ export default async function Home(props: {
     );
     summary["Total a facturar"] += total;
     excelRow.push(total);
-    const subTotal = computeBase(total, Number(original_comprobante?.iva!));
+    const subTotal = computeBase(
+      total,
+      Number(original_comprobante?.iva ?? "0")
+    );
     summary["Sub Total"] += subTotal;
     excelRow.push(subTotal);
-    const iva = computeIva(total, Number(original_comprobante?.iva!));
+    const iva = computeIva(total, Number(original_comprobante?.iva ?? "0"));
     summary.IVA += iva;
     excelRow.push(iva);
     excelRows.push(excelRow);
@@ -224,18 +227,21 @@ export default async function Home(props: {
           </>
         )}
       </div>
-      <div  className="bg-[#f6f6f6] rounded-lg text-sm">
+      <div className="bg-[#f6f6f6] rounded-lg text-sm">
         <ul className="grid grid-cols-3 gap-x-2 gap-y-3 list-none px-8 py-5">
           <li className="">
-            <span className="">RAZÓN SOCIAL</span><br />
+            <span className="">RAZÓN SOCIAL</span>
+            <br />
             <p className="font-medium">{companyData?.razon_social ?? "-"}</p>
           </li>
           <li>
-            <span className="">CUIT</span><br />
+            <span className="">CUIT</span>
+            <br />
             <p className="font-medium">{companyData?.cuit ?? "-"}</p>
           </li>
           <li>
-            <span className="">MARCA</span><br />
+            <span className="">MARCA</span>
+            <br />
             <p className="font-medium">XXXX</p>
           </li>
           <li>
@@ -251,18 +257,23 @@ export default async function Home(props: {
           <li>
             <span className="">FECHA DE PROCESO</span>
             <br />
-            <p className="font-medium">{dayjs.utc(preliquidation?.createdAt).format("DD/MM/YYYY") ?? "-"}</p>
+            <p className="font-medium">
+              {dayjs.utc(preliquidation?.createdAt).format("DD/MM/YYYY") ?? "-"}
+            </p>
           </li>
           <li className="">
-            <span className="">UNIDAD DE NEGOCIOS</span><br />
+            <span className="">UNIDAD DE NEGOCIOS</span>
+            <br />
             <p className="font-medium">XXXX</p>
           </li>
           <li>
-            <span className="">FECHA DE EMISIÓN</span><br />
+            <span className="">FECHA DE EMISIÓN</span>
+            <br />
             <p className="font-medium">XXXX</p>
           </li>
           <li>
-            <span className="">VENCIMIENTOS</span><br />
+            <span className="">VENCIMIENTOS</span>
+            <br />
             <p className="font-medium">XXXX</p>
           </li>
           <li>

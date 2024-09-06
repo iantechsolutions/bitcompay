@@ -62,7 +62,7 @@ const stringAsDate = z
       month = value.substring(2, 4);
       year = value.substring(4, 8);
     }
-
+    console.log("Como ewtan las minas", `${year}-${month}-${day}`);
     return dayjs(`${year}-${month}-${day}`).toDate();
   })
   .refine((value) => {

@@ -170,10 +170,10 @@ export default function ResponseUnconfirmedPage(props: UploadedPageProps) {
             </Button>
           )}
         </div>
+        <div className="mt-5">
+          {data && <LargeTable rows={data.records} headers={data.header} />}
+        </div>
       </LayoutContainer>
-      <div className="mt-5">
-        {data && <LargeTable rows={data.records} headers={data.header} />}
-      </div>
     </>
   );
 }
