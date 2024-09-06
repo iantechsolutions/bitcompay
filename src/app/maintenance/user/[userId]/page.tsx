@@ -61,13 +61,17 @@ export default function UserPage(props: { params: { userId: string } }) {
   }, [user]);
   async function handleChange() {
     try {
-      await editUser({
+      const res = await editUser({
         userId: props.params.userId,
         role,
         firstName,
         lastName,
         username,
       });
+      if (res.message) {
+        toast.error(res.message);
+        return;
+      }
       toast.success("Se han guardado los cambios");
       router.refresh();
     } catch (e) {
@@ -79,7 +83,7 @@ export default function UserPage(props: { params: { userId: string } }) {
   return (
     <LayoutContainer>
       {isLoading ? (
-        <div> cargando...</div>
+        <div> Cargando...</div>
       ) : (
         <section className="space-y-2">
           <div className="flex justify-between">
@@ -122,7 +126,6 @@ export default function UserPage(props: { params: { userId: string } }) {
                       <Input
                         id="username"
                         value={username}
-                        disabled
                         onChange={(e) => setUsername(e.target.value)}
                       />
                     </div>

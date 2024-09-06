@@ -14,6 +14,7 @@ import { auth } from "@clerk/nextjs/server";
 import { SetDefaultOrganization } from "./set-default-org";
 import { checkRole } from "~/lib/utils/server/roles";
 import { api } from "~/trpc/server";
+import { getServerAuthSession } from "~/server/auth";
 
 dayjs.locale("es");
 const montserrat = Montserrat({
@@ -28,6 +29,22 @@ export const metadata = {
 };
 
 export default async function RootLayout(props: { children: React.ReactNode }) {
+  const session = await getServerAuthSession();
+  if(!session){
+    return (
+      <ClerkProvider signInFallbackRedirectUrl={"/dashboard"}>
+      <html lang="es">
+        {/* biome-ignore lint/nursery/useSortedClasses: <explanation> */}
+        <body className={`text-[#3E3E3E] font-family ${montserrat.className}`}>
+          <TRPCReactProvider cookies={cookies().toString()}>
+          {props.children}
+          <Toaster />
+          </TRPCReactProvider>
+        </body>
+      </html>
+      </ClerkProvider>
+    );
+  }
   const { orgId } = auth();
 
   if (orgId || checkRole("admin")) {
@@ -64,10 +81,8 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
       {/* biome-ignore lint/nursery/useSortedClasses: <explanation> */}
       <body className={`text-[#3E3E3E] font-family ${montserrat.className}`}>
         <TRPCReactProvider cookies={cookies().toString()}>
-
-    <SetDefaultOrganization />;
-    <Toaster />
-    </TRPCReactProvider>
+          <SetDefaultOrganization />
+      </TRPCReactProvider>
   </body>
 </html>
 </ClerkProvider>
