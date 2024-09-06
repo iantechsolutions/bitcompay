@@ -52,7 +52,7 @@ export default function AddPreLiquidation() {
   const [puntoVenta, setPuntoVenta] = useState("");
   const [logo_url, setLogo_url] = useState("");
 
-  const [interest, setInterest] = useState<number | null>(null);
+  const [interest, setInterest] = useState<number | null>(0);
   const { data: marcas } = api.brands.list.useQuery();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -64,32 +64,37 @@ export default function AddPreLiquidation() {
     api.comprobantes.createPreLiquidation.useMutation();
 
   async function handleCreate() {
-    if (mes && anio && anio >= new Date().getFullYear()) {
-      const liquidation = await createLiquidation({
-        pv: puntoVenta,
-        brandId: brandId,
-        dateDesde: new Date(anio, mes - 1, 1),
-        dateHasta: new Date(anio, mes, 0),
-        dateDue: fechaVencimiento2,
-        interest: interest ?? 0,
-        logo_url: logo_url ?? undefined,
-      });
-      if ("error" in liquidation!) {
-        console.log("liquidation", liquidation);
-        toast.error(liquidation.error);
-      } else if (liquidation) {
-        queryClient.invalidateQueries();
-        toast.success("Pre-Liquidación creada correctamente");
-        setOpen(false);
-      } else {
-        toast.error("Error al crear la Pre-Liquidación");
+    if (!puntoVenta || !brandId || !fechaVencimiento2) {
+      toast.error("Ingrese los valores requeridos");
+    } else {
+      if (mes && anio && anio >= new Date().getFullYear()) {
+        const liquidation = await createLiquidation({
+          pv: puntoVenta,
+          brandId: brandId,
+          dateDesde: new Date(anio, mes - 1, 1),
+          dateHasta: new Date(anio, mes, 0),
+          dateDue: fechaVencimiento2,
+          interest: interest ?? 0,
+          logo_url: logo_url ?? undefined,
+        });
+        if ("error" in liquidation!) {
+          console.log("liquidation", liquidation);
+          toast.error(liquidation.error);
+        } else if (liquidation) {
+          queryClient.invalidateQueries();
+          toast.success("Pre-Liquidación creada correctamente");
+          setOpen(false);
+        } else {
+          toast.error("Error al crear la Pre-Liquidación");
+        }
+      }
+      if (!mes) {
+        toast.error("Seleccione un mes");
+      } else if (!anio || anio < new Date().getFullYear()) {
+        toast.error("El año seleccionado no es válido");
       }
     }
-    if (!mes) {
-      toast.error("Seleccione un mes");
-    } else if (!anio || anio < new Date().getFullYear()) {
-      toast.error("El año seleccionado no es válido");
-    }
+
     //TODO CORREGIR ESTO
     // await new Promise((resolve) => setTimeout(resolve, 500));
   }
