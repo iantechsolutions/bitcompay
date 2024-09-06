@@ -80,6 +80,7 @@ export default function Page() {
   const { data: marcas } = api.brands.list.useQuery();
   const { data: gruposFamiliar } = api.family_groups.list.useQuery();
   const { data: obrasSociales } = api.healthInsurances.list.useQuery();
+
   const [logo, setLogo] = useState("");
   const [fcSelec, setFCSelec] = useState("");
   const [comprobantes, setComprobantes] = useState<any[]>([]);
@@ -283,13 +284,14 @@ export default function Page() {
       !concepto ||
       !iva ||
       !dateVencimiento ||
-      !importe
+      !importe ||
+      parseInt(importe) <= 0
     ) {
-      toast.error("Ingrese todos los valores");
+      toast.error("Ingrese los valores requeridos");
       return null;
     }
     if (concepto !== "1" && (!dateDesde || !dateHasta)) {
-      toast.error("Ingrese todos los valores");
+      toast.error("Ingrese los valores requeridos");
       return null;
     }
     try {
@@ -380,7 +382,8 @@ export default function Page() {
                 : null,
             ImpTotal: comprobante[0]?.importe,
             ImpTotConc: 0,
-            ImpNeto: (Number(comprobante[0]?.importe) / ivaFloat).toFixed(2),
+            ImpNeto:
+              (Number(comprobante[0]?.importe) / ivaFloat).toFixed(2) ?? "0",
             ImpOpEx: 0,
             ImpIVA:
               Math.round(

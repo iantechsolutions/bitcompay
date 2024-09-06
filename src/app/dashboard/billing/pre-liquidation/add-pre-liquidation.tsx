@@ -4,7 +4,13 @@ import "dayjs/locale/es";
 import { Input } from "~/components/ui/input";
 import utc from "dayjs/plugin/utc";
 import { useState } from "react";
-import { PlusCircleIcon, Loader2Icon, Loader2, Plus, CirclePlus } from "lucide-react";
+import {
+  PlusCircleIcon,
+  Loader2Icon,
+  Loader2,
+  Plus,
+  CirclePlus,
+} from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { toast } from "sonner";
 import {
@@ -65,7 +71,7 @@ export default function AddPreLiquidation() {
         dateDesde: new Date(anio, mes - 1, 1),
         dateHasta: new Date(anio, mes, 0),
         dateDue: fechaVencimiento2,
-        interest: interest ?? undefined,
+        interest: interest ?? 0,
         logo_url: logo_url ?? undefined,
       });
       if ("error" in liquidation!) {
@@ -117,9 +123,10 @@ export default function AddPreLiquidation() {
           <div className="w-flex flex-auto text-gray-500 m-3 pr-2 ">
             <Label className="text-xs">MARCA</Label>
             <Select onValueChange={handleBrandChange}>
-              <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              <SelectTrigger
+                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right">
-                <SelectValue placeholder="Seleccione una marca"/>
+                <SelectValue placeholder="Seleccione una marca" />
               </SelectTrigger>
               <SelectContent>
                 {marcas &&
@@ -127,15 +134,14 @@ export default function AddPreLiquidation() {
                     <SelectItem
                       key={marca?.id}
                       value={marca?.id}
-                      className="rounded-none hover:focus:bg-green-300"
-                    >
+                      className="rounded-none hover:focus:bg-green-300">
                       {marca?.name}
                     </SelectItem>
                   ))}
               </SelectContent>
             </Select>
           </div>
-          <div className="w-full flex flex-row gap-2 text-gray-500" >
+          <div className="w-full flex flex-row gap-2 text-gray-500">
             <div className="w-1/2 m-3 mr-3">
               <Label className="text-xs">1° FECHA DE VENCIMIENTO</Label>
               <br />
@@ -146,8 +152,7 @@ export default function AddPreLiquidation() {
                     className={cn(
                       "w-full border-b-2 border-green-200 pl-3 text-left font-normal hover:bg-none hover:bg-transparent shadow-none",
                       !fechaVencimiento1 && "text-muted-foreground"
-                    )}
-                  >
+                    )}>
                     <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[#3E3E3E]">
                       {fechaVencimiento1 ? (
                         dayjs(fechaVencimiento1).format("D [de] MMMM [de] YYYY")
@@ -178,13 +183,12 @@ export default function AddPreLiquidation() {
               <br />
               <Popover open={popover2Open} onOpenChange={setPopover2Open}>
                 <PopoverTrigger asChild>
-                <Button
+                  <Button
                     variant={"form"}
                     className={cn(
                       "w-full border-b-2 border-green-200 pl-3 text-left font-normal hover:bg-none hover:bg-transparent",
                       !fechaVencimiento2 && "text-muted-foreground"
-                    )}
-                  >
+                    )}>
                     <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[#3E3E3E]">
                       {fechaVencimiento2 ? (
                         dayjs(fechaVencimiento2).format("D [de] MMMM [de] YYYY")
@@ -273,85 +277,74 @@ export default function AddPreLiquidation() {
           </div> */}
           <div className="w-full flex flex-row gap-2 text-gray-500">
             <div className="w-1/2 m-3 mr-3">
-              <Label htmlFor="validy_date" className="text-xs">MES DE VIGENCIA</Label>
+              <Label htmlFor="validy_date" className="text-xs">
+                MES DE VIGENCIA
+              </Label>
               <Select
                 onValueChange={(e) => setMes(Number(e))}
-                defaultValue={mes?.toString()}
-              >
+                defaultValue={mes?.toString()}>
                 <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none focus-visible:ring-green-400">
                   <SelectValue placeholder="Seleccione un mes" />
                 </SelectTrigger>
                 <SelectContent>
-                <SelectItem
+                  <SelectItem
                     value="1"
-                    disabled={new Date(anio, 1, 1) < new Date()}
-                  >
+                    disabled={new Date(anio, 1, 1) < new Date()}>
                     Enero
                   </SelectItem>
                   <SelectItem
                     value="2"
-                    disabled={new Date(anio, 2, 1) < new Date()}
-                  >
+                    disabled={new Date(anio, 2, 1) < new Date()}>
                     Febrero
                   </SelectItem>
                   <SelectItem
                     value="3"
-                    disabled={new Date(anio, 3, 1) < new Date()}
-                  >
+                    disabled={new Date(anio, 3, 1) < new Date()}>
                     Marzo
                   </SelectItem>
                   <SelectItem
                     value="4"
-                    disabled={new Date(anio, 4, 1) < new Date()}
-                  >
+                    disabled={new Date(anio, 4, 1) < new Date()}>
                     Abril
                   </SelectItem>
                   <SelectItem
                     value="5"
-                    disabled={new Date(anio, 5, 1) < new Date()}
-                  >
+                    disabled={new Date(anio, 5, 1) < new Date()}>
                     Mayo
                   </SelectItem>
                   <SelectItem
                     value="6"
-                    disabled={new Date(anio, 6, 1) < new Date()}
-                  >
+                    disabled={new Date(anio, 6, 1) < new Date()}>
                     Junio
                   </SelectItem>
                   <SelectItem
                     value="7"
-                    disabled={new Date(anio, 7, 1) < new Date()}
-                  >
+                    disabled={new Date(anio, 7, 1) < new Date()}>
                     Julio
                   </SelectItem>
                   <SelectItem
                     value="8"
-                    disabled={new Date(anio, 8, 1) < new Date()}
-                  >
+                    disabled={new Date(anio, 8, 1) < new Date()}>
                     Agosto
                   </SelectItem>
                   <SelectItem
                     value="9"
-                    disabled={new Date(anio, 9, 1) < new Date()}
-                  >
+                    disabled={new Date(anio, 9, 1) < new Date()}>
                     Septiembre
                   </SelectItem>
                   <SelectItem
                     value="10"
-                    disabled={new Date(anio, 10, 1) < new Date()}
-                  >
+                    disabled={new Date(anio, 10, 1) < new Date()}>
                     Octubre
                   </SelectItem>
                   <SelectItem
                     value="11"
-                    disabled={new Date(anio, 11, 1) < new Date()}
-                  >
+                    disabled={new Date(anio, 11, 1) < new Date()}>
                     Noviembre
                   </SelectItem>
                   <SelectItem
                     value="12"
-                    disabled={new Date(anio, 12, 1) < new Date()}
-                  >
+                    disabled={new Date(anio, 12, 1) < new Date()}>
                     Diciembre
                   </SelectItem>
                 </SelectContent>
@@ -370,7 +363,9 @@ export default function AddPreLiquidation() {
           </div>
           <div className="w-full flex flex-row  gap-2 text-gray-500">
             <div className="m-3 ml-2 mr-3 mb-3">
-              <Label htmlFor="name" className="text-xs">PUNTO DE VENTA A UTILIZAR</Label>
+              <Label htmlFor="name" className="text-xs">
+                PUNTO DE VENTA A UTILIZAR
+              </Label>
               <br />
               <ComboboxDemo
                 title="Seleccionar PV..."
@@ -387,7 +382,10 @@ export default function AddPreLiquidation() {
               />
             </div>
             <div className="w-2/4 text-gray-500 m-3 ml-3 pr-">
-              <Label htmlFor="interest" className="text-xs"> INTERÉS (%) </Label>
+              <Label htmlFor="interest" className="text-xs">
+                {" "}
+                INTERÉS (%){" "}
+              </Label>
               <Input
                 className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 type="number"
@@ -404,8 +402,7 @@ export default function AddPreLiquidation() {
             type="submit"
             className="m-5 mb-2 rounded-full w-fit justify-self-center bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#DEF5DD]"
             disabled={isLoading}
-            onClick={handleCreate}
-          >
+            onClick={handleCreate}>
             {isLoading && (
               <Loader2Icon className="mr-2 animate-spin" size={20} />
             )}

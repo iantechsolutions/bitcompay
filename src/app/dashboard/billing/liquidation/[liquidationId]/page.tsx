@@ -156,12 +156,12 @@ export default async function Home(props: {
     excelRow.push(Aporte);
     const interes = toNumberOrZero(
       original_comprobante?.items.find((item) => item.concept === "Interes")
-        ?.amount
+        ?.amount ?? "0"
     );
     summary["Interés"] += interes;
     excelRow.push(interes);
     const total = toNumberOrZero(
-      parseFloat(original_comprobante?.importe?.toFixed(2)!)
+      parseFloat(original_comprobante?.importe?.toFixed(2) ?? "0")
     );
     summary["Total a facturar"] += total;
     excelRow.push(total);
