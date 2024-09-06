@@ -87,6 +87,7 @@ export const brandsRouter = createTRPCRouter({
         iva: z.string().optional(),
         billType: z.string().optional(),
         concept: z.string().optional(),
+        code: z.string().optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -95,7 +96,7 @@ export const brandsRouter = createTRPCRouter({
       const newBrand = await db
         .insert(brands)
         .values({
-          ...input,
+          ...input,prisma_code: input.code,
         })
         .returning();
       return newBrand;

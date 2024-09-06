@@ -57,7 +57,7 @@ export default function BrandPage({
   const router = useRouter();
   const [name, setName] = useState(brand.name);
   const [concept, setConcept] = useState(brand.concept!);
-
+  const [code, setCode] = useState(brand.prisma_code!);
   const [iva, setIva] = useState<string>(brand.iva!);
   const [billType, setBillType] = useState<string>(brand.bill_type!);
 
@@ -96,6 +96,7 @@ export default function BrandPage({
     if (!reducedDescription) errors.push("Descripción Reducida");
     if (!concept) errors.push("Concepto");
     if (!iva) errors.push("IVA");
+    if (!code) errors.push("Código");
     // if (!billType) errors.push("Tipo de Factura");
 
     return errors;
@@ -173,6 +174,17 @@ export default function BrandPage({
                       id="name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="code">Código de marca(max. 4 carac)</Label>
+                    <Input
+                      id="code"
+                      placeholder="..."
+                      value={code}
+                      onChange={(e) => setCode(e.target.value)}
+                      required
+                      maxLength={4}
                     />
                   </div>
                   <div className="col-span-2">

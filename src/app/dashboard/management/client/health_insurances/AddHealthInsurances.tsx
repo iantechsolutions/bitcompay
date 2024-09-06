@@ -169,16 +169,161 @@ export function AddHealthInsurances(props: {
               <DialogTitle>Agregar obra social</DialogTitle>
             )}
           </DialogHeader>
-          <div className="grid grid-cols-3 gap-5">
+          <div className="grid grid-cols-4 gap-5">
             <div>
-              <Label htmlFor="IdNumber">Numero de Identificacion</Label>
+              <Label htmlFor="IdNumber" className="text-xs">CODIGO</Label>
               <Input
                 id="IdNumber"
+                className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right"
                 placeholder="..."
                 value={idNumber}
                 onChange={(e) => setIdNumber(e.target.value)}
               />
             </div>
+            <div>
+              <Label htmlFor="IdNumber" className="text-xs">SIGLA</Label>
+              <Input
+                id="IdNumber"
+                className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right"
+                placeholder="..."
+                value={idNumber}
+                disabled={true}
+                onChange={(e) => setIdNumber(e.target.value)}
+              />
+            </div>
+            <div/>
+            <div/>
+            <p>Datos fiscales</p>
+            <div/>
+            <div/>
+            <div/>
+
+            <div>
+              <Label className="text-xs">UNIDAD DE NEGOCIO</Label>
+              <Select onValueChange={setFiscalIdType} value={fiscalIdType} disabled={true}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccione un tipo de ID" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="CUIT">CUIT</SelectItem>
+                  <SelectItem value="CUIL">CUIL</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="name" className="text-xs">RAZON SOCIAL</Label>
+              <Input
+                disabled={true}
+                id="name"
+                placeholder="..."
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+
+
+            <div>
+              <Label className="text-xs">TIPO DOC. FISCAL</Label>
+              <Select onValueChange={setFiscalIdType} value={fiscalIdType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccione un tipo de ID" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="CUIT">CUIT</SelectItem>
+                  <SelectItem value="CUIL">CUIL</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="idNumber" className="text-xs">NRO DOC. FISCAL</Label>
+              <Input
+                id="idNumber"
+                placeholder="xxxxxxxxxxx"
+                type="number"
+                value={fiscalIdNumber}
+                onChange={(e) => setFiscalIdNumber(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <Label className="text-xs">CONDICIÓN AFIP</Label>
+              <Select onValueChange={setAfipStatus} value={afipStatus}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccione un estado de AFIP" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="monotributista">Monotributista</SelectItem>
+                  <SelectItem value="responsable_inscripto">
+                    Responsable Inscripto
+                  </SelectItem>
+                  <SelectItem value="exento">Exento</SelectItem>
+                  <SelectItem value="consumidor_final">
+                    Consumidor Final
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="text-xs">CONDICIÓN IIBB</Label>
+              <Select onValueChange={setAfipStatus} value={afipStatus} disabled={true}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccione un estado de AFIP" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="monotributista">Monotributista</SelectItem>
+                  <SelectItem value="responsable_inscripto">
+                    Responsable Inscripto
+                  </SelectItem>
+                  <SelectItem value="exento">Exento</SelectItem>
+                  <SelectItem value="consumidor_final">
+                    Consumidor Final
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="IdNumber" className="text-xs">N° IIBB</Label>
+              <Input
+                disabled={true}
+                id="IdNumber"
+                className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right"
+                placeholder="..."
+                value={idNumber}
+                onChange={(e) => setIdNumber(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="IdNumber" className="text-xs">CONDICION DE VENTA</Label>
+              <Input
+                disabled={true}
+                id="IdNumber"
+                className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right"
+                placeholder="..."
+                value={idNumber}
+                onChange={(e) => setIdNumber(e.target.value)}
+              />
+            </div>
+
+
+            <div>
+              <Label htmlFor="address" className="text-xs">DOMICILIO FISCAL</Label>
+              <Input
+                id="address"
+                placeholder="..."
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+              />
+            </div>
+
+
+            <div/>
             <div>
               <Label htmlFor="name">Nombre</Label>
               <Input
@@ -197,37 +342,7 @@ export function AddHealthInsurances(props: {
                 onChange={(e) => setResponsibleName(e.target.value)}
               />
             </div>
-            <div>
-              <Label>Seleccione tipo de documento fiscal</Label>
-              <Select onValueChange={setFiscalIdType} value={fiscalIdType}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccione un tipo de ID" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="CUIT">CUIT</SelectItem>
-                  <SelectItem value="CUIL">CUIL</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="idNumber">Numero de documento fiscal</Label>
-              <Input
-                id="idNumber"
-                placeholder="..."
-                type="number"
-                value={fiscalIdNumber}
-                onChange={(e) => setFiscalIdNumber(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="address">Direccion de facturacion</Label>
-              <Input
-                id="address"
-                placeholder="..."
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-              />
-            </div>
+           
             <div>
               <Label htmlFor="locality">Localidad</Label>
               <Input
@@ -261,24 +376,7 @@ export function AddHealthInsurances(props: {
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label>Estado de AFIP</Label>
-              <Select onValueChange={setAfipStatus} value={afipStatus}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccione un estado de AFIP" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="monotributista">Monotributista</SelectItem>
-                  <SelectItem value="responsable_inscripto">
-                    Responsable Inscripto
-                  </SelectItem>
-                  <SelectItem value="exento">Exento</SelectItem>
-                  <SelectItem value="consumidor_final">
-                    Consumidor Final
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            
             {OS ? null : (
               <div>
                 <Label htmlFor="initialValue">Saldo inicial</Label>
