@@ -59,10 +59,10 @@
    /@radix-ui/react-collapsible@1.0.3(@types/react-dom@18.2.18)(@types/react@18.2.45)(react-dom@18.2.0)(react@18.3.1):[m
      resolution: {integrity: sha512-UBmVDkmR6IvDsloHVN+3rtx4Mi5TFvylYXpluuv0f37dtaz3H99bp8No0LGXRigVpl3UAT4l9j6bIchh42S/Gg==}[m
      peerDependencies:[m
-[1mdiff --git a/src/app/dashboard/company/[]/sales/procedures/add-procedure.tsx b/src/app/dashboard/company/[companyId]/sales/procedures/add-procedure.tsx[m
+[1mdiff --git a/src/app/company/[]/sales/procedures/add-procedure.tsx b/src/app/company/[companyId]/sales/procedures/add-procedure.tsx[m
 [1mindex 59201e9..4fb3563 100644[m
-[1m--- a/src/app/dashboard/company/[companyId]/sales/procedures/add-procedure.tsx[m
-[1m+++ b/src/app/dashboard/company/[companyId]/sales/procedures/add-procedure.tsx[m
+[1m--- a/src/app/company/[companyId]/sales/procedures/add-procedure.tsx[m
+[1m+++ b/src/app/company/[companyId]/sales/procedures/add-procedure.tsx[m
 [36m@@ -10,11 +10,14 @@[m [mimport {[m
  } from "~/components/ui/dialog";[m
  import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";[m

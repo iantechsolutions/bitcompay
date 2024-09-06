@@ -1,13 +1,16 @@
-import fs from 'node:fs'
-import { createTRPCRouter, protectedProcedure } from '../trpc'
+import fs from "node:fs";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 // a partir de
 
 export const afipRouter = createTRPCRouter({
-    createPDF: protectedProcedure.query(async () => {
-        const html = fs.readFileSync('http:/localhost:3000/dashboard/admin/factura/bill.html', 'utf8')
-        return html
-    }),
-})
+  createPDF: protectedProcedure.query(async () => {
+    const html = fs.readFileSync(
+      "http:/localhost:3000/admin/factura/bill.html",
+      "utf8"
+    );
+    return html;
+  }),
+});
 
 // export const afipRouter = createTRPCRouter({
 //     createPDF: protectedProcedure

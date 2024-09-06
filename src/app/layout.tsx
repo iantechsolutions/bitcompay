@@ -7,6 +7,16 @@ import { cookies } from "next/headers";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
 import { Toaster } from "~/components/ui/sonner";
+import AppLayout from "~/components/applayout";
+import CompanySidenav from "~/components/company-sidenav";
+import { CompanyProvider } from "./company-provider";
+import { auth } from "@clerk/nextjs/server";
+import { SetDefaultOrganization } from "./set-default-org";
+import { checkRole } from "~/lib/utils/server/roles";
+import { api } from "~/trpc/server";
+import { getServerAuthSession } from "~/server/auth";
+import { headers } from "next/headers";
+
 dayjs.locale("es");
 const montserrat = Montserrat({
   subsets: ["latin-ext"],
@@ -19,15 +29,62 @@ export const metadata = {
   icons: [{ rel: "icon", url: "/public/bitcom_icon.png" }],
 };
 
-export default function RootLayout(props: { children: React.ReactNode }) {
+export default async function RootLayout(props: { children: React.ReactNode }) {
+  const session = await getServerAuthSession();
+  const pathName = headers().get("x-invoke-path") || "/";
+  if (!session || pathName.includes("signin")) {
+    return (
+      <ClerkProvider signInFallbackRedirectUrl={"/dashboard"}>
+        <html lang="es">
+          {/* biome-ignore lint/nursery/useSortedClasses: <explanation> */}
+          <body
+            className={`text-[#3E3E3E] font-family ${montserrat.className}`}>
+            <TRPCReactProvider cookies={cookies().toString()}>
+              {props.children}
+              <Toaster />
+            </TRPCReactProvider>
+          </body>
+        </html>
+      </ClerkProvider>
+    );
+  }
+  const { orgId } = auth();
+
+  if (orgId || checkRole("admin")) {
+    const company = await api.companies.get.query();
+
+    return (
+      <ClerkProvider signInFallbackRedirectUrl={"/dashboard"}>
+        <html lang="es">
+          {/* biome-ignore lint/nursery/useSortedClasses: <explanation> */}
+          <body
+            className={`text-[#3E3E3E] font-family ${montserrat.className}`}>
+            <TRPCReactProvider cookies={cookies().toString()}>
+              <AppLayout
+                headerClass="bg-white"
+                sidenavClass="top-0"
+                sidenav={<CompanySidenav />}>
+                {company && (
+                  <CompanyProvider company={company}>
+                    {props.children}
+                  </CompanyProvider>
+                )}
+                {!company && checkRole("admin") && props.children}
+              </AppLayout>
+              <Toaster />
+            </TRPCReactProvider>
+          </body>
+        </html>
+      </ClerkProvider>
+    );
+  }
   return (
     <ClerkProvider signInFallbackRedirectUrl={"/dashboard"}>
       <html lang="es">
         {/* biome-ignore lint/nursery/useSortedClasses: <explanation> */}
         <body className={`text-[#3E3E3E] font-family ${montserrat.className}`}>
           <TRPCReactProvider cookies={cookies().toString()}>
-            {props.children}
-            <Toaster />
+            <SetDefaultOrganization />
           </TRPCReactProvider>
         </body>
       </html>
