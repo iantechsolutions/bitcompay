@@ -15,6 +15,7 @@ import { SetDefaultOrganization } from "./set-default-org";
 import { checkRole } from "~/lib/utils/server/roles";
 import { api } from "~/trpc/server";
 import { getServerAuthSession } from "~/server/auth";
+import { usePathname } from 'next/navigation'
 
 dayjs.locale("es");
 const montserrat = Montserrat({
@@ -30,7 +31,8 @@ export const metadata = {
 
 export default async function RootLayout(props: { children: React.ReactNode }) {
   const session = await getServerAuthSession();
-  if(!session){
+  const pathName = usePathname();
+  if(!session || pathName.includes("signin") ){
     return (
       <ClerkProvider signInFallbackRedirectUrl={"/dashboard"}>
       <html lang="es">
