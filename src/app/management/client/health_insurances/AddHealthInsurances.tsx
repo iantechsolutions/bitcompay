@@ -161,7 +161,7 @@ export function AddHealthInsurances(props: {
       </AddElementButton>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-[800px]">
+        <DialogContent className="sm:max-w-[850px]">
           <DialogHeader>
             {OS ? (
               <DialogTitle>Editar obra social</DialogTitle>
@@ -169,9 +169,11 @@ export function AddHealthInsurances(props: {
               <DialogTitle>Agregar obra social</DialogTitle>
             )}
           </DialogHeader>
-          <div className="grid grid-cols-4 gap-5">
+          <div className="grid grid-cols-4 gap-y-4 gap-x-8">
             <div>
-              <Label htmlFor="IdNumber" className="text-xs">CODIGO</Label>
+              <Label htmlFor="IdNumber" className="text-xs">
+                CODIGO
+              </Label>
               <Input
                 id="IdNumber"
                 className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
@@ -182,7 +184,9 @@ export function AddHealthInsurances(props: {
               />
             </div>
             <div>
-              <Label htmlFor="IdNumber" className="text-xs">SIGLA</Label>
+              <Label htmlFor="IdNumber" className="text-xs">
+                SIGLA
+              </Label>
               <Input
                 id="IdNumber"
                 className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
@@ -193,17 +197,21 @@ export function AddHealthInsurances(props: {
                 onChange={(e) => setIdNumber(e.target.value)}
               />
             </div>
-            <div/>
-            <div/>
-            <p>Datos fiscales</p>
-            <div/>
-            <div/>
-            <div/>
+            <div />
+            <div />
+            <p className="col-span-4">Datos fiscales</p>
 
             <div>
               <Label className="text-xs">UNIDAD DE NEGOCIO</Label>
-              <Select onValueChange={setFiscalIdType} value={fiscalIdType} disabled={true}>
-                <SelectTrigger>
+              <Select
+                onValueChange={setFiscalIdType}
+                value={fiscalIdType}
+                disabled={true}
+              >
+                <SelectTrigger
+                  className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right"
+                >
                   <SelectValue placeholder="Seleccione un tipo de ID" />
                 </SelectTrigger>
                 <SelectContent>
@@ -213,9 +221,13 @@ export function AddHealthInsurances(props: {
               </Select>
             </div>
             <div>
-              <Label htmlFor="name" className="text-xs">RAZON SOCIAL</Label>
+              <Label htmlFor="name" className="text-xs">
+                RAZON SOCIAL
+              </Label>
               <Input
                 disabled={true}
+                className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right"
                 id="name"
                 placeholder="..."
                 value={name}
@@ -223,11 +235,13 @@ export function AddHealthInsurances(props: {
               />
             </div>
 
-
             <div>
               <Label className="text-xs">TIPO DOC. FISCAL</Label>
               <Select onValueChange={setFiscalIdType} value={fiscalIdType}>
-                <SelectTrigger>
+                <SelectTrigger
+                  className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right"
+                >
                   <SelectValue placeholder="Seleccione un tipo de ID" />
                 </SelectTrigger>
                 <SelectContent>
@@ -237,8 +251,12 @@ export function AddHealthInsurances(props: {
               </Select>
             </div>
             <div>
-              <Label htmlFor="idNumber" className="text-xs">NRO DOC. FISCAL</Label>
+              <Label htmlFor="idNumber" className="text-xs">
+                NRO DOC. FISCAL
+              </Label>
               <Input
+                className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+                hover:none justify-self-right"
                 id="idNumber"
                 placeholder="xxxxxxxxxxx"
                 type="number"
@@ -250,7 +268,10 @@ export function AddHealthInsurances(props: {
             <div>
               <Label className="text-xs">CONDICIÓN AFIP</Label>
               <Select onValueChange={setAfipStatus} value={afipStatus}>
-                <SelectTrigger>
+                <SelectTrigger
+                  className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right"
+                >
                   <SelectValue placeholder="Seleccione un estado de AFIP" />
                 </SelectTrigger>
                 <SelectContent>
@@ -268,8 +289,15 @@ export function AddHealthInsurances(props: {
 
             <div>
               <Label className="text-xs">CONDICIÓN IIBB</Label>
-              <Select onValueChange={setAfipStatus} value={afipStatus} disabled={true}>
-                <SelectTrigger>
+              <Select
+                onValueChange={setAfipStatus}
+                value={afipStatus}
+                disabled={true}
+              >
+                <SelectTrigger
+                  className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right"
+                >
                   <SelectValue placeholder="Seleccione un estado de AFIP" />
                 </SelectTrigger>
                 <SelectContent>
@@ -286,7 +314,9 @@ export function AddHealthInsurances(props: {
             </div>
 
             <div>
-              <Label htmlFor="IdNumber" className="text-xs">N° IIBB</Label>
+              <Label htmlFor="IdNumber" className="text-xs">
+                N° IIBB
+              </Label>
               <Input
                 disabled={true}
                 id="IdNumber"
@@ -299,7 +329,9 @@ export function AddHealthInsurances(props: {
             </div>
 
             <div>
-              <Label htmlFor="IdNumber" className="text-xs">CONDICION DE VENTA</Label>
+              <Label htmlFor="IdNumber" className="text-xs">
+                CONDICION DE VENTA
+              </Label>
               <Input
                 disabled={true}
                 id="IdNumber"
@@ -311,10 +343,13 @@ export function AddHealthInsurances(props: {
               />
             </div>
 
-
-            <div>
-              <Label htmlFor="address" className="text-xs">DOMICILIO FISCAL</Label>
+            <div className="col-span-2">
+              <Label htmlFor="address" className="text-xs">
+                DOMICILIO FISCAL
+              </Label>
               <Input
+                className=" mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right w-full"
                 id="address"
                 placeholder="..."
                 value={address}
@@ -322,8 +357,9 @@ export function AddHealthInsurances(props: {
               />
             </div>
 
-
-            <div/>
+            <div />
+            <div />
+            <p className="col-span-4">Datos de Contacto</p>
             <div>
               <Label htmlFor="name">Nombre</Label>
               <Input
@@ -342,7 +378,7 @@ export function AddHealthInsurances(props: {
                 onChange={(e) => setResponsibleName(e.target.value)}
               />
             </div>
-           
+
             <div>
               <Label htmlFor="locality">Localidad</Label>
               <Input
@@ -376,7 +412,7 @@ export function AddHealthInsurances(props: {
                 </SelectContent>
               </Select>
             </div>
-            
+
             {OS ? null : (
               <div>
                 <Label htmlFor="initialValue">Saldo inicial</Label>
