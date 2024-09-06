@@ -41,7 +41,7 @@ const UserButtonAndMenu = ({
             className="h-[4.5vh]  mr-[1vw]"
           />
           <div className="flex-1 flex flex-col justify-center">
-            <div className="text-startP font-medium mb-[0.4vh]">
+            <div className="text-startP font-medium mb-[0.4vh] whitespace-nowrap">
               {user?.fullName
                 ? trimName(user.fullName)
                 : user?.primaryEmailAddress?.emailAddress!}

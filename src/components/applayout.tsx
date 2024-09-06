@@ -23,7 +23,7 @@ export default async function AppLayout(props: AppLayoutProps) {
     <>
       <header
         // biome-ignore lint/nursery/useSortedClasses: <explanation>
-        className={`fixed top-0 right-0 left-0 z-10 flex h-[11vh] items-center px-2 backdrop-blur-md md:px-4 ${props.headerClass}`}
+        className={`fixed top-0 right-0 left-0 z-10 flex h-[11vh] min-h-14 items-center px-2 backdrop-blur-md md:px-4 ${props.headerClass}`}
       >
         <SidenavSheet
           trigger={
