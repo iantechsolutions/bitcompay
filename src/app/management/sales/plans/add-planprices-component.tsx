@@ -160,6 +160,9 @@ export default function AddPlanPricesComponent({
       if (!mes && !edit) {
         toast.error("ingrese el mes correspondiente");
         setWorking(false);
+      } else if (data.prices.length < 1) {
+        toast.error("ingrese al menos un precio");
+        setWorking(false);
       } else {
         let allowed = true;
         console.log("start");

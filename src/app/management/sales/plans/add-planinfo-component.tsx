@@ -1,14 +1,7 @@
 "use client";
-import {
-  CircleX,
-  PlusCircle,
-  PlusCircleIcon,
-  Loader2Icon,
-  CirclePlus,
-} from "lucide-react";
+import { CirclePlus, Loader2Icon, PlusCircleIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import {
   Select,
   SelectTrigger,
@@ -22,34 +15,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import dayjs from "dayjs";
-import "dayjs/locale/es";
-import utc from "dayjs/plugin/utc";
-// import { CalendarByMountAndYear } from "~/components/ui/calendarMonthAndYear";
 import { Input } from "~/components/ui/input";
-
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "~/components/ui/form";
 import { Button } from "~/components/ui/button";
 import { toast } from "sonner";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { PlanSchema } from "~/server/forms/plans-schema";
 import { api } from "~/trpc/react";
-import { useFieldArray } from "react-hook-form";
-import { Label } from "~/components/ui/label";
-import { RouterOutputs } from "~/trpc/shared";
-import { GoBackArrow } from "~/components/goback-arrow";
 import { useQueryClient } from "@tanstack/react-query";
 import Edit02Icon from "~/components/icons/edit-02-stroke-rounded";
-
-dayjs.extend(utc);
-dayjs.locale("es");
+import { Label } from "~/components/ui/label";
 
 type AddPlanDialogProps = {
   planId?: string;
@@ -84,48 +58,44 @@ export default function AddPlanInfoComponent({
     }
   }, [planData]);
 
-  const { data: brands } = api.brands.list.useQuery(undefined);
+  const { data: brands } = api.brands.list.useQuery();
   const { data: plans } = api.plans.list.useQuery();
 
   const { mutateAsync: createPlan, isLoading: isCreating } =
     api.plans.create.useMutation();
   const { mutateAsync: updatePlan, isLoading: isUpdating } =
     api.plans.change.useMutation();
-  const queryClient = useQueryClient();
   const router = useRouter();
 
-  async function handleSumbit() {
+  async function handleSubmit() {
     if (
       plans?.some((plan) => plan.plan_code === codigo && plan.id !== planId)
     ) {
-      return toast.error("No se pueden repetir los codigos de los planes");
+      return toast.error("No se pueden repetir los códigos de los planes");
     } else {
       if (!brand || !codigo || !descripcion) {
-        return toast.error("Ingrese la informacion de todos los campos");
+        return toast.error("Ingrese la información de todos los campos");
       }
       if (planId) {
-        const plan = await updatePlan({
+        await updatePlan({
           planId: planId,
           brand_id: brand,
           plan_code: codigo,
           description: descripcion,
         });
         toast.success("Plan actualizado correctamente");
-        router.refresh();
       } else {
-        const plan = await createPlan({
+        const newPlan = await createPlan({
           brand_id: brand,
           plan_code: codigo,
           description: descripcion,
         });
         if (onPlanIdChange) {
-          onPlanIdChange(plan[0]!.id);
+          onPlanIdChange(newPlan[0]!.id);
         }
-        queryClient.invalidateQueries();
-
         toast.success("Plan creado correctamente");
-        router.refresh();
       }
+      router.refresh();
       closeDialog();
     }
   }
@@ -138,9 +108,7 @@ export default function AddPlanInfoComponent({
           <Select
             onValueChange={(value: string) => setBrand(value)}
             value={brand}>
-            <SelectTrigger
-              className="w-full mb-3 gap-3 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right">
+            <SelectTrigger className="w-full mb-3 gap-3 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none hover:none justify-self-right">
               <SelectValue placeholder="Seleccione una marca" />
             </SelectTrigger>
             <SelectContent>
@@ -156,8 +124,7 @@ export default function AddPlanInfoComponent({
       <div className="w-1/4 text-gray-500 mb-2">
         <Label className="text-xs">CÓDIGO</Label>
         <Input
-          className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right"
+          className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none hover:none justify-self-right"
           type="text"
           value={codigo}
           onChange={(e) => setCodigo(e.target.value)}
@@ -166,8 +133,7 @@ export default function AddPlanInfoComponent({
       <div className="w-1/4 text-gray-500 mt-2">
         <Label className="text-xs">DESCRIPCIÓN</Label>
         <Input
-          className="w-fit mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right"
+          className="w-fit mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none hover:none justify-self-right"
           type="text"
           value={descripcion}
           onChange={(e) => setDescripcion(e.target.value)}
@@ -175,18 +141,20 @@ export default function AddPlanInfoComponent({
       </div>
 
       <Button
-        onClick={handleSumbit}
+        onClick={handleSubmit}
         disabled={isCreating || isUpdating}
-        className=" mt-7 font-medium mb-2 rounded-full w-fit justify-self-right bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3E3E3E]">
-        {(isCreating || isUpdating) && (
+        className="mt-7 font-medium mb-2 rounded-full w-fit justify-self-right bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3E3E3E]">
+        {isCreating || isUpdating ? (
           <Loader2Icon className="mr-2 animate-spin" size={20} />
-        )}
-        {planId ? (
-          <Edit02Icon className="mr-2 h-4" />
         ) : (
-          <CirclePlus className="mr-2" />
+          <>
+            {planId ? (
+              <Edit02Icon className="mr-2 h-4" />
+            ) : (
+              <CirclePlus className="mr-2" />
+            )}
+          </>
         )}
-
         {planId ? "Actualizar plan" : "Agregar Plan"}
       </Button>
     </div>
