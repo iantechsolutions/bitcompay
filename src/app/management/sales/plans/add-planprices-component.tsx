@@ -99,7 +99,9 @@ export default function AddPlanPricesComponent({
           const currentVigency = futurosVigency?.sort(
             (a, b) => b.validy_date.getTime() - a.validy_date.getTime()
           )[0];
-          setCurrentVigency(currentVigency?.validy_date ?? new Date());
+          setCurrentVigency(
+            currentVigency?.validy_date ?? new Date(1, 1, 2023)
+          );
         }
         router.refresh();
       },
@@ -135,8 +137,9 @@ export default function AddPlanPricesComponent({
   const [pricesToDelete, setPricesToDelete] = useState<string[]>([]);
   // Add logging to check for re-renders
 
+  const [trues, setTrues] = useState(true);
   useEffect(() => {
-    if (initialPrices) {
+    if (initialPrices && trues) {
       form.reset({ prices: initialPrices });
       const givenDate = initialPrices[0]?.validy_date;
       if ((givenDate?.getTime() ?? 0) > new Date().getTime()) {
@@ -147,8 +150,9 @@ export default function AddPlanPricesComponent({
         }
         setAnio(initialPrices[0]?.validy_date.getFullYear() ?? null);
       }
+      setTrues(false);
     }
-  }, [initialPrices]);
+  }, [initialPrices, working]);
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     try {
@@ -158,6 +162,10 @@ export default function AddPlanPricesComponent({
         setWorking(false);
       } else {
         let allowed = true;
+        console.log("start");
+        data.prices.sort((a, b) => (a.from_age ?? 0) - (b.from_age ?? 0));
+        console.log("emnding");
+
         const validity_date = new Date(anio ?? 0, (mes ?? 1) - 1, 1);
         for (let i = 0; i < data.prices.length; i++) {
           const { from_age: fromAge1, to_age: toAge1 } = data.prices[i] ?? {
@@ -236,7 +244,7 @@ export default function AddPlanPricesComponent({
       setWorking(false);
     }
   };
-  useEffect(() => {}, [pricesToDelete]);
+  // useEffect(() => {}, [pricesToDelete]);
 
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
@@ -249,6 +257,8 @@ export default function AddPlanPricesComponent({
       const price = initialPrices?.[index];
       if (price?.id) {
         await deletePricePerCondition({ id: price?.id ?? "" });
+        remove(index);
+      } else {
         remove(index);
       }
     } catch {

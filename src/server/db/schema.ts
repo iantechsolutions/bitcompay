@@ -11,12 +11,15 @@ import {
   varchar,
   serial,
 } from "drizzle-orm/pg-core";
-import { columnId, createdAt, pgTable, updatedAt } from "./schema/util";
+import {
+  columnId,
+  createdAt,
+  pgTable,
+  updatedAt,
+} from "~/server/db/schema/util";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { literal, number, type z } from "zod";
 import { he } from "date-fns/locale";
-
-export { pgTable } from "./schema/util";
 
 export const documentUploads = pgTable(
   "document_upload",

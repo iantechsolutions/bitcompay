@@ -295,11 +295,11 @@ function generateDebitoDirecto(
   let divisa = "ARS0";
 
   const fileName = formatString(" ", input.fileName, 12, true);
-  const redDescription = formatString(" ", input.redescription, 10, true);
+  const service_code = formatString(" ", input.redescription, 10, true);
 
   let brand_name = formatString(" ", input.brand_name, 36, true);
   let account_type = "20";
-  let text = `${register_code}${brand_code}${dateYYYYMMDD}${dateYYYYMMDD}${banco_emisor}${sucursal_number}${account_digit}${account_number}${redDescription}${divisa}${fileName}${brand_name}${account_type}${" ".repeat(
+  let text = `${register_code}${brand_code}${dateYYYYMMDD}${dateYYYYMMDD}${banco_emisor}${sucursal_number}${account_digit}${account_number}${service_code}${divisa}${fileName}${brand_name}${account_type}${" ".repeat(
     141
   )}\r\n`;
 

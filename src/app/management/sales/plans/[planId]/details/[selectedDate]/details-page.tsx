@@ -44,8 +44,11 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/tablePreliq";
+import { toast } from "sonner";
+
 import { GoBackButton } from "~/components/goback-button";
 import DeletePrice from "~/components/plan/delete-price";
+import { asTRPCError } from "~/lib/errors";
 // import AddPlanDialogPerPrice from "./AddPlanDialog";
 
 dayjs.extend(utc);
@@ -83,7 +86,27 @@ export default function DetailsPage(props: {
   const [openDelete, setOpenDelete] = useState<boolean>(false);
 
   const { mutateAsync: deletePricePerCondition, isLoading: isDeleting } =
-    api.pricePerCondition.delete.useMutation();
+    api.pricePerCondition.deleteByPlanAndDate.useMutation();
+
+  const planId = props?.plan?.id ?? "";
+
+  async function handleDelete() {
+    try {
+      if (props.date) {
+        await deletePricePerCondition({
+          id: planId,
+          currentVigency: props.date,
+        });
+
+        toast.success("Precios eliminados correctamente");
+        router.push("./");
+        // router.refresh();
+      }
+    } catch (e) {
+      const error = asTRPCError(e)!;
+      toast.error(error.message);
+    }
+  }
   const plaId = props.plan?.id ?? "";
   const { data, error, isLoading } =
     api.pricePerCondition.getByCreatedAt.useQuery({
@@ -262,7 +285,11 @@ export default function DetailsPage(props: {
 
             {deleteable && (
               <div className="flex items-center">
-                <DeletePrice planId={plaId} currentVigency={validity_date} />
+                <Button onClick={() => setOpenDelete(true)} className="ml-10">
+                  {" "}
+                  Eliminar
+                </Button>
+
                 <Button
                   onClick={() => handleUpdatePrice("edit")}
                   className="ml-10">
@@ -364,7 +391,7 @@ export default function DetailsPage(props: {
               </TabsContent>
             </Tabs>
           )}
-          {/* <Dialog open={openDelete} onOpenChange={setOpenDelete}>
+          <Dialog open={openDelete} onOpenChange={setOpenDelete}>
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
                 <DialogTitle>Seguro que borrar esta vigencia?</DialogTitle>
@@ -380,7 +407,7 @@ export default function DetailsPage(props: {
                 </Button>
               </DialogFooter>
             </DialogContent>
-          </Dialog> */}
+          </Dialog>
         </section>
       </div>
     </LayoutContainer>
