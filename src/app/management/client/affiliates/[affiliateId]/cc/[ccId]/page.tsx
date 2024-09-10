@@ -14,6 +14,15 @@ import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 import LayoutContainer from "~/components/layout-container";
 import { Button } from "~/components/ui/button";
+import { Card } from "~/components/ui/card";
+import { Input } from "~/components/ui/input";
+import TableToolbar from "~/components/tanstack/table-toolbar";
+import { table } from "node:console";
+import { DataTable } from "~/app/management/client/health_insurances/data-table";
+import Download02Icon from "~/components/icons/download-02-stroke-rounded";
+
+
+
 export default function CCDetail(props: {
   params: { ccId: string; affiliateId: string };
 }) {
@@ -22,11 +31,46 @@ export default function CCDetail(props: {
   const grupo = api.family_groups.get.useQuery({
     family_groupsId: props.params.affiliateId,
   });
+  const grupos = props.params.affiliateId;
+  const { data: cc } = api.currentAccount.getByFamilyGroup.useQuery({
+    familyGroupId: grupos ?? "",
+  });
+  const lastEvent = cc?.events.reduce((prev, current) => {
+    return new Date(prev.createdAt) > new Date(current.createdAt)
+      ? prev
+      : current;
+  });
   const comprobantes = grupo.data?.comprobantes;
+  function handleGenerate(rows: any) {
+    throw new Error("Function not implemented.");
+  }
+
   return (
     <LayoutContainer>
-      <Title>Detalle cuenta corriente</Title>
-      <h2 className=" font-semibold mb-2">Movimientos cuenta corriente</h2>
+      <Title>Movimientos cuenta corriente</Title>
+      <h2 className=" font-semibold mb-2">Grupo familiar N° XX</h2>
+      <div className="flex gap-3 mt-5 mb-10">
+          <Card className="py-4 px-6 w-1/4 grid grid-cols-2 items-center">
+            <div className="flex flex-col">
+              <p className="text-base font-medium block">SALDO ACTUAL</p>
+              <span className="text-[#EB2727] text-2xl font-bold">
+                $
+                {lastEvent?.current_amount !== undefined
+                  ? lastEvent.current_amount.toFixed(2)
+                  : "0.00"}
+              </span>
+            </div>
+          </Card>
+          <Card className="py-4 px-9 bg-[#DEF5DD] w-1/4 flex flex-col justify-center">
+            <div className="flex flex-col  justify-center">
+              <p className="text-sm font-medium block">PRÓXIMO VENCIMIENTO</p>
+              <span className="text-[#3E3E3E] font-semibold text-xl">
+                10/09/2024
+              </span>
+            </div>
+          </Card>
+      </div>
+   
       <Table>
         <TableHeader>
           <TableRow className="bg-[#F7F7F7] hover:bg-[#F7F7F7] rounded-lg ">
@@ -85,7 +129,7 @@ export default function CCDetail(props: {
                       !comprobante?.billLink
                         ? alert("No hay link")
                         : window.open(comprobante?.billLink);
-                      // : router.push(`${comprobante?.billLink}`);
+                      // : router.push(${comprobante?.billLink});
                     }}
                   >
                     <FileText
@@ -97,6 +141,20 @@ export default function CCDetail(props: {
             ))}
         </TableBody>
       </Table>
+      <div className="flex flex-auto justify-end">
+    <Button
+      variant="bitcompay"
+      className=" text-base px-16 py-6 mt-5 gap-3 text-[#3e3e3e] rounded-full font-medium"
+      // onClick={async () => {
+      //   alert("Exportando");
+      //   handleGenerate(rows);
+      // }}
+    >
+      <Download02Icon />
+      Exportar
+    </Button>
+    </div>
     </LayoutContainer>
   );
 }
+
