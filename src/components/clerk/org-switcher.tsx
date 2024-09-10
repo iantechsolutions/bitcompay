@@ -20,7 +20,7 @@ export const CustomOrganizationSwitcher = ({
   const { organization } = useOrganization();
 
   if (!isLoaded) {
-    return <p>cargando...</p>;
+    return <p>Cargando...</p>;
   }
 
   return (

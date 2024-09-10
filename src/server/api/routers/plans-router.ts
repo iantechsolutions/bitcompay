@@ -39,7 +39,16 @@ export const plansRouter = createTRPCRouter({
     });
     return plan_reduced;
   }),
+  getByBrand: protectedProcedure
+    .input(z.object({ brandId: z.string() }))
+    .query(async ({ input }) => {
+      const planes = await db.query.plans.findMany({
+        where: eq(schema.plans.brand_id, input.brandId),
+        with: { pricesPerCondition: true },
+      });
 
+      return planes;
+    }),
   create: protectedProcedure
     .input(
       z.object({

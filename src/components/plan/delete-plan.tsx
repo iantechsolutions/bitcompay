@@ -17,18 +17,28 @@ import { asTRPCError } from "~/lib/errors";
 
 export default function DeleteButton(props: { id: string }) {
   const router = useRouter();
+  const planId = props?.id;
+  const [error, setError] = useState<boolean>(false);
+  const { data: familiGroups } = api.family_groups.getbyPlans.useQuery({
+    planId: planId,
+  });
   async function handleDelete() {
-    try {
-      await deletePlan({
-        planId: props.id ?? "",
-      });
+    if (familiGroups) {
+      setError(true);
+      return toast.error("No se pudo eliminar el plan");
+    } else {
+      try {
+        await deletePlan({
+          planId: props.id ?? "",
+        });
 
-      toast.success("El plan se eliminado correctamente");
-      router.push("/dashboard/management/sales/plans");
-      router.refresh();
-    } catch (e) {
-      const error = asTRPCError(e)!;
-      toast.error(error.message);
+        toast.success("El plan se eliminado correctamente");
+        router.push("/management/sales/plans");
+        router.refresh();
+      } catch (e) {
+        const error = asTRPCError(e)!;
+        toast.error(error.message);
+      }
     }
   }
   const { mutateAsync: deletePlan, isLoading } = api.plans.delete.useMutation();
@@ -50,12 +60,17 @@ export default function DeleteButton(props: { id: string }) {
             </DialogTitle>
           </DialogHeader>
 
+          {error && (
+            <p className="text-red-500 text-center">
+              {" "}
+              Hay grupos familiares relacionados a este plan
+            </p>
+          )}
           <div className="w-full flex justify-center">
-
             <Button
               type="submit"
               className="rounded-full bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#BEF0BB]"
-              disabled={isLoading}
+              disabled={isLoading || error}
               onClick={handleDelete}
             >
               {isLoading && (
@@ -65,7 +80,6 @@ export default function DeleteButton(props: { id: string }) {
               <h1 className="font-medium-medium p-1">Eliminar</h1>
             </Button>
           </div>
-      
         </DialogContent>
       </Dialog>
     </>

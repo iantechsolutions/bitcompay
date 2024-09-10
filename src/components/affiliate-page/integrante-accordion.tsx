@@ -25,10 +25,8 @@ const AccordionTrigger = React.forwardRef<
     CustomTriggerProps
 >(({ className, children, relationship, ...props }, ref) => {
   const isHolder = relationship === "Titular";
-  const badgeClassName = `rounded-full px-3 py-1 text-xs font-bold ${
-    isHolder ? "bg-[#DDF9CC] text-[#4C740C] " : "text-[#f7f7f7] "
-  }`;
-  console.log("control:", relationship, isHolder);
+  const badgeClassName = `rounded-full px-3 py-1 text-xs font-bold
+  ${isHolder ? "bg-[#DDF9CC] text-[#4C740C] " : "text-[#3E3E3E]"} `;
   return (
     <AccordionPrimitive.Header className="flex items-center">
       <AccordionPrimitive.Trigger
@@ -42,7 +40,7 @@ const AccordionTrigger = React.forwardRef<
         {children}
         <div className="flex gap-10 items-center">
           <div className={badgeClassName}>
-            {isHolder ? "Titular" : "Adherente"}
+          {relationship ? relationship : "Sin Parentesco"}
           </div>
           <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200" />
         </div>

@@ -1,7 +1,7 @@
 import AppLayout from "~/components/applayout";
 import CompanySidenav from "~/components/company-sidenav";
 import { api } from "~/trpc/server";
-import { CompanyProvider } from "./company-provider";
+import { CompanyProvider } from "../company-provider";
 import { auth } from "@clerk/nextjs/server";
 import { SetDefaultOrganization } from "./set-default-org";
 import { checkRole } from "~/lib/utils/server/roles";
