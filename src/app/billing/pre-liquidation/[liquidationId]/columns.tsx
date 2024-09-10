@@ -29,20 +29,20 @@ export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "nroGF",
     header: () => (
-      <div className="text-center whitespace-nowrap text-medium px-7">N° GF</div>
+      <div className="text-center whitespace-nowrap text-medium px-7">
+        N° GF
+      </div>
     ),
     cell: ({ row }) => {
-      return (
-        <div className="text-center">
-          {row.getValue("nroGF")}
-        </div>
-      );
+      return <div className="text-center">{row.getValue("nroGF")}</div>;
     },
   },
   {
     accessorKey: "nombre",
     header: () => (
-      <div className="text-center whitespace-nowrap text-medium px-7">Nombre</div>
+      <div className="text-center whitespace-nowrap text-medium px-7">
+        Nombre
+      </div>
     ),
     cell: ({ row }) => {
       return (
@@ -55,18 +55,20 @@ export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "cuit",
     header: () => (
-      <div className="text-center whitespace-nowrap text-medium px-7">CUIL/CUIT</div>
+      <div className="text-center whitespace-nowrap text-medium px-7">
+        CUIL/CUIT
+      </div>
     ),
     cell: ({ row }) => {
-      return (
-        <div className="text-center">{row.getValue("cuit")}</div>
-      );
+      return <div className="text-center">{row.getValue("cuit")}</div>;
     },
   },
   {
     accessorKey: "saldo anterior",
     header: () => (
-      <div className="text-center whitespace-nowrap text-medium px-7">Saldo anterior</div>
+      <div className="text-center whitespace-nowrap text-medium px-7">
+        Saldo anterior
+      </div>
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("saldo anterior"));
@@ -81,7 +83,9 @@ export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "cuota plan",
     header: () => (
-      <div className="text-center whitespace-nowrap text-medium px-7">Cuota plan</div>
+      <div className="text-center whitespace-nowrap text-medium px-7">
+        Cuota plan
+      </div>
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("cuota plan"));
@@ -96,7 +100,9 @@ export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "bonificacion",
     header: () => (
-      <div className="text-center whitespace-nowrap text-medium px-7">Bonificación</div>
+      <div className="text-center whitespace-nowrap text-medium px-7">
+        Bonificación
+      </div>
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("bonificacion"));
@@ -111,7 +117,9 @@ export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "diferencial",
     header: () => (
-      <div className="text-center whitespace-nowrap text-medium px-7">Diferencial</div>
+      <div className="text-center whitespace-nowrap text-medium px-7">
+        Diferencial
+      </div>
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("diferencial"));
@@ -126,7 +134,9 @@ export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "Aporte",
     header: () => (
-      <div className="text-center whitespace-nowrap text-medium px-7">Aportes</div>
+      <div className="text-center whitespace-nowrap text-medium px-7">
+        Aportes
+      </div>
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("Aporte"));
@@ -141,7 +151,9 @@ export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "interes",
     header: () => (
-      <div className="text-center whitespace-nowrap text-medium px-7">Interés</div>
+      <div className="text-center whitespace-nowrap text-medium px-7">
+        Interés
+      </div>
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("interes"));
@@ -156,7 +168,9 @@ export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "subtotal",
     header: () => (
-      <div className="text-center whitespace-nowrap text-medium px-7">Sub Total</div>
+      <div className="text-center whitespace-nowrap text-medium px-7">
+        Sub Total
+      </div>
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("subtotal"));
@@ -170,7 +184,9 @@ export const columns: ColumnDef<TableRecord>[] = [
   },
   {
     accessorKey: "iva",
-    header: () => <div className="text-center whitespace-nowrap text-medium px-7">IVA</div>,
+    header: () => (
+      <div className="text-center whitespace-nowrap text-medium px-7">IVA</div>
+    ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("iva"));
       const formatted = new Intl.NumberFormat("en-US", {
@@ -184,7 +200,9 @@ export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "total",
     header: () => (
-      <div className="text-center whitespace-nowrap text-medium px-7">Total</div>
+      <div className="text-center whitespace-nowrap text-medium px-7">
+        Total
+      </div>
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("total"));

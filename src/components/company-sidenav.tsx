@@ -213,7 +213,7 @@ export default function CompanySidenav() {
       <Sidenav className="w-[20vw] bg-white px-[1vw] pl-[2vw]">
         <SidenavItem
           className="w-[11vw]  bg-white pl-[1vw] text-sideNav"
-          href={`/dashboard/home`}
+          href={`/`}
           icon={
             <img
               src="/public/sidebar/Frame.png"

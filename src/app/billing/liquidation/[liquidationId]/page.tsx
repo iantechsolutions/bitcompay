@@ -142,16 +142,22 @@ export default async function Home(props: {
     );
     summary["Bonificación"] += bonificacion;
     excelRow.push(bonificacion);
-    const diferencial = toNumberOrZero(
-      original_comprobante?.items.find((item) => item.concept === "Diferencial")
-        ?.amount
-    );
-    summary["Diferencial"] += diferencial;
-    excelRow.push(diferencial);
+
+    const diferencial = await api.differentialsValues.getByIntegranteId.query({
+      integrantId: billResponsible?.id ?? "",
+    });
+    console.log("entro", diferencial?.amount);
+
+    const diferential_amount = toNumberOrZero(diferencial?.amount);
+
+    summary["Diferencial"] += diferential_amount;
+    excelRow.push(diferential_amount);
+
     const Aporte = toNumberOrZero(
       original_comprobante?.items.find((item) => item.concept === "Aporte")
         ?.amount
     );
+
     summary["Aporte"] += Aporte;
     excelRow.push(Aporte);
     const interes = toNumberOrZero(
@@ -194,7 +200,7 @@ export default async function Home(props: {
         0,
       "cuota plan": cuota_planes,
       bonificacion,
-      diferencial,
+      diferencial: diferential_amount,
       Aporte,
       interes,
       subtotal: subTotal,
