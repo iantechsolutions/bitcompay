@@ -14,6 +14,8 @@ import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 import LayoutContainer from "~/components/layout-container";
 import { Button } from "~/components/ui/button";
+import { type TableRecord, columns } from "./columns";
+import DataTable from "./data-table";
 export default function CCDetail(props: {
   params: { ccId: string; affiliateId: string };
 }) {
@@ -23,80 +25,25 @@ export default function CCDetail(props: {
     family_groupsId: props.params.affiliateId,
   });
   const comprobantes = grupo.data?.comprobantes;
+  const tableRows: TableRecord[] = [];
+  if (events.data) {
+    for (const event of events?.data) {
+      tableRows.push({
+        date: event.createdAt,
+        description: event.description,
+        amount: event.event_amount,
+        comprobanteType: "Nota de credito A",
+        comprobanteNumber: "00001-00002546",
+        status:"Pendiente", 
+        iva: 0.21,
+      });
+    }
+  }
   return (
     <LayoutContainer>
       <Title>Detalle cuenta corriente</Title>
       <h2 className=" font-semibold mb-2">Movimientos cuenta corriente</h2>
-      <Table>
-        <TableHeader>
-          <TableRow className="bg-[#F7F7F7] hover:bg-[#F7F7F7] rounded-lg ">
-            <TableHead className="w-[4rem]">Fecha</TableHead>
-            <TableHead>Descripción</TableHead>
-            <TableHead>Tipo</TableHead>
-            <TableHead>Importe</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {events.data?.map((event) => (
-            <TableRow
-              key={event.id}
-              className=" border-b-2 border-gray-200 border-x-0 text-center  "
-            >
-              <TableCell className="w-[15rem]">
-                {dayjs(event?.createdAt).format("YYYY-MM-DD HH:mm")}
-              </TableCell>
-              <TableCell>{event?.description}</TableCell>
-              <TableCell>{event?.type}</TableCell>
-              <TableCell>${event?.event_amount * -1}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      <h2 className="font-semibold mb-2">Comprobantes</h2>
-      <Table>
-        <TableHeader>
-          <TableRow className="bg-[#F7F7F7] hover:bg-[#F7F7F7] rounded-lg ">
-            <TableHead>Fecha</TableHead>
-            <TableHead>Tipo</TableHead>
-            <TableHead>Importe</TableHead>
-            <TableHead>Estado</TableHead>
-            <TableHead>Acciones</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {comprobantes
-            ?.filter((x) => x.estado != "generada" && x.estado != "anulada")
-            .map((comprobante) => (
-              <TableRow
-                key={comprobante.id}
-                className="border-b-2 border-gray-200 border-x-0 text-center  "
-              >
-                <TableCell>
-                  {dayjs(comprobante?.createdAt).format("YYYY-MM-DD hh:mm")}
-                </TableCell>
-                <TableCell>{comprobante?.tipoComprobante}</TableCell>
-                <TableCell>${comprobante?.importe}</TableCell>
-                <TableCell>{comprobante?.estado}</TableCell>
-                <TableCell className="flex justify-center">
-                  <Button
-                    disabled={!comprobante?.billLink}
-                    variant="ghost"
-                    onClick={() => {
-                      !comprobante?.billLink
-                        ? alert("No hay link")
-                        : window.open(comprobante?.billLink);
-                      // : router.push(`${comprobante?.billLink}`);
-                    }}
-                  >
-                    <FileText
-                    // className="cursor-pointer"
-                    />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-        </TableBody>
-      </Table>
+      <DataTable data={tableRows} columns={columns}/>
     </LayoutContainer>
   );
 }

@@ -62,7 +62,7 @@ export function DataTable<TData, TValue>({
     router.push(`/dashboard/billing/pre-liquidation/${originalData.id}`);
   };
 
-  const desiredColumns = ["Marca"];
+  const desiredColumns = ["Marca", "UN"];
   const filteredColumns = Array.from(table.getAllColumns()).filter((column) =>
     desiredColumns.includes(column.id!)
   );
