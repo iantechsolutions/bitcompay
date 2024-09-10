@@ -52,6 +52,7 @@ export default function BreadcrumbComp() {
     management: "GESTIÓN",
     client: "CLIENTES",
     affiliates: "AFILIADOS",
+    cc:"CUENTA CORRIENTE",
     health_insurances: "OBRAS SOCIALES",
     documents: "DOCUMENTOS",
     "masive-upload": "CARGA MASIVA",
