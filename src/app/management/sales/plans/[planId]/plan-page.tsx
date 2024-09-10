@@ -278,7 +278,7 @@ export default function PlanPage(props: {
                               disabled={vigente === fecha || vigente > fecha}>
                               <DeletePrice
                                 planId={plan?.id ?? ""}
-                                currentVigency={vigente}
+                                currentVigency={fecha}
                               />
                             </DropdownMenuItem>
                           </div>

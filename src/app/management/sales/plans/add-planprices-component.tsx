@@ -100,7 +100,7 @@ export default function AddPlanPricesComponent({
             (a, b) => b.validy_date.getTime() - a.validy_date.getTime()
           )[0];
           setCurrentVigency(
-            currentVigency?.validy_date ?? new Date(1, 1, 2023)
+            currentVigency?.validy_date ?? new Date(1, 1, 2000)
           );
         }
         router.refresh();
@@ -137,9 +137,9 @@ export default function AddPlanPricesComponent({
   const [pricesToDelete, setPricesToDelete] = useState<string[]>([]);
   // Add logging to check for re-renders
 
-  const [trues, setTrues] = useState(true);
+  // const [trues, setTrues] = useState(true);
   useEffect(() => {
-    if (initialPrices && trues) {
+    if (edit && initialPrices) {
       form.reset({ prices: initialPrices });
       const givenDate = initialPrices[0]?.validy_date;
       if ((givenDate?.getTime() ?? 0) > new Date().getTime()) {
@@ -150,15 +150,17 @@ export default function AddPlanPricesComponent({
         }
         setAnio(initialPrices[0]?.validy_date.getFullYear() ?? null);
       }
-      setTrues(false);
     }
-  }, [initialPrices, working]);
+  }, [edit, initialPrices, form, working]);
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     try {
       setWorking(true);
       if (!mes && !edit) {
         toast.error("ingrese el mes correspondiente");
+        setWorking(false);
+      } else if (data.prices.length < 1) {
+        toast.error("ingrese al menos un precio");
         setWorking(false);
       } else {
         let allowed = true;
@@ -310,7 +312,7 @@ export default function AddPlanPricesComponent({
                 <Select
                   disabled={edit}
                   onValueChange={(e) => setMes(Number(e))}
-                  defaultValue={mes?.toString()}>
+                  defaultValue={mes?.toString() || "0"}>
                   <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none hover:bg-transparent">
                     <SelectValue placeholder="Seleccione un mes" />
                   </SelectTrigger>
@@ -550,6 +552,7 @@ export default function AddPlanPricesComponent({
                             className="w-full max-w-24 border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none
               hover:none justify-self-right pr-0 hover:bg-transparent"
                             type="number"
+                            min="0"
                             {...field}
                             value={field.value?.toString()}
                           />
@@ -568,15 +571,15 @@ export default function AddPlanPricesComponent({
                           id: "",
                           createdAt: new Date(),
                           validy_date: new Date(),
-                          from_age: null,
-                          to_age: null,
-                          condition: "",
-                          isAmountByAge: false,
+                          from_age: 0,
+                          to_age: 0,
+                          condition: "",              
+                          isAmountByAge: true,
                           plan_id: "",
                           amount: 0,
-                        })
+                       })
                       }>
-                      {isButtonDisabled ? (
+                      {isButtonDisabled || working ? (
                         <Loader2Icon
                           className="left-0 animate-spin"
                           size={20}
@@ -594,7 +597,7 @@ export default function AddPlanPricesComponent({
                       type="button"
                       className="relative top-3 hover:bg-transparent"
                       onClick={() => handleDelete(index)}>
-                      {isButtonDisabled ? (
+                      {isButtonDisabled || working ? (
                         <Loader2Icon
                           className="left-0 animate-spin"
                           size={20}

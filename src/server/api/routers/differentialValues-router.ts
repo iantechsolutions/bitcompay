@@ -14,6 +14,16 @@ export const differentialsValuesRouter = createTRPCRouter({
         });
       return differentialValue_found;
     }),
+
+  getByIntegranteId: protectedProcedure
+    .input(z.object({ integrantId: z.string() }))
+    .query(async ({ input }) => {
+      const differentialsValues = await db.query.differentialsValues.findFirst({
+        where: eq(schema.differentialsValues.integrant_id, input.integrantId),
+      });
+
+      return differentialsValues;
+    }),
   list: protectedProcedure.query(async () => {
     const differentialValues = await db.query.differentialsValues.findMany();
     return differentialValues;
@@ -24,7 +34,7 @@ export const differentialsValuesRouter = createTRPCRouter({
         differentialId: z.string(),
         amount: z.number(),
         integrant_id: z.string(),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       const newDifferentialValue = await db
@@ -43,13 +53,16 @@ export const differentialsValuesRouter = createTRPCRouter({
         differentialId: z.string(),
         amount: z.number(),
         integrant_id: z.string(),
-
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       const differentialValue_changed = await db
         .update(schema.differentialsValues)
-        .set({ differentialId: input.differentialId, amount: input.amount, integrant_id: input.integrant_id,        })
+        .set({
+          differentialId: input.differentialId,
+          amount: input.amount,
+          integrant_id: input.integrant_id,
+        })
         .where(eq(schema.differentialsValues.id, input.differentialValueId));
       return differentialValue_changed;
     }),

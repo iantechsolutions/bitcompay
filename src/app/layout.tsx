@@ -34,7 +34,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
   const pathName = headers().get("x-invoke-path") || "/";
   if (!session || pathName.includes("signin")) {
     return (
-      <ClerkProvider signInFallbackRedirectUrl={"/dashboard"}>
+      <ClerkProvider signInFallbackRedirectUrl={"/"}>
         <html lang="es">
           {/* biome-ignore lint/nursery/useSortedClasses: <explanation> */}
           <body
