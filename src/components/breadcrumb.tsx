@@ -42,7 +42,7 @@ export default function BreadcrumbComp() {
     information: "INFORMACIÓN",
     liquidation: "LIQUIDACIÓN",
     "pre-liquidation": "PRE-LIQUIDACIÓN",
-    manual_issuance: "GENERAR MANUAL",
+    manual_issuance: "GENERACION MANUAL",
 
     maintenance: "MANTENIMIENTO",
     roles: "ROLES",
