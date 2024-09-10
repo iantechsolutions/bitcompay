@@ -18,8 +18,6 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  TableHeader,
-  TableHead,
 } from "~/components/ui/tablePreliq";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
