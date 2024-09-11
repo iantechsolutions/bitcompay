@@ -1,23 +1,10 @@
 "use client";
 import React, { forwardRef, useImperativeHandle, useState } from "react";
-import { CalendarIcon, SlidersHorizontal } from "lucide-react";
-import { Search } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Button } from "../ui/button";
 import { Column, Table } from "@tanstack/react-table";
 import { useForm } from "react-hook-form";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "../ui/form";
-import { Input } from "../ui/input";
-import { Calendar } from "~/components/ui/calendar";
-import { cn } from "~/lib/utils";
-import dayjs from "dayjs";
+import { Form, FormControl, FormField, FormItem } from "../ui/form";
+
 import {
   Select,
   SelectTrigger,
@@ -26,7 +13,8 @@ import {
   SelectItem,
 } from "../ui/select";
 import { ChevronDown } from "lucide-react";
-
+import { api } from "~/trpc/react";
+import { RouterOutputs } from "~/trpc/shared";
 // Definimos el tipo para las props del componente
 interface FiltersProps<TData, TValue> {
   table: Table<TData>;
@@ -39,6 +27,15 @@ interface FiltersRef {
   clearFilters: () => void;
 }
 
+type responseMap =
+  | RouterOutputs["plans"]["list"]
+  | RouterOutputs["modos"]["list"]
+  | RouterOutputs["bussinessUnits"]["list"]
+  | RouterOutputs["brands"]["list"];
+function hasName(obj: any): obj is { name: string } {
+  return obj && typeof obj.name === "string";
+}
+
 const Filters = forwardRef<FiltersRef, FiltersProps<any, any>>(
   ({ table, columns, onClearFilters }, ref) => {
     const [showFilters, setShowFilters] = useState(false);
@@ -46,6 +43,13 @@ const Filters = forwardRef<FiltersRef, FiltersProps<any, any>>(
     const [filterValues, setFilterValues] = useState<
       Record<string, string | undefined>
     >({});
+    const apiFetchMap: Record<string, responseMap | undefined> = {
+      Plan: api.plans.list.useQuery().data,
+      modo: api.modos.list.useQuery().data,
+      Modalidad: api.modos.list.useQuery().data,
+      UN: api.bussinessUnits.list.useQuery().data,
+      Marca: api.brands.list.useQuery().data,
+    };
 
     // Exponemos clearFilters a través de la ref usando useImperativeHandle
     useImperativeHandle(ref, () => ({
@@ -133,26 +137,23 @@ const Filters = forwardRef<FiltersRef, FiltersProps<any, any>>(
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {Array.from(
-                                column.getFacetedUniqueValues().keys()
-                              )
-                                .filter((value) => value !== "")
-                                .map((value) => {
-                                  return (
-                                    <SelectItem
-                                      value={value}
-                                      className="text-sm"
-                                      key={value}
-                                      onClick={() => {
-                                        if (columnTable) {
-                                          columnTable?.setFilterValue(value);
-                                        }
-                                      }}
-                                    >
-                                      {value}
-                                    </SelectItem>
-                                  );
-                                })}
+                              {apiFetchMap[column.id]?.map((item) =>
+                                hasName(item) ? (
+                                  <SelectItem
+                                    key={item.id}
+                                    value={item?.name}
+                                  >
+                                    {item?.name}
+                                  </SelectItem>
+                                ) : (
+                                  <SelectItem
+                                    key={item.id}
+                                    value={item?.description}
+                                  >
+                                    {item?.description}
+                                  </SelectItem>
+                                )
+                              )}
                             </SelectContent>
                           </Select>
                         </FormItem>

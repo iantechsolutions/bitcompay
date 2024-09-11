@@ -923,7 +923,7 @@ export default function CompanySidenav() {
                 }
                 href={`/billing/manual_issuance`}
                 className="text-sideNav">
-                Generar manual
+                Generacion manual
               </SidenavItem>
             )}
             {canSeePreLiquidation && (

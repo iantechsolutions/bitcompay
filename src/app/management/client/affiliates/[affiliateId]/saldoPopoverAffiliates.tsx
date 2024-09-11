@@ -17,35 +17,20 @@ export function SaldoPopoverAffiliates(props: {
   const router = useRouter();
   return (
     <Popover>
-      <PopoverTrigger asChild>
-        <Button className="bg-[#F7F7F7] hover:bg-[#F7F7F7] text-[#3E3E3E] text-medium-medium rounded-full shadow-none border-none">
-          <Eye className="mr-2" /> Ver movimientos
+  <PopoverTrigger asChild className="w-60 whitespace-nowrap">
+    <div className="items-center justify-center whitespace-nowrap">
+      <div className="p-1 w-44 whitespace-nowrap">
+        <Button className="pr-10 pl-10 bg-[#F7F7F7] hover:bg-[#F7F7F7] text-[#3E3E3E] text-medium-medium rounded-full shadow-none border-none flex items-center gap-x-2">
+          <Link
+            href={`/management/client/affiliates/${props.healthInsuranceId}/cc/${props.ccId}`}
+            className="flex items-center"
+          >
+            <Eye className="mr-2" /> Ver movimientos
+          </Link>
         </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-60">
-        <div className="space-y-2">
-          <h4 className="font-medium leading-none pb-3">Opciones</h4>
-        </div>
-        <div className="items-center justify-center">
-          <div className=" p-1 w-44">
-            <Button className="bg-[#0DA485] hover:bg-[#0da486e2] text-[#FAFDFD] font-medium-medium text-xs rounded-2xl py-0 px-6">
-              <Link
-                href={`/management/client/affiliates/${props.healthInsuranceId}/cc/${props.ccId}`}
-              >
-                Consulta de movimientos
-              </Link>
-            </Button>
-          </div>
-          <div className=" p-1 w-44">
-            <Button
-              disabled={true}
-              className="pr-8 bg-[#0DA485] hover:bg-[#0da486e2] text-[#FAFDFD] font-medium-medium text-xs rounded-2xl py-0 px-6"
-            >
-              Simulación de Factura
-            </Button>
-          </div>
-        </div>
-      </PopoverContent>
-    </Popover>
+      </div>
+    </div>
+  </PopoverTrigger>
+</Popover>
   );
 }

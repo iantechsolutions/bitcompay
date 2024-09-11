@@ -5,11 +5,14 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import Filters from "./filters";
 import { Column } from "@tanstack/react-table";
+import { api } from "~/trpc/react";
+import { cn } from "~/lib/utils";
 
 interface DataTableToolbarProps<TData, TValue> {
   table: Table<TData>;
   searchColumn?: string;
   columns?: Column<TData, TValue>[];
+  containerClassName?: string;
 }
 
 // Definimos el tipo de ref que vamos a usar con Filters
@@ -21,6 +24,7 @@ export default function TableToolbar<TData, TValue>({
   table,
   columns,
   searchColumn,
+  containerClassName,
 }: DataTableToolbarProps<TData, TValue>) {
   const filtersRef = useRef<FiltersRef>(null); // Ref para el componente Filters
 
@@ -32,10 +36,10 @@ export default function TableToolbar<TData, TValue>({
     }
     table.resetColumnFilters(); // Reseteamos también los filtros de la tabla
   };
-
+ 
   return (
-    <div className="flex flex-row justify-between items-center w-full">
-      <div className="w-full max-w-sm flex items-center place-content-center py-4 relative">
+    <div className={cn('flex flex-row justify-between items-center w-full py-5', containerClassName)}>
+      <div className="w-full max-w-sm flex items-center place-content-center relative">
         {searchColumn !== undefined && table.getColumn(searchColumn ?? "") && (
           <>
             <Input

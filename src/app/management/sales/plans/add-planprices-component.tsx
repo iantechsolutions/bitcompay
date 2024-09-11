@@ -584,13 +584,13 @@ export default function AddPlanPricesComponent({
                           id: "",
                           createdAt: new Date(),
                           validy_date: new Date(),
-                          from_age: null,
-                          to_age: null,
-                          condition: "",
-                          isAmountByAge: false,
+                          from_age: 0,
+                          to_age: 0,
+                          condition: "",              
+                          isAmountByAge: true,
                           plan_id: "",
                           amount: 0,
-                        })
+                       })
                       }>
                       {isButtonDisabled || working ? (
                         <Loader2Icon
