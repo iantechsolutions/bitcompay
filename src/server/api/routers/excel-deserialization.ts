@@ -121,6 +121,7 @@ export const excelDeserializationRouter = createTRPCRouter({
                 receipt: " ",
                 state: "ACTIVO",
                 procedureId: procedure[0]?.id ?? "",
+                entry_date: new Date(),
               })
               .returning();
             familyGroupMap.set(row.holder_id_number, familygroup[0]!.id);

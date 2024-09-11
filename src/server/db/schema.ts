@@ -873,7 +873,7 @@ export const family_groups = pgTable("family_groups", {
     () => procedure.id
   ),
   state: varchar("state", { length: 255 }),
-  entry_date: timestamp("validity", { mode: "date" }),
+  entry_date: timestamp("entry_date", { mode: "date" }),
   payment_status: varchar("payment_status", { length: 255 }).default("pending"),
   numericalId: serial("autoincrementNumber"),
 });

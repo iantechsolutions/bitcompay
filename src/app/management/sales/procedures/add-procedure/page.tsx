@@ -85,7 +85,7 @@ export default function Page() {
         member.isHolder && new Date(member.birth_date) <= eighteenYearsAgo;
 
       return createIntegrant({
-        postal_codeId: "",
+        postal_codeId: member.postal_codeId,
         affiliate_type: member.affiliate_type,
         relationship: member.relationship,
         name: member.name,
@@ -131,6 +131,7 @@ export default function Page() {
         validity: valuesForm.validity,
         plan: valuesForm.plan,
         modo: valuesForm.mode,
+        entry_date: new Date(),
       });
       const family_groupId = result[0]!.id;
 
@@ -161,8 +162,7 @@ export default function Page() {
       <section className="space-y-2">
         <Link
           className="w-20 h-auto flex justify-between"
-          href={`/management/sales/procedures`}
-        >
+          href={`/management/sales/procedures`}>
           <ArrowLeftIcon /> Volver
         </Link>
         <div className="flex justify-between">

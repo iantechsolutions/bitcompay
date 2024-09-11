@@ -80,8 +80,9 @@ export default function AddProcedure() {
       const isAdultHolder =
         member.isHolder && new Date(member.birth_date) <= eighteenYearsAgo;
 
+      console.log(member.postal_codeId);
       return createIntegrant({
-        postal_codeId: "",
+        postal_codeId: member.postal_codeId,
         affiliate_type: member.affiliate_type,
         relationship: member.relationship,
         name: member.name,
@@ -127,6 +128,7 @@ export default function AddProcedure() {
         validity: valuesForm.validity,
         plan: valuesForm.plan,
         modo: valuesForm.mode,
+        entry_date: new Date(),
       });
       const family_groupId = result[0]!.id;
 
@@ -166,8 +168,7 @@ export default function AddProcedure() {
           </DialogHeader>
           <Tabs
             value={activeTab}
-            onValueChange={(value) => setActiveTab(value)}
-          >
+            onValueChange={(value) => setActiveTab(value)}>
             <TabsList>
               <TabsTrigger value="general_info">
                 Informacion General

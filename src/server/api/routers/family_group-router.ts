@@ -336,6 +336,7 @@ export const family_groupsRouter = createTRPCRouter({
         procedureId: z.string().optional(),
         state: z.string().optional(),
         payment_status: z.string().optional(),
+        entry_date: z.date(),
       })
     )
     .mutation(async ({ input }) => {

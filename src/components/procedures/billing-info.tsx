@@ -135,7 +135,7 @@ export default function BillingInfo({ data, form }: propsBillingInfo) {
 
   useEffect(() => {
     const validateApiResponse = async () => {
-      if (billingFormValues.card_number.length < 6) {
+      if (billingFormValues?.card_number.length < 6) {
         return;
       }
       try {
