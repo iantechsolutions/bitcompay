@@ -11,12 +11,15 @@ import {
   varchar,
   serial,
 } from "drizzle-orm/pg-core";
-import { columnId, createdAt, pgTable, updatedAt } from "./schema/util";
+import {
+  columnId,
+  createdAt,
+  pgTable,
+  updatedAt,
+} from "~/server/db/schema/util";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { literal, number, type z } from "zod";
 import { he } from "date-fns/locale";
-
-export { pgTable } from "./schema/util";
 
 export const documentUploads = pgTable(
   "document_upload",
@@ -106,6 +109,7 @@ export const payments = pgTable(
     fiscal_id_number: bigint("fiscal_id_number", { mode: "number" }),
     du_type: varchar("du_type", { length: 255 }),
     du_number: bigint("du_number", { mode: "number" }),
+    affiliate_number: varchar("affiliate_number", { length: 255 }),
     product: varchar("product", { length: 255 }),
     product_number: integer("product_number").references(() => products.number),
     //! Can be used as id
@@ -264,7 +268,8 @@ export const brands = pgTable(
     createdAt,
     updatedAt,
     logo_url: varchar("logo_url"),
-    prisma_code: varchar("prisma_code"),
+    prisma_code: varchar("prisma_code", { length: 4 }),
+    utility: varchar("utility", { length: 8 }),
     number: serial("number"),
   },
   (brands) => ({

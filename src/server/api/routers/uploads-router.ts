@@ -522,6 +522,7 @@ async function readResponseUploadContents(
   const fileContent = await response.text();
   const lines: string[] = fileContent.trim().split(/\r?\n/);
   // encabezado
+  console.log("bosta", fileContent);
   lines.shift();
   lines.pop();
 
@@ -538,18 +539,21 @@ async function readResponseUploadContents(
       const importe_final = recordValues[3];
       const payment_date = recordValues[2]?.slice(19, 27);
 
-      const invoice_number = largeNumber?.slice(16, 21);
+      const invoice_number = largeNumber?.slice(16, 21).replace(/^0+/, "");
       // const fiscal_id_number = largeNumber?.slice(84, 104);
       // const invoice_number = largeNumber?.slice(16, 21);
       // const importe_final = largeNumber?.slice(48, 58);
-      console.log(invoice_number!, "payments_date");
+      console.log(invoice_number!.replace(/^0+/, ""), "payments_date");
 
       const day = payment_date!.slice(0, 2);
-      const month = payment_date![2];
-      const year = payment_date!.slice(3);
+      const month = payment_date!.slice(2, 4);
+      const year = payment_date!.slice(4, 8);
 
-      const date = dayjs(`${day}${month}${year}`, "DDMMYY").format("DD-MM-YY");
-
+      console.log("testamento", payment_date, day, month, year);
+      const date = dayjs(`${year}${month}${day}`, "YYYYMMDD").format(
+        "YYYY-MM-DD"
+      );
+      console.log("mate", date);
       let status;
       if (parceImporte(importe_final!) > 0) {
         status = "00";
@@ -565,7 +569,10 @@ async function readResponseUploadContents(
         });
         if (original_transaction) {
           original_transaction.statusId = statusCodeMap.get(status) ?? "90";
-          original_transaction.payment_date = dayjs(date, "DD-MM-YY").toDate();
+          original_transaction.payment_date = dayjs(
+            date,
+            "YYYY-MM-DD"
+          ).toDate();
           original_transaction.collected_amount =
             original_transaction.first_due_amount! +
             original_transaction.second_due_amount!;
@@ -595,20 +602,23 @@ async function readResponseUploadContents(
       console.log("recordValues", recordValues);
 
       const largeNumber = recordValues[0];
-      const largeNumber2 = recordValues[2];
+      const largeNumber2 = recordValues[1];
 
-      const invoice_number = recordValues[1] ?? "33666";
-      const fiscal_id_number = largeNumber?.slice(1, 12);
-      const importe_final = largeNumber2?.slice(17, 28);
-
-      const payment_date = recordValues[2]!.slice(0, 8);
+      const invoice_number = largeNumber?.slice(35, 40).replace(/^0+/, "");
+      const importe_final = largeNumber?.slice(57, 68);
+      const fiscal_id_number = largeNumber?.slice(1, 18).replace(/^0+/, "");
+      const payment_date = largeNumber?.slice(49, 57);
       const year = payment_date!.slice(0, 4);
       const month = payment_date!.slice(4, 6);
-      const day = payment_date!.slice(6);
+      const day = payment_date!.slice(6, 8);
 
+      console.log("testamento", payment_date, year, month, day);
       console.log(importe_final, "testtt", invoice_number);
-      const date = dayjs(`${day}${month}${year}`, "DDMMYY").format("DD-MM-YY");
+      const date = dayjs(`${year}${month}${day}`, "YYYYMMDD").format(
+        "YYYY-MM-DD"
+      );
 
+      console.log(date, "boludon");
       let status;
       if (parceImporte(importe_final!) > 0) {
         status = "00";
@@ -626,7 +636,10 @@ async function readResponseUploadContents(
         if (original_transaction) {
           original_transaction.statusId = statusCodeMap.get(status) ?? "90";
 
-          original_transaction.payment_date = dayjs(date, "DD-MM-YY").toDate();
+          original_transaction.payment_date = dayjs(
+            date,
+            "YYYY-MM-DD"
+          ).toDate();
           original_transaction.collected_amount =
             original_transaction.first_due_amount! +
             original_transaction.second_due_amount!;
@@ -649,7 +662,7 @@ async function readResponseUploadContents(
       console.log("recordValues", recordValues);
 
       const fiscal_id_number = recordValues[0]?.slice(32, 42);
-      const invoice_number = recordValues[0]?.slice(42, 62);
+      const invoice_number = recordValues[0]?.slice(42, 62).replace(/^0+/, "");
       const payment_date = recordValues[0]?.slice(0, 8);
 
       const importe_final = recordValues[0]?.slice(9, 23);
@@ -658,9 +671,11 @@ async function readResponseUploadContents(
       const month = payment_date!.slice(4, 6);
       const day = payment_date!.slice(6);
 
-      const date = dayjs(`${day}${month}${year}`, "DDMMYY").format("DD-MM-YY");
+      const date = dayjs(`${year}${month}${day}`, "YYYYDDMM").format(
+        "YYYY-MM-DD"
+      );
 
-      console.log(payment_date?.slice(0, 4), "ES ESTAAA");
+      console.log(payment_date, "ES ESTAAA");
 
       let status;
       if (parceImporte(importe_final!) > 0) {
@@ -685,7 +700,10 @@ async function readResponseUploadContents(
         });
         if (original_transaction) {
           original_transaction.statusId = statusCodeMap.get(status) ?? "90";
-          original_transaction.payment_date = dayjs(date, "DD-MM-YY").toDate();
+          original_transaction.payment_date = dayjs(
+            date,
+            "YYYY-MM-DD"
+          ).toDate();
           original_transaction.collected_amount =
             original_transaction.first_due_amount! +
             original_transaction.second_due_amount!;
@@ -703,17 +721,101 @@ async function readResponseUploadContents(
       recordIndex++;
     }
   }
-  if (channelName === "DEBITO AUTOMATICO EN TARJETAS") {
+  if (channelName === "DEBITO AUTOMATICO") {
+    //Cómo leés los archivos de tarjetas de crédito
+    //(RDEBLIQC y RDEBLIMC):
+    // (RDEBLIQD y LDEBLIQD)
+    let importe_final;
+    let invoice_number;
+    let mensaje;
+    let payment_date;
+    let new_tarjeta;
+    let failed_error;
+    let news_type;
+    let affiliate_number;
+    let news_description;
+    let affiliate_name;
+    for (const line of lines) {
+      const recordValues = line.trim().split(/\s{2,}/);
+      console.log("recordValues2", recordValues);
+    }
+
     for (const line of lines) {
       const recordValues = line.trim().split(/\s{2,}/);
       console.log("recordValues", recordValues);
 
-      const invoice_number = recordValues[0]?.slice(45, 50);
-      const importe_final = recordValues[1];
-      const payment_date = recordValues[5]?.slice(16, 22);
+      //NOVEDADES DE de tarjetas de crédito!!!
+      if (fileContent.startsWith("0RNOVDEBC")) {
+        console.log("Golpes al ego");
+
+        news_type = recordValues[1]?.slice(0, 1);
+        affiliate_number = recordValues[1]?.slice(21, 36).replace(/^0+/, "");
+        affiliate_name = recordValues[1]?.slice(36);
+        if ((news_type = "1")) {
+          news_description = "Alta";
+        }
+        if ((news_type = "2")) {
+          news_description = "Baja";
+        }
+        if ((news_type = "3")) {
+          news_description = "Stop Debit";
+        }
+        //
+        console.log("affiliate_number: ", affiliate_number);
+        console.log("affiliate_name: ", affiliate_name);
+
+        console.log("Descripcion novedad: ", news_type);
+        console.log("Descripcion novedad: ", news_description);
+      } else if (
+        fileContent.startsWith(
+          "0RDEBLIQD" || "0RDEBLIMD" || "0LDEBLIQD" || "0LDEBLIMD"
+        )
+      ) {
+        //Cómo leés los archivos de tarjetas de crédito
+        //TARJETAS DE CREDITO
+        console.log("elemental");
+
+        invoice_number = recordValues[1]?.slice(0, 8).replace(/^0+/, "");
+        new_tarjeta = recordValues[0]?.slice(0, 16);
+
+        importe_final = recordValues[1]?.slice(20, 35);
+
+        failed_error = recordValues[2]?.slice(0, 3);
+        mensaje = recordValues[2]?.slice(3, 43);
+        payment_date = recordValues[1]?.slice(8, 16);
+
+        //Cómo leés los archivos de tarjetas de débito Visa:
+      } else if (fileContent.startsWith("0RDEBLIQC" || "0RDEBLIMC")) {
+        console.log("Eureka");
+
+        const recordValues = line.trim().split(/\s{2,}/);
+
+        importe_final = recordValues[1];
+        invoice_number = recordValues[0]?.slice(42, 50).replace(/^0+/, "");
+
+        mensaje = recordValues[3]?.slice(5, 35);
+
+        if (recordValues[5]) {
+          if (recordValues[5].length > 20) {
+            new_tarjeta = recordValues[5]?.slice(0, 16);
+            payment_date = recordValues[5]?.slice(22, 28);
+          } else {
+            payment_date = recordValues[5]?.slice(6, 12);
+          }
+        } else {
+          new_tarjeta = recordValues[0]?.slice(26, 42);
+          payment_date = recordValues[4]?.slice(6, 12);
+        }
+      }
+
       console.log(invoice_number, "largeNumber");
+      console.log(new_tarjeta, "tarjeta");
+      console.log(payment_date, "payment_date");
+      console.log(failed_error, "failed_error");
+
+      console.log("mensaje", mensaje);
       console.log(importe_final, "importe_final");
-      console.log(recordValues[4], "importe_final");
+      // console.log(recordValues[4], "importe_final");
 
       let estado;
 
@@ -728,32 +830,50 @@ async function readResponseUploadContents(
       }
       console.log(estado, "estado");
 
-      const day = payment_date!.slice(0, 2);
-      const month = payment_date![2];
-      const year = payment_date!.slice(3);
+      const day = payment_date?.slice(6, 8);
+      const month = payment_date?.slice(4, 6);
+      const year = payment_date?.slice(0, 4);
 
-      const date = dayjs(`${day}${month}${year}`, "DDMMYY").format("DD-MM-YY");
+      const date = dayjs(`${year}${month}${day}`, "YYYYMMDD").format(
+        "YYYY-MM-DD"
+      );
 
       console.log(dayjs(date!), "date");
-      if (invoice_number) {
-        const original_transaction = await db.query.payments.findFirst({
-          where: eq(
-            schema.payments.invoice_number,
-            Number.parseInt(invoice_number)
-          ),
-        });
+
+      try {
+        let original_transaction;
+
+        if (invoice_number) {
+          original_transaction = await db.query.payments.findFirst({
+            where: eq(
+              schema.payments.invoice_number,
+              Number.parseInt(invoice_number)
+            ),
+          });
+        } else if (affiliate_number) {
+          original_transaction = await db.query.payments.findFirst({
+            where: eq(schema.payments.affiliate_number, affiliate_number),
+          });
+        }
+
         if (original_transaction) {
           original_transaction.statusId = estado?.id ?? "";
-          original_transaction.payment_date = dayjs(date, "DD-MM-YY").toDate();
+          original_transaction.payment_date = dayjs(
+            date,
+            "YYYY-MM-DD"
+          ).toDate();
           original_transaction.collected_amount =
             original_transaction.first_due_amount! +
             original_transaction.second_due_amount!;
+          if (mensaje) {
+            original_transaction.additional_info = mensaje;
+          }
           original_transaction.recollected_amount = parceImporte(
             importe_final!
           );
           records.push(original_transaction);
         }
-      } else {
+      } catch {
         throw Error("cannot read invoice number");
       }
 
@@ -768,10 +888,10 @@ async function readResponseUploadContents(
         console.log("recordValues", recordValues);
         //trato el ultimo elemento que esta junto nro de factura y estado de pago
         const largeNumber = recordValues[2];
-        console.log(largeNumber);
+
         const status_code = largeNumber?.slice(37, 39);
         const importe = largeNumber?.slice(22, 39);
-        console.log("length", importe?.length);
+
         const importe_int = importe?.slice(0, importe.length - 2);
         const importe_dec = importe?.slice(importe.length - 2);
         const parte_entera = parseInt(importe_int!);
@@ -780,7 +900,7 @@ async function readResponseUploadContents(
         // extract invoice_number
         const stringInvoiceNumber =
           recordValues[recordValues.length - 1] ?? null;
-        console.log("stringInvoiceNumber", stringInvoiceNumber);
+
         if (!stringInvoiceNumber) {
           throw new Error("there is no invoice number");
         }

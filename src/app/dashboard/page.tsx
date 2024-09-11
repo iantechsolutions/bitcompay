@@ -4,8 +4,6 @@ import { EyeOff } from "lucide-react";
 import { Clock9 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Overview } from "~/components/dashboard/overview";
-import { RecentSales } from "~/components/dashboard/recent-sales";
 import { Title } from "~/components/title";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -18,6 +16,8 @@ import {
 } from "~/components/ui/select";
 import AccessDenied from "../accessdenied/page";
 import LayoutContainer from "~/components/layout-container";
+import { Overview } from "~/components/dashboard/overview";
+import { RecentSales } from "~/components/dashboard/recent-sales";
 export default async function page() {
   const { has } = auth();
   const canAccessDashboard = has!({ permission: "org:general:dashboard" });

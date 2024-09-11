@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import React from "react";
+import { string } from "zod";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -11,6 +12,7 @@ import {
   BreadcrumbSeparator,
 } from "~/components/ui/breadcrumb";
 import { clientStatuses } from "~/server/db/schema";
+import { api } from "~/trpc/react";
 
 export default function BreadcrumbComp() {
   const pathname = usePathname();
@@ -40,7 +42,7 @@ export default function BreadcrumbComp() {
     information: "INFORMACIÓN",
     liquidation: "LIQUIDACIÓN",
     "pre-liquidation": "PRE-LIQUIDACIÓN",
-    manual_issuance: "GENERAR MANUAL",
+    manual_issuance: "GENERACION MANUAL",
 
     maintenance: "MANTENIMIENTO",
     roles: "ROLES",
@@ -50,6 +52,7 @@ export default function BreadcrumbComp() {
     management: "GESTIÓN",
     client: "CLIENTES",
     affiliates: "AFILIADOS",
+    cc:"CUENTA CORRIENTE",
     health_insurances: "OBRAS SOCIALES",
     documents: "DOCUMENTOS",
     "masive-upload": "CARGA MASIVA",
@@ -75,17 +78,32 @@ export default function BreadcrumbComp() {
     current_count: "CUENTA CORRIENTE",
     payments: "PAGOS",
   };
-
+  let planDescription : string |null= null
+  let indicePlanId : number |null= null;
+  if(pathnames.includes("plans")){
+    const indicePlans= pathnames.indexOf("plans")
+    indicePlanId= indicePlans+1
+    const planId= pathnames[indicePlanId]
+    if (planId){
+      //fetchear data from api
+      const {data: plan} = api.plans.get.useQuery({planId: planId!})
+      planDescription= plan?.description || null
+    }
+  }
   return (
     <Breadcrumb>
       <BreadcrumbList>
         {pathnames.map((value, index) => {
-          const translatedValue = breadcrumbMapping[value] || null;
+          let translatedValue : string | null = null
+          translatedValue = breadcrumbMapping[value] || null;
+          if(index== indicePlanId){
+            translatedValue= planDescription || null
+          }
           // const href = `/${pathnames.slice(1, index + 1).join("/")}`;
           let isLast = false;
           if (index === pathnames.length - 1) {
             isLast = true;
-          } else if (!((pathnames[index + 1] ?? "") in breadcrumbMapping)) {
+          } else if (!((pathnames[index + 1] ?? "") in breadcrumbMapping) &&  !((index +1) == indicePlanId)) {
             isLast = true;
           }
 
@@ -93,13 +111,6 @@ export default function BreadcrumbComp() {
             <React.Fragment key={translatedValue}>
               <BreadcrumbItem>
                 <BreadcrumbPage>{translatedValue}</BreadcrumbPage>
-                {/* {isLast ? (
-                  <BreadcrumbPage>{translatedValue}</BreadcrumbPage>
-                ) : (
-                  <BreadcrumbLink href={href}>
-                    {translatedValue}
-                  </BreadcrumbLink>
-                )} */}
               </BreadcrumbItem>
               {!isLast && <BreadcrumbSeparator />}
             </React.Fragment>

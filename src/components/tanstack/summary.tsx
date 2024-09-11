@@ -36,8 +36,6 @@ export default function DataTableSummary<TData>({
     summary[key as keyof typeof summary] = parseFloat(summary[key as keyof typeof summary].toFixed(2));
   });
   return (
-    <div className="flex">
-
     <ScrollArea  className="w-full border rounded-lg">
       <div className="flex flex-auto flex-row justify-center pt-5 px-2 pb-0 w-max">
        {Object.entries(summary).map(([key, value], index, array) => (
@@ -56,6 +54,6 @@ export default function DataTableSummary<TData>({
       </div>
     <ScrollBar orientation="horizontal"/>
     </ScrollArea>
-    </div>
+    
   );
 }

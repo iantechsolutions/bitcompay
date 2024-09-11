@@ -12,7 +12,7 @@ export const differentialsRouter = createTRPCRouter({
     .input(
       z.object({
         differentialId: z.string(),
-      }),
+      })
     )
     .query(async ({ input }) => {
       const differential = await db.query.differentials.findFirst({
@@ -27,7 +27,7 @@ export const differentialsRouter = createTRPCRouter({
       z.object({
         codigo: z.string(),
         descripcion: z.string(),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       const newDifferential = await db
@@ -42,7 +42,7 @@ export const differentialsRouter = createTRPCRouter({
         id: z.string(),
         codigo: z.string(),
         descripcion: z.string(),
-      }),
+      })
     )
     .mutation(async ({ input: { id, ...input } }) => {
       const updatedDifferential = await db
@@ -57,7 +57,7 @@ export const differentialsRouter = createTRPCRouter({
     .input(
       z.object({
         differentialId: z.string(),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       await db
