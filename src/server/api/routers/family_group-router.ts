@@ -70,55 +70,54 @@ export const family_groupsRouter = createTRPCRouter({
     return family_group_reduced;
   }),
 
-
   NAmountWithIntegransPlanAndModo: protectedProcedure
-  .input(
-    z.object({
-      skipAmount: z.number(),
-      takeAmount: z.number(),
-    })
-  )
-  .mutation(async ({ ctx, input }) => {
+    .input(
+      z.object({
+        skipAmount: z.number(),
+        takeAmount: z.number(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const validBusinessUnits = await db.query.bussinessUnits.findMany({
+        where: eq(schema.bussinessUnits.companyId, ctx.session.orgId ?? ""),
+      });
 
+      if (validBusinessUnits.length == 0) return [];
+      const family_groups = await db.query.family_groups.findMany({
+        with: {
+          modo: true,
+          plan: true,
+          integrants: {
+            with: {
+              postal_code: true,
+            },
+          },
+          businessUnitData: {
+            with: {
+              brand: true,
+            },
+          },
+        },
+        where: inArray(
+          schema.family_groups.businessUnit,
+          validBusinessUnits.map((x) => x.id)
+        ),
+        limit: input.takeAmount,
+        offset: input.skipAmount,
+      });
+
+      // console.log("orgId", ctx.session.orgId);
+      // const family_group_reduced = family_groups.filter((family_groups) => {
+      //   return family_groups.businessUnitData?.companyId === ctx.session.orgId!;
+      // });
+      return family_groups;
+    }),
+  GetLength: protectedProcedure.query(async ({ ctx, input }) => {
     const validBusinessUnits = await db.query.bussinessUnits.findMany({
-      where:eq(schema.bussinessUnits.companyId, (ctx.session.orgId ?? ""))
-    })
-
-    if(validBusinessUnits.length==0) return [];
-    const family_groups = await db.query.family_groups.findMany({
-      with: {
-        modo: true,
-        plan: true,
-        integrants: {
-          with: {
-            postal_code: true,
-          },
-        },
-        businessUnitData: {
-          with: {
-            brand: true,
-          },
-        },
-      },
-      where: inArray(schema.family_groups.businessUnit, validBusinessUnits.map(x=>x.id)),
-      limit: input.takeAmount,
-      offset: input.skipAmount
+      where: eq(schema.bussinessUnits.companyId, ctx.session.orgId ?? ""),
     });
 
-    // console.log("orgId", ctx.session.orgId);
-    // const family_group_reduced = family_groups.filter((family_groups) => {
-    //   return family_groups.businessUnitData?.companyId === ctx.session.orgId!;
-    // });
-    return family_groups;
-  }),
-  GetLength: protectedProcedure
-  .query(async ({ ctx, input }) => {
-
-    const validBusinessUnits = await db.query.bussinessUnits.findMany({
-      where:eq(schema.bussinessUnits.companyId, (ctx.session.orgId ?? ""))
-    })
-
-    if(validBusinessUnits.length==0) return 0;
+    if (validBusinessUnits.length == 0) return 0;
     const family_groups = await db.query.family_groups.findMany({
       with: {
         modo: true,
@@ -134,7 +133,10 @@ export const family_groupsRouter = createTRPCRouter({
           },
         },
       },
-      where: inArray(schema.family_groups.businessUnit, validBusinessUnits.map(x=>x.id)),
+      where: inArray(
+        schema.family_groups.businessUnit,
+        validBusinessUnits.map((x) => x.id)
+      ),
     });
 
     // console.log("orgId", ctx.session.orgId);
@@ -214,7 +216,7 @@ export const family_groupsRouter = createTRPCRouter({
         with: {
           plan: true,
           modo: true,
-          integrants: true,
+          integrants: { with: { differentialsValues: true } },
           cc: true,
           businessUnitData: true,
           comprobantes: {

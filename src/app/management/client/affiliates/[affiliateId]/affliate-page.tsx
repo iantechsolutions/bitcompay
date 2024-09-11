@@ -19,6 +19,11 @@ import {
 import ActiveBadge from "~/components/active-badge";
 import { Card } from "~/components/ui/card";
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 import { getDifferentialAmount, getGroupContribution } from "~/lib/utils";
 import { RouterOutputs } from "~/trpc/shared";
@@ -87,7 +92,9 @@ export default function AffiliatePage(props: {
     Estado: grupo?.state,
     "Fecha estado": "",
     "Motivo baja": "",
-    "Fecha alta": dayjs(grupo?.validity).format("YYYY-MM-DD"),
+    "Fecha alta": grupo?.validity
+      ? dayjs.utc(grupo?.entry_date).startOf("day").format("YYYY-MM-DD")
+      : "-",
     "Usuario alta": "",
     Vendedor: "",
     Supervisor: "",
@@ -100,8 +107,12 @@ export default function AffiliatePage(props: {
   const integrantsPlanData = new Map<string, Record<string, string>>();
   const additionalData = {
     PROMOCIÓN: bonusValido?.amount + " %" ?? "-",
-    DESDE: dayjs(bonusValido?.from).format("YYYY-MM-DD") ?? "-",
-    HASTA: dayjs(bonusValido?.to).format("YYYY-MM-DD") ?? "-",
+    DESDE: bonusValido?.from
+      ? dayjs(bonusValido?.from).startOf("day").format("YYYY-MM-DD")
+      : "-",
+    HASTA: bonusValido?.to
+      ? dayjs(bonusValido?.to).startOf("day").format("YYYY-MM-DD")
+      : "-",
     APORTES: grupo ? getGroupContribution(grupo) : "-",
     ORIGEN: "",
     "FECHA APORTES": "-",
@@ -284,8 +295,7 @@ export default function AffiliatePage(props: {
           <Accordion
             className="w-full"
             defaultValue={["item-1", "item-2", "item-3"]}
-            type="multiple"
-          >
+            type="multiple">
             <AccordionItem value="item-1">
               <AccordionTrigger>Datos del grupo familiar</AccordionTrigger>
               <AccordionContent className="pt-6 pl-5">
@@ -303,13 +313,11 @@ export default function AffiliatePage(props: {
               <AccordionContent className="pt-6 pl-5">
                 <AccordionIntegrant
                   type="multiple"
-                  className="rounded-md overflow-hidden"
-                >
+                  className="rounded-md overflow-hidden">
                   {integrant?.map((int) => (
                     <AccordionItemIntegrant value={int.id}>
                       <AccordionTriggerIntegrant
-                        relationship={int?.relationship}
-                      >
+                        relationship={int?.relationship}>
                         {int.name}
                       </AccordionTriggerIntegrant>
                       <AccordionContentIntegrant>

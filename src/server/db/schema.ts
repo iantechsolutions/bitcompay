@@ -873,6 +873,7 @@ export const family_groups = pgTable("family_groups", {
     () => procedure.id
   ),
   state: varchar("state", { length: 255 }),
+  entry_date: timestamp("validity", { mode: "date" }),
   payment_status: varchar("payment_status", { length: 255 }).default("pending"),
   numericalId: serial("autoincrementNumber"),
 });
@@ -1233,6 +1234,7 @@ export const events = pgTable("events", {
   description: varchar("description", { length: 255 }).notNull(),
   type: varchar("type", { enum: ["NC", "FC", "REC"] }), //alta = rec
   currentAccount_id: varchar("currentAccount_id", { length: 255 }),
+  comprobante_id: varchar("comprobante_id", { length: 255 }),
   event_amount: real("event_amount").notNull(),
   current_amount: real("current_amout").notNull(), // saldo post transaccion
   createdAt,
@@ -1242,6 +1244,10 @@ export const eventsRelations = relations(events, ({ one }) => ({
   currentAccount: one(currentAccount, {
     fields: [events.currentAccount_id],
     references: [currentAccount.id],
+  }),
+  comprobantes: one(comprobantes, {
+    fields: [events.comprobante_id],
+    references: [comprobantes.id],
   }),
 }));
 

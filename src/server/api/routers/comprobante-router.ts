@@ -402,6 +402,7 @@ async function approbatecomprobante(liquidationId: string) {
             const event = await db.insert(schema.events).values({
               currentAccount_id: cc?.id,
               event_amount: comprobante.importe,
+              comprobante_id: comprobante.id,
               current_amount: lastEvent.current_amount + comprobante.importe,
               description: "Nota de credito comprobante anterior",
               type: "NC",
@@ -410,6 +411,7 @@ async function approbatecomprobante(liquidationId: string) {
           if (comprobante.origin === "Factura") {
             const event = await db.insert(schema.events).values({
               currentAccount_id: cc?.id,
+              comprobante_id: comprobante.id,
               event_amount: comprobante.importe * -1,
               current_amount: lastEvent.current_amount - comprobante.importe,
               description: "Factura aprobadas",
@@ -419,6 +421,7 @@ async function approbatecomprobante(liquidationId: string) {
         } else {
           const event = await db.insert(schema.events).values({
             currentAccount_id: cc?.id,
+            comprobante_id: comprobante.id,
             event_amount: comprobante.importe * -1,
             current_amount: 0 - comprobante.importe,
             description: "Factura aprobada",

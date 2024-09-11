@@ -46,6 +46,7 @@ export const eventsRouter = createTRPCRouter({
         family_group_id: z.string(),
         type: z.string(),
         amount: z.number(),
+        comprobante_id: z.string(),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -76,6 +77,7 @@ export const eventsRouter = createTRPCRouter({
             .values({
               description: "Recaudacion",
               currentAccount_id: cc?.id,
+              comprobante_id: input.comprobante_id,
               type: input.type,
               event_amount: input.amount,
               current_amount: (lastEvent?.current_amount ?? 0) + input.amount,
@@ -88,6 +90,7 @@ export const eventsRouter = createTRPCRouter({
             .values({
               description: "Comprobante Creado",
               currentAccount_id: cc?.id,
+              comprobante_id: input.comprobante_id,
               type: input.type,
               event_amount: input.amount * -1,
               current_amount: (lastEvent?.current_amount ?? 0) - input.amount,
@@ -100,6 +103,7 @@ export const eventsRouter = createTRPCRouter({
             .values({
               description: "Nota de credito",
               currentAccount_id: cc?.id,
+              comprobante_id: input.comprobante_id,
               type: input.type,
               event_amount: input.amount,
               current_amount: (lastEvent?.current_amount ?? 0) + input.amount,
@@ -117,6 +121,7 @@ export const eventsRouter = createTRPCRouter({
       z.object({
         type: z.string(),
         amount: z.number(),
+        comprobante_id: z.string(),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -127,6 +132,7 @@ export const eventsRouter = createTRPCRouter({
         orderBy: [desc(schema.events.createdAt)],
         where: eq(schema.events.currentAccount_id, cc?.id ?? ""),
       });
+      console.log("looool test", input.comprobante_id);
       let new_event;
       switch (input.type) {
         case "REC":
@@ -135,6 +141,7 @@ export const eventsRouter = createTRPCRouter({
             .values({
               description: "Recaudacion",
               currentAccount_id: cc?.id,
+              comprobante_id: input.comprobante_id,
               type: input.type,
               event_amount: input.amount,
               current_amount: (lastEvent?.current_amount ?? 0) + input.amount,
@@ -146,6 +153,7 @@ export const eventsRouter = createTRPCRouter({
             .insert(schema.events)
             .values({
               description: "Comprobante Creado",
+              comprobante_id: input.comprobante_id,
               currentAccount_id: cc?.id,
               type: input.type,
               event_amount: input.amount,
@@ -158,6 +166,7 @@ export const eventsRouter = createTRPCRouter({
             .insert(schema.events)
             .values({
               description: "Nota de credito",
+              comprobante_id: input.comprobante_id,
               currentAccount_id: cc?.id,
               type: input.type,
               event_amount: input.amount * -1,

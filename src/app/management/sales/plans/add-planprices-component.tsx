@@ -67,7 +67,17 @@ export default function AddPlanPricesComponent({
   date,
 }: AddPlanDialogProps) {
   const [anio, setAnio] = useState<number | null>(date?.getFullYear() ?? 2024);
-  const [mes, setMes] = useState<number | null>(date ? date.getMonth() + 1 : 1);
+  let number = 2;
+  if (edit) {
+    number = 1;
+  }
+  const [mes, setMes] = useState<number | null>(
+    date ? date.getMonth() + number : 1
+  );
+
+  const [formData, setFormData] = useState<FormValues>({
+    prices: initialPrices || [],
+  });
 
   const router = useRouter();
   const [working, setWorking] = useState(false);
@@ -103,6 +113,7 @@ export default function AddPlanPricesComponent({
             currentVigency?.validy_date ?? new Date(1, 1, 2000)
           );
         }
+
         router.refresh();
       },
     }
@@ -140,7 +151,9 @@ export default function AddPlanPricesComponent({
   // const [trues, setTrues] = useState(true);
   useEffect(() => {
     if (edit && initialPrices) {
+      setFormData({ prices: initialPrices });
       form.reset({ prices: initialPrices });
+
       const givenDate = initialPrices[0]?.validy_date;
       if ((givenDate?.getTime() ?? 0) > new Date().getTime()) {
         if (initialPrices[0]?.validy_date.getMonth()) {

@@ -21,7 +21,7 @@ export default function AddPlanPage(props: {
         setHasQueried(true);
       },
     }
-  );
+  ); 
   useEffect(() => {
     setPriceList(
       planData?.pricesPerCondition.filter(
