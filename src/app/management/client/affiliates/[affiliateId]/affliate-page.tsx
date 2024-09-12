@@ -92,7 +92,7 @@ export default function AffiliatePage(props: {
     Estado: grupo?.state,
     "Fecha estado": "",
     "Motivo baja": "",
-    "Fecha alta": grupo?.validity
+    "Fecha alta": grupo?.entry_date
       ? dayjs.utc(grupo?.entry_date).startOf("day").format("YYYY-MM-DD")
       : "-",
     "Usuario alta": "",
@@ -101,6 +101,8 @@ export default function AffiliatePage(props: {
     Gerencia: "",
   };
 
+  console.log("bonusValido?.from", bonusValido?.from);
+
   const integrantsPersonalData = new Map<string, Record<string, string>>();
   const integrantsFiscalData = new Map<string, Record<string, string>>();
   const integrantsContactData = new Map<string, Record<string, string>>();
@@ -108,10 +110,10 @@ export default function AffiliatePage(props: {
   const additionalData = {
     PROMOCIÓN: bonusValido?.amount + " %" ?? "-",
     DESDE: bonusValido?.from
-      ? dayjs(bonusValido?.from).startOf("day").format("YYYY-MM-DD")
+      ? dayjs(bonusValido?.from).utc().format("YYYY-MM-DD")
       : "-",
     HASTA: bonusValido?.to
-      ? dayjs(bonusValido?.to).startOf("day").format("YYYY-MM-DD")
+      ? dayjs(bonusValido?.to).utc().format("YYYY-MM-DD")
       : "-",
     APORTES: grupo ? getGroupContribution(grupo) : "-",
     ORIGEN: "",
