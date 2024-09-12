@@ -48,6 +48,7 @@ export type InputsBilling = {
   cbu: string;
   card_brand: string;
   card_type: string;
+  sale_condition: string;
 };
 type propsBillingInfo = {
   data: InputsMembers[];

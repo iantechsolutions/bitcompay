@@ -146,6 +146,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     phone: string | null;
     cellphone: string | null;
     email: string | null;
+    sale_condition: string | null;
     isAffiliated: boolean | null;
     isHolder: boolean | null;
     isPaymentHolder: boolean | null;
@@ -208,6 +209,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
       TELEFONO?: string | number | null | undefined;
       CELULAR?: string | number | null | undefined;
       EMAIL?: string | null | undefined;
+      "CONDICION DE VENTA": string | null | undefined;
       "ES AFILIADO"?: string | boolean | null | undefined;
       "ES TITULAR"?: string | boolean | null | undefined;
       "ES TITULAR DEL PAGO"?: string | boolean | null | undefined;
@@ -345,6 +347,7 @@ export const recDocumentValidator = z
       .nullable()
       .optional(),
     "ES AFILIADO": stringAsBoolean.nullable().optional(),
+    "CONDICION DE VENTA": z.string().min(0).max(140).nullable().optional(),
     "ES TITULAR": stringAsBoolean.nullable().optional(),
     "ES TITULAR DEL PAGO": stringAsBoolean.nullable().optional(),
     "ES RESP PAGADOR": stringAsBoolean.nullable().optional(),
@@ -401,6 +404,7 @@ export const recDocumentValidator = z
       floor: value.PISO ?? null,
       apartment: value.DEPTO ?? null,
       "postal code": value.CP ?? null,
+      sale_condition: value["CONDICION DE VENTA"] ?? null,
       phone: value.TELEFONO ?? null,
       cellphone: value.CELULAR ?? null,
       email: value.EMAIL ?? null,
@@ -469,6 +473,7 @@ export const recHeaders: TableHeaders = [
   { key: "is_new", label: "ALTA NUEVA", width: 140 },
   { key: "card_type", label: "TIPO DE TARJETA", width: 140 },
   { key: "card_number", label: "Nro. TARJETA", width: 140 },
+  { key: "sale_condition", label: "CONDICION DE VENTA", width: 140 },
 ];
 
 export const requiredColumns = [
@@ -497,6 +502,7 @@ export const requiredColumns = [
   // { key: "cellphone", label: "CELULAR" },
   { key: "plan", label: "PLAN" },
   { key: "product", label: "PRODUCTO" },
+  { key: "sale_condition", label: "CONDICION DE VENTA" },
 ];
 
 export const columnLabelByKey = Object.fromEntries(
