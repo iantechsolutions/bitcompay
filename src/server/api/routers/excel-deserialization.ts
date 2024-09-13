@@ -323,7 +323,8 @@ export const excelDeserializationRouter = createTRPCRouter({
             console.log("row");
             console.log(row.differential_value);
             console.log(precioIntegrante);
-            const precioDiferencial = parseFloat(row.differential_value ?? "0");
+            const precioDiferencial =
+              parseFloat(row.differential_value ?? "0") / precioIntegrante;
             // precioIntegrante;
             console.log("precioDiferencial", precioDiferencial);
             const differentialValue = await db
