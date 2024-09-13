@@ -86,7 +86,9 @@ export default function AffiliatePage(props: {
     "Unidad de negocio": grupo?.businessUnitData?.description,
     Modalidad: grupo?.modo?.description,
     Plan: grupo?.plan?.description,
-    Vigencia: grupo?.validity ? dayjs(grupo?.validity).format("DD-MM-YYYY") : "-",
+    Vigencia: grupo?.validity
+      ? dayjs(grupo?.validity).format("DD-MM-YYYY")
+      : "-",
     "O.S Asignada": "",
     "O.S Origen": "",
     Zona: "",
@@ -107,12 +109,12 @@ export default function AffiliatePage(props: {
   const integrantsContactData = new Map<string, Record<string, string>>();
   const integrantsPlanData = new Map<string, Record<string, string>>();
   const additionalData = {
-    PROMOCIÓN: bonusValido? bonusValido?.amount + " %"  : "-",
+    PROMOCIÓN: bonusValido ? bonusValido?.amount + " %" : "-",
     DESDE: bonusValido?.from
-      ? dayjs(bonusValido?.from).startOf("day").format("DD-MM-YYYY")
+      ? dayjs(bonusValido?.from).utc().format("DD-MM-YYYY")
       : "-",
     HASTA: bonusValido?.to
-      ? dayjs(bonusValido?.to).startOf("day").format("DD-MM-YYYY")
+      ? dayjs(bonusValido?.to).utc().format("DD-MM-YYYY")
       : "-",
     APORTES: grupo ? getGroupContribution(grupo) : "-",
     ORIGEN: "",
@@ -296,7 +298,8 @@ export default function AffiliatePage(props: {
           <Accordion
             className="w-full"
             defaultValue={["item-1", "item-2", "item-3"]}
-            type="multiple">
+            type="multiple"
+          >
             <AccordionItem value="item-1">
               <AccordionTrigger>Datos del grupo familiar</AccordionTrigger>
               <AccordionContent className="pt-6 pl-5">
@@ -314,13 +317,14 @@ export default function AffiliatePage(props: {
               <AccordionContent className="pt-6 pl-5">
                 <AccordionIntegrant
                   type="multiple"
-                  className="rounded-md overflow-hidden">
+                  className="rounded-md overflow-hidden"
+                >
                   {integrant?.map((int) => (
                     <AccordionItemIntegrant value={int.id}>
                       <AccordionTriggerIntegrant
                         relationship={int?.relationship}
-                        affiliate= {int}
-                        >
+                        affiliate={int}
+                      >
                         {int.name}
                       </AccordionTriggerIntegrant>
                       <AccordionContentIntegrant>

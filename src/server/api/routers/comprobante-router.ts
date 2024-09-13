@@ -794,6 +794,13 @@ async function getDifferentialAmount(grupo: grupoCompleto, fechaPreliq: Date) {
       const differentialIntegrante =
         differential.amount * (precioIntegrante ?? 0);
       importe += differentialIntegrante;
+      console.log(
+        "differentialIntegrante",
+        differentialIntegrante,
+        importe,
+        differential.amount,
+        precioIntegrante
+      );
     });
   });
   return importe;
@@ -905,6 +912,21 @@ export const comprobantesRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const grupos = await getGruposForLiquidation(input.brandId, input.date);
       return grupos;
+    }),
+  getComprobanteByEvent: protectedProcedure
+    .input(z.object({ eventId: z.string() }))
+    .query(async ({ input }) => {
+      const events = await db.query.events.findFirst({
+        where: eq(schema.events.id, input.eventId),
+        with: {
+          comprobantes: true,
+        },
+      });
+      if (!events?.comprobantes) {
+        return [];
+      } else {
+        return events?.comprobantes;
+      }
     }),
   getByLiquidation: protectedProcedure
     .input(z.object({ liquidationId: z.string() }))
@@ -1415,6 +1437,7 @@ export async function preparateComprobante(
       //   "Diferencial",
       //   differential_amount
       // );
+      console.log(ivaFloat, comprobante[0]?.importe ?? "", "Total factura");
       createcomprobanteItem(
         ivaFloat,
         comprobante[0]?.id ?? "",
@@ -1469,7 +1492,17 @@ async function calculateAmount(
   if (modo?.description == "PRIVADO") {
     contribution = 0;
   }
-
+  console.log(
+    "calculo de abono",
+    abono,
+    bonificacion,
+    diferencial,
+    previous_bill,
+    saldo,
+    iva,
+    ivaCodigo,
+    contribution
+  );
   const precioNuevo = abono - bonificacion + diferencial;
   if (saldo > 0) {
     amount = (previous_bill + interest + precioNuevo) * iva - contribution;

@@ -337,6 +337,7 @@ export const family_groupsRouter = createTRPCRouter({
         state: z.string().optional(),
         payment_status: z.string().optional(),
         entry_date: z.date(),
+        sale_condition: z.string().optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -362,6 +363,7 @@ export const family_groupsRouter = createTRPCRouter({
         procedureId: z.string().nullable().optional(),
         state: z.string().nullable().optional(),
         payment_status: z.string().nullable().optional(),
+        sale_condition: z.string().optional(),
       })
     )
     .mutation(async ({ input: { id, ...input } }) => {

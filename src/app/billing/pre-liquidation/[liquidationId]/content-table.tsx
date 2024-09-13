@@ -33,25 +33,26 @@ function ContentTable(props: propsContentTable) {
       {comprobante?.items
         .filter((item) => item.concept != "Total factura")
         .map((item) => {
-          const amount= item.amount ?? 0;
-          const iva= item.iva ?? 0;
-          const total= item.total ?? 0;
+          const amount = item.amount ?? 0;
+          const iva = item.iva ?? 0;
+          const total = item.total ?? 0;
           return (
             <TableRow key={item.id} className="border-b last:border-none">
-            <TableCell className="pl-4 ">
-              {item.concept}
-            </TableCell>
-            <TableCell className=" ">
-              ${amount <0 ? "$" : "-$"}{Math.abs(amount)}
-            </TableCell>
-            <TableCell className=" ">
-              ${iva < 0 ? "$" : "-$"}{Math.abs(iva)}
-            </TableCell>
-            <TableCell className=" ">
-            ${total <0 ? "$" : "-$"}{Math.abs(total)}
-            </TableCell>
-          </TableRow>
-          )
+              <TableCell className="pl-4 ">{item.concept}</TableCell>
+              <TableCell className=" ">
+                {amount < 0 ? "$" : "-$"}
+                {Math.abs(amount)}
+              </TableCell>
+              <TableCell className=" ">
+                {iva < 0 ? "$" : "-$"}
+                {Math.abs(iva)}
+              </TableCell>
+              <TableCell className=" ">
+                {total < 0 ? "$" : "-$"}
+                {Math.abs(total)}
+              </TableCell>
+            </TableRow>
+          );
         })}
     </Table>
   );

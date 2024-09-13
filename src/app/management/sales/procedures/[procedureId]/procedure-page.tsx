@@ -82,6 +82,7 @@ export default function ProcedurePage(props: ProcedurePageProps) {
         modo: generalInfoValues.mode,
         receipt: generalInfoValues.receipt,
         bonus: generalInfoValues.bonus,
+        sale_condition: billingInfoValues.sale_condition,
       });
 
       await updateProcedure({

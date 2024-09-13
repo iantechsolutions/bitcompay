@@ -10,8 +10,6 @@ export default async function Page(props: { params: { planId: string } }) {
   const plan = await api.plans.get.query({
     planId,
   });
-  console.log(plan);
-  console.log("planParseo");
   return (
     <div>
       <PlanPage plan={plan} />

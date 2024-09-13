@@ -132,6 +132,7 @@ export default function Page() {
         plan: valuesForm.plan,
         modo: valuesForm.mode,
         entry_date: new Date(),
+        sale_condition: "VENTA",
       });
       const family_groupId = result[0]!.id;
 

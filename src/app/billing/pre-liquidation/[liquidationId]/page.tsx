@@ -161,6 +161,7 @@ export default async function Home(props: {
     );
     summary["Aporte"] += Aporte;
     excelRow.push(Aporte);
+
     const interes = toNumberOrZero(
       original_comprobante?.items.find((item) => item.concept === "Interes")
         ?.amount
