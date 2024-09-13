@@ -63,6 +63,7 @@ export default function AffiliatePage(props: {
         new Date().getTime() >= bonus.from.getTime() &&
         new Date().getTime() <= bonus.to.getTime())
   );
+
   const billResponsible = grupo?.integrants.find((x) => x.isBillResponsible);
   const paymentResponsible = grupo?.integrants.find((x) => x.isPaymentHolder);
   let pa: RouterOutputs["pa"]["get"];
@@ -85,15 +86,15 @@ export default function AffiliatePage(props: {
     "Unidad de negocio": grupo?.businessUnitData?.description,
     Modalidad: grupo?.modo?.description,
     Plan: grupo?.plan?.description,
-    Vigencia: "",
+    Vigencia: grupo?.validity ? dayjs(grupo?.validity).format("DD-MM-YYYY") : "-",
     "O.S Asignada": "",
     "O.S Origen": "",
     Zona: "",
     Estado: grupo?.state,
     "Fecha estado": "",
     "Motivo baja": "",
-    "Fecha alta": grupo?.validity
-      ? dayjs.utc(grupo?.entry_date).startOf("day").format("YYYY-MM-DD")
+    "Fecha alta": grupo?.entry_date
+      ? dayjs.utc(grupo?.entry_date).startOf("day").format("DD-MM-YYYY")
       : "-",
     "Usuario alta": "",
     Vendedor: "",
@@ -106,12 +107,12 @@ export default function AffiliatePage(props: {
   const integrantsContactData = new Map<string, Record<string, string>>();
   const integrantsPlanData = new Map<string, Record<string, string>>();
   const additionalData = {
-    PROMOCIÓN: bonusValido?.amount + " %" ?? "-",
+    PROMOCIÓN: bonusValido? bonusValido?.amount + " %"  : "-",
     DESDE: bonusValido?.from
-      ? dayjs(bonusValido?.from).startOf("day").format("YYYY-MM-DD")
+      ? dayjs(bonusValido?.from).startOf("day").format("DD-MM-YYYY")
       : "-",
     HASTA: bonusValido?.to
-      ? dayjs(bonusValido?.to).startOf("day").format("YYYY-MM-DD")
+      ? dayjs(bonusValido?.to).startOf("day").format("DD-MM-YYYY")
       : "-",
     APORTES: grupo ? getGroupContribution(grupo) : "-",
     ORIGEN: "",
@@ -125,9 +126,9 @@ export default function AffiliatePage(props: {
       "TIPO DE DOCUMENTO": integrant.id_type ?? "-",
       "NUMERO DE DOCUMENTO": integrant.id_number ?? "-",
       "NRO. AFILIADO": integrant.affiliate_number ?? "-",
-      EXTENSION: integrant.extention ?? "-",
-      "NRO. CREDENCIAL": integrant.affiliate_number ?? "-",
-      "FECHA DE NAC": dayjs(integrant.birth_date).format("YYYY-MM-DD") ?? "-",
+      EXTENSION: integrant.extention ? integrant?.extention : "-",
+      "NRO. CREDENCIAL": `${integrant.affiliate_number}-${integrant.extention}`,
+      "FECHA DE NAC": dayjs(integrant.birth_date).format("DD-MM-YYYY") ?? "-",
       EDAD: integrant?.age?.toString() ?? "-",
       "GÉNERO:": integrant?.gender ?? "-",
       "ESTADO CIVIL:": integrant?.civil_status ?? "-",
@@ -317,7 +318,9 @@ export default function AffiliatePage(props: {
                   {integrant?.map((int) => (
                     <AccordionItemIntegrant value={int.id}>
                       <AccordionTriggerIntegrant
-                        relationship={int?.relationship}>
+                        relationship={int?.relationship}
+                        affiliate= {int}
+                        >
                         {int.name}
                       </AccordionTriggerIntegrant>
                       <AccordionContentIntegrant>

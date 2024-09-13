@@ -34,7 +34,10 @@ export const columns: ColumnDef<TableRecord>[] = [
             {" "}
             {dayjs(row.getValue("date")).format("D [de] MMMM ")}
           </p>
-          <p className="font-bold text-sm absolute top-1/2 transform -translate-y-1/2"> {row.getValue("description")} </p>
+          <p className="font-bold text-sm absolute top-1/2 transform -translate-y-1/2">
+            {" "}
+            {row.getValue("description")}{" "}
+          </p>
           <p className="text-[#c4c4c4] text-xs absolute top-1/2 transform translate-y-4">
             {" "}
             {row.getValue("comprobanteType")} - №{" "}
@@ -91,9 +94,10 @@ export const columns: ColumnDef<TableRecord>[] = [
     header: () => null,
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("amount"));
-      const formatted = new Intl.NumberFormat("en-US", {
+      const formatted = new Intl.NumberFormat("es-AR", {
         style: "currency",
-        currency: "USD",
+        currency: "ARS",
+        currencyDisplay: "narrowSymbol",
       }).format(amount);
       return (
         <div className="relative h-full flex flex-col justify-center items-center mx-10 mr-14">

@@ -40,7 +40,7 @@ import { api } from "~/trpc/react";
 import { ComboboxDemo } from "~/components/ui/combobox";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-
+import { asTRPCError } from "~/lib/errors";
 export default function AddPreLiquidation() {
   const [open, setOpen] = useState(false);
   const [fechaVencimiento1, setFechaVencimiento1] = useState<Date>();
@@ -64,36 +64,46 @@ export default function AddPreLiquidation() {
     api.comprobantes.createPreLiquidation.useMutation();
 
   async function handleCreate() {
-    if (!puntoVenta || !brandId || !fechaVencimiento2) {
-      toast.error("Ingrese los valores requeridos");
-    } else {
-      if (mes && anio && anio >= new Date().getFullYear()) {
-        const liquidation = await createLiquidation({
-          pv: puntoVenta,
-          brandId: brandId,
-          dateDesde: new Date(anio, mes - 1, 1),
-          dateHasta: new Date(anio, mes, 0),
-          dateDue: fechaVencimiento2,
-          interest: interest ?? 0,
-          logo_url: logo_url ?? undefined,
-        });
-        if ("error" in liquidation!) {
-          console.log("liquidation", liquidation);
-          toast.error(liquidation.error);
-        } else if (liquidation) {
-          queryClient.invalidateQueries();
-          toast.success("Pre-Liquidación creada correctamente");
-          setOpen(false);
-        } else {
-          toast.error("Error al crear la Pre-Liquidación");
+    try{
+      if (!puntoVenta || !brandId || !fechaVencimiento2) {
+        toast.error("Ingrese los valores requeridos");
+      } else {
+        if (mes && anio && anio >= new Date().getFullYear()) {
+          const liquidation = await createLiquidation({
+            pv: puntoVenta,
+            brandId: brandId,
+            dateDesde: new Date(anio, mes - 1, 1),
+            dateHasta: new Date(anio, mes, 0),
+            dateDue: fechaVencimiento2,
+            interest: interest ?? 0,
+            logo_url: logo_url ?? undefined,
+          });
+          if ("error" in liquidation!) {
+            console.log("liquidation", liquidation);
+            toast.error(liquidation.error);
+          } else if (liquidation) {
+            queryClient.invalidateQueries();
+            toast.success("Pre-Liquidación creada correctamente");
+            setOpen(false);
+          } else {
+            toast.error("Error al crear la Pre-Liquidación");
+          }
+        }
+        if (!mes) {
+          toast.error("Seleccione un mes");
+        } else if (!anio || anio < new Date().getFullYear()) {
+          toast.error("El año seleccionado no es válido");
         }
       }
-      if (!mes) {
-        toast.error("Seleccione un mes");
-      } else if (!anio || anio < new Date().getFullYear()) {
-        toast.error("El año seleccionado no es válido");
-      }
+      setOpen(false);
+      toast.success("Pre-Liquidación creada correctamente");
     }
+    catch(e){
+      console.log("error", e);
+      const error = asTRPCError(e)!;
+      toast.error(error.message);
+    }
+   
 
     //TODO CORREGIR ESTO
     // await new Promise((resolve) => setTimeout(resolve, 500));
