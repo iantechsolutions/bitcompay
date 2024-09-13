@@ -1,7 +1,7 @@
 "use client";
 
 import dayjs from "dayjs";
-import { FileSpreadsheetIcon } from "lucide-react";
+import { ChevronRight, FileSpreadsheetIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type React from "react";
 import { useState } from "react";
@@ -23,7 +23,7 @@ export type UploadedPageProps = {
 
 export default function ResponseUnconfirmedPage(props: UploadedPageProps) {
   const router = useRouter();
-
+  const channelName = props.channel.name;
   const { upload } = props;
   const { mutateAsync: deleteUpload } = api.uploads.delete.useMutation();
 
@@ -131,6 +131,9 @@ export default function ResponseUnconfirmedPage(props: UploadedPageProps) {
   return (
     <>
       <LayoutContainer>
+        <div className="flex items-center font-semibold text-sm opacity-80">
+          {channelName} <ChevronRight />{" "}
+        </div>
         <Title>Proceso de carga</Title>
 
         <Card className="flex items-center gap-3 p-3">

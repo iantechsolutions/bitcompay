@@ -906,6 +906,21 @@ export const comprobantesRouter = createTRPCRouter({
       const grupos = await getGruposForLiquidation(input.brandId, input.date);
       return grupos;
     }),
+  getComprobanteByEvent: protectedProcedure
+    .input(z.object({ eventId: z.string() }))
+    .query(async ({ input }) => {
+      const events = await db.query.events.findFirst({
+        where: eq(schema.events.id, input.eventId),
+        with: {
+          comprobantes: true,
+        },
+      });
+      if (!events?.comprobantes) {
+        return [];
+      } else {
+        return events?.comprobantes;
+      }
+    }),
   getByLiquidation: protectedProcedure
     .input(z.object({ liquidationId: z.string() }))
     .query(async ({ input }) => {

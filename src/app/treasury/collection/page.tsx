@@ -1,5 +1,6 @@
 import { api } from "~/trpc/server";
 import TransactionsPage from "./transactions-page";
+import LayoutContainer from "~/components/layout-container";
 
 export default async function Page() {
   try {
@@ -27,18 +28,21 @@ export default async function Page() {
     });
 
     return (
-      <div className="absolute bottom-0 left-0 right-0 top-0 h-[calc(100dvh_-_70px)]">
-        {transactionsTable && (
-          <TransactionsPage transactions={transactionsTable} />
-        )}
-      </div>
+      <LayoutContainer>
+        <section className="space-y-2">
+          <div className="flex justify-between">
+            {transactionsTable && (
+              <TransactionsPage transactions={transactionsTable} />
+            )}
+          </div>
+        </section>
+      </LayoutContainer>
     );
   } catch (error) {
     const transactions = await api.transactions.list.query();
     const statusIds = transactions.map((transaction) => transaction.statusId);
     console.log("statusIds", statusIds.length);
     console.log("transactions", transactions.length);
-    console.log("AAAAAAAAAAAAAAAAAAAAAAAA");
     console.error("Error loading transactions or statuses:", error);
     return <div>No se encontraron cobros</div>;
   }

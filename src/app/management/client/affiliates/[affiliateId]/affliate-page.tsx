@@ -101,8 +101,6 @@ export default function AffiliatePage(props: {
     Gerencia: "",
   };
 
-  console.log("bonusValido?.from", bonusValido?.from);
-
   const integrantsPersonalData = new Map<string, Record<string, string>>();
   const integrantsFiscalData = new Map<string, Record<string, string>>();
   const integrantsContactData = new Map<string, Record<string, string>>();

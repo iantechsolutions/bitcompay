@@ -127,6 +127,7 @@ export const excelDeserializationRouter = createTRPCRouter({
               .returning();
             familyGroupMap.set(row.holder_id_number, familygroup[0]!.id);
             familyGroupId = familygroup[0]?.id ?? "";
+
             const bonus = await db
               .insert(schema.bonuses)
               .values({
@@ -322,8 +323,8 @@ export const excelDeserializationRouter = createTRPCRouter({
             console.log("row");
             console.log(row.differential_value);
             console.log(precioIntegrante);
-            const precioDiferencial =
-              parseFloat(row.differential_value ?? "0") / precioIntegrante;
+            const precioDiferencial = parseFloat(row.differential_value ?? "0");
+            // precioIntegrante;
             console.log("precioDiferencial", precioDiferencial);
             const differentialValue = await db
               .insert(schema.differentialsValues)
@@ -552,7 +553,6 @@ async function readExcelFile(
     //     `UNIDAD DE NEGOCIO no pertenece a la organizacion (fila:${rowNum}) `
     //   );
     // }
-    console.log("testigo", row.own_id_type);
 
     if (
       row.differential_value &&

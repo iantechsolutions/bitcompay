@@ -120,16 +120,16 @@ export const iofilesRouter = createTRPCRouter({
           };
           text = generateRapiPago(generateInput, payments);
         } else if (channel.name.includes("DEBITO AUTOMATICO")) {
-          // if (
-          //   !input.card_brand ||
-          //   !input.card_type
-          //   //|| !input.presentation_date
-          // ) {
-          //   throw new TRPCError({
-          //     code: "BAD_REQUEST",
-          //     message: `card_brand, card_type and presentation_date are required for DEBITO AUTOMATICO`,
-          //   });
-          // }
+          if (
+            !input.card_brand ||
+            !input.card_type
+            //|| !input.presentation_date
+          ) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: `card_brand, card_type and presentation_date are required for DEBITO AUTOMATICO`,
+            });
+          }
           let card_brand = input.card_brand ?? "Visa";
 
           console.log("testttt", card_brand, brand.id);
@@ -139,13 +139,9 @@ export const iofilesRouter = createTRPCRouter({
               eq(schema.establishments.flag, card_brand ?? "")
             ),
           });
-          console.log("testttt", establishment);
 
           if (!establishment) {
-            throw new TRPCError({
-              code: "BAD_REQUEST",
-              message: `establishment not found`,
-            });
+            return null;
           }
           text = generateDebitoAutomatico({
             payments,

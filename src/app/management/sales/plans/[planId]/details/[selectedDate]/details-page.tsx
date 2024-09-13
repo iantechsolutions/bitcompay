@@ -113,7 +113,6 @@ export default function DetailsPage(props: {
       planId: plaId,
       createdAt: props.date,
     });
-  console.log(data);
 
   const router = useRouter();
   const [open, setOpen] = useState(false);
