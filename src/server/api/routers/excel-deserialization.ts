@@ -524,6 +524,17 @@ async function readExcelFile(
         );
       }
     }
+    const health_insurance = await db.query.healthInsurances.findFirst({
+      where: and(
+        eq(schema.healthInsurances.identificationNumber, row.os!),
+        eq(schema.healthInsurances.companyId, ctx.session.orgId!)
+      ),
+    });
+    if (!health_insurance) {
+      errors.push(
+        `OBRA SOCIAL no valida o no perteneciente a la organizacion en (fila:${rowNum})`
+      );
+    }
 
     const business_unit = await db.query.bussinessUnits.findFirst({
       where: and(
