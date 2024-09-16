@@ -161,6 +161,7 @@ export default async function Home(props: {
     );
     summary["Aporte"] += Aporte;
     excelRow.push(Aporte);
+
     const interes = toNumberOrZero(
       original_comprobante?.items.find((item) => item.concept === "Interes")
         ?.amount
@@ -293,7 +294,11 @@ export default async function Home(props: {
           <li>
             <span className="">INTERÉS (%)</span>
             <br />
-            <p className="font-medium">{preliquidation?.interest ?? "-"}</p>
+            <p className="font-medium">{new Intl.NumberFormat("es-AR",{
+              style: "percent",
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            }).format(preliquidation?.interest!/100)?? "-"}</p>
           </li>
         </ul>
       </div>

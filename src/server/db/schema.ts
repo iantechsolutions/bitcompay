@@ -153,6 +153,7 @@ export const payments = pgTable(
     invoiceNumberIdx: index("invoiceNumber_idx").on(payments.invoice_number),
   })
 );
+
 export const selectPaymentSchema = createSelectSchema(payments);
 export type Payment = z.infer<typeof selectPaymentSchema>;
 

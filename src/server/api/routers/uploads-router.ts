@@ -706,7 +706,7 @@ async function readResponseUploadContents(
           ).toDate();
           original_transaction.collected_amount =
             original_transaction.first_due_amount! +
-            original_transaction.second_due_amount!;
+            (original_transaction.second_due_amount ?? 0);
 
           original_transaction.recollected_amount = parceImporte(
             importe_final!
@@ -889,15 +889,27 @@ async function readResponseUploadContents(
         //trato el ultimo elemento que esta junto nro de factura y estado de pago
         const largeNumber = recordValues[2];
 
-        const status_code = largeNumber?.slice(37, 39);
+        const status_code = largeNumber?.slice(34, 36);
         const importe = largeNumber?.slice(22, 39);
+        const observacion = recordValues[5]?.slice(16, 56);
+        const code = obtenerDescripcionCodigo(status_code ?? "00");
+        const payment_date = recordValues[4];
+
+        console.log("codigo gogo", code, status_code, observacion);
+
+        const day = payment_date?.slice(6, 8);
+        const month = payment_date?.slice(4, 6);
+        const year = payment_date?.slice(0, 4);
+        const date = dayjs(`${year}${month}${day}`, "YYYYMMDD").format(
+          "YYYY-MM-DD"
+        );
 
         const importe_int = importe?.slice(0, importe.length - 2);
         const importe_dec = importe?.slice(importe.length - 2);
         const parte_entera = parseInt(importe_int!);
         const parte_dec = parseInt(importe_dec!);
         const importe_final = parte_entera + parte_dec / 100;
-        // extract invoice_number
+
         const stringInvoiceNumber =
           recordValues[recordValues.length - 1] ?? null;
 
@@ -907,6 +919,7 @@ async function readResponseUploadContents(
 
         const invoice_number = stringInvoiceNumber.slice(10, 15) ?? null;
         console.log("invoice_number", invoice_number);
+
         const errorStatus = await db.query.paymentStatus.findFirst({
           where: eq(schema.paymentStatus.code, "04"),
         });
@@ -919,8 +932,17 @@ async function readResponseUploadContents(
           });
           if (original_transaction) {
             original_transaction.statusId =
-              statusCodeMap.get(status_code) ?? errorStatus?.id;
+              statusCodeMap.get(code) ?? errorStatus?.id;
+
+            original_transaction.payment_date = dayjs(
+              date,
+              "YYYY-MM-DD"
+            ).toDate();
+            original_transaction.additional_info = observacion ?? "";
             original_transaction.recollected_amount = importe_final;
+            original_transaction.collected_amount =
+              original_transaction.first_due_amount! +
+              (original_transaction.second_due_amount ?? 0);
             console.log("statusCode", status_code);
             console.log("status", original_transaction.statusId);
             console.log("importeString", importe_int, importe_dec);
@@ -1253,4 +1275,53 @@ function parceImporte(number: string) {
   console.log("number, ", formattedNumber);
 
   return formattedNumber;
+}
+
+function obtenerDescripcionCodigo(codigo: string) {
+  switch (codigo) {
+    case "00":
+      return "CARGADO OK";
+    case "01":
+      return "CUENTA ERRÓNEA";
+    case "02":
+      return "CUENTA CANCELADA";
+    case "03":
+      return "SALDO INSUF.";
+    case "04":
+      return "STOP DEBIT";
+    case "05":
+      return "BAJA DEL SERVICIO";
+    case "06":
+      return "IMPEDIMENTOS CUEN.";
+    case "07":
+      return "SUCURSAL ERRÓNEA";
+    case "08":
+      return "REFERENCIA ERRÓNEA";
+    case "09":
+      return "ADHERENTE INEXISTENTE";
+    case "10":
+      return "OTROS RECHAZOS";
+    case "11":
+      return "FECHA INVÁLIDA O ERRÓNEA";
+    case "12":
+      return "MONEDA Y SERVICIO NO COINCIDEN";
+    case "13":
+      return "CUENTA INEXISTENTE";
+    case "15":
+      return "DIA NO LABORABLE";
+    case "16":
+      return "SOPORTE DADO DE BAJA";
+    case "17":
+      return "SERVICIO EN DÓLARES NO PERMITIDO";
+    case "18":
+      return "FECHA DE COMPENSACIÓN ERRÓNEA";
+    case "20":
+      return "RECHAZO DE SOPORTE A SOL CLI";
+    case "24":
+      return "TRANSACCIÓN DUPLICADA";
+    case "90":
+      return "REVERSO NO CORRESPON u OTRO RECHAZO";
+    default:
+      return "Código desconocido";
+  }
 }

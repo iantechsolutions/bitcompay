@@ -41,15 +41,15 @@ function ContentTable(props: propsContentTable) {
             <TableRow key={item.id} className="border-b last:border-none">
               <TableCell className="pl-4 ">{item.concept}</TableCell>
               <TableCell className=" ">
-                ${amount < 0 ? "$" : "-$"}
+                {amount < 0 ? "$" : "-$"}
                 {Math.abs(amount)}
               </TableCell>
               <TableCell className=" ">
-                ${iva < 0 ? "$" : "-$"}
+                {iva < 0 ? "$" : "-$"}
                 {Math.abs(iva)}
               </TableCell>
               <TableCell className=" ">
-                ${total < 0 ? "$" : "-$"}
+                {total < 0 ? "$" : "-$"}
                 {Math.abs(total)}
               </TableCell>
             </TableRow>

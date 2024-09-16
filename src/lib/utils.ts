@@ -107,9 +107,10 @@ export function htmlBill(
     const payment = comprobante.payments;
   }
   function formatNumberAsCurrency(amount: number): string {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("es-AR", {
       style: "currency",
-      currency: "USD",
+      currency: "ARS",
+      currencyDisplay: "narrowSymbol",
       minimumFractionDigits: 2,
     }).format(amount);
   }

@@ -42,12 +42,12 @@ const UserButtonAndMenu = ({
           />
           <div className="flex-1 flex flex-col justify-center">
             <div className="text-startP font-medium mb-[0.4vh] whitespace-nowrap">
+              {companyName ?? " "}
+            </div>
+            <div className="text-startP text-left color-[#b5b5b5] opacity-50">
               {user?.fullName
                 ? trimName(user.fullName)
                 : user?.primaryEmailAddress?.emailAddress!}
-            </div>
-            <div className="text-startP text-left color-[#b5b5b5] opacity-50">
-              {companyName ?? " "}
             </div>
           </div>
           <div className="ml-[2vw] border-none">

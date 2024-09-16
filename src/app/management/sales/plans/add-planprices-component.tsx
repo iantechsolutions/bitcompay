@@ -177,9 +177,7 @@ export default function AddPlanPricesComponent({
         setWorking(false);
       } else {
         let allowed = true;
-        console.log("start");
         data.prices.sort((a, b) => (a.from_age ?? 0) - (b.from_age ?? 0));
-        console.log("emnding");
 
         const validity_date = new Date(anio ?? 0, (mes ?? 1) - 1, 1);
         for (let i = 0; i < data.prices.length; i++) {
@@ -586,11 +584,11 @@ export default function AddPlanPricesComponent({
                           validy_date: new Date(),
                           from_age: 0,
                           to_age: 0,
-                          condition: "",              
+                          condition: "",
                           isAmountByAge: true,
                           plan_id: "",
                           amount: 0,
-                       })
+                        })
                       }>
                       {isButtonDisabled || working ? (
                         <Loader2Icon
