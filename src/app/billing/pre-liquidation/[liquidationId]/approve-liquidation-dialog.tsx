@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { currentUser } from "@clerk/nextjs/server";
-import { CircleCheck, CircleX } from "lucide-react";
+
 import {
   Dialog,
   DialogContent,
@@ -13,8 +13,9 @@ import {
 import { useRouter } from "next/navigation";
 import { Button, buttonVariants } from "~/components/ui/button";
 import { api } from "~/trpc/react";
-import { Loader2Icon } from "lucide-react";
+import { CircleCheck, CircleX, Loader2Icon } from "lucide-react";
 import CheckmarkCircle02Icon from "~/components/icons/checkmark-circle-02-stroke-rounded";
+import AlertDiamondIcon from "~/components/icons/alert-diamond-stroke-rounded";
 
 
 
@@ -51,31 +52,33 @@ function UpdateLiquidationEstadoDialog({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[425px] p-4">
           <DialogHeader>
-            <DialogTitle className="text-lg font-semibold">
-              ¿Está seguro?
+            <DialogTitle className="flex text-lg font-semibold gap-2">
+            <AlertDiamondIcon />
+             ¿Está seguro? 
             </DialogTitle>
-            <DialogDescription className="text-sm text-gray-600">
-              Los comprobantes van a ser enviadas a la AFIP, incluyendo todos
-              los detalles de los montos. Asegúrese de que toda la información
-              es correcta antes de proceder.
+            <DialogDescription className="text-sm text-gray-600 text-center p-2">
+              <p>Los comprobantes van a ser enviadas a la AFIP. </p>
+              <p>¿Desea continuar?</p>
             </DialogDescription>
           </DialogHeader>
           {/* Add more dialog content here as needed */}
           <DialogFooter>
         <Button
-          className="h-7 bg-[#D9D7D8] hover:bg-[#d9d7d8dc] text-[#4B4B4B]  text-xs rounded-2xl py-0 px-6"
+          className="font-medium-medium text-xs mb-2 rounded-full w-fit justify-items-end bg-[#dddddd] hover:bg-[#cccccc] text-[#3E3E3E]"
           onClick={() => setOpen(false)}>
-          Cancelar <CircleX className="h-4 w-auto ml-2" />
+          <CircleX className="mr-1 text-[#3E3E3E] font-thin h-4" />
+          Cancelar 
         </Button>
         <Button
-          className="h-7 bg-[#0DA485] hover:bg-[#0da486e2] text-[#FAFDFD] font-medium-medium text-xs rounded-2xl py-0 px-6"
+          className="font-medium-medium text-xs mb-2 rounded-full w-fit justify-items-end bg-[#BEF0BB] hover:bg-[#a6eca2] text-[#3E3E3E]"
           type="submit"
           disabled={isLoading}
           onClick={approveLiquidation}>
           {isLoading && (
-            <Loader2Icon className="mr-2 animate-spin" size={20} />
+            <Loader2Icon className="mr-2 animate-spin" size={16} />
           )}
-          Aprobar Liquidación <CircleCheck className="h-4 w-auto ml-2" />
+          <CircleCheck className=" mr-1 text-[#3E3E3E] font-thin h-4 " />
+          Aprobar preliquidación 
         </Button>
       </DialogFooter>
     </DialogContent>
