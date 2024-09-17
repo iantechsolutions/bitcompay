@@ -5,6 +5,14 @@ import { db, schema } from "~/server/db";
 import { api } from "~/trpc/server";
 import GenerateChannelOutputPage from "./generate-channel-output";
 import LayoutContainer from "~/components/layout-container";
+import { SelectDebitoAutomatico } from "./debitoautomaticoselect";
+// import { useState } from "react";
+
+type SelectData = {
+  cardType: string | null;
+  cardBrand: string | null;
+  presentationDate: Date | null;
+};
 export default async function page({
   params,
 }: {
@@ -17,6 +25,7 @@ export default async function page({
   if (!company) {
     return <Title>company not found</Title>;
   }
+  // const [selectedData, setSelectedData] = useState<SelectData>();
 
   const { brand, channel } = await getBrandAndChannel(db, {
     companyId: company.id,
@@ -29,7 +38,7 @@ export default async function page({
 
   // Pagos que no tienen archivo de salida que corresponden a la marca y los productos del canal
   const genFileStatus = await db.query.paymentStatus.findFirst({
-    where: eq(schema.paymentStatus.code, "92"),
+    where: eq(schema.paymentStatus.code, "91"),
   });
   const statusCancelado = await db.query.paymentStatus.findFirst({
     where: eq(schema.paymentStatus.code, "90"),
@@ -65,7 +74,20 @@ export default async function page({
   for (const transaction of payments.filter(
     (x) => x.statusId != statusCancelado?.id && x.statusId != statusEnviado?.id
   )) {
-    if (
+    if (channel.name.includes("DEBITO AUTOMATICO")) {
+      console.log("Entro como caballo");
+      if (
+        !transaction.genChannels.includes(channel.id) &&
+        transaction.g_c === brand.number
+        // &&
+        // transaction.card_brand === (selectedData?.cardBrand ?? "") &&
+        // transaction.card_type === (selectedData?.cardType ?? "")
+      ) {
+        status_batch[0]!.records += 1;
+        status_batch[0]!.amount_collected +=
+          transaction?.collected_amount ?? transaction?.first_due_amount ?? 0;
+      }
+    } else if (
       !transaction.genChannels.includes(channel.id) &&
       transaction.g_c === brand.number
     ) {
@@ -75,19 +97,27 @@ export default async function page({
     }
   }
 
+  // const handleDebitoAutomaticoData = (data: SelectData) => {
+  //   setSelectedData(data);
+  //   console.log("Datos seleccionados: ", data);
+  // };
+
+  if (!channel) {
+    return <Title>Channel not found</Title>;
+  }
   return (
     <LayoutContainer>
-      {channel ? (
-        <GenerateChannelOutputPage
-          channel={channel}
-          company={company}
-          brand={brand}
-          status_batch={status_batch}
-          outputFiles={outputFiles}
-        />
-      ) : (
-        <Title>Channel not found</Title>
-      )}
+      {/* {channel.name.includes("DEBITO AUTOMATICO") && (
+        <SelectDebitoAutomatico onSelectData={handleDebitoAutomaticoData} />
+      )} */}
+
+      <GenerateChannelOutputPage
+        channel={channel}
+        company={company}
+        brand={brand}
+        status_batch={status_batch}
+        outputFiles={outputFiles}
+      />
     </LayoutContainer>
   );
 }

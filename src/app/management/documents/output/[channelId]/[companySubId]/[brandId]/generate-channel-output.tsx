@@ -55,6 +55,7 @@ import {
 } from "~/components/ui/form";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
+import { channel } from "diagnostics_channel";
 dayjs.extend(utc);
 dayjs.locale("es");
 export default function GenerateChannelOutputPage(props: {
@@ -82,9 +83,9 @@ export default function GenerateChannelOutputPage(props: {
   const [disabled, setDisabled] = useState(false);
 
   const FileNameMap: Record<string, string> = {
-    "Visa Credito": "DEBLIQC ",
-    "Visa Debito": "DEBLIQD ",
-    "Mastercard Credito": "DEBLIMC ",
+    "visa credito": "DEBLIQC ",
+    "visa debito": "DEBLIQD ",
+    "mastercard credito": "DEBLIMC ",
   };
   let fileNameCard;
   const form = useForm();
@@ -111,15 +112,19 @@ export default function GenerateChannelOutputPage(props: {
         card_brand: cardBrand ?? null,
       });
 
-      if (!data) {
+      if (!data && props.channel.name === "DEBITO AUTOMATICO") {
         return toast.error(
           "No existe número de establecimiento válido para la marca"
         );
       }
+      if (!data && props.channel.name.includes("DEBITO DIRECTO CBU")) {
+        return toast.error("Error. Existen pagos sin un CBU asociado");
+      }
+      toast.success("Se ha generado el archivo");
       setError(null);
       setDisabled(true);
     } catch {
-      toast.error("No existe número de establecimiento válido para la marca");
+      toast.error("Error");
     }
   }
 
@@ -217,8 +222,8 @@ export default function GenerateChannelOutputPage(props: {
                           <SelectValue placeholder="Marca Tarjeta" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Visa">Visa</SelectItem>
-                          <SelectItem value="Mastercard">MasterCard</SelectItem>
+                          <SelectItem value="visa">Visa</SelectItem>
+                          <SelectItem value="mastercard">MasterCard</SelectItem>
                         </SelectContent>
                       </Select>
                       <Label htmlFor="card_type"> Tipo de Tarjeta</Label>
@@ -227,10 +232,10 @@ export default function GenerateChannelOutputPage(props: {
                           <SelectValue placeholder="Tipo tarjeta" />
                         </SelectTrigger>
                         <SelectContent>
-                          {cardBrand === "Visa" ? (
-                            <SelectItem value="Debito">Debito</SelectItem>
+                          {cardBrand === "visa" ? (
+                            <SelectItem value="debito">Debito</SelectItem>
                           ) : null}
-                          <SelectItem value="Credito">Credito</SelectItem>
+                          <SelectItem value="credito">Credito</SelectItem>
                         </SelectContent>
                       </Select>
 
