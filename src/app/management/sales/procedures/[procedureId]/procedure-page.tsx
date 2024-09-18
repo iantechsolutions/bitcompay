@@ -327,14 +327,14 @@ export default function ProcedurePage(props: ProcedurePageProps) {
               </Card>
             </AccordionContent>
           </AccordionItem>
-          <AccordionItem value="item-5" className="border-none">
+          {/* <AccordionItem value="item-5" className="border-none">
             <AccordionTrigger>
               <h2 className="text-md">Eliminar Marca</h2>
             </AccordionTrigger>
             <AccordionContent>
               <div className="flex justify-end"></div>
             </AccordionContent>
-          </AccordionItem>
+          </AccordionItem> */}
         </Accordion>
       </section>
     </LayoutContainer>
