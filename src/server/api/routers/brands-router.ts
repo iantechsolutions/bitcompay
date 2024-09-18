@@ -96,7 +96,8 @@ export const brandsRouter = createTRPCRouter({
       const newBrand = await db
         .insert(brands)
         .values({
-          ...input,prisma_code: input.code,
+          ...input,
+          prisma_code: input.code,
         })
         .returning();
       return newBrand;
@@ -111,6 +112,7 @@ export const brandsRouter = createTRPCRouter({
         reducedDescription: z.string().min(0).max(10).optional(),
         iva: z.string().optional(),
         billType: z.string().optional(),
+        code: z.string().optional(),
         companiesId: z.set(z.string()),
         concept: z.string().optional(),
         razon_social: z.string().optional(),
@@ -124,6 +126,7 @@ export const brandsRouter = createTRPCRouter({
           description: input.description,
           redescription: input.reducedDescription,
           iva: input.iva,
+          prisma_code: input.code,
           bill_type: input.billType,
           concept: input.concept,
           razon_social: input.razon_social,

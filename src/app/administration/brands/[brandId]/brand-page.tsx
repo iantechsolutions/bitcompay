@@ -55,13 +55,13 @@ export default function BrandPage({
   type Company = CompaniesResponse extends (infer T)[] ? T : never;
 
   const router = useRouter();
-  const [name, setName] = useState(brand.name);
-  const [concept, setConcept] = useState(brand.concept!);
-  const [code, setCode] = useState(brand.prisma_code!);
-  const [iva, setIva] = useState<string>(brand.iva!);
-  const [billType, setBillType] = useState<string>(brand.bill_type!);
+  const [name, setName] = useState(brand.name ?? "");
+  const [concept, setConcept] = useState(brand.concept ?? "");
+  const [code, setCode] = useState(brand.prisma_code ?? "");
+  const [iva, setIva] = useState<string>(brand.iva ?? "");
+  const [billType, setBillType] = useState<string>(brand.bill_type ?? "");
 
-  const [description, setDescription] = useState(brand.description);
+  const [description, setDescription] = useState(brand.description ?? "");
   const [reducedDescription, setReducedDescription] = useState(
     brand.redescription
   );
@@ -119,7 +119,6 @@ export default function BrandPage({
         (company) => company !== undefined
       );
       const companiesId = new Set(nonNullRelatedCompanies);
-
       await changeBrand({
         name,
         iva: iva.toString(),
@@ -127,10 +126,11 @@ export default function BrandPage({
         billType: billType,
         reducedDescription,
         companiesId,
+        code,
         brandId: brand.id,
         concept,
       });
-      toast.success("Se han guardado los cambios");
+      toast.success("Se han guardado los cambios los");
       router.refresh();
     } catch (e) {
       const error = asTRPCError(e)!;
@@ -207,8 +207,7 @@ export default function BrandPage({
                     <Label htmlFor="concept">Concepto</Label>
                     <Select
                       onValueChange={(e) => setConcept(e)}
-                      value={concept ?? ""}
-                    >
+                      value={concept ?? ""}>
                       <SelectTrigger className="w-[180px] font-bold">
                         <SelectValue placeholder="Seleccionar concepto..." />
                       </SelectTrigger>
@@ -374,8 +373,7 @@ function Deletebrand(props: { brandId: string }) {
           <AlertDialogAction
             className="bg-red-500 active:bg-red-700 hover:bg-red-600"
             onClick={handleDelete}
-            disabled={isLoading}
-          >
+            disabled={isLoading}>
             Eliminar
           </AlertDialogAction>
         </AlertDialogFooter>
