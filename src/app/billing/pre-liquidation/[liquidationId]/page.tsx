@@ -145,12 +145,10 @@ export default async function Home(props: {
     summary["Bonificación"] += bonificacion;
     excelRow.push(bonificacion);
 
-    const diferencial = fg.integrants.reduce((sum, integrant) => {
-      const differentialAmount = toNumberOrZero(
-        integrant.differentialsValues[0]?.amount
-      );
-      return sum + differentialAmount;
-    }, 0);
+    const diferencial = toNumberOrZero(
+      original_comprobante?.items.find((item) => item.concept === "Diferencial")
+        ?.amount
+    )
 
     summary["Diferencial"] += diferencial;
     excelRow.push(diferencial);
