@@ -96,7 +96,7 @@ export default function BrandPage({
     if (!reducedDescription) errors.push("Descripción Reducida");
     if (!concept) errors.push("Concepto");
     if (!iva) errors.push("IVA");
-    if (!code) errors.push("Código");
+    // if (!code) errors.push("Código");
     // if (!billType) errors.push("Tipo de Factura");
 
     return errors;
@@ -130,7 +130,7 @@ export default function BrandPage({
         brandId: brand.id,
         concept,
       });
-      toast.success("Se han guardado los cambios los");
+      toast.success("Se han guardado los cambios");
       router.refresh();
     } catch (e) {
       const error = asTRPCError(e)!;
