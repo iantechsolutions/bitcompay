@@ -14,6 +14,7 @@ export const liquidationsRouter = createTRPCRouter({
           comprobantes: {
             with: {
               items: true,
+              payments: true,
               family_group: {
                 with: {
                   integrants: {

@@ -30,7 +30,7 @@ export const columns: ColumnDef<TableRecord>[] = [
     accessorKey: "nroGF",
     header: () => (
       <div className="text-center whitespace-nowrap text-medium px-7">
-        N° GF
+        Nro
       </div>
     ),
     cell: ({ row }) => {
@@ -94,7 +94,7 @@ export const columns: ColumnDef<TableRecord>[] = [
         style: "currency",
         currency: "ARS",
         currencyDisplay: "narrowSymbol",
-      }).format(amount);
+      }).format(Math.abs(amount));
 
       return <div className="text-center  ">{formatted}</div>;
     },
@@ -166,7 +166,7 @@ export const columns: ColumnDef<TableRecord>[] = [
         style: "currency",
         currency: "ARS",
         currencyDisplay: "narrowSymbol",
-      }).format(amount);
+      }).format(Math.abs(amount));
 
       return <div className="text-center  ">{formatted}</div>;
     },
@@ -200,7 +200,7 @@ export const columns: ColumnDef<TableRecord>[] = [
         style: "currency",
         currency: "ARS",
         currencyDisplay: "narrowSymbol",
-      }).format(amount);
+      }).format(Math.abs(amount));
 
       return <div className="text-center  ">{formatted}</div>;
     },

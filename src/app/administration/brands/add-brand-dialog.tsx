@@ -115,8 +115,7 @@ export function AddBrandDialog() {
               <Label htmlFor="concept">Concepto</Label>
               <Select
                 onValueChange={(e) => setConcepto(e)}
-                value={concept ?? ""}
-              >
+                value={concept ?? ""}>
                 <SelectTrigger className="w-[180px] font-bold">
                   <SelectValue placeholder="Seleccionar concepto..." />
                 </SelectTrigger>

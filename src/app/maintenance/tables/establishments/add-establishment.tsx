@@ -49,8 +49,8 @@ export default function AddEstablishment(props: AddEstablishmentProps) {
     </SelectItem>
   ));
   const flags = [
-    { id: "1", name: "Visa" },
-    { id: "2", name: "MasterCard" },
+    { id: "1", name: "visa" },
+    { id: "2", name: "mastercard" },
   ];
 
   const selectFlagOptions = flags?.map((flag) => (
