@@ -4,13 +4,63 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 dayjs.extend(customParseFormat);
 import type { TableHeaders } from "~/components/table";
 import { Value } from "@radix-ui/react-select";
+
 const stringAsDate = z
   .union([z.string(), z.number()])
   .transform((value) => {
-    console.log(value);
-    const date = excelDateToJSDate({ exceldate: Number(value) });
-    console.log(date);
+    console.log("Original value:", value);
 
+    let date;
+
+    // Manejar el formato DD/MM/YYYY
+    if (typeof value === "string" && /\d{2}\/\d{2}\/\d{4}/.test(value)) {
+      date = dayjs(value, "DD/MM/YYYY").toDate();
+    }
+
+    // Manejar el formato de meses abreviados (e.g., "AGO.2024")
+    else if (
+      typeof value === "string" &&
+      /^[A-Z]{3}\.\d{4}$/.test(value.replace(/^x\s*/, ""))
+    ) {
+      const [monthStr, year] = value.split(".");
+      let mount = monthStr?.slice(2, 5) ?? "ENE";
+
+      console.log("Original value2:", "1", mount, "1", year, "1");
+
+      const monthMap: { [key: string]: number } = {
+        ENE: 0,
+        FEB: 1,
+        MAR: 2,
+        ABR: 3,
+        MAY: 4,
+        JUN: 5,
+        JUL: 6,
+        AGO: 7,
+        SEP: 8,
+        OCT: 9,
+        NOV: 10,
+        DIC: 11,
+      };
+
+      const month = monthMap[mount ?? "ENE"] ?? -1;
+      console.log("month:", month);
+      if (month !== -1) {
+        date = new Date(Number(year), month, 1);
+      } else {
+        throw new Error("Mes no reconocido");
+      }
+    }
+    console.log("month:", date);
+
+    if (!date && typeof value === "number") {
+      date = excelDateToJSDate({ exceldate: Number(value) });
+    }
+
+    if (!date || isNaN(date.getTime())) {
+      throw new Error("Formato de fecha no reconocido");
+    }
+
+    console.log("Converted date:", date);
     return date;
   })
   .refine(
@@ -161,6 +211,9 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     is_new: boolean | null;
     card_number: string | null;
     card_type: string | null;
+    import: string | null;
+    remuneration: string | null;
+    monotributo: string | null;
   }[] = [];
   let errors: z.ZodError<
     {
@@ -182,7 +235,15 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
       "NRO DOC PROPIO"?: string | number | null | undefined;
       PAR?: string | null | undefined;
       "FECHA NACIMIENTO"?: string | number | null | undefined;
-      GENERO?: "MASCULINO" | "FEMENINO" | "OTRO" | null | undefined;
+      GENERO?:
+        | "MASCULINO"
+        | "FEMENINO"
+        | "OTRO"
+        | "M"
+        | "F"
+        | "O"
+        | null
+        | undefined;
       "ESTADO CIVIL"?:
         | "CASADO"
         | "SOLTERO"
@@ -224,6 +285,9 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
       "ALTA NUEVA"?: string | boolean | null | undefined;
       "NRO. TARJETA"?: number | null | undefined;
       "TIPO DE TARJETA"?: string | null | undefined;
+      IMPORTE?: string | number | null | undefined;
+      REMUNERACION?: string | number | null | undefined;
+      MONOTRIBUTO?: string | number | null | undefined;
     }[]
   >[] = [];
   rows.map((row) => {
@@ -294,7 +358,13 @@ export const recDocumentValidator = z
       .optional(),
     "FECHA NACIMIENTO": stringAsDate.nullable().optional(),
     GENERO: z
-      .enum(["MASCULINO", "FEMENINO", "OTRO"])
+      .enum(["MASCULINO", "FEMENINO", "OTRO", "M", "F", "O"])
+      .transform((value) => {
+        if (value === "M") return "MASCULINO";
+        if (value === "F") return "FEMENINO";
+        if (value === "O") return "OTRO";
+        return value;
+      })
       .refine((value) => ["MASCULINO", "FEMENINO", "OTRO"].includes(value), {
         message: "El genero debe ser 'MASCULINO', 'FEMENINO' o 'OTRO'",
       })
@@ -370,6 +440,10 @@ export const recDocumentValidator = z
     "ALTA NUEVA": stringAsBoolean.nullable().optional(),
     "NRO. TARJETA": cardNumber.nullable().optional(),
     "TIPO DE TARJETA": z.string().nullable().optional(),
+    REMUNERACION: numberAsString.optional().nullable(),
+    MONOTRIBUTO: numberAsString.optional().nullable(),
+    OTROS: numberAsString.optional().nullable(),
+    IMPORTE: numberAsString.optional().nullable(),
   })
   .transform((value) => {
     // Translated to english
@@ -423,6 +497,10 @@ export const recDocumentValidator = z
       is_new: value["ALTA NUEVA"] ?? null,
       card_number: value["NRO. TARJETA"] ?? null,
       card_type: value["TIPO DE TARJETA"] ?? null,
+      remuneration: value["REMUNERACION"] ?? null,
+      monotributo: value["MONOTRIBUTO"] ?? null,
+      otros: value["OTROS"] ?? null,
+      import: value["IMPORTE"] ?? null,
     };
   });
 
@@ -474,6 +552,10 @@ export const recHeaders: TableHeaders = [
   { key: "card_type", label: "TIPO DE TARJETA", width: 140 },
   { key: "card_number", label: "Nro. TARJETA", width: 140 },
   { key: "sale_condition", label: "CONDICION DE VENTA", width: 140 },
+  { key: "remuneration", label: "REMUNERACION", width: 140 },
+  { key: "monotributo", label: "MONOTRIBUTO", width: 140 },
+  { key: "otros", label: "OTROS", width: 140 },
+  { key: "import", label: "IMPORTE", width: 140 },
 ];
 
 export const requiredColumns = [

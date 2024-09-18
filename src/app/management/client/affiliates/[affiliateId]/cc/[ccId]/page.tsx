@@ -53,7 +53,9 @@ export default function CCDetail(props: {
   return (
     <LayoutContainer>
       <Title>Movimientos cuenta corriente</Title>
-      <h2 className=" font-semibold mb-2">Grupo familiar N° XX</h2>
+      <h2 className=" font-semibold mb-2">
+        Grupo familiar N° {grupo.data?.numericalId}
+      </h2>
       <div className="flex gap-3 mt-5 mb-10">
         <Card className="py-4 px-6 w-1/4 grid grid-cols-2 items-center">
           <div className="flex flex-col">
@@ -79,8 +81,7 @@ export default function CCDetail(props: {
       <div className="flex flex-auto justify-end">
         <Button
           variant="bitcompay"
-          className=" text-base px-16 py-6 mt-5 gap-3 text-[#3e3e3e] rounded-full font-medium"
-        >
+          className=" text-base px-16 py-6 mt-5 gap-3 text-[#3e3e3e] rounded-full font-medium">
           <Download02Icon />
           Exportar
         </Button>

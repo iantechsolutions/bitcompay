@@ -50,7 +50,7 @@ export const iofilesRouter = createTRPCRouter({
         });
 
         const statusEnviado = await db.query.paymentStatus.findFirst({
-          where: eq(schema.paymentStatus.code, "00"),
+          where: eq(schema.paymentStatus.code, "92"),
         });
 
         const paymentsFull = await db.query.payments.findMany({
@@ -68,11 +68,11 @@ export const iofilesRouter = createTRPCRouter({
             p.statusId !== statusEnviado?.id
         );
 
+        let card_brand = input?.card_brand?.toLowerCase();
+        let card_type = input?.card_type?.toLowerCase();
         if (channel.name.includes("DEBITO AUTOMATICO")) {
           payments = payments.filter(
-            (p) =>
-              p.card_brand === input.card_brand &&
-              p.card_type === input.card_type
+            (p) => p.card_brand === card_brand && p.card_type === card_type
           );
         }
 
@@ -132,8 +132,8 @@ export const iofilesRouter = createTRPCRouter({
           text = generateRapiPago(generateInput, payments);
         } else if (channel.name.includes("DEBITO AUTOMATICO")) {
           if (
-            !input.card_brand ||
-            !input.card_type
+            !card_brand ||
+            !card_type
             //|| !input.presentation_date
           ) {
             throw new TRPCError({
@@ -141,8 +141,7 @@ export const iofilesRouter = createTRPCRouter({
               message: `card_brand, card_type and presentation_date are required for DEBITO AUTOMATICO`,
             });
           }
-          let card_brand = input.card_brand;
-          let card_type = input.card_type;
+
           console.log("testttt", card_brand, brand.id, card_type);
           const establishment = await db.query.establishments.findFirst({
             where: and(
@@ -158,8 +157,8 @@ export const iofilesRouter = createTRPCRouter({
           text = generateDebitoAutomatico({
             payments,
             EstablishmentNumber: establishment.establishment_number ?? 0,
-            cardType: input.card_type ?? "",
-            flag: input.card_brand ?? "",
+            cardType: card_type ?? "",
+            flag: card_brand ?? "",
             // presentationDate: input.presentation_date,
           });
         } else {
@@ -246,6 +245,7 @@ export const iofilesRouter = createTRPCRouter({
                   .update(schema.payments)
                   .set({
                     genChannels: newGenChannles,
+                    statusId: statusEnviado?.id,
                   })
                   .where(eq(schema.payments.id, payment.id));
                 console.log(
@@ -586,7 +586,7 @@ async function generatePagoFacil(
     const invoice_number = formatString(
       "0",
       transaction.invoice_number.toString(),
-      18,
+      21,
       false
     );
     const seq_number = `${dayjs(transaction.first_due_date).year()}01`;
@@ -861,7 +861,6 @@ function generateDebitoAutomatico(props: generateDAprops) {
     "mastercard credito": "DEBLIMC ",
   };
 
-  console.log("desquised", FileNameMap);
   let currentDate = dayjs().utc().tz("America/Argentina/Buenos_Aires");
   const currentHour = currentDate.hour();
   const currentMinutes = currentDate.minute();
