@@ -18,6 +18,7 @@ import { type TableRecord, columns } from "./columns";
 import DataTable from "./data-table";
 import { Card } from "~/components/ui/card";
 import Download02Icon from "~/components/icons/download-02-stroke-rounded";
+import { RouterOutputs } from "~/trpc/shared";
 
 export default function CCDetail(props: {
   params: { ccId: string; affiliateId: string };
@@ -67,8 +68,13 @@ export default function CCDetail(props: {
   }
 
   const afiliado = grupo.data?.integrants.find((x)=>x.isHolder);
-console.log("afiliado es ", afiliado)
-
+  const comprobantesTable :RouterOutputs["comprobantes"]["getByLiquidation"] = [];
+  if(comprobanteFCReciente){
+    comprobantesTable.push(comprobanteFCReciente);
+  }
+  if(comprobanteNCReciente){
+    comprobantesTable.push(comprobanteNCReciente);
+  }
   const tableRows: TableRecord[] = [];
   if (events) {
     for (const event of events) {
@@ -80,7 +86,7 @@ console.log("afiliado es ", afiliado)
         comprobanteNumber: "00001-00002546",
         status: "Pendiente",
         iva: 0.21,
-        comprobantes: comprobanteFCReciente ?? null,
+        comprobantes: comprobantesTable,
         currentAccountAmount: NCTotal ?? 0,
         saldo_a_pagar: saldo_a_pagar ?? 0,
         nombre: afiliado?.name ?? "",
