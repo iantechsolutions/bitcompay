@@ -73,6 +73,7 @@ export default function ModoPage(props: {
   const { mutateAsync: updateModo, isLoading } = api.modos.change.useMutation();
   const { mutateAsync: deleteModo, isLoading: isPending } =
     api.modos.delete.useMutation();
+  const [isDeleting, setIsDeleting] = useState(false); 
 
   const handleUpdate: SubmitHandler<Inputs> = async (data) => {
     try {
@@ -99,18 +100,18 @@ export default function ModoPage(props: {
 
   async function handleDelete() {
     try {
-      deleteModo({
+     await deleteModo({
         modosId: modoId,
       });
 
-      toast.success("El modo se ha eliminado correctamente");
-      router.refresh();
+      toast.success("El modo ha sido eliminado correctamente");
       router.push("/maintenance/tables/modos");
     } catch (e) {
       const error = asTRPCError(e)!;
       toast.error(error.message);
     }
-  }
+    router.refresh();
+  };
 
   return (
     <LayoutContainer>
@@ -152,8 +153,8 @@ export default function ModoPage(props: {
 
           <DialogFooter>
             <Button onClick={() => setOpenDelete(false)}>Cancelar</Button>
-            <Button disabled={isPending} onClick={handleDelete}>
-              {isPending && (
+            <Button disabled={isDeleting} onClick={handleDelete}>
+            {isDeleting && (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}
               Eliminar modo

@@ -18,11 +18,12 @@ import { type TableRecord, columns } from "./columns";
 import DataTable from "./data-table";
 import { Card } from "~/components/ui/card";
 import Download02Icon from "~/components/icons/download-02-stroke-rounded";
+
 export default function CCDetail(props: {
   params: { ccId: string; affiliateId: string };
 }) {
   const router = useRouter();
-  const events = api.events.getByCC.useQuery({ ccId: props.params.ccId });
+  const {data: events} = api.events.getByCC.useQuery({ ccId: props.params.ccId });
   const grupo = api.family_groups.get.useQuery({
     family_groupsId: props.params.affiliateId,
   });
@@ -36,9 +37,41 @@ export default function CCDetail(props: {
       : current;
   });
   const comprobantes = grupo.data?.comprobantes;
+
+  let comprobanteNCReciente = comprobantes?.find(
+    (comprobante) => comprobante.origin === "Nota de credito"
+  );
+  let comprobanteFCReciente = comprobantes?.find(
+    (comprobante) => comprobante.origin === "Factura"
+  );
+
+  let FCTotal = null;
+  let NCTotal = null;
+  if (comprobanteFCReciente) {
+    FCTotal = comprobanteFCReciente.items.find(
+      (item) => item.concept === "Total factura"
+    )?.total;
+  }
+  if (comprobanteNCReciente) {
+    NCTotal = comprobanteNCReciente.items.find(
+      (item) => item.concept === "Nota de credito"
+    )?.amount;
+  }
+
+  const total_a_pagar = comprobanteFCReciente?.items.find(
+    (item) => item.concept == "Total a pagar"
+  )?.total;
+  let saldo_a_pagar = FCTotal;
+  if (FCTotal && total_a_pagar) {
+    saldo_a_pagar = FCTotal - total_a_pagar;
+  }
+
+  const afiliado = grupo.data?.integrants.find((x)=>x.isHolder);
+console.log("afiliado es ", afiliado)
+
   const tableRows: TableRecord[] = [];
-  if (events.data) {
-    for (const event of events?.data) {
+  if (events) {
+    for (const event of events) {
       tableRows.push({
         date: event.createdAt,
         description: event.description,
@@ -47,6 +80,11 @@ export default function CCDetail(props: {
         comprobanteNumber: "00001-00002546",
         status: "Pendiente",
         iva: 0.21,
+        comprobantes: comprobanteFCReciente ?? null,
+        currentAccountAmount: NCTotal ?? 0,
+        saldo_a_pagar: saldo_a_pagar ?? 0,
+        nombre: afiliado?.name ?? "",
+        cuit: afiliado?.fiscal_id_number ?? "",
       });
     }
   }
