@@ -531,6 +531,28 @@ export const healthInsurances = pgTable("health_insurances", {
   postal_code: varchar("postal_code", { length: 255 }).references(
     () => postal_code.id
   ),
+  initials: varchar("initials", { length: 255 }),
+  businessUnit: varchar("businessUnit", { length: 255 }),
+  businessName: varchar("businessName", { length: 255 }),
+  fiscalAddress: varchar("fiscalAddress", { length: 255 }),
+  fiscalFloor: varchar("fiscalFloor", { length: 255 }),
+  fiscalOffice: varchar("fiscalOffice", { length: 255 }),
+  fiscalLocality: varchar("fiscalLocality", { length: 255 }),
+  fiscalProvince: varchar("fiscalProvince", { length: 255 }),
+  fiscalPostalCode: varchar("fiscalPostalCode", { length: 255 }),
+  fiscalCountry: varchar("fiscalCountry", { length: 255 }),
+  IIBBStatus: varchar("IIBBStatus", { length: 255 }),
+  IIBBNumber: varchar("IIBBNumber", { length: 255 }),
+  sellCondition: varchar("sellCondition", { length: 255 }),
+  phoneNumber: varchar("phoneNumber", { length: 255 }),
+  email: varchar("email", { length: 255 }),
+  state: varchar("state", { length: 255 }),
+  user: varchar("user", { length: 255 }),
+  cancelMotive: varchar("cancelMotive", { length: 255 }),
+  floor: varchar("floor", { length: 255 }),
+  office: varchar("office", { length: 255 }),
+  dateState: timestamp("dateState", { mode: "date" }),
+
 });
 
 export const healthInsurancesRelations = relations(

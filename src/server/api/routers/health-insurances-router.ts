@@ -40,6 +40,30 @@ export const healthInsurancesRouter = createTRPCRouter({
       });
       return healthInsurance_found;
     }),
+
+
+
+    // const [initials, setInitials] = useState(OS?.initials ?? "");
+//   const [businessUnit, setBusinessUnit] = useState(OS?.businessUnit ?? "");
+//   const [businessName, setBusinessName] = useState(OS?.businessName ?? "");
+//   const [fiscalAddress, setFiscalAddress] = useState(OS?.fiscalAddress ?? "");
+//   const [fiscalFloor, setFiscalFloor] = useState(OS?.fiscalFloor ?? "");
+//   const [fiscalOffice, setFiscalOffice] = useState(OS?.fiscalOffice ?? "");
+//   const [fiscalLocality, setFiscalLocality] = useState(OS?.fiscalLocality ?? "");
+//   const [fiscalProvince, setFiscalProvince] = useState(OS?.fiscalProvince ?? "");
+//   const [fiscalPostalCode, setFiscalPostalCode] = useState(OS?.fiscalPostalCode ?? "");
+//   const [fiscalCountry, setFiscalCountry] = useState(OS?.fiscalCountry ?? "");
+//   const [IIBBStatus, setIIBBStatus] = useState(OS?.IIBBStatus ?? "");
+//   const [IIBBNumber, setIIBBNumber] = useState(OS?.IIBBNumber ?? "");
+//   const [sellCondition, setSellCondition] = useState(OS?.sellCondition ?? "");
+//   const [phoneNumber, setPhoneNumber] = useState(OS?.phoneNumber ?? "");
+//   const [email, setEmail] = useState(OS?.email ?? "");
+//   const [state, setState] = useState(OS?.state ?? "");
+//   const [user, setUser] = useState(OS?.user ?? "");
+//   const [cancelMotive, setCancelMotive] = useState(OS?.cancelMotive ?? "");
+//   const [floor, setFloor] = useState(OS?.floor ?? "");
+//   const [office, setOffice] = useState(OS?.office ?? "");
+//   const [dateState, setDateState] = useState<Date | undefined>(OS?.dateState);
   list: protectedProcedure.query(async ({ input, ctx }) => {
     const companyId = ctx.session.orgId;
     const healthInsurances = await db.query.healthInsurances.findMany({
@@ -63,6 +87,27 @@ export const healthInsurancesRouter = createTRPCRouter({
         province: z.string().optional(),
         postal_code: z.string().optional(),
         initialValue: z.string().optional(),
+        initials: z.string().optional(),
+        businessUnit: z.string().optional(),
+        businessName: z.string().optional(),
+        fiscalAddress: z.string().optional(),
+        fiscalFloor: z.string().optional(),
+        fiscalOffice: z.string().optional(),
+        fiscalLocality: z.string().optional(),
+        fiscalProvince: z.string().optional(),
+        fiscalPostalCode: z.string().optional(),
+        fiscalCountry: z.string().optional(),
+        IIBBStatus: z.string().optional(),
+        IIBBNumber: z.string().optional(),
+        sellCondition: z.string().optional(),
+        phoneNumber: z.string().optional(),
+        email: z.string().optional(),
+        state: z.string().optional(),
+        user: z.string().optional(),
+        cancelMotive: z.string().optional(),
+        floor: z.string().optional(),
+        office: z.string().optional(),
+        dateState: z.date().optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -82,6 +127,27 @@ export const healthInsurancesRouter = createTRPCRouter({
           locality: input.locality,
           province: input.province,
           postal_code: input.postal_code,
+          initials: input.initials,
+          businessUnit: input.businessUnit,
+          businessName: input.businessName,
+          fiscalAddress: input.fiscalAddress,
+          fiscalFloor: input.fiscalFloor,
+          fiscalOffice: input.fiscalOffice,
+          fiscalLocality: input.fiscalLocality,
+          fiscalProvince: input.fiscalProvince,
+          fiscalPostalCode: input.fiscalPostalCode,
+          fiscalCountry: input.fiscalCountry,
+          IIBBStatus: input.IIBBStatus,
+          IIBBNumber: input.IIBBNumber,
+          sellCondition: input.sellCondition,
+          phoneNumber: input.phoneNumber,
+          email: input.email,
+          state: input.state,
+          user: input.user,
+          cancelMotive: input.cancelMotive,
+          floor: input.floor,
+          office: input.office,
+          dateState: input.dateState
         })
         .returning();
 
@@ -118,6 +184,27 @@ export const healthInsurancesRouter = createTRPCRouter({
         locality: z.string().optional(),
         province: z.string().optional(),
         postal_code: z.string().optional(),
+        initials: z.string().optional(),
+        businessUnit: z.string().optional(),
+        businessName: z.string().optional(),
+        fiscalAddress: z.string().optional(),
+        fiscalFloor: z.string().optional(),
+        fiscalOffice: z.string().optional(),
+        fiscalLocality: z.string().optional(),
+        fiscalProvince: z.string().optional(),
+        fiscalPostalCode: z.string().optional(),
+        fiscalCountry: z.string().optional(),
+        IIBBStatus: z.string().optional(),
+        IIBBNumber: z.string().optional(),
+        sellCondition: z.string().optional(),
+        phoneNumber: z.string().optional(),
+        email: z.string().optional(),
+        state: z.string().optional(),
+        user: z.string().optional(),
+        cancelMotive: z.string().optional(),
+        floor: z.string().optional(),
+        office: z.string().optional(),
+        dateState: z.date().optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -135,6 +222,27 @@ export const healthInsurancesRouter = createTRPCRouter({
           locality: input.locality,
           province: input.province,
           postal_code: input.postal_code,
+          initials: input.initials,
+          businessUnit: input.businessUnit,
+          businessName: input.businessName,
+          fiscalAddress: input.fiscalAddress,
+          fiscalFloor: input.fiscalFloor,
+          fiscalOffice: input.fiscalOffice,
+          fiscalLocality: input.fiscalLocality,
+          fiscalProvince: input.fiscalProvince,
+          fiscalPostalCode: input.fiscalPostalCode,
+          fiscalCountry: input.fiscalCountry,
+          IIBBStatus: input.IIBBStatus,
+          IIBBNumber: input.IIBBNumber,
+          sellCondition: input.sellCondition,
+          phoneNumber: input.phoneNumber,
+          email: input.email,
+          state: input.state,
+          user: input.user,
+          cancelMotive: input.cancelMotive,
+          floor: input.floor,
+          office: input.office,
+          dateState: input.dateState,
         })
         .where(eq(schema.healthInsurances.id, input.healthInsuranceId));
       return healthInsurance_changed;

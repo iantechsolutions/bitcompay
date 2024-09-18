@@ -26,6 +26,11 @@ import { api } from "~/trpc/react";
 import AddElementButton from "~/components/add-element";
 import { router } from "@trpc/server";
 import { RouterOutputs } from "~/trpc/shared";
+import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
+import { cn } from "~/lib/utils";
+import { format } from "date-fns";
+import Calendar01Icon from "~/components/icons/calendar-01-stroke-rounded";
+import { Calendar } from "~/components/ui/calendar";
 
 export function AddHealthInsurances(props: {
   healthInsurance: RouterOutputs["healthInsurances"]["get"] | null;
@@ -44,7 +49,7 @@ export function AddHealthInsurances(props: {
     api.currentAccount.createInitial.useMutation();
   const { data: company } = api.companies.get.useQuery();
   const { data: cps } = api.postal_code.list.useQuery();
-
+  const { data: businessUnits } = api.bussinessUnits.list.useQuery();
   // State management for the form fields
   const [name, setName] = useState(OS?.name ?? "");
   const [idNumber, setIdNumber] = useState(OS?.identificationNumber ?? "");
@@ -65,6 +70,29 @@ export function AddHealthInsurances(props: {
   const [province, setProvince] = useState(OS?.province ?? "");
   const [postalCode, setPostalCode] = useState(OS?.postal_code ?? "");
   const [initialValue, setInitialValue] = useState("0");
+  const [initials, setInitials] = useState(OS?.initials ?? "");
+  const [businessUnit, setBusinessUnit] = useState(OS?.businessUnit ?? "");
+  const [businessName, setBusinessName] = useState(OS?.businessName ?? "");
+  const [fiscalAddress, setFiscalAddress] = useState(OS?.fiscalAddress ?? "");
+  const [fiscalFloor, setFiscalFloor] = useState(OS?.fiscalFloor ?? "");
+  const [fiscalOffice, setFiscalOffice] = useState(OS?.fiscalOffice ?? "");
+  const [fiscalLocality, setFiscalLocality] = useState(OS?.fiscalLocality ?? "");
+  const [fiscalProvince, setFiscalProvince] = useState(OS?.fiscalProvince ?? "");
+  const [fiscalPostalCode, setFiscalPostalCode] = useState(OS?.fiscalPostalCode ?? "");
+  const [fiscalCountry, setFiscalCountry] = useState(OS?.fiscalCountry ?? "");
+  const [IIBBStatus, setIIBBStatus] = useState(OS?.IIBBStatus ?? "");
+  const [IIBBNumber, setIIBBNumber] = useState(OS?.IIBBNumber ?? "");
+  const [sellCondition, setSellCondition] = useState(OS?.sellCondition ?? "");
+  const [phoneNumber, setPhoneNumber] = useState(OS?.phoneNumber ?? "");
+  const [email, setEmail] = useState(OS?.email ?? "");
+  const [state, setState] = useState(OS?.state ?? "");
+  const [user, setUser] = useState(OS?.user ?? "");
+  const [cancelMotive, setCancelMotive] = useState(OS?.cancelMotive ?? "");
+  const [floor, setFloor] = useState(OS?.floor ?? "");
+  const [office, setOffice] = useState(OS?.office ?? "");
+  const [dateState, setDateState] = useState<Date | undefined>(OS?.dateState ?? undefined);
+  const [popoverEmisionOpen, setPopoverEmisionOpen] = useState(false);
+  
 
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -161,7 +189,7 @@ export function AddHealthInsurances(props: {
       </AddElementButton>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-[850px]">
+        <DialogContent className="max-w-[1000px]">
           <DialogHeader>
             {OS ? (
               <DialogTitle>Editar obra social</DialogTitle>
@@ -176,7 +204,7 @@ export function AddHealthInsurances(props: {
               </Label>
               <Input
                 id="IdNumber"
-                className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+                className="w-fit mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right"
                 placeholder="..."
                 value={idNumber}
@@ -189,12 +217,12 @@ export function AddHealthInsurances(props: {
               </Label>
               <Input
                 id="IdNumber"
-                className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+                className="w-fit mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right"
                 placeholder="..."
-                value={idNumber}
+                value={initials}
                 disabled={true}
-                onChange={(e) => setIdNumber(e.target.value)}
+                onChange={(e) => setInitials(e.target.value)}
               />
             </div>
             <div />
@@ -204,19 +232,22 @@ export function AddHealthInsurances(props: {
             <div>
               <Label className="text-xs">UNIDAD DE NEGOCIO</Label>
               <Select
-                onValueChange={setFiscalIdType}
-                value={fiscalIdType}
+                onValueChange={setBusinessUnit}
+                value={businessUnit}
                 disabled={true}
               >
                 <SelectTrigger
-                  className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+                  className="w-fit mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right"
                 >
                   <SelectValue placeholder="Seleccione un tipo de ID" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="CUIT">CUIT</SelectItem>
-                  <SelectItem value="CUIL">CUIL</SelectItem>
+                  {businessUnits?.map((bu) => (
+                    <SelectItem key={bu.id} value={bu.id}>
+                      {bu?.description ?? ""}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -226,12 +257,12 @@ export function AddHealthInsurances(props: {
               </Label>
               <Input
                 disabled={true}
-                className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+                className="w-fit mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right"
                 id="name"
                 placeholder="..."
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={businessName}
+                onChange={(e) => setBusinessName(e.target.value)}
               />
             </div>
 
@@ -239,7 +270,7 @@ export function AddHealthInsurances(props: {
               <Label className="text-xs">TIPO DOC. FISCAL</Label>
               <Select onValueChange={setFiscalIdType} value={fiscalIdType}>
                 <SelectTrigger
-                  className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+                  className="w-fit mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right"
                 >
                   <SelectValue placeholder="Seleccione un tipo de ID" />
@@ -255,7 +286,7 @@ export function AddHealthInsurances(props: {
                 NRO DOC. FISCAL
               </Label>
               <Input
-                className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+                className="w-fit mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
                 hover:none justify-self-right"
                 id="idNumber"
                 placeholder="xxxxxxxxxxx"
@@ -269,7 +300,7 @@ export function AddHealthInsurances(props: {
               <Label className="text-xs">CONDICIÓN AFIP</Label>
               <Select onValueChange={setAfipStatus} value={afipStatus}>
                 <SelectTrigger
-                  className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+                  className="w-fit mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right"
                 >
                   <SelectValue placeholder="Seleccione un estado de AFIP" />
@@ -290,12 +321,12 @@ export function AddHealthInsurances(props: {
             <div>
               <Label className="text-xs">CONDICIÓN IIBB</Label>
               <Select
-                onValueChange={setAfipStatus}
-                value={afipStatus}
+                onValueChange={setIIBBStatus}
+                value={IIBBStatus}
                 disabled={true}
               >
                 <SelectTrigger
-                  className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+                  className="w-fit mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right"
                 >
                   <SelectValue placeholder="Seleccione un estado de AFIP" />
@@ -320,11 +351,11 @@ export function AddHealthInsurances(props: {
               <Input
                 disabled={true}
                 id="IdNumber"
-                className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+                className="w-fit mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right"
                 placeholder="..."
-                value={idNumber}
-                onChange={(e) => setIdNumber(e.target.value)}
+                value={IIBBNumber}
+                onChange={(e) => setIIBBNumber(e.target.value)}
               />
             </div>
 
@@ -335,72 +366,84 @@ export function AddHealthInsurances(props: {
               <Input
                 disabled={true}
                 id="IdNumber"
-                className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+                className="w-fit mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right"
                 placeholder="..."
-                value={idNumber}
-                onChange={(e) => setIdNumber(e.target.value)}
+                value={sellCondition}
+                onChange={(e) => setSellCondition(e.target.value)}
               />
             </div>
 
-            <div className="col-span-2">
+            <div >
               <Label htmlFor="address" className="text-xs">
                 DOMICILIO FISCAL
               </Label>
               <Input
-                className=" mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right w-full"
                 id="address"
                 placeholder="..."
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
+                value={fiscalAddress}
+                onChange={(e) => setFiscalAddress(e.target.value)}
               />
             </div>
-
-            <div />
-            <div />
-            <p className="col-span-4">Datos de Contacto</p>
-            <div>
-              <Label htmlFor="name">Nombre</Label>
+            <div >
+              <Label htmlFor="address" className="text-xs">
+                PISO
+              </Label>
               <Input
-                id="name"
+                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right w-full"
+                id="address"
                 placeholder="..."
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={fiscalFloor}
+                onChange={(e) => setFiscalFloor(e.target.value)}
               />
             </div>
-            <div>
-              <Label htmlFor="facturationName">Nombre de facturacion</Label>
+            <div >
+              <Label htmlFor="address" className="text-xs">
+                OFICINA
+              </Label>
               <Input
-                id="facturationName"
+                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right w-full"
+                id="address"
                 placeholder="..."
-                value={responsibleName}
-                onChange={(e) => setResponsibleName(e.target.value)}
+                value={fiscalOffice}
+                onChange={(e) => setFiscalOffice(e.target.value)}
               />
             </div>
-
-            <div>
-              <Label htmlFor="locality">Localidad</Label>
+            <div >
+              <Label htmlFor="address" className="text-xs">
+                LOCALIDAD
+              </Label>
               <Input
-                id="locality"
+                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right w-full"
+                id="address"
                 placeholder="..."
-                value={locality}
-                onChange={(e) => setLocality(e.target.value)}
+                value={fiscalLocality}
+                onChange={(e) => setFiscalLocality(e.target.value)}
               />
             </div>
-            <div>
-              <Label htmlFor="province">Provincia</Label>
+            <div >
+              <Label htmlFor="address" className="text-xs">
+                PROVINCIA
+              </Label>
               <Input
-                id="province"
+                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right w-full"
+                id="address"
                 placeholder="..."
-                value={province}
-                onChange={(e) => setProvince(e.target.value)}
+                value={fiscalProvince}
+                onChange={(e) => setFiscalProvince(e.target.value)}
               />
             </div>
             <div>
               <Label htmlFor="postal_code">Codigo Postal</Label>
-              <Select onValueChange={setPostalCode} value={postalCode}>
-                <SelectTrigger className="w-[180px] font-bold">
+              <Select onValueChange={setFiscalPostalCode} value={fiscalPostalCode}>
+                <SelectTrigger                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right w-full">
                   <SelectValue placeholder="Seleccionar CP" />
                 </SelectTrigger>
                 <SelectContent>
@@ -412,6 +455,206 @@ export function AddHealthInsurances(props: {
                 </SelectContent>
               </Select>
             </div>
+            <div >
+              <Label htmlFor="address" className="text-xs">
+                PAIS
+              </Label>
+              <Input
+                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right w-full"
+                id="address"
+                placeholder="..."
+                value={fiscalCountry}
+                onChange={(e) => setFiscalCountry(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="facturationName" className="text-xs">Nombre de facturacion</Label>
+              <Input
+                              className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+                              hover:none justify-self-right w-full"                
+                id="facturationName"
+                placeholder="..."
+                value={responsibleName}
+                onChange={(e) => setResponsibleName(e.target.value)}
+              />
+            </div>
+            <p className="col-span-4">Datos de Contacto</p>
+            <div >
+              <Label htmlFor="address" className="text-xs">
+                DOMICILIO COMERCIAL
+              </Label>
+              <Input
+                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right w-full"
+                id="address"
+                placeholder="..."
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+              />
+            </div>
+            <div >
+              <Label htmlFor="address" className="text-xs">
+                PISO
+              </Label>
+              <Input
+                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right w-full"
+                id="address"
+                placeholder="..."
+                value={floor}
+                onChange={(e) => setFloor(e.target.value)}
+              />
+            </div>
+            <div >
+              <Label htmlFor="address" className="text-xs">
+                PISO
+              </Label>
+              <Input
+                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right w-full"
+                id="address"
+                placeholder="..."
+                value={office}
+                onChange={(e) => setOffice(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="locality">Localidad</Label>
+              <Input
+              className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right w-full"
+                id="locality"
+                placeholder="..."
+                value={locality}
+                onChange={(e) => setLocality(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="province">Provincia</Label>
+              <Input
+                            className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right w-full"
+                id="province"
+                placeholder="..."
+                value={province}
+                onChange={(e) => setProvince(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="postal_code">Codigo Postal</Label>
+              <Select onValueChange={setPostalCode} value={postalCode}>
+                <SelectTrigger className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right w-full">
+                  <SelectValue placeholder="Seleccionar CP" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cps?.map((cp) => (
+                    <SelectItem key={cp.id} value={cp.id}>
+                      {cp.cp}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div >
+              <Label htmlFor="address" className="text-xs">
+                TELEFONO
+              </Label>
+              <Input
+                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right w-full"
+                id="address"
+                placeholder="..."
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+              />
+            </div>
+            <div >
+              <Label htmlFor="address" className="text-xs">
+                E-MAIL
+              </Label>
+              <Input
+                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right w-full"
+                id="address"
+                placeholder="..."
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <p className="col-span-4">Información de la cuenta</p>
+            <div>
+              <Label htmlFor="postal_code">ESTADO</Label>
+              <Select onValueChange={setState} value={state}>
+                <SelectTrigger                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right w-full">
+                  <SelectValue placeholder="Seleccionar CP" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ACTIVO">ACTIVO</SelectItem>
+                  <SelectItem value="INACTIVO">INACTIVO</SelectItem>
+                  <SelectItem value="BAJA">BAJA</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+            <Label htmlFor="postal_code">FECHA DE ESTADO</Label>
+            <Popover
+                      open={popoverEmisionOpen}
+                      onOpenChange={setPopoverEmisionOpen}>
+                      <PopoverTrigger asChild={true}>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
+                            !dateState && "text-muted-foreground"
+                          )}>
+                          {dateState ? (
+                            format(dateState, "PPP")
+                          ) : (
+                            <span>Seleccionar fecha</span>
+                          )}
+                          <Calendar01Icon className="h-4 w-4" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className=" p-0 overflow-y-scroll">
+                        <Calendar
+                          mode="single"
+                          selected={dateState}
+                          onSelect={(e) => setDateState(e)}
+                          initialFocus={true}
+                          />
+                      </PopoverContent>
+                    </Popover>
+                          </div>
+                    <div >
+              <Label htmlFor="user" className="text-xs">
+                USUARIO
+              </Label>
+              <Input
+                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right w-full"
+                id="user"
+                placeholder="..."
+                value={user}
+                onChange={(e) => setUser(e.target.value)}
+              />
+            </div>
+            <div >
+              <Label htmlFor="cancelMotive" className="text-xs">
+                MOTIVO DE BAJA
+              </Label>
+              <Input
+                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right w-full"
+                id="cancelMotive"
+                placeholder="..."
+                value={cancelMotive}
+                onChange={(e) => setCancelMotive(e.target.value)}
+              />
+            </div>
+            
 
             {OS ? null : (
               <div>
