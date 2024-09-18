@@ -9,7 +9,7 @@ export type TableRecord = {
   number: string;
   Marca: string;
   period: string;
-  cuit: string;
+  processDate: string;
   UN: string;
 };
 
@@ -17,7 +17,7 @@ export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "number",
     header: () => (
-      <div className="text-center whitespace-nowrap text-medium">Número preliq</div>
+      <div className="text-center whitespace-nowrap text-medium">Nro.</div>
     ),
     cell: ({ row }) => {
       return (
@@ -44,30 +44,6 @@ export const columns: ColumnDef<TableRecord>[] = [
     },
   },
   {
-    accessorKey: "period",
-    header: () => (
-      <div className="text-center whitespace-nowrap text-medium">Periodo</div>
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className="text-center  ">
-          {row.getValue("period")}
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "cuit",
-    header: () => (
-      <div className="text-center whitespace-nowrap text-medium">CUIL/CUIT</div>
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className="text-center  ">{row.getValue("cuit")}</div>
-      );
-    },
-  },
-  {
     accessorKey: "UN",
     header: () => (
       <div className="text-center whitespace-nowrap text-medium">
@@ -81,6 +57,30 @@ export const columns: ColumnDef<TableRecord>[] = [
     },
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));
+    },
+  },
+  {
+    accessorKey: "period",
+    header: () => (
+      <div className="text-center whitespace-nowrap text-medium">Período</div>
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="text-center  ">
+          {row.getValue("period")}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "processDate",
+    header: () => (
+      <div className="text-center whitespace-nowrap text-medium">Fecha de proceso</div>
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="text-center  ">{row.getValue("processDate")}</div>
+      );
     },
   },
 ];

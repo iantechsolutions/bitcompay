@@ -36,6 +36,7 @@ import DownloadExcelButton from "./downloadExcelButton";
 import RejectLiquidationDialog from "./reject-liquidation-dialog";
 import { ChevronLeft, CircleX } from "lucide-react";
 import { GoBackButton } from "~/components/goback-button";
+
 export default async function Home(props: {
   params: { liquidationId: string };
 }) {
@@ -70,7 +71,7 @@ export default async function Home(props: {
   // })) || [{ value: "", label: "" }];
 
   const periodo =
-    dayjs.utc(preliquidation?.period).format("MMMM [de] YYYY") ?? "-";
+    dayjs.utc(preliquidation?.period).format("MM/YYYY") ?? "-";
   const headers = [
     "NRO. GF",
     "Nombre",
@@ -233,64 +234,77 @@ export default async function Home(props: {
           </>
         )}
       </div>
-      <div className="bg-[#f6f6f6] rounded-lg text-sm">
-        <ul className="grid grid-cols-3 gap-x-2 gap-y-3 list-none px-8 py-5">
+      <div className="bg-[#f6f6f6] rounded-lg text-xs min-w-[35rem]">
+        <ul className="grid grid-cols-3 whitespace-nowrap gap-x-4 gap-y-6 list-none px-8 py-5">
           <li className="">
             <span className="">RAZÓN SOCIAL</span>
             <br />
-            <p className="font-medium">{companyData?.razon_social ?? "-"}</p>
+            <p className="font-medium text-sm">{companyData?.razon_social ?? "-"}</p>
           </li>
           <li>
             <span className="">CUIT</span>
             <br />
-            <p className="font-medium">{companyData?.cuit ?? "-"}</p>
+            <p className="font-medium text-sm">{companyData?.cuit ?? "-"}</p>
           </li>
           <li>
             <span className="">MARCA</span>
             <br />
-            <p className="font-medium">XXXX</p>
+            <p className="font-medium text-sm">{preliquidation?.brand?.name ?? "-"}</p>
           </li>
           <li>
             <span className="">PERÍODO</span>
             <br />
-            <p className="font-medium">{periodo}</p>
+            <p className="font-medium  text-sm">{periodo}</p>
           </li>
           <li>
             <span className="">N° PRE-LIQUIDACIÓN</span>
             <br />
-            <p className="font-medium">{preliquidation?.number ?? "-"}</p>
+            <p className="font-medium  text-sm">{preliquidation?.number ?? "-"}</p>
           </li>
           <li>
             <span className="">FECHA DE PROCESO</span>
             <br />
-            <p className="font-medium">
-              {dayjs.utc(preliquidation?.createdAt).format("DD/MM/YYYY") ?? "-"}
+            <p className="font-medium text-sm">
+            {dayjs.utc(preliquidation?.period).format("DD/MM/YYYY hh:mm") ?? "-"}
             </p>
           </li>
           <li className="">
             <span className="">UNIDAD DE NEGOCIOS</span>
             <br />
-            <p className="font-medium">XXXX</p>
+            <p className="font-medium text-sm">
+            {(preliquidation?.bussinessUnits?.description) ?? "-"}
+            </p>
           </li>
           <li>
             <span className="">FECHA DE EMISIÓN</span>
             <br />
-            <p className="font-medium">XXXX</p>
-          </li>
-          <li>
-            <span className="">VENCIMIENTOS</span>
-            <br />
-            <p className="font-medium">XXXX</p>
+            <p className="font-medium text-sm">
+            {dayjs.utc(preliquidation?.createdAt).format("DD/MM/YYYY") ?? "-"}
+            </p>
           </li>
           <li>
             <span className="">PDV</span>
             <br />
-            <p className="font-medium">{preliquidation?.pdv ?? "-"}</p>
+            <p className="font-medium text-sm">{preliquidation?.pdv ?? "-"}</p>
           </li>
           <li>
-            <span className="">INTERÉS (%)</span>
+            <span className="">1° FECHA DE VENCIMIENTO</span>
             <br />
-            <p className="font-medium">
+            <p className="font-medium text-sm">
+            {dayjs.utc(preliquidation?.comprobantes[0]?.payments[0]?.first_due_date).format("DD/MM/YYYY") ?? "-"}
+              </p>
+          </li>
+          <li>
+            <span className="">2° FECHA DE VENCIMIENTO</span>
+            <br />
+            <p className="font-medium text-sm">
+            {dayjs.utc(preliquidation?.comprobantes[0]?.payments[0]?.second_due_date).format("DD/MM/YYYY") ?? "-"}
+            </p>
+          </li>
+          <li>
+            <span className="">INTERÉS</span>
+            <br />
+            <p className="font-medium text-sm">
               {new Intl.NumberFormat("es-AR", {
                 style: "percent",
                 minimumFractionDigits: 2,

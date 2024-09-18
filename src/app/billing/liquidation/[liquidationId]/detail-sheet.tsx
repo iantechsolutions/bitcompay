@@ -27,6 +27,7 @@ type DetailSheetProps = {
 import Download02Icon from "~/components/icons/download-02-stroke-rounded";
 
 type Comprobante = RouterOutputs["comprobantes"]["getByLiquidation"][number];
+
 export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
   const [openFCAccordion, setOpenFCAccordion] = useState(true);
   const [openNCAccordion, setOpenNCAccordion] = useState(true);

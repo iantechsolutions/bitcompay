@@ -203,7 +203,7 @@ export default function CompanySidenav() {
 
   return (
     <ScrollArea className="h-[99vh] w-full relative overflow-x-auto">
-      <div className="sticky top-0 bg-white w-full h-[11vh] px-[1vw] items-center justify-center content-center text-center">
+      <div className="sticky top-0 bg-white w-full h-[11vh] px-[1vw] items-center justify-center content-center text-center z-20">
         <img
           className="h-[10vh] pb-[1vh] pt-[2vh] mx-auto my-auto"
           src="/public/bitcom-03.png"

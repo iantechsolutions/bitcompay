@@ -16,7 +16,7 @@ import {
 import { ChangeEvent, useState } from "react";
 import DetailSheet from "./components_acciones/detail-sheet";
 import DialogCC from "./components_acciones/dialog";
-
+import { RouterOutputs } from "~/trpc/shared";
 
 export type TableRecord = {
   date: Date;
@@ -26,6 +26,12 @@ export type TableRecord = {
   comprobanteNumber: string;
   status: "Pagada" | "Pendiente";
   iva: number;
+  comprobantes: RouterOutputs["comprobantes"]["getByLiquidation"]|null;
+  currentAccountAmount: number;
+  saldo_a_pagar: number;
+  nombre: string;
+  cuit: string;
+  [index: string]: any;
 };
 
 export const AjustarDialog = () => {
@@ -96,7 +102,7 @@ export const columns: ColumnDef<TableRecord>[] = [
       return (
         <div>
           <div
-            className={`rounded-full inline-block font-bold ${style} px-7 py-1`}
+             className={`rounded-full inline-block font-bold ${style} px-7 py-1`}
           >
             {" "}
             {row.getValue("status")}
@@ -129,10 +135,19 @@ export const columns: ColumnDef<TableRecord>[] = [
   
     {
       id: "actions",
-      cell: ({}) => {
+      cell: ({ row }) => {
+        
         const [dialogOpen, setDialOpen] = useState(false);
         const [sheetOpen, setSheetOpen] = useState(false);
-        
+        const [detailData, setDetailData] = useState<TableRecord | null>(null);
+
+        const handleMenuClick = () => {
+          let detailData = row.original as TableRecord;
+
+          setDetailData(detailData);
+          setSheetOpen(!sheetOpen);
+        };
+
          return (
           <>
             <DropdownMenu>
@@ -143,7 +158,7 @@ export const columns: ColumnDef<TableRecord>[] = [
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="bg-[#f7f7f7] hover:bg-[#f7f7f7]">
-                <DropdownMenuItem onClick={() => setSheetOpen(true)}>
+                <DropdownMenuItem onClick={() => handleMenuClick()}>
                   <ViewIcon className="mr-1 h-4" /> Ver
                   
                 </DropdownMenuItem>
@@ -159,13 +174,12 @@ export const columns: ColumnDef<TableRecord>[] = [
               </DropdownMenuContent>
             </DropdownMenu>
     
-           
-            <DetailSheet
+           {detailData && <DetailSheet
               open={sheetOpen}
               setOpen={setSheetOpen}
-              // data={bla bla}
-              />
-
+              data={detailData}
+              />}
+            
              <DialogCC
              open={dialogOpen} 
              setOpen={setDialOpen}

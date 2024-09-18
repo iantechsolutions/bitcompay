@@ -156,44 +156,41 @@ export default function AddPreLiquidation() {
               </SelectContent>
             </Select>
           </div>
-          <div className="w-full flex flex-row gap-2 text-gray-500">
-            <div className="w-1/2 m-3 mr-3">
-              <Label className="text-xs">1° FECHA DE VENCIMIENTO</Label>
-              <br />
-              <Popover open={popover1Open} onOpenChange={setPopover1Open}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"form"}
-                    className={cn(
-                      "w-full border-b-2 border-green-200 pl-3 text-left font-normal hover:bg-none hover:bg-transparent shadow-none",
-                      !fechaVencimiento1 && "text-muted-foreground"
-                    )}>
-                    <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[#3E3E3E]">
-                      {fechaVencimiento1 ? (
-                        dayjs(fechaVencimiento1).format("D [de] MMMM [de] YYYY")
-                      ) : (
-                        <span>Seleccione una fecha</span>
-                      )}
-                    </p>
-                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={
-                      fechaVencimiento1
-                        ? new Date(fechaVencimiento1)
-                        : undefined
-                    }
-                    onSelect={(e) => FechasCreate(e)}
-                    disabled={(date: Date) => date < new Date()}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div className="w-1/2 text-gray-500 m-3 ml-3 ">
+          <div className="max-w-md w-full flex flex-row gap-2 text-gray-500 p-3 mr-1 pl-2">
+            <div className="w-1/2 m-3 mr-2 ml-2 pr-2">
+  <Label className="text-xs">1° FECHA DE VENCIMIENTO</Label>
+  <br />
+  <Popover open={popover1Open} onOpenChange={setPopover1Open}>
+    <PopoverTrigger asChild>
+      <Button
+        variant={"form"}
+        className={cn(
+          "w-full border-b-2 border-green-200 pl-3 text-left font-normal hover:bg-none hover:bg-transparent shadow-none overflow-hidden text-ellipsis whitespace-nowrap",
+          !fechaVencimiento1 && "text-muted-foreground"
+        )}
+      >
+        <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[#3E3E3E]">
+          {fechaVencimiento1 ? (
+            dayjs(fechaVencimiento1).format("D [de] MMMM [de] YYYY")
+          ) : (
+            <span>Seleccione una fecha</span>
+          )}
+        </p>
+        <CalendarIcon className="ml-2 h-4 w-4 opacity-50" />
+      </Button>
+    </PopoverTrigger>
+    <PopoverContent className="w-auto p-0" align="start">
+      <Calendar
+        mode="single"
+        selected={fechaVencimiento1 ? new Date(fechaVencimiento1) : undefined}
+        onSelect={(e) => FechasCreate(e)}
+        disabled={(date: Date) => date < new Date()}
+        initialFocus
+      />
+    </PopoverContent>
+  </Popover>
+</div>
+            <div className="w-1/2 m-3 mr-2 ml-2 pr-2">
               <Label className="text-xs">2° FECHA DE VENCIMIENTO</Label>
               <br />
               <Popover open={popover2Open} onOpenChange={setPopover2Open}>
@@ -211,7 +208,7 @@ export default function AddPreLiquidation() {
                         <span>Seleccione una fecha</span>
                       )}
                     </p>
-                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    <CalendarIcon className="ml-2 h-4 w-4 opacity-50" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -298,7 +295,7 @@ export default function AddPreLiquidation() {
               <Select
                 onValueChange={(e) => setMes(Number(e))}
                 defaultValue={mes?.toString()}>
-                <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none focus-visible:ring-green-400">
+                <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none">
                   <SelectValue placeholder="Seleccione un mes" />
                 </SelectTrigger>
                 <SelectContent>
@@ -368,7 +365,7 @@ export default function AddPreLiquidation() {
             <div className="w-1/2 m-3 ml-3">
               <Label className="text-xs">AÑO DE VIGENCIA</Label>
               <Input
-                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none"
                 type="number"
                 min={new Date().getFullYear()}
                 value={anio}
@@ -399,7 +396,7 @@ export default function AddPreLiquidation() {
             <div className="w-2/4 text-gray-500 m-3 ml-3 pr-">
               <Label htmlFor="interest" className="text-xs">
                 {" "}
-                INTERÉS (%){" "}
+                INTERÉS (%)*{" "}
               </Label>
               <Input
                 className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
@@ -413,6 +410,11 @@ export default function AddPreLiquidation() {
               />
             </div>
           </div>
+<div>
+<h3 className="text-[#3E3E3E] font-thin text-opacity-80 text-[10px] italic justify-center">
+  *Aplica sobre saldos adeudados de períodos anteriores. Completar con alícuota como porcentaje directo sobre la base del cálculo.
+</h3>
+</div>
           <Button
             type="submit"
             className="m-5 mb-2 rounded-full w-fit justify-self-center bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#DEF5DD]"
