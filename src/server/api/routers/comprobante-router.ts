@@ -913,7 +913,19 @@ export const comprobantesRouter = createTRPCRouter({
       const grupos = await getGruposForLiquidation(input.brandId, input.date);
       return grupos;
     }),
-  getComprobanteByEvent: protectedProcedure
+
+  getLastComprobante: protectedProcedure
+    .query(async ({}) => {
+      const ulticomprobante = await db.query.comprobantes.findFirst({
+        where: eq(schema.comprobantes.origin, "Factura"),
+        with: {
+          items: true,
+        },
+      });
+        return ulticomprobante;
+    }),
+
+    getComprobanteByEvent: protectedProcedure
     .input(z.object({ eventId: z.string() }))
     .query(async ({ input }) => {
       const events = await db.query.events.findFirst({
@@ -928,6 +940,7 @@ export const comprobantesRouter = createTRPCRouter({
         return events?.comprobantes;
       }
     }),
+
   getByLiquidation: protectedProcedure
     .input(z.object({ liquidationId: z.string() }))
     .query(async ({ input }) => {
