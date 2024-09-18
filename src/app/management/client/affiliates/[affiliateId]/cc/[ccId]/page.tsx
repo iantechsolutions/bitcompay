@@ -18,6 +18,7 @@ import { type TableRecord, columns } from "./columns";
 import DataTable from "./data-table";
 import { Card } from "~/components/ui/card";
 import Download02Icon from "~/components/icons/download-02-stroke-rounded";
+import { RouterOutputs } from "~/trpc/shared";
 
 export default function CCDetail(props: {
   params: { ccId: string; affiliateId: string };
@@ -67,8 +68,13 @@ export default function CCDetail(props: {
   }
 
   const afiliado = grupo.data?.integrants.find((x)=>x.isHolder);
-console.log("afiliado es ", afiliado)
-
+  const comprobantesTable :RouterOutputs["comprobantes"]["getByLiquidation"] = [];
+  if(comprobanteFCReciente){
+    comprobantesTable.push(comprobanteFCReciente);
+  }
+  if(comprobanteNCReciente){
+    comprobantesTable.push(comprobanteNCReciente);
+  }
   const tableRows: TableRecord[] = [];
   if (events) {
     for (const event of events) {
@@ -80,7 +86,7 @@ console.log("afiliado es ", afiliado)
         comprobanteNumber: "00001-00002546",
         status: "Pendiente",
         iva: 0.21,
-        comprobantes: comprobanteFCReciente ?? null,
+        comprobantes: comprobantesTable,
         currentAccountAmount: NCTotal ?? 0,
         saldo_a_pagar: saldo_a_pagar ?? 0,
         nombre: afiliado?.name ?? "",
@@ -91,7 +97,9 @@ console.log("afiliado es ", afiliado)
   return (
     <LayoutContainer>
       <Title>Movimientos cuenta corriente</Title>
-      <h2 className=" font-semibold mb-2">Grupo familiar N° XX</h2>
+      <h2 className=" font-semibold mb-2">
+        Grupo familiar N° {grupo.data?.numericalId}
+      </h2>
       <div className="flex gap-3 mt-5 mb-10">
         <Card className="py-4 px-6 w-1/4 grid grid-cols-2 items-center">
           <div className="flex flex-col">
@@ -117,8 +125,7 @@ console.log("afiliado es ", afiliado)
       <div className="flex flex-auto justify-end">
         <Button
           variant="bitcompay"
-          className=" text-base px-16 py-6 mt-5 gap-3 text-[#3e3e3e] rounded-full font-medium"
-        >
+          className=" text-base px-16 py-6 mt-5 gap-3 text-[#3e3e3e] rounded-full font-medium">
           <Download02Icon />
           Exportar
         </Button>
