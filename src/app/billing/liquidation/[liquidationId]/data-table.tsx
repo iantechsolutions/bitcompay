@@ -46,6 +46,7 @@ interface DetailData {
   cuit: string;
   [index: string]: any;
 }
+
 export function DataTable<TData, TValue>({
   columns,
   data,
@@ -81,7 +82,7 @@ export function DataTable<TData, TValue>({
         detailData[key] = row.original[key];
       }
     }
-    console.log(detailData);
+    
     setDetailData(detailData);
     setOpen(!open);
   };

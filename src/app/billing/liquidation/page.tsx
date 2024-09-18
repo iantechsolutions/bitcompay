@@ -31,8 +31,8 @@ export default async function Page() {
       id: liquidation?.id!,
       number: String(liquidation?.number) ?? "NO NUMBER",
       Marca: liquidation.brand?.name ?? "NO BRAND",
-      period: dayjs(liquidation?.period).format("MM-YYYY"),
-      cuit: liquidation?.cuit ?? "NO CUIT",
+      period: dayjs(liquidation?.period).format("MM/YYYY"),
+      processDate: dayjs(liquidation?.createdAt).format("DD/MM/YYYY hh:mm:ss"), //revisar
       UN: liquidation?.bussinessUnits?.description ?? "NO BU",
     });
   }
