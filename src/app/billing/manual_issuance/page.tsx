@@ -415,10 +415,12 @@ export default function Page() {
               Nro: facSeleccionada?.nroComprobante ?? 0,
             },
           };
+          console.log("testtt");
           const event = createEventFamily({
             family_group_id: grupoFamiliarId,
             type: "NC",
             amount: comprobante[0]?.importe ?? 0,
+            comprobante_id: comprobante[0]?.id ?? "",
           });
         } else if (tipoComprobante == "1" || tipoComprobante == "6") {
           let ivaFloat =
@@ -496,6 +498,7 @@ export default function Page() {
             family_group_id: grupoFamiliarId,
             type: "FC",
             amount: comprobante[0]?.importe ?? 0,
+            comprobante_id: comprobante[0]?.id ?? "",
           });
         } else if (tipoComprobante == "0") {
           // iva = 0;
@@ -523,12 +526,15 @@ export default function Page() {
             family_group_id: grupoFamiliarId,
             type: "REC",
             amount: comprobante[0]?.importe ?? 0,
+            comprobante_id: comprobante[0]?.id ?? "",
           });
           const eventOrg = createEventOrg({
             type: "REC",
             amount: comprobante[0]?.importe ?? 0,
+            comprobante_id: comprobante[0]?.id ?? "",
           });
         }
+        console.log("testtt2");
 
         if (data) {
           try {

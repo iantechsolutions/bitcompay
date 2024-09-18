@@ -68,35 +68,39 @@ export default function AddPlanInfoComponent({
   const router = useRouter();
 
   async function handleSubmit() {
-    if (
-      plans?.some((plan) => plan.plan_code === codigo && plan.id !== planId)
-    ) {
-      return toast.error("No se pueden repetir los códigos de los planes");
-    } else {
-      if (!brand || !codigo || !descripcion) {
-        return toast.error("Ingrese la información de todos los campos");
-      }
-      if (planId) {
-        await updatePlan({
-          planId: planId,
-          brand_id: brand,
-          plan_code: codigo,
-          description: descripcion,
-        });
-        toast.success("Plan actualizado correctamente");
+    try {
+      if (
+        plans?.some((plan) => plan.plan_code === codigo && plan.id !== planId)
+      ) {
+        return toast.error("No se pueden repetir los códigos de los planes");
       } else {
-        const newPlan = await createPlan({
-          brand_id: brand,
-          plan_code: codigo,
-          description: descripcion,
-        });
-        if (onPlanIdChange) {
-          onPlanIdChange(newPlan[0]!.id);
+        if (!brand || !codigo || !descripcion) {
+          return toast.error("Ingrese la información de todos los campos");
         }
-        toast.success("Plan creado correctamente");
+        if (planId) {
+          await updatePlan({
+            planId: planId,
+            brand_id: brand,
+            plan_code: codigo,
+            description: descripcion,
+          });
+          toast.success("Plan actualizado correctamente");
+        } else {
+          const newPlan = await createPlan({
+            brand_id: brand,
+            plan_code: codigo,
+            description: descripcion,
+          });
+          if (onPlanIdChange) {
+            onPlanIdChange(newPlan[0]!.id);
+          }
+          toast.success("Plan creado correctamente");
+        }
+        router.refresh();
+        closeDialog();
       }
-      router.refresh();
-      closeDialog();
+    } catch (e) {
+      console.error(e);
     }
   }
 
@@ -107,7 +111,8 @@ export default function AddPlanInfoComponent({
           <Label className="text-xs">MARCA</Label>
           <Select
             onValueChange={(value: string) => setBrand(value)}
-            value={brand}>
+            value={brand}
+          >
             <SelectTrigger className="w-full mb-3 gap-3 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none hover:none justify-self-right">
               <SelectValue placeholder="Seleccione una marca" />
             </SelectTrigger>
@@ -143,7 +148,8 @@ export default function AddPlanInfoComponent({
       <Button
         onClick={handleSubmit}
         disabled={isCreating || isUpdating}
-        className="mt-7 font-medium mb-2 rounded-full w-fit justify-self-right bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3E3E3E]">
+        className="mt-7 font-medium mb-2 rounded-full w-fit justify-self-right bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3E3E3E]"
+      >
         {isCreating || isUpdating ? (
           <Loader2Icon className="mr-2 animate-spin" size={20} />
         ) : (

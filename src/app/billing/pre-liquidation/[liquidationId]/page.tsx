@@ -145,13 +145,15 @@ export default async function Home(props: {
     summary["Bonificación"] += bonificacion;
     excelRow.push(bonificacion);
 
-    const diferencial = await api.differentialsValues.getByIntegranteId.query({
-      integrantId: billResponsible?.id ?? "",
-    });
+    const diferencial = fg.integrants.reduce((sum, integrant) => {
+      const differentialAmount = toNumberOrZero(
+        integrant.differentialsValues[0]?.amount
+      );
+      return sum + differentialAmount;
+    }, 0);
 
-    const diferential_amount = toNumberOrZero(diferencial?.amount);
-    summary["Diferencial"] += diferential_amount;
-    excelRow.push(diferential_amount);
+    summary["Diferencial"] += diferencial;
+    excelRow.push(diferencial);
 
     const Aporte = toNumberOrZero(
       original_comprobante?.items.find((item) => item.concept === "Aporte")
@@ -159,6 +161,7 @@ export default async function Home(props: {
     );
     summary["Aporte"] += Aporte;
     excelRow.push(Aporte);
+
     const interes = toNumberOrZero(
       original_comprobante?.items.find((item) => item.concept === "Interes")
         ?.amount
@@ -200,7 +203,7 @@ export default async function Home(props: {
         0,
       "cuota plan": cuota_planes,
       bonificacion,
-      diferencial: diferential_amount,
+      diferencial: diferencial,
       Aporte,
       interes,
       subtotal: subTotal,
@@ -291,7 +294,11 @@ export default async function Home(props: {
           <li>
             <span className="">INTERÉS (%)</span>
             <br />
-            <p className="font-medium">{preliquidation?.interest ?? "-"}</p>
+            <p className="font-medium">{new Intl.NumberFormat("es-AR",{
+              style: "percent",
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            }).format(preliquidation?.interest!/100)?? "-"}</p>
           </li>
         </ul>
       </div>

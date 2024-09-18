@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import LayoutContainer from "~/components/layout-container";
@@ -31,6 +32,9 @@ export default function UploadResponsePage(props: {
 
   return (
     <LayoutContainer>
+      <div className="flex items-center font-semibold text-sm opacity-80">
+        {channelName} <ChevronRight />{" "}
+      </div>
       <Title>Cargar documento</Title>
 
       {disabled && (

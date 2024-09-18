@@ -72,9 +72,10 @@ export const columns: ColumnDef<TableRecord>[] = [
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("saldo anterior"));
-      const formatted = new Intl.NumberFormat("en-US", {
+      const formatted = new Intl.NumberFormat("es-AR", {
         style: "currency",
-        currency: "USD",
+        currency: "ARS",
+        currencyDisplay: "narrowSymbol",
       }).format(amount);
 
       return <div className="text-center  ">{formatted}</div>;
@@ -89,9 +90,10 @@ export const columns: ColumnDef<TableRecord>[] = [
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("cuota plan"));
-      const formatted = new Intl.NumberFormat("en-US", {
+      const formatted = new Intl.NumberFormat("es-AR", {
         style: "currency",
-        currency: "USD",
+        currency: "ARS",
+        currencyDisplay: "narrowSymbol",
       }).format(amount);
 
       return <div className="text-center  ">{formatted}</div>;
@@ -106,9 +108,10 @@ export const columns: ColumnDef<TableRecord>[] = [
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("bonificacion"));
-      const formatted = new Intl.NumberFormat("en-US", {
+      const formatted = new Intl.NumberFormat("es-AR", {
         style: "currency",
-        currency: "USD",
+        currency: "ARS",
+        currencyDisplay: "narrowSymbol",
       }).format(amount);
 
       return <div className="text-center  ">{formatted}</div>;
@@ -123,9 +126,10 @@ export const columns: ColumnDef<TableRecord>[] = [
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("diferencial"));
-      const formatted = new Intl.NumberFormat("en-US", {
+      const formatted = new Intl.NumberFormat("es-AR", {
         style: "currency",
-        currency: "USD",
+        currency: "ARS",
+        currencyDisplay: "narrowSymbol",
       }).format(amount);
 
       return <div className="text-center  ">{formatted}</div>;
@@ -140,9 +144,10 @@ export const columns: ColumnDef<TableRecord>[] = [
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("Aporte"));
-      const formatted = new Intl.NumberFormat("en-US", {
+      const formatted = new Intl.NumberFormat("es-AR", {
         style: "currency",
-        currency: "USD",
+        currency: "ARS",
+        currencyDisplay: "narrowSymbol",
       }).format(amount);
 
       return <div className="text-center  ">{formatted}</div>;
@@ -157,9 +162,10 @@ export const columns: ColumnDef<TableRecord>[] = [
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("interes"));
-      const formatted = new Intl.NumberFormat("en-US", {
+      const formatted = new Intl.NumberFormat("es-AR", {
         style: "currency",
-        currency: "USD",
+        currency: "ARS",
+        currencyDisplay: "narrowSymbol",
       }).format(amount);
 
       return <div className="text-center  ">{formatted}</div>;
@@ -174,9 +180,10 @@ export const columns: ColumnDef<TableRecord>[] = [
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("subtotal"));
-      const formatted = new Intl.NumberFormat("en-US", {
+      const formatted = new Intl.NumberFormat("es-AR", {
         style: "currency",
-        currency: "USD",
+        currency: "ARS",
+        currencyDisplay: "narrowSymbol",
       }).format(amount);
 
       return <div className="text-center  ">{formatted}</div>;
@@ -189,9 +196,10 @@ export const columns: ColumnDef<TableRecord>[] = [
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("iva"));
-      const formatted = new Intl.NumberFormat("en-US", {
+      const formatted = new Intl.NumberFormat("es-AR", {
         style: "currency",
-        currency: "USD",
+        currency: "ARS",
+        currencyDisplay: "narrowSymbol",
       }).format(amount);
 
       return <div className="text-center  ">{formatted}</div>;
@@ -206,9 +214,10 @@ export const columns: ColumnDef<TableRecord>[] = [
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("total"));
-      const formatted = new Intl.NumberFormat("en-US", {
+      const formatted = new Intl.NumberFormat("es-AR", {
         style: "currency",
-        currency: "USD",
+        currency: "ARS",
+        currencyDisplay: "narrowSymbol",
       }).format(amount);
 
       return <div className="text-center  ">{formatted}</div>;

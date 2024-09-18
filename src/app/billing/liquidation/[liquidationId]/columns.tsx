@@ -32,11 +32,7 @@ export const columns: ColumnDef<TableRecord>[] = [
       <div className="text-center   whitespace-nowrap text-medium">N° GF</div>
     ),
     cell: ({ row }) => {
-      return (
-        <div className="text-center  ">
-          {row.getValue("nroGF")}
-        </div>
-      );
+      return <div className="text-center  ">{row.getValue("nroGF")}</div>;
     },
   },
   {
@@ -58,21 +54,22 @@ export const columns: ColumnDef<TableRecord>[] = [
       <div className="text-center whitespace-nowrap text-medium">CUIL/CUIT</div>
     ),
     cell: ({ row }) => {
-      return (
-        <div className="text-center  ">{row.getValue("cuit")}</div>
-      );
+      return <div className="text-center  ">{row.getValue("cuit")}</div>;
     },
   },
   {
     accessorKey: "saldo anterior",
     header: () => (
-      <div className="text-center whitespace-nowrap text-medium">Saldo anterior</div>
+      <div className="text-center whitespace-nowrap text-medium">
+        Saldo anterior
+      </div>
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("saldo anterior"));
-      const formatted = new Intl.NumberFormat("en-US", {
+      const formatted = new Intl.NumberFormat("es-AR", {
         style: "currency",
-        currency: "USD",
+        currency: "ARS",
+        currencyDisplay: "narrowSymbol",
       }).format(amount);
 
       return <div className="text-center  ">{formatted}</div>;
@@ -81,13 +78,16 @@ export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "cuota plan",
     header: () => (
-      <div className="text-center whitespace-nowrap text-medium">Cuota plan</div>
+      <div className="text-center whitespace-nowrap text-medium">
+        Cuota plan
+      </div>
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("cuota plan"));
-      const formatted = new Intl.NumberFormat("en-US", {
+      const formatted = new Intl.NumberFormat("es-AR", {
         style: "currency",
-        currency: "USD",
+        currency: "ARS",
+        currencyDisplay: "narrowSymbol",
       }).format(amount);
 
       return <div className="text-center  ">{formatted}</div>;
@@ -96,13 +96,16 @@ export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "bonificacion",
     header: () => (
-      <div className="text-center whitespace-nowrap text-medium">Bonificación</div>
+      <div className="text-center whitespace-nowrap text-medium">
+        Bonificación
+      </div>
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("bonificacion"));
-      const formatted = new Intl.NumberFormat("en-US", {
+      const formatted = new Intl.NumberFormat("es-AR", {
         style: "currency",
-        currency: "USD",
+        currency: "ARS",
+        currencyDisplay: "narrowSymbol",
       }).format(amount);
 
       return <div className="text-center  ">{formatted}</div>;
@@ -111,13 +114,16 @@ export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "diferencial",
     header: () => (
-      <div className="text-center whitespace-nowrap text-medium">Diferencial</div>
+      <div className="text-center whitespace-nowrap text-medium">
+        Diferencial
+      </div>
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("diferencial"));
-      const formatted = new Intl.NumberFormat("en-US", {
+      const formatted = new Intl.NumberFormat("es-AR", {
         style: "currency",
-        currency: "USD",
+        currency: "ARS",
+        currencyDisplay: "narrowSymbol",
       }).format(amount);
 
       return <div className="text-center  ">{formatted}</div>;
@@ -130,9 +136,10 @@ export const columns: ColumnDef<TableRecord>[] = [
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("Aporte"));
-      const formatted = new Intl.NumberFormat("en-US", {
+      const formatted = new Intl.NumberFormat("es-AR", {
         style: "currency",
-        currency: "USD",
+        currency: "ARS",
+        currencyDisplay: "narrowSymbol",
       }).format(amount);
 
       return <div className="text-center  ">{formatted}</div>;
@@ -145,9 +152,10 @@ export const columns: ColumnDef<TableRecord>[] = [
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("interes"));
-      const formatted = new Intl.NumberFormat("en-US", {
+      const formatted = new Intl.NumberFormat("es-AR", {
         style: "currency",
-        currency: "USD",
+        currency: "ARS",
+        currencyDisplay: "narrowSymbol",
       }).format(amount);
 
       return <div className="text-center  ">{formatted}</div>;
@@ -160,9 +168,10 @@ export const columns: ColumnDef<TableRecord>[] = [
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("subtotal"));
-      const formatted = new Intl.NumberFormat("en-US", {
+      const formatted = new Intl.NumberFormat("es-AR", {
         style: "currency",
-        currency: "USD",
+        currency: "ARS",
+        currencyDisplay: "narrowSymbol",
       }).format(amount);
 
       return <div className="text-center  ">{formatted}</div>;
@@ -170,12 +179,15 @@ export const columns: ColumnDef<TableRecord>[] = [
   },
   {
     accessorKey: "iva",
-    header: () => <div className="text-center whitespace-nowrap text-medium">IVA</div>,
+    header: () => (
+      <div className="text-center whitespace-nowrap text-medium">IVA</div>
+    ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("iva"));
-      const formatted = new Intl.NumberFormat("en-US", {
+      const formatted = new Intl.NumberFormat("es-AR", {
         style: "currency",
-        currency: "USD",
+        currency: "ARS",
+        currencyDisplay: "narrowSymbol",
       }).format(amount);
 
       return <div className="text-center  ">{formatted}</div>;
@@ -188,9 +200,10 @@ export const columns: ColumnDef<TableRecord>[] = [
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("total"));
-      const formatted = new Intl.NumberFormat("en-US", {
+      const formatted = new Intl.NumberFormat("es-AR", {
         style: "currency",
-        currency: "USD",
+        currency: "ARS",
+        currencyDisplay: "narrowSymbol",
       }).format(amount);
 
       return <div className="text-center  ">{formatted}</div>;

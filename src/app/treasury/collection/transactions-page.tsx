@@ -8,6 +8,7 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import "dayjs/locale/es"; // import the locale
 import { type RouterOutputs } from "~/trpc/shared";
+import LayoutContainer from "~/components/layout-container";
 dayjs.extend(utc);
 dayjs.locale("es");
 export default function TransactionsPage(props: {
@@ -39,9 +40,6 @@ export default function TransactionsPage(props: {
   return (
     <div>
       <LargeTable height={height} headers={recHeaders} rows={tableRows} />
-      <div className="fixed right-20 top-4 z-10">
-        {/* <TransactionsFiltersDialog filters={0} onChange={() => {}} /> */}
-      </div>
     </div>
   );
 }

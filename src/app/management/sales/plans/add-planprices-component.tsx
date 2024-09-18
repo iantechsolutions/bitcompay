@@ -67,7 +67,17 @@ export default function AddPlanPricesComponent({
   date,
 }: AddPlanDialogProps) {
   const [anio, setAnio] = useState<number | null>(date?.getFullYear() ?? 2024);
-  const [mes, setMes] = useState<number | null>(date ? date.getMonth() + 1 : 1);
+  let number = 2;
+  if (edit) {
+    number = 1;
+  }
+  const [mes, setMes] = useState<number | null>(
+    date ? date.getMonth() + number : 1
+  );
+
+  const [formData, setFormData] = useState<FormValues>({
+    prices: initialPrices || [],
+  });
 
   const router = useRouter();
   const [working, setWorking] = useState(false);
@@ -103,6 +113,7 @@ export default function AddPlanPricesComponent({
             currentVigency?.validy_date ?? new Date(1, 1, 2000)
           );
         }
+
         router.refresh();
       },
     }
@@ -140,7 +151,9 @@ export default function AddPlanPricesComponent({
   // const [trues, setTrues] = useState(true);
   useEffect(() => {
     if (edit && initialPrices) {
+      setFormData({ prices: initialPrices });
       form.reset({ prices: initialPrices });
+
       const givenDate = initialPrices[0]?.validy_date;
       if ((givenDate?.getTime() ?? 0) > new Date().getTime()) {
         if (initialPrices[0]?.validy_date.getMonth()) {
@@ -164,9 +177,7 @@ export default function AddPlanPricesComponent({
         setWorking(false);
       } else {
         let allowed = true;
-        console.log("start");
         data.prices.sort((a, b) => (a.from_age ?? 0) - (b.from_age ?? 0));
-        console.log("emnding");
 
         const validity_date = new Date(anio ?? 0, (mes ?? 1) - 1, 1);
         for (let i = 0; i < data.prices.length; i++) {
@@ -573,11 +584,11 @@ export default function AddPlanPricesComponent({
                           validy_date: new Date(),
                           from_age: 0,
                           to_age: 0,
-                          condition: "",              
+                          condition: "",
                           isAmountByAge: true,
                           plan_id: "",
                           amount: 0,
-                       })
+                        })
                       }>
                       {isButtonDisabled || working ? (
                         <Loader2Icon

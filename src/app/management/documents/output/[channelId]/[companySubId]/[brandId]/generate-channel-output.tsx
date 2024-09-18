@@ -54,6 +54,8 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { useForm, type SubmitHandler } from "react-hook-form";
+import { toast } from "sonner";
+import { channel } from "diagnostics_channel";
 dayjs.extend(utc);
 dayjs.locale("es");
 export default function GenerateChannelOutputPage(props: {
@@ -66,8 +68,6 @@ export default function GenerateChannelOutputPage(props: {
   const {
     mutateAsync: generateOutputFile,
     isLoading,
-    // isSuccess,
-    // error,
     data,
   } = api.iofiles.generate.useMutation();
 
@@ -79,13 +79,13 @@ export default function GenerateChannelOutputPage(props: {
   const [fileName, setFileName] = useState<string | null>(null);
   const [cardType, setCardType] = useState<string | null>(null);
   const [cardBrand, setCardBrand] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>("");
   const [disabled, setDisabled] = useState(false);
 
   const FileNameMap: Record<string, string> = {
-    "Visa Credito": "DEBLIQC ",
-    "Visa Debito": "DEBLIQD ",
-    "Mastercard Credito": "DEBLIMC ",
+    "visa credito": "DEBLIQC ",
+    "visa debito": "DEBLIQD ",
+    "mastercard credito": "DEBLIMC ",
   };
   let fileNameCard;
   const form = useForm();
@@ -95,10 +95,14 @@ export default function GenerateChannelOutputPage(props: {
   }, [cardBrand, cardType]);
 
   async function handleGenerate() {
+    if (!fileName || fileName?.length > 10) {
+      setError("no se puede asignar un nombre mayor a 10 caracteres");
+      return;
+    }
     try {
       schema.parse({ texto: fileName });
       const { company } = props;
-      await generateOutputFile({
+      const data = await generateOutputFile({
         channelId: props.channel.id,
         companyId: company.id,
         brandId: props.brand.id,
@@ -106,19 +110,21 @@ export default function GenerateChannelOutputPage(props: {
         concept: company.concept,
         card_type: cardType ?? null,
         card_brand: cardBrand ?? null,
-        // presentation_date: form.watch().presentation_date ?? null,
       });
 
-      console.log(cardBrand, "texto");
-
-      // Limpiar los errores
+      if (!data && props.channel.name === "DEBITO AUTOMATICO") {
+        return toast.error(
+          "No existe número de establecimiento válido para la marca"
+        );
+      }
+      if (!data && props.channel.name.includes("DEBITO DIRECTO CBU")) {
+        return toast.error("Error. Existen pagos sin un CBU asociado");
+      }
+      toast.success("Se ha generado el archivo");
       setError(null);
-      // desabilitar el boton
       setDisabled(true);
-    } catch (_error) {
-      // Si hay errores de validación, mostrarlos al usuario
-      setError("no se puede asignar un nombre mayor a 10 caracteres");
-      console.log(_error);
+    } catch {
+      toast.error("Error");
     }
   }
 
@@ -216,8 +222,8 @@ export default function GenerateChannelOutputPage(props: {
                           <SelectValue placeholder="Marca Tarjeta" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Visa">Visa</SelectItem>
-                          <SelectItem value="Mastercard">MasterCard</SelectItem>
+                          <SelectItem value="visa">Visa</SelectItem>
+                          <SelectItem value="mastercard">MasterCard</SelectItem>
                         </SelectContent>
                       </Select>
                       <Label htmlFor="card_type"> Tipo de Tarjeta</Label>
@@ -226,10 +232,10 @@ export default function GenerateChannelOutputPage(props: {
                           <SelectValue placeholder="Tipo tarjeta" />
                         </SelectTrigger>
                         <SelectContent>
-                          {cardBrand === "Visa" ? (
-                            <SelectItem value="Debito">Debito</SelectItem>
+                          {cardBrand === "visa" ? (
+                            <SelectItem value="debito">Debito</SelectItem>
                           ) : null}
-                          <SelectItem value="Credito">Credito</SelectItem>
+                          <SelectItem value="credito">Credito</SelectItem>
                         </SelectContent>
                       </Select>
 
@@ -334,7 +340,7 @@ export default function GenerateChannelOutputPage(props: {
                 {data}
                 {!data && (
                   <p className="my-10 text-center text-sm text-stone-500">
-                    No se generó nada
+                    {error}
                   </p>
                 )}
               </pre>

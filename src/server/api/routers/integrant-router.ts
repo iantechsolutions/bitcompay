@@ -117,6 +117,7 @@ export const integrantsRouter = createTRPCRouter({
         isAffiliate: z.boolean(),
         isBillResponsible: z.boolean(),
         family_group_id: z.string(),
+        postal_codeId: z.string(),
       })
     )
     .mutation(async ({ input: { id, ...input } }) => {

@@ -81,7 +81,7 @@ export function DataTable<TData, TValue>({
         detailData[key] = row.original[key];
       }
     }
-    console.log(detailData);
+  
     setDetailData(detailData);
     setOpen(!open);
   };
@@ -91,7 +91,6 @@ export function DataTable<TData, TValue>({
     desiredColumns.includes(column.id!)
   );
 
-  console.log("desire columna", filteredColumns);
   return (
     <>
       <DataTableSummary table={table} />

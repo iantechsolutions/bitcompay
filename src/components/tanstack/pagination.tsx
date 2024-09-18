@@ -16,13 +16,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { cn } from "~/lib/utils";
 
 interface DataTablePaginationProps<TData> {
   table: Table<TData>;
+  containerClassName?: string;
 }
 
 export function DataTablePagination<TData>({
   table,
+  containerClassName
 }: DataTablePaginationProps<TData>) {
   const [pages, setPages] = useState<(number | string)[]>([]);
   const { pageIndex, pageSize } = table.getState().pagination;
@@ -76,7 +79,7 @@ export function DataTablePagination<TData>({
   };
 
   return (
-    <div className="flex items-center justify-between px-2 mt-2 w-full">
+    <div className={cn('flex items-center justify-between px-2 mt-2 w-full',containerClassName)}>
       <div className="flex items-center space-x-2">
         <p className="text-sm text-muted-foreground ">Mostrar</p>
         <Select
@@ -104,7 +107,7 @@ export function DataTablePagination<TData>({
           </SelectContent>
         </Select>
       </div>
-      <div className="ml-2 flex-1 text-sm text-muted-foreground">
+      <div className="ml-2 flex-1 text-sm text-muted-foreground hidden sm:block">
         Mostrando <span className="font-bold"> {firstRowShown}</span> a{" "}
         <span className="font-bold"> {lastRowShown}</span> de{" "}
         <span className="font-bold">{totalRows} </span> entradas

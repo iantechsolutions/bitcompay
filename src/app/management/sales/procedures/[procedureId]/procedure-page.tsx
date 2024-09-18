@@ -45,12 +45,12 @@ export default function ProcedurePage(props: ProcedurePageProps) {
     healthInsurances: "",
     cuit: "",
     id: props.family_group.id,
-    bussinessUnit: props.family_group.businessUnit!,
-    plan: props.family_group.plan!,
-    validity: props.family_group.validity!,
-    mode: props.family_group.modo!,
-    receipt: props.family_group.receipt!,
-    bonus: props.family_group.bonus!,
+    bussinessUnit: props.family_group.businessUnit ?? "",
+    plan: props.family_group.plan ?? "",
+    validity: props.family_group.validity ?? new Date(),
+    mode: props.family_group.modo ?? "",
+    receipt: props.family_group.receipt ?? "",
+    bonus: props.family_group.bonus ?? "",
   };
   const generalInfoForm = useForm<InputsGeneralInfo>({
     defaultValues: initialValuesGeneralInfo,
@@ -82,6 +82,7 @@ export default function ProcedurePage(props: ProcedurePageProps) {
         modo: generalInfoValues.mode,
         receipt: generalInfoValues.receipt,
         bonus: generalInfoValues.bonus,
+        sale_condition: billingInfoValues.sale_condition,
       });
 
       await updateProcedure({
@@ -139,6 +140,7 @@ export default function ProcedurePage(props: ProcedurePageProps) {
             partido: member.county,
             provincia: member.province,
             cp: member.cp,
+            postal_codeId: member.postal_codeId,
             zona: member.zone,
             isAffiliate: member.isAffiliate,
             iva: member.iva,
@@ -149,7 +151,7 @@ export default function ProcedurePage(props: ProcedurePageProps) {
           });
         } else {
           await createIntegrant({
-            postal_codeId: "",
+            postal_codeId: member.postal_codeId,
             affiliate_type: member.affiliate_type,
             relationship: member.relationship,
             name: member.name,
@@ -253,6 +255,7 @@ export default function ProcedurePage(props: ProcedurePageProps) {
           partido: integrant.partido ?? "",
           province: integrant.province ?? "",
           cp: integrant.cp ?? "",
+          postal_codeId: integrant.postal_codeId ?? "test",
           zone: integrant.zone ?? "",
           isAffiliate: integrant.isAffiliate ?? "",
           iva: integrant.iva ?? "",
