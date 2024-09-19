@@ -17,6 +17,7 @@ export const brandsRouter = createTRPCRouter({
       const brand = await db.query.brands.findFirst({
         where: eq(schema.brands.id, input.brandId),
         with: {
+          establishments: true,
           company: {
             columns: {
               companyId: false,
@@ -43,9 +44,8 @@ export const brandsRouter = createTRPCRouter({
   }),
 
   list: protectedProcedure.query(async ({ ctx }) => {
-    const companyId = ctx.session.orgId;
     const brands = await db.query.brands.findMany({
-      with: { company: true },
+      with: { company: true, establishments: true },
     });
 
     return brands.filter((x) =>

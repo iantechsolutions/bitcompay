@@ -39,11 +39,24 @@ export function AddPostalCode() {
 
   const router = useRouter();
 
+  function validateFields() {
+    const errors: string[] = [];
+    if (!cp) errors.push("Codigo postal");
+    if (!name) errors.push("Nombre");
+    if (!zone) errors.push("Zona");
+
+    return errors;
+  }
+
   async function handleCreate() {
-    // if (!zones?.some((zoneItem) => zoneItem.name === zone)) {
-    //   toast.error("La zona no es válida");
-    //   return;
-    // }
+    const validationErrors = validateFields();
+    if (validationErrors.length > 0) {
+      return toast.error(
+        `Los siguientes campos están vacíos y sin obligatorios: ${validationErrors.join(
+          ", "
+        )}`
+      );
+    }
 
     try {
       await createPostalCode({
