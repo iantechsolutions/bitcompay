@@ -282,6 +282,7 @@ export const brands = pgTable(
 export const brandsRelations = relations(brands, ({ many }) => ({
   company: many(companiesToBrands),
   plansList: many(plans),
+  establishments: many(establishments),
 }));
 
 export const companiesToBrands = pgTable(
