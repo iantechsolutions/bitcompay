@@ -106,6 +106,7 @@ export default async function Home(props: {
   const tableRows: TableRecord[] = [];
   for (const fg of familyGroups) {
     const excelRow = [];
+    const businessUnit = fg?.businessUnitData?.description ?? "";
     const billResponsible = fg?.integrants?.find(
       (integrante) => integrante?.isBillResponsible
     );
@@ -194,6 +195,7 @@ export default async function Home(props: {
     tableRows.push({
       id: fg?.id!,
       nroGF: fg?.numericalId ?? "N/A",
+      UN: businessUnit,
       nombre: name,
       cuit,
       "saldo anterior":

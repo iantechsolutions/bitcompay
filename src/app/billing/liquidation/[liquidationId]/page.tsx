@@ -112,6 +112,7 @@ export default async function Home(props: {
     );
     const name = billResponsible?.name ?? "";
     const cuit = billResponsible?.id_number ?? "";
+    const businessUnit = fg?.businessUnitData?.description ?? "";
     excelRow.push(fg?.numericalId ?? "");
     excelRow.push(name);
     excelRow.push(cuit);
@@ -201,6 +202,7 @@ export default async function Home(props: {
     tableRows.push({
       id: fg?.id!,
       nroGF: fg?.numericalId ?? "N/A",
+      UN: businessUnit,
       nombre: name,
       cuit,
       "saldo anterior":
@@ -219,9 +221,9 @@ export default async function Home(props: {
       Plan: plan,
       modo,
     });
-    console.log("comprobantes", fg?.comprobantes);
+    
   }
-  console.log("summary", summary);
+
   return (
     <LayoutContainer>
       <div className="flex flex-row justify-between w-full">
