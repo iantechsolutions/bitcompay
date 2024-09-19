@@ -1435,6 +1435,14 @@ export async function preparateComprobante(
           interest / ivaFloatAnterior
         );
       }
+      if (differential_amount != 0) {
+        createcomprobanteItem(
+          ivaFloatAnterior,
+          comprobante[0]?.id ?? "",
+          "Diferencial",
+          differential_amount
+        );
+      }
       if (previous_bill != 0) {
         createcomprobanteItem(
           ivaFloatAnterior,
@@ -1457,6 +1465,7 @@ export async function preparateComprobante(
         "Total factura",
         (comprobante[0]?.importe ?? 0) / ivaFloat
       );
+      
       // await createcomprobanteItem(
       //   ivaFloat,
       //   comprobante[0]?.id ?? "",
