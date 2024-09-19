@@ -6,7 +6,7 @@ export default function ActiveBadge(props: {
 }) {
   return (
     <div
-      className={`rounded-full px-3 py-1 text-xs font-bold bg-[#DDF9CC] text-[#4E9F1D] ${props.className}`}
+      className={`flex flex-auto rounded-full px-4 py-1 text-xs font-bold bg-[#DDF9CC] text-[#4E9F1D] ${props.className}`}
     >
       {props.children}
     </div>
