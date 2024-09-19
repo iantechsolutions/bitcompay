@@ -22,7 +22,7 @@ import { api } from "~/trpc/react";
 import ContentTable from "~/app/billing/liquidation/[liquidationId]/content-table";
 
 type DetailSheetProps = {
-  data: {
+  data?: {
     date: Date;
     description: string;
     amount: number;
@@ -30,7 +30,7 @@ type DetailSheetProps = {
     comprobanteNumber: string;
     status: "Pagada" | "Pendiente";
     iva: number;
-    comprobantes: RouterOutputs["comprobantes"]["getByLiquidation"] | null;
+    comprobantes?: RouterOutputs["comprobantes"]["getByLiquidation"];
     currentAccountAmount: number;
     saldo_a_pagar: number;
     nombre: string;
@@ -87,7 +87,7 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
               Importe total:{" "}
             </p>
             <p className="text-[#6952EB] font-semibold">
-              {data.saldo_a_pagar}
+              {data?.saldo_a_pagar}
             </p>
           </div>
   </SheetContent>

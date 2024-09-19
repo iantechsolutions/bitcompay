@@ -5,7 +5,6 @@ import LayoutContainer from "~/components/layout-container";
 export default async function Page() {
   try {
     const transactions = await api.transactions.list.query();
-    console.log("AAAAAAAAAAAAAAAAAAAAAAAA");
     const statusIds = transactions.map((transaction) => transaction.statusId);
     const statusesList = await api.status.list.query();
     const statuses = await Promise.all(
