@@ -27,12 +27,24 @@ export function AddChannelDialog() {
   const [open, setOpen] = useState(false);
 
   const router = useRouter();
+  function validateFields() {
+    const errors: string[] = [];
+    if (!description) errors.push("Descripción");
+    if (!name) errors.push("Nombre del canal");
 
+    return errors;
+  }
   async function handleCreate() {
+    const validationErrors = validateFields();
+    if (validationErrors.length > 0) {
+      return toast.error(
+        `Los siguientes campos están vacíos: ${validationErrors.join(", ")}`
+      );
+    }
     try {
       await createChannel({
         description,
-        name,
+        name: name.toUpperCase(),
       });
 
       toast.success("Canal creado correctamente");
