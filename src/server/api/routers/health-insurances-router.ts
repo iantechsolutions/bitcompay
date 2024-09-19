@@ -41,29 +41,27 @@ export const healthInsurancesRouter = createTRPCRouter({
       return healthInsurance_found;
     }),
 
-
-
-    // const [initials, setInitials] = useState(OS?.initials ?? "");
-//   const [businessUnit, setBusinessUnit] = useState(OS?.businessUnit ?? "");
-//   const [businessName, setBusinessName] = useState(OS?.businessName ?? "");
-//   const [fiscalAddress, setFiscalAddress] = useState(OS?.fiscalAddress ?? "");
-//   const [fiscalFloor, setFiscalFloor] = useState(OS?.fiscalFloor ?? "");
-//   const [fiscalOffice, setFiscalOffice] = useState(OS?.fiscalOffice ?? "");
-//   const [fiscalLocality, setFiscalLocality] = useState(OS?.fiscalLocality ?? "");
-//   const [fiscalProvince, setFiscalProvince] = useState(OS?.fiscalProvince ?? "");
-//   const [fiscalPostalCode, setFiscalPostalCode] = useState(OS?.fiscalPostalCode ?? "");
-//   const [fiscalCountry, setFiscalCountry] = useState(OS?.fiscalCountry ?? "");
-//   const [IIBBStatus, setIIBBStatus] = useState(OS?.IIBBStatus ?? "");
-//   const [IIBBNumber, setIIBBNumber] = useState(OS?.IIBBNumber ?? "");
-//   const [sellCondition, setSellCondition] = useState(OS?.sellCondition ?? "");
-//   const [phoneNumber, setPhoneNumber] = useState(OS?.phoneNumber ?? "");
-//   const [email, setEmail] = useState(OS?.email ?? "");
-//   const [state, setState] = useState(OS?.state ?? "");
-//   const [user, setUser] = useState(OS?.user ?? "");
-//   const [cancelMotive, setCancelMotive] = useState(OS?.cancelMotive ?? "");
-//   const [floor, setFloor] = useState(OS?.floor ?? "");
-//   const [office, setOffice] = useState(OS?.office ?? "");
-//   const [dateState, setDateState] = useState<Date | undefined>(OS?.dateState);
+  // const [initials, setInitials] = useState(OS?.initials ?? "");
+  //   const [businessUnit, setBusinessUnit] = useState(OS?.businessUnit ?? "");
+  //   const [businessName, setBusinessName] = useState(OS?.businessName ?? "");
+  //   const [fiscalAddress, setFiscalAddress] = useState(OS?.fiscalAddress ?? "");
+  //   const [fiscalFloor, setFiscalFloor] = useState(OS?.fiscalFloor ?? "");
+  //   const [fiscalOffice, setFiscalOffice] = useState(OS?.fiscalOffice ?? "");
+  //   const [fiscalLocality, setFiscalLocality] = useState(OS?.fiscalLocality ?? "");
+  //   const [fiscalProvince, setFiscalProvince] = useState(OS?.fiscalProvince ?? "");
+  //   const [fiscalPostalCode, setFiscalPostalCode] = useState(OS?.fiscalPostalCode ?? "");
+  //   const [fiscalCountry, setFiscalCountry] = useState(OS?.fiscalCountry ?? "");
+  //   const [IIBBStatus, setIIBBStatus] = useState(OS?.IIBBStatus ?? "");
+  //   const [IIBBNumber, setIIBBNumber] = useState(OS?.IIBBNumber ?? "");
+  //   const [sellCondition, setSellCondition] = useState(OS?.sellCondition ?? "");
+  //   const [phoneNumber, setPhoneNumber] = useState(OS?.phoneNumber ?? "");
+  //   const [email, setEmail] = useState(OS?.email ?? "");
+  //   const [state, setState] = useState(OS?.state ?? "");
+  //   const [user, setUser] = useState(OS?.user ?? "");
+  //   const [cancelMotive, setCancelMotive] = useState(OS?.cancelMotive ?? "");
+  //   const [floor, setFloor] = useState(OS?.floor ?? "");
+  //   const [office, setOffice] = useState(OS?.office ?? "");
+  //   const [dateState, setDateState] = useState<Date | undefined>(OS?.dateState);
   list: protectedProcedure.query(async ({ input, ctx }) => {
     const companyId = ctx.session.orgId;
     const healthInsurances = await db.query.healthInsurances.findMany({
@@ -147,7 +145,7 @@ export const healthInsurancesRouter = createTRPCRouter({
           cancelMotive: input.cancelMotive,
           floor: input.floor,
           office: input.office,
-          dateState: input.dateState
+          dateState: input.dateState,
         })
         .returning();
 

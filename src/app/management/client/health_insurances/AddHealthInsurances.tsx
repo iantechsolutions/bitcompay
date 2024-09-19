@@ -26,11 +26,16 @@ import { api } from "~/trpc/react";
 import AddElementButton from "~/components/add-element";
 import { router } from "@trpc/server";
 import { RouterOutputs } from "~/trpc/shared";
-import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
 import { cn } from "~/lib/utils";
 import { format } from "date-fns";
 import Calendar01Icon from "~/components/icons/calendar-01-stroke-rounded";
 import { Calendar } from "~/components/ui/calendar";
+import { bussinessUnits } from "~/server/db/schema";
 
 export function AddHealthInsurances(props: {
   healthInsurance: RouterOutputs["healthInsurances"]["get"] | null;
@@ -47,11 +52,11 @@ export function AddHealthInsurances(props: {
     api.healthInsurances.change.useMutation();
   const { mutateAsync: startCC } =
     api.currentAccount.createInitial.useMutation();
-  const { data: company } = api.companies.get.useQuery();
   const { data: cps } = api.postal_code.list.useQuery();
   const { data: businessUnits } = api.bussinessUnits.list.useQuery();
+  // const { data: company } = api.companies.get.useQuery();
   // State management for the form fields
-  const [name, setName] = useState(OS?.name ?? "");
+  // const [name, setName] = useState(OS?.name ?? "");
   const [idNumber, setIdNumber] = useState(OS?.identificationNumber ?? "");
   const [address, setAddress] = useState(OS?.adress ?? "");
   const [afipStatus, setAfipStatus] = useState(
@@ -76,9 +81,15 @@ export function AddHealthInsurances(props: {
   const [fiscalAddress, setFiscalAddress] = useState(OS?.fiscalAddress ?? "");
   const [fiscalFloor, setFiscalFloor] = useState(OS?.fiscalFloor ?? "");
   const [fiscalOffice, setFiscalOffice] = useState(OS?.fiscalOffice ?? "");
-  const [fiscalLocality, setFiscalLocality] = useState(OS?.fiscalLocality ?? "");
-  const [fiscalProvince, setFiscalProvince] = useState(OS?.fiscalProvince ?? "");
-  const [fiscalPostalCode, setFiscalPostalCode] = useState(OS?.fiscalPostalCode ?? "");
+  const [fiscalLocality, setFiscalLocality] = useState(
+    OS?.fiscalLocality ?? ""
+  );
+  const [fiscalProvince, setFiscalProvince] = useState(
+    OS?.fiscalProvince ?? ""
+  );
+  const [fiscalPostalCode, setFiscalPostalCode] = useState(
+    OS?.fiscalPostalCode ?? ""
+  );
   const [fiscalCountry, setFiscalCountry] = useState(OS?.fiscalCountry ?? "");
   const [IIBBStatus, setIIBBStatus] = useState(OS?.IIBBStatus ?? "");
   const [IIBBNumber, setIIBBNumber] = useState(OS?.IIBBNumber ?? "");
@@ -90,32 +101,41 @@ export function AddHealthInsurances(props: {
   const [cancelMotive, setCancelMotive] = useState(OS?.cancelMotive ?? "");
   const [floor, setFloor] = useState(OS?.floor ?? "");
   const [office, setOffice] = useState(OS?.office ?? "");
-  const [dateState, setDateState] = useState<Date | undefined>(OS?.dateState ?? undefined);
+  const [dateState, setDateState] = useState<Date | undefined>(
+    OS?.dateState ?? undefined
+  );
   const [popoverEmisionOpen, setPopoverEmisionOpen] = useState(false);
-  
 
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  async function handleCreate() {
-    try {
-      if (
-        !name ||
-        !idNumber ||
-        !afipStatus ||
-        !fiscalIdNumber ||
-        !fiscalIdType ||
-        !responsibleName ||
-        !company
-      ) {
-        setError("Todos los campos son obligatoriOS?.");
-        return;
-      }
 
+  function validateFields() {
+    const errors: string[] = [];
+    if (!!businessName) errors.push("RAZON SOCIAL");
+    if (!idNumber) errors.push("CODIGO");
+    if (!fiscalIdNumber) errors.push("NRO DOC. FISCAL");
+    if (!fiscalIdType) errors.push("TIPO DOC FISCAL");
+    if (!responsibleName) errors.push("USUARIO");
+    // if (!code) errors.push("Código");
+    // if (!billType) errors.push("Tipo de Factura");
+
+    return errors;
+  }
+  async function handleCreate() {
+    const validationErrors = validateFields();
+    if (validationErrors.length > 0) {
+      toast.error(
+        `Los siguientes campos están vacíos: ${validationErrors.join(", ")}`
+      );
+      return;
+    }
+
+    try {
       // Creating a health insurance product
       const healthInsurance = await createHealtinsurances({
-        name: name,
+        name: businessName,
         identificationNumber: idNumber,
         isClient: true,
         adress: address,
@@ -143,22 +163,21 @@ export function AddHealthInsurances(props: {
   async function handleEdit() {
     try {
       if (
-        !name ||
+        !businessName ||
         !idNumber ||
         !afipStatus ||
         !fiscalIdNumber ||
         !fiscalIdType ||
-        !responsibleName ||
-        !company
+        !responsibleName
       ) {
-        setError("Todos los campos son obligatoriOS?.");
+        setError("Todos los campos son obligatorios?.");
         return;
       }
 
       // Creating a health insurance product
       const healthInsurance = await UploadhealthInsurances({
         healthInsuranceId: OS?.id ?? "",
-        name: name,
+        name: businessName,
         identificationNumber: idNumber,
         adress: address,
         afip_status: afipStatus,
@@ -234,12 +253,10 @@ export function AddHealthInsurances(props: {
               <Select
                 onValueChange={setBusinessUnit}
                 value={businessUnit}
-                disabled={true}
-              >
+                disabled={true}>
                 <SelectTrigger
                   className="w-fit mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right"
-                >
+              hover:none justify-self-right">
                   <SelectValue placeholder="Seleccione un tipo de ID" />
                 </SelectTrigger>
                 <SelectContent>
@@ -271,8 +288,7 @@ export function AddHealthInsurances(props: {
               <Select onValueChange={setFiscalIdType} value={fiscalIdType}>
                 <SelectTrigger
                   className="w-fit mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right"
-                >
+              hover:none justify-self-right">
                   <SelectValue placeholder="Seleccione un tipo de ID" />
                 </SelectTrigger>
                 <SelectContent>
@@ -301,8 +317,7 @@ export function AddHealthInsurances(props: {
               <Select onValueChange={setAfipStatus} value={afipStatus}>
                 <SelectTrigger
                   className="w-fit mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right"
-                >
+              hover:none justify-self-right">
                   <SelectValue placeholder="Seleccione un estado de AFIP" />
                 </SelectTrigger>
                 <SelectContent>
@@ -323,12 +338,10 @@ export function AddHealthInsurances(props: {
               <Select
                 onValueChange={setIIBBStatus}
                 value={IIBBStatus}
-                disabled={true}
-              >
+                disabled={true}>
                 <SelectTrigger
                   className="w-fit mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right"
-                >
+              hover:none justify-self-right">
                   <SelectValue placeholder="Seleccione un estado de AFIP" />
                 </SelectTrigger>
                 <SelectContent>
@@ -374,7 +387,7 @@ export function AddHealthInsurances(props: {
               />
             </div>
 
-            <div >
+            <div>
               <Label htmlFor="address" className="text-xs">
                 DOMICILIO FISCAL
               </Label>
@@ -387,7 +400,7 @@ export function AddHealthInsurances(props: {
                 onChange={(e) => setFiscalAddress(e.target.value)}
               />
             </div>
-            <div >
+            <div>
               <Label htmlFor="address" className="text-xs">
                 PISO
               </Label>
@@ -400,7 +413,7 @@ export function AddHealthInsurances(props: {
                 onChange={(e) => setFiscalFloor(e.target.value)}
               />
             </div>
-            <div >
+            <div>
               <Label htmlFor="address" className="text-xs">
                 OFICINA
               </Label>
@@ -413,7 +426,7 @@ export function AddHealthInsurances(props: {
                 onChange={(e) => setFiscalOffice(e.target.value)}
               />
             </div>
-            <div >
+            <div>
               <Label htmlFor="address" className="text-xs">
                 LOCALIDAD
               </Label>
@@ -426,7 +439,7 @@ export function AddHealthInsurances(props: {
                 onChange={(e) => setFiscalLocality(e.target.value)}
               />
             </div>
-            <div >
+            <div>
               <Label htmlFor="address" className="text-xs">
                 PROVINCIA
               </Label>
@@ -441,8 +454,11 @@ export function AddHealthInsurances(props: {
             </div>
             <div>
               <Label htmlFor="postal_code">Codigo Postal</Label>
-              <Select onValueChange={setFiscalPostalCode} value={fiscalPostalCode}>
-                <SelectTrigger                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              <Select
+                onValueChange={setFiscalPostalCode}
+                value={fiscalPostalCode}>
+                <SelectTrigger
+                  className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right w-full">
                   <SelectValue placeholder="Seleccionar CP" />
                 </SelectTrigger>
@@ -455,7 +471,7 @@ export function AddHealthInsurances(props: {
                 </SelectContent>
               </Select>
             </div>
-            <div >
+            <div>
               <Label htmlFor="address" className="text-xs">
                 PAIS
               </Label>
@@ -469,10 +485,12 @@ export function AddHealthInsurances(props: {
               />
             </div>
             <div>
-              <Label htmlFor="facturationName" className="text-xs">Nombre de facturacion</Label>
+              <Label htmlFor="facturationName" className="text-xs">
+                Nombre de facturacion
+              </Label>
               <Input
-                              className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-                              hover:none justify-self-right w-full"                
+                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+                              hover:none justify-self-right w-full"
                 id="facturationName"
                 placeholder="..."
                 value={responsibleName}
@@ -480,7 +498,7 @@ export function AddHealthInsurances(props: {
               />
             </div>
             <p className="col-span-4">Datos de Contacto</p>
-            <div >
+            <div>
               <Label htmlFor="address" className="text-xs">
                 DOMICILIO COMERCIAL
               </Label>
@@ -493,7 +511,7 @@ export function AddHealthInsurances(props: {
                 onChange={(e) => setAddress(e.target.value)}
               />
             </div>
-            <div >
+            <div>
               <Label htmlFor="address" className="text-xs">
                 PISO
               </Label>
@@ -506,7 +524,7 @@ export function AddHealthInsurances(props: {
                 onChange={(e) => setFloor(e.target.value)}
               />
             </div>
-            <div >
+            <div>
               <Label htmlFor="address" className="text-xs">
                 PISO
               </Label>
@@ -522,7 +540,7 @@ export function AddHealthInsurances(props: {
             <div>
               <Label htmlFor="locality">Localidad</Label>
               <Input
-              className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right w-full"
                 id="locality"
                 placeholder="..."
@@ -533,7 +551,7 @@ export function AddHealthInsurances(props: {
             <div>
               <Label htmlFor="province">Provincia</Label>
               <Input
-                            className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right w-full"
                 id="province"
                 placeholder="..."
@@ -544,7 +562,8 @@ export function AddHealthInsurances(props: {
             <div>
               <Label htmlFor="postal_code">Codigo Postal</Label>
               <Select onValueChange={setPostalCode} value={postalCode}>
-                <SelectTrigger className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+                <SelectTrigger
+                  className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right w-full">
                   <SelectValue placeholder="Seleccionar CP" />
                 </SelectTrigger>
@@ -557,7 +576,7 @@ export function AddHealthInsurances(props: {
                 </SelectContent>
               </Select>
             </div>
-            <div >
+            <div>
               <Label htmlFor="address" className="text-xs">
                 TELEFONO
               </Label>
@@ -570,7 +589,7 @@ export function AddHealthInsurances(props: {
                 onChange={(e) => setPhoneNumber(e.target.value)}
               />
             </div>
-            <div >
+            <div>
               <Label htmlFor="address" className="text-xs">
                 E-MAIL
               </Label>
@@ -587,7 +606,8 @@ export function AddHealthInsurances(props: {
             <div>
               <Label htmlFor="postal_code">ESTADO</Label>
               <Select onValueChange={setState} value={state}>
-                <SelectTrigger                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+                <SelectTrigger
+                  className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right w-full">
                   <SelectValue placeholder="Seleccionar CP" />
                 </SelectTrigger>
@@ -599,36 +619,36 @@ export function AddHealthInsurances(props: {
               </Select>
             </div>
             <div>
-            <Label htmlFor="postal_code">FECHA DE ESTADO</Label>
-            <Popover
-                      open={popoverEmisionOpen}
-                      onOpenChange={setPopoverEmisionOpen}>
-                      <PopoverTrigger asChild={true}>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
-                            !dateState && "text-muted-foreground"
-                          )}>
-                          {dateState ? (
-                            format(dateState, "PPP")
-                          ) : (
-                            <span>Seleccionar fecha</span>
-                          )}
-                          <Calendar01Icon className="h-4 w-4" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className=" p-0 overflow-y-scroll">
-                        <Calendar
-                          mode="single"
-                          selected={dateState}
-                          onSelect={(e) => setDateState(e)}
-                          initialFocus={true}
-                          />
-                      </PopoverContent>
-                    </Popover>
-                          </div>
-                    <div >
+              <Label htmlFor="postal_code">FECHA DE ESTADO</Label>
+              <Popover
+                open={popoverEmisionOpen}
+                onOpenChange={setPopoverEmisionOpen}>
+                <PopoverTrigger asChild={true}>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
+                      !dateState && "text-muted-foreground"
+                    )}>
+                    {dateState ? (
+                      format(dateState, "PPP")
+                    ) : (
+                      <span>Seleccionar fecha</span>
+                    )}
+                    <Calendar01Icon className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className=" p-0 overflow-y-scroll">
+                  <Calendar
+                    mode="single"
+                    selected={dateState}
+                    onSelect={(e) => setDateState(e)}
+                    initialFocus={true}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div>
               <Label htmlFor="user" className="text-xs">
                 USUARIO
               </Label>
@@ -641,7 +661,7 @@ export function AddHealthInsurances(props: {
                 onChange={(e) => setUser(e.target.value)}
               />
             </div>
-            <div >
+            <div>
               <Label htmlFor="cancelMotive" className="text-xs">
                 MOTIVO DE BAJA
               </Label>
@@ -654,7 +674,6 @@ export function AddHealthInsurances(props: {
                 onChange={(e) => setCancelMotive(e.target.value)}
               />
             </div>
-            
 
             {OS ? null : (
               <div>
