@@ -7,7 +7,8 @@ import LayoutContainer from "~/components/layout-container";
 import { Title } from "~/components/title";
 import { UploadDropzone } from "~/components/uploadthing";
 import type { RouterOutputs } from "~/trpc/shared";
-
+import { api } from "~/trpc/react";
+import {Establishment} from "~/server/db/schema";
 export default function UploadResponsePage(props: {
   channel: NonNullable<RouterOutputs["channels"]["get"]>;
 }) {
@@ -29,6 +30,22 @@ export default function UploadResponsePage(props: {
       setDisabled(true);
     }
   }, [channelName]);
+
+  const brands =  api.brands.list.useQuery().data || []
+  const establishments : Establishment[]= brands.reduce<Establishment[]>((acc, brand) => {
+    if (brand.establishments) {
+      acc.push(...brand.establishments);
+    }
+    return acc;
+  }, []);
+  if(establishments.length === 0){
+    return (
+      <LayoutContainer>
+         <Title>Cargar documento</Title>
+          <p className="text-red-500">No hay establecimientos asociados a la marca</p>
+      </LayoutContainer>
+    )
+  }
 
   return (
     <LayoutContainer>
