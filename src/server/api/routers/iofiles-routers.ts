@@ -68,14 +68,20 @@ export const iofilesRouter = createTRPCRouter({
             p.statusId !== statusEnviado?.id
         );
 
-        let card_brand = input?.card_brand?.toLowerCase();
-        let card_type = input?.card_type?.toLowerCase();
+        let card_brand = input?.card_brand?.toUpperCase();
+        let card_type = input?.card_type?.toUpperCase();
         console.log(card_brand, card_type, "acal");
         console.log("patata", payments);
 
-        if (channel.name.includes("DEBITO AUTOMATICO")) {
+        if (
+          channel.name.includes("DEBITO AUTOMATICO") &&
+          card_brand &&
+          card_type
+        ) {
           payments = payments.filter(
-            (p) => p.card_brand === card_brand && p.card_type === card_type
+            (p) =>
+              p.card_brand?.toUpperCase().includes(card_brand) &&
+              p.card_type?.toUpperCase().includes(card_type)
           );
         }
 
@@ -83,7 +89,7 @@ export const iofilesRouter = createTRPCRouter({
 
         const regexPagoFacil = /pago\s*f[aá]cil/i;
         // Generamos el archivo de salida segun el canal
-        console.log("patata", payments);
+        console.log("patatas", payments.length, payments);
         if (payments.length === 0) {
           text = "No existen payments disponibles";
         } else if (channel.name.includes("DEBITO DIRECTO CBU")) {
@@ -159,8 +165,8 @@ export const iofilesRouter = createTRPCRouter({
           text = generateDebitoAutomatico({
             payments,
             EstablishmentNumber: establishment.establishment_number ?? 0,
-            cardType: card_type ?? "",
-            flag: card_brand ?? "",
+            cardType: card_type,
+            flag: card_brand,
             // presentationDate: input.presentation_date,
           });
         } else {
@@ -865,9 +871,9 @@ type generateDAprops = {
 };
 function generateDebitoAutomatico(props: generateDAprops) {
   const FileNameMap: Record<string, string> = {
-    "visa credito": "DEBLIQC ",
-    "visa debito": "DEBLIQD ",
-    "mastercard credito": "DEBLIMC ",
+    "VISA CREDITO": "DEBLIQC ",
+    "VISA DEBITO": "DEBLIQD ",
+    "MASTERCARD CREDITO": "DEBLIMC ",
   };
 
   let currentDate = dayjs().utc().tz("America/Argentina/Buenos_Aires");
@@ -878,7 +884,7 @@ function generateDebitoAutomatico(props: generateDAprops) {
   }
   const dateYYYYMMDD = currentDate.format("YYYYMMDD");
 
-  let key = `${props.flag.toLowerCase()} ${props.cardType.toLowerCase()}`;
+  let key = `${props.flag.toUpperCase()} ${props.cardType.toUpperCase()}`;
   console.log("testamento", props.flag, props.cardType, key);
   const fileName = FileNameMap[key] || " ".repeat(8);
 

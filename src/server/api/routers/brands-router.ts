@@ -86,6 +86,7 @@ export const brandsRouter = createTRPCRouter({
         redescription: z.string().min(0).max(10),
         iva: z.string().optional(),
         billType: z.string().optional(),
+        utility: z.string().optional(),
         concept: z.string().optional(),
         code: z.string().optional(),
       })

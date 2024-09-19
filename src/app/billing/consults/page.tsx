@@ -6,6 +6,7 @@ import { LargeTable } from "~/components/table";
 import { ComprobantesHeaders } from "~/server/uploads/validators";
 
 import { useLayoutEffect, useState } from "react";
+import LayoutContainer from "~/components/layout-container";
 
 export default function Page() {
   const comprobantes = api.comprobantes.list.useQuery().data;
@@ -25,8 +26,9 @@ export default function Page() {
   }, []);
 
   return (
-    <div>
-      <div className="flex justify-between">
+    <LayoutContainer>
+      <section className="space-y-5"></section>
+      <div>
         <Title>Consultas</Title>
       </div>
       <div className="mt-5 flex overflow-x-auto overflow-y-auto">
@@ -38,6 +40,7 @@ export default function Page() {
           />
         )}
       </div>
-    </div>
+      <section className="space-y-5"></section>
+    </LayoutContainer>
   );
 }

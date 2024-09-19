@@ -117,7 +117,8 @@ export function AddHealthInsurances(props: {
     if (!idNumber) errors.push("CODIGO");
     if (!fiscalIdNumber) errors.push("NRO DOC. FISCAL");
     if (!fiscalIdType) errors.push("TIPO DOC FISCAL");
-    if (!responsibleName) errors.push("USUARIO");
+    if (!afipStatus) errors.push("ESTADO AFIP");
+    if (!responsibleName) errors.push("Nombre de facturacion");
     // if (!code) errors.push("Código");
     // if (!billType) errors.push("Tipo de Factura");
 
@@ -161,19 +162,14 @@ export function AddHealthInsurances(props: {
   }
 
   async function handleEdit() {
+    const validationErrors = validateFields();
+    if (validationErrors.length > 0) {
+      toast.error(
+        `Los siguientes campos están vacíos: ${validationErrors.join(", ")}`
+      );
+      return;
+    }
     try {
-      if (
-        !businessName ||
-        !idNumber ||
-        !afipStatus ||
-        !fiscalIdNumber ||
-        !fiscalIdType ||
-        !responsibleName
-      ) {
-        setError("Todos los campos son obligatorios?.");
-        return;
-      }
-
       // Creating a health insurance product
       const healthInsurance = await UploadhealthInsurances({
         healthInsuranceId: OS?.id ?? "",

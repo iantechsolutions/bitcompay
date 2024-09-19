@@ -37,6 +37,9 @@ export function AddBussiness(props: { params: { companyId: string } }) {
   const { data: brands } = api.brands.list.useQuery();
 
   async function handleCreate() {
+    if (!brand || !description) {
+      return toast.error("Todos los campos son obligatorios");
+    }
     try {
       await createProduct({
         description: description,

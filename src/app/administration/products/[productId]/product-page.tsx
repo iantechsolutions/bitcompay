@@ -67,7 +67,20 @@ export default function ProductPage({
   const [name, setName] = useState(product.name);
   const [description, setDescription] = useState(product.description);
 
+  function validateFields() {
+    const errors: string[] = [];
+    if (!description) errors.push("Descripción");
+    if (!name) errors.push("Nombre del producto");
+
+    return errors;
+  }
   async function handleChange() {
+    const validationErrors = validateFields();
+    if (validationErrors.length > 0) {
+      return toast.error(
+        `Los siguientes campos están vacíos: ${validationErrors.join(", ")}`
+      );
+    }
     try {
       await changeProduct({
         productId: product.id,

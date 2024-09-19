@@ -63,47 +63,61 @@ export default function AddPreLiquidation() {
   const { mutateAsync: createLiquidation, isLoading } =
     api.comprobantes.createPreLiquidation.useMutation();
 
+  function validateFields() {
+    const errors: string[] = [];
+    if (!puntoVenta) errors.push("Punto de venta");
+    if (!brandId) errors.push("Marca");
+    if (!fechaVencimiento2 || !fechaVencimiento1) errors.push("Vencimientos");
+    if (!mes) errors.push("Mes de vigencia");
+
+    return errors;
+  }
+
   async function handleCreate() {
-    try{
-      if (!puntoVenta || !brandId || !fechaVencimiento2) {
-        toast.error("Ingrese los valores requeridos");
-      } else {
-        if (mes && anio && anio >= new Date().getFullYear()) {
-          const liquidation = await createLiquidation({
-            pv: puntoVenta,
-            brandId: brandId,
-            dateDesde: new Date(anio, mes - 1, 1),
-            dateHasta: new Date(anio, mes, 0),
-            dateDue: fechaVencimiento2,
-            interest: interest ?? 0,
-            logo_url: logo_url ?? undefined,
-          });
-          if ("error" in liquidation!) {
-            console.log("liquidation", liquidation);
-            toast.error(liquidation.error);
-          } else if (liquidation) {
-            queryClient.invalidateQueries();
-            toast.success("Pre-Liquidación creada correctamente");
-            setOpen(false);
-          } else {
-            toast.error("Error al crear la Pre-Liquidación");
-          }
-        }
-        if (!mes) {
-          toast.error("Seleccione un mes");
-        } else if (!anio || anio < new Date().getFullYear()) {
-          toast.error("El año seleccionado no es válido");
+    const validationErrors = validateFields();
+    if (validationErrors.length > 0) {
+      return toast.error(
+        `Los siguientes campos están vacíos y sin obligatorios: ${validationErrors.join(
+          ", "
+        )}`
+      );
+    }
+
+    try {
+      if (mes && anio && anio >= new Date().getFullYear()) {
+        const liquidation = await createLiquidation({
+          pv: puntoVenta,
+          brandId: brandId,
+          dateDesde: new Date(anio, mes - 1, 1),
+          dateHasta: new Date(anio, mes, 0),
+          dateDue: fechaVencimiento2,
+          interest: interest ?? 0,
+          logo_url: logo_url ?? undefined,
+        });
+        if ("error" in liquidation!) {
+          console.log("liquidation", liquidation);
+          toast.error(liquidation.error);
+        } else if (liquidation) {
+          queryClient.invalidateQueries();
+          toast.success("Pre-Liquidación creada correctamente");
+          setOpen(false);
+        } else {
+          toast.error("Error al crear la Pre-Liquidación");
         }
       }
+      if (!mes) {
+        toast.error("Seleccione un mes");
+      } else if (!anio || anio < new Date().getFullYear()) {
+        toast.error("El año seleccionado no es válido");
+      }
+
       setOpen(false);
       toast.success("Pre-Liquidación creada correctamente");
-    }
-    catch(e){
+    } catch (e) {
       console.log("error", e);
       const error = asTRPCError(e)!;
       toast.error(error.message);
     }
-   
 
     //TODO CORREGIR ESTO
     // await new Promise((resolve) => setTimeout(resolve, 500));
@@ -158,38 +172,41 @@ export default function AddPreLiquidation() {
           </div>
           <div className="max-w-md w-full flex flex-row gap-2 text-gray-500 p-3 mr-1 pl-2">
             <div className="w-1/2 m-3 mr-2 ml-2 pr-2">
-  <Label className="text-xs">1° FECHA DE VENCIMIENTO</Label>
-  <br />
-  <Popover open={popover1Open} onOpenChange={setPopover1Open}>
-    <PopoverTrigger asChild>
-      <Button
-        variant={"form"}
-        className={cn(
-          "w-full border-b-2 border-green-200 pl-3 text-left font-normal hover:bg-none hover:bg-transparent shadow-none overflow-hidden text-ellipsis whitespace-nowrap",
-          !fechaVencimiento1 && "text-muted-foreground"
-        )}
-      >
-        <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[#3E3E3E]">
-          {fechaVencimiento1 ? (
-            dayjs(fechaVencimiento1).format("D [de] MMMM [de] YYYY")
-          ) : (
-            <span>Seleccione una fecha</span>
-          )}
-        </p>
-        <CalendarIcon className="ml-2 h-4 w-4 opacity-50" />
-      </Button>
-    </PopoverTrigger>
-    <PopoverContent className="w-auto p-0" align="start">
-      <Calendar
-        mode="single"
-        selected={fechaVencimiento1 ? new Date(fechaVencimiento1) : undefined}
-        onSelect={(e) => FechasCreate(e)}
-        disabled={(date: Date) => date < new Date()}
-        initialFocus
-      />
-    </PopoverContent>
-  </Popover>
-</div>
+              <Label className="text-xs">1° FECHA DE VENCIMIENTO</Label>
+              <br />
+              <Popover open={popover1Open} onOpenChange={setPopover1Open}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"form"}
+                    className={cn(
+                      "w-full border-b-2 border-green-200 pl-3 text-left font-normal hover:bg-none hover:bg-transparent shadow-none overflow-hidden text-ellipsis whitespace-nowrap",
+                      !fechaVencimiento1 && "text-muted-foreground"
+                    )}>
+                    <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[#3E3E3E]">
+                      {fechaVencimiento1 ? (
+                        dayjs(fechaVencimiento1).format("D [de] MMMM [de] YYYY")
+                      ) : (
+                        <span>Seleccione una fecha</span>
+                      )}
+                    </p>
+                    <CalendarIcon className="ml-2 h-4 w-4 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={
+                      fechaVencimiento1
+                        ? new Date(fechaVencimiento1)
+                        : undefined
+                    }
+                    onSelect={(e) => FechasCreate(e)}
+                    disabled={(date: Date) => date < new Date()}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
             <div className="w-1/2 m-3 mr-2 ml-2 pr-2">
               <Label className="text-xs">2° FECHA DE VENCIMIENTO</Label>
               <br />
@@ -410,20 +427,22 @@ export default function AddPreLiquidation() {
               />
             </div>
           </div>
-<div>
-<h3 className="text-[#3E3E3E] font-thin text-opacity-80 text-[10px] italic justify-center">
-  *Aplica sobre saldos adeudados de períodos anteriores. Completar con alícuota como porcentaje directo sobre la base del cálculo.
-</h3>
-</div>
+          <div>
+            <h3 className="text-[#3E3E3E] font-thin text-opacity-80 text-[10px] italic justify-center">
+              *Aplica sobre saldos adeudados de períodos anteriores. Completar
+              con alícuota como porcentaje directo sobre la base del cálculo.
+            </h3>
+          </div>
           <Button
             type="submit"
             className="m-5 mb-2 rounded-full w-fit justify-self-center bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#DEF5DD]"
             disabled={isLoading}
             onClick={handleCreate}>
-            {isLoading && (
+            {isLoading ? (
               <Loader2Icon className="mr-2 animate-spin" size={20} />
+            ) : (
+              <CirclePlus className="mr-2" />
             )}
-            <CirclePlus className="mr-2" />
             Crear Pre-Liquidación
           </Button>
         </DialogContent>

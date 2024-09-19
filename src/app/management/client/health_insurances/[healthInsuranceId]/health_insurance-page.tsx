@@ -155,23 +155,21 @@ export default function HealthInsurancePage(props: {
     <div>
       <Link
         className=" font-monserrat w-20 h-auto flex justify-between"
-        href={`/management/client/health_insurances`}
-      >
+        href={`/management/client/health_insurances`}>
         <ArrowLeftIcon className="mb-2" /> Volver
       </Link>
       <LayoutContainer>
         <section className="space-y-2">
           <div className="flex w-full justify-between">
             <h2 className="text-lg font-monserrat font-semibold mt-2">
-              Obra Social
+              Obra Social {props?.healthInsurance?.businessName}
             </h2>
             <div>
               <AddHealthInsurances healthInsurance={props?.healthInsurance} />
               <Button
                 variant={"destructive"}
                 className="ml-10"
-                onClick={() => setOpenDelete(true)}
-              >
+                onClick={() => setOpenDelete(true)}>
                 Eliminar
               </Button>
             </div>
@@ -194,8 +192,7 @@ export default function HealthInsurancePage(props: {
                   router.push(
                     `/management/client/health_insurances/${props.healthInsuranceId}/cc/${props.ccId}`
                   );
-                }}
-              >
+                }}>
                 <Eye className="mr-2 w-4 h-4" />
                 Ver movimientos
               </Button>
@@ -207,8 +204,7 @@ export default function HealthInsurancePage(props: {
               <h2 className="text-md font-semibold">Datos Básicos</h2>
               <button
                 onClick={() => setOpenBasicData(!openBasicData)}
-                className="absolute top-0 right-0 mt-4 mr-4 text-gray-400"
-              >
+                className="absolute top-0 right-0 mt-4 mr-4 text-gray-400">
                 {openBasicData ? (
                   <CircleChevronUp className="w-5 h-5" />
                 ) : (
@@ -254,8 +250,7 @@ export default function HealthInsurancePage(props: {
               <h2 className="text-md font-semibold">Facturación</h2>
               <button
                 onClick={() => setOpenFacturacion(!openFacturacion)}
-                className="absolute top-0 right-0 mt-4 mr-4 text-gray-400"
-              >
+                className="absolute top-0 right-0 mt-4 mr-4 text-gray-400">
                 {openFacturacion ? (
                   <CircleChevronUp className="w-5 h-5" />
                 ) : (
