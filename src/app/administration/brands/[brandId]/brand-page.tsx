@@ -100,7 +100,7 @@ export default function BrandPage({
     if (!iva) errors.push("IVA");
     // if (!code) errors.push("Código");
     // if (!billType) errors.push("Tipo de Factura");
-    if (!utility || utility.length != 8) errors.push("Utilidad");
+
     return errors;
   }
 
@@ -110,6 +110,10 @@ export default function BrandPage({
       toast.error(
         `Los siguientes campos están vacíos: ${validationErrors.join(", ")}`
       );
+      return;
+    }
+    if (!utility || utility.length != 8) {
+      toast.error("No ha ingresado una utilidad de senapsa valida");
       return;
     }
     try {
@@ -200,7 +204,9 @@ export default function BrandPage({
                     />
                   </div>
                   <div>
-                    <Label htmlFor="utility">Codigo de utilidad(8 carac)</Label>
+                    <Label htmlFor="utility">
+                      Codigo de utilidad(8 otorgada por senapsa)
+                    </Label>
                     <Input
                       id="utility"
                       value={utility}

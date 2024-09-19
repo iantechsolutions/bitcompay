@@ -5,6 +5,7 @@ import { CheckIcon, Loader2, Loader2Icon, UserCircleIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type MouseEventHandler, useState } from "react";
 import { toast } from "sonner";
+import { GoBackButton } from "~/components/goback-button";
 import LayoutContainer from "~/components/layout-container";
 import { List, ListTile } from "~/components/list";
 import { Title } from "~/components/title";
@@ -107,6 +108,7 @@ export default function CompanyPage({
 
   return (
     <LayoutContainer>
+      <GoBackButton url={""} />
       <section className="space-y-2">
         <div className="flex justify-between">
           <Title>{company.name}</Title>
