@@ -80,117 +80,85 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
           </SheetDescription>
         </SheetHeader>
 
-        <div className="flex flex-row border justify-between items-center p-5 rounded-md mt-3">
+        <div className="flex flex-row border justify-between items-center p-5 rounded-md mt-3 bg-[#f7f7f7]">
           <p className="text-lg font-medium-medium">Saldo actual </p>
           <p className="text-[#6952EB] font-semibold text-xl">
             $ {data.currentAccountAmount}
           </p>
         </div>
-
         <div className="mt-5">
-          {/* {comprobanteNCReciente && (
-            <div className="mt-2">
-              <div
-                className="flex flex-row justify-between items-center py-2 px-2 mb-3 rounded-md bg-[#c2bebe84] 
-                hover:bg-[#cbc7c7ce] transition-all"
-                // onClick={() => setOpenNCAccordion(!openNCAccordion)}
-              >
-                <p className="text-xl font-medium opacity-70 flex flex-row items-center">
-                  {comprobanteNCReciente.billLink &&
-                  comprobanteNCReciente.billLink !== "" ? (
-                    <div className="items-center justify-center">
-                      <Button
-                        variant="ghost"
-                        className="mr-2"
-                        onClick={() => {
-                          !comprobanteNCReciente?.billLink
-                            ? alert("El archivo no cargo todavia")
-                            : window.open(comprobanteNCReciente?.billLink);
-                          // : router.push(`${comprobante?.billLink}`);
-                        }}
-                      >
-                        <FileText></FileText>
-                      </Button>
-                    </div>
-                  ) : null}
-                  NC */}
-          {/* {openNCAccordion ? (
-                    <ChevronDown
-                      className="ml-2 transition-transform duration-200"
-                      size={12}
-                    />
-                  ) : (
-                    <ChevronRight
-                      className="ml-2 transition-transform duration-200"
-                      size={12}
-                    />
-                  )} */}
-          {/* </p>
-                <p className="text-lg font-semibold text-[#4af0d4]">
-                  {NCTotal ? `$ ${NCTotal}` : "N/A"}
-                </p>
-              </div>
-              {openNCAccordion && (
-                <ContentTable comprobante={comprobanteNCReciente} />
-              )}
-            </div>
-          )} */}
-          {/* <div
-            className="flex flex-row justify-between items-center py-2 px-2 mb-3 rounded-md bg-[#c2bebe84] hover:bg-[#cbc7c7ce] transition-all mt-5"
-            // onClick={() => setOpenFCAccordion(!openFCAccordion)}
-          >
-            <p className="text-xl font-medium opacity-70 flex flex-row items-center">
-              {comprobanteFCReciente?.billLink &&
-              comprobanteFCReciente?.billLink !== "" ? (
-                <div className="items-center justify-center">
-                  
+          {comprobanteNCReciente && (
+            <>
+              <h1 className="text-base font-bold mb-3">
+                {comprobanteNCReciente.tipoComprobante}
+              </h1>
+              <ContentTable comprobante={comprobanteNCReciente} />
+              <div className="mt-3">
+                <div className="bg-[#DEF5DD] flex flex-row justify-between items-center p-3 rounded-md mt-2">
+                  <p className=" text-[#6952EB] font-semibold">
+                    Total:{" "}
+                  </p>
+                  <p className="text-[#6952EB] font-semibold">
+                    {NCTotal ? `$ ${NCTotal}` : "N/A"}
+                  </p>
                 </div>
-              ) : null}
-              FC */}
-          {/* {openFCAccordion ? (
-                <ChevronDown
-                  className="ml-2 transition-transform duration-200"
-                  size={12}
-                />
-              ) : (
-                <ChevronRight
-                  className="ml-2 transition-transform duration-200"
-                  size={12}
-                />
-              )} */}
-          {/* </p>
-            <p className="text-lg font-semibold text-[#4af0d4]">
-              {FCTotal ? `$ ${FCTotal}` : "N/A"}
-            </p>
-          </div> */}
-          {openFCAccordion && comprobanteFCReciente && (
-            <ContentTable comprobante={comprobanteFCReciente} />
+              </div>
+              <div>
+                <div className="flex flex-auto justify-end">
+                  <Button
+                    variant="bitcompay"
+                    className="text-base px-7 py-[1.27rem] mt-5 gap-3 text-[#3e3e3e] rounded-full font-medium"
+                    onClick={() => {
+                      !comprobanteNCReciente?.billLink
+                        ? alert("El archivo no cargo todavia")
+                        : window.open(comprobanteNCReciente?.billLink);
+                      // : router.push(`${comprobante?.billLink}`);
+                    }}
+                  >
+                    <Download02Icon className="h-5" />
+                    Descargar Comprobante
+                  </Button>
+                </div>
+              </div>
+            </>
           )}
         </div>
-        <div className="mt-3">
-          <div className="bg-[#DEF5DD] flex flex-row justify-between items-center p-3 rounded-md mt-2">
-            <p className=" text-[#4E9F1D] font-semibold opacity-60">
-              Saldo a pagar:{" "}
-            </p>
-            <p className="text-[#4E9F1D] font-semibold opacity-60">
-              {saldo_a_pagar ? `$ ${saldo_a_pagar}` : "N/A"}
-            </p>
-          </div>
-          <div className="flex flex-auto justify-end">
-            <Button
-              variant="bitcompay"
-              className=" text-lg px-8 py-6 mt-5 gap-3 text-[#3e3e3e] rounded-full font-medium"
-              onClick={() => {
-                !comprobanteFCReciente?.billLink
-                  ? alert("El archivo no cargo todavia")
-                  : window.open(comprobanteFCReciente?.billLink);
-                // : router.push(`${comprobante?.billLink}`);
-              }}
-            >
-              <Download02Icon />
-              Descargar Factura
-            </Button>
-          </div>
+        <div className="mt-4">
+          {comprobanteFCReciente && (
+            <>
+              <h1 className="text-base font-bold mb-3">
+                {comprobanteFCReciente.tipoComprobante}
+              </h1>
+              <ContentTable comprobante={comprobanteFCReciente} />
+              <div className="mt-3">
+                <div className="bg-[#DEF5DD] flex flex-row justify-between items-center p-3 rounded-md mt-2">
+                  <p className=" text-[#6952EB] font-semibold ">
+                    Saldo a pagar:{" "}
+                  </p>
+                  <p className="text-[#6952EB] font-semibold ">
+                    {saldo_a_pagar ? `$ ${saldo_a_pagar}` : "N/A"}
+                  </p>
+                </div>
+              </div>
+              <div>
+                <div className="flex flex-auto justify-end">
+                  <Button
+                    variant="bitcompay"
+                    className="text-base px-7 py-[1.27rem] mt-5 gap-3 text-[#3e3e3e] rounded-full font-medium"
+                    onClick={() => {
+                      !comprobanteFCReciente?.billLink
+                        ? alert("El archivo no cargo todavia")
+                        : window.open(comprobanteFCReciente?.billLink);
+                      // : router.push(`${comprobante?.billLink}`);
+                    }}
+                  >
+                    <Download02Icon className="h-5" />
+                    Descargar Comprobante
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </SheetContent>
     </Sheet>
