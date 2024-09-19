@@ -30,6 +30,8 @@ export function AddCompanyDialog() {
   const [name, setName] = useState("");
   const [organizationName, setOrganizationName] = useState("");
   const [concept, setConcept] = useState("");
+  const [CUIT, setCUIT] = useState("");
+
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
 
@@ -38,45 +40,49 @@ export function AddCompanyDialog() {
     texto: z.string().max(40),
   });
   const handleCreate: FormEventHandler<HTMLFormElement> = async (e) => {
-    e.preventDefault();
-    try {
-      schema.parse({ texto: concept });
-      let organization;
-      if (createOrganization) {
-        organization = await createOrganization({ name: organizationName });
-      } else {
-        console.warn("createOrganization is undefined");
-      }
-      if (organization) {
-        await createCompany({
-          id: organization.id,
-          description,
-          name,
-          concept,
-        });
-        const cc = await createCC({
-          company_id: organization.id,
-          family_group: null,
-        });
-        await createEvent({
-          ccId: cc[0]?.id ?? "",
-          type: "REC",
-          amount: 0,
-        });
-      }
-      setName("");
-      setDescription("");
-      setConcept("");
-      toast.success("Entidad creado correctamente");
-      router.refresh();
-      setOpen(false);
-    } catch (e) {
-      setError("ocurrio un error al crear entidad");
-      const errorResult = asTRPCError(e);
-      if (errorResult) {
-        toast.error(errorResult.message);
-      } else {
-        console.error("Error conversion failed");
+    if (!name || !description || !concept || !CUIT) {
+      return toast.error("Todos los campos son obligatorios");
+    } else {
+      e.preventDefault();
+      try {
+        schema.parse({ texto: concept });
+        let organization;
+        if (createOrganization) {
+          organization = await createOrganization({ name: organizationName });
+        } else {
+          console.warn("createOrganization is undefined");
+        }
+        if (organization) {
+          await createCompany({
+            id: organization.id,
+            description,
+            name,
+            concept,
+          });
+          const cc = await createCC({
+            company_id: organization.id,
+            family_group: null,
+          });
+          await createEvent({
+            ccId: cc[0]?.id ?? "",
+            type: "REC",
+            amount: 0,
+          });
+        }
+        setName("");
+        setDescription("");
+        setConcept("");
+        toast.success("Entidad creado correctamente");
+        router.refresh();
+        setOpen(false);
+      } catch (e) {
+        setError("ocurrio un error al crear entidad");
+        const errorResult = asTRPCError(e);
+        if (errorResult) {
+          toast.error(errorResult.message);
+        } else {
+          console.error("Error conversion failed");
+        }
       }
     }
   };
@@ -133,6 +139,16 @@ export function AddCompanyDialog() {
                     );
                   }
                 }}
+              />
+              <span className="text-red-600 text-xs">{error}</span>
+            </div>
+            <div>
+              <Label htmlFor="CUIL">CUIL/CUIT</Label>
+              <Input
+                id="CUIL"
+                placeholder="..."
+                value={CUIT}
+                onChange={(e) => setCUIT(e.target.value)}
               />
               <span className="text-red-600 text-xs">{error}</span>
             </div>

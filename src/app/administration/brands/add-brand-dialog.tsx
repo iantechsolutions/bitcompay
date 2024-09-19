@@ -60,6 +60,7 @@ export function AddBrandDialog() {
         iva: iva.toString(),
         description,
         name,
+        code,
         redescription: reducedDescription,
         concept,
       });

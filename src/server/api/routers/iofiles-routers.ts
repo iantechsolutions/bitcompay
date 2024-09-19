@@ -70,6 +70,9 @@ export const iofilesRouter = createTRPCRouter({
 
         let card_brand = input?.card_brand?.toLowerCase();
         let card_type = input?.card_type?.toLowerCase();
+        console.log(card_brand, card_type, "acal");
+        console.log("patata", payments);
+
         if (channel.name.includes("DEBITO AUTOMATICO")) {
           payments = payments.filter(
             (p) => p.card_brand === card_brand && p.card_type === card_type
@@ -116,7 +119,7 @@ export const iofilesRouter = createTRPCRouter({
             concept: input.concept,
             brandName: brand.name,
             redescription: brand.redescription,
-            prisma_code: brand.prisma_code,
+            utility: brand.utility,
           };
           text = await generatePagoFacil(generateInput, payments);
         } else if (channel.name.includes("RAPIPAGO")) {
@@ -142,7 +145,6 @@ export const iofilesRouter = createTRPCRouter({
             });
           }
 
-          console.log("testttt", card_brand, brand.id, card_type);
           const establishment = await db.query.establishments.findFirst({
             where: and(
               eq(schema.establishments.brandId, brand.id),
@@ -168,11 +170,12 @@ export const iofilesRouter = createTRPCRouter({
           });
         }
         if (text.includes("Error. La marca no posee codigo de prisma")) {
-          console.log("llego");
           return text;
-        }
-        if (text.includes("Error. Hay pagos sin un CBU asociado.")) {
-          console.log("patata");
+        } else if (text.includes("Error. Hay pagos sin un CBU asociado.")) {
+          return text;
+        } else if (text.includes("Error. La marca no posee utility code")) {
+          return text;
+        } else if (text.includes("Error. Utility code incorrecto")) {
           return text;
         }
         // Subimos el archivo a Uploadthing
@@ -348,7 +351,7 @@ function generateDebitoDirecto(
 
     const fiscalNumber = formatString(
       " ",
-      transaction.fiscal_id_number!.toString(),
+      transaction.affiliate_number!.toString(),
       22,
       true
     );
@@ -368,7 +371,7 @@ function generateDebitoDirecto(
     if (transaction.cbu.length === 22) {
       CBU = transaction.cbu;
     }
-    text += `421002513  ${fiscalNumber}${CBU}${collectedAmount}    ${period}${dateYYYYMMDD}  ${invoice_number}${" ".repeat(
+    text += `421002513  ${fiscalNumber}${CBU}${collectedAmount}      ${period}${dateYYYYMMDD}  ${invoice_number}${" ".repeat(
       127
     )}\r\n`;
     let name;
@@ -505,7 +508,7 @@ function generatePagomiscuentas(
     let filler2 = "0".repeat(29);
     let filler = "0".repeat(19);
 
-    text += `${register_code}${affiliate_number}${invoice_number}${moneda}${first_due_date}${first_due_amount}${second_due_date}${second_due_amount}${third_due_amount}${filler}${affiliate_number}${ticketMessage}ABONO ${displayMessage}${barcode}${filler2}\n`;
+    text += `${register_code}${affiliate_number.toUpperCase()}${invoice_number}${moneda}${first_due_date}${first_due_amount}${second_due_date}${second_due_amount}${third_due_amount}${filler}${affiliate_number.toUpperCase()}${ticketMessage}ABONO ${displayMessage.toUpperCase()}${barcode}${filler2}\n`;
 
     total_collected += transaction.first_due_amount!;
   }
@@ -533,15 +536,20 @@ async function generatePagoFacil(
     concept: string;
     brandName: string;
     redescription: string;
-    prisma_code: string | undefined | null;
+    utility: string | null;
   },
   transactions: RouterOutputs["transactions"]["list"]
 ): Promise<string> {
-  if (_input.prisma_code === "" || _input.prisma_code === null) {
-    return "Error. La marca no posee codigo de prisma";
-  }
   let text = "";
 
+  if (!_input.utility) {
+    text = "Error. La marca no posee utility code";
+    return text;
+  }
+  if (_input.utility?.length != 8) {
+    text = "Error. Utility code incorrecto";
+    return text;
+  }
   let registeR_type = "01";
   const records_number = formatString(
     "0",
@@ -550,7 +558,7 @@ async function generatePagoFacil(
     false
   );
   let action = "A";
-  const utility = formatString(" ", _input.redescription, 8, true);
+  let utility = formatString(" ", _input.utility, 8, true);
 
   const todayDate = dayjs().format("YYYYMMDD");
   // const date = dayjs().format("DDMMYYYY");
@@ -617,7 +625,7 @@ async function generatePagoFacil(
     const seq_terminal = "1234";
     const payment_time = dayjs(transaction.first_due_date).format("HHmmss");
     // codigo de barras
-    const service_company = _input.prisma_code;
+    const service_company = _input.utility;
     const dayOfYear = dayjs(transaction.first_due_date).dayOfYear();
     const first_due_date_bar_code_YY = dayjs(transaction.first_due_date).format(
       "YY"
@@ -681,6 +689,7 @@ function generateRapiPago(
     fileName: string;
     concept: string;
     redescription: string;
+    prisma_code: string | null;
   },
   transactions: RouterOutputs["transactions"]["list"]
 ) {
@@ -793,7 +802,7 @@ function formatAmount(number: number, limit: number) {
     while (numString.length < limit + 2) {
       numString = "0" + numString;
     }
-
+    console.log(numString, "revisar");
     return numString;
   } else {
     while (numString.length < limit) {

@@ -77,7 +77,6 @@ export default async function page({
       x.statusId != statusCargado?.id
   )) {
     if (channel.name.includes("DEBITO AUTOMATICO")) {
-      console.log("Entro como caballo");
       if (
         !transaction.genChannels.includes(channel.id) &&
         transaction.g_c === brand.number
