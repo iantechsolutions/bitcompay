@@ -205,7 +205,7 @@ export function AddHealthInsurances(props: {
       </AddElementButton>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-[1000px] gap-4 rounded-2xl p-12">
+        <DialogContent className="max-w-[1000px] max-h-[95vh] gap-4 rounded-2xl p-6 overflow-y-scroll">
           <DialogHeader>
             {OS ? (
               <DialogTitle>Editar obra social</DialogTitle>
@@ -215,7 +215,7 @@ export function AddHealthInsurances(props: {
           </DialogHeader>
           <div className="grid grid-cols-4 gap-y-4 gap-x-8 justify-between">
             <div>
-            <Label htmlFor="IdNumber" className="text-xs text-gray-400">
+            <Label htmlFor="IdNumber" className="text-xs text-gray-500">
                 CODIGO
               </Label>
               <Select onValueChange={setIdNumber}>
@@ -230,7 +230,7 @@ export function AddHealthInsurances(props: {
         </Select>
             </div>
             <div>
-              <Label className="text-xs text-gray-400">
+              <Label className="text-xs text-gray-500">
                 SIGLA
               </Label>
               <Select>
@@ -249,7 +249,7 @@ export function AddHealthInsurances(props: {
   
             <p className="col-span-4 mt-3 p-3 justify-start text-black font-xs text-sm font-semibold">Datos fiscales</p>
             <div>
-              <Label className="text-xs text-gray-400">UNIDAD DE NEGOCIO</Label>
+              <Label className="text-xs text-gray-500">UNIDAD DE NEGOCIO</Label>
               <Input
           type="number"
           id="importe"
@@ -275,7 +275,7 @@ export function AddHealthInsurances(props: {
               </Select> */}
             </div>
             <div>
-              <Label htmlFor="name" className="text-xs text-gray-400">
+              <Label htmlFor="name" className="text-xs text-gray-500">
                 RAZON SOCIAL
               </Label>
               <Input
@@ -288,7 +288,7 @@ export function AddHealthInsurances(props: {
             </div>
 
             <div>
-              <Label className="text-xs text-gray-400">CUIT</Label>
+              <Label className="text-xs text-gray-500">CUIT</Label>
               <Input
               type="number"
               id="importe"
@@ -297,7 +297,7 @@ export function AddHealthInsurances(props: {
              />
             </div>
             <div>
-              <Label className="text-xs text-gray-400">CONDICIÓN AFIP</Label>
+              <Label className="text-xs text-gray-500">CONDICIÓN AFIP</Label>
               <Select onValueChange={setAfipStatus} value={afipStatus}>
                 <SelectTrigger
                    className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none">
@@ -317,7 +317,7 @@ export function AddHealthInsurances(props: {
             </div>
 
             <div>
-              <Label className="text-xs text-gray-400">CONDICIÓN IIBB</Label>
+              <Label className="text-xs text-gray-500">CONDICIÓN IIBB</Label>
               <Select
                 onValueChange={setIIBBStatus}
                 value={IIBBStatus}>
@@ -339,7 +339,7 @@ export function AddHealthInsurances(props: {
             </div>
 
             <div>
-              <Label htmlFor="IdNumber" className="text-xs text-gray-400">
+              <Label htmlFor="IdNumber" className="text-xs text-gray-500">
                 N° IIBB
               </Label>
               <Input
@@ -352,7 +352,7 @@ export function AddHealthInsurances(props: {
             </div>
 
             <div>
-              <Label htmlFor="IdNumber" className="text-xs text-gray-400">
+              <Label htmlFor="IdNumber" className="text-xs text-gray-500">
                 CONDICION DE VENTA
               </Label>
               <Input
@@ -365,7 +365,7 @@ export function AddHealthInsurances(props: {
             </div>  
             <div></div>        
             <div className="w-">
-              <Label htmlFor="address" className="text-xs text-gray-400">
+              <Label htmlFor="address" className="text-xs text-gray-500">
                 DOMICILIO FISCAL
               </Label>
               <Input
@@ -378,7 +378,7 @@ export function AddHealthInsurances(props: {
               />
             </div>
             <div className="flex-auto w-24">
-              <Label htmlFor="address" className="text-xs text-gray-400">
+              <Label htmlFor="address" className="text-xs text-gray-500">
                 PISO
               </Label>
               <Input
@@ -391,7 +391,7 @@ export function AddHealthInsurances(props: {
               />
             </div>
             <div className="flex-auto w-24">
-              <Label htmlFor="address" className="text-xs text-gray-400">
+              <Label htmlFor="address" className="text-xs text-gray-500">
                 OFICINA
               </Label>
               <Input
@@ -404,7 +404,7 @@ export function AddHealthInsurances(props: {
               />
             </div>
             <div>
-              <Label htmlFor="address" className="text-xs text-gray-400">
+              <Label htmlFor="address" className="text-xs text-gray-500">
                 LOCALIDAD
               </Label>
               <Input
@@ -417,7 +417,7 @@ export function AddHealthInsurances(props: {
               />
             </div>
             <div>
-              <Label htmlFor="address" className="text-xs text-gray-400">
+              <Label htmlFor="address" className="text-xs text-gray-500">
                 PROVINCIA
               </Label>
               <Input
@@ -430,7 +430,7 @@ export function AddHealthInsurances(props: {
               />
             </div>
             <div>
-              <Label htmlFor="postal_code" className="text-xs text-gray-400">CÓDIGO POSTAL</Label>
+              <Label htmlFor="postal_code" className="text-xs text-gray-500">CÓDIGO POSTAL</Label>
               <Select
                 onValueChange={setFiscalPostalCode}
                 value={fiscalPostalCode}>
@@ -449,7 +449,7 @@ export function AddHealthInsurances(props: {
               </Select>
             </div>
             <div>
-              <Label htmlFor="address" className="text-xs text-gray-400">
+              <Label htmlFor="address" className="text-xs text-gray-500">
                 PAÍS
               </Label>
               <Input
@@ -464,7 +464,7 @@ export function AddHealthInsurances(props: {
 
             <p className="col-span-4 mt-3 p-3 justify-start text-black font-xs text-sm font-semibold">Datos de Contacto</p>
             <div>
-              <Label htmlFor="address" className="text-xs text-gray-400">
+              <Label htmlFor="address" className="text-xs text-gray-500">
                 DOMICILIO COMERCIAL
               </Label>
               <Input
@@ -476,7 +476,7 @@ export function AddHealthInsurances(props: {
               />
             </div>
             <div>
-              <Label htmlFor="address" className="text-xs text-gray-400">
+              <Label htmlFor="address" className="text-xs text-gray-500">
                 PISO
               </Label>
               <Input
@@ -488,7 +488,7 @@ export function AddHealthInsurances(props: {
               />
             </div>
             <div>
-              <Label htmlFor="address" className="text-xs text-gray-400">
+              <Label htmlFor="address" className="text-xs text-gray-500">
                 OFICINA
               </Label>
               <Input
@@ -501,7 +501,7 @@ export function AddHealthInsurances(props: {
               />
             </div>
             <div>
-              <Label htmlFor="locality" className="text-xs text-gray-400">LOCALIDAD</Label>
+              <Label htmlFor="locality" className="text-xs text-gray-500">LOCALIDAD</Label>
               <Input
                 className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 id="locality"
@@ -511,7 +511,7 @@ export function AddHealthInsurances(props: {
               />
             </div>
             <div>
-              <Label htmlFor="province" className="text-xs text-gray-400">PROVINCIA</Label>
+              <Label htmlFor="province" className="text-xs text-gray-500">PROVINCIA</Label>
               <Input
                 className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 id="province"
@@ -521,7 +521,7 @@ export function AddHealthInsurances(props: {
               />
             </div>
             <div>
-              <Label htmlFor="postal_code" className="text-xs text-gray-400">CÓDIGO POSTAL</Label>
+              <Label htmlFor="postal_code" className="text-xs text-gray-500">CÓDIGO POSTAL</Label>
               <Select onValueChange={setPostalCode} value={postalCode}>
                 <SelectTrigger
                   className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
@@ -537,7 +537,7 @@ export function AddHealthInsurances(props: {
               </Select>
             </div>
             <div>
-              <Label htmlFor="address" className="text-xs text-gray-400">
+              <Label htmlFor="address" className="text-xs text-gray-500">
                 TELÉFONO
               </Label>
               <Input
@@ -549,7 +549,7 @@ export function AddHealthInsurances(props: {
               />
             </div>
             <div>
-              <Label htmlFor="address" className="text-xs text-gray-400">
+              <Label htmlFor="address" className="text-xs text-gray-500">
                 E-MAIL
               </Label>
               <Input
@@ -562,7 +562,7 @@ export function AddHealthInsurances(props: {
             </div>
             <p className="col-span-4 mt-3 p-3 justify-start text-black font-xs text-sm font-semibold">Información de la cuenta</p>
             <div>
-              <Label htmlFor="postal_code" className="text-xs text-gray-400">ESTADO</Label>
+              <Label htmlFor="postal_code" className="text-xs text-gray-500">ESTADO</Label>
               <Select onValueChange={setState} value={state}>
                 <SelectTrigger
                   className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
@@ -576,7 +576,7 @@ export function AddHealthInsurances(props: {
               </Select>
             </div>
             <div>
-              <Label htmlFor="postal_code" className="text-xs text-gray-400">FECHA DE ESTADO</Label>
+              <Label htmlFor="postal_code" className="text-xs text-gray-500">FECHA DE ESTADO</Label>
               <Popover
                 open={popoverEmisionOpen}
                 onOpenChange={setPopoverEmisionOpen}>
@@ -606,7 +606,7 @@ export function AddHealthInsurances(props: {
               </Popover>
             </div>
             <div>
-              <Label htmlFor="user" className="text-xs text-gray-400">
+              <Label htmlFor="user" className="text-xs text-gray-500">
                 USUARIO
               </Label>
               <Input
@@ -618,7 +618,7 @@ export function AddHealthInsurances(props: {
               />
             </div>
             <div>
-              <Label htmlFor="cancelMotive" className="text-xs text-gray-400">
+              <Label htmlFor="cancelMotive" className="text-xs text-gray-500">
                 MOTIVO DE BAJA
               </Label>
               <Input
