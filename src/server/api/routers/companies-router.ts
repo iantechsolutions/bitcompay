@@ -370,9 +370,6 @@ export const companiesRouter = createTRPCRouter({
             )
           );
         }
-        await tx
-          .delete(schema.healthInsurances)
-          .where(eq(schema.healthInsurances.companyId, input.companyId));
 
         await tx.delete(schema.integrants).where(
           inArray(
@@ -392,8 +389,12 @@ export const companiesRouter = createTRPCRouter({
             family_groups.map((fg) => fg.id)
           )
         );
+
         await deleteComprobantesCircuit(tx, input.companyId);
 
+        await tx
+          .delete(schema.healthInsurances)
+          .where(eq(schema.healthInsurances.companyId, input.companyId));
         await tx.delete(schema.family_groups).where(
           inArray(
             schema.family_groups.procedureId,

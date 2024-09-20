@@ -251,6 +251,7 @@ export const healthInsurancesRouter = createTRPCRouter({
       const healthInsurance_deleted = await db
         .delete(schema.healthInsurances)
         .where(eq(schema.healthInsurances.id, input.healthInsuranceId));
+
       return healthInsurance_deleted;
     }),
 });

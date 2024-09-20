@@ -103,7 +103,7 @@ export default function HealthInsurancePage(props: {
   async function handleDelete() {
     try {
       setIsLoading(true);
-      await deleteHealthInsurance({
+      const os = await deleteHealthInsurance({
         healthInsuranceId: props.healthInsurance!.id,
       });
 
@@ -111,7 +111,9 @@ export default function HealthInsurancePage(props: {
       router.push("./");
     } catch (e) {
       const error = asTRPCError(e)!;
-      toast.error(error.message);
+      toast.error(
+        "No puede eliminarse obras sociiales con afiliados asociados"
+      );
     }
   }
 

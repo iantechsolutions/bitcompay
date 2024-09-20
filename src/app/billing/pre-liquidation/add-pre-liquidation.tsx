@@ -105,14 +105,14 @@ export default function AddPreLiquidation() {
           toast.error("Error al crear la Pre-Liquidación");
         }
       }
-      if (!mes) {
-        toast.error("Seleccione un mes");
-      } else if (!anio || anio < new Date().getFullYear()) {
-        toast.error("El año seleccionado no es válido");
-      }
+      // if (!mes) {
+      //   toast.error("Seleccione un mes");
+      // } else if (!anio || anio < new Date().getFullYear()) {
+      //   toast.error("El año seleccionado no es válido");
+      // }
 
-      setOpen(false);
-      toast.success("Pre-Liquidación creada correctamente");
+      // setOpen(false);
+      // toast.success("Pre-Liquidación creada correctamente");
     } catch (e) {
       console.log("error", e);
       const error = asTRPCError(e)!;
