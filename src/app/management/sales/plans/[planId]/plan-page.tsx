@@ -150,15 +150,15 @@ export default function PlanPage(props: {
       toast.error(error.message);
     }
   }
-
+  const planName= plan?.description;
   return (
-    <LayoutContainer>
+    <LayoutContainer pageName={planName}>
       <section className="space-y-2">
         <div className="flex-col justify-between mb-5">
           <div className="flex justify-between">
             <Title>
               Planes
-              <span className="text-[#3e3e3e] font-medium text-xl">
+              <span className="text-[#3e3e3e] font-medium text-lg">
                 {" "}
                 {plan?.description}
               </span>

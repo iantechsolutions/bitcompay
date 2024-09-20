@@ -48,10 +48,7 @@ export default function UploadResponsePage(props: {
   }
 
   return (
-    <LayoutContainer>
-      <div className="flex items-center font-semibold text-sm opacity-80">
-        {channelName} <ChevronRight />{" "}
-      </div>
+    <LayoutContainer pageName={channelName}>
       <Title>Cargar documento</Title>
 
       {disabled && (

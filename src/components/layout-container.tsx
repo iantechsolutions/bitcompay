@@ -3,10 +3,12 @@ import BreadcrumbComp from "./breadcrumb";
 interface LayoutContainerProps {
   children: React.ReactNode;
   className?: string;
+  pageName?:string;
 }
 export default function LayoutContainer({
   children,
   className,
+  pageName
 }: LayoutContainerProps) {
   
   return (
@@ -16,7 +18,7 @@ export default function LayoutContainer({
         className
       )}>
       <div>
-      <BreadcrumbComp />
+      <BreadcrumbComp pageName={pageName}/>
       </div>
       {children}
     </div>
