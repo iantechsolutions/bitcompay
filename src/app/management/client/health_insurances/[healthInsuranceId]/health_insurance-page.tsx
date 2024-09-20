@@ -78,20 +78,22 @@ export default function HealthInsurancePage(props: {
   
   // const [openDelete, setOpenDelete] = useState<boolean>(false);
 
-  // async function handleDelete() {
-  //   try {
-  //     setIsLoading(true);
-  //     await deleteHealthInsurance({
-  //       healthInsuranceId: props.healthInsurance!.id,
-  //     });
+  async function handleDelete() {
+    try {
+      setIsLoading(true);
+      const os = await deleteHealthInsurance({
+        healthInsuranceId: props.healthInsurance!.id,
+      });
 
-  //     toast.success("Obra social eliminada correctamente");
-  //     router.push("./");
-  //   } catch (e) {
-  //     const error = asTRPCError(e)!;
-  //     toast.error(error.message);
-  //   }
-  // }
+      toast.success("Obra social eliminada correctamente");
+      router.push("./");
+    } catch (e) {
+      const error = asTRPCError(e)!;
+      toast.error(
+        "No puede eliminarse obras sociiales con afiliados asociados"
+      );
+    }
+  }
 
   const fiscalData = {
     "Unidad de negocio": props.healthInsurance?.businessUnit,
