@@ -26,7 +26,21 @@ export function AddZones() {
 
   const router = useRouter();
 
+  function validateFields() {
+    const errors: string[] = [];
+    if (!name) errors.push("Nombre");
+    return errors;
+  }
   async function handleCreate() {
+    const validationErrors = validateFields();
+    if (validationErrors.length > 0) {
+      return toast.error(
+        `Los siguientes campos están vacíos y sin obligatorios: ${validationErrors.join(
+          ", "
+        )}`
+      );
+    }
+
     try {
       await createZone({
         name: name,

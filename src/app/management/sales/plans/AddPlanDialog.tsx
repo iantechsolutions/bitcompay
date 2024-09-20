@@ -31,7 +31,7 @@ export default function AddPlanDialog(props: { planId?: string }) {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           {planId ? (
-            <Button className="bg-transparent hover:bg-transparent p-0 text-[#3e3e3e] shadow-none h-5">
+            <Button className="bg-transparent hover:bg-transparent px-1 text-[#3e3e3e] shadow-none h-5">
               <Edit02Icon className="mr-1 h-4" /> Actualizar Info
             </Button>
           ) : (

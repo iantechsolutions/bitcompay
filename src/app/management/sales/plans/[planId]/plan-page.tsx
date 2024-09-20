@@ -1,12 +1,9 @@
 "use client";
 import { useRouter } from "next/navigation";
 import {
-  Pencil,
   Trash2,
-  CirclePlus,
   ChevronDown,
   PlusCircleIcon,
-  PlusCircle,
 } from "lucide-react";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
@@ -33,11 +30,6 @@ import {
   DropdownMenuSeparator,
 } from "~/components/ui/dropdown-menu";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
-import {
   Dialog,
   DialogContent,
   DialogFooter,
@@ -59,6 +51,7 @@ import Delete02Icon from "~/components/icons/delete-02-stroke-rounded";
 import Edit02Icon from "~/components/icons/edit-02-stroke-rounded";
 import DeletePrice from "~/components/plan/delete-price";
 import EditPrice from "~/components/plan/edit-price";
+import Settings02Icon from "~/components/icons/settings-02-stroke-rounded";
 
 dayjs.extend(utc);
 dayjs.locale("es");
@@ -200,8 +193,8 @@ export default function PlanPage(props: {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button className=" bg-[#BEF0BB] hover:bg-[#BEF0BB]  rounded-full text-[#3E3E3E] hover:text-[#3E3E3E]">
-                  <PlusCircleIcon className="mr-2" size={20} strokeWidth={1} />
-                  Agregar precio
+                  <Settings02Icon className="mr-2 h-5" strokeWidth={1} />
+                  Opciones
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
@@ -214,7 +207,8 @@ export default function PlanPage(props: {
                     <Link
                       href={`/management/sales/plans/${plan?.id}/editPrice`}
                       className="p-0 text-[#3e3e3e] font-medium shadow-none h-5 flex">
-                      Agregar manualmente
+                    <PlusCircleIcon className="mr-2" size={20} strokeWidth={1} />
+                      Agregar precio
                     </Link>
                   </DropdownMenuItem>
                 </DropdownMenuItem>

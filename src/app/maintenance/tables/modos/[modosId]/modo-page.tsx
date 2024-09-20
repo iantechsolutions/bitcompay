@@ -64,22 +64,37 @@ type Inputs = {
 export default function ModoPage(props: {
   modo: RouterOutputs["modos"]["get"];
 }) {
-  const modoId = props.modo?.id ?? "";
+  const modo = props.modo;
 
   const router = useRouter();
-  const [description, setDescription] = useState(props.modo!.description!);
+  const [description, setDescription] = useState(modo?.description ?? "");
   const [openDelete, setOpenDelete] = useState<boolean>(false);
 
   const { mutateAsync: updateModo, isLoading } = api.modos.change.useMutation();
   const { mutateAsync: deleteModo, isLoading: isPending } =
     api.modos.delete.useMutation();
-  const [isDeleting, setIsDeleting] = useState(false); 
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleUpdate: SubmitHandler<Inputs> = async (data) => {
+  function validateFields() {
+    const errors: string[] = [];
+    if (!description) errors.push("description");
+    return errors;
+  }
+
+  async function handleUpdate() {
+    const validationErrors = validateFields();
+    if (validationErrors.length > 0) {
+      return toast.error(
+        `Los siguientes campos están vacíos y sin obligatorios: ${validationErrors.join(
+          ", "
+        )}`
+      );
+    }
+
     try {
       await updateModo({
-        id: props.modo!.id,
-        description: data.description,
+        id: modo?.id ?? "",
+        description: description,
       });
 
       toast.success("Modo actualizado correctamente");
@@ -88,20 +103,12 @@ export default function ModoPage(props: {
       const error = asTRPCError(e)!;
       toast.error(error.message);
     }
-  };
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<Inputs>({
-    defaultValues: { description },
-  });
+  }
 
   async function handleDelete() {
     try {
-     await deleteModo({
-        modosId: modoId,
+      await deleteModo({
+        modosId: modo?.id ?? "",
       });
 
       toast.success("El modo ha sido eliminado correctamente");
@@ -111,7 +118,7 @@ export default function ModoPage(props: {
       toast.error(error.message);
     }
     router.refresh();
-  };
+  }
 
   return (
     <LayoutContainer>
@@ -123,25 +130,21 @@ export default function ModoPage(props: {
         <Label htmlFor="description">Descripción</Label>
         <Input
           id="description"
+          value={description}
           placeholder="..."
-          {...register("description", { required: true })}
           onChange={(e) => setDescription(e.target.value)}
         />
-        {errors.description && <span>Este campo es requerido</span>}
+        {/* {errors.description && <span>Este campo es requerido</span>} */}
       </div>
-      <Button
-        onClick={() => handleUpdate}
-        disabled={isLoading}
-        className="m-3 ml-0"
-      >
+      <Button disabled={isLoading} onClick={handleUpdate}>
         {isLoading && <Loader2Icon className="mr-2 animate-spin" size={20} />}
         Actualizar Modo
       </Button>
+
       <Button
         variant={"destructive"}
         className="ml-10"
-        onClick={() => setOpenDelete(true)}
-      >
+        onClick={() => setOpenDelete(true)}>
         Eliminar
       </Button>
 
@@ -154,7 +157,7 @@ export default function ModoPage(props: {
           <DialogFooter>
             <Button onClick={() => setOpenDelete(false)}>Cancelar</Button>
             <Button disabled={isDeleting} onClick={handleDelete}>
-            {isDeleting && (
+              {isDeleting && (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}
               Eliminar modo

@@ -21,7 +21,7 @@ const buttonVariants = cva(
         ghost: "shadow:none hover:bg-accent hover:text-accent-foreground",
         link: "shadow:none text-primary underline-offset-4 hover:underline",
         bitcompay:
-          "h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#FAFDFD] font-medium-medium text-xs rounded-2xl py-0 px-6 shadow:none",
+          "h-7 bg-[#DEF5DD] hover:bg-[#DEF5DD] text-[#FAFDFD] font-medium-medium text-xs rounded-2xl py-0 px-6 shadow:none",
       },
       size: {
         default: "h-9 px-4 py-2",

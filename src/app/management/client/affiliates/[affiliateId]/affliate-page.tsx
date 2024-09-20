@@ -266,7 +266,7 @@ export default function AffiliatePage(props: {
     <LayoutContainer>
       <section>
         <h2 className="text-2xl mt-4 font-semibold">
-          Afiliados Nº {grupo?.numericalId}
+          Grupo familiar Nº {grupo?.numericalId}
         </h2>
 
         <div className="flex gap-3 mt-5 mb-10">
@@ -301,9 +301,10 @@ export default function AffiliatePage(props: {
             type="multiple"
           >
             <AccordionItem value="item-1">
-              <AccordionTrigger>Datos del grupo familiar</AccordionTrigger>
+              <AccordionTrigger className="font-semibold" name="editIcon">
+                Datos del grupo familiar</AccordionTrigger>
               <AccordionContent className="pt-6 pl-5">
-                <div className="grid grid-cols-5 gap-4 p-3 rounded-md">
+                <div className="grid grid-cols-5 gap-6 p-3 rounded-md">
                   {Object.entries(familyGroupData).map(([key, value]) => (
                     <ElementCard key={key} element={{ key, value }} />
                   ))}
@@ -311,7 +312,7 @@ export default function AffiliatePage(props: {
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2">
-              <AccordionTrigger className=" rounded-md overflow-hidden">
+              <AccordionTrigger className="font-semibold rounded-md overflow-hidden" name="editIcon">
                 Integrantes
               </AccordionTrigger>
               <AccordionContent className="pt-6 pl-5">
@@ -331,7 +332,7 @@ export default function AffiliatePage(props: {
                         <p className="text-xs font-semibold">
                           Informacion Personal
                         </p>
-                        <div className="flex flex-wrap gap-4 bg-white pt-6">
+                        <div className="flex flex-1 flex-wrap justify-start gap-8 pt-2">
                           {Object.entries(
                             integrantsPersonalData.get(int.id) ?? {}
                           ).map(([key, value]) => (
@@ -341,7 +342,7 @@ export default function AffiliatePage(props: {
                         <p className="text-xs font-semibold my-3 mt-8">
                           Información Fiscal
                         </p>
-                        <div className="flex gap-2">
+                        <div className="flex flex-1 flex-wrap justify-start gap-8 pt-2">
                           {Object.entries(
                             integrantsFiscalData.get(int?.id ?? "") ?? {}
                           ).map(([key, value]) => (
@@ -351,7 +352,7 @@ export default function AffiliatePage(props: {
                         <p className="text-xs font-semibold my-3 mt-8">
                           Información de contacto
                         </p>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-1 flex-wrap justify-start gap-8 pt-2">
                           {Object.entries(
                             integrantsContactData.get(int?.id ?? "") ?? {}
                           ).map(([key, value]) => (
@@ -361,15 +362,13 @@ export default function AffiliatePage(props: {
                         <p className="text-xs font-semibold my-3 mt-8">
                           Información sobre el plan
                         </p>
-                        <div className="flex gap-2">
+                        <div className="flex flex-1 flex-wrap justify-start gap-8 pt-2">
                           {Object.entries(
                             integrantsPlanData.get(int?.id ?? "") ?? {}
                           ).map(([key, value]) => {
                             if (key === "Estado" && value === "Activo") {
                               return (
-                                <ElementCard key={key} element={{ key, value }}>
-                                  <ActiveBadge>Activo</ActiveBadge>
-                                </ElementCard>
+                                <ElementCard key={key} element={{ key, value }} />
                               );
                             }
                             return (
@@ -384,7 +383,7 @@ export default function AffiliatePage(props: {
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-3">
-              <AccordionTrigger>Datos de facturación</AccordionTrigger>
+              <AccordionTrigger className="font-semibold">Datos de facturación</AccordionTrigger>
               <AccordionContent className="pt-8 pl-8">
                 <div className="flex gap-2">
                   <div className="flex flex-col gap-1 bg-[#DEF5DD] pl-5 pr-6 pt-5 pb-14 w-1/3 rounded-lg">

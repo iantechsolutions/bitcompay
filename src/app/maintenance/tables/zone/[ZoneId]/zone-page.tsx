@@ -53,7 +53,21 @@ export default function ZonePage(props: {
 
   const router = useRouter();
 
+  function validateFields() {
+    const errors: string[] = [];
+    if (!name) errors.push("Nombre");
+    return errors;
+  }
   async function handleUpdate() {
+    const validationErrors = validateFields();
+    if (validationErrors.length > 0) {
+      return toast.error(
+        `Los siguientes campos están vacíos y sin obligatorios: ${validationErrors.join(
+          ", "
+        )}`
+      );
+    }
+
     try {
       await updateZone({
         id: props.zone!.id,
@@ -172,8 +186,7 @@ export default function ZonePage(props: {
                       <AlertDialogAction
                         className="bg-red-500 hover:bg-red-600 active:bg-red-700"
                         onClick={handleDelete}
-                        disabled={isLoadingDelete}
-                      >
+                        disabled={isLoadingDelete}>
                         {isLoadingDelete && (
                           <Loader2 className="mr-2 animate-spin" size={20} />
                         )}

@@ -556,6 +556,13 @@ async function generatePagoFacil(
     text = "Error. Utility code incorrecto";
     return text;
   }
+  let brandType = "000";
+  if (_input.brandName.toUpperCase() === "RED ARGENTINA DE SANATORIOS") {
+    brandType = "002";
+  }
+  if (_input.brandName.toUpperCase() === "CRISTAL SALUD") {
+    brandType = "003";
+  }
   let registeR_type = "01";
   const records_number = formatString(
     "0",
@@ -600,7 +607,7 @@ async function generatePagoFacil(
     const invoice_number = formatString(
       "0",
       transaction.invoice_number.toString(),
-      21,
+      18,
       false
     );
     const seq_number = `${dayjs(transaction.first_due_date).year()}01`;
@@ -652,6 +659,16 @@ async function generatePagoFacil(
       transaction.first_due_amount!,
       6
     );
+    console.log(
+      "testeos",
+      brandType,
+      "+",
+      invoice_number,
+      "+",
+      fiscal_id_number,
+      "   ",
+      transaction.affiliate_number
+    );
 
     let payment_type = "T";
     let moneda = "0";
@@ -668,7 +685,7 @@ async function generatePagoFacil(
     console.log("updated_bar_code", updated_bar_code);
     const barcode = formatString(" ", updated_bar_code, 55, true);
 
-    text += `${register_type}${invoice_number}${fiscal_id_number}${seq_number}${message}${name}${barcode}${validity_date}${first_due_date}${payment_type}${" ".repeat(
+    text += `${register_type}${brandType}${invoice_number}${fiscal_id_number}${seq_number}${message}${name}${barcode}${validity_date}${first_due_date}${payment_type}${" ".repeat(
       9
     )}\r\n`;
     // detalle;
