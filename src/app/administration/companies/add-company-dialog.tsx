@@ -1,6 +1,6 @@
 "use client";
 
-import { PlusCircleIcon } from "lucide-react";
+import { CirclePlus, Loader2Icon, PlusCircleIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, FormEventHandler } from "react";
 import { toast } from "sonner";
@@ -30,7 +30,8 @@ export function AddCompanyDialog() {
   const [name, setName] = useState("");
   const [organizationName, setOrganizationName] = useState("");
   const [concept, setConcept] = useState("");
-  const [CUIT, setCUIT] = useState("");
+  const [cuit, setCuit] = useState("");
+  const [afipKey, setAfipKey] = useState("");
 
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
@@ -39,9 +40,24 @@ export function AddCompanyDialog() {
   const schema = z.object({
     texto: z.string().max(40),
   });
+
+  function validateFields() {
+    const errors: string[] = [];
+    if (!description) errors.push("Descripción");
+    if (!name) errors.push("Nombre de entidad");
+    if (!concept) errors.push("Concepto");
+    if (!cuit) errors.push("CUIT/CUIL");
+    if (!afipKey) errors.push("Clave fiscal");
+
+    return errors;
+  }
+
   const handleCreate: FormEventHandler<HTMLFormElement> = async (e) => {
-    if (!name || !description || !concept || !CUIT) {
-      return toast.error("Todos los campos son obligatorios");
+    const validationErrors = validateFields();
+    if (validationErrors.length > 0) {
+      return toast.error(
+        `Los siguientes campos están vacíos: ${validationErrors.join(", ")}`
+      );
     } else {
       e.preventDefault();
       try {
@@ -58,6 +74,8 @@ export function AddCompanyDialog() {
             description,
             name,
             concept,
+            cuit,
+            afipKey,
           });
           const cc = await createCC({
             company_id: organization.id,
@@ -72,7 +90,7 @@ export function AddCompanyDialog() {
         setName("");
         setDescription("");
         setConcept("");
-        toast.success("Entidad creado correctamente");
+        toast.success("Entidad creada correctamente");
         router.refresh();
         setOpen(false);
       } catch (e) {
@@ -143,18 +161,33 @@ export function AddCompanyDialog() {
               <span className="text-red-600 text-xs">{error}</span>
             </div>
             <div>
-              <Label htmlFor="CUIL">CUIL/CUIT</Label>
+              <Label htmlFor="cuit">CUIL/CUIT</Label>
               <Input
-                id="CUIL"
+                id="cuit"
                 placeholder="..."
-                value={CUIT}
-                onChange={(e) => setCUIT(e.target.value)}
+                value={cuit}
+                onChange={(e) => setCuit(e.target.value)}
+              />
+              <span className="text-red-600 text-xs">{error}</span>
+            </div>
+            <div>
+              <Label htmlFor="afipKey">Clave fiscal</Label>
+              <Input
+                id="afipKey"
+                placeholder="..."
+                value={afipKey}
+                onChange={(e) => setAfipKey(e.target.value)}
               />
               <span className="text-red-600 text-xs">{error}</span>
             </div>
             <br />
             <DialogFooter>
               <Button disabled={isLoadingCC || isLoading} type="submit">
+                {isLoading ? (
+                  <Loader2Icon className="mr-2 animate-spin" size={20} />
+                ) : (
+                  <CirclePlus className="mr-2" />
+                )}
                 Crear entidad
               </Button>
             </DialogFooter>
