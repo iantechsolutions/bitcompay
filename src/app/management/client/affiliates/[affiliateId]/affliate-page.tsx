@@ -270,20 +270,22 @@ export default function AffiliatePage(props: {
         </h2>
 
         <div className="flex gap-3 mt-5 mb-10">
-          <Card className="py-4 px-6 w-1/2 grid grid-cols-2 items-center">
-            <div className="flex flex-col">
-              <p className="text-base font-medium block">SALDO ACTUAL</p>
-              <span className="text-[#EB2727] text-2xl font-bold">
+          <Card className="flex-auto py-4 px-6 w-1/2  items-center">
+          <div className=" grid grid-cols-2 items-center">
+              <div>
+              <p className="text-sm">SALDO ACTUAL</p>
+              <span className="text-[#EB2727] text-xl font-bold">
                 $
                 {lastEvent?.current_amount !== undefined
                   ? lastEvent.current_amount.toFixed(2)
                   : "0.00"}
               </span>
-            </div>
+              </div>
             <SaldoPopoverAffiliates
               ccId={cc?.id}
               healthInsuranceId={props.params.affiliateId}
-            />
+              />
+              </div>
           </Card>
           <Card className="py-4 px-9 bg-[#DEF5DD] w-1/2 flex flex-col justify-center">
             <div className="flex flex-col  justify-center">

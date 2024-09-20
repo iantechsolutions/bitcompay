@@ -4,50 +4,25 @@ import { useRouter } from "next/navigation";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
 import utc from "dayjs/plugin/utc";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 import { Button } from "~/components/ui/button";
 import { asTRPCError } from "~/lib/errors";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
 import { type RouterOutputs } from "~/trpc/shared";
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "~/components/ui/dialog";
-import {
-  ArrowLeftIcon,
-  ChevronDown,
-  CircleChevronDown,
-  CircleChevronUp,
   Eye,
-  Loader2Icon,
 } from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "~/components/ui/alert-dialog";
-import Link from "next/link";
 import LayoutContainer from "~/components/layout-container";
 import {
   Accordion,
+  AccordionContent,
   AccordionItem,
   AccordionTrigger,
-  AccordionContent,
-} from "~/components/ui/accordion";
-import { SaldoPopover } from "./saldoPopover";
-import { Separator } from "~/components/ui/separator";
+} from "~/components/affiliate-page/affiliate-accordion";
 import { AddHealthInsurances } from "../AddHealthInsurances";
+import { Card } from "~/components/ui/card";
+import Upload02Icon from "~/components/icons/upload-02-stroke-rounded";
+import ElementCard from "~/components/affiliate-page/element-card";
 dayjs.extend(utc);
 dayjs.locale("es");
 
@@ -80,10 +55,7 @@ export default function HealthInsurancePage(props: {
   const { mutateAsync: updateHealthInsurance, isLoading } =
     api.healthInsurances.change.useMutation();
 
-  const { mutateAsync: deleteHealthInsurance, isLoading: isDeleting } =
-    api.healthInsurances.delete.useMutation();
-
-  async function handleUpdate() {
+    async function handleUpdate() {
     try {
       await updateHealthInsurance({
         healthInsuranceId: props.healthInsurance!.id,
@@ -98,12 +70,18 @@ export default function HealthInsurancePage(props: {
       toast.error(error.message);
     }
   }
-  const [openDelete, setOpenDelete] = useState<boolean>(false);
+
+   
+
+  // const { mutateAsync: deleteHealthInsurance, isLoading: isDeleting } =
+  //   api.healthInsurances.delete.useMutation();
+  
+  // const [openDelete, setOpenDelete] = useState<boolean>(false);
 
   async function handleDelete() {
     try {
       setIsLoading(true);
-      await deleteHealthInsurance({
+      const os = await deleteHealthInsurance({
         healthInsuranceId: props.healthInsurance!.id,
       });
 
@@ -111,79 +89,77 @@ export default function HealthInsurancePage(props: {
       router.push("./");
     } catch (e) {
       const error = asTRPCError(e)!;
-      toast.error(error.message);
+      toast.error(
+        "No puede eliminarse obras sociiales con afiliados asociados"
+      );
     }
   }
 
   const fiscalData = {
-    Código: props.healthInsurance?.identificationNumber,
-    Sigla: "-",
+    "Unidad de negocio": props.healthInsurance?.businessUnit,
     "Razón Social": props.healthInsurance?.responsibleName,
     CUIT: props.healthInsurance?.fiscal_id_number,
     "Condición AFIP": props.healthInsurance?.afip_status,
-    "Condicion de IIBB": "-",
-    "Numero IIBB": "-",
+    "Condicion de IIBB": props.healthInsurance?.IIBBStatus,
+    "Numero IIBB": props.healthInsurance?.IIBBNumber,
+    "Condición de venta": props.healthInsurance?.sellCondition,
+  };
+
+  const facturacion = {
+    "Domicilio fiscal": props.healthInsurance?.fiscalAddress,
+    Piso: props.healthInsurance?.fiscalFloor,
+    Oficina: props.healthInsurance?.fiscalOffice,
+    Localidad: props.healthInsurance?.fiscalLocality,
+    Provincia: props.healthInsurance?.fiscalProvince,
+    "Codigo postal": props.healthInsurance?.fiscalPostalCode,
+    País: props.healthInsurance?.fiscalCountry,
   };
 
   const contactData = {
     "Domicilio Comercial": props.healthInsurance?.adress,
-    Piso: "-",
-    Oficina: "-",
-    Localidad: "-",
-    Provincia: "-",
-    "Codigo postal": props.healthInsurance?.cpData?.cp ?? "-",
-    Telefono: "-",
-    "E-mail": "example@gmail.com",
+    Piso: props.healthInsurance?.floor,
+    Oficina: props.healthInsurance?.office,
+    Localidad: props.healthInsurance?.locality,
+    Provincia: props.healthInsurance?.province,
+    "Codigo postal": props.healthInsurance?.postal_code,
+    Telefono: props.healthInsurance?.phoneNumber,
+    "E-mail": props.healthInsurance?.email,
   };
 
-  const basicData = { ...fiscalData, ...contactData };
-
-  const facturacion = {
-    "Unidad de negocio": "-",
-    Provincia: "-",
-    Oficina: "-",
-    Piso: "-",
-    "Condicion de venta": "-",
-    "Codigo postal": "-",
-    Localidad: "-",
+  const accountInfo = {
+    Estado: props.healthInsurance?.state,
+    "Fecha de estado": JSON.stringify(props.healthInsurance?.dateState),
+    Usuario: props.healthInsurance?.user,
+    "Motivo de baja": props.healthInsurance?.cancelMotive,
   };
 
-  const postal_code = {
-    "Codigo postal": props.healthInsurance?.cpData?.cp ?? "-",
-  };
   return (
-    <div>
-      <Link
-        className=" font-monserrat w-20 h-auto flex justify-between"
-        href={`/management/client/health_insurances`}>
-        <ArrowLeftIcon className="mb-2" /> Volver
-      </Link>
-      <LayoutContainer>
-        <section className="space-y-2">
-          <div className="flex w-full justify-between">
-            <h2 className="text-lg font-monserrat font-semibold mt-2">
-              Obra Social {props?.healthInsurance?.businessName}
-            </h2>
-            <div>
-              <AddHealthInsurances healthInsurance={props?.healthInsurance} />
-              <Button
-                variant={"destructive"}
-                className="ml-10"
-                onClick={() => setOpenDelete(true)}>
-                Eliminar
-              </Button>
+    <LayoutContainer>
+        <section>
+          
+          <div className="flex flex-row justify-between mt-4">
+            <div className="flex flex-row  gap-6" >
+          <h2 className="flex items-center text-2xl font-semibold">
+              Obra Social 
+          </h2>
+          <h3 className="flex items-center text-lg font-medium">
+          {props.healthInsurance?.identificationNumber} {" "} {props.healthInsurance?.initials} 
+          </h3>
             </div>
+          <AddHealthInsurances healthInsurance={props?.healthInsurance} />
           </div>
-          <div className="border rounded-lg border-gray-200 mt-2 p-4 w-1/2">
-            <div className="flex flex-row justify-between items-center">
+          <div className="flex gap-3 mt-5 mb-10">
+          <Card className="flex-auto py-4 px-6 w-1/2  items-center">
+          <div className="grid grid-cols-2 items-center">
               <div>
-                <p className="text-md">SALDO OBRA SOCIAL</p>
-                <span className="text-[#CD3D3B] text-2xl font-bold">
+                <p className="text-sm font-medium">SALDO ACTUAL</p>
+                <span className="text-[#CD3D3B] text-center text-xl font-bold">
                   $ {currentAmount}
                 </span>
               </div>
+              <div>
               <Button
-                className="flex flex-row bg-[#F7F7F7] hover:bg-[#DEF5DD] text-black font-medium-medium text-xs rounded-2xl py-1 px-3"
+                className="flex flex-row bg-[#F7F7F7] hover:bg-[#DEF5DD] text-[#3e3e3e] font-medium text-xs rounded-full py-1 px-5"
                 onClick={() => {
                   if (!props.ccId) {
                     alert("ccId is undefined");
@@ -196,104 +172,62 @@ export default function HealthInsurancePage(props: {
                 <Eye className="mr-2 w-4 h-4" />
                 Ver movimientos
               </Button>
-            </div>
-          </div>
-
-          <div className="border rounded-lg border-gray-200 p-4 w-full relative">
-            <div className="flex justify-between items-center">
-              <h2 className="text-md font-semibold">Datos Básicos</h2>
-              <button
-                onClick={() => setOpenBasicData(!openBasicData)}
-                className="absolute top-0 right-0 mt-4 mr-4 text-gray-400">
-                {openBasicData ? (
-                  <CircleChevronUp className="w-5 h-5" />
-                ) : (
-                  <CircleChevronDown className="w-5 h-5" />
-                )}
-              </button>
-            </div>
-            {openBasicData && (
-              <div className="px-6 py-5">
-                <h3 className="font-bold text-md mb-4">Datos Fiscales</h3>
-                <div className="grid grid-cols-4 gap-4">
-                  {Object.entries(fiscalData).map(([key, value]) => (
-                    <div key={key} className="flex flex-col">
-                      <p className="font-extrabold text-sm text-[#3e3e3e]">
-                        {key}:
-                      </p>
-                      <div className="text-sm text-[#3e3e3e] opacity-75">
-                        {value}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <Separator className="m-4" />
-                <h3 className="font-bold text-md mb-4">Datos de Contacto</h3>
-                <div className="grid grid-cols-4 gap-4">
-                  {Object.entries(contactData).map(([key, value]) => (
-                    <div key={key} className="flex flex-col">
-                      <p className="font-extrabold text-sm text-[#3e3e3e]">
-                        {key}:
-                      </p>
-                      <div className="text-sm text-[#3e3e3e] opacity-75">
-                        {value}
-                      </div>
-                    </div>
-                  ))}
-                </div>
               </div>
-            )}
-          </div>
-
-          <div className="border rounded-lg border-gray-200 p-4 w-full relative">
-            <div className="flex justify-between items-center">
-              <h2 className="text-md font-semibold">Facturación</h2>
-              <button
-                onClick={() => setOpenFacturacion(!openFacturacion)}
-                className="absolute top-0 right-0 mt-4 mr-4 text-gray-400">
-                {openFacturacion ? (
-                  <CircleChevronUp className="w-5 h-5" />
-                ) : (
-                  <CircleChevronDown className="w-5 h-5" />
-                )}
-              </button>
             </div>
-            {openFacturacion && (
-              <div className="px-6 py-5">
-                <div className="grid grid-cols-4 gap-4">
-                  {Object.entries(facturacion).map(([key, value]) => (
-                    <div key={key} className="flex flex-col">
-                      <p className="font-extrabold text-sm text-[#3e3e3e]">
-                        {key}:
-                      </p>
-                      <div className="text-sm text-[#3e3e3e] opacity-75">
-                        {value}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-          <Dialog open={openDelete} onOpenChange={setOpenDelete}>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Seguro que desea la obra social?</DialogTitle>
-              </DialogHeader>
-
-              <DialogFooter>
-                <Button onClick={() => setOpenDelete(false)}>Cancelar</Button>
-                <Button disabled={isDeleting} onClick={handleDelete}>
-                  {isDeleting && (
-                    <Loader2Icon className="mr-2 animate-spin" size={20} />
-                  )}
-                  Eliminar obra social
+          </Card>
+          <Card className="py-4 px-9 bg-[#DEF5DD] w-1/2 flex flex-col justify-center">
+            <div className="flex flex-row place-items-center justify-between">
+              <p className="text-base font-[550] block place-content-center text-[#3e3e3e]">Soportes</p>
+                <Button
+                  variant="bitcompay"
+                  className="bg-[#85CE81] text-sm px-4 h-7 gap-2 text-[#ffffff] rounded-full font-normal"
+                  >
+                    <Upload02Icon className="h-4"/>
+                  Subir archivo
                 </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+            </div>
+          </Card>      
+          </div>
+          <div >
+          <Accordion
+            className="w-full"
+            type="multiple"
+          >
+            <AccordionItem value="item-1">
+            <AccordionTrigger className="font-semibold" name="editIcon">
+              Datos Básicos</AccordionTrigger>
+              <AccordionContent className="pt-6 pl-5">
+                <h3 className="font-bold text-md mb-4">
+                  Datos Fiscales</h3>
+                <div className="grid grid-cols-4 gap-6 p-3 rounded-md">
+                  {Object.entries(fiscalData).map(([key, value]) => (
+                    <ElementCard key={key} element={{ key, value }} />
+                  ))}
+                </div>
+                <div className="grid grid-cols-4 gap-6 p-3 rounded-md">
+                  {Object.entries(facturacion).map(([key, value]) => (
+                    <ElementCard key={key} element={{ key, value }} />
+                  ))}
+                </div>
+                <h3 className="font-bold text-md my-4">
+                  Datos de Contacto</h3>
+                <div className="grid grid-cols-4 gap-6 p-3 rounded-md">
+                  {Object.entries(contactData).map(([key, value]) => (
+                    <ElementCard key={key} element={{ key, value }} />
+                  ))}
+                </div>
+                <h3 className="font-bold text-md my-4">
+                  Información de la cuenta</h3>
+                  <div className="grid grid-cols-4 gap-6 p-3 rounded-md">
+                  {Object.entries(accountInfo).map(([key, value]) => (
+                    <ElementCard key={key} element={{ key, value }} />
+                  ))}
+                </div>  
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+            </div>
         </section>
       </LayoutContainer>
-    </div>
   );
 }

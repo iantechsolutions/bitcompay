@@ -27,7 +27,7 @@ export default function ElementCard(props: ElementCardProps) {
   }
   return (
     <div className={cn("flex flex-col justify-stretch gap-2 p-2 pl-0 pb-1 border-b-2 text-[#747474] text-sm",props.className)}>
-      <p className={cn("flex uppercase whitespace-nowrap opacity-70",props.keyClassName)}>{props.element.key}</p>
+      <p className={cn("flex uppercase whitespace-nowrap opacity-90 text-xs",props.keyClassName)}>{props.element.key}</p>
       {content}
     </div>
   );
