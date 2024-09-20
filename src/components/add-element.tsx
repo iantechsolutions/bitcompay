@@ -1,3 +1,4 @@
+import Edit02Icon from "./icons/edit-02-stroke-rounded";
 import { Button } from "./ui/button";
 import { Loader2, PlusCircleIcon } from "lucide-react";
 interface AddElementButtonProps {
@@ -19,7 +20,7 @@ export default function AddElementButton({
       {isLoading ? (
         <Loader2 className="mr-2 animate-spin" />
       ) : (
-        <PlusCircleIcon className="mr-2" size={20} />
+        <Edit02Icon className="h-3" />
       )}
       {children}
     </Button>

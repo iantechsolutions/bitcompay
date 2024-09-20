@@ -61,11 +61,11 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetContent className="sm:max-w-[550px] px-10 py-12 overflow-y-scroll">
         <SheetHeader>
-          <SheetTitle className="font-medium text-2xl">
+          <SheetTitle className="font-semibold text-2xl text-[#3e3e3e] ">
             Detalle del movimiento
           </SheetTitle>
           <SheetDescription>
-            <ul className="mt-2">
+            <ul className="mt-2 text-base">
               <li className="text-xs"> RECEPTOR </li>
               <li className="font-medium text-[#3e3e3e]">
                 {" "}
@@ -79,8 +79,8 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
           </SheetDescription>
         </SheetHeader>
 
-        <div className="flex flex-row border justify-between items-center p-5 rounded-md mt-3 bg-[#f7f7f7]">
-          <p className="text-lg font-medium-medium">Saldo actual </p>
+        <div className="flex flex-row border-none justify-between items-center p-5 py-8 rounded-md mt-3 bg-[#f7f7f7]">
+          <p className="text-lg font-medium">Saldo actual </p>
           <p className="text-[#6952EB] font-semibold text-xl">
             $ {data.currentAccountAmount}
           </p>
@@ -95,10 +95,10 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
               <ContentTable comprobante={comprobanteNCReciente} />
               <div className="mt-3">
                 <div className="bg-[#DEF5DD] flex flex-row justify-between items-center p-3 rounded-md mt-2">
-                  <p className=" text-[#6952EB] font-semibold">
-                    Saldo a pagar:{" "}
+                  <p className=" text-[#6952EB] font-[550]">
+                    Total:{" "}
                   </p>
-                  <p className="text-[#6952EB] font-semibold">
+                  <p className="text-[#6952EB] font-[550]">
                     {NCTotal ? `$ ${NCTotal}` : "N/A"}
                   </p>
                 </div>
@@ -115,10 +115,10 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
               <ContentTable comprobante={comprobanteFCReciente} />
               <div className="mt-3">
                 <div className="bg-[#DEF5DD] flex flex-row justify-between items-center p-3 rounded-md mt-2">
-                  <p className=" text-[#6952EB] font-semibold ">
+                  <p className=" text-[#6952EB] font-[550] ">
                     Saldo a pagar:{" "}
                   </p>
-                  <p className="text-[#6952EB] font-semibold ">
+                  <p className="text-[#6952EB] font-[550] ">
                     {saldo_a_pagar ? `$ ${saldo_a_pagar}` : "N/A"}
                   </p>
                 </div>

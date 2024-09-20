@@ -24,7 +24,7 @@ function ContentTable(props: propsContentTable) {
   const { comprobante } = props;
   return (
     <Table>
-      <TableHeader className="bg-[#F7F7F7] rounded-lg">
+      <TableHeader className="bg-[#F7F7F7] rounded-xl">
         <TableHead className="pl-4 "> Concepto </TableHead>
         <TableHead className=" "> Importe </TableHead>
         <TableHead className=" "> IVA</TableHead>
