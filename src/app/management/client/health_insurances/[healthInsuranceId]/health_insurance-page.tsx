@@ -71,12 +71,10 @@ export default function HealthInsurancePage(props: {
     }
   }
 
-   
-
-  // const { mutateAsync: deleteHealthInsurance, isLoading: isDeleting } =
-  //   api.healthInsurances.delete.useMutation();
+  const { mutateAsync: deleteHealthInsurance, isLoading: isDeleting } =
+    api.healthInsurances.delete.useMutation();
   
-  // const [openDelete, setOpenDelete] = useState<boolean>(false);
+  const [openDelete, setOpenDelete] = useState<boolean>(false);
 
   async function handleDelete() {
     try {
@@ -139,14 +137,14 @@ export default function HealthInsurancePage(props: {
           
           <div className="flex flex-row justify-between mt-4">
             <div className="flex flex-row  gap-6" >
-          <h2 className="flex items-center text-2xl font-semibold">
-              Obra Social 
+          <h2 className="flex items-center text-xl font-semibold">
+              Obras Sociales
           </h2>
           <h3 className="flex items-center text-lg font-medium">
           {props.healthInsurance?.identificationNumber} {" "} {props.healthInsurance?.initials} 
           </h3>
             </div>
-          <AddHealthInsurances healthInsurance={props?.healthInsurance} />
+          
           </div>
           <div className="flex gap-3 mt-5 mb-10">
           <Card className="flex-auto py-4 px-6 w-1/2  items-center">
@@ -159,7 +157,7 @@ export default function HealthInsurancePage(props: {
               </div>
               <div>
               <Button
-                className="flex flex-row bg-[#F7F7F7] hover:bg-[#DEF5DD] text-[#3e3e3e] font-medium text-xs rounded-full py-1 px-5"
+                className="flex flex-row bg-[#F7F7F7] hover:bg-[#DEF5DD] text-[#3e3e3e] font-medium text-sm rounded-full h-8 px-5"
                 onClick={() => {
                   if (!props.ccId) {
                     alert("ccId is undefined");
@@ -177,12 +175,13 @@ export default function HealthInsurancePage(props: {
           </Card>
           <Card className="py-4 px-9 bg-[#DEF5DD] w-1/2 flex flex-col justify-center">
             <div className="flex flex-row place-items-center justify-between">
-              <p className="text-base font-[550] block place-content-center text-[#3e3e3e]">Soportes</p>
+              <p className="text-lg font-[550] block place-content-center text-[#3e3e3e]">
+                Soportes</p>
                 <Button
                   variant="bitcompay"
-                  className="bg-[#85CE81] text-sm px-4 h-7 gap-2 text-[#ffffff] rounded-full font-normal"
+                  className="bg-[#85CE81] text-base px-4 h-8 gap-2 text-[#ffffff] rounded-full font-normal"
                   >
-                    <Upload02Icon className="h-4"/>
+                    <Upload02Icon className="h-5"/>
                   Subir archivo
                 </Button>
             </div>
@@ -194,8 +193,12 @@ export default function HealthInsurancePage(props: {
             type="multiple"
           >
             <AccordionItem value="item-1">
-            <AccordionTrigger className="font-semibold" name="editIcon">
-              Datos Básicos</AccordionTrigger>
+            <AccordionTrigger className="relative font-semibold">
+              Datos Básicos
+              <div className="absolute right-14 z-20">
+              <AddHealthInsurances healthInsurance={props?.healthInsurance}/>
+              </div>
+              </AccordionTrigger>
               <AccordionContent className="pt-6 pl-5">
                 <h3 className="font-bold text-md mb-4">
                   Datos Fiscales</h3>

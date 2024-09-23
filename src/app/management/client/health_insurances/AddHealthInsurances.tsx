@@ -197,11 +197,18 @@ export function AddHealthInsurances(props: {
       toast.error(error.message);
     }
   }
+  let cN= ""
+  OS ? cN= "text-sm px-4 py-2 h-5 justify-center place-content-center rounded-full font-[550] text-[#3E3E3E]" : cN="rounded-full gap-1 p-4 text-base text-[#3E3E3E] bg-[#BEF0BB] "
 
   return (
     <>
-      <AddElementButton onClick={() => setOpen(true)}>
-        {OS ? <>Editar datos</> : <>Agregar Obra Social</>}
+      <AddElementButton onClick={() => setOpen(true)} 
+      className={cN}  >
+        {OS ? <>
+        <Edit02Icon className="h-3" />
+        Editar</> : <>
+        <PlusCircleIcon className="h-4" />
+        Agregar obra social como cliente</>}
       </AddElementButton>
 
       <Dialog open={open} onOpenChange={setOpen}>
