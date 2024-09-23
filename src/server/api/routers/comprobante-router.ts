@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray, lt } from "drizzle-orm";
 import Afip from "@afipsdk/afip.js";
 import { z } from "zod";
 import { db, schema } from "~/server/db";
@@ -914,18 +914,17 @@ export const comprobantesRouter = createTRPCRouter({
       return grupos;
     }),
 
-  getLastComprobante: protectedProcedure
-    .query(async ({}) => {
-      const ulticomprobante = await db.query.comprobantes.findFirst({
-        where: eq(schema.comprobantes.origin, "Factura"),
-        with: {
-          items: true,
-        },
-      });
-        return ulticomprobante;
-    }),
+  getLastComprobante: protectedProcedure.query(async ({}) => {
+    const ulticomprobante = await db.query.comprobantes.findFirst({
+      where: eq(schema.comprobantes.origin, "Factura"),
+      with: {
+        items: true,
+      },
+    });
+    return ulticomprobante;
+  }),
 
-    getComprobanteByEvent: protectedProcedure
+  getComprobanteByEvent: protectedProcedure
     .input(z.object({ eventId: z.string() }))
     .query(async ({ input }) => {
       const events = await db.query.events.findFirst({
@@ -1108,9 +1107,11 @@ export const comprobantesRouter = createTRPCRouter({
         dateDue: z.date().optional(),
         interest: z.number().optional(),
         logo_url: z.string().optional(),
+        user: z.string().optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
+      const user = input.user;
       const companyId = ctx.session.orgId;
       const grupos = await getGruposForLiquidation(
         input.brandId,
@@ -1124,7 +1125,7 @@ export const comprobantesRouter = createTRPCRouter({
         };
       }
 
-      const user = await currentUser();
+      // const user = await currentUser();
 
       const brand = await db.query.brands.findFirst({
         where: eq(schema.brands.id, input.brandId),
@@ -1153,7 +1154,7 @@ export const comprobantesRouter = createTRPCRouter({
           estado: "pendiente",
           cuit: company?.cuit ?? "",
           period: input.dateDesde,
-          userCreated: user?.id ?? "",
+          userCreated: user ?? "",
           userApproved: "",
           pdv: parseInt(input.pv),
           interest: input.interest,
@@ -1169,7 +1170,8 @@ export const comprobantesRouter = createTRPCRouter({
         input.dateDue,
         input.pv,
         liquidation!.id,
-        input.interest ?? 0
+        input.interest ?? 0,
+        user ?? ""
       );
       return liquidation;
     }),
@@ -1230,13 +1232,22 @@ export async function preparateComprobante(
   dateVencimiento: Date | undefined,
   pv: string,
   liquidationId: string,
-  interes: number
+  interes: number,
+  user: string
 ) {
-  const user = currentUser();
-
-  for (let i = 0; i < grupos.length; i++) {
-    const grupo = grupos[i];
-    if (grupo) {
+  // const user = currentUser();
+  let groupIds = grupos.map((grupo) => grupo.cc?.id ?? "");
+  const events = await db.query.events.findMany({
+    where: and(
+      inArray(schema.events.currentAccount_id, groupIds),
+      lt(schema.events.createdAt, new Date())
+    ),
+  });
+  console.log(events.length);
+  await Promise.all(
+    grupos.map(async (grupo) => {
+      // const grupo = grupos[i];
+      // if (grupo) {
       //calculate iva
 
       let iva =
@@ -1273,20 +1284,21 @@ export async function preparateComprobante(
       );
       let saldo = 0;
       //calculate saldo
-      let events = await db.query.events.findMany({
-        where: eq(schema.events.currentAccount_id, grupo.cc?.id ?? ""),
-      });
-      events = events?.filter(
-        (x) => x.createdAt.getTime() < new Date().getTime()
-      );
-      if (events && events.length > 0) {
-        const lastEvent = events.reduce((prev, current) => {
+      // let events = await db.query.events.findMany({
+      //   where: eq(schema.events.currentAccount_id, grupo.cc?.id ?? ""),
+      // });
+      // events = events?.filter(
+      //   (x) => x.createdAt.getTime() < new Date().getTime()
+      // );
+
+      const lastEvent = events
+        .filter((x) => x.currentAccount_id == grupo.cc?.id)
+        .reduce((prev, current) => {
           return new Date(prev.createdAt) > new Date(current.createdAt)
             ? prev
             : current;
         });
-        saldo = lastEvent.current_amount * -1;
-      }
+      saldo = lastEvent.current_amount * -1;
 
       //calculate interest
       let interest = 0;
@@ -1465,7 +1477,7 @@ export async function preparateComprobante(
         "Total factura",
         (comprobante[0]?.importe ?? 0) / ivaFloat
       );
-      
+
       // await createcomprobanteItem(
       //   ivaFloat,
       //   comprobante[0]?.id ?? "",
@@ -1480,9 +1492,8 @@ export async function preparateComprobante(
           (previous_bill - saldo) * -1
         );
       }
-    }
-  }
-
+    })
+  );
   return "OK";
 }
 async function calculateAmount(
