@@ -5,23 +5,21 @@ interface AddElementButtonProps {
   children: React.ReactNode;
   isLoading?: boolean;
   onClick?: () => void;
+  className?: string;
 }
 export default function AddElementButton({
   children,
   isLoading,
   onClick,
+  className,
 }: AddElementButtonProps) {
   return (
     <Button
-      className="bg-[#bef0bb] hover:bg-[#bef0bb] text-[#3E3E3E] rounded-full"
+      variant="bitcompay"
+      className={className}
       onClick={onClick}
       disabled={isLoading}
     >
-      {isLoading ? (
-        <Loader2 className="mr-2 animate-spin" />
-      ) : (
-        <Edit02Icon className="h-3" />
-      )}
       {children}
     </Button>
   );
