@@ -36,23 +36,25 @@ import DownloadExcelButton from "./downloadExcelButton";
 import RejectLiquidationDialog from "./reject-liquidation-dialog";
 import { ChevronLeft, CircleX } from "lucide-react";
 import { GoBackButton } from "~/components/goback-button";
+import { family_groups } from "~/server/db/schema";
 export default async function Home(props: {
   params: { liquidationId: string };
 }) {
+  const liquidationId = props.params.liquidationId;
   const userActual = await currentUser();
   const companyData = await api.companies.get.query();
   const eventos = await api.events.list.query();
   const preliquidation = await api.liquidations.get.query({
-    id: props.params.liquidationId,
+    id: liquidationId,
   });
-  const businessUnit = preliquidation?.bussinessUnits;
-  const user = await clerkClient.users.getUser(
-    preliquidation?.userCreated ?? "user_2iy8lXXdnoa2f5wHjRh5nj3W0fU"
-  );
+  // const businessUnit = preliquidation?.bussinessUnits;
+  // const user = await clerkClient.users.getUser(
+  //   preliquidation?.userCreated ?? "user_2iy8lXXdnoa2f5wHjRh5nj3W0fU"
+  // );
   if (!preliquidation) return <Title>Preliquidacion no encotrada</Title>;
-  const familyGroups = await api.family_groups.getByLiquidation.query({
-    liquidationId: props.params.liquidationId,
-  });
+  // const familyGroups = await api.family_groups.getByLiquidation.query({
+  //   liquidationId: liquidationId,
+  // });
 
   // const fg = await api.family_groups.getWithFilteredComprobantes.query({
 
@@ -69,8 +71,7 @@ export default async function Home(props: {
   //   label: modo?.description ?? "modo sin nombre",
   // })) || [{ value: "", label: "" }];
 
-  const periodo =
-    dayjs.utc(preliquidation?.period).format("MM/YYYY") ?? "-";
+  const periodo = dayjs.utc(preliquidation?.period).format("MM/YYYY") ?? "-";
   const headers = [
     "NRO. GF",
     "Nombre",
@@ -104,7 +105,12 @@ export default async function Home(props: {
   };
   const excelRows: (string | number)[][] = [[...headers]];
   const tableRows: TableRecord[] = [];
-  for (const fg of familyGroups) {
+
+  const family_groups = preliquidation.comprobantes.map(
+    (fg) => fg.family_group
+  );
+
+  family_groups.map((fg) => {
     const excelRow = [];
     const businessUnit = fg?.businessUnitData?.description ?? "";
     const billResponsible = fg?.integrants?.find(
@@ -149,7 +155,7 @@ export default async function Home(props: {
     const diferencial = toNumberOrZero(
       original_comprobante?.items.find((item) => item.concept === "Diferencial")
         ?.amount
-    )
+    );
 
     summary["Diferencial"] += diferencial;
     excelRow.push(diferencial);
@@ -215,10 +221,11 @@ export default async function Home(props: {
       modo,
     });
     // console.log("comprobantes", fg?.comprobantes);
-  }
+  });
+
   // let fechavenc2 = {dayjs.utc(preliquidation?.comprobantes[0]?.payments[0]?.second_due_date).format("DD/MM/YYYY") ?? "-" }
   // fechavenc2 == {"Invalid Date"} ? "-" : fechavenc2
-  
+
   return (
     <LayoutContainer>
       <div className="flex flex-row justify-between w-full">
@@ -243,7 +250,9 @@ export default async function Home(props: {
           <li className="">
             <span className="">RAZÓN SOCIAL</span>
             <br />
-            <p className="font-medium text-sm">{companyData?.razon_social ?? "-"}</p>
+            <p className="font-medium text-sm">
+              {companyData?.razon_social ?? "-"}
+            </p>
           </li>
           <li>
             <span className="">CUIT</span>
@@ -253,7 +262,9 @@ export default async function Home(props: {
           <li>
             <span className="">MARCA</span>
             <br />
-            <p className="font-medium text-sm">{preliquidation?.brand?.name ?? "-"}</p>
+            <p className="font-medium text-sm">
+              {preliquidation?.brand?.name ?? "-"}
+            </p>
           </li>
           <li>
             <span className="">PERÍODO</span>
@@ -263,27 +274,30 @@ export default async function Home(props: {
           <li>
             <span className="">N° PRE-LIQUIDACIÓN</span>
             <br />
-            <p className="font-medium text-sm">{preliquidation?.number ?? "-"}</p>
+            <p className="font-medium text-sm">
+              {preliquidation?.number ?? "-"}
+            </p>
           </li>
           <li>
             <span className="">FECHA DE PROCESO</span>
             <br />
             <p className="font-medium text-sm">
-            {dayjs.utc(preliquidation?.period).format("DD/MM/YYYY hh:mm") ?? "-"}
+              {dayjs.utc(preliquidation?.period).format("DD/MM/YYYY hh:mm") ??
+                "-"}
             </p>
           </li>
           <li className="">
             <span className="">UNIDAD DE NEGOCIOS</span>
             <br />
             <p className="font-medium text-sm">
-            {(preliquidation?.bussinessUnits?.description) ?? "-"}
+              {preliquidation?.bussinessUnits?.description ?? "-"}
             </p>
           </li>
           <li>
             <span className="">FECHA DE EMISIÓN</span>
             <br />
             <p className="font-medium text-sm">
-            {dayjs.utc(preliquidation?.createdAt).format("DD/MM/YYYY") ?? "-"}
+              {dayjs.utc(preliquidation?.createdAt).format("DD/MM/YYYY") ?? "-"}
             </p>
           </li>
           <li>
@@ -295,25 +309,34 @@ export default async function Home(props: {
             <span className="">1° FECHA DE VENCIMIENTO</span>
             <br />
             <p className="font-medium text-sm">
-            {dayjs.utc(preliquidation?.comprobantes[0]?.payments[0]?.first_due_date).format("DD/MM/YYYY") ?? "-"}
-              </p>
+              {dayjs
+                .utc(
+                  preliquidation?.comprobantes[0]?.payments[0]?.first_due_date
+                )
+                .format("DD/MM/YYYY") ?? "-"}
+            </p>
           </li>
           <li>
             <span className="">2° FECHA DE VENCIMIENTO</span>
             <br />
             <p className="font-medium text-sm">
-            {dayjs.utc(preliquidation?.comprobantes[0]?.payments[0]?.second_due_date).format("DD/MM/YYYY") ?? "-" }
-
+              {dayjs
+                .utc(
+                  preliquidation?.comprobantes[0]?.payments[0]?.second_due_date
+                )
+                .format("DD/MM/YYYY") ?? "-"}
             </p>
           </li>
           <li>
             <span className="">INTERÉS</span>
             <br />
-            <p className="font-medium text-sm">{new Intl.NumberFormat("es-AR",{
-              style: "percent",
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2
-            }).format(preliquidation?.interest!/100)?? "-"}</p>
+            <p className="font-medium text-sm">
+              {new Intl.NumberFormat("es-AR", {
+                style: "percent",
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }).format(preliquidation?.interest! / 100) ?? "-"}
+            </p>
           </li>
         </ul>
       </div>

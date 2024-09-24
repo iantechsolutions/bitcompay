@@ -1107,11 +1107,10 @@ export const comprobantesRouter = createTRPCRouter({
         dateDue: z.date().optional(),
         interest: z.number().optional(),
         logo_url: z.string().optional(),
-        user: z.string().optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const user = input.user;
+      // const user = input.user;
       const companyId = ctx.session.orgId;
       const grupos = await getGruposForLiquidation(
         input.brandId,
@@ -1125,7 +1124,7 @@ export const comprobantesRouter = createTRPCRouter({
         };
       }
 
-      // const user = await currentUser();
+      const user = await currentUser();
 
       const brand = await db.query.brands.findFirst({
         where: eq(schema.brands.id, input.brandId),
@@ -1154,7 +1153,7 @@ export const comprobantesRouter = createTRPCRouter({
           estado: "pendiente",
           cuit: company?.cuit ?? "",
           period: input.dateDesde,
-          userCreated: user ?? "",
+          userCreated: user?.id ?? "",
           userApproved: "",
           pdv: parseInt(input.pv),
           interest: input.interest,
@@ -1171,7 +1170,7 @@ export const comprobantesRouter = createTRPCRouter({
         input.pv,
         liquidation!.id,
         input.interest ?? 0,
-        user ?? ""
+        user?.id ?? ""
       );
       return liquidation;
     }),

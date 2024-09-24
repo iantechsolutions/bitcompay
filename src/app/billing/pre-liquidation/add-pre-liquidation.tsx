@@ -59,7 +59,6 @@ export default function AddPreLiquidation() {
   const queryClient = useQueryClient();
   const [popover1Open, setPopover1Open] = useState(false);
   const [popover2Open, setPopover2Open] = useState(false);
-  const { user } = useUser();
 
   const [brandId, setBrandId] = useState("");
   const { mutateAsync: createLiquidation, isLoading } =
@@ -76,7 +75,6 @@ export default function AddPreLiquidation() {
   }
 
   async function handleCreate() {
-    console.log("poto polola", user?.id.toString());
     const validationErrors = validateFields();
     if (validationErrors.length > 0) {
       return toast.error(
@@ -96,7 +94,6 @@ export default function AddPreLiquidation() {
           dateDue: fechaVencimiento2,
           interest: interest ?? 0,
           logo_url: logo_url ?? undefined,
-          user: user?.id.toString() ?? "",
         });
         if ("error" in liquidation!) {
           toast.error(liquidation.error);
@@ -108,14 +105,6 @@ export default function AddPreLiquidation() {
           toast.error("Error al crear la Pre-Liquidación");
         }
       }
-      // if (!mes) {
-      //   toast.error("Seleccione un mes");
-      // } else if (!anio || anio < new Date().getFullYear()) {
-      //   toast.error("El año seleccionado no es válido");
-      // }
-
-      // setOpen(false);
-      // toast.success("Pre-Liquidación creada correctamente");
     } catch (e) {
       console.log("error", e);
       const error = asTRPCError(e)!;

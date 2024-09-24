@@ -186,6 +186,8 @@ export const uploadsRouter = createTRPCRouter({
               .set({
                 statusId: record.statusId,
                 // payment_channel: input.channelName,
+                payment_date: record.payment_date,
+                additional_info: record.additional_info,
                 recollected_amount: record.recollected_amount,
               })
               .where(
@@ -573,12 +575,13 @@ async function readResponseUploadContents(
             date,
             "YYYY-MM-DD"
           ).toDate();
+
           original_transaction.collected_amount =
             original_transaction.first_due_amount! +
             original_transaction.second_due_amount!;
-          original_transaction.recollected_amount = parceImporte(
-            importe_final!
-          );
+          original_transaction.recollected_amount =
+            (original_transaction.recollected_amount ?? 0) +
+            parceImporte(importe_final!);
 
           console.log(
             status,
@@ -641,10 +644,11 @@ async function readResponseUploadContents(
             "YYYY-MM-DD"
           ).toDate();
           original_transaction.collected_amount =
-            original_transaction.first_due_amount! +
-            original_transaction.second_due_amount!;
+            (original_transaction.first_due_amount ?? 0) +
+            (original_transaction.second_due_amount ?? 0);
+
           original_transaction.recollected_amount = parceImporte(
-            importe_final!
+            importe_final ?? "0"
           );
           records.push(original_transaction);
         }
@@ -961,6 +965,7 @@ async function readResponseUploadContents(
       recordIndex++;
     }
   }
+  console.log("darius", records.length);
   return { upload, records, total_rows, header: recHeaders };
 }
 
