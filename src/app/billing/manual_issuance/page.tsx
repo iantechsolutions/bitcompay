@@ -8,6 +8,8 @@ import {
   CircleCheck,
   Search,
   Scroll,
+  ChevronRightCircleIcon,
+  CircleChevronRight,
 } from "lucide-react";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -57,7 +59,7 @@ import ElementCard from "~/components/affiliate-page/element-card";
 import Calendar01Icon from "~/components/icons/calendar-01-stroke-rounded";
 import { Command, CommandInput } from "~/components/ui/command";
 import { CommandGroup, CommandItem } from "cmdk";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import ComprobanteCard from "~/components/manual_issuance/comprobante-card";
 import {
   Form,
@@ -66,6 +68,13 @@ import {
   FormItem,
   FormLabel,
 } from "~/components/ui/form";
+import AdditionalInfoCard from "~/components/manual_issuance/additional-info";
+import { RouterOutputs } from "~/trpc/shared";
+import AddCircleIcon from "~/components/icons/add-circle-stroke-rounded";
+import CancelCircleIcon from "~/components/icons/cancel-circle-stroke-rounded";
+import OtherTributes from "~/components/manual_issuance/other-tributes";
+import ConfirmationPage from "~/components/manual_issuance/confirmation-page";
+import ReceptorCard from "~/components/manual_issuance/receptor-card";
 
 function formatDate(date: Date | undefined) {
   if (date) {
@@ -94,7 +103,7 @@ export default function Page() {
 
   const [logo, setLogo] = useState("");
   const [fcSelec, setFCSelec] = useState("");
-  const [comprobantes, setComprobantes] = useState<any[]>([]);
+  const [comprobantes, setComprobantes] = useState<any[]>();
   const [selectedComprobante, setSelectedComprobante] = useState<any>(null);
   const [comprobanteCreado, setComprobanteCreado] = useState<any>(null);
   const [afip, setAfip] = useState<any>(null);
@@ -105,9 +114,6 @@ export default function Page() {
       setLoading(false);
       const voucherTypes = await afip.ElectronicBilling.getVoucherTypes();
       const ivaTypes = await afip.ElectronicBilling.getAliquotTypes();
-      console.log("afip loaded");
-      console.log("voucherTypes", voucherTypes);
-      console.log("aliquot types", ivaTypes);
       setAfip(afip);
     }
 
@@ -354,7 +360,7 @@ export default function Page() {
 
           //
           comprobante = await createComprobante({
-            billLink: "",
+            billLink: "", //deberiamos poner un link ?
             concepto: Number(concepto) ?? 0,
             importe: Number(importe) * ivaFloat + Number(tributos) ?? 0,
             iva: "0",
@@ -396,46 +402,6 @@ export default function Page() {
           ?.find((x) => x.id == grupoFamiliarId)
           ?.integrants.find((x) => x.isBillResponsible);
         const obraSocial = obrasSociales?.find((x) => x.id == obraSocialId);
-
-        // let barcodeImage;
-
-        // function BarCode() {
-        //   if (comprobante?.length && products?.length) {
-        //     const pago = comprobante[0]!.payments[0];
-
-        //     return (
-        //       <BarcodeProcedure
-        //         dateVto={pago.first_due_date ?? new Date()}
-        //         amountVto={pago.first_due_amount ?? 0}
-        //         client={pago.fiscal_id_number ?? 0}
-        //         isPagoFacil={true}
-        //         invoiceNumber={pago.invoice_number ?? 0}
-        //       />
-        //     );
-        //   } else {
-        //     return "lol";
-        //   }
-
-        // if (comprobante?.length && products?.length) {
-        //   const pago = comprobante[0]!.payments[0];
-        //   console.log(pago, "------2-------");
-
-        //   if (pago) {
-        //     try {
-        //       barcodeImage = BarcodeProcedure({
-        //         dateVto: pago.first_due_date ?? new Date(),
-        //         amountVto: pago.first_due_amount ?? 0,
-        //         client: pago.fiscal_id_number ?? 0,
-        //         isPagoFacil: true,
-        //         invoiceNumber: pago.invoice_number ?? 0,
-        //       });
-        //     } catch {
-        //       barcodeImage = "lol";
-        //     }
-        //   }
-
-        //   console.log("llegoppp", barcodeImage);
-        // }
 
         if (comprobante && comprobante[0]) {
           const html = htmlBill(
@@ -512,6 +478,14 @@ export default function Page() {
     dateHasta: Date;
     facturasEmitidas: Number;
   };
+  type ConceptsForm = {
+    concepts: {
+      concepto: string;
+      importe: number;
+      iva: number;
+      total: number;
+    }[];
+  };
 
   const [tipoComprobante, setTipoComprobante] = useState("");
   const [concepto, setConcepto] = useState("");
@@ -539,6 +513,62 @@ export default function Page() {
       facturasEmitidas: 0,
     },
   });
+  const conceptsForm = useForm<ConceptsForm>({
+    defaultValues: {
+      concepts: [{ concepto: "", importe: 0, iva: 0, total: 0 }],
+    },
+  });
+  type OtherTributesForm = {
+    tributes: {
+      tribute: string;
+      base: number;
+      aliquot: number;
+      amount: number;
+    }[];
+  };
+  const otherTributesForm = useForm<OtherTributesForm>({
+    defaultValues: {
+      tributes: [{ tribute: "", base: 0, aliquot: 0, amount: 0 }],
+    },
+  });
+  type AsociatedFCForm = {
+    comprobantes: {
+      tipoComprobante: string;
+      puntoVenta: string;
+      nroComprobante: string;
+      dateEmision: Date;
+    }[];
+  };
+  const asociatedFCForm = useForm<AsociatedFCForm>({
+    defaultValues: {
+      comprobantes: [
+        {
+          tipoComprobante: "",
+          puntoVenta: "",
+          nroComprobante: "",
+          dateEmision: new Date(),
+        },
+      ],
+    },
+  });
+
+  type otherConceptsForm = {
+    otherConcepts: {
+      description: string;
+      importe: number;
+    }[];
+  };
+  const otherConceptsForm = useForm<otherConceptsForm>({
+    defaultValues: { otherConcepts: [{ description: "", importe: 0 }] },
+  });
+  const [page, setPage] = useState<"formPage" | "confirmationPage">("formPage");
+  function handlePageChange(page: "formPage" | "confirmationPage") {
+    setPage(page);
+  }
+  const pagesMap: Record<string, React.ReactNode> = {
+    formPage: <></>,
+    confirmationPage: <></>,
+  };
   const products = api.products.list.useQuery().data;
   const [brandId, setBrandId] = useState("");
   function handleGrupoFamilarChange(value: string) {
@@ -626,222 +656,200 @@ export default function Page() {
       </LayoutContainer>
     );
   }
-  console.log("tipo de comprobante",tipoComprobante);
-  // <ComprobanteCard  form= {form}/>
   return (
     <>
       <LayoutContainer>
-        <section className="space-y-5">
-          <div>
-            <Title>Generación de comprobantes</Title>
-          </div>
-          <div className="flex flex-row justify-between">
-            <p className=" text-lg font-semibold">Receptor</p>
-            <div className="pb-2">
-              <Button
-                className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 mr-3 shadow-none"
-                // onClick={() => setOpen(true)}
-                disabled={loading}
-                onClick={generateComprobante}
-              >
-                {loading ? (
-                  <Loader2Icon className="mr-2 animate-spin" size={20} />
-                ) : (
-                  <CircleCheck className="h-4 w-auto mr-2" />
-                )}
-                Aprobar
-              </Button>
-              <Button
-                className="  h-7 bg-[#f9c3c3] hover:bg-[#f9c3c3] text-[#4B4B4B]  text-sm rounded-2xl py-4 px-4 shadow-none "
-                // onClick={() => setOpen(true)}
-              >
-                <CircleX className="h-4 w-auto mr-2" />
-                Anular
-              </Button>
+        {page === "formPage" && (
+          <section className="space-y-5 flex flex-col">
+            <div>
+              <Title>Generación de comprobantes</Title>
             </div>
-          </div>
-
-          <div className="flex flex-row justify-between gap-8 ">
-            <Select
-              onValueChange={(e) => handleGrupoFamilarChange(e)}
-              value={grupoFamiliarId}
-            >
-              <SelectTriggerMagnify className=" w-full bg-[#FAFAFA] font-normal text-[#747474]">
-                <SelectValue placeholder="Buscar afiliado.." />
-              </SelectTriggerMagnify>
-              <SelectContent>
-                {gruposFamiliar &&
-                  gruposFamiliar.map((gruposFamiliar) => (
-                    <SelectItem
-                      key={gruposFamiliar?.id}
-                      value={gruposFamiliar?.id}
-                      className="rounded-none"
-                    >
-                      {gruposFamiliar?.integrants.find((x) => x.isHolder)?.name}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
-            <Select
-              onValueChange={(e) => handleObraSocialChange(e)}
-              value={obraSocialId}
-            >
-              <SelectTriggerMagnify className="w-full bg-[#FAFAFA] font-normal text-[#747474]">
-                <SelectValue placeholder="Buscar por obra social.." />
-              </SelectTriggerMagnify>
-              <SelectContent>
-                {obrasSociales &&
-                  obrasSociales.map((obrasSocial) => (
-                    <SelectItem
-                      key={obrasSocial?.id}
-                      value={obrasSocial?.id}
-                      className="rounded-none"
-                    >
-                      {obrasSocial?.name}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="bg-[#F7F7F7] rounded-lg py-4 px-24 flex flex-row justify-between ">
-            <ElementCard
-              element={{ key: "NOMBRE", value: nombre }}
-              className="pr-24 "
-            ></ElementCard>
-            <div className="flex gap-20">
-              <ElementCard
-                element={{ key: "DNI", value: nroDocumentoDNI }}
-                className="pr-8 "
-              ></ElementCard>
-              <ElementCard
-                element={{ key: "CUIT", value: nroDocumento }}
-                className="pr-11 "
-              ></ElementCard>
-            </div>
-          </div>
-
-          <ComprobanteCard form={form} tipoComprobante={tipoComprobante} setTipoComprobante={setTipoComprobante}/>
-          
-          <div className="border rounded-lg px-4 pt-5 pb-8">
-            <p className="text-lg font-semibold">
-              Datos del Comprobante Asociado
-            </p>
-            <div className="grid grid-cols-2 gap-4 mt-4">
-              <ElementCard
-                className="pr-1 pb-0 border-[#bef0bb]"
-                element={{
-                  key: "COMPROBANTE ASOCIADO",
-                  value: (
-                    <Select
-                      onValueChange={(e) => handleComprobanteChange(e)}
-                      disabled={
-                        tipoComprobante != "3" && tipoComprobante != "8"
-                      }
-                    >
-                      <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8">
-                        <SelectValue placeholder="Seleccionar comprobante..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {gruposFamiliar?.find((x) => x.id == grupoFamiliarId) &&
-                          gruposFamiliar
-                            ?.find((x) => x.id == grupoFamiliarId)
-                            ?.comprobantes.filter(
-                              (x) =>
-                                x.estado != "generada" &&
-                                x.ptoVenta.toString() ===
-                                  form.getValues().puntoVenta
-                            )
-                            .map((comprobante) => (
-                              <SelectItem
-                                key={comprobante?.id}
-                                value={comprobante?.id}
-                                className="rounded-none "
-                              >
-                                {comprobante?.nroComprobante}
-                              </SelectItem>
-                            ))}
-                      </SelectContent>
-                    </Select>
-                  ),
-                }}
-              />
-            </div>
-          </div>
-
-          <div className="border rounded-lg px-4 pt-5 pb-8">
-            <p className=" text-lg font-semibold">Totales</p>
-            <div className="flex flex-row justify-between pb-2">
-              <div className="flex flex-col gap-2">
-                <Label className="text-[#747474]">SUB-TOTAL FACTURA</Label>
-                <Input
-                  // disabled={true}
-                  value={
-                    "$ " +
-                    (!selectedComprobante
-                      ? importe
-                      : selectedComprobante.iva == "0"
-                      ? selectedComprobante?.importe
-                      : (selectedComprobante?.importe /
-                          Number(selectedComprobante.iva)) *
-                        100)
-                  }
-                  onChange={(e) => setImporte(e.target.value.slice(2))}
-                  className="bg-[#def5dd] text-[#85ce81] font-semibold rounded-lg opacity-100 border-[#e9fcf8] border"
-                />
+            <div className="flex flex-row justify-between">
+              <p className=" text-lg font-semibold">Receptor</p>
+              <div className="pb-2">
+                <Button
+                  className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 mr-3 shadow-none"
+                  // onClick={() => setOpen(true)}
+                  disabled={loading}
+                  onClick={generateComprobante}
+                >
+                  {loading ? (
+                    <Loader2Icon className="mr-2 animate-spin" size={20} />
+                  ) : (
+                    <CircleCheck className="h-4 w-auto mr-2" />
+                  )}
+                  Aprobar
+                </Button>
+                <Button
+                  className="  h-7 bg-[#f9c3c3] hover:bg-[#f9c3c3] text-[#4B4B4B]  text-sm rounded-2xl py-4 px-4 shadow-none "
+                  // onClick={() => setOpen(true)}
+                >
+                  <CircleX className="h-4 w-auto mr-2" />
+                  Anular
+                </Button>
               </div>
-              <div className="flex flex-col gap-2">
-                <Label className="text-[#747474]">IMPORTE IVA</Label>
-                <Input
-                  // disabled={true}
-                  value={
-                    "$ " +
-                    (!selectedComprobante
-                      ? (
-                          (Number(importe) *
-                            Number(ivaDictionary[Number(iva)])) /
-                          100
-                        ).toFixed(2)
-                      : selectedComprobante.iva == "0"
-                      ? "0"
-                      : selectedComprobante?.importe -
-                        (selectedComprobante?.importe /
-                          Number(selectedComprobante.iva)) *
+            </div>
+
+            <div className="flex flex-row justify-between gap-8 ">
+              <Select
+                onValueChange={(e) => handleGrupoFamilarChange(e)}
+                value={grupoFamiliarId}
+              >
+                <SelectTriggerMagnify className=" w-full bg-[#FAFAFA] font-normal text-[#747474]">
+                  <SelectValue placeholder="Buscar afiliado.." />
+                </SelectTriggerMagnify>
+                <SelectContent>
+                  {gruposFamiliar &&
+                    gruposFamiliar.map((gruposFamiliar) => (
+                      <SelectItem
+                        key={gruposFamiliar?.id}
+                        value={gruposFamiliar?.id}
+                        className="rounded-none"
+                      >
+                        {
+                          gruposFamiliar?.integrants.find((x) => x.isHolder)
+                            ?.name
+                        }
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+              <Select
+                onValueChange={(e) => handleObraSocialChange(e)}
+                value={obraSocialId}
+              >
+                <SelectTriggerMagnify className="w-full bg-[#FAFAFA] font-normal text-[#747474]">
+                  <SelectValue placeholder="Buscar por obra social.." />
+                </SelectTriggerMagnify>
+                <SelectContent>
+                  {obrasSociales &&
+                    obrasSociales.map((obrasSocial) => (
+                      <SelectItem
+                        key={obrasSocial?.id}
+                        value={obrasSocial?.id}
+                        className="rounded-none"
+                      >
+                        {obrasSocial?.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <ReceptorCard 
+              nombre={nombre}
+              nroDocumento={nroDocumento}
+              nroDocumentoDNI={nroDocumentoDNI}
+            />
+
+            <ComprobanteCard
+              visualization={false}
+              form={form}
+              tipoComprobante={tipoComprobante}
+              setTipoComprobante={setTipoComprobante}
+            />
+
+            <AdditionalInfoCard
+              tipoComprobante={tipoComprobante}
+              conceptsForm={conceptsForm}
+              form={form}
+              asociatedFCForm={asociatedFCForm}
+              otherConceptsForm={otherConceptsForm}
+            />
+
+            <OtherTributes otherTributes={otherTributesForm} />
+            <div className="border rounded-lg px-4 pt-5 pb-8">
+              <p className=" text-lg font-semibold">Totales</p>
+              <div className="flex flex-row justify-between pb-2">
+                <div className="flex flex-col gap-2">
+                  <Label className="text-[#747474]">SUB-TOTAL FACTURA</Label>
+                  <Input
+                    // disabled={true}
+                    value={
+                      "$ " +
+                      (!selectedComprobante
+                        ? importe
+                        : selectedComprobante.iva == "0"
+                        ? selectedComprobante?.importe
+                        : (selectedComprobante?.importe /
+                            Number(selectedComprobante.iva)) *
                           100)
-                  }
-                  className="bg-[#def5dd] text-[#85ce81] font-semibold  rounded-lg opacity-100 border-[#e9fcf8] border"
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label className="text-[#747474]">OTROS ATRIBUTOS</Label>
-                <Input
-                  // disabled={true}
-                  value={"$ " + !selectedComprobante ? tributos : "0"}
-                  // onChange={(e) => setTributos(e.target.value.slice(2))}
-                  className="bg-[#def5dd] text-[#85ce81] font-semibold  rounded-lg opacity-100 border-[#e9fcf8] border"
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label className="text-[#747474]">TOTAL</Label>
-                <Input
-                  // disabled={true}
-                  value={
-                    "$ " +
-                    (!selectedComprobante
-                      ? (
-                          Number(importe) +
-                          (Number(importe) *
-                            Number(ivaDictionary[Number(iva)])) /
-                            100 +
-                          Number(tributos)
-                        ).toFixed(2)
-                      : selectedComprobante?.importe)
-                  }
-                  className="bg-[#def5dd] text-[#85ce81] font-semibold rounded-lg  opacity-100 border-[#e9fcf8] border"
-                />
+                    }
+                    onChange={(e) => setImporte(e.target.value.slice(2))}
+                    className="bg-[#def5dd] text-[#85ce81] font-semibold rounded-lg opacity-100 border-[#e9fcf8] border"
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label className="text-[#747474]">IMPORTE IVA</Label>
+                  <Input
+                    // disabled={true}
+                    value={
+                      "$ " +
+                      (!selectedComprobante
+                        ? (
+                            (Number(importe) *
+                              Number(ivaDictionary[Number(iva)])) /
+                            100
+                          ).toFixed(2)
+                        : selectedComprobante.iva == "0"
+                        ? "0"
+                        : selectedComprobante?.importe -
+                          (selectedComprobante?.importe /
+                            Number(selectedComprobante.iva)) *
+                            100)
+                    }
+                    className="bg-[#def5dd] text-[#85ce81] font-semibold  rounded-lg opacity-100 border-[#e9fcf8] border"
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label className="text-[#747474]">OTROS ATRIBUTOS</Label>
+                  <Input
+                    // disabled={true}
+                    value={"$ " + !selectedComprobante ? tributos : "0"}
+                    // onChange={(e) => setTributos(e.target.value.slice(2))}
+                    className="bg-[#def5dd] text-[#85ce81] font-semibold  rounded-lg opacity-100 border-[#e9fcf8] border"
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label className="text-[#747474]">TOTAL</Label>
+                  <Input
+                    // disabled={true}
+                    value={
+                      "$ " +
+                      (!selectedComprobante
+                        ? (
+                            Number(importe) +
+                            (Number(importe) *
+                              Number(ivaDictionary[Number(iva)])) /
+                              100 +
+                            Number(tributos)
+                          ).toFixed(2)
+                        : selectedComprobante?.importe)
+                    }
+                    className="bg-[#def5dd] text-[#85ce81] font-semibold rounded-lg  opacity-100 border-[#e9fcf8] border"
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        </section>
+            <Button
+              variant="outline"
+              className="flex justify-between px-4 py-4 rounded-full self-end bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e]"
+              onClick={() => setPage("confirmationPage")}
+            >
+              Siguiente <CircleChevronRight className="h-4 ml-2" />
+            </Button>
+          </section>
+        )}
+        {page === "confirmationPage" && (
+          <ConfirmationPage
+            form={form}
+            setTipoComprobante={setTipoComprobante}
+            tipoComprobante={tipoComprobante}
+            asociatedFCForm={asociatedFCForm}
+            otherTributes={otherTributesForm}
+            changePage={handlePageChange}
+          />
+        )}
       </LayoutContainer>
     </>
   );

@@ -78,7 +78,7 @@ export default function AddPlanPricesComponent({
   const [formData, setFormData] = useState<FormValues>({
     prices: initialPrices || [],
   });
-
+  
   const router = useRouter();
   const [working, setWorking] = useState(false);
   const form = useForm<FormValues>({
