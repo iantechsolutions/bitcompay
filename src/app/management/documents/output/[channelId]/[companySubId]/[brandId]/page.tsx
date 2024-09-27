@@ -34,6 +34,7 @@ export default async function page({
   });
 
   // Productos del canal
+  console.log(channel.products, "test");
   const productsNumbers = channel.products.map((p) => p.product.number);
 
   // Pagos que no tienen archivo de salida que corresponden a la marca y los productos del canal

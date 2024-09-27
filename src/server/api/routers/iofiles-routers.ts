@@ -126,6 +126,7 @@ export const iofilesRouter = createTRPCRouter({
             brandName: brand.name,
             redescription: brand.redescription,
             utility: brand.utility,
+            accion: "A",
           };
           text = await generatePagoFacil(generateInput, payments);
         } else if (channel.name.includes("RAPIPAGO")) {
@@ -543,6 +544,7 @@ async function generatePagoFacil(
     brandName: string;
     redescription: string;
     utility: string | null;
+    accion: string | null;
   },
   transactions: RouterOutputs["transactions"]["list"]
 ): Promise<string> {
@@ -570,7 +572,7 @@ async function generatePagoFacil(
     9,
     false
   );
-  let action = "A";
+  let action = _input.accion ?? "A";
   let utility = formatString(" ", _input.utility, 8, true);
 
   const todayDate = dayjs().format("YYYYMMDD");
@@ -599,16 +601,16 @@ async function generatePagoFacil(
     // }
 
     const fiscal_id_number = formatString(
-      " ",
-      transaction.affiliate_number ?? "",
-      30,
-      true
-    );
-    const invoice_number = formatString(
       "0",
-      transaction.invoice_number.toString(),
+      transaction.affiliate_number ?? "",
       18,
       false
+    );
+    const invoice_number = formatString(
+      " ",
+      transaction.invoice_number.toString(),
+      30,
+      true
     );
     const seq_number = `${dayjs(transaction.first_due_date).year()}01`;
     console.log("testos", seq_number);
@@ -685,7 +687,7 @@ async function generatePagoFacil(
     console.log("updated_bar_code", updated_bar_code);
     const barcode = formatString(" ", updated_bar_code, 55, true);
 
-    text += `${register_type}${brandType}${invoice_number}${fiscal_id_number}${seq_number}${message}${name}${barcode}${validity_date}${first_due_date}${payment_type}${" ".repeat(
+    text += `${register_type}${brandType}${fiscal_id_number}${invoice_number}${seq_number}${message}${name}${barcode}${validity_date}${first_due_date}${payment_type}${" ".repeat(
       9
     )}\r\n`;
     // detalle;
@@ -928,15 +930,23 @@ function generateDebitoAutomatico(props: generateDAprops) {
       false
     );
 
+    const affiliate_number = formatString(
+      "0",
+      payment?.affiliate_number ?? "",
+      15,
+      false
+    );
+
+    const transation_code = "0005";
     const importe = payment.collected_amount ?? payment.first_due_amount;
     const importeString = formatAmount(importe!, 13);
 
     const registrationCode = payment.is_new ? "E" : " ";
     body += `1${
       payment.card_number || " ".repeat(16)
-    }   ${invoice_number}${dateYYYYMMDD}0005${importeString}${"0".repeat(4)}${
-      payment.fiscal_id_number
-    }${registrationCode}${" ".repeat(28)}*\r\n`;
+    }   ${invoice_number}${dateYYYYMMDD}${transation_code}${importeString}${affiliate_number}${registrationCode}${" ".repeat(
+      28
+    )}*\r\n`;
     total_collected += importe!;
   }
   const total_records = formatString(
