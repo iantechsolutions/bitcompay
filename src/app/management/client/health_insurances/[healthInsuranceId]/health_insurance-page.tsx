@@ -39,14 +39,16 @@ export default function HealthInsurancePage(props: {
     healthInsuranceId: props.healthInsurance?.id ?? "",
   });
   let currentAmount = 0;
+
+  let lastEvent;
   if (cc?.events) {
-    const lastEvent = cc?.events.reduce((prev, current) => {
+    lastEvent = cc?.events.reduce((prev, current) => {
       return new Date(prev.createdAt) > new Date(current.createdAt)
         ? prev
         : current;
     });
-    currentAmount = lastEvent?.current_amount ?? 0;
   }
+  currentAmount = lastEvent?.current_amount ?? 0;
   const [openBasicData, setOpenBasicData] = useState<boolean>(false);
   const [openFacturacion, setOpenFacturacion] = useState<boolean>(false);
 
