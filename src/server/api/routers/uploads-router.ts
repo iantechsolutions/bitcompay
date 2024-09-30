@@ -173,11 +173,12 @@ export const uploadsRouter = createTRPCRouter({
         await Promise.all(
           records.map(async (record) => {
             const invoiceNumber = record.invoice_number || 0;
-            const fiscal_id_number = record.fiscal_id_number || 0;
+            const affiliate_number = record.affiliate_number || "";
+            console.log("affiliate_number", affiliate_number);
             let subquery = tx
               .select({ id: schema.payments.id })
               .from(schema.payments)
-              .where(eq(schema.payments.fiscal_id_number, fiscal_id_number))
+              .where(eq(schema.payments.affiliate_number, affiliate_number))
               .orderBy(desc(schema.payments.createdAt))
               .limit(1);
             console.log("subquery", subquery, typeof subquery);
@@ -193,7 +194,7 @@ export const uploadsRouter = createTRPCRouter({
               .where(
                 or(
                   eq(schema.payments.invoice_number, invoiceNumber),
-                  eq(schema.payments.fiscal_id_number, fiscal_id_number)
+                  eq(schema.payments.affiliate_number, affiliate_number)
                 )
               );
             const payment = await tx.query.payments.findFirst({
@@ -395,7 +396,7 @@ export const uploadsRouter = createTRPCRouter({
               id: createId(),
               userId: ctx.session.user.id,
               documentUploadId: upload.id,
-              companyId: companyId!,
+              companyId: companyId ?? "",
               g_c: row.g_c,
               name: row.name,
               fiscal_id_type: row.fiscal_id_type,
@@ -403,7 +404,7 @@ export const uploadsRouter = createTRPCRouter({
               du_type: row.du_type,
               du_number: row.du_number,
               product_number: row.product_number,
-              invoice_number: row.invoice_number!,
+              invoice_number: row.invoice_number ?? 0,
               period: row.period,
               first_due_amount: row.first_due_amount,
               first_due_date: row.first_due_date,
@@ -414,7 +415,7 @@ export const uploadsRouter = createTRPCRouter({
               payment_date: row.payment_date ?? null,
               collected_amount: row.collected_amount ?? null,
               cbu: row.cbu ?? null,
-              statusId: defaultStatus?.id!,
+              statusId: defaultStatus?.id ?? "",
               card_number: row.card_number?.toString() ?? null,
               card_type: row.card_type ?? null,
               card_brand: row.card_brand ?? null,
@@ -537,16 +538,24 @@ async function readResponseUploadContents(
       const recordValues = line.trim().split(/\s{2,}/);
       console.log("recordValues", recordValues);
       const largeNumber = recordValues[0];
-      const fiscal_id_number = recordValues[1];
-      const importe_final = recordValues[3];
-      const payment_date = recordValues[2]?.slice(19, 27);
+      let affiliate_number = recordValues[1];
+      let importe_string = recordValues[2];
+
+      let importe_final = parceImporte(importe_string ?? "0");
+      const payment_date = recordValues[0]?.slice(1, 9);
 
       const invoice_number = largeNumber?.slice(16, 21).replace(/^0+/, "");
       // const fiscal_id_number = largeNumber?.slice(84, 104);
       // const invoice_number = largeNumber?.slice(16, 21);
       // const importe_final = largeNumber?.slice(48, 58);
+      affiliate_number = affiliate_number?.slice(1, 21).replace(/^0+/, "");
       console.log(invoice_number!.replace(/^0+/, ""), "payments_date");
-
+      console.log(
+        "El numbero",
+        affiliate_number,
+        importe_string,
+        importe_final
+      );
       const day = payment_date!.slice(0, 2);
       const month = payment_date!.slice(2, 4);
       const year = payment_date!.slice(4, 8);
@@ -556,21 +565,12 @@ async function readResponseUploadContents(
         "YYYY-MM-DD"
       );
       console.log("mate", date);
-      let status;
-      if (parceImporte(importe_final!) > 0) {
-        status = "00";
-      } else {
-        status = "90";
-      }
-      if (invoice_number) {
+
+      if (affiliate_number) {
         const original_transaction = await db.query.payments.findFirst({
-          where: eq(
-            schema.payments.invoice_number,
-            Number.parseInt(invoice_number)
-          ),
+          where: eq(schema.payments.affiliate_number, affiliate_number),
         });
         if (original_transaction) {
-          original_transaction.statusId = statusCodeMap.get(status) ?? "90";
           original_transaction.payment_date = dayjs(
             date,
             "YYYY-MM-DD"
@@ -580,14 +580,15 @@ async function readResponseUploadContents(
             original_transaction.first_due_amount! +
             original_transaction.second_due_amount!;
           original_transaction.recollected_amount =
-            (original_transaction.recollected_amount ?? 0) +
-            parceImporte(importe_final!);
+            (original_transaction.recollected_amount ?? 0) + importe_final;
 
-          console.log(
-            status,
-            original_transaction.statusId,
-            "Este es el estado"
+          let estado = await obtenerEstado(
+            original_transaction.recollected_amount,
+            original_transaction.first_due_amount,
+            original_transaction.second_due_amount
           );
+
+          original_transaction.statusId = estado;
 
           records.push(original_transaction);
         }
@@ -609,7 +610,7 @@ async function readResponseUploadContents(
 
       const invoice_number = largeNumber?.slice(35, 40).replace(/^0+/, "");
       const importe_final = largeNumber?.slice(57, 68);
-      const fiscal_id_number = largeNumber?.slice(1, 18).replace(/^0+/, "");
+      const affiliate_number = largeNumber?.slice(1, 18).replace(/^0+/, "");
       const payment_date = largeNumber?.slice(49, 57);
       const year = payment_date!.slice(0, 4);
       const month = payment_date!.slice(4, 6);
@@ -621,24 +622,13 @@ async function readResponseUploadContents(
         "YYYY-MM-DD"
       );
 
-      console.log(date, "boludon");
-      let status;
-      if (parceImporte(importe_final!) > 0) {
-        status = "00";
-      } else {
-        status = "90";
-      }
+      console.log(date, "boludon", affiliate_number);
 
       if (invoice_number) {
         const original_transaction = await db.query.payments.findFirst({
-          where: eq(
-            schema.payments.invoice_number,
-            Number.parseInt(invoice_number)
-          ),
+          where: eq(schema.payments.affiliate_number, affiliate_number ?? ""),
         });
         if (original_transaction) {
-          original_transaction.statusId = statusCodeMap.get(status) ?? "90";
-
           original_transaction.payment_date = dayjs(
             date,
             "YYYY-MM-DD"
@@ -650,6 +640,14 @@ async function readResponseUploadContents(
           original_transaction.recollected_amount = parceImporte(
             importe_final ?? "0"
           );
+
+          let estado = await obtenerEstado(
+            original_transaction.recollected_amount,
+            original_transaction.first_due_amount,
+            original_transaction.second_due_amount
+          );
+
+          original_transaction.statusId = estado;
           records.push(original_transaction);
         }
       } else {
@@ -665,45 +663,34 @@ async function readResponseUploadContents(
       const recordValues = line.trim().split(/\s{2,}/);
       console.log("recordValues", recordValues);
 
-      const fiscal_id_number = recordValues[0]?.slice(32, 42);
+      const affiliate_number = recordValues[0]
+        ?.slice(23, 42)
+        .replace(/^0+/, "");
       const invoice_number = recordValues[0]?.slice(42, 62).replace(/^0+/, "");
-      const payment_date = recordValues[0]?.slice(0, 8);
 
       const importe_final = recordValues[0]?.slice(9, 23);
 
+      const payment_date = recordValues[0]?.slice(0, 8);
       const year = payment_date!.slice(0, 4);
       const month = payment_date!.slice(4, 6);
       const day = payment_date!.slice(6);
 
-      const date = dayjs(`${year}${month}${day}`, "YYYYDDMM").format(
+      const date = dayjs(`${year}${month}${day}`, "YYYYMMDD").format(
         "YYYY-MM-DD"
       );
 
       console.log(payment_date, "ES ESTAAA");
 
-      let status;
-      if (parceImporte(importe_final!) > 0) {
-        status = "00";
-      } else {
-        status = "90";
-      }
-
       console.log(date, "ES ESTAAA");
       console.log(importe_final);
+      console.log("affiliate_number", affiliate_number);
       console.log("invoice_number", invoice_number);
-      console.log(
-        " recordValues[0]?.slice(42, 48);",
-        recordValues[0]?.slice(42, 48)
-      );
+
       if (invoice_number) {
         const original_transaction = await db.query.payments.findFirst({
-          where: eq(
-            schema.payments.invoice_number,
-            Number.parseInt(invoice_number)
-          ),
+          where: eq(schema.payments.affiliate_number, affiliate_number ?? ""),
         });
         if (original_transaction) {
-          original_transaction.statusId = statusCodeMap.get(status) ?? "90";
           original_transaction.payment_date = dayjs(
             date,
             "YYYY-MM-DD"
@@ -712,9 +699,18 @@ async function readResponseUploadContents(
             original_transaction.first_due_amount! +
             (original_transaction.second_due_amount ?? 0);
 
-          original_transaction.recollected_amount = parceImporte(
-            importe_final!
+          original_transaction.recollected_amount =
+            (original_transaction.recollected_amount! ?? 0) +
+            parceImporte(importe_final!);
+
+          let estado = await obtenerEstado(
+            original_transaction.recollected_amount,
+            original_transaction.first_due_amount,
+            original_transaction.second_due_amount
           );
+
+          original_transaction.statusId = estado;
+
           records.push(original_transaction);
         }
       } else {
@@ -753,7 +749,9 @@ async function readResponseUploadContents(
         console.log("Golpes al ego");
 
         news_type = recordValues[1]?.slice(0, 1);
-        affiliate_number = recordValues[1]?.slice(21, 36).replace(/^0+/, "");
+        affiliate_number = recordValues[2]?.slice(0, 15).replace(/^0+/, "");
+        // affiliate_number = recordValues[1]?.slice(21, 36).replace(/^0+/, "");
+
         affiliate_name = recordValues[1]?.slice(36);
         if ((news_type = "1")) {
           news_description = "Alta";
@@ -781,7 +779,7 @@ async function readResponseUploadContents(
 
         invoice_number = recordValues[1]?.slice(0, 8).replace(/^0+/, "");
         new_tarjeta = recordValues[0]?.slice(0, 16);
-
+        affiliate_number = recordValues[2]?.slice(0, 15).replace(/^0+/, "");
         importe_final = recordValues[1]?.slice(20, 35);
 
         failed_error = recordValues[2]?.slice(0, 3);
@@ -796,7 +794,7 @@ async function readResponseUploadContents(
 
         importe_final = recordValues[1];
         invoice_number = recordValues[0]?.slice(42, 50).replace(/^0+/, "");
-
+        affiliate_number = recordValues[2]?.slice(0, 15).replace(/^0+/, "");
         mensaje = recordValues[3]?.slice(5, 35);
 
         if (recordValues[5]) {
@@ -821,47 +819,32 @@ async function readResponseUploadContents(
       console.log(importe_final, "importe_final");
       // console.log(recordValues[4], "importe_final");
 
-      let estado;
-
-      if (parceImporte(importe_final!) > 0) {
-        estado = await db.query.paymentStatus.findFirst({
-          where: eq(schema.paymentStatus.code, "00"),
-        });
-      } else {
-        estado = await db.query.paymentStatus.findFirst({
-          where: eq(schema.paymentStatus.code, "03"),
-        });
-      }
-      console.log(estado, "estado");
-
-      const day = payment_date?.slice(6, 8);
-      const month = payment_date?.slice(4, 6);
-      const year = payment_date?.slice(0, 4);
+      const day = payment_date?.slice(0, 2);
+      const month = payment_date?.slice(2, 4);
+      const year = "20" + payment_date?.slice(4, 6);
 
       const date = dayjs(`${year}${month}${day}`, "YYYYMMDD").format(
         "YYYY-MM-DD"
       );
 
-      console.log(dayjs(date!), "date");
+      console.log(date, "date");
 
       try {
         let original_transaction;
-
-        if (invoice_number) {
+        if (affiliate_number) {
+          original_transaction = await db.query.payments.findFirst({
+            where: eq(schema.payments.affiliate_number, affiliate_number),
+          });
+        } else if (invoice_number) {
           original_transaction = await db.query.payments.findFirst({
             where: eq(
               schema.payments.invoice_number,
               Number.parseInt(invoice_number)
             ),
           });
-        } else if (affiliate_number) {
-          original_transaction = await db.query.payments.findFirst({
-            where: eq(schema.payments.affiliate_number, affiliate_number),
-          });
         }
 
         if (original_transaction) {
-          original_transaction.statusId = estado?.id ?? "";
           original_transaction.payment_date = dayjs(
             date,
             "YYYY-MM-DD"
@@ -872,9 +855,17 @@ async function readResponseUploadContents(
           if (mensaje) {
             original_transaction.additional_info = mensaje;
           }
-          original_transaction.recollected_amount = parceImporte(
-            importe_final!
+          original_transaction.recollected_amount =
+            (original_transaction.recollected_amount! ?? 0) +
+            parceImporte(importe_final!);
+
+          let estado = await obtenerEstado(
+            original_transaction.recollected_amount,
+            original_transaction.first_due_amount,
+            original_transaction.second_due_amount
           );
+
+          original_transaction.statusId = estado;
           records.push(original_transaction);
         }
       } catch {
@@ -896,10 +887,10 @@ async function readResponseUploadContents(
         const status_code = largeNumber?.slice(34, 36);
         const importe = largeNumber?.slice(22, 39);
         const observacion = recordValues[5]?.slice(16, 56);
-        const code = obtenerDescripcionCodigo(status_code ?? "00");
+
         const payment_date = recordValues[4];
 
-        console.log("codigo gogo", code, status_code, observacion);
+        console.log("codigo gogo", status_code, observacion);
 
         const day = payment_date?.slice(6, 8);
         const month = payment_date?.slice(4, 6);
@@ -935,9 +926,6 @@ async function readResponseUploadContents(
             ),
           });
           if (original_transaction) {
-            original_transaction.statusId =
-              statusCodeMap.get(code) ?? errorStatus?.id;
-
             original_transaction.payment_date = dayjs(
               date,
               "YYYY-MM-DD"
@@ -947,6 +935,15 @@ async function readResponseUploadContents(
             original_transaction.collected_amount =
               original_transaction.first_due_amount! +
               (original_transaction.second_due_amount ?? 0);
+
+            let estado = await obtenerEstado(
+              original_transaction.recollected_amount,
+              original_transaction.first_due_amount,
+              original_transaction.second_due_amount
+            );
+
+            original_transaction.statusId = estado;
+
             console.log("statusCode", status_code);
             console.log("status", original_transaction.statusId);
             console.log("importeString", importe_int, importe_dec);
@@ -1282,51 +1279,34 @@ function parceImporte(number: string) {
   return formattedNumber;
 }
 
-function obtenerDescripcionCodigo(codigo: string) {
-  switch (codigo) {
-    case "00":
-      return "CARGADO OK";
-    case "01":
-      return "CUENTA ERRÓNEA";
-    case "02":
-      return "CUENTA CANCELADA";
-    case "03":
-      return "SALDO INSUF.";
-    case "04":
-      return "STOP DEBIT";
-    case "05":
-      return "BAJA DEL SERVICIO";
-    case "06":
-      return "IMPEDIMENTOS CUEN.";
-    case "07":
-      return "SUCURSAL ERRÓNEA";
-    case "08":
-      return "REFERENCIA ERRÓNEA";
-    case "09":
-      return "ADHERENTE INEXISTENTE";
-    case "10":
-      return "OTROS RECHAZOS";
-    case "11":
-      return "FECHA INVÁLIDA O ERRÓNEA";
-    case "12":
-      return "MONEDA Y SERVICIO NO COINCIDEN";
-    case "13":
-      return "CUENTA INEXISTENTE";
-    case "15":
-      return "DIA NO LABORABLE";
-    case "16":
-      return "SOPORTE DADO DE BAJA";
-    case "17":
-      return "SERVICIO EN DÓLARES NO PERMITIDO";
-    case "18":
-      return "FECHA DE COMPENSACIÓN ERRÓNEA";
-    case "20":
-      return "RECHAZO DE SOPORTE A SOL CLI";
-    case "24":
-      return "TRANSACCIÓN DUPLICADA";
-    case "90":
-      return "REVERSO NO CORRESPON u OTRO RECHAZO";
+async function obtenerEstado(
+  importe_final: number,
+  first_due_amount: number | null,
+  second_due_amount: number | null
+): Promise<string> {
+  const suma_deuda = (first_due_amount ?? 0) + (second_due_amount ?? 0);
+  let estado;
+
+  switch (true) {
+    case importe_final > suma_deuda:
+      estado = await db.query.paymentStatus.findFirst({
+        where: eq(schema.paymentStatus.code, "00"),
+      });
+      break;
+
+    case importe_final < suma_deuda && importe_final > 0:
+      estado = await db.query.paymentStatus.findFirst({
+        where: eq(schema.paymentStatus.code, "15"),
+      });
+      break;
+
     default:
-      return "Código desconocido";
+      estado = await db.query.paymentStatus.findFirst({
+        where: eq(schema.paymentStatus.code, "03"),
+      });
+      break;
   }
+  console.log("benito", suma_deuda, importe_final, estado);
+
+  return estado?.id ?? "MwiWSY_282T-sISz2uWED";
 }
