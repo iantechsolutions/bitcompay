@@ -12,13 +12,13 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import Calendar01Icon from "../icons/calendar-01-stroke-rounded";
 import { Calendar } from "../ui/calendar";
 import { Button } from "../ui/button";
-import { cn } from "~/lib/utils";
+import { cn, reverseComprobanteDictionary } from "~/lib/utils";
 import { format, setDefaultOptions } from "date-fns";
 import { es } from "date-fns/locale";
-import { Form, FormField } from "../ui/form";
+import { Form, FormControl, FormField } from "../ui/form";
 import { Input } from "../ui/input";
 import { valueToNameComprobanteMap } from "~/lib/utils";
-import { useState } from "react";
+import { visualizationSwitcher } from "~/lib/utils";
 import dayjs from "dayjs";
 type ManualGenInputs = {
   puntoVenta: string;
@@ -92,20 +92,22 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                 render={({ field }) => (
                   <Popover>
                     <PopoverTrigger asChild={true}>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "dd/MM/yyyy")
-                        ) : (
-                          <span>Seleccionar fecha</span>
-                        )}
-                        <Calendar01Icon className="h-4 w-4" />
-                      </Button>
+                  
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value, "dd/MM/yyyy")
+                          ) : (
+                            <span>Seleccionar fecha</span>
+                          )}
+                          <Calendar01Icon className="h-4 w-4" />
+                        </Button>
+                     
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
                       <Calendar mode="single" initialFocus={true} />
@@ -114,7 +116,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                 )}
               />,
               dayjs(props.form.getValues("dateEmision")).format("DD/MM/YYYY") ??
-                "no hay fecha"
+                "no hay fecha seleccionada"
             ),
           }}
         />
@@ -235,7 +237,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
               />,
               dayjs(props.form.getValues("dateVencimiento")).format(
                 "DD/MM/YYYY"
-              ) ?? "no hay fecha"
+              ) ?? "no hay fecha seleccionada"
             ),
           }}
         />
@@ -274,7 +276,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                 )}
               />,
               dayjs(props.form.getValues("dateDesde")).format("DD/MM/YYYY") ??
-                "no hay fecha"
+                "no hay fecha seleccionada"
             ),
           }}
         />
@@ -313,7 +315,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                 )}
               />,
               dayjs(props.form.getValues("dateHasta")).format("DD/MM/YYYY") ??
-                "no hay fecha"
+                "no hay fecha seleccionada"
             ),
           }}
         />
@@ -393,7 +395,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                 )}
               />,
               dayjs(props.form.getValues("dateEmision")).format("DD/MM/YYYY") ??
-                "no hay fecha"
+                "no hay fecha seleccionada"
             ),
           }}
         />
@@ -432,7 +434,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
               />,
               dayjs(props.form.getValues("dateVencimiento")).format(
                 "DD/MM/YYYY"
-              ) ?? "no hay fecha"
+              ) ?? "no hay fecha seleccionada"
             ),
           }}
         />
@@ -471,7 +473,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                 )}
               />,
               dayjs(props.form.getValues("dateDesde")).format("DD/MM/YYYY") ??
-                "no hay fecha"
+                "no hay fecha seleccionada"
             ),
           }}
         />
@@ -510,7 +512,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                 )}
               />,
               dayjs(props.form.getValues("dateHasta")).format("DD/MM/YYYY") ??
-                "no hay fecha"
+                "no hay fecha seleccionada"
             ),
           }}
         />
@@ -552,7 +554,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                 )}
               />,
               dayjs(props.form.getValues("dateEmision")).format("DD/MM/YYYY") ??
-                "no hay fecha"
+                "no hay fecha seleccionada"
             ),
           }}
         />
@@ -560,7 +562,8 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
           className="pr-1 pb-0 border-[#bef0bb]"
           element={{
             key: "Facturas emitidas",
-            value: visualizationSwitcher(props.visualization,(
+            value: visualizationSwitcher(
+              props.visualization,
               <FormField
                 control={props.form.control}
                 name="facturasEmitidas"
@@ -573,8 +576,10 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                     value={field.value as number}
                   />
                 )}
-              />
-            ), props.form.getValues("facturasEmitidas").toString() ?? "no hay facturas emitidas"),
+              />,
+              props.form.getValues("facturasEmitidas").toString() ??
+                "no hay facturas emitidas"
+            ),
           }}
         />
       </>
@@ -592,14 +597,15 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                 comprobanteValueTipo == "Recibo" &&
                   "w-full grid grid-flow-col justify-stretch gap-5",
                 comprobanteValueTipo != "Recibo" &&
-                  "grid grid-cols-2 gap-4 gap-x-1"
+                  "grid grid-cols-2 gap-4 gap-x-6"
               )}
             >
               <ElementCard
                 className="pr-1 pb-0 border-[#bef0bb]"
                 element={{
                   key: "Tipo Comprobante",
-                  value: visualizationSwitcher(props.visualization,(
+                  value: visualizationSwitcher(
+                    props.visualization,
                     <Select
                       onValueChange={(e) => props.setTipoComprobante(e)}
                       defaultValue={props.tipoComprobante}
@@ -614,8 +620,9 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                         <SelectItem value="6">FACTURA B</SelectItem>
                         <SelectItem value="8">NOTA DE CREDITO B</SelectItem>
                       </SelectContent>
-                    </Select>
-                  ), props.tipoComprobante),
+                    </Select>,
+                    reverseComprobanteDictionary[Number(props.tipoComprobante)]
+                  ),
                 }}
               />
               {props.tipoComprobante != "" &&
@@ -626,12 +633,4 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
       </div>
     </>
   );
-}
-
-function visualizationSwitcher(
-  visualization: boolean,
-  editFormComponent: React.ReactNode,
-  viewFormComponent: React.ReactNode
-) {
-  return visualization ? viewFormComponent : editFormComponent;
 }

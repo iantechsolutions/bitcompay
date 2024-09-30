@@ -197,18 +197,26 @@ export function AddHealthInsurances(props: {
       toast.error(error.message);
     }
   }
-  let cN= ""
-  OS ? cN= "text-sm px-4 py-2 h-5 justify-center place-content-center rounded-full font-[550] text-[#3E3E3E]" : cN="rounded-full gap-1 p-4 text-base text-[#3E3E3E] bg-[#BEF0BB] "
+  let cN = "";
+  OS
+    ? (cN =
+        "text-sm px-4 py-2 h-5 justify-center place-content-center rounded-full font-[550] text-[#3E3E3E]")
+    : (cN = "rounded-full gap-1 p-4 text-base text-[#3E3E3E] bg-[#BEF0BB] ");
 
   return (
     <>
-      <AddElementButton onClick={() => setOpen(true)} 
-      className={cN}  >
-        {OS ? <>
-        <Edit02Icon className="h-3" />
-        Editar</> : <>
-        <PlusCircleIcon className="h-4" />
-        Agregar obra social como cliente</>}
+      <AddElementButton onClick={() => setOpen(true)} className={cN}>
+        {OS ? (
+          <>
+            <Edit02Icon className="h-3" />
+            Editar
+          </>
+        ) : (
+          <>
+            <PlusCircleIcon className="h-4" />
+            Agregar obra social como cliente
+          </>
+        )}
       </AddElementButton>
 
       <Dialog open={open} onOpenChange={setOpen}>
@@ -222,47 +230,47 @@ export function AddHealthInsurances(props: {
           </DialogHeader>
           <div className="grid grid-cols-4 gap-y-4 gap-x-8 justify-between">
             <div>
-            <Label htmlFor="IdNumber" className="text-xs text-gray-500">
+              <Label htmlFor="IdNumber" className="text-xs text-gray-500">
                 CODIGO
               </Label>
               <Select onValueChange={setIdNumber}>
-          <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
-            <SelectValue placeholder="..." />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="1">1-3432-8</SelectItem>
-            <SelectItem value="2">1-3456-2</SelectItem>
-            <SelectItem value="3">1-3567-1</SelectItem>
-          </SelectContent>
-        </Select>
+                <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
+                  <SelectValue placeholder="..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1-3432-8</SelectItem>
+                  <SelectItem value="2">1-3456-2</SelectItem>
+                  <SelectItem value="3">1-3567-1</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div>
-              <Label className="text-xs text-gray-500">
-                SIGLA
-              </Label>
+              <Label className="text-xs text-gray-500">SIGLA</Label>
               <Select>
-          <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
-            <SelectValue placeholder="..." />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="1">OSBARA</SelectItem>
-            <SelectItem value="2">OSECAC</SelectItem>
-            <SelectItem value="3">UTHGRA</SelectItem>
-          </SelectContent>
-        </Select>
+                <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
+                  <SelectValue placeholder="..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">OSBARA</SelectItem>
+                  <SelectItem value="2">OSECAC</SelectItem>
+                  <SelectItem value="3">UTHGRA</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div />
             <div />
-  
-            <p className="col-span-4 mt-3 p-3 justify-start text-black font-xs text-sm font-semibold">Datos fiscales</p>
+
+            <p className="col-span-4 mt-3 p-3 justify-start text-black font-xs text-sm font-semibold">
+              Datos fiscales
+            </p>
             <div>
               <Label className="text-xs text-gray-500">UNIDAD DE NEGOCIO</Label>
               <Input
-          type="number"
-          id="importe"
-          className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
-          placeholder="Ej: 121234"
-        />
+                type="number"
+                id="importe"
+                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                placeholder="Ej: 121234"
+              />
               {/* <Select
                 onValueChange={setBusinessUnit}
                 value={businessUnit}
@@ -286,7 +294,7 @@ export function AddHealthInsurances(props: {
                 RAZON SOCIAL
               </Label>
               <Input
-                 className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 id="name"
                 placeholder="..."
                 value={businessName}
@@ -297,17 +305,16 @@ export function AddHealthInsurances(props: {
             <div>
               <Label className="text-xs text-gray-500">CUIT</Label>
               <Input
-              type="number"
-              id="importe"
-               className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
-              placeholder="XX-XXXXXXXX-X"
-             />
+                type="number"
+                id="importe"
+                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                placeholder="XX-XXXXXXXX-X"
+              />
             </div>
             <div>
               <Label className="text-xs text-gray-500">CONDICIÓN AFIP</Label>
               <Select onValueChange={setAfipStatus} value={afipStatus}>
-                <SelectTrigger
-                   className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none">
+                <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none">
                   <SelectValue placeholder="Seleccione uno" />
                 </SelectTrigger>
                 <SelectContent>
@@ -325,11 +332,8 @@ export function AddHealthInsurances(props: {
 
             <div>
               <Label className="text-xs text-gray-500">CONDICIÓN IIBB</Label>
-              <Select
-                onValueChange={setIIBBStatus}
-                value={IIBBStatus}>
-                <SelectTrigger
-                  className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none">
+              <Select onValueChange={setIIBBStatus} value={IIBBStatus}>
+                <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none">
                   <SelectValue placeholder="Seleccione uno" />
                 </SelectTrigger>
                 <SelectContent>
@@ -369,8 +373,8 @@ export function AddHealthInsurances(props: {
                 value={sellCondition}
                 onChange={(e) => setSellCondition(e.target.value)}
               />
-            </div>  
-            <div></div>        
+            </div>
+            <div></div>
             <div className="w-">
               <Label htmlFor="address" className="text-xs text-gray-500">
                 DOMICILIO FISCAL
@@ -437,13 +441,17 @@ export function AddHealthInsurances(props: {
               />
             </div>
             <div>
-              <Label htmlFor="postal_code" className="text-xs text-gray-500">CÓDIGO POSTAL</Label>
+              <Label htmlFor="postal_code" className="text-xs text-gray-500">
+                CÓDIGO POSTAL
+              </Label>
               <Select
                 onValueChange={setFiscalPostalCode}
-                value={fiscalPostalCode}>
+                value={fiscalPostalCode}
+              >
                 <SelectTrigger
                   className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right w-full">
+              hover:none justify-self-right w-full"
+                >
                   <SelectValue placeholder="Seleccionar CP" />
                 </SelectTrigger>
                 <SelectContent>
@@ -469,7 +477,9 @@ export function AddHealthInsurances(props: {
               />
             </div>
 
-            <p className="col-span-4 mt-3 p-3 justify-start text-black font-xs text-sm font-semibold">Datos de Contacto</p>
+            <p className="col-span-4 mt-3 p-3 justify-start text-black font-xs text-sm font-semibold">
+              Datos de Contacto
+            </p>
             <div>
               <Label htmlFor="address" className="text-xs text-gray-500">
                 DOMICILIO COMERCIAL
@@ -508,7 +518,9 @@ export function AddHealthInsurances(props: {
               />
             </div>
             <div>
-              <Label htmlFor="locality" className="text-xs text-gray-500">LOCALIDAD</Label>
+              <Label htmlFor="locality" className="text-xs text-gray-500">
+                LOCALIDAD
+              </Label>
               <Input
                 className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 id="locality"
@@ -518,7 +530,9 @@ export function AddHealthInsurances(props: {
               />
             </div>
             <div>
-              <Label htmlFor="province" className="text-xs text-gray-500">PROVINCIA</Label>
+              <Label htmlFor="province" className="text-xs text-gray-500">
+                PROVINCIA
+              </Label>
               <Input
                 className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 id="province"
@@ -528,10 +542,11 @@ export function AddHealthInsurances(props: {
               />
             </div>
             <div>
-              <Label htmlFor="postal_code" className="text-xs text-gray-500">CÓDIGO POSTAL</Label>
+              <Label htmlFor="postal_code" className="text-xs text-gray-500">
+                CÓDIGO POSTAL
+              </Label>
               <Select onValueChange={setPostalCode} value={postalCode}>
-                <SelectTrigger
-                  className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
+                <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
                   <SelectValue placeholder="Seleccionar CP" />
                 </SelectTrigger>
                 <SelectContent>
@@ -567,12 +582,15 @@ export function AddHealthInsurances(props: {
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
-            <p className="col-span-4 mt-3 p-3 justify-start text-black font-xs text-sm font-semibold">Información de la cuenta</p>
+            <p className="col-span-4 mt-3 p-3 justify-start text-black font-xs text-sm font-semibold">
+              Información de la cuenta
+            </p>
             <div>
-              <Label htmlFor="postal_code" className="text-xs text-gray-500">ESTADO</Label>
+              <Label htmlFor="postal_code" className="text-xs text-gray-500">
+                ESTADO
+              </Label>
               <Select onValueChange={setState} value={state}>
-                <SelectTrigger
-                  className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
+                <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
                   <SelectValue placeholder="Seleccionar CP" />
                 </SelectTrigger>
                 <SelectContent>
@@ -583,17 +601,18 @@ export function AddHealthInsurances(props: {
               </Select>
             </div>
             <div>
-              <Label htmlFor="postal_code" className="text-xs text-gray-500">FECHA DE ESTADO</Label>
-              <Popover
-                open={popoverEmisionOpen}
-                onOpenChange={setPopoverEmisionOpen}>
+              <Label htmlFor="postal_code" className="text-xs text-gray-500">
+                FECHA DE ESTADO
+              </Label>
+              <Popover>
                 <PopoverTrigger asChild={true}>
                   <Button
                     variant={"outline"}
                     className={cn(
-                      "text-left flex justify-between font-medium w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none pr-0 pl-0"
-         ,!dateState && "text-muted-foreground"
-                    )}>
+                      "text-left flex justify-between font-medium w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none pr-0 pl-0",
+                      !dateState && "text-muted-foreground"
+                    )}
+                  >
                     {dateState ? (
                       format(dateState, "PPP")
                     ) : (
@@ -657,39 +676,38 @@ export function AddHealthInsurances(props: {
             </div>
           </div>
           <DialogFooter className="flex justify-self-start">
-  {OS ? (
-    <Button
-      disabled={isPending}
-      onClick={handleEdit}
-      className="mt-7 font-medium mb-2 rounded-full w-fit bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3E3E3E] flex items-center justify-start justify-left"
-    >
-      {isPending ? (
-        <Loader2Icon className="mr-2 animate-spin" size={20} />
-      ) : (
-        <>
-          <Edit02Icon className="mr-2 h-4" />
-          Actualizar
-        </>
-      )}
-    </Button>
-          ) : (
-    <Button
-      disabled={isLoading}
-      onClick={handleCreate}
-      className="mt-7 font-medium mb-2 rounded-full w-fit bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3E3E3E] flex items-center self-start"
+            {OS ? (
+              <Button
+                disabled={isPending}
+                onClick={handleEdit}
+                className="mt-7 font-medium mb-2 rounded-full w-fit bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3E3E3E] flex items-center justify-start justify-left"
               >
-               {isLoading ? (
-             <Loader2Icon className="mr-2 animate-spin" size={20} />
+                {isPending ? (
+                  <Loader2Icon className="mr-2 animate-spin" size={20} />
                 ) : (
-                <>
-                 <CirclePlus className="mr-2" size={20} />
-                Alta de obra social
-                </>
-                 )}
+                  <>
+                    <Edit02Icon className="mr-2 h-4" />
+                    Actualizar
+                  </>
+                )}
+              </Button>
+            ) : (
+              <Button
+                disabled={isLoading}
+                onClick={handleCreate}
+                className="mt-7 font-medium mb-2 rounded-full w-fit bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3E3E3E] flex items-center self-start"
+              >
+                {isLoading ? (
+                  <Loader2Icon className="mr-2 animate-spin" size={20} />
+                ) : (
+                  <>
+                    <CirclePlus className="mr-2" size={20} />
+                    Alta de obra social
+                  </>
+                )}
               </Button>
             )}
-            </DialogFooter>
-
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>

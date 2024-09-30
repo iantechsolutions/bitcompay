@@ -14,7 +14,7 @@ type ElementCardProps = {
 export default function ElementCard(props: ElementCardProps) {
   let content: React.ReactNode = (
     <div className={cn("flex font-medium whitespace-nowrap text-[#3E3E3E] text-base pl-4", props.contentClassName)}>
-      {props.element.value ?? "-"}
+      {!props.element.value ? "-" : props.element.value}
     </div>
   );
   

@@ -9,7 +9,7 @@ interface Props {
 }
 const ReceptorCard = ({nombre, nroDocumentoDNI, nroDocumento, conditionIVA, conditionVenta}: Props) => {
   return (
-    <div className="bg-[#F7F7F7] rounded-lg py-4 pb-6">
+    <div className="bg-[#F7F7F7] rounded-lg py-4 pb-6 px-2">
       <div className="w-full grid grid-flow-col justify-stretch px-4 gap-4">
         <ElementCard
           element={{ key: "NOMBRE", value: nombre }}

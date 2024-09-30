@@ -1014,3 +1014,11 @@ export const reverseConceptDictionary: { [key: number]: string } = {
   3: "Productos y Servicios",
   0: "",
 };
+
+export function visualizationSwitcher(
+  visualization: boolean,
+  editFormComponent: React.ReactNode,
+  viewFormComponent: React.ReactNode
+) {
+  return visualization ? viewFormComponent : editFormComponent;
+}

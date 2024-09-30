@@ -11,6 +11,8 @@ import { UseFormReturn } from "react-hook-form";
 import ElementCard from "../affiliate-page/element-card";
 import ReceptorCard from "./receptor-card";
 import ComprobanteCard from "./comprobante-card";
+import AdditionalInfoCard from "./additional-info";
+import OtherTributes from "./other-tributes";
 type ManualGenInputs = {
   puntoVenta: string;
   tipoDeConcepto: string;
@@ -24,6 +26,7 @@ type ManualGenInputs = {
 type OtherTributesForm = {
   tributes: {
     tribute: string;
+    jurisdiccion: string; 
     base: number;
     aliquot: number;
     amount: number;
@@ -37,15 +40,42 @@ type AsociatedFCForm = {
     dateEmision: Date;
   }[];
 };
+type ConceptsForm = {
+  concepts: {
+    concepto: string;
+    importe: number;
+    iva: number;
+    total: number;
+  }[];
+};
+
+type otherConceptsForm = {
+  otherConcepts: {
+    description: string;
+    importe: number;
+  }[];
+};
+
 interface Props {
   changePage: (page: "formPage" | "confirmationPage") => void;
   form: UseFormReturn<ManualGenInputs>;
   otherTributes: UseFormReturn<OtherTributesForm>;
   tipoComprobante: string;
   asociatedFCForm: UseFormReturn<AsociatedFCForm>;
+  conceptsForm: UseFormReturn<ConceptsForm>;
+  otherConcepts: UseFormReturn<otherConceptsForm>;
   setTipoComprobante: (tipoComprobante: string) => void;
 }
-const confirmationPage = ({ changePage, form, otherTributes, tipoComprobante, asociatedFCForm, setTipoComprobante }: Props) => {
+const confirmationPage = ({
+  changePage,
+  form,
+  otherTributes,
+  tipoComprobante,
+  asociatedFCForm,
+  setTipoComprobante,
+  conceptsForm,
+  otherConcepts
+}: Props) => {
   return (
     <section className="space-y-2 flex flex-col">
       <Title>Resumen de datos</Title>
@@ -63,14 +93,15 @@ const confirmationPage = ({ changePage, form, otherTributes, tipoComprobante, as
         setTipoComprobante={setTipoComprobante}
       />
 
-      <GeneralCard title="Conceptos">
-        <p>conceptos</p>
-      </GeneralCard>
-
-      <GeneralCard title="Otros tributos">
-        <p>otros tributos</p>
-      </GeneralCard>
-
+      <AdditionalInfoCard
+        visualization={true}
+        asociatedFCForm={asociatedFCForm}
+        conceptsForm={conceptsForm}
+        form={form}
+        otherConceptsForm={otherConcepts}
+        tipoComprobante={tipoComprobante}
+      />
+      <OtherTributes Visualization={true} otherTributes={otherTributes}/>
       <GeneralCard title="Totales">
         <p>totales</p>
       </GeneralCard>

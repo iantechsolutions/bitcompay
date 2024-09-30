@@ -11,18 +11,22 @@ import {
 } from "../ui/select";
 import ElementCard from "../affiliate-page/element-card";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
+import { FormField } from "../ui/form";
+import { visualizationSwitcher } from "~/lib/utils";
 type OtherTributesForm = {
   tributes: {
     tribute: string;
+    jurisdiccion: string;
     base: number;
     aliquot: number;
     amount: number;
   }[];
 };
 interface Props {
+  Visualization: boolean;
   otherTributes: UseFormReturn<OtherTributesForm>;
 }
-const OtherTributes = ({ otherTributes }: Props) => {
+const OtherTributes = ({ otherTributes, Visualization }: Props) => {
   const { fields, remove, append } = useFieldArray({
     control: otherTributes.control,
     name: "tributes",
@@ -35,88 +39,139 @@ const OtherTributes = ({ otherTributes }: Props) => {
           <p> no se agregaran otro tributos</p>
           <Button
             onClick={() =>
-              append({ tribute: "", base: 0, aliquot: 0, amount: 0 })
+              append({
+                tribute: "",
+                jurisdiccion: "",
+                base: 0,
+                aliquot: 0,
+                amount: 0,
+              })
             }
           >
             Agregar concepto
           </Button>
         </div>
       )}
-      {fields.map((field, index) => (
+      {fields.map((fieldElement, index) => (
         <div
-          key={field.id}
-          className="flex justify-stretch items-center w-full mt-3"
+          key={fieldElement.id}
+          className=" w-full grid grid-flow-col gap-5 justify-stretch items-center"
         >
           <ElementCard
             element={{
               key: "TRIBUTOS",
-              value: (
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar tributos" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">Tributo 1</SelectItem>
-                    <SelectItem value="2">Tributo 2</SelectItem>
-                    <SelectItem value="3">Tributo 3</SelectItem>
-                  </SelectContent>
-                </Select>
+              value: visualizationSwitcher(
+                Visualization,
+                <FormField
+                  name={`tributes.${index}.tribute`}
+                  control={otherTributes.control}
+                  render={({ field }) => (
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar tributos" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">Tributo 1</SelectItem>
+                        <SelectItem value="2">Tributo 2</SelectItem>
+                        <SelectItem value="3">Tributo 3</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />,
+                fieldElement.tribute
               ),
             }}
           />
           <ElementCard
             element={{
               key: "JURISDICCION",
-              value: (
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar jurisdiccion" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">Provincias</SelectItem>
-                    <SelectItem value="2">Nacion</SelectItem>
-                    <SelectItem value="3">Municipio</SelectItem>
-                  </SelectContent>
-                </Select>
+              value: visualizationSwitcher(
+                Visualization,
+                <FormField
+                  name={`tributes.${index}.jurisdiccion`}
+                  control={otherTributes.control}
+                  render={({ field }) => (
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar jurisdiccion" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">Provincias</SelectItem>
+                        <SelectItem value="2">Nacion</SelectItem>
+                        <SelectItem value="3">Municipio</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />,
+                fieldElement.base
               ),
             }}
           />
           <ElementCard
             element={{
               key: "BASE IMPONIBLE",
-              value: <Input type="number" />,
+              value: visualizationSwitcher( Visualization,
+                <FormField
+                  name={`tributes.${index}.base`}
+                  control={otherTributes.control}
+                  render={({ field }) => <Input type="number" {...field} />}
+                />
+              , fieldElement.base),
             }}
           />
           <ElementCard
             element={{
               key: "ALICUOTA",
-              value: <Input type="number" />,
+              value: visualizationSwitcher(Visualization,
+                <FormField
+                  name={`tributes.${index}.aliquot`}
+                  control={otherTributes.control}
+                  render={({ field }) => <Input type="number" {...field} />}
+                />
+              , fieldElement.aliquot),
             }}
           />
           <ElementCard
             element={{
               key: "IMPORTE",
-              value: <Input type="number" />,
+              value: visualizationSwitcher(Visualization,
+                <FormField
+                  name={`tributes.${index}.amount`}
+                  control={otherTributes.control}
+                  render={({ field }) => <Input type="number" {...field} />}
+                />
+              , fieldElement.amount),
             }}
           />
-          <Button
-            variant="outline"
-            size="icon"
-            className="bg-transparent hover:bg-transparent border-none shadow-none"
-            onClick={() =>
-              append({ tribute: "", base: 0, aliquot: 0, amount: 0 })
-            }
-          >
-            <AddCircleIcon className="text-[#8bd087]" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="bg-transparent hover:bg-transparent border-none shadow-none"
-            onClick={() => remove(index)}
-          >
-            <CancelCircleIcon className="text-[#ed4444]" />
-          </Button>
+
+          {Visualization ? null : (
+            <div className="w-24 flex gap-1">
+              <Button
+                variant="outline"
+                size="icon"
+                className="bg-transparent hover:bg-transparent border-none shadow-none"
+                onClick={() =>
+                  append({ tribute: "", jurisdiccion: "",base: 0, aliquot: 0, amount: 0 })
+                }
+              >
+                <AddCircleIcon className="text-[#8bd087]" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="bg-transparent hover:bg-transparent border-none shadow-none"
+                onClick={() => remove(index)}
+              >
+                <CancelCircleIcon className="text-[#ed4444]" />
+              </Button>
+            </div>
+          )}
         </div>
       ))}
     </div>

@@ -521,6 +521,7 @@ export default function Page() {
   type OtherTributesForm = {
     tributes: {
       tribute: string;
+      jurisdiccion:string;
       base: number;
       aliquot: number;
       amount: number;
@@ -528,7 +529,7 @@ export default function Page() {
   };
   const otherTributesForm = useForm<OtherTributesForm>({
     defaultValues: {
-      tributes: [{ tribute: "", base: 0, aliquot: 0, amount: 0 }],
+      tributes: [{ tribute: "", jurisdiccion: "",base: 0, aliquot: 0, amount: 0 }],
     },
   });
   type AsociatedFCForm = {
@@ -750,6 +751,7 @@ export default function Page() {
             />
 
             <AdditionalInfoCard
+              visualization={false}
               tipoComprobante={tipoComprobante}
               conceptsForm={conceptsForm}
               form={form}
@@ -757,7 +759,7 @@ export default function Page() {
               otherConceptsForm={otherConceptsForm}
             />
 
-            <OtherTributes otherTributes={otherTributesForm} />
+            <OtherTributes Visualization={false} otherTributes={otherTributesForm} />
             <div className="border rounded-lg px-4 pt-5 pb-8">
               <p className=" text-lg font-semibold">Totales</p>
               <div className="flex flex-row justify-between pb-2">
@@ -843,6 +845,8 @@ export default function Page() {
         {page === "confirmationPage" && (
           <ConfirmationPage
             form={form}
+            conceptsForm={conceptsForm}
+            otherConcepts={otherConceptsForm}
             setTipoComprobante={setTipoComprobante}
             tipoComprobante={tipoComprobante}
             asociatedFCForm={asociatedFCForm}

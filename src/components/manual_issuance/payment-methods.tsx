@@ -10,6 +10,13 @@ import {
 import { Input } from "../ui/input";
 import { useState } from "react";
 import ElementCard from "../affiliate-page/element-card";
+import { cn, visualizationSwitcher } from "~/lib/utils";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Button } from "../ui/button";
+import { format } from "date-fns";
+import Calendar01Icon from "../icons/calendar-01-stroke-rounded";
+import { Calendar } from "../ui/calendar";
+import dayjs from "dayjs";
 type PaymentMethodsProps = {
   nroCheque: string;
   banco: string;
@@ -21,24 +28,31 @@ type PaymentMethodsProps = {
   transferDate: Date;
 };
 
-export default function PaymentMethods() {
-  const [paymentMethod, setPaymentMethod] = useState<string>("default");
+interface pageProps {
+  visualization: boolean;
+  paymentMethod: string;
+  setPaymentMethod: (paymentMethod: string) => void;
+}
+export default function PaymentMethods({ visualization, paymentMethod,setPaymentMethod }: pageProps) {
+  
   const paymentMethodsForm = useForm<PaymentMethodsProps>({});
   const paymentMethodsMap: Record<string, React.ReactNode> = {
     default: <></>,
     efectivo: <></>,
-    cheque: (
+    Cheque: (
       <>
         <ElementCard
           className="pr-1 pb-0 border-[#bef0bb]"
           element={{
             key: "Nº Cheque",
-            value: (
+            value: visualizationSwitcher(
+              visualization,
               <FormField
                 control={paymentMethodsForm.control}
                 name="nroCheque"
                 render={({ field }) => <Input type="number" {...field} />}
-              />
+              />,
+              paymentMethodsForm.getValues("nroCheque")
             ),
           }}
         />
@@ -46,12 +60,14 @@ export default function PaymentMethods() {
           className="pr-1 pb-0 border-[#bef0bb]"
           element={{
             key: "Banco",
-            value: (
+            value: visualizationSwitcher(
+              visualization,
               <FormField
                 control={paymentMethodsForm.control}
                 name="banco"
                 render={({ field }) => <Input {...field} />}
-              />
+              />,
+              paymentMethodsForm.getValues("banco")
             ),
           }}
         />
@@ -59,30 +75,58 @@ export default function PaymentMethods() {
           className="pr-1 pb-0 border-[#bef0bb]"
           element={{
             key: "Fecha de pago",
-            value: (
+            value: visualizationSwitcher(
+              visualization,
               <FormField
                 control={paymentMethodsForm.control}
                 name="paymentDate"
-                render={({ field }) => <Input type="date" />}
-              />
+                render={({ field }) => (
+                  <Popover>
+                    <PopoverTrigger asChild={true}>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "dd/MM/yyyy")
+                        ) : (
+                          <span>Seleccionar fecha</span>
+                        )}
+                        <Calendar01Icon className="h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar mode="single" initialFocus={true} />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />,
+              dayjs(paymentMethodsForm.getValues("paymentDate")).format(
+                "DD/MM/YYYY"
+              ) ?? "no hay fecha seleccionada"
             ),
           }}
         />
       </>
     ),
 
-    chequeDiferido: (
+    "Cheque pago diferido": (
       <>
         <ElementCard
           className="pr-1 pb-0 border-[#bef0bb]"
           element={{
             key: "Nº Cheque",
-            value: (
+            value: visualizationSwitcher(
+              visualization,
               <FormField
                 control={paymentMethodsForm.control}
                 name="nroCheque"
                 render={({ field }) => <Input type="number" {...field} />}
-              />
+              />,
+              paymentMethodsForm.getValues("nroCheque")
             ),
           }}
         />
@@ -90,12 +134,14 @@ export default function PaymentMethods() {
           className="pr-1 pb-0 border-[#bef0bb]"
           element={{
             key: "Banco",
-            value: (
+            value: visualizationSwitcher(
+              visualization,
               <FormField
                 control={paymentMethodsForm.control}
                 name="banco"
                 render={({ field }) => <Input {...field} />}
-              />
+              />,
+              paymentMethodsForm.getValues("banco")
             ),
           }}
         />
@@ -103,12 +149,38 @@ export default function PaymentMethods() {
           className="pr-1 pb-0 border-[#bef0bb]"
           element={{
             key: "Fecha de emisión",
-            value: (
+            value: visualizationSwitcher(
+              visualization,
               <FormField
                 control={paymentMethodsForm.control}
                 name="emisionDate"
-                render={({ field }) => <Input type="date" />}
-              />
+                render={({ field }) => (
+                  <Popover>
+                    <PopoverTrigger asChild={true}>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "dd/MM/yyyy")
+                        ) : (
+                          <span>Seleccionar fecha</span>
+                        )}
+                        <Calendar01Icon className="h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar mode="single" initialFocus={true} />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />,
+              dayjs(paymentMethodsForm.getValues("emisionDate")).format(
+                "DD/MM/YYYY"
+              ) ?? "no hay fecha seleccionada"
             ),
           }}
         />
@@ -116,29 +188,57 @@ export default function PaymentMethods() {
           className="pr-1 pb-0 border-[#bef0bb]"
           element={{
             key: "Fecha de pago",
-            value: (
+            value: visualizationSwitcher(
+              visualization,
               <FormField
                 control={paymentMethodsForm.control}
                 name="paymentDate"
-                render={({ field }) => <Input type="date" />}
-              />
+                render={({ field }) => (
+                  <Popover>
+                    <PopoverTrigger asChild={true}>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "dd/MM/yyyy")
+                        ) : (
+                          <span>Seleccionar fecha</span>
+                        )}
+                        <Calendar01Icon className="h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar mode="single" initialFocus={true} />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />,
+              dayjs(paymentMethodsForm.getValues("paymentDate")).format(
+                "DD/MM/YYYY"
+              ) ?? "no hay fecha seleccionada"
             ),
           }}
         />
       </>
     ),
-    eCheque: (
+    "E-Cheque": (
       <>
         <ElementCard
           className="pr-1 pb-0 border-[#bef0bb]"
           element={{
             key: "Banco",
-            value: (
+            value: visualizationSwitcher(
+              visualization,
               <FormField
                 control={paymentMethodsForm.control}
                 name="banco"
                 render={({ field }) => <Input {...field} />}
-              />
+              />,
+              paymentMethodsForm.getValues("banco")
             ),
           }}
         />
@@ -146,29 +246,57 @@ export default function PaymentMethods() {
           className="pr-1 pb-0 border-[#bef0bb]"
           element={{
             key: "Fecha de pago",
-            value: (
+            value: visualizationSwitcher(
+              visualization,
               <FormField
                 control={paymentMethodsForm.control}
                 name="paymentDate"
-                render={({ field }) => <Input type="date" />}
-              />
+                render={({ field }) => (
+                  <Popover>
+                    <PopoverTrigger asChild={true}>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "dd/MM/yyyy")
+                        ) : (
+                          <span>Seleccionar fecha</span>
+                        )}
+                        <Calendar01Icon className="h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar mode="single" initialFocus={true} />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />,
+              dayjs(paymentMethodsForm.getValues("paymentDate")).format(
+                "DD/MM/YYYY"
+              ) ?? "no hay fecha seleccionada"
             ),
           }}
         />
       </>
     ),
-    eCPD: (
+    "E-CPD": (
       <>
         <ElementCard
           className="pr-1 pb-0 border-[#bef0bb]"
           element={{
             key: "Banco",
-            value: (
+            value: visualizationSwitcher(
+              visualization,
               <FormField
                 control={paymentMethodsForm.control}
                 name="banco"
                 render={({ field }) => <Input {...field} />}
-              />
+              />,
+              paymentMethodsForm.getValues("banco")
             ),
           }}
         />
@@ -176,12 +304,38 @@ export default function PaymentMethods() {
           className="pr-1 pb-0 border-[#bef0bb]"
           element={{
             key: "Fecha de emisión",
-            value: (
+            value: visualizationSwitcher(
+              visualization,
               <FormField
                 control={paymentMethodsForm.control}
                 name="emisionDate"
-                render={({ field }) => <Input type="date" />}
-              />
+                render={({ field }) => (
+                  <Popover>
+                    <PopoverTrigger asChild={true}>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "dd/MM/yyyy")
+                        ) : (
+                          <span>Seleccionar fecha</span>
+                        )}
+                        <Calendar01Icon className="h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar mode="single" initialFocus={true} />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />,
+              dayjs(paymentMethodsForm.getValues("emisionDate")).format(
+                "DD/MM/YYYY"
+              ) ?? "no hay fecha seleccionada"
             ),
           }}
         />
@@ -189,29 +343,57 @@ export default function PaymentMethods() {
           className="pr-1 pb-0 border-[#bef0bb]"
           element={{
             key: "Fecha de pago",
-            value: (
+            value: visualizationSwitcher(
+              visualization,
               <FormField
                 control={paymentMethodsForm.control}
                 name="paymentDate"
-                render={({ field }) => <Input type="date" />}
-              />
+                render={({ field }) => (
+                  <Popover>
+                    <PopoverTrigger asChild={true}>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "dd/MM/yyyy")
+                        ) : (
+                          <span>Seleccionar fecha</span>
+                        )}
+                        <Calendar01Icon className="h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar mode="single" initialFocus={true} />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />,
+              dayjs(paymentMethodsForm.getValues("paymentDate")).format(
+                "DD/MM/YYYY"
+              ) ?? "no hay fecha seleccionada"
             ),
           }}
         />
       </>
     ),
-    tarjeta: (
+    Tarjeta: (
       <>
         <ElementCard
           className="pr-1 pb-0 border-[#bef0bb]"
           element={{
             key: "bandera",
-            value: (
+            value: visualizationSwitcher(
+              visualization,
               <FormField
                 control={paymentMethodsForm.control}
                 name="bandera"
                 render={({ field }) => <Input {...field} />}
-              />
+              />,
+              paymentMethodsForm.getValues("bandera")
             ),
           }}
         />
@@ -219,29 +401,33 @@ export default function PaymentMethods() {
           className="pr-1 pb-0 border-[#bef0bb]"
           element={{
             key: "Tipo de tarjeta",
-            value: (
+            value: visualizationSwitcher(
+              visualization,
               <FormField
                 control={paymentMethodsForm.control}
                 name="cardType"
                 render={({ field }) => <Input {...field} />}
-              />
+              />,
+              paymentMethodsForm.getValues("cardType")
             ),
           }}
         />
       </>
     ),
-    transferencia: (
+    Transferencia: (
       <>
         <ElementCard
           className="pr-1 pb-0 border-[#bef0bb]"
           element={{
             key: "Entidad",
-            value: (
+            value: visualizationSwitcher(
+              visualization,
               <FormField
                 control={paymentMethodsForm.control}
                 name="entity"
                 render={({ field }) => <Input {...field} />}
-              />
+              />,
+              paymentMethodsForm.getValues("entity")
             ),
           }}
         />
@@ -249,12 +435,38 @@ export default function PaymentMethods() {
           className="pr-1 pb-0 border-[#bef0bb]"
           element={{
             key: "Fecha de transferencia",
-            value: (
+            value: visualizationSwitcher(
+              visualization,
               <FormField
                 control={paymentMethodsForm.control}
                 name="transferDate"
-                render={({ field }) => <Input type="date" />}
-              />
+                render={({ field }) => (
+                  <Popover>
+                    <PopoverTrigger asChild={true}>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "dd/MM/yyyy")
+                        ) : (
+                          <span>Seleccionar fecha</span>
+                        )}
+                        <Calendar01Icon className="h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar mode="single" initialFocus={true} />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />,
+              dayjs(paymentMethodsForm.getValues("transferDate")).format(
+                "DD/MM/YYYY"
+              )
             ),
           }}
         />
@@ -262,37 +474,44 @@ export default function PaymentMethods() {
     ),
   };
   return (
-    <Form {...paymentMethodsForm}>
-      <form>
-        <div className="w-full grid grid-flow-col justify-stretch px-4 gap-2 ">
+    <div className="w-full">
+      <Form {...paymentMethodsForm}>
+        <form
+          className={cn(
+            (paymentMethod == "efectivo" || paymentMethod == "default") &&
+              "grid grid-cols-4",
+            paymentMethod != "efectivo" &&
+              paymentMethod &&
+              "w-full grid grid-flow-col gap-5 justify-stretch items-center"
+          )}
+        >
           <ElementCard
-            className="pr-1 pb-0 border-[#bef0bb]"
+            className={cn("pr-1 pb-0 border-[#bef0bb]")}
             element={{
               key: "Medio de Pago",
-              value: (
+              value: visualizationSwitcher(visualization,
                 <Select onValueChange={(e) => setPaymentMethod(e)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar medio de pago" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="efectivo">Efectivo</SelectItem>
-                    <SelectItem value="cheque">Cheque</SelectItem>
-                    <SelectItem value="chequeDiferido">
+                    <SelectItem value="Efectivo">Efectivo</SelectItem>
+                    <SelectItem value="Cheque">Cheque</SelectItem>
+                    <SelectItem value="Cheque pago diferido">
                       Cheque pago diferido
                     </SelectItem>
-                    <SelectItem value="eCheque"> E-Cheque</SelectItem>
-                    <SelectItem value="eCPD">E-CPD</SelectItem>
-                    <SelectItem value="tarjeta">Tarjeta</SelectItem>
-                    <SelectItem value="transferencia">Transferencia</SelectItem>
+                    <SelectItem value="E-Cheque"> E-Cheque</SelectItem>
+                    <SelectItem value="E-CPD">E-CPD</SelectItem>
+                    <SelectItem value="Tarjeta">Tarjeta</SelectItem>
+                    <SelectItem value="Transferencia">Transferencia</SelectItem>
                   </SelectContent>
                 </Select>
-              ),
+              , paymentMethod),
             }}
           />
-        </div>
-
-        {paymentMethodsMap[paymentMethod]}
-      </form>
-    </Form>
+          {paymentMethodsMap[paymentMethod]}
+        </form>
+      </Form>
+    </div>
   );
 }
