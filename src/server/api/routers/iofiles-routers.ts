@@ -9,8 +9,8 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { createId } from "~/lib/utils";
 import { utapi } from "~/server/uploadthing";
 import type { RouterOutputs } from "~/trpc/shared";
-import { Payment } from "~/server/db/schema";
-import { Repeat } from "lucide-react";
+import { Payment, payments } from "~/server/db/schema";
+import { Barcode, Repeat } from "lucide-react";
 import dayOfYear from "dayjs/plugin/dayOfYear";
 import timezone from "dayjs/plugin/timezone";
 import { Console } from "console";
@@ -43,7 +43,7 @@ export const iofilesRouter = createTRPCRouter({
         const productsNumbers = channel.products.map((p) => p.product.number);
         // estado completado:
         const genFileStatus = await db.query.paymentStatus.findFirst({
-          where: eq(schema.paymentStatus.code, "92"),
+          where: eq(schema.paymentStatus.code, "91"),
         });
         const statusCancelado = await db.query.paymentStatus.findFirst({
           where: eq(schema.paymentStatus.code, "90"),
@@ -60,16 +60,27 @@ export const iofilesRouter = createTRPCRouter({
             inArray(schema.payments.product_number, productsNumbers)
           ),
         });
-        const payments = paymentsFull.filter(
+
+        let payments = paymentsFull.filter(
           (p) =>
             p.genChannels.includes(channel.id) === false &&
             p.statusId !== statusCancelado?.id &&
             p.statusId !== statusEnviado?.id
         );
 
+        if (channel.name.includes("DEBITO AUTOMATICO")) {
+          payments = payments.filter(
+            (p) =>
+              p.card_brand === input.card_brand &&
+              p.card_type === input.card_type
+          );
+        }
+
+        console.log("Algo ahi");
+
         const regexPagoFacil = /pago\s*f[aá]cil/i;
         // Generamos el archivo de salida segun el canal
-
+        console.log("patata", payments);
         if (payments.length === 0) {
           text = "No existen payments disponibles";
         } else if (channel.name.includes("DEBITO DIRECTO CBU")) {
@@ -105,7 +116,7 @@ export const iofilesRouter = createTRPCRouter({
             concept: input.concept,
             brandName: brand.name,
             redescription: brand.redescription,
-            prisma_code: brand.prisma_code ?? "0000",
+            prisma_code: brand.prisma_code,
           };
           text = await generatePagoFacil(generateInput, payments);
         } else if (channel.name.includes("RAPIPAGO")) {
@@ -120,33 +131,30 @@ export const iofilesRouter = createTRPCRouter({
           };
           text = generateRapiPago(generateInput, payments);
         } else if (channel.name.includes("DEBITO AUTOMATICO")) {
-          // if (
-          //   !input.card_brand ||
-          //   !input.card_type
-          //   //|| !input.presentation_date
-          // ) {
-          //   throw new TRPCError({
-          //     code: "BAD_REQUEST",
-          //     message: `card_brand, card_type and presentation_date are required for DEBITO AUTOMATICO`,
-          //   });
-          // }
-          let card_brand = input.card_brand ?? "Visa";
-
-          console.log("testttt", card_brand, brand.id);
+          if (
+            !input.card_brand ||
+            !input.card_type
+            //|| !input.presentation_date
+          ) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: `card_brand, card_type and presentation_date are required for DEBITO AUTOMATICO`,
+            });
+          }
+          let card_brand = input.card_brand;
+          let card_type = input.card_type;
+          console.log("testttt", card_brand, brand.id, card_type);
           const establishment = await db.query.establishments.findFirst({
             where: and(
               eq(schema.establishments.brandId, brand.id),
-              eq(schema.establishments.flag, card_brand ?? "")
+              eq(schema.establishments.flag, card_brand)
             ),
           });
-          console.log("testttt", establishment);
 
           if (!establishment) {
-            throw new TRPCError({
-              code: "BAD_REQUEST",
-              message: `establishment not found`,
-            });
+            return null;
           }
+
           text = generateDebitoAutomatico({
             payments,
             EstablishmentNumber: establishment.establishment_number ?? 0,
@@ -160,7 +168,14 @@ export const iofilesRouter = createTRPCRouter({
             message: `channel ${channel?.name} is not supported`,
           });
         }
-
+        if (text.includes("Error. La marca no posee codigo de prisma")) {
+          console.log("llego");
+          return text;
+        }
+        if (text.includes("Error. Hay pagos sin un CBU asociado.")) {
+          console.log("patata");
+          return text;
+        }
         // Subimos el archivo a Uploadthing
         // const uploaded = await utapi.uploadFiles(
         //   new File([text], input.fileName, { type: "text/plain" })
@@ -288,6 +303,8 @@ function generateDebitoDirecto(
   }
   const dateYYYYMMDD = currentDate.format("YYYYMMDD");
 
+  console.log("Hoy algo ahi 2");
+
   let banco_emisor = "0017";
   let sucursal_number = "0356";
   let account_digit = "73";
@@ -295,11 +312,11 @@ function generateDebitoDirecto(
   let divisa = "ARS0";
 
   const fileName = formatString(" ", input.fileName, 12, true);
-  const redDescription = formatString(" ", input.redescription, 10, true);
+  const service_code = formatString(" ", input.redescription, 10, true);
 
   let brand_name = formatString(" ", input.brand_name, 36, true);
   let account_type = "20";
-  let text = `${register_code}${brand_code}${dateYYYYMMDD}${dateYYYYMMDD}${banco_emisor}${sucursal_number}${account_digit}${account_number}${redDescription}${divisa}${fileName}${brand_name}${account_type}${" ".repeat(
+  let text = `${register_code}${brand_code}${dateYYYYMMDD}${dateYYYYMMDD}${banco_emisor}${sucursal_number}${account_digit}${account_number}${service_code}${divisa}${fileName}${brand_name}${account_type}${" ".repeat(
     141
   )}\r\n`;
 
@@ -307,6 +324,11 @@ function generateDebitoDirecto(
   let total_operations = 0;
   let total_collected = 0;
   for (const transaction of transactions) {
+    if (!transaction.cbu && transaction?.cbu?.length === 0) {
+      text += "Error. Hay pagos sin un CBU asociado.";
+      return text;
+    }
+
     const date = dayjs(transaction.first_due_date);
     const year = date.year();
     const monthName = date.format("MMMM").toUpperCase();
@@ -415,9 +437,10 @@ function generatePagomiscuentas(
   //   });
   // }
   //header
-
+  console.log("prismaCode", prismaCode);
   if (prismaCode.length != 4) {
-    prismaCode = "ERROR";
+    prismaCode = "EROR";
+    return "Error. La marca no posee codigo de prisma";
   }
 
   let register_code = "0";
@@ -510,10 +533,13 @@ async function generatePagoFacil(
     concept: string;
     brandName: string;
     redescription: string;
-    prisma_code: string;
+    prisma_code: string | undefined | null;
   },
   transactions: RouterOutputs["transactions"]["list"]
 ): Promise<string> {
+  if (_input.prisma_code === "" || _input.prisma_code === null) {
+    return "Error. La marca no posee codigo de prisma";
+  }
   let text = "";
 
   let registeR_type = "01";
@@ -541,14 +567,15 @@ async function generatePagoFacil(
 
   for (const transaction of transactions) {
     let register_type = "02";
-    let brandCode;
-    if (_input.brandName === "RED ARGENTINA DE SANATORIOS") {
-      brandCode = "002";
-    } else if (_input.brandName === "Cristal Salud") {
-      brandCode = "002";
-    } else {
-      brandCode = "000";
-    }
+    let brandCode = utility.slice(4, 8);
+    console.log("testatario", brandCode, utility);
+    // if (_input.brandName === "RED ARGENTINA DE SANATORIOS") {
+    //   brandCode = "002";
+    // } else if (_input.brandName === "Cristal Salud") {
+    //   brandCode = "002";
+    // } else {
+    //   brandCode = "000";
+    // }
 
     const fiscal_id_number = formatString(
       " ",
@@ -617,18 +644,17 @@ async function generatePagoFacil(
     const second_due_amount_charge = "0".repeat(6);
     const second_due_date_barcode = "0".repeat(2);
     // codigo de barras
-    const bar_code = `${service_company}${first_due_amount_bar_code}${first_due_date_bar_code_YY}${first_due_date_bar_code_DDD}${fiscal_id_number_bar_code}${moneda}${second_due_amount_charge}${second_due_date_barcode}`;
+    const bar_code = `${brandCode}${first_due_amount_bar_code}${first_due_date_bar_code_YY}${first_due_date_bar_code_DDD}${fiscal_id_number_bar_code}${moneda}${second_due_amount_charge}${second_due_date_barcode}`;
 
-    let verifier_digit = modulo11Verifier(bar_code);
+    const { verifier_digit_1, verifier_digit_2, updated_bar_code } =
+      generateVerifiers(bar_code);
 
-    const barcode = formatString(
-      " ",
-      bar_code + verifier_digit.toString(),
-      55,
-      true
-    );
+    console.log("verifier_digit_1", verifier_digit_1);
+    console.log("verifier_digit_2", verifier_digit_2);
+    console.log("updated_bar_code", updated_bar_code);
+    const barcode = formatString(" ", updated_bar_code, 55, true);
 
-    text += `${register_type}${brandCode}${invoice_number}${fiscal_id_number}${seq_number}${message}${name}${barcode}${validity_date}${first_due_date}${payment_type}${" ".repeat(
+    text += `${register_type}${invoice_number}${fiscal_id_number}${seq_number}${message}${name}${barcode}${validity_date}${first_due_date}${payment_type}${" ".repeat(
       9
     )}\r\n`;
     // detalle;
@@ -835,6 +861,7 @@ function generateDebitoAutomatico(props: generateDAprops) {
     "mastercard credito": "DEBLIMC ",
   };
 
+  console.log("desquised", FileNameMap);
   let currentDate = dayjs().utc().tz("America/Argentina/Buenos_Aires");
   const currentHour = currentDate.hour();
   const currentMinutes = currentDate.minute();
@@ -901,22 +928,66 @@ function generateDebitoAutomatico(props: generateDAprops) {
   return header + body + footer;
 }
 
-function modulo11Verifier(code: string) {
-  let sum = 0;
-  let weight = 2;
+function modulo11Verifier(code: string): string {
+  let numericCode = code.replace(/\D/g, "");
 
-  for (let i = code.length - 1; i >= 0; i--) {
-    sum += parseInt(code[i]!) * weight;
-    weight = weight === 7 ? 2 : weight + 1;
+  let sequence = [];
+  let pattern = [1, 3, 5, 7, 9];
+
+  if (numericCode) {
+    for (let i = 0; i < numericCode.length; i++) {
+      sequence.push(pattern[i % pattern.length] ?? 0);
+    }
+
+    let sum = 0;
+
+    for (let i = 0; i < numericCode.length; i++) {
+      sum += parseInt(numericCode[i] ?? "0") * (sequence[i] ?? 0);
+    }
+
+    let resultDiv2 = Math.floor(sum / 2);
+
+    let verifier = resultDiv2 % 10;
+
+    return verifier.toString();
   }
 
-  const remainder = sum % 11;
-  let verifierDigit = 11 - remainder;
-
-  // Asegúrate de que el dígito verificador sea de dos dígitos
-  if (verifierDigit >= 10) {
-    return verifierDigit.toString().padStart(2, "0");
-  } else {
-    return "0" + verifierDigit;
-  }
+  return "0";
 }
+
+function generateVerifiers(bar_code: string) {
+  let verifier_digit_1 = modulo11Verifier(bar_code) ?? "0";
+
+  let updated_bar_code = bar_code + verifier_digit_1;
+
+  let verifier_digit_2 = modulo11Verifier(updated_bar_code);
+  updated_bar_code = updated_bar_code + verifier_digit_2;
+  return {
+    verifier_digit_1,
+    verifier_digit_2,
+    updated_bar_code,
+  };
+}
+
+// Función para generar la secuencia alternante 1, 3, 5, 7, 9
+
+// function modulo11Verifier(code: string) {
+//   let sum = 0;
+//   let weight = 2;
+
+//   const numericCode = code.replace(/\D/g, "0"); // Filtramos solo los caracteres numéricos
+
+//   for (let i = numericCode.length - 1; i >= 0; i--) {
+//     sum += parseInt(numericCode[i]!) * weight;
+//     weight = weight === 7 ? 2 : weight + 1;
+//   }
+
+//   const remainder = sum % 11;
+//   let verifierDigit = 11 - remainder;
+
+//   if (verifierDigit >= 10) {
+//     return verifierDigit.toString().padStart(2, "0");
+//   } else {
+//     return "0" + verifierDigit;
+//   }
+// }

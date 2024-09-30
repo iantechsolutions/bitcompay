@@ -5,6 +5,7 @@ import { ChevronDown } from "lucide-react";
 import * as React from "react";
 
 import { cn } from "~/lib/utils";
+import { RouterOutputs } from "~/trpc/shared";
 
 const Accordion = AccordionPrimitive.Root;
 
@@ -18,17 +19,18 @@ AccordionItem.displayName = "AccordionItem";
 
 type CustomTriggerProps = {
   relationship?: string | null;
+  affiliate?: RouterOutputs["integrants"]["getByGroup"][number];
 };
 const AccordionTrigger = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger> &
     CustomTriggerProps
->(({ className, children, relationship, ...props }, ref) => {
-  const isHolder = relationship === "Titular";
-  const badgeClassName = `rounded-full px-3 py-1 text-xs font-bold ${
-    isHolder ? "bg-[#DDF9CC] text-[#4C740C] " : "text-[#f7f7f7] "
-  }`;
-  console.log("control:", relationship, isHolder);
+>(({ className, children, relationship, affiliate, ...props }, ref) => {
+  const isHolder = affiliate?.relationship === "Titular";
+  const isBillResponsible= affiliate?.isBillResponsible;
+  const isAffiliate = affiliate?.isAffiliate;
+  const badgeClassName = `rounded-full px-3 py-1 text-xs font-bold
+  ${isHolder ? "bg-[#DDF9CC] text-[#4C740C] " : "text-[#3E3E3E]"} `;
   return (
     <AccordionPrimitive.Header className="flex items-center">
       <AccordionPrimitive.Trigger
@@ -42,7 +44,10 @@ const AccordionTrigger = React.forwardRef<
         {children}
         <div className="flex gap-10 items-center">
           <div className={badgeClassName}>
-            {isHolder ? "Titular" : "Adherente"}
+          {isHolder ? "Titular " : ""}
+          {isBillResponsible ? "Responsable pagador " : ""}
+          {isAffiliate ? "Afiliado " : ""}	
+          {!isHolder && !isBillResponsible && !isAffiliate ? "Adherente" : ""}
           </div>
           <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200" />
         </div>

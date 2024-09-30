@@ -370,6 +370,10 @@ export const companiesRouter = createTRPCRouter({
             )
           );
         }
+        await tx
+          .delete(schema.healthInsurances)
+          .where(eq(schema.healthInsurances.companyId, input.companyId));
+
         await tx.delete(schema.integrants).where(
           inArray(
             schema.integrants.family_group_id,
@@ -441,9 +445,6 @@ export const companiesRouter = createTRPCRouter({
             .where(eq(schema.companiesToBrands.companyId, input.companyId));
         }
 
-        await tx
-          .delete(schema.healthInsurances)
-          .where(eq(schema.healthInsurances.companyId, input.companyId));
         // al final de todo si borrar la compañia
         await tx
           .delete(schema.documentUploads)

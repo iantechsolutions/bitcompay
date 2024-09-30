@@ -100,4 +100,17 @@ export const pricePerConditionRouter = createTRPCRouter({
         .where(eq(schema.pricePerCondition.id, input.id));
       return pricePerCondition_deleted;
     }),
+  deleteByPlanAndDate: protectedProcedure
+    .input(z.object({ id: z.string(), currentVigency: z.date() }))
+    .mutation(async ({ input }) => {
+      const pricePerCondition_deleted = await db
+        .delete(schema.pricePerCondition)
+        .where(
+          and(
+            eq(schema.pricePerCondition.plan_id, input.id),
+            eq(schema.pricePerCondition.validy_date, input.currentVigency)
+          )
+        );
+      return pricePerCondition_deleted;
+    }),
 });

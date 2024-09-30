@@ -42,7 +42,7 @@ export default function BreadcrumbComp() {
     information: "INFORMACIÓN",
     liquidation: "LIQUIDACIÓN",
     "pre-liquidation": "PRE-LIQUIDACIÓN",
-    manual_issuance: "GENERAR MANUAL",
+    manual_issuance: "GENERACION MANUAL",
 
     maintenance: "MANTENIMIENTO",
     roles: "ROLES",
@@ -52,6 +52,7 @@ export default function BreadcrumbComp() {
     management: "GESTIÓN",
     client: "CLIENTES",
     affiliates: "AFILIADOS",
+    cc:"CUENTA CORRIENTE",
     health_insurances: "OBRAS SOCIALES",
     documents: "DOCUMENTOS",
     "masive-upload": "CARGA MASIVA",

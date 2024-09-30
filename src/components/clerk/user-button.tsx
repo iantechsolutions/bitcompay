@@ -33,7 +33,7 @@ const UserButtonAndMenu = ({
         {/* Render a button using the image and email from `user` */}
         <Button
           onClick={() => setActive(!active)}
-          className="flex rounded-full border-none items-center bg-[#DEF5DD] px-8 lg:px-[3vw] py-[0.7vh] hover:bg-[#DEF5DD] text-[#3E3E3E] h-[7vh] "
+          className="flex rounded-full border-none items-center min-h-10 bg-[#DEF5DD] px-8 lg:px-[3vw] py-[0.7vh] hover:bg-[#DEF5DD] text-[#3E3E3E] h-[7vh] "
         >
           <img
             src="/public/header/Frame-12.png"
@@ -41,13 +41,13 @@ const UserButtonAndMenu = ({
             className="h-[4.5vh]  mr-[1vw]"
           />
           <div className="flex-1 flex flex-col justify-center">
-            <div className="text-startP font-medium mb-[0.4vh]">
+            <div className="text-startP font-medium mb-[0.4vh] whitespace-nowrap">
+              {companyName ?? " "}
+            </div>
+            <div className="text-startP text-left color-[#b5b5b5] opacity-50">
               {user?.fullName
                 ? trimName(user.fullName)
                 : user?.primaryEmailAddress?.emailAddress!}
-            </div>
-            <div className="text-startP text-left color-[#b5b5b5] opacity-50">
-              {companyName ?? " "}
             </div>
           </div>
           <div className="ml-[2vw] border-none">

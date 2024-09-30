@@ -121,10 +121,13 @@ export const excelDeserializationRouter = createTRPCRouter({
                 receipt: " ",
                 state: "ACTIVO",
                 procedureId: procedure[0]?.id ?? "",
+                entry_date: new Date(),
+                sale_condition: row.sale_condition ?? "",
               })
               .returning();
             familyGroupMap.set(row.holder_id_number, familygroup[0]!.id);
             familyGroupId = familygroup[0]?.id ?? "";
+
             const bonus = await db
               .insert(schema.bonuses)
               .values({
@@ -322,6 +325,7 @@ export const excelDeserializationRouter = createTRPCRouter({
             console.log(precioIntegrante);
             const precioDiferencial =
               parseFloat(row.differential_value ?? "0") / precioIntegrante;
+            // precioIntegrante;
             console.log("precioDiferencial", precioDiferencial);
             const differentialValue = await db
               .insert(schema.differentialsValues)
@@ -521,6 +525,19 @@ async function readExcelFile(
         );
       }
     }
+    if (row.mode?.toUpperCase() === "MIXTO") {
+      const health_insurance = await db.query.healthInsurances.findFirst({
+        where: and(
+          eq(schema.healthInsurances.identificationNumber, row.os!),
+          eq(schema.healthInsurances.companyId, ctx.session.orgId!)
+        ),
+      });
+      if (!health_insurance) {
+        errors.push(
+          `OBRA SOCIAL no valida o no perteneciente a la organizacion en (fila:${rowNum})`
+        );
+      }
+    }
 
     const business_unit = await db.query.bussinessUnits.findFirst({
       where: and(
@@ -550,7 +567,6 @@ async function readExcelFile(
     //     `UNIDAD DE NEGOCIO no pertenece a la organizacion (fila:${rowNum}) `
     //   );
     // }
-    console.log("testigo", row.own_id_type);
 
     if (
       row.differential_value &&
@@ -563,7 +579,17 @@ async function readExcelFile(
       const health_insurance = await db.query.healthInsurances.findFirst({
         where: eq(schema.healthInsurances.identificationNumber, row.os!),
       });
-
+      if (row["originating os"]) {
+        const originating_os = await db.query.healthInsurances.findFirst({
+          where: eq(
+            schema.healthInsurances.identificationNumber,
+            row["originating os"]!
+          ),
+        });
+        if (!originating_os) {
+          errors.push(`OBRA SOCIAL DE ORIGEN no valida en (fila:${rowNum})`);
+        }
+      }
       if (!health_insurance) {
         errors.push(
           `OBRA SOCIAL no valida en (fila:${rowNum}) para integrante MIXTO`

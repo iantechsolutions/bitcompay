@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
 import utc from "dayjs/plugin/utc";
@@ -46,6 +46,7 @@ import {
 } from "react-hook-form";
 import { cn } from "~/lib/utils";
 import { add } from "date-fns";
+import { api } from "~/trpc/react";
 dayjs.extend(utc);
 dayjs.locale("es");
 
@@ -73,6 +74,7 @@ export type InputsMembers = {
   // state: string;
   province: string;
   cp: string;
+  postal_codeId: string;
   zone: string;
   phone_number: string;
   cellphone_number: string;
@@ -91,6 +93,7 @@ interface AddMembersProps {
 
 export default function AddMembers(props: AddMembersProps) {
   const [open, setOpen] = useState(false);
+
   const onSubmit: SubmitHandler<InputsMembers> = async (data) => {
     const { addMember, membersData } = props;
     addMember([...membersData, data]);
@@ -99,7 +102,37 @@ export default function AddMembers(props: AddMembersProps) {
     setOpen(false);
   };
 
+  const { data: cp } = api.postal_code.list.useQuery();
+  const { data: zone } = api.zone.list.useQuery();
+
   const [popover1Open, setPopover1Open] = useState(false);
+  const [postalCodes, setPostalCodes] = useState<any[]>([]);
+  const [selectedZone, setSelectedZone] = useState<string>("");
+
+  useEffect(() => {
+    if (cp) {
+      if (selectedZone) {
+        const filteredPostalCodes = cp.filter(
+          (postalCode) =>
+            postalCode.zone === selectedZone || postalCode.zone === ""
+        );
+        setPostalCodes(filteredPostalCodes);
+      } else {
+        setPostalCodes(cp);
+      }
+    }
+  }, [selectedZone, cp]);
+
+  const handlePostalCodeChange = (value: string) => {
+    const selectedPostalCode = postalCodes.find(
+      (postalCode) => postalCode.cp === value
+    );
+    console.log("posta", selectedPostalCode.id);
+    if (selectedPostalCode) {
+      props.form.setValue("cp", value);
+      props.form.setValue("postal_codeId", selectedPostalCode.id);
+    }
+  };
 
   async function FechasCreate(e: any) {
     props.form.setValue("birth_date", e);
@@ -124,8 +157,7 @@ export default function AddMembers(props: AddMembersProps) {
         <Form {...props.form}>
           <form
             onSubmit={props.form.handleSubmit(onSubmit)}
-            className="mt-4 flex flex-col gap-2"
-          >
+            className="mt-4 flex flex-col gap-2">
             <div className="grid grid-cols-4 gap-x-16 gap-y-6">
               <FormField
                 control={props.form.control}
@@ -135,8 +167,7 @@ export default function AddMembers(props: AddMembersProps) {
                     <FormLabel>Parentezco</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                      defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccione un parentezco" />
@@ -172,8 +203,7 @@ export default function AddMembers(props: AddMembersProps) {
                     <FormLabel>Tipo Documento</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                      defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccione un tipo de documento" />
@@ -214,8 +244,7 @@ export default function AddMembers(props: AddMembersProps) {
                             className={cn(
                               "w-[240px] pl-3 text-left font-normal",
                               !field.value && "text-muted-foreground"
-                            )}
-                          >
+                            )}>
                             <p>
                               {field.value ? (
                                 dayjs
@@ -254,8 +283,7 @@ export default function AddMembers(props: AddMembersProps) {
                     <FormLabel>Género</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                      defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccione un género" />
@@ -278,8 +306,7 @@ export default function AddMembers(props: AddMembersProps) {
                     <FormLabel>Estado Civil</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                      defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccione un estado civil" />
@@ -313,8 +340,7 @@ export default function AddMembers(props: AddMembersProps) {
                     <FormLabel>Condición Impositiva</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                      defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccione una condición impositiva" />
@@ -344,8 +370,7 @@ export default function AddMembers(props: AddMembersProps) {
                     <FormLabel>Tipo de id fiscal</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                      defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccione un tipo de id fiscal" />
@@ -447,24 +472,61 @@ export default function AddMembers(props: AddMembersProps) {
               />
               <FormField
                 control={props.form.control}
-                name="cp"
+                name="zone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Código Postal</FormLabel>
-                    <Input {...field} placeholder="Ingrese el código postal" />
+                    <FormLabel>Zona</FormLabel>
+                    <Select
+                      {...field}
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        setSelectedZone(value);
+                      }}
+                      defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar Zona" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {zone?.map((z) => (
+                          <SelectItem key={z.id} value={z.id}>
+                            {z.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </FormItem>
                 )}
               />
               <FormField
                 control={props.form.control}
-                name="zone"
+                name="cp"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Zona</FormLabel>
-                    <Input {...field} placeholder="Ingrese la zona" />
+                    <FormLabel>Código Postal</FormLabel>
+                    <Select
+                      onValueChange={(value) => {
+                        handlePostalCodeChange(value); // Maneja el cambio de código postal
+                      }}
+                      defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar CP" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {postalCodes.map((postalCode) => (
+                          <SelectItem key={postalCode.id} value={postalCode.cp}>
+                            {postalCode.cp}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={props.form.control}
                 name="phone_number"
@@ -507,8 +569,7 @@ export default function AddMembers(props: AddMembersProps) {
                     <FormLabel>Seleccione el iva a utilizar</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                      defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccione un tipo de iva" />
