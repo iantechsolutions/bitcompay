@@ -35,6 +35,7 @@ import {
   idDictionary,
   dateNormalFormat,
   reverseConceptDictionary,
+  valueToNameComprobanteMap,
 } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
@@ -75,6 +76,13 @@ import CancelCircleIcon from "~/components/icons/cancel-circle-stroke-rounded";
 import OtherTributes from "~/components/manual_issuance/other-tributes";
 import ConfirmationPage from "~/components/manual_issuance/confirmation-page";
 import ReceptorCard from "~/components/manual_issuance/receptor-card";
+import Totals from "~/components/manual_issuance/totals";
+
+type Totals = {
+  subTotal: number;
+  iva: number;
+  otherAttributes: number;
+};
 
 function formatDate(date: Date | undefined) {
   if (date) {
@@ -100,7 +108,9 @@ export default function Page() {
   const { data: marcas } = api.brands.list.useQuery();
   const { data: gruposFamiliar } = api.family_groups.list.useQuery();
   const { data: obrasSociales } = api.healthInsurances.list.useQuery();
-
+  const [subTotal, setSubTotal]= useState<number>(0);
+  const [ivaTotal, setIvaTotal]= useState<number>(0);
+  const [otherAttributes, setOtherAttributes]= useState<number>(0);
   const [logo, setLogo] = useState("");
   const [fcSelec, setFCSelec] = useState("");
   const [comprobantes, setComprobantes] = useState<any[]>();
@@ -119,6 +129,32 @@ export default function Page() {
 
     loginAfip();
   }, []);
+
+  function computeTotals() {
+    let subTotal=0;
+    let ivaTotal=0;
+    let otherAttributes=0;
+    for (const attribute of otherTributesForm.watch("tributes")) {
+      otherAttributes += Number(attribute.amount);
+    }
+
+    switch (valueToNameComprobanteMap[tipoComprobante]) {
+      case "Factura":
+        for (const concept of conceptsForm.getValues().concepts) {
+          subTotal += concept.total;
+          ivaTotal += concept.iva;
+        }
+      case "Recibo":
+        for (const concepts of otherConceptsForm.getValues().otherConcepts) {
+          subTotal += concepts.importe;
+        }
+      case "Nota de Crédito":
+      // implementar logica de factura asociada
+    }
+    setSubTotal(subTotal);
+    setIvaTotal(ivaTotal);
+    setOtherAttributes(otherAttributes);
+  }
 
   function generateComprobante() {
     if (marcas) {
@@ -521,7 +557,7 @@ export default function Page() {
   type OtherTributesForm = {
     tributes: {
       tribute: string;
-      jurisdiccion:string;
+      jurisdiccion: string;
       base: number;
       aliquot: number;
       amount: number;
@@ -529,7 +565,9 @@ export default function Page() {
   };
   const otherTributesForm = useForm<OtherTributesForm>({
     defaultValues: {
-      tributes: [{ tribute: "", jurisdiccion: "",base: 0, aliquot: 0, amount: 0 }],
+      tributes: [
+        { tribute: "", jurisdiccion: "", base: 0, aliquot: 0, amount: 0 },
+      ],
     },
   });
   type AsociatedFCForm = {
@@ -562,14 +600,20 @@ export default function Page() {
   const otherConceptsForm = useForm<otherConceptsForm>({
     defaultValues: { otherConcepts: [{ description: "", importe: 0 }] },
   });
+  useEffect(() => {
+    computeTotals();
+    console.log("computeTotals");
+    console.log("total otros tributos", otherAttributes);
+  }, [
+    otherTributesForm.watch("tributes"),
+    conceptsForm.watch("concepts"),
+    otherConceptsForm.watch("otherConcepts"),
+  ]);
   const [page, setPage] = useState<"formPage" | "confirmationPage">("formPage");
   function handlePageChange(page: "formPage" | "confirmationPage") {
     setPage(page);
   }
-  const pagesMap: Record<string, React.ReactNode> = {
-    formPage: <></>,
-    confirmationPage: <></>,
-  };
+
   const products = api.products.list.useQuery().data;
   const [brandId, setBrandId] = useState("");
   function handleGrupoFamilarChange(value: string) {
@@ -736,8 +780,8 @@ export default function Page() {
                 </SelectContent>
               </Select>
             </div>
-            
-            <ReceptorCard 
+
+            <ReceptorCard
               nombre={nombre}
               nroDocumento={nroDocumento}
               nroDocumentoDNI={nroDocumentoDNI}
@@ -759,80 +803,12 @@ export default function Page() {
               otherConceptsForm={otherConceptsForm}
             />
 
-            <OtherTributes Visualization={false} otherTributes={otherTributesForm} />
-            <div className="border rounded-lg px-4 pt-5 pb-8">
-              <p className=" text-lg font-semibold">Totales</p>
-              <div className="flex flex-row justify-between pb-2">
-                <div className="flex flex-col gap-2">
-                  <Label className="text-[#747474]">SUB-TOTAL FACTURA</Label>
-                  <Input
-                    // disabled={true}
-                    value={
-                      "$ " +
-                      (!selectedComprobante
-                        ? importe
-                        : selectedComprobante.iva == "0"
-                        ? selectedComprobante?.importe
-                        : (selectedComprobante?.importe /
-                            Number(selectedComprobante.iva)) *
-                          100)
-                    }
-                    onChange={(e) => setImporte(e.target.value.slice(2))}
-                    className="bg-[#def5dd] text-[#85ce81] font-semibold rounded-lg opacity-100 border-[#e9fcf8] border"
-                  />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Label className="text-[#747474]">IMPORTE IVA</Label>
-                  <Input
-                    // disabled={true}
-                    value={
-                      "$ " +
-                      (!selectedComprobante
-                        ? (
-                            (Number(importe) *
-                              Number(ivaDictionary[Number(iva)])) /
-                            100
-                          ).toFixed(2)
-                        : selectedComprobante.iva == "0"
-                        ? "0"
-                        : selectedComprobante?.importe -
-                          (selectedComprobante?.importe /
-                            Number(selectedComprobante.iva)) *
-                            100)
-                    }
-                    className="bg-[#def5dd] text-[#85ce81] font-semibold  rounded-lg opacity-100 border-[#e9fcf8] border"
-                  />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Label className="text-[#747474]">OTROS ATRIBUTOS</Label>
-                  <Input
-                    // disabled={true}
-                    value={"$ " + !selectedComprobante ? tributos : "0"}
-                    // onChange={(e) => setTributos(e.target.value.slice(2))}
-                    className="bg-[#def5dd] text-[#85ce81] font-semibold  rounded-lg opacity-100 border-[#e9fcf8] border"
-                  />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Label className="text-[#747474]">TOTAL</Label>
-                  <Input
-                    // disabled={true}
-                    value={
-                      "$ " +
-                      (!selectedComprobante
-                        ? (
-                            Number(importe) +
-                            (Number(importe) *
-                              Number(ivaDictionary[Number(iva)])) /
-                              100 +
-                            Number(tributos)
-                          ).toFixed(2)
-                        : selectedComprobante?.importe)
-                    }
-                    className="bg-[#def5dd] text-[#85ce81] font-semibold rounded-lg  opacity-100 border-[#e9fcf8] border"
-                  />
-                </div>
-              </div>
-            </div>
+            <OtherTributes
+              Visualization={false}
+              otherTributes={otherTributesForm}
+            />
+
+            <Totals subTotal={subTotal} iva={ivaTotal} otherAttributes={otherAttributes}/>
             <Button
               variant="outline"
               className="flex justify-between px-4 py-4 rounded-full self-end bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e]"
