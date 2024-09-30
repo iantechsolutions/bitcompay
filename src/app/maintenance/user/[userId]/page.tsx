@@ -46,6 +46,8 @@ export default function UserPage(props: { params: { userId: string } }) {
     id: props.params.userId,
   });
   const { mutateAsync: editUser, isLoading } = api.clerk.editUser.useMutation();
+  // const {data:companies } = api.companies.list.useQuery();
+  // const {data:relCompanies} = 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [username, setUsername] = useState("");
@@ -160,6 +162,34 @@ export default function UserPage(props: { params: { userId: string } }) {
                 </Card>
               </AccordionContent>
             </AccordionItem>
+            {/* <AccordionItem value="item-3">
+            <AccordionTrigger>
+              <h2 className="text-md">Agregar a entidad</h2>
+            </AccordionTrigger>
+            <AccordionContent>
+              <List>
+                {companies?.map((company) => {
+                  const isChecked = Array.from(relCompanies).some(
+                    (c) => c?.id === company?.id
+                  );
+                  return (
+                    <ListTile
+                      key={company?.id}
+                      title={company?.name}
+                      trailing={
+                        <Switch
+                          checked={isChecked}
+                          onCheckedChange={(required) =>
+                            changeCompany(company, required)
+                          }
+                        />
+                      }
+                    />
+                  );
+                })}
+              </List>
+            </AccordionContent>
+          </AccordionItem> */}
           </Accordion>
         </section>
       )}

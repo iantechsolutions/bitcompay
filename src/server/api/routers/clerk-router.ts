@@ -25,6 +25,7 @@ export const clerkRouter = createTRPCRouter({
         firstName: z.string().min(0).max(1023).optional().nullable(),
         lastName: z.string().min(0).max(1023).optional().nullable(),
         username: z.string().min(0).max(1023).optional().nullable(),
+        entities: z.array(z.string()).optional().nullable(), 
       })
     )
     .mutation(async ({ input }) => {
@@ -40,6 +41,15 @@ export const clerkRouter = createTRPCRouter({
           lastName: input.lastName ?? undefined,
           username: input.username ?? undefined,
         });
+        input.entities?.forEach(async (entityId) => {
+          const res2 = await clerkClient.organizations.createOrganizationInvitation({
+            organizationId: entityId,
+            inviterUserId: res.id,
+            role: input.role,
+            emailAddress: res.emailAddresses[0]?.emailAddress ?? "",
+          })
+        })
+        
         console.log("userUpdated");
         console.log(res);
         return { res };
