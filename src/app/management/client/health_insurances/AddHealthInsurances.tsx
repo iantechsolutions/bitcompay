@@ -233,7 +233,13 @@ export function AddHealthInsurances(props: {
               <Label htmlFor="IdNumber" className="text-xs text-gray-500">
                 CODIGO
               </Label>
-              <Select onValueChange={setIdNumber}>
+              <Input
+                id="code"
+                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                placeholder=""
+              />
+
+              {/* <Select onValueChange={setIdNumber}>
                 <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
                   <SelectValue placeholder="..." />
                 </SelectTrigger>
@@ -242,11 +248,16 @@ export function AddHealthInsurances(props: {
                   <SelectItem value="2">1-3456-2</SelectItem>
                   <SelectItem value="3">1-3567-1</SelectItem>
                 </SelectContent>
-              </Select>
+              </Select> */}
             </div>
             <div>
               <Label className="text-xs text-gray-500">SIGLA</Label>
-              <Select>
+              <Input
+                id="importe"
+                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                placeholder=""
+              />
+              {/* <Select>
                 <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
                   <SelectValue placeholder="..." />
                 </SelectTrigger>
@@ -255,7 +266,7 @@ export function AddHealthInsurances(props: {
                   <SelectItem value="2">OSECAC</SelectItem>
                   <SelectItem value="3">UTHGRA</SelectItem>
                 </SelectContent>
-              </Select>
+              </Select> */}
             </div>
             <div />
             <div />
@@ -265,20 +276,20 @@ export function AddHealthInsurances(props: {
             </p>
             <div>
               <Label className="text-xs text-gray-500">UNIDAD DE NEGOCIO</Label>
-              <Input
+              {/* <Input
                 type="number"
                 id="importe"
                 className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 placeholder="Ej: 121234"
-              />
-              {/* <Select
+              /> */}
+              <Select
                 onValueChange={setBusinessUnit}
                 value={businessUnit}
                 >
                 <SelectTrigger
                   className="w-fit mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right">
-                  <SelectValue placeholder="Seleccione un tipo de ID" />
+                  <SelectValue placeholder="Seleccione una UN" />
                 </SelectTrigger>
                 <SelectContent>
                   {businessUnits?.map((bu) => (
@@ -287,7 +298,7 @@ export function AddHealthInsurances(props: {
                     </SelectItem>
                   ))}
                 </SelectContent>
-              </Select> */}
+              </Select>
             </div>
             <div>
               <Label htmlFor="name" className="text-xs text-gray-500">
