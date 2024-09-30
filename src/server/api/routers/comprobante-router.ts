@@ -27,6 +27,7 @@ import { utapi } from "~/server/uploadthing";
 import { id } from "date-fns/locale";
 import { Events } from "./events-router";
 import { datetime } from "drizzle-orm/mysql-core";
+import { Console } from "console";
 // import chromium from "chrome-aws-lambda";
 
 type Bonus = {
@@ -291,6 +292,7 @@ async function approbatecomprobante(liquidationId: string) {
               )
             );
         } else {
+          console.log("Encontro?");
           const payment = await db
             .insert(schema.payments)
             .values({
@@ -725,6 +727,7 @@ async function createcomprobanteItem(
       comprobante_id: comprobanteId,
     })
     .returning();
+  console.log("Llegaron", concept, amount, ivaFloat, abonoItem);
 }
 async function getGroupAmount(grupo: grupoCompleto, date: Date) {
   let importe = 0;
@@ -757,6 +760,8 @@ async function getGroupAmount(grupo: grupoCompleto, date: Date) {
       }
     });
   }
+
+  console.log("La casa", importe);
   return importe;
 }
 async function getGroupContribution(grupo: grupoCompleto) {
@@ -1041,6 +1046,8 @@ export const comprobantesRouter = createTRPCRouter({
             ),
           });
           console.log("Encontro producto");
+          console.log("Entro?");
+
           const payment = await db
             .insert(schema.payments)
             .values({
@@ -1242,7 +1249,7 @@ export async function preparateComprobante(
       lt(schema.events.createdAt, new Date())
     ),
   });
-  console.log(events.length);
+  console.log("lele", events.length);
   await Promise.all(
     grupos.map(async (grupo) => {
       // const grupo = grupos[i];
@@ -1256,7 +1263,7 @@ export async function preparateComprobante(
 
       //calculate ppb
       const abono = await getGroupAmount(grupo, dateDesde!);
-
+      console.log("lele", abono);
       //calculate bonification
       const today = new Date();
       const bonificacion =
@@ -1282,6 +1289,14 @@ export async function preparateComprobante(
         dateDesde!
       );
       let saldo = 0;
+
+      console.log(
+        "lele",
+        differential_amount,
+        contribution,
+        abono,
+        bonificacion
+      );
       //calculate saldo
       // let events = await db.query.events.findMany({
       //   where: eq(schema.events.currentAccount_id, grupo.cc?.id ?? ""),
@@ -1350,7 +1365,7 @@ export async function preparateComprobante(
           previous_bill,
           saldo
         );
-
+      console.log("lelelel", importe, ivaPostFiltro);
       if (ivaPostFiltro && ivaPostFiltro == "3") {
         ivaFloat = 1;
       }
