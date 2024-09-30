@@ -114,12 +114,12 @@ export function AddHealthInsurances(props: {
 
   function validateFields() {
     const errors: string[] = [];
-    if (!!businessName) errors.push("RAZON SOCIAL");
+    if (!businessName) errors.push("RAZON SOCIAL");
     if (!idNumber) errors.push("CODIGO");
-    if (!fiscalIdNumber) errors.push("NRO DOC. FISCAL");
+    // if (!fiscalIdNumber) errors.push("NRO DOC. FISCAL");
     if (!fiscalIdType) errors.push("TIPO DOC FISCAL");
     if (!afipStatus) errors.push("ESTADO AFIP");
-    if (!responsibleName) errors.push("Nombre de facturacion");
+    // if (!responsibleName) errors.push("Nombre de facturacion");
     // if (!code) errors.push("Código");
     // if (!billType) errors.push("Tipo de Factura");
 
@@ -446,12 +446,10 @@ export function AddHealthInsurances(props: {
               </Label>
               <Select
                 onValueChange={setFiscalPostalCode}
-                value={fiscalPostalCode}
-              >
+                value={fiscalPostalCode}>
                 <SelectTrigger
                   className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right w-full"
-                >
+              hover:none justify-self-right w-full">
                   <SelectValue placeholder="Seleccionar CP" />
                 </SelectTrigger>
                 <SelectContent>
@@ -611,8 +609,7 @@ export function AddHealthInsurances(props: {
                     className={cn(
                       "text-left flex justify-between font-medium w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none pr-0 pl-0",
                       !dateState && "text-muted-foreground"
-                    )}
-                  >
+                    )}>
                     {dateState ? (
                       format(dateState, "PPP")
                     ) : (
@@ -680,8 +677,7 @@ export function AddHealthInsurances(props: {
               <Button
                 disabled={isPending}
                 onClick={handleEdit}
-                className="mt-7 font-medium mb-2 rounded-full w-fit bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3E3E3E] flex items-center justify-start justify-left"
-              >
+                className="mt-7 font-medium mb-2 rounded-full w-fit bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3E3E3E] flex items-center justify-start justify-left">
                 {isPending ? (
                   <Loader2Icon className="mr-2 animate-spin" size={20} />
                 ) : (
@@ -695,8 +691,7 @@ export function AddHealthInsurances(props: {
               <Button
                 disabled={isLoading}
                 onClick={handleCreate}
-                className="mt-7 font-medium mb-2 rounded-full w-fit bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3E3E3E] flex items-center self-start"
-              >
+                className="mt-7 font-medium mb-2 rounded-full w-fit bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3E3E3E] flex items-center self-start">
                 {isLoading ? (
                   <Loader2Icon className="mr-2 animate-spin" size={20} />
                 ) : (
