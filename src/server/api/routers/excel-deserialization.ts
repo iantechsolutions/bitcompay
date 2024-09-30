@@ -577,7 +577,17 @@ async function readExcelFile(
       const health_insurance = await db.query.healthInsurances.findFirst({
         where: eq(schema.healthInsurances.identificationNumber, row.os!),
       });
-
+      if (row["originating os"]) {
+        const originating_os = await db.query.healthInsurances.findFirst({
+          where: eq(
+            schema.healthInsurances.identificationNumber,
+            row["originating os"]!
+          ),
+        });
+        if (!originating_os) {
+          errors.push(`OBRA SOCIAL DE ORIGEN no valida en (fila:${rowNum})`);
+        }
+      }
       if (!health_insurance) {
         errors.push(
           `OBRA SOCIAL no valida en (fila:${rowNum}) para integrante MIXTO`
@@ -588,17 +598,17 @@ async function readExcelFile(
       where: eq(schema.modos.description, row.mode!),
     });
 
-    // if (row["originating os"]) {
-    //   const originating_os = await db.query.healthInsurances.findFirst({
-    //     where: eq(
-    //       schema.healthInsurances.identificationNumber,
-    //       row["originating os"]!
-    //     ),
-    //   });
-    //   if (!originating_os) {
-    //     errors.push(`OBRA SOCIAL DE ORIGEN no valida en (fila:${rowNum})`);
-    //   }
-    // }
+    if (row["originating os"]) {
+      const originating_os = await db.query.healthInsurances.findFirst({
+        where: eq(
+          schema.healthInsurances.identificationNumber,
+          row["originating os"]!
+        ),
+      });
+      if (!originating_os) {
+        errors.push(`OBRA SOCIAL DE ORIGEN no valida en (fila:${rowNum})`);
+      }
+    }
     if (!mode) {
       errors.push(`MODO no valido en (fila:${rowNum})`);
     }
