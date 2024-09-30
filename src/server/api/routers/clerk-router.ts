@@ -25,7 +25,7 @@ export const clerkRouter = createTRPCRouter({
         firstName: z.string().min(0).max(1023).optional().nullable(),
         lastName: z.string().min(0).max(1023).optional().nullable(),
         username: z.string().min(0).max(1023).optional().nullable(),
-        entities: z.array(z.string()).optional().nullable(), 
+        entities: z.array(z.string().optional().nullable()).optional().nullable(), 
       })
     )
     .mutation(async ({ input }) => {
@@ -41,9 +41,25 @@ export const clerkRouter = createTRPCRouter({
           lastName: input.lastName ?? undefined,
           username: input.username ?? undefined,
         });
+
+        const currentmemberships = await clerkClient.users.getOrganizationMembershipList({
+          userId: input.userId
+        })
+        const currentorgIds = currentmemberships.data.map((x) => x.organization.id);
+        currentorgIds.forEach(async (orgId) =>{
+
+          const remove = await clerkClient.organizations.deleteOrganizationMembership({
+            organizationId: orgId ?? "",
+            userId: input.userId
+          })
+          
+        })
+
+
+
         input.entities?.forEach(async (entityId) => {
           const res2 = await clerkClient.organizations.createOrganizationInvitation({
-            organizationId: entityId,
+            organizationId: entityId ?? "",
             inviterUserId: res.id,
             role: input.role,
             emailAddress: res.emailAddresses[0]?.emailAddress ?? "",
@@ -53,6 +69,43 @@ export const clerkRouter = createTRPCRouter({
         console.log("userUpdated");
         console.log(res);
         return { res };
+      } catch (e:any) {
+        console.log(e);
+        if(e.errors && e.errors.length > 0) {
+          if(e.errors[0].code === "username_exists") {
+            return { message: "El nombre de usuario ya esta registrado, por favor elija otro" };
+          }
+          if(e.errors[0].code === "form_username_invalid_length") {
+            return { message: "El nombre de usuario debe tener entre 4 y 64 caracteres" };
+          }
+          if(e.errors[0].code === "form_username_needs_non_number_char") {
+            return { message: "El nombre de usuario debe tener un caracter no numerico" };
+          }
+          return { message: e.errors[0].longMessage };
+        }
+        return {message: "Error desconocido. Por favor contacte al Administrador"};
+      }
+    }),
+  relatedOrgs: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string().min(0).max(1023),
+      })
+    )
+    .query(async ({ input }) => {
+      if (!checkRole("admin")) {
+        return { message: "Not Authorized" };
+      }
+      try {
+        console.log("orgList")
+        console.log(input);
+        const res = await clerkClient.users.getOrganizationMembershipList({
+          userId: input.userId
+        })
+        const orgIds = res.data.map((x) => x.organization.id);
+        console.log(res);
+        console.log(res);
+        return { orgIds };
       } catch (e:any) {
         console.log(e);
         if(e.errors && e.errors.length > 0) {
