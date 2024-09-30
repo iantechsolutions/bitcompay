@@ -68,13 +68,15 @@ export default function HealthInsurancePage(props: {
   let currentAmount = 0;
 
   let lastEvent;
-  if (cc?.events) {
+  if (cc?.events && cc.events.length > 0) {
     lastEvent = cc?.events.reduce((prev, current) => {
       return new Date(prev.createdAt) > new Date(current.createdAt)
         ? prev
         : current;
     });
     currentAmount = lastEvent?.current_amount ?? 0;
+  } else {
+    currentAmount = 0;
   }
   const [openBasicData, setOpenBasicData] = useState<boolean>(false);
   const [openFacturacion, setOpenFacturacion] = useState<boolean>(false);
@@ -157,8 +159,7 @@ export default function HealthInsurancePage(props: {
     <div>
       <Link
         className=" font-monserrat w-20 h-auto flex justify-between"
-        href={`/management/client/health_insurances`}
-      >
+        href={`/management/client/health_insurances`}>
         <ArrowLeftIcon className="mb-2" /> Volver
       </Link>
       <LayoutContainer>
@@ -172,8 +173,7 @@ export default function HealthInsurancePage(props: {
               <Button
                 variant={"destructive"}
                 className="ml-10"
-                onClick={() => setOpenDelete(true)}
-              >
+                onClick={() => setOpenDelete(true)}>
                 Eliminar
               </Button>
             </div>
@@ -196,8 +196,7 @@ export default function HealthInsurancePage(props: {
                   router.push(
                     `/management/client/health_insurances/${props.healthInsuranceId}/cc/${props.ccId}`
                   );
-                }}
-              >
+                }}>
                 <Eye className="mr-2 w-4 h-4" />
                 Ver movimientos
               </Button>
@@ -209,8 +208,7 @@ export default function HealthInsurancePage(props: {
               <h2 className="text-md font-semibold">Datos Básicos</h2>
               <button
                 onClick={() => setOpenBasicData(!openBasicData)}
-                className="absolute top-0 right-0 mt-4 mr-4 text-gray-400"
-              >
+                className="absolute top-0 right-0 mt-4 mr-4 text-gray-400">
                 {openBasicData ? (
                   <CircleChevronUp className="w-5 h-5" />
                 ) : (
@@ -256,8 +254,7 @@ export default function HealthInsurancePage(props: {
               <h2 className="text-md font-semibold">Facturación</h2>
               <button
                 onClick={() => setOpenFacturacion(!openFacturacion)}
-                className="absolute top-0 right-0 mt-4 mr-4 text-gray-400"
-              >
+                className="absolute top-0 right-0 mt-4 mr-4 text-gray-400">
                 {openFacturacion ? (
                   <CircleChevronUp className="w-5 h-5" />
                 ) : (
