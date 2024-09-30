@@ -134,7 +134,9 @@ export default function Page() {
     let subTotal=0;
     let ivaTotal=0;
     let otherAttributes=0;
-    for (const attribute of otherTributesForm.watch("tributes")) {
+    const res = otherTributesForm.getValues()
+    console.log("res", res)
+    for (const attribute of res.tributes) {
       otherAttributes += Number(attribute.amount);
     }
 
@@ -600,15 +602,16 @@ export default function Page() {
   const otherConceptsForm = useForm<otherConceptsForm>({
     defaultValues: { otherConcepts: [{ description: "", importe: 0 }] },
   });
-  useEffect(() => {
-    computeTotals();
-    console.log("computeTotals");
-    console.log("total otros tributos", otherAttributes);
-  }, [
-    otherTributesForm.watch("tributes"),
-    conceptsForm.watch("concepts"),
-    otherConceptsForm.watch("otherConcepts"),
-  ]);
+    // useEffect(() => {
+    //   console.log("preComputeTotals");
+    //   computeTotals();
+    //   console.log("computeTotals");
+    //   console.log("total otros tributos", otherAttributes);
+    // }, [
+    //   otherTributesForm.watch("tributes"),
+    //   conceptsForm.watch("concepts"),
+    //   otherConceptsForm.watch("otherConcepts"),
+    // ]);
   const [page, setPage] = useState<"formPage" | "confirmationPage">("formPage");
   function handlePageChange(page: "formPage" | "confirmationPage") {
     setPage(page);
@@ -806,6 +809,7 @@ export default function Page() {
             <OtherTributes
               Visualization={false}
               otherTributes={otherTributesForm}
+              onAdd={computeTotals}
             />
 
             <Totals subTotal={subTotal} iva={ivaTotal} otherAttributes={otherAttributes}/>

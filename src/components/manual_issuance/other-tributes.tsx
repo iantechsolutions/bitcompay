@@ -25,8 +25,9 @@ type OtherTributesForm = {
 interface Props {
   Visualization: boolean;
   otherTributes: UseFormReturn<OtherTributesForm>;
+  onAdd?: () => void;
 }
-const OtherTributes = ({ otherTributes, Visualization }: Props) => {
+const OtherTributes = ({ otherTributes, Visualization, onAdd }: Props) => {
   const { fields, remove, append } = useFieldArray({
     control: otherTributes.control,
     name: "tributes",
@@ -38,7 +39,10 @@ const OtherTributes = ({ otherTributes, Visualization }: Props) => {
         <div className="flex justify-between px-2">
           <p> no se agregaran otro tributos</p>
           <Button
-            onClick={() =>
+            onClick={() =>{
+              if (onAdd){
+                onAdd()
+              }
               append({
                 tribute: "",
                 jurisdiccion: "",
@@ -46,6 +50,7 @@ const OtherTributes = ({ otherTributes, Visualization }: Props) => {
                 aliquot: 0,
                 amount: 0,
               })
+            }
             }
           >
             Agregar concepto
@@ -144,7 +149,20 @@ const OtherTributes = ({ otherTributes, Visualization }: Props) => {
                 <FormField
                   name={`tributes.${index}.amount`}
                   control={otherTributes.control}
-                  render={({ field }) => <Input type="number" {...field} />}
+                  
+                  render={({ field }) => 
+                  <Input 
+                  type="number"
+                   {...field} 
+                   onChange={
+                      (e) => {
+                        field.onChange(e)
+                        if(onAdd){
+                          onAdd()
+                        }
+                      }
+                   }
+                   />}
                 />
               , fieldElement.amount),
             }}
@@ -157,6 +175,7 @@ const OtherTributes = ({ otherTributes, Visualization }: Props) => {
                 size="icon"
                 className="bg-transparent hover:bg-transparent border-none shadow-none"
                 onClick={() =>
+
                   append({ tribute: "", jurisdiccion: "",base: 0, aliquot: 0, amount: 0 })
                 }
               >
