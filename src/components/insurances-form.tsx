@@ -57,7 +57,7 @@ export default function InsurancesForm({
       const parsedData = UnitSchema.parse(data);
       await updateInsurance({
         ...parsedData,
-        healthInsuranceId: insurance!.id!,
+        id: insurance!.id!,
         identificationNumber: "",
       });
       router.refresh();
@@ -71,8 +71,7 @@ export default function InsurancesForm({
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(insurance ? onChange : OnSubmit)}
-          className="flex-col items-center justify-center gap-2 space-y-8"
-        >
+          className="flex-col items-center justify-center gap-2 space-y-8">
           <FormField
             control={form.control}
             name="name"

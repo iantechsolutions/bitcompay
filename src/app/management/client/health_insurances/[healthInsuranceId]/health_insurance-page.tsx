@@ -58,7 +58,7 @@ export default function HealthInsurancePage(props: {
   async function handleUpdate() {
     try {
       await updateHealthInsurance({
-        healthInsuranceId: props.healthInsurance!.id,
+        id: props.healthInsurance!.id,
         name,
         identificationNumber: idNumber,
       });
@@ -70,28 +70,6 @@ export default function HealthInsurancePage(props: {
       toast.error(error.message);
     }
   }
-
-  // const { mutateAsync: deleteHealthInsurance, isLoading: isDeleting } =
-  //   api.healthInsurances.delete.useMutation();
-
-  // const [openDelete, setOpenDelete] = useState<boolean>(false);
-
-  // async function handleDelete() {
-  //   try {
-  //     setIsLoading(true);
-  //     const os = await deleteHealthInsurance({
-  //       healthInsuranceId: props.healthInsurance!.id,
-  //     });
-
-  //     toast.success("Obra social eliminada correctamente");
-  //     router.push("./");
-  //   } catch (e) {
-  //     const error = asTRPCError(e)!;
-  //     toast.error(
-  //       "No puede eliminarse obras sociiales con afiliados asociados"
-  //     );
-  //   }
-  // }
 
   const fiscalData = {
     "Unidad de negocio": props.healthInsurance?.businessUnit,
@@ -166,7 +144,8 @@ export default function HealthInsurancePage(props: {
                     router.push(
                       `/management/client/health_insurances/${props.healthInsuranceId}/cc/${props.ccId}`
                     );
-                  }}>
+                  }}
+                >
                   <Eye className="mr-2 w-4 h-4" />
                   Ver movimientos
                 </Button>
@@ -180,7 +159,8 @@ export default function HealthInsurancePage(props: {
               </p>
               <Button
                 variant="bitcompay"
-                className="bg-[#85CE81] text-sm px-4 h-7 gap-2 text-[#ffffff] rounded-full font-normal">
+                className="bg-[#85CE81] text-sm px-4 h-7 gap-2 text-[#ffffff] rounded-full font-normal"
+              >
                 <Upload02Icon className="h-4" />
                 Subir archivo
               </Button>
@@ -227,3 +207,25 @@ export default function HealthInsurancePage(props: {
     </LayoutContainer>
   );
 }
+
+// const { mutateAsync: deleteHealthInsurance, isLoading: isDeleting } =
+//   api.healthInsurances.delete.useMutation();
+
+// const [openDelete, setOpenDelete] = useState<boolean>(false);
+
+// async function handleDelete() {
+//   try {
+//     setIsLoading(true);
+//     const os = await deleteHealthInsurance({
+//       healthInsuranceId: props.healthInsurance!.id,
+//     });
+
+//     toast.success("Obra social eliminada correctamente");
+//     router.push("./");
+//   } catch (e) {
+//     const error = asTRPCError(e)!;
+//     toast.error(
+//       "No puede eliminarse obras sociiales con afiliados asociados"
+//     );
+//   }
+// }
