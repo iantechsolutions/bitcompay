@@ -584,7 +584,7 @@ export const requiredColumns = [
   // { key: "cellphone", label: "CELULAR" },
   { key: "plan", label: "PLAN" },
   { key: "product", label: "PRODUCTO" },
-  { key: "sale_condition", label: "CONDICION DE VENTA" },
+  // { key: "sale_condition", label: "CONDICION DE VENTA" },
 ];
 
 export const columnLabelByKey = Object.fromEntries(
