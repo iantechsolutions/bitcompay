@@ -13,6 +13,7 @@ import ReceptorCard from "./receptor-card";
 import ComprobanteCard from "./comprobante-card";
 import AdditionalInfoCard from "./additional-info";
 import OtherTributes from "./other-tributes";
+import Totals from "./totals";
 type ManualGenInputs = {
   puntoVenta: string;
   tipoDeConcepto: string;
@@ -65,6 +66,9 @@ interface Props {
   conceptsForm: UseFormReturn<ConceptsForm>;
   otherConcepts: UseFormReturn<otherConceptsForm>;
   setTipoComprobante: (tipoComprobante: string) => void;
+  subTotal: number;
+  ivaTotal: number;
+  otherAttributes: number;
 }
 const confirmationPage = ({
   changePage,
@@ -74,7 +78,10 @@ const confirmationPage = ({
   asociatedFCForm,
   setTipoComprobante,
   conceptsForm,
-  otherConcepts
+  otherConcepts,
+  subTotal,
+  ivaTotal,
+  otherAttributes
 }: Props) => {
   return (
     <section className="space-y-2 flex flex-col">
@@ -102,9 +109,7 @@ const confirmationPage = ({
         tipoComprobante={tipoComprobante}
       />
       <OtherTributes Visualization={true} otherTributes={otherTributes}/>
-      <GeneralCard title="Totales">
-        <p>totales</p>
-      </GeneralCard>
+      <Totals subTotal={subTotal} iva={ivaTotal} otherAttributes={otherAttributes}/>
       <div className="self-end flex gap-1">
         <Button
           onClick={() => changePage("formPage")}

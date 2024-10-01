@@ -57,6 +57,7 @@ type otherConceptsForm = {
   }[];
 };
 type AdditionalInfoProps = {
+  onValueChange?: () => void;
   visualization: boolean;
   tipoComprobante: string;
   conceptsForm: UseFormReturn<ConceptsForm>;
@@ -66,6 +67,7 @@ type AdditionalInfoProps = {
   grupoFamiliar?: RouterOutputs["family_groups"]["list"][number];
 };
 export default function AdditionalInfoCard({
+  onValueChange,
   conceptsForm,
   asociatedFCForm,
   form,
@@ -182,6 +184,10 @@ export default function AdditionalInfoCard({
                       <Input
                         {...field}
                         type="number"
+                        onChange={(e) => {
+                          field.onChange(e);
+                          if (onValueChange) onValueChange();
+                        }}
                         value={field.value ?? 0}
                       />
                     )}
@@ -203,6 +209,10 @@ export default function AdditionalInfoCard({
                       <Input
                         {...field}
                         type="number"
+                        onChange={(e) => {
+                          field.onChange(e);
+                          if (onValueChange) onValueChange();
+                        }}
                         value={field.value ?? 0}
                       />
                     )}
@@ -229,7 +239,10 @@ export default function AdditionalInfoCard({
                   size="icon"
                   type="button"
                   className="bg-transparent hover:bg-transparent border-none shadow-none"
-                  onClick={() => remove(index)}
+                  onClick={() => {
+                    remove(index);
+                    if (onValueChange) onValueChange();
+                  }}
                 >
                   <CancelCircleIcon className="text-[#ed4444]" />
                 </Button>
@@ -449,7 +462,16 @@ export default function AdditionalInfoCard({
                     <FormField
                       name={`otherConcepts.${index}.importe`}
                       control={otherConceptsForm.control}
-                      render={({ field }) => <Input {...field} type="number" />}
+                      render={({ field }) => (
+                        <Input
+                          {...field}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            if (onValueChange) onValueChange();
+                          }}
+                          type="number"
+                        />
+                      )}
                     />,
                     fieldElement.importe
                   ),
@@ -472,7 +494,10 @@ export default function AdditionalInfoCard({
                     variant="outline"
                     size="icon"
                     className="bg-transparent hover:bg-transparent border-none shadow-none"
-                    onClick={() => otherConceptsRemove(index)}
+                    onClick={(e) => {
+                      otherConceptsRemove(index)
+                      if (onValueChange) onValueChange();
+                    }}
                   >
                     <CancelCircleIcon className="text-[#ed4444]" />
                   </Button>
