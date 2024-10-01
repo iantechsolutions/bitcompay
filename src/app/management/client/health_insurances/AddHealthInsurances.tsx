@@ -117,7 +117,7 @@ export function AddHealthInsurances(props: {
   const [responsibleName, setResponsibleName] = useState(
     OS?.responsibleName ?? ""
   );
-  // const [initialValue, setInitialValue] = useState("0");
+  const [initialValue, setInitialValue] = useState("0");
 
   function validateFields() {
     const errors: string[] = [];
@@ -169,22 +169,16 @@ export function AddHealthInsurances(props: {
         province: province,
         postal_code: postalCode,
         initialValue: initialValue,
-        office: office,
-        floor: floor,
+
         phoneNumber: phoneNumber,
         email: email,
         state: state,
         user: user,
         cancelMotive: cancelMotive,
-        phoneNumber: phoneNumber,
-        email: email,
 
         isClient: true,
-        state: state,
         dateState: dateState,
         responsibleName: responsibleName,
-        user: user,
-        cancelMotive: cancelMotive,
         // initialValue: initialValue,
         // responsibleName: responsibleName,
         // sellCondition: sellCondition,
@@ -300,7 +294,6 @@ export function AddHealthInsurances(props: {
               </Label>
               <Input
                 id="code"
-                onChange={(e) => setIdNumber(e.target.value)}
                 className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 placeholder=""
                 value={identificationNumber}
@@ -321,8 +314,7 @@ export function AddHealthInsurances(props: {
             <div>
               <Label className="text-xs text-gray-500">SIGLA</Label>
               <Input
-                id="importe"
-                onChange={(e) => setIdNumber(e.target.value)}
+                id="initials"
                 className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 placeholder=""
                 value={initials}
