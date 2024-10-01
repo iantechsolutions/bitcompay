@@ -143,12 +143,12 @@ export default function Page() {
     switch (valueToNameComprobanteMap[tipoComprobante]) {
       case "Factura":
         for (const concept of conceptsForm.getValues().concepts) {
-          subTotal += concept.total;
-          ivaTotal += concept.iva;
+          subTotal += Number(concept.total);
+          ivaTotal += Number(concept.iva);
         }
       case "Recibo":
         for (const concepts of otherConceptsForm.getValues().otherConcepts) {
-          subTotal += concepts.importe;
+          subTotal += Number(concepts.importe);
         }
       case "Nota de Crédito":
       // implementar logica de factura asociada
@@ -798,6 +798,7 @@ export default function Page() {
             />
 
             <AdditionalInfoCard
+              onValueChange={computeTotals}
               visualization={false}
               tipoComprobante={tipoComprobante}
               conceptsForm={conceptsForm}
@@ -832,6 +833,9 @@ export default function Page() {
             asociatedFCForm={asociatedFCForm}
             otherTributes={otherTributesForm}
             changePage={handlePageChange}
+            subTotal={subTotal}
+            ivaTotal={ivaTotal}
+            otherAttributes={otherAttributes}
           />
         )}
       </LayoutContainer>

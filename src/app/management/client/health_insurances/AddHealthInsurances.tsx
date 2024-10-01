@@ -168,6 +168,14 @@ export function AddHealthInsurances(props: {
         locality: locality,
         province: province,
         postal_code: postalCode,
+        initialValue: initialValue,
+        office: office,
+        floor: floor,
+        phoneNumber: phoneNumber,
+        email: email,
+        state: state,
+        user: user,
+        cancelMotive: cancelMotive,
         phoneNumber: phoneNumber,
         email: email,
 
@@ -292,6 +300,7 @@ export function AddHealthInsurances(props: {
               </Label>
               <Input
                 id="code"
+                onChange={(e) => setIdNumber(e.target.value)}
                 className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 placeholder=""
                 value={identificationNumber}
@@ -313,6 +322,7 @@ export function AddHealthInsurances(props: {
               <Label className="text-xs text-gray-500">SIGLA</Label>
               <Input
                 id="importe"
+                onChange={(e) => setIdNumber(e.target.value)}
                 className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 placeholder=""
                 value={initials}

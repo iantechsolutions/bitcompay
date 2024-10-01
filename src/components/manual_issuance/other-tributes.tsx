@@ -39,19 +39,15 @@ const OtherTributes = ({ otherTributes, Visualization, onAdd }: Props) => {
         <div className="flex justify-between px-2">
           <p> no se agregaran otro tributos</p>
           <Button
-            onClick={() =>{
-              if (onAdd){
-                onAdd()
-              }
+            onClick={() => {
               append({
                 tribute: "",
                 jurisdiccion: "",
                 base: 0,
                 aliquot: 0,
                 amount: 0,
-              })
-            }
-            }
+              });
+            }}
           >
             Agregar concepto
           </Button>
@@ -121,50 +117,54 @@ const OtherTributes = ({ otherTributes, Visualization, onAdd }: Props) => {
           <ElementCard
             element={{
               key: "BASE IMPONIBLE",
-              value: visualizationSwitcher( Visualization,
+              value: visualizationSwitcher(
+                Visualization,
                 <FormField
                   name={`tributes.${index}.base`}
                   control={otherTributes.control}
                   render={({ field }) => <Input type="number" {...field} />}
-                />
-              , fieldElement.base),
+                />,
+                fieldElement.base
+              ),
             }}
           />
           <ElementCard
             element={{
               key: "ALICUOTA",
-              value: visualizationSwitcher(Visualization,
+              value: visualizationSwitcher(
+                Visualization,
                 <FormField
                   name={`tributes.${index}.aliquot`}
                   control={otherTributes.control}
                   render={({ field }) => <Input type="number" {...field} />}
-                />
-              , fieldElement.aliquot),
+                />,
+                fieldElement.aliquot
+              ),
             }}
           />
           <ElementCard
             element={{
               key: "IMPORTE",
-              value: visualizationSwitcher(Visualization,
+              value: visualizationSwitcher(
+                Visualization,
                 <FormField
                   name={`tributes.${index}.amount`}
                   control={otherTributes.control}
-                  
-                  render={({ field }) => 
-                  <Input 
-                  type="number"
-                   {...field} 
-                   onChange={
-                      (e) => {
-                        field.onChange(e)
-                        if(onAdd){
-                          onAdd()
+                  render={({ field }) => (
+                    <Input
+                      type="number"
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        if (onAdd) {
+                          onAdd();
                         }
-                      }
-                   }
-                   />}
-                />
-              , fieldElement.amount),
+                      }}
+                    />
+                  )}
+                />,
+                fieldElement.amount
+              ),
             }}
           />
 
@@ -175,8 +175,13 @@ const OtherTributes = ({ otherTributes, Visualization, onAdd }: Props) => {
                 size="icon"
                 className="bg-transparent hover:bg-transparent border-none shadow-none"
                 onClick={() =>
-
-                  append({ tribute: "", jurisdiccion: "",base: 0, aliquot: 0, amount: 0 })
+                  append({
+                    tribute: "",
+                    jurisdiccion: "",
+                    base: 0,
+                    aliquot: 0,
+                    amount: 0,
+                  })
                 }
               >
                 <AddCircleIcon className="text-[#8bd087]" />
@@ -185,7 +190,12 @@ const OtherTributes = ({ otherTributes, Visualization, onAdd }: Props) => {
                 variant="outline"
                 size="icon"
                 className="bg-transparent hover:bg-transparent border-none shadow-none"
-                onClick={() => remove(index)}
+                onClick={() => {
+                  remove(index);
+                  if (onAdd) {
+                    onAdd();
+                  }
+                }}
               >
                 <CancelCircleIcon className="text-[#ed4444]" />
               </Button>

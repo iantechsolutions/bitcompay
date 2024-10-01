@@ -42,14 +42,14 @@ export default async function Home(props: {
 }) {
   const userActual = await currentUser();
   const companyData = await api.companies.get.query();
-  const eventos = await api.events.list.query();
+  // const eventos = await api.events.list.query();
   const preliquidation = await api.liquidations.get.query({
     id: props.params.liquidationId,
   });
-  const businessUnit = preliquidation?.bussinessUnits;
-  const user = await clerkClient.users.getUser(
-    preliquidation?.userCreated ?? "user_2iy8lXXdnoa2f5wHjRh5nj3W0fU"
-  );
+  // const businessUnit = preliquidation?.bussinessUnits;
+  // const user = await clerkClient.users.getUser(
+  //   preliquidation?.userCreated ?? "user_2iy8lXXdnoa2f5wHjRh5nj3W0fU"
+  // );
   if (!preliquidation) return <Title>Preliquidacion no encotrada</Title>;
   const familyGroups = await api.family_groups.getByLiquidation.query({
     liquidationId: props.params.liquidationId,
@@ -105,7 +105,7 @@ export default async function Home(props: {
   };
   const excelRows: (string | number)[][] = [[...headers]];
   const tableRows: TableRecord[] = [];
-  for (const fg of familyGroups) {
+  familyGroups.map((fg) => {
     const excelRow = [];
     const billResponsible = fg?.integrants?.find(
       (integrante) => integrante?.isBillResponsible
@@ -124,13 +124,26 @@ export default async function Home(props: {
     //     (item) => item.concept === "Saldo anterior"
     //   )?.amount
     // );
-    const eventPreComprobante = eventos.find(
-      (x) =>
-        x.currentAccount_id === fg?.cc?.id &&
-        x.createdAt < preliquidation?.createdAt
+    // const eventPreComprobante = eventos.find(
+    //   (x) =>
+    //     x.currentAccount_id === fg?.cc?.id &&
+    //     x.createdAt < preliquidation?.createdAt
+    // );
+
+
+
+    // summary["Saldo anterior"] += eventPreComprobante?.current_amount ?? 0;
+    // excelRow.push(eventPreComprobante?.current_amount ?? 0);
+    
+    const saldo_anterior = toNumberOrZero(
+      original_comprobante?.items.find(
+        (item) => item.concept === "Factura Anterior"
+      )?.amount
     );
-    summary["Saldo anterior"] += eventPreComprobante?.current_amount ?? 0;
-    excelRow.push(eventPreComprobante?.current_amount ?? 0);
+    console.log("saldo_anterior",saldo_anterior)
+    summary["Saldo anterior"] += saldo_anterior
+    excelRow.push(saldo_anterior);
+
     const cuota_planes = toNumberOrZero(
       original_comprobante?.items.find((item) => item.concept === "Abono")
         ?.amount
@@ -207,7 +220,7 @@ export default async function Home(props: {
       cuit,
       "saldo anterior":
         //  eventPreComprobante?.current_amount ??
-        0,
+        saldo_anterior,
       "cuota plan": cuota_planes,
       bonificacion,
       diferencial: diferencial,
@@ -222,7 +235,7 @@ export default async function Home(props: {
       modo,
     });
     
-  }
+  })
 
   return (
     <LayoutContainer>
