@@ -73,7 +73,7 @@ export const healthInsurancesRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
-        name: z.string(),
+        name: z.string().optional(),
         identificationNumber: z.string(),
         adress: z.string().optional(),
         afip_status: z.string().optional(),
@@ -114,7 +114,7 @@ export const healthInsurancesRouter = createTRPCRouter({
         .insert(schema.healthInsurances)
         .values({
           companyId,
-          name: input.name,
+          name: input.name ?? "",
           identificationNumber: input.identificationNumber,
           adress: input.adress,
           afip_status: input.afip_status,
@@ -170,9 +170,9 @@ export const healthInsurancesRouter = createTRPCRouter({
   change: protectedProcedure
     .input(
       z.object({
-        name: z.string(),
+        id: z.string(),
+        name: z.string().optional(),
         identificationNumber: z.string(),
-        healthInsuranceId: z.string(),
         adress: z.string().optional(),
         afip_status: z.string().optional(),
         fiscal_id_number: z.string().optional(),
@@ -182,6 +182,7 @@ export const healthInsurancesRouter = createTRPCRouter({
         locality: z.string().optional(),
         province: z.string().optional(),
         postal_code: z.string().optional(),
+        initialValue: z.string().optional(),
         initials: z.string().optional(),
         businessUnit: z.string().optional(),
         businessName: z.string().optional(),
@@ -242,7 +243,7 @@ export const healthInsurancesRouter = createTRPCRouter({
           office: input.office,
           dateState: input.dateState,
         })
-        .where(eq(schema.healthInsurances.id, input.healthInsuranceId));
+        .where(eq(schema.healthInsurances.id, input.id));
       return healthInsurance_changed;
     }),
   delete: protectedProcedure

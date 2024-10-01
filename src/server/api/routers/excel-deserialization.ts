@@ -531,9 +531,9 @@ async function readExcelFile(
         eq(schema.healthInsurances.companyId, ctx.session.orgId!)
       ),
     });
-    if (!health_insurance) {
+    if (!health_insurance && row.mode === "MIXTO") {
       errors.push(
-        `OBRA SOCIAL no valida o no perteneciente a la organizacion en (fila:${rowNum})`
+        `El modo es incorrecto, la OBRA SOCIAL no es valida o no perteneciente a la organizacion en (fila:${rowNum})`
       );
     }
 
