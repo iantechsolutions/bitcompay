@@ -32,6 +32,8 @@ export function AddBrandDialog() {
   const [description, setDescription] = useState("");
   const [iva, setIva] = useState<string>("21%");
   const [name, setName] = useState("");
+  const [utility, setUtility] = useState("");
+
   const [code, setCode] = useState("");
   const [razonSocial, setRazonSocial] = useState("");
   const [concept, setConcepto] = useState("");
@@ -60,6 +62,8 @@ export function AddBrandDialog() {
         iva: iva.toString(),
         description,
         name,
+        code,
+        utility,
         redescription: reducedDescription,
         concept,
       });
@@ -83,7 +87,7 @@ export function AddBrandDialog() {
         Crear marca
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Crear nueva marca</DialogTitle>
           </DialogHeader>
@@ -127,16 +131,28 @@ export function AddBrandDialog() {
               </Select>
             </div>
             {/* Código de marca */}
-            <div>
-              <Label htmlFor="code">Código de marca(max. 4 carac)</Label>
-              <Input
-                id="code"
-                placeholder="..."
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                required
-                maxLength={4}
-              />
+            <div className="flex">
+              <div className="w-[250px] font-bold">
+                <Label htmlFor="code">Código de marca(max. 4 carac)</Label>
+                <Input
+                  id="code"
+                  placeholder="..."
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  required
+                  maxLength={4}
+                />
+              </div>
+              <div className="w-[250px] font-bold">
+                <Label htmlFor="utility">Código de utilidad(senapsa)</Label>
+                <Input
+                  id="utility"
+                  placeholder="..."
+                  value={utility}
+                  onChange={(e) => setUtility(e.target.value)}
+                  maxLength={8}
+                />
+              </div>
             </div>
 
             {/* Descripción */}

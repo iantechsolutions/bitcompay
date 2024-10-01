@@ -8,6 +8,8 @@ import {
   CircleCheck,
   Search,
   Scroll,
+  ChevronRightCircleIcon,
+  CircleChevronRight,
 } from "lucide-react";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -33,6 +35,7 @@ import {
   idDictionary,
   dateNormalFormat,
   reverseConceptDictionary,
+  valueToNameComprobanteMap,
 } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
@@ -55,6 +58,31 @@ import { SelectTrigger as SelectTriggerMagnify } from "~/components/selectwithse
 import { channel } from "diagnostics_channel";
 import ElementCard from "~/components/affiliate-page/element-card";
 import Calendar01Icon from "~/components/icons/calendar-01-stroke-rounded";
+import { Command, CommandInput } from "~/components/ui/command";
+import { CommandGroup, CommandItem } from "cmdk";
+import { useForm, useFieldArray } from "react-hook-form";
+import ComprobanteCard from "~/components/manual_issuance/comprobante-card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "~/components/ui/form";
+import AdditionalInfoCard from "~/components/manual_issuance/additional-info";
+import { RouterOutputs } from "~/trpc/shared";
+import AddCircleIcon from "~/components/icons/add-circle-stroke-rounded";
+import CancelCircleIcon from "~/components/icons/cancel-circle-stroke-rounded";
+import OtherTributes from "~/components/manual_issuance/other-tributes";
+import ConfirmationPage from "~/components/manual_issuance/confirmation-page";
+import ReceptorCard from "~/components/manual_issuance/receptor-card";
+import Totals from "~/components/manual_issuance/totals";
+
+type Totals = {
+  subTotal: number;
+  iva: number;
+  otherAttributes: number;
+};
 
 function formatDate(date: Date | undefined) {
   if (date) {
@@ -80,10 +108,12 @@ export default function Page() {
   const { data: marcas } = api.brands.list.useQuery();
   const { data: gruposFamiliar } = api.family_groups.list.useQuery();
   const { data: obrasSociales } = api.healthInsurances.list.useQuery();
-
+  const [subTotal, setSubTotal]= useState<number>(0);
+  const [ivaTotal, setIvaTotal]= useState<number>(0);
+  const [otherAttributes, setOtherAttributes]= useState<number>(0);
   const [logo, setLogo] = useState("");
   const [fcSelec, setFCSelec] = useState("");
-  const [comprobantes, setComprobantes] = useState<any[]>([]);
+  const [comprobantes, setComprobantes] = useState<any[]>();
   const [selectedComprobante, setSelectedComprobante] = useState<any>(null);
   const [comprobanteCreado, setComprobanteCreado] = useState<any>(null);
   const [afip, setAfip] = useState<any>(null);
@@ -94,183 +124,39 @@ export default function Page() {
       setLoading(false);
       const voucherTypes = await afip.ElectronicBilling.getVoucherTypes();
       const ivaTypes = await afip.ElectronicBilling.getAliquotTypes();
-      console.log("afip loaded");
-      console.log("voucherTypes", voucherTypes);
-      console.log("aliquot types", ivaTypes);
       setAfip(afip);
     }
 
     loginAfip();
   }, []);
 
-  // async function handlePrevisualize() {
-  //   console.log("arranca");
-  //   let comprobanteAhora = null;
-  //   if (!comprobanteCreado) {
-  //     console.log("empieza a crear");
-  //     if (marcas) {
-  //       setLogo(marcas[0]!.logo_url!);
-  //     }
-  //     setLoading(true);
-  //     let comprobante = null;
-  //     const fecha = new Date(
-  //       Date.now() - new Date().getTimezoneOffset() * 60000
-  //     )
-  //       .toISOString()
-  //       .split("T")[0];
-  //     console.log("se define por tipoComprobante", tipoComprobante);
-  //     if (fcSelec && (tipoComprobante == "2" || tipoComprobante == "12")) {
-  //       const facSeleccionada = comprobantes?.find((x) => x.id == fcSelec);
-  //       let ivaFloat = (100 + parseFloat(facSeleccionada?.iva ?? "0")) / 100;
-  //       comprobante = await createComprobante({
-  //         billLink: "",
-  //         concepto: facSeleccionada?.concepto ?? 0,
-  //         importe: facSeleccionada?.importe ?? 0,
-  //         iva: facSeleccionada?.iva ?? "0",
-  //         nroDocumento: facSeleccionada?.nroDocumento ?? 0,
-  //         ptoVenta: facSeleccionada?.ptoVenta ?? 0,
-  //         tipoDocumento: facSeleccionada?.tipoDocumento ?? 0,
-  //         tipoComprobante: reverseComprobanteDictionary[tipoComprobante],
-  //         fromPeriod: facSeleccionada?.fromPeriod,
-  //         toPeriod: facSeleccionada?.toPeriod,
-  //         due_date: facSeleccionada?.due_date,
-  //         generated: new Date(),
-  //         prodName: facSeleccionada?.prodName ?? "",
-  //         nroComprobante: facSeleccionada?.nroComprobante ?? 0,
-  //         family_group_id: grupoFamiliarId,
-  //       });
-  //       setComprobanteCreado(comprobante[0]);
-  //       const event = createEventFamily({
-  //         family_group_id: grupoFamiliarId,
-  //         type: "NC",
-  //         amount: comprobante[0]?.importe ?? 0,
-  //       });
-  //     } else if (tipoComprobante == "3" || tipoComprobante == "6") {
-  //       let ivaFloat =
-  //         (100 + parseFloat(ivaDictionary[Number(iva)] ?? "0")) / 100;
-  //       comprobante = await createComprobante({
-  //         billLink: "",
-  //         concepto: Number(concepto) ?? 0,
-  //         importe: Number(importe) ?? 0,
-  //         iva: iva ?? "0",
-  //         nroDocumento: Number(nroDocumento) ?? 0,
-  //         ptoVenta: Number(puntoVenta) ?? 0,
-  //         tipoDocumento: idDictionary[tipoDocumento ?? ""] ?? 0,
-  //         tipoComprobante: reverseComprobanteDictionary[tipoComprobante],
-  //         fromPeriod: dateDesde,
-  //         toPeriod: dateHasta,
-  //         due_date: dateVencimiento,
-  //         generated: new Date(),
-  //         prodName: servicioprod ?? "",
-  //         nroComprobante: 0,
-  //         family_group_id: grupoFamiliarId,
-  //       });
-  //       setComprobanteCreado(comprobante[0]);
-  //       const event = createEventFamily({
-  //         family_group_id: grupoFamiliarId,
-  //         type: "FC",
-  //         amount: comprobante[0]?.importe ?? 0,
-  //       });
-  //     } else if (tipoComprobante == "0") {
-  //       comprobante = await createComprobante({
-  //         billLink: "",
-  //         concepto: Number(concepto) ?? 0,
-  //         importe: Number(importe) ?? 0,
-  //         iva: "0",
-  //         nroDocumento: Number(nroDocumento) ?? 0,
-  //         ptoVenta: Number(puntoVenta) ?? 0,
-  //         tipoDocumento: idDictionary[tipoDocumento ?? ""] ?? 0,
-  //         tipoComprobante: reverseComprobanteDictionary[tipoComprobante],
-  //         fromPeriod: dateDesde,
-  //         toPeriod: dateHasta,
-  //         due_date: dateVencimiento,
-  //         generated: new Date(),
-  //         prodName: servicioprod ?? "",
-  //         nroComprobante: 0,
-  //         family_group_id: grupoFamiliarId,
-  //       });
-  //       setComprobanteCreado(comprobante[0]);
-  //       const event = createEventFamily({
-  //         family_group_id: grupoFamiliarId,
-  //         type: "REC",
-  //         amount: comprobante[0]?.importe ?? 0,
-  //       });
-  //       const eventOrg = createEventOrg({
-  //         type: "REC",
-  //         amount: comprobante[0]?.importe ?? 0,
-  //       });
-  //     }
-  //     comprobanteAhora = comprobante ? comprobante[0] : null;
-  //     console.log("hecho");
-  //     setLoading(false);
-  //     // toast.success("La factura se creo correctamente");
-  //   }
-  //   console.log("billLink if");
-  //   if (comprobanteAhora || !comprobanteCreado?.billLink) {
-  //     console.log("creacion link");
-  //     const billResponsible = gruposFamiliar
-  //       ?.find((x) => x.id == grupoFamiliarId)
-  //       ?.integrants.find((x) => x.isBillResponsible);
-  //     const obraSocial = obrasSociales?.find((x) => x.id == obraSocialId);
-  //     console.log("html");
-  //     const html = htmlBill(
-  //       comprobanteCreado,
-  //       company,
-  //       undefined,
-  //       2,
-  //       marcas?.find((x) => x.id === brandId),
-  //       nombre,
-  //       billResponsible
-  //         ? billResponsible?.address ??
-  //             "" + " " + (billResponsible?.address_number ?? "")
-  //         : obraSocial?.adress ?? "",
-  //       (billResponsible ? billResponsible?.locality : obraSocial?.locality) ??
-  //         "",
-  //       (billResponsible ? billResponsible?.province : obraSocial?.province) ??
-  //         "",
-  //       (billResponsible
-  //         ? billResponsible?.postal_code?.cp
-  //         : obraSocial?.postal_code) ?? "",
-  //       (billResponsible
-  //         ? billResponsible?.fiscal_id_type
-  //         : obraSocial?.fiscal_id_type) ?? "",
-  //       (billResponsible
-  //         ? billResponsible?.fiscal_id_number
-  //         : obraSocial?.fiscal_id_number?.toString()) ?? "",
-  //       (billResponsible
-  //         ? billResponsible?.afip_status
-  //         : obraSocial?.afip_status) ?? ""
-  //     );
-  //     const options = {
-  //       width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
-  //       marginLeft: 0.8, // Margen izquierdo en pulgadas. Usar 0.1 para ticket
-  //       marginRight: 0.8, // Margen derecho en pulgadas. Usar 0.1 para ticket
-  //       marginTop: 0.4, // Margen superior en pulgadas. Usar 0.1 para ticket
-  //       marginBottom: 0.4, // Margen inferior en pulgadas. Usar 0.1 para ticket
-  //     };
-  //     const name = "DEMO.pdf";
-  //     console.log("subiendo");
-  //     const resHtml = await afip.ElectronicBilling.createPDF({
-  //       html: html,
-  //       file_name: name,
-  //       options: options,
-  //     });
-  //     console.log("resHtml", resHtml);
-  //     const updatedComprobante = await updateComprobante({
-  //       id: comprobanteCreado?.id ?? "",
-  //       billLink: resHtml.file,
-  //     });
-  //     setComprobanteCreado(updatedComprobante);
-  //   }
-  //   console.log("aca hay window");
-  //   console.log(comprobanteAhora);
-  //   console.log(comprobanteCreado);
-  //   if (comprobanteAhora && comprobanteAhora?.billLink) {
-  //     window.open(comprobanteAhora?.billLink, "_blank");
-  //   } else {
-  //     window.open(comprobanteCreado.billLink, "_blank");
-  //   }
-  // }
+  function computeTotals() {
+    let subTotal=0;
+    let ivaTotal=0;
+    let otherAttributes=0;
+    const res = otherTributesForm.getValues()
+    console.log("res", res)
+    for (const attribute of res.tributes) {
+      otherAttributes += Number(attribute.amount);
+    }
+
+    switch (valueToNameComprobanteMap[tipoComprobante]) {
+      case "Factura":
+        for (const concept of conceptsForm.getValues().concepts) {
+          subTotal += Number(concept.total);
+          ivaTotal += Number(concept.iva);
+        }
+      case "Recibo":
+        for (const concepts of otherConceptsForm.getValues().otherConcepts) {
+          subTotal += Number(concepts.importe);
+        }
+      case "Nota de Crédito":
+      // implementar logica de factura asociada
+    }
+    setSubTotal(subTotal);
+    setIvaTotal(ivaTotal);
+    setOtherAttributes(otherAttributes);
+  }
 
   function generateComprobante() {
     if (marcas) {
@@ -278,19 +164,22 @@ export default function Page() {
     }
 
     if (
-      !puntoVenta ||
-      !dateEmision ||
+      !form.getValues().puntoVenta ||
+      !form.getValues().dateEmision ||
       !tipoComprobante ||
       !concepto ||
       !iva ||
-      !dateVencimiento ||
+      !form.getValues().dateVencimiento ||
       !importe ||
       parseInt(importe) <= 0
     ) {
       toast.error("Ingrese los valores requeridos");
       return null;
     }
-    if (concepto !== "1" && (!dateDesde || !dateHasta)) {
+    if (
+      concepto !== "1" &&
+      (!form.getValues().dateDesde || !form.getValues().dateHasta)
+    ) {
       toast.error("Ingrese los valores requeridos");
       return null;
     }
@@ -351,7 +240,7 @@ export default function Page() {
           });
           try {
             last_voucher = await afip.ElectronicBilling.getLastVoucher(
-              puntoVenta,
+              form.getValues().puntoVenta,
               tipoComprobante
             );
           } catch {
@@ -434,12 +323,12 @@ export default function Page() {
             importe: Number(importe) * ivaFloat + Number(tributos) ?? 0,
             iva: iva ?? "0",
             nroDocumento: Number(nroDocumento) ?? 0,
-            ptoVenta: Number(puntoVenta) ?? 0,
+            ptoVenta: Number(form.getValues().puntoVenta) ?? 0,
             tipoDocumento: idDictionary[tipoDocumento ?? ""] ?? 0,
             tipoComprobante: reverseComprobanteDictionary[tipoComprobante],
-            fromPeriod: dateDesde,
-            toPeriod: dateHasta,
-            due_date: dateVencimiento,
+            fromPeriod: form.getValues().dateDesde,
+            toPeriod: form.getValues().dateHasta,
+            due_date: form.getValues().dateVencimiento,
             generated: new Date(),
             prodName: servicioprod ?? "",
             nroComprobante: 0,
@@ -447,7 +336,7 @@ export default function Page() {
           });
           try {
             last_voucher = await afip.ElectronicBilling.getLastVoucher(
-              puntoVenta,
+              form.getValues().puntoVenta,
               tipoComprobante
             );
           } catch {
@@ -455,7 +344,7 @@ export default function Page() {
           }
           data = {
             CantReg: 1, // Cantidad de comprobantes a registrar
-            PtoVta: Number(puntoVenta),
+            PtoVta: Number(form.getValues().puntoVenta),
             CbteTipo: Number(tipoComprobante),
             Concepto: Number(concepto),
             DocTipo: idDictionary[tipoDocumento ?? ""],
@@ -464,12 +353,16 @@ export default function Page() {
             CbteHasta: last_voucher + 1,
             CbteFch: parseInt(fecha?.replace(/-/g, "") ?? ""),
             FchServDesde:
-              concepto != "1" ? formatDate(dateDesde ?? new Date()) : null,
+              concepto != "1"
+                ? formatDate(form.getValues().dateDesde ?? new Date())
+                : null,
             FchServHasta:
-              concepto != "1" ? formatDate(dateHasta ?? new Date()) : null,
+              concepto != "1"
+                ? formatDate(form.getValues().dateHasta ?? new Date())
+                : null,
             FchVtoPago:
               concepto != "1"
-                ? formatDate(dateVencimiento ?? new Date())
+                ? formatDate(form.getValues().dateVencimiento ?? new Date())
                 : null,
             ImpTotal:
               Math.round(
@@ -505,17 +398,17 @@ export default function Page() {
 
           //
           comprobante = await createComprobante({
-            billLink: "",
+            billLink: "", //deberiamos poner un link ?
             concepto: Number(concepto) ?? 0,
             importe: Number(importe) * ivaFloat + Number(tributos) ?? 0,
             iva: "0",
             nroDocumento: Number(nroDocumento) ?? 0,
-            ptoVenta: Number(puntoVenta) ?? 0,
+            ptoVenta: Number(form.getValues().puntoVenta) ?? 0,
             tipoDocumento: idDictionary[tipoDocumento ?? ""] ?? 0,
             tipoComprobante: reverseComprobanteDictionary[tipoComprobante],
-            fromPeriod: dateDesde,
-            toPeriod: dateHasta,
-            due_date: dateVencimiento,
+            fromPeriod: form.getValues().dateDesde,
+            toPeriod: form.getValues().dateHasta,
+            due_date: form.getValues().dateVencimiento,
             generated: new Date(),
             prodName: servicioprod ?? "",
             nroComprobante: 0,
@@ -547,46 +440,6 @@ export default function Page() {
           ?.find((x) => x.id == grupoFamiliarId)
           ?.integrants.find((x) => x.isBillResponsible);
         const obraSocial = obrasSociales?.find((x) => x.id == obraSocialId);
-
-        // let barcodeImage;
-
-        // function BarCode() {
-        //   if (comprobante?.length && products?.length) {
-        //     const pago = comprobante[0]!.payments[0];
-
-        //     return (
-        //       <BarcodeProcedure
-        //         dateVto={pago.first_due_date ?? new Date()}
-        //         amountVto={pago.first_due_amount ?? 0}
-        //         client={pago.fiscal_id_number ?? 0}
-        //         isPagoFacil={true}
-        //         invoiceNumber={pago.invoice_number ?? 0}
-        //       />
-        //     );
-        //   } else {
-        //     return "lol";
-        //   }
-
-        // if (comprobante?.length && products?.length) {
-        //   const pago = comprobante[0]!.payments[0];
-        //   console.log(pago, "------2-------");
-
-        //   if (pago) {
-        //     try {
-        //       barcodeImage = BarcodeProcedure({
-        //         dateVto: pago.first_due_date ?? new Date(),
-        //         amountVto: pago.first_due_amount ?? 0,
-        //         client: pago.fiscal_id_number ?? 0,
-        //         isPagoFacil: true,
-        //         invoiceNumber: pago.invoice_number ?? 0,
-        //       });
-        //     } catch {
-        //       barcodeImage = "lol";
-        //     }
-        //   }
-
-        //   console.log("llegoppp", barcodeImage);
-        // }
 
         if (comprobante && comprobante[0]) {
           const html = htmlBill(
@@ -653,18 +506,25 @@ export default function Page() {
     }
   }
 
-  type Channel = {
-    number: number;
-    id: string;
-    name: string;
-    description: string;
-    enabled: boolean;
-    createdAt: Date;
-    updatedAt: Date | null;
-    requiredColumns: string[];
+  type ManualGenInputs = {
+    puntoVenta: string;
+    tipoDeConcepto: string;
+    alicuota: string;
+    dateEmision: Date;
+    dateVencimiento: Date;
+    dateDesde: Date;
+    dateHasta: Date;
+    facturasEmitidas: Number;
+  };
+  type ConceptsForm = {
+    concepts: {
+      concepto: string;
+      importe: number;
+      iva: number;
+      total: number;
+    }[];
   };
 
-  const [puntoVenta, setPuntoVenta] = useState("");
   const [tipoComprobante, setTipoComprobante] = useState("");
   const [concepto, setConcepto] = useState("");
   const [tipoDocumento, setTipoDocumento] = useState("");
@@ -673,16 +533,89 @@ export default function Page() {
   const [nombre, setNombre] = useState("");
   const [importe, setImporte] = useState("0");
   const [tributos, setTributos] = useState("0");
-  const [dateDesde, setDateDesde] = React.useState<Date>();
-  const [dateHasta, setDateHasta] = React.useState<Date>();
-  const [dateVencimiento, setDateVencimiento] = React.useState<Date>();
-  const [dateEmision, setDateEmision] = React.useState<Date>();
   const [servicioprod, setservicioprod] = useState("Servicio");
   const [obraSocialId, setObraSocialId] = useState("");
   const [iva, setIva] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [grupoFamiliarId, setGrupoFamiliarId] = useState("");
+  const form = useForm<ManualGenInputs>({
+    defaultValues: {
+      puntoVenta: "",
+      dateDesde: new Date(),
+      dateHasta: new Date(),
+      dateVencimiento: new Date(),
+      dateEmision: new Date(),
+      tipoDeConcepto: "",
+      alicuota: "",
+      facturasEmitidas: 0,
+    },
+  });
+  const conceptsForm = useForm<ConceptsForm>({
+    defaultValues: {
+      concepts: [{ concepto: "", importe: 0, iva: 0, total: 0 }],
+    },
+  });
+  type OtherTributesForm = {
+    tributes: {
+      tribute: string;
+      jurisdiccion: string;
+      base: number;
+      aliquot: number;
+      amount: number;
+    }[];
+  };
+  const otherTributesForm = useForm<OtherTributesForm>({
+    defaultValues: {
+      tributes: [
+        { tribute: "", jurisdiccion: "", base: 0, aliquot: 0, amount: 0 },
+      ],
+    },
+  });
+  type AsociatedFCForm = {
+    comprobantes: {
+      tipoComprobante: string;
+      puntoVenta: string;
+      nroComprobante: string;
+      dateEmision: Date;
+    }[];
+  };
+  const asociatedFCForm = useForm<AsociatedFCForm>({
+    defaultValues: {
+      comprobantes: [
+        {
+          tipoComprobante: "",
+          puntoVenta: "",
+          nroComprobante: "",
+          dateEmision: new Date(),
+        },
+      ],
+    },
+  });
+
+  type otherConceptsForm = {
+    otherConcepts: {
+      description: string;
+      importe: number;
+    }[];
+  };
+  const otherConceptsForm = useForm<otherConceptsForm>({
+    defaultValues: { otherConcepts: [{ description: "", importe: 0 }] },
+  });
+    // useEffect(() => {
+    //   console.log("preComputeTotals");
+    //   computeTotals();
+    //   console.log("computeTotals");
+    //   console.log("total otros tributos", otherAttributes);
+    // }, [
+    //   otherTributesForm.watch("tributes"),
+    //   conceptsForm.watch("concepts"),
+    //   otherConceptsForm.watch("otherConcepts"),
+    // ]);
+  const [page, setPage] = useState<"formPage" | "confirmationPage">("formPage");
+  function handlePageChange(page: "formPage" | "confirmationPage") {
+    setPage(page);
+  }
 
   const products = api.products.list.useQuery().data;
   const [brandId, setBrandId] = useState("");
@@ -706,8 +639,6 @@ export default function Page() {
     setNroDocumentoDNI("0" ?? "");
     setNombre(obra?.responsibleName ?? "");
     setTipoDocumento(obra?.fiscal_id_type ?? "");
-    // setTipoDocumento(billResponsible?.fiscal_id_type ?? "");
-    // setBrandId(obra?.businessUnitData?.brandId ?? "");
   }
   function handleComprobanteChange(value: string) {
     setFCSelec(value);
@@ -715,69 +646,23 @@ export default function Page() {
   }
   let selectedBrand;
 
-  const [popoverDesdeOpen, setPopoverDesdeOpen] = useState(false);
-  const [popoverFinOpen, setPopoverFinOpen] = useState(false);
-  const [popoverVencimientoOpen, setPopoverVencimientoOpen] = useState(false);
-  const [popoverEmisionOpen, setPopoverEmisionOpen] = useState(false);
-
-  async function FechasCreateDesde(e: any) {
-    setDateDesde(e);
-    setPopoverDesdeOpen(false);
-  }
-  async function FechasCreateFin(e: any) {
-    setDateHasta(e);
-    setPopoverFinOpen(false);
-  }
-  async function FechasCreateVencimiento(e: any) {
-    setDateVencimiento(e);
-    setPopoverVencimientoOpen(false);
-  }
-  async function FechasCreateEmision(e: any) {
-    setDateEmision(e);
-    setPopoverEmisionOpen(false);
-  }
-
   const handleBrandChange = (value: string) => {
     selectedBrand = marcas?.find((marca) => marca.id === value);
     setBrandId(value);
   };
 
-  return (
-    <>
+  if (!grupoFamiliarId && !obraSocialId) {
+    return (
       <LayoutContainer>
-        <section className="space-y-5">
+        <section>
           <div>
-            <Title>Generación de comprobantes</Title>
+            <Title>Generacion de comprobantes</Title>
           </div>
-          <div className="flex flex-row justify-between">
-            <p className=" text-lg font-semibold">Receptor</p>
-            <div className="pb-2">
-              <Button
-                className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 mr-3 shadow-none"
-                // onClick={() => setOpen(true)}
-                disabled={loading}
-                onClick={generateComprobante}>
-                {loading ? (
-                  <Loader2Icon className="mr-2 animate-spin" size={20} />
-                ) : (
-                  <CircleCheck className="h-4 w-auto mr-2" />
-                )}
-                Aprobar
-              </Button>
-              <Button
-                className="  h-7 bg-[#f9c3c3] hover:bg-[#f9c3c3] text-[#4B4B4B]  text-sm rounded-2xl py-4 px-4 shadow-none "
-                // onClick={() => setOpen(true)}
-              >
-                <CircleX className="h-4 w-auto mr-2" />
-                Anular
-              </Button>
-            </div>
-          </div>
-
           <div className="flex flex-row justify-between gap-8 ">
             <Select
               onValueChange={(e) => handleGrupoFamilarChange(e)}
-              value={grupoFamiliarId}>
+              value={grupoFamiliarId}
+            >
               <SelectTriggerMagnify className=" w-full bg-[#FAFAFA] font-normal text-[#747474]">
                 <SelectValue placeholder="Buscar afiliado.." />
               </SelectTriggerMagnify>
@@ -787,7 +672,8 @@ export default function Page() {
                     <SelectItem
                       key={gruposFamiliar?.id}
                       value={gruposFamiliar?.id}
-                      className="rounded-none">
+                      className="rounded-none"
+                    >
                       {gruposFamiliar?.integrants.find((x) => x.isHolder)?.name}
                     </SelectItem>
                   ))}
@@ -795,7 +681,8 @@ export default function Page() {
             </Select>
             <Select
               onValueChange={(e) => handleObraSocialChange(e)}
-              value={obraSocialId}>
+              value={obraSocialId}
+            >
               <SelectTriggerMagnify className="w-full bg-[#FAFAFA] font-normal text-[#747474]">
                 <SelectValue placeholder="Buscar por obra social.." />
               </SelectTriggerMagnify>
@@ -805,558 +692,152 @@ export default function Page() {
                     <SelectItem
                       key={obrasSocial?.id}
                       value={obrasSocial?.id}
-                      className="rounded-none">
+                      className="rounded-none"
+                    >
                       {obrasSocial?.name}
                     </SelectItem>
                   ))}
               </SelectContent>
             </Select>
           </div>
-          <div className="bg-[#F7F7F7] rounded-lg py-4 px-24 flex flex-row justify-between ">
-            <ElementCard
-              element={{ key: "NOMBRE", value: nombre }}
-              className="pr-24 "></ElementCard>
-            <div className="flex gap-20">
-              <ElementCard
-                element={{ key: "DNI", value: nroDocumentoDNI }}
-                className="pr-8 "></ElementCard>
-              <ElementCard
-                element={{ key: "CUIT", value: nroDocumento }}
-                className="pr-11 "></ElementCard>
-            </div>
-          </div>
-
-          <div className="border rounded-lg px-6 pt-7 pb-8">
-            <p className=" text-lg font-semibold">Datos del Comprobante</p>
-            <div className="grid grid-cols-2 gap-4 gap-x-10 mt-3">
-              <ElementCard
-                className="pr-1 pb-0 border-[#bef0bb]"
-                element={{
-                  key: "Punto de venta",
-                  value: (
-                    <Select onValueChange={(e) => setPuntoVenta(e)}>
-                      <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8">
-                        <SelectValue placeholder="Seleccionar PV..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {[
-                          { value: "1", label: "1" },
-                          { value: "2", label: "2" },
-                        ].map((option) => (
-                          <SelectItem
-                            key={option.value}
-                            value={option.value}
-                            className="rounded-none ">
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ),
-                }}
-              />
-              <ElementCard
-                className="pr-1 pb-0 border-[#bef0bb]"
-                element={{
-                  key: "Fecha de emisión",
-                  value: (
-                    <Popover
-                      open={popoverEmisionOpen}
-                      onOpenChange={setPopoverEmisionOpen}>
-                      <PopoverTrigger asChild={true}>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
-                            !dateEmision && "text-muted-foreground"
-                          )}>
-                          {dateEmision ? (
-                            format(dateEmision, "PPP")
-                          ) : (
-                            <span>Seleccionar fecha</span>
-                          )}
-                          <Calendar01Icon className="h-4 w-4" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <Calendar
-                          mode="single"
-                          selected={dateEmision}
-                          onSelect={(e) => FechasCreateEmision(e)}
-                          initialFocus={true}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  ),
-                }}
-              />
-              <ElementCard
-                className="pr-1 pb-0 border-[#bef0bb]"
-                element={{
-                  key: "Tipo Comprobante",
-                  value: (
-                    <Select onValueChange={(e) => setTipoComprobante(e)}>
-                      <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8">
-                        <SelectValue placeholder="Seleccionar comprobante..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {[
-                          { value: "1", label: "FACTURA A" },
-                          { value: "6", label: "FACTURA B" },
-                          { value: "3", label: "NOTA DE CREDITO A" },
-                          { value: "8", label: "NOTA DE CREDITO B" },
-                          { value: "0", label: "RECIBO" },
-                        ].map((option) => (
-                          <SelectItem
-                            key={option.value}
-                            value={option.value}
-                            className="rounded-none ">
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ),
-                }}
-              />
-              <ElementCard
-                className="pr-1 pb-0 border-[#bef0bb]"
-                element={{
-                  key: "Alicuota",
-                  value: (
-                    <Select onValueChange={(e) => setIva(e)}>
-                      <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8 ">
-                        <SelectValue placeholder="Seleccionar alicuota" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {[
-                          { value: "3", label: "0%" },
-                          { value: "4", label: "10.5%" },
-                          { value: "5", label: "21%" },
-                          { value: "6", label: "27%" },
-                          { value: "8", label: "5%" },
-                          { value: "9", label: "2.5%" },
-                        ].map((option) => (
-                          <SelectItem
-                            key={option.value}
-                            value={option.value}
-                            className="rounded-none ">
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ),
-                }}
-              />
-              <ElementCard
-                className="pr-1 pb-0 border-[#bef0bb]"
-                element={{
-                  key: "Tipo de concepto",
-                  value: (
-                    <Select onValueChange={(e) => setConcepto(e)}>
-                      <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8">
-                        <SelectValue placeholder="Seleccionar concepto" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {[
-                          { value: "1", label: "Productos" },
-                          { value: "2", label: "Servicios" },
-                          { value: "3", label: "Productos y Servicios" },
-                        ].map((option) => (
-                          <SelectItem
-                            key={option.value}
-                            value={option.value}
-                            className="rounded-none ">
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ),
-                }}
-              />
-              <ElementCard
-                className="pr-1 pb-0 border-[#bef0bb]"
-                element={{
-                  key: "Fecha de vencimiento",
-                  value: (
-                    <Popover
-                      open={popoverVencimientoOpen}
-                      onOpenChange={setPopoverVencimientoOpen}>
-                      <PopoverTrigger asChild={true}>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
-                            !dateVencimiento && "text-muted-foreground"
-                          )}>
-                          {dateVencimiento ? (
-                            format(dateVencimiento, "PPP")
-                          ) : (
-                            <span>Seleccionar fecha</span>
-                          )}
-                          <Calendar01Icon className=" h-4 w-4" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <Calendar
-                          mode="single"
-                          selected={dateVencimiento}
-                          onSelect={(e) => FechasCreateVencimiento(e)}
-                          initialFocus={true}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  ),
-                }}
-              />
-              <ElementCard
-                className="pr-1 pb-0 border-[#bef0bb]"
-                element={{
-                  key: "Fecha inicio de servicio",
-                  value: (
-                    <Popover
-                      open={popoverDesdeOpen}
-                      onOpenChange={setPopoverDesdeOpen}>
-                      <PopoverTrigger asChild={true}>
-                        <Button
-                          variant={"outline"}
-                          disabled={concepto == "" || concepto == "1"}
-                          className={cn(
-                            "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
-                            !dateDesde && "text-muted-foreground"
-                          )}>
-                          {dateDesde ? (
-                            format(dateDesde, "PPP")
-                          ) : (
-                            <span>Seleccionar fecha</span>
-                          )}
-                          <Calendar01Icon className="h-4 w-4" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <Calendar
-                          mode="single"
-                          selected={dateDesde}
-                          onSelect={(e) => FechasCreateDesde(e)}
-                          initialFocus={true}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  ),
-                }}
-              />
-              <ElementCard
-                className="pr-1 pb-0 border-[#bef0bb]"
-                element={{
-                  key: "Fecha fin de servicio",
-                  value: (
-                    <Popover
-                      open={popoverFinOpen}
-                      onOpenChange={setPopoverFinOpen}>
-                      <PopoverTrigger asChild={true}>
-                        <Button
-                          variant={"outline"}
-                          disabled={concepto == "" || concepto == "1"}
-                          className={cn(
-                            "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
-                            !dateHasta && "text-muted-foreground"
-                          )}>
-                          {dateHasta ? (
-                            format(dateHasta, "PPP")
-                          ) : (
-                            <span>Seleccionar fecha</span>
-                          )}
-                          <Calendar01Icon className="h-4 w-4" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <Calendar
-                          mode="single"
-                          selected={dateHasta}
-                          onSelect={(e) => FechasCreateFin(e)}
-                          initialFocus={true}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  ),
-                }}
-              />
-              <div></div>
-            </div>
-          </div>
-
-          <div className="border rounded-lg px-4 pt-5 pb-8">
-            <p className="text-lg font-semibold">
-              Datos del Comprobante Asociado
-            </p>
-            <div className="grid grid-cols-2 gap-4 mt-4">
-              <ElementCard
-                className="pr-1 pb-0 border-[#bef0bb]"
-                element={{
-                  key: "COMPROBANTE ASOCIADO",
-                  value: (
-                    <Select
-                      onValueChange={(e) => handleComprobanteChange(e)}
-                      disabled={
-                        tipoComprobante != "3" && tipoComprobante != "8"
-                      }>
-                      <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8">
-                        <SelectValue placeholder="Seleccionar comprobante..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {gruposFamiliar?.find((x) => x.id == grupoFamiliarId) &&
-                          gruposFamiliar
-                            ?.find((x) => x.id == grupoFamiliarId)
-                            ?.comprobantes.filter(
-                              (x) =>
-                                x.estado != "generada" &&
-                                x.ptoVenta.toString() === puntoVenta
-                            )
-                            .map((comprobante) => (
-                              <SelectItem
-                                key={comprobante?.id}
-                                value={comprobante?.id}
-                                className="rounded-none ">
-                                {comprobante?.nroComprobante}
-                              </SelectItem>
-                            ))}
-                      </SelectContent>
-                    </Select>
-                  ),
-                }}
-              />
-            </div>
-          </div>
-          <div className="p-0 flex gap-2 ">
-            <div className="bg-[#F7F7F7] rounded-lg p-4 flex flex-row justify-between gap-4 w-1/2">
-              <ElementCard
-                keyClassName="mb-3"
-                contentClassName="pl-0 pr-0"
-                className="pr-0 pt-0"
-                element={{
-                  key: "PUNTO DE VENTA",
-                  value: (
-                    <Input
-                      disabled={true}
-                      value={selectedComprobante ? puntoVenta : "-"}
-                      className="bg-[#f7f7f7] h-6 border-none focus:ring-transparent py-0 pl-0 pb-0 "
-                    />
-                  ),
-                }}
-              />
-              <ElementCard
-                keyClassName="mb-3 "
-                contentClassName="pl-0 pr-0 "
-                className="pr-0 pt-0"
-                element={{
-                  key: "Nº FACTURA",
-                  value: (
-                    <Input
-                      disabled={true}
-                      value={
-                        selectedComprobante
-                          ? selectedComprobante.nroComprobante
-                          : "-"
-                      }
-                      className="bg-[#f7f7f7] h-6 border-none focus:ring-transparent py-0 pl-0 pb-0 "
-                    />
-                  ),
-                }}
-              />
-              <ElementCard
-                keyClassName="mb-3"
-                contentClassName="pl-0 pr-0"
-                className="pr-0 pt-0"
-                element={{
-                  key: "FECHA EMISION",
-                  value: (
-                    <Input
-                      disabled={true}
-                      value={
-                        selectedComprobante
-                          ? dateNormalFormat(selectedComprobante.createdAt)
-                          : "-"
-                      }
-                      className="bg-[#f7f7f7] h-6 border-none focus:ring-transparent py-0 pl-0 pb-0"
-                    />
-                  ),
-                }}
-              />
-              <div className="flex flex-col gap-2"></div>
-            </div>
-            <div className="bg-[#F7F7F7] rounded-lg p-4 flex flex-row justify-between gap-4 w-1/2">
-              <ElementCard
-                keyClassName="mb-3 "
-                contentClassName="pl-0 pr-0 "
-                className="pr-0 pt-0"
-                element={{
-                  key: "DESDE",
-                  value: (
-                    <Input
-                      disabled={true}
-                      value={
-                        selectedComprobante
-                          ? dateNormalFormat(selectedComprobante.fromPeriod)
-                          : "-"
-                      }
-                      className="bg-[#f7f7f7] h-6 border-none focus:ring-transparent py-0 pl-0 pb-0"
-                    />
-                  ),
-                }}
-              />
-              <ElementCard
-                keyClassName="mb-3 "
-                contentClassName="pl-0 pr-0 "
-                className="pr-0 pt-0"
-                element={{
-                  key: "HASTA",
-                  value: (
-                    <Input
-                      disabled={true}
-                      value={
-                        selectedComprobante
-                          ? dateNormalFormat(selectedComprobante.toPeriod)
-                          : "-"
-                      }
-                      className="bg-[#f7f7f7] h-6 border-none focus:ring-transparent py-0 pl-0 pb-0"
-                    />
-                  ),
-                }}
-              />
-              <ElementCard
-                keyClassName="mb-3 "
-                contentClassName="pl-0 pr-0 "
-                className="pr-0 pt-0"
-                element={{
-                  key: "CONCEPTO",
-                  value: (
-                    <Input
-                      disabled={true}
-                      value={
-                        selectedComprobante
-                          ? reverseConceptDictionary[
-                              selectedComprobante.concepto
-                            ]
-                          : "-"
-                      }
-                      className="bg-[#f7f7f7] h-6 border-none focus:ring-transparent py-0 pl-0 pb-0"
-                    />
-                  ),
-                }}
-              />
-              <ElementCard
-                keyClassName="mb-3 "
-                contentClassName="pl-0 pr-0 "
-                className="pr-0 pt-0"
-                element={{
-                  key: "IMPORTE",
-                  value: (
-                    <Input
-                      disabled={true}
-                      value={
-                        selectedComprobante ? selectedComprobante.importe : "-"
-                      }
-                      className="bg-[#f7f7f7] h-6 border-none focus:ring-transparent py-0 pl-0 pb-0"
-                    />
-                  ),
-                }}
-              />
-            </div>
-          </div>
-
-          <div className="border rounded-lg px-4 pt-5 pb-8">
-            <p className=" text-lg font-semibold">Totales</p>
-            <div className="flex flex-row justify-between pb-2">
-              <div className="flex flex-col gap-2">
-                <Label className="text-[#747474]">SUB-TOTAL FACTURA</Label>
-                <Input
-                  // disabled={true}
-                  value={
-                    "$ " +
-                    (!selectedComprobante
-                      ? importe
-                      : selectedComprobante.iva == "0"
-                      ? selectedComprobante?.importe
-                      : (selectedComprobante?.importe /
-                          Number(selectedComprobante.iva)) *
-                        100)
-                  }
-                  onChange={(e) => setImporte(e.target.value.slice(2))}
-                  className="bg-[#def5dd] text-[#85ce81] font-semibold rounded-lg opacity-100 border-[#e9fcf8] border"
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label className="text-[#747474]">IMPORTE IVA</Label>
-                <Input
-                  // disabled={true}
-                  value={
-                    "$ " +
-                    (!selectedComprobante
-                      ? (
-                          (Number(importe) *
-                            Number(ivaDictionary[Number(iva)])) /
-                          100
-                        ).toFixed(2)
-                      : selectedComprobante.iva == "0"
-                      ? "0"
-                      : selectedComprobante?.importe -
-                        (selectedComprobante?.importe /
-                          Number(selectedComprobante.iva)) *
-                          100)
-                  }
-                  className="bg-[#def5dd] text-[#85ce81] font-semibold  rounded-lg opacity-100 border-[#e9fcf8] border"
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label className="text-[#747474]">OTROS ATRIBUTOS</Label>
-                <Input
-                  // disabled={true}
-                  value={"$ " + !selectedComprobante ? tributos : "0"}
-                  // onChange={(e) => setTributos(e.target.value.slice(2))}
-                  className="bg-[#def5dd] text-[#85ce81] font-semibold  rounded-lg opacity-100 border-[#e9fcf8] border"
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label className="text-[#747474]">TOTAL</Label>
-                <Input
-                  // disabled={true}
-                  value={
-                    "$ " +
-                    (!selectedComprobante
-                      ? (
-                          Number(importe) +
-                          (Number(importe) *
-                            Number(ivaDictionary[Number(iva)])) /
-                            100 +
-                          Number(tributos)
-                        ).toFixed(2)
-                      : selectedComprobante?.importe)
-                  }
-                  className="bg-[#def5dd] text-[#85ce81] font-semibold rounded-lg  opacity-100 border-[#e9fcf8] border"
-                />
-              </div>
-            </div>
-          </div>
-          {/* <Button
-            className="h-7 bg-[#0DA485] hover:bg-[#0da486e2] text-[#FAFDFD] font-medium-medium text-md rounded-2xl py-4 px-6 mr-3 float-right "
-            onClick={() => handlePrevisualize()}
-            disabled={loading}
-          >
-            {loading ? (
-              <Loader2Icon className="mr-2 animate-spin" size={20} />
-            ) : (
-              <Scroll className="h-5 w-auto ml-2" />
-            )}
-            <p className="p-4">Previsualizacion de factura</p>
-          </Button> */}
-
-          {/* <Button disabled={loading} onClick={generateComprobante}>
-            {loading && <Loader2Icon className="mr-2 animate-spin" size={20} />}
-            Generar nuevo comprobante
-          </Button> */}
         </section>
+      </LayoutContainer>
+    );
+  }
+  return (
+    <>
+      <LayoutContainer>
+        {page === "formPage" && (
+          <section className="space-y-5 flex flex-col">
+            <div>
+              <Title>Generación de comprobantes</Title>
+            </div>
+            <div className="flex flex-row justify-between">
+              <p className=" text-lg font-semibold">Receptor</p>
+              <div className="pb-2">
+                <Button
+                  className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 mr-3 shadow-none"
+                  // onClick={() => setOpen(true)}
+                  disabled={loading}
+                  onClick={generateComprobante}
+                >
+                  {loading ? (
+                    <Loader2Icon className="mr-2 animate-spin" size={20} />
+                  ) : (
+                    <CircleCheck className="h-4 w-auto mr-2" />
+                  )}
+                  Aprobar
+                </Button>
+                <Button
+                  className="  h-7 bg-[#f9c3c3] hover:bg-[#f9c3c3] text-[#4B4B4B]  text-sm rounded-2xl py-4 px-4 shadow-none "
+                  // onClick={() => setOpen(true)}
+                >
+                  <CircleX className="h-4 w-auto mr-2" />
+                  Anular
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex flex-row justify-between gap-8 ">
+              <Select
+                onValueChange={(e) => handleGrupoFamilarChange(e)}
+                value={grupoFamiliarId}
+              >
+                <SelectTriggerMagnify className=" w-full bg-[#FAFAFA] font-normal text-[#747474]">
+                  <SelectValue placeholder="Buscar afiliado.." />
+                </SelectTriggerMagnify>
+                <SelectContent>
+                  {gruposFamiliar &&
+                    gruposFamiliar.map((gruposFamiliar) => (
+                      <SelectItem
+                        key={gruposFamiliar?.id}
+                        value={gruposFamiliar?.id}
+                        className="rounded-none"
+                      >
+                        {
+                          gruposFamiliar?.integrants.find((x) => x.isHolder)
+                            ?.name
+                        }
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+              <Select
+                onValueChange={(e) => handleObraSocialChange(e)}
+                value={obraSocialId}
+              >
+                <SelectTriggerMagnify className="w-full bg-[#FAFAFA] font-normal text-[#747474]">
+                  <SelectValue placeholder="Buscar por obra social.." />
+                </SelectTriggerMagnify>
+                <SelectContent>
+                  {obrasSociales &&
+                    obrasSociales.map((obrasSocial) => (
+                      <SelectItem
+                        key={obrasSocial?.id}
+                        value={obrasSocial?.id}
+                        className="rounded-none"
+                      >
+                        {obrasSocial?.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <ReceptorCard
+              nombre={nombre}
+              nroDocumento={nroDocumento}
+              nroDocumentoDNI={nroDocumentoDNI}
+            />
+
+            <ComprobanteCard
+              visualization={false}
+              form={form}
+              tipoComprobante={tipoComprobante}
+              setTipoComprobante={setTipoComprobante}
+            />
+
+            <AdditionalInfoCard
+              onValueChange={computeTotals}
+              visualization={false}
+              tipoComprobante={tipoComprobante}
+              conceptsForm={conceptsForm}
+              form={form}
+              asociatedFCForm={asociatedFCForm}
+              otherConceptsForm={otherConceptsForm}
+            />
+
+            <OtherTributes
+              Visualization={false}
+              otherTributes={otherTributesForm}
+              onAdd={computeTotals}
+            />
+
+            <Totals subTotal={subTotal} iva={ivaTotal} otherAttributes={otherAttributes}/>
+            <Button
+              variant="outline"
+              className="flex justify-between px-4 py-4 rounded-full self-end bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e]"
+              onClick={() => setPage("confirmationPage")}
+            >
+              Siguiente <CircleChevronRight className="h-4 ml-2" />
+            </Button>
+          </section>
+        )}
+        {page === "confirmationPage" && (
+          <ConfirmationPage
+            form={form}
+            conceptsForm={conceptsForm}
+            otherConcepts={otherConceptsForm}
+            setTipoComprobante={setTipoComprobante}
+            tipoComprobante={tipoComprobante}
+            asociatedFCForm={asociatedFCForm}
+            otherTributes={otherTributesForm}
+            changePage={handlePageChange}
+            subTotal={subTotal}
+            ivaTotal={ivaTotal}
+            otherAttributes={otherAttributes}
+          />
+        )}
       </LayoutContainer>
     </>
   );

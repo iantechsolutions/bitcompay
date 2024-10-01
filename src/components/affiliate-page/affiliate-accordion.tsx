@@ -5,6 +5,8 @@ import { CircleChevronDown } from "lucide-react";
 import * as React from "react";
 import { Card } from "../ui/card";
 import { cn } from "~/lib/utils";
+import { Button } from "../ui/button";
+import Edit02Icon from "../icons/edit-02-stroke-rounded";
 
 const Accordion = AccordionPrimitive.Root;
 
@@ -26,17 +28,27 @@ const AccordionTrigger = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>
 >(({ className, children, ...props }, ref) => {
+  let editIcon: React.ReactNode 
+  if (props.name === "editIcon") {
+    editIcon = (
+      <Button variant="bitcompay"
+      className="absolute right-10 text-sm px-4 h-5 justify-center text-[#3e3e3e] rounded-full font-medium">
+        <Edit02Icon className="h-3" /> Editar
+      </Button>
+     )
+    }
   return (
     <AccordionPrimitive.Header className="flex">
       <AccordionPrimitive.Trigger
         ref={ref}
         className={cn(
-          "flex flex-1 items-center justify-between py-3 text-lg  font-medium  transition-all [&[data-state=open]>svg]:rotate-180 ",
+          "relative flex flex-1 items-center justify-between py-3 text-lg  font-medium  transition-all [&[data-state=open]>svg]:rotate-180 ",
           className
         )}
         {...props}
       >
         {children}
+        {editIcon}
         <CircleChevronDown
           className="h-5 w-7 shrink-0 transition-transform duration-200"
           strokeWidth={1.3}

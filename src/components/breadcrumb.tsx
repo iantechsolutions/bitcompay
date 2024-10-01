@@ -14,7 +14,7 @@ import {
 import { clientStatuses } from "~/server/db/schema";
 import { api } from "~/trpc/react";
 
-export default function BreadcrumbComp() {
+export default function BreadcrumbComp(props: { pageName?: string }) {
   const pathname = usePathname();
   const pathnames = pathname.split("/").filter((x) => x && x !== "dashboard");
 
@@ -78,32 +78,17 @@ export default function BreadcrumbComp() {
     current_count: "CUENTA CORRIENTE",
     payments: "PAGOS",
   };
-  let planDescription : string |null= null
-  let indicePlanId : number |null= null;
-  if(pathnames.includes("plans")){
-    const indicePlans= pathnames.indexOf("plans")
-    indicePlanId= indicePlans+1
-    const planId= pathnames[indicePlanId]
-    if (planId){
-      //fetchear data from api
-      const {data: plan} = api.plans.get.useQuery({planId: planId!})
-      planDescription= plan?.description || null
-    }
-  }
   return (
     <Breadcrumb>
       <BreadcrumbList>
         {pathnames.map((value, index) => {
           let translatedValue : string | null = null
-          translatedValue = breadcrumbMapping[value] || null;
-          if(index== indicePlanId){
-            translatedValue= planDescription || null
-          }
+          translatedValue = breadcrumbMapping[value] || props.pageName || null;
           // const href = `/${pathnames.slice(1, index + 1).join("/")}`;
           let isLast = false;
           if (index === pathnames.length - 1) {
             isLast = true;
-          } else if (!((pathnames[index + 1] ?? "") in breadcrumbMapping) &&  !((index +1) == indicePlanId)) {
+          } else if (!((pathnames[index + 1] ?? "") in breadcrumbMapping) && !props.pageName) {
             isLast = true;
           }
 

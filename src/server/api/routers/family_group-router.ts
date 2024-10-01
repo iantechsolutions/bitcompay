@@ -193,7 +193,11 @@ export const family_groupsRouter = createTRPCRouter({
           plan: true,
           modo: true,
           bonus: true,
-          comprobantes: true,
+          comprobantes: {
+            with: {
+              items: true,
+            },
+          },
           integrants: {
             with: {
               contribution: true,

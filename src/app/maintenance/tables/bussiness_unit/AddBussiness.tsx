@@ -36,7 +36,22 @@ export function AddBussiness(props: { params: { companyId: string } }) {
   const router = useRouter();
   const { data: brands } = api.brands.list.useQuery();
 
+  function validateFields() {
+    const errors: string[] = [];
+    if (!description) errors.push("Descripcion");
+    if (!brand) errors.push("Marca");
+
+    return errors;
+  }
   async function handleCreate() {
+    const validationErrors = validateFields();
+    if (validationErrors.length > 0) {
+      return toast.error(
+        `Los siguientes campos están vacíos y sin obligatorios: ${validationErrors.join(
+          ", "
+        )}`
+      );
+    }
     try {
       await createProduct({
         description: description,

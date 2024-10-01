@@ -30,7 +30,7 @@ type Comprobante = RouterOutputs["comprobantes"]["getByLiquidation"][number];
 export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
   const [openFCAccordion, setOpenFCAccordion] = useState(true); // Qué es esto??
   const [openNCAccordion, setOpenNCAccordion] = useState(false);
-  let comprobanteNCReciente = data.comprobantes.find(
+  let comprobanteNCReciente =   data.comprobantes.find(
     (comprobante) => comprobante.origin === "Nota de credito"
   );
   let comprobanteFCReciente = data.comprobantes.find(
@@ -61,11 +61,11 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetContent className="sm:max-w-[550px] px-10 py-12 overflow-y-scroll">
         <SheetHeader>
-          <SheetTitle className="font-medium text-2xl">
+          <SheetTitle className="font-semibold text-2xl text-[#3e3e3e] ">
             Detalle del movimiento
           </SheetTitle>
           <SheetDescription>
-            <ul className="mt-2">
+            <ul className="mt-2 text-base">
               <li className="text-xs"> RECEPTOR </li>
               <li className="font-medium text-[#3e3e3e]">
                 {" "}
@@ -79,94 +79,52 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
           </SheetDescription>
         </SheetHeader>
 
-        <div className="flex flex-row border justify-between items-center p-5 rounded-md mt-3">
-          <p className="text-lg font-medium-medium">Saldo actual </p>
+        <div className="flex flex-row border-none justify-between items-center p-5 py-8 rounded-md mt-3 bg-[#f7f7f7]">
+          <p className="text-lg font-medium">Saldo actual </p>
           <p className="text-[#6952EB] font-semibold text-xl">
             $ {data.currentAccountAmount}
           </p>
         </div>
 
         <div className="mt-5">
-          {/* {comprobanteNCReciente && (
-            <div className="mt-2">
-              <div
-                className="flex flex-row justify-between items-center py-2 px-2 mb-3 rounded-md bg-[#c2bebe84] hover:bg-[#cbc7c7ce] transition-all hover:cursor-pointer"
-                onClick={() => setOpenNCAccordion(!openNCAccordion)}
-              >
-                <p className="text-xl font-medium opacity-70 flex flex-row items-center">
-                  {comprobanteNCReciente.billLink &&
-                  comprobanteNCReciente.billLink !== "" ? (
-                    <div className="items-center justify-center">
-                      <Link href={comprobanteNCReciente.billLink}>
-                        <FileText></FileText>
-                      </Link>
-                    </div>
-                  ) : null}
-                  NC
-                  {openNCAccordion ? (
-                    <ChevronDown
-                      className="ml-2 transition-transform duration-200"
-                      size={12}
-                    />
-                  ) : (
-                    <ChevronRight
-                      className="ml-2 transition-transform duration-200"
-                      size={12}
-                    />
-                  )}
-                </p>
-                <p className="text-lg font-semibold text-[#4af0d4]">
-                  {NCTotal ? `$ ${NCTotal}` : "N/A"}
-                </p>
-              </div>
-              {openNCAccordion && (
-                <ContentTable comprobante={comprobanteNCReciente} />
-              )}
-            </div>
-          )}
-          <div
-            className="flex flex-row justify-between items-center py-2 px-2 mb-3 rounded-md bg-[#c2bebe84] hover:bg-[#cbc7c7ce] transition-all hover:cursor-pointer mt-5"
-            onClick={() => setOpenFCAccordion(!openFCAccordion)}
-          >
-            <p className="text-xl font-medium opacity-70 flex flex-row items-center">
-              {comprobanteFCReciente?.billLink &&
-              comprobanteFCReciente?.billLink !== "" ? (
-                <div className="items-center justify-center">
-                  <Link href={comprobanteFCReciente?.billLink}>
-                    <FileText></FileText>
-                  </Link>
+          {comprobanteNCReciente && (
+            <>
+              <h1 className="text-base font-bold mb-3">
+                {comprobanteNCReciente.tipoComprobante}
+              </h1>
+              <ContentTable comprobante={comprobanteNCReciente} />
+              <div className="mt-3">
+                <div className="bg-[#DEF5DD] flex flex-row justify-between items-center p-3 rounded-md mt-2">
+                  <p className=" text-[#6952EB] font-[550]">
+                    Total:{" "}
+                  </p>
+                  <p className="text-[#6952EB] font-[550]">
+                    {NCTotal ? `$ ${NCTotal}` : "N/A"}
+                  </p>
                 </div>
-              ) : null}
-              FC
-              {openFCAccordion ? (
-                <ChevronDown
-                  className="ml-2 transition-transform duration-200"
-                  size={12}
-                />
-              ) : (
-                <ChevronRight
-                  className="ml-2 transition-transform duration-200"
-                  size={12}
-                />
-              )}
-            </p>
-            <p className="text-lg font-semibold text-[#4af0d4]">
-              {FCTotal ? `$ ${FCTotal}` : "N/A"}
-            </p>
-          </div> */}
-          {openFCAccordion && comprobanteFCReciente && (
-            <ContentTable comprobante={comprobanteFCReciente} />
+              </div>
+            </>
           )}
         </div>
-        <div className="mt-3">
-          <div className="bg-[#DEF5DD] flex flex-row justify-between items-center p-3 rounded-md mt-2">
-            <p className=" text-[#4E9F1D] font-semibold opacity-60">
-              Saldo a pagar:{" "}
-            </p>
-            <p className="text-[#4E9F1D] font-semibold opacity-60">
-              {saldo_a_pagar ? `$ ${saldo_a_pagar}` : "N/A"}
-            </p>
-          </div>
+        <div className="mt-4">
+          {comprobanteFCReciente && (
+            <>
+              <h1 className="text-base font-bold mb-3">
+                {comprobanteFCReciente.tipoComprobante}
+              </h1>
+              <ContentTable comprobante={comprobanteFCReciente} />
+              <div className="mt-3">
+                <div className="bg-[#DEF5DD] flex flex-row justify-between items-center p-3 rounded-md mt-2">
+                  <p className=" text-[#6952EB] font-[550] ">
+                    Saldo a pagar:{" "}
+                  </p>
+                  <p className="text-[#6952EB] font-[550] ">
+                    {saldo_a_pagar ? `$ ${saldo_a_pagar}` : "N/A"}
+                  </p>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </SheetContent>
     </Sheet>

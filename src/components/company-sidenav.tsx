@@ -155,6 +155,7 @@ export default function CompanySidenav() {
   //lo ocultamos por ahora
   const canSeeAudit = false;
 
+  let disabled = false;
   //Facturacion
 
   const canSeeManualIssuance = has!({
@@ -203,7 +204,7 @@ export default function CompanySidenav() {
 
   return (
     <ScrollArea className="h-[99vh] w-full relative overflow-x-auto">
-      <div className="sticky top-0 bg-white w-full h-[11vh] px-[1vw] items-center justify-center content-center text-center">
+      <div className="sticky top-0 bg-white w-full h-[11vh] px-[1vw] items-center justify-center content-center text-center z-20">
         <img
           className="h-[10vh] pb-[1vh] pt-[2vh] mx-auto my-auto"
           src="/public/bitcom-03.png"
@@ -330,7 +331,7 @@ export default function CompanySidenav() {
                 Marcas
               </SidenavItem>
             )}
-            {canSeeServices && (
+            {canSeeServices && disabled && (
               <SidenavItem
                 href={`/administration/services`}
                 activeIcon={
@@ -345,7 +346,7 @@ export default function CompanySidenav() {
                 Servicios
               </SidenavItem>
             )}
-            {canSeeQuotes && (
+            {canSeeQuotes && disabled && (
               <SidenavItem
                 href={`/administration/quotes`}
                 icon={<FileText strokeWidth={1} className="w-[1.5vw] h-auto" />}
@@ -383,19 +384,21 @@ export default function CompanySidenav() {
               className="text-sideNav">
               Usuarios
             </SidenavItem>
-            <SidenavItem
-              icon={<Shield strokeWidth={1} className="w-[1.5vw] h-auto" />}
-              href={`/maintenance/roles`}
-              activeIcon={
-                <Shield
-                  strokeWidth={1}
-                  color="#6952EB"
-                  className="w-[1.5vw] h-auto"
-                />
-              }
-              className="text-sideNav">
-              Roles
-            </SidenavItem>
+            {disabled && (
+              <SidenavItem
+                icon={<Shield strokeWidth={1} className="w-[1.5vw] h-auto" />}
+                href={`/maintenance/roles`}
+                activeIcon={
+                  <Shield
+                    strokeWidth={1}
+                    color="#6952EB"
+                    className="w-[1.5vw] h-auto"
+                  />
+                }
+                className="text-sideNav">
+                Roles
+              </SidenavItem>
+            )}
             <SidenavItem
               icon={<Grid strokeWidth={1} className="w-[1.5vw] h-auto" />}
               activeIcon={
@@ -447,7 +450,7 @@ export default function CompanySidenav() {
                     </SideNavTrigger>
                   </AccordionTrigger>
                   <AccordionContent className="pl-[1.5vw]">
-                    {canSeeAdvisors && (
+                    {canSeeAdvisors && disabled && (
                       <SidenavItem
                         icon={
                           <UserPlus
@@ -509,7 +512,7 @@ export default function CompanySidenav() {
                         Planes
                       </SidenavItem>
                     )}
-                    {canSeeDifferentials && (
+                    {canSeeDifferentials && disabled && (
                       <SidenavItem
                         icon={
                           <BarChart2
@@ -530,7 +533,7 @@ export default function CompanySidenav() {
                         Diferenciales
                       </SidenavItem>
                     )}
-                    {canSeeComissions && (
+                    {canSeeComissions && disabled && (
                       <SidenavItem
                         icon={
                           <DollarSign
@@ -551,7 +554,7 @@ export default function CompanySidenav() {
                         Comisiones
                       </SidenavItem>
                     )}
-                    {canSeeBonuses && (
+                    {canSeeBonuses && disabled && (
                       <SidenavItem
                         icon={
                           <Percent
@@ -964,7 +967,7 @@ export default function CompanySidenav() {
                 Liquidacion
               </SidenavItem>
             )}
-            {canSeeInformation && (
+            {canSeeInformation && disabled && (
               <SidenavItem
                 icon={
                   <HelpCircle strokeWidth={1} className="w-[1.5vw] h-auto" />
@@ -981,7 +984,7 @@ export default function CompanySidenav() {
                 Informacion
               </SidenavItem>
             )}
-            {canSeeConsults && (
+            {canSeeConsults && disabled && (
               <SidenavItem
                 icon={<Search strokeWidth={1} className="w-[1.5vw] h-auto" />}
                 activeIcon={
@@ -1006,7 +1009,7 @@ export default function CompanySidenav() {
               </SidenavSeparator>
             </div>
 
-            {canSeeCC && (
+            {canSeeCC && disabled && (
               <SidenavItem
                 icon={<Database strokeWidth={1} className="w-[1.5vw] h-auto" />}
                 activeIcon={

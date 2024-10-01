@@ -7,7 +7,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2Icon, PlusCircleIcon } from "lucide-react";
+import { CirclePlus, Loader2Icon, PlusCircleIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -26,6 +26,17 @@ import { api } from "~/trpc/react";
 import AddElementButton from "~/components/add-element";
 import { router } from "@trpc/server";
 import { RouterOutputs } from "~/trpc/shared";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import { cn } from "~/lib/utils";
+import { format } from "date-fns";
+import Calendar01Icon from "~/components/icons/calendar-01-stroke-rounded";
+import { Calendar } from "~/components/ui/calendar";
+import { bussinessUnits } from "~/server/db/schema";
+import Edit02Icon from "~/components/icons/edit-02-stroke-rounded";
 
 export function AddHealthInsurances(props: {
   healthInsurance: RouterOutputs["healthInsurances"]["get"] | null;
@@ -42,11 +53,11 @@ export function AddHealthInsurances(props: {
     api.healthInsurances.change.useMutation();
   const { mutateAsync: startCC } =
     api.currentAccount.createInitial.useMutation();
-  const { data: company } = api.companies.get.useQuery();
   const { data: cps } = api.postal_code.list.useQuery();
-
+  const { data: businessUnits } = api.bussinessUnits.list.useQuery();
+  // const { data: company } = api.companies.get.useQuery();
   // State management for the form fields
-  const [name, setName] = useState(OS?.name ?? "");
+  // const [name, setName] = useState(OS?.name ?? "");
   const [idNumber, setIdNumber] = useState(OS?.identificationNumber ?? "");
   const [address, setAddress] = useState(OS?.adress ?? "");
   const [afipStatus, setAfipStatus] = useState(
@@ -65,29 +76,68 @@ export function AddHealthInsurances(props: {
   const [province, setProvince] = useState(OS?.province ?? "");
   const [postalCode, setPostalCode] = useState(OS?.postal_code ?? "");
   const [initialValue, setInitialValue] = useState("0");
+  const [initials, setInitials] = useState(OS?.initials ?? "");
+  const [businessUnit, setBusinessUnit] = useState(OS?.businessUnit ?? "");
+  const [businessName, setBusinessName] = useState(OS?.businessName ?? "");
+  const [fiscalAddress, setFiscalAddress] = useState(OS?.fiscalAddress ?? "");
+  const [fiscalFloor, setFiscalFloor] = useState(OS?.fiscalFloor ?? "");
+  const [fiscalOffice, setFiscalOffice] = useState(OS?.fiscalOffice ?? "");
+  const [fiscalLocality, setFiscalLocality] = useState(
+    OS?.fiscalLocality ?? ""
+  );
+  const [fiscalProvince, setFiscalProvince] = useState(
+    OS?.fiscalProvince ?? ""
+  );
+  const [fiscalPostalCode, setFiscalPostalCode] = useState(
+    OS?.fiscalPostalCode ?? ""
+  );
+  const [fiscalCountry, setFiscalCountry] = useState(OS?.fiscalCountry ?? "");
+  const [IIBBStatus, setIIBBStatus] = useState(OS?.IIBBStatus ?? "");
+  const [IIBBNumber, setIIBBNumber] = useState(OS?.IIBBNumber ?? "");
+  const [sellCondition, setSellCondition] = useState(OS?.sellCondition ?? "");
+  const [phoneNumber, setPhoneNumber] = useState(OS?.phoneNumber ?? "");
+  const [email, setEmail] = useState(OS?.email ?? "");
+  const [state, setState] = useState(OS?.state ?? "");
+  const [user, setUser] = useState(OS?.user ?? "");
+  const [cancelMotive, setCancelMotive] = useState(OS?.cancelMotive ?? "");
+  const [floor, setFloor] = useState(OS?.floor ?? "");
+  const [office, setOffice] = useState(OS?.office ?? "");
+  const [dateState, setDateState] = useState<Date | undefined>(
+    OS?.dateState ?? undefined
+  );
+  const [popoverEmisionOpen, setPopoverEmisionOpen] = useState(false);
 
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  async function handleCreate() {
-    try {
-      if (
-        !name ||
-        !idNumber ||
-        !afipStatus ||
-        !fiscalIdNumber ||
-        !fiscalIdType ||
-        !responsibleName ||
-        !company
-      ) {
-        setError("Todos los campos son obligatoriOS?.");
-        return;
-      }
 
+  function validateFields() {
+    const errors: string[] = [];
+    if (!businessName) errors.push("RAZON SOCIAL");
+    if (!idNumber) errors.push("CODIGO");
+    // if (!fiscalIdNumber) errors.push("NRO DOC. FISCAL");
+    if (!fiscalIdType) errors.push("TIPO DOC FISCAL");
+    if (!afipStatus) errors.push("ESTADO AFIP");
+    // if (!responsibleName) errors.push("Nombre de facturacion");
+    // if (!code) errors.push("Código");
+    // if (!billType) errors.push("Tipo de Factura");
+
+    return errors;
+  }
+  async function handleCreate() {
+    const validationErrors = validateFields();
+    if (validationErrors.length > 0) {
+      toast.error(
+        `Los siguientes campos están vacíos: ${validationErrors.join(", ")}`
+      );
+      return;
+    }
+
+    try {
       // Creating a health insurance product
       const healthInsurance = await createHealtinsurances({
-        name: name,
+        name: businessName,
         identificationNumber: idNumber,
         isClient: true,
         adress: address,
@@ -99,6 +149,13 @@ export function AddHealthInsurances(props: {
         province: province,
         postal_code: postalCode,
         initialValue: initialValue,
+        office: office,
+        floor: floor,
+        phoneNumber: phoneNumber,
+        email: email,
+        state: state,
+        user: user,
+        cancelMotive: cancelMotive,
       });
 
       toast.success("Obra social creada correctamente");
@@ -113,24 +170,18 @@ export function AddHealthInsurances(props: {
   }
 
   async function handleEdit() {
+    const validationErrors = validateFields();
+    if (validationErrors.length > 0) {
+      toast.error(
+        `Los siguientes campos están vacíos: ${validationErrors.join(", ")}`
+      );
+      return;
+    }
     try {
-      if (
-        !name ||
-        !idNumber ||
-        !afipStatus ||
-        !fiscalIdNumber ||
-        !fiscalIdType ||
-        !responsibleName ||
-        !company
-      ) {
-        setError("Todos los campos son obligatoriOS?.");
-        return;
-      }
-
       // Creating a health insurance product
       const healthInsurance = await UploadhealthInsurances({
         healthInsuranceId: OS?.id ?? "",
-        name: name,
+        name: businessName,
         identificationNumber: idNumber,
         adress: address,
         afip_status: afipStatus,
@@ -153,15 +204,30 @@ export function AddHealthInsurances(props: {
       toast.error(error.message);
     }
   }
+  let cN = "";
+  OS
+    ? (cN =
+        "text-sm px-4 py-2 h-5 justify-center place-content-center rounded-full font-[550] text-[#3E3E3E]")
+    : (cN = "rounded-full gap-1 p-4 text-base text-[#3E3E3E] bg-[#BEF0BB] ");
 
   return (
     <>
-      <AddElementButton onClick={() => setOpen(true)}>
-        {OS ? <>Editar datos</> : <>Agregar Obra social como cliente</>}
+      <AddElementButton onClick={() => setOpen(true)} className={cN}>
+        {OS ? (
+          <>
+            <Edit02Icon className="h-3" />
+            Editar
+          </>
+        ) : (
+          <>
+            <PlusCircleIcon className="h-4" />
+            Agregar obra social como cliente
+          </>
+        )}
       </AddElementButton>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-[850px]">
+        <DialogContent className="max-w-[1000px] max-h-[95vh] gap-4 rounded-2xl p-6 overflow-y-scroll">
           <DialogHeader>
             {OS ? (
               <DialogTitle>Editar obra social</DialogTitle>
@@ -169,110 +235,107 @@ export function AddHealthInsurances(props: {
               <DialogTitle>Agregar obra social</DialogTitle>
             )}
           </DialogHeader>
-          <div className="grid grid-cols-4 gap-y-4 gap-x-8">
+          <div className="grid grid-cols-4 gap-y-4 gap-x-8 justify-between">
             <div>
-              <Label htmlFor="IdNumber" className="text-xs">
+              <Label htmlFor="IdNumber" className="text-xs text-gray-500">
                 CODIGO
               </Label>
               <Input
-                id="IdNumber"
-                className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right"
-                placeholder="..."
-                value={idNumber}
+                id="code"
                 onChange={(e) => setIdNumber(e.target.value)}
+                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                placeholder=""
               />
-            </div>
-            <div>
-              <Label htmlFor="IdNumber" className="text-xs">
-                SIGLA
-              </Label>
-              <Input
-                id="IdNumber"
-                className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right"
-                placeholder="..."
-                value={idNumber}
-                disabled={true}
-                onChange={(e) => setIdNumber(e.target.value)}
-              />
-            </div>
-            <div />
-            <div />
-            <p className="col-span-4">Datos fiscales</p>
 
-            <div>
-              <Label className="text-xs">UNIDAD DE NEGOCIO</Label>
-              <Select
-                onValueChange={setFiscalIdType}
-                value={fiscalIdType}
-                disabled={true}
-              >
-                <SelectTrigger
-                  className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right"
-                >
-                  <SelectValue placeholder="Seleccione un tipo de ID" />
+              {/* <Select onValueChange={setIdNumber}>
+                <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
+                  <SelectValue placeholder="..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="CUIT">CUIT</SelectItem>
-                  <SelectItem value="CUIL">CUIL</SelectItem>
+                  <SelectItem value="1">1-3432-8</SelectItem>
+                  <SelectItem value="2">1-3456-2</SelectItem>
+                  <SelectItem value="3">1-3567-1</SelectItem>
+                </SelectContent>
+              </Select> */}
+            </div>
+            <div>
+              <Label className="text-xs text-gray-500">SIGLA</Label>
+              <Input
+                id="importe"
+                onChange={(e) => setIdNumber(e.target.value)}
+                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                placeholder=""
+              />
+              {/* <Select>
+                <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
+                  <SelectValue placeholder="..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">OSBARA</SelectItem>
+                  <SelectItem value="2">OSECAC</SelectItem>
+                  <SelectItem value="3">UTHGRA</SelectItem>
+                </SelectContent>
+              </Select> */}
+            </div>
+            <div />
+            <div />
+
+            <p className="col-span-4 mt-3 p-3 justify-start text-black font-xs text-sm font-semibold">
+              Datos fiscales
+            </p>
+            <div>
+              <Label className="text-xs text-gray-500">UNIDAD DE NEGOCIO</Label>
+              {/* <Input
+                type="number"
+                id="importe"
+                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                placeholder="Ej: 121234"
+              /> */}
+              <Select
+                onValueChange={setBusinessUnit}
+                value={businessUnit}
+                >
+                <SelectTrigger
+                  className="w-fit mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right">
+                  <SelectValue placeholder="Seleccione una UN" />
+                </SelectTrigger>
+                <SelectContent>
+                  {businessUnits?.map((bu) => (
+                    <SelectItem key={bu.id} value={bu.id}>
+                      {bu?.description ?? ""}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Label htmlFor="name" className="text-xs">
+              <Label htmlFor="name" className="text-xs text-gray-500">
                 RAZON SOCIAL
               </Label>
               <Input
-                disabled={true}
-                className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right"
+                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 id="name"
                 placeholder="..."
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={businessName}
+                onChange={(e) => setBusinessName(e.target.value)}
               />
             </div>
 
             <div>
-              <Label className="text-xs">TIPO DOC. FISCAL</Label>
-              <Select onValueChange={setFiscalIdType} value={fiscalIdType}>
-                <SelectTrigger
-                  className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right"
-                >
-                  <SelectValue placeholder="Seleccione un tipo de ID" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="CUIT">CUIT</SelectItem>
-                  <SelectItem value="CUIL">CUIL</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="idNumber" className="text-xs">
-                NRO DOC. FISCAL
-              </Label>
+              <Label className="text-xs text-gray-500">CUIT</Label>
               <Input
-                className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-                hover:none justify-self-right"
-                id="idNumber"
-                placeholder="xxxxxxxxxxx"
                 type="number"
-                value={fiscalIdNumber}
-                onChange={(e) => setFiscalIdNumber(e.target.value)}
+                id="importe"
+                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                placeholder="XX-XXXXXXXX-X"
               />
             </div>
-
             <div>
-              <Label className="text-xs">CONDICIÓN AFIP</Label>
+              <Label className="text-xs text-gray-500">CONDICIÓN AFIP</Label>
               <Select onValueChange={setAfipStatus} value={afipStatus}>
-                <SelectTrigger
-                  className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right"
-                >
-                  <SelectValue placeholder="Seleccione un estado de AFIP" />
+                <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none">
+                  <SelectValue placeholder="Seleccione uno" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="monotributista">Monotributista</SelectItem>
@@ -288,17 +351,10 @@ export function AddHealthInsurances(props: {
             </div>
 
             <div>
-              <Label className="text-xs">CONDICIÓN IIBB</Label>
-              <Select
-                onValueChange={setAfipStatus}
-                value={afipStatus}
-                disabled={true}
-              >
-                <SelectTrigger
-                  className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right"
-                >
-                  <SelectValue placeholder="Seleccione un estado de AFIP" />
+              <Label className="text-xs text-gray-500">CONDICIÓN IIBB</Label>
+              <Select onValueChange={setIIBBStatus} value={IIBBStatus}>
+                <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none">
+                  <SelectValue placeholder="Seleccione uno" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="monotributista">Monotributista</SelectItem>
@@ -314,93 +370,106 @@ export function AddHealthInsurances(props: {
             </div>
 
             <div>
-              <Label htmlFor="IdNumber" className="text-xs">
+              <Label htmlFor="IdNumber" className="text-xs text-gray-500">
                 N° IIBB
               </Label>
               <Input
-                disabled={true}
                 id="IdNumber"
-                className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right"
+                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none"
                 placeholder="..."
-                value={idNumber}
-                onChange={(e) => setIdNumber(e.target.value)}
+                value={IIBBNumber}
+                onChange={(e) => setIIBBNumber(e.target.value)}
               />
             </div>
 
             <div>
-              <Label htmlFor="IdNumber" className="text-xs">
+              <Label htmlFor="IdNumber" className="text-xs text-gray-500">
                 CONDICION DE VENTA
               </Label>
               <Input
-                disabled={true}
                 id="IdNumber"
-                className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right"
+                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none"
                 placeholder="..."
-                value={idNumber}
-                onChange={(e) => setIdNumber(e.target.value)}
+                value={sellCondition}
+                onChange={(e) => setSellCondition(e.target.value)}
               />
             </div>
-
-            <div className="col-span-2">
-              <Label htmlFor="address" className="text-xs">
+            <div></div>
+            <div className="w-">
+              <Label htmlFor="address" className="text-xs text-gray-500">
                 DOMICILIO FISCAL
               </Label>
               <Input
-                className=" mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right w-full"
                 id="address"
                 placeholder="..."
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
+                value={fiscalAddress}
+                onChange={(e) => setFiscalAddress(e.target.value)}
               />
             </div>
-
-            <div />
-            <div />
-            <p className="col-span-4">Datos de Contacto</p>
-            <div>
-              <Label htmlFor="name">Nombre</Label>
+            <div className="flex-auto w-24">
+              <Label htmlFor="address" className="text-xs text-gray-500">
+                PISO
+              </Label>
               <Input
-                id="name"
+                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right w-full"
+                id="address"
                 placeholder="..."
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={fiscalFloor}
+                onChange={(e) => setFiscalFloor(e.target.value)}
               />
             </div>
-            <div>
-              <Label htmlFor="facturationName">Nombre de facturacion</Label>
+            <div className="flex-auto w-24">
+              <Label htmlFor="address" className="text-xs text-gray-500">
+                OFICINA
+              </Label>
               <Input
-                id="facturationName"
+                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right w-full"
+                id="address"
                 placeholder="..."
-                value={responsibleName}
-                onChange={(e) => setResponsibleName(e.target.value)}
+                value={fiscalOffice}
+                onChange={(e) => setFiscalOffice(e.target.value)}
               />
             </div>
-
             <div>
-              <Label htmlFor="locality">Localidad</Label>
+              <Label htmlFor="address" className="text-xs text-gray-500">
+                LOCALIDAD
+              </Label>
               <Input
-                id="locality"
+                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right w-full"
+                id="address"
                 placeholder="..."
-                value={locality}
-                onChange={(e) => setLocality(e.target.value)}
+                value={fiscalLocality}
+                onChange={(e) => setFiscalLocality(e.target.value)}
               />
             </div>
             <div>
-              <Label htmlFor="province">Provincia</Label>
+              <Label htmlFor="address" className="text-xs text-gray-500">
+                PROVINCIA
+              </Label>
               <Input
-                id="province"
+                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right w-full"
+                id="address"
                 placeholder="..."
-                value={province}
-                onChange={(e) => setProvince(e.target.value)}
+                value={fiscalProvince}
+                onChange={(e) => setFiscalProvince(e.target.value)}
               />
             </div>
             <div>
-              <Label htmlFor="postal_code">Codigo Postal</Label>
-              <Select onValueChange={setPostalCode} value={postalCode}>
-                <SelectTrigger className="w-[180px] font-bold">
+              <Label htmlFor="postal_code" className="text-xs text-gray-500">
+                CÓDIGO POSTAL
+              </Label>
+              <Select
+                onValueChange={setFiscalPostalCode}
+                value={fiscalPostalCode}>
+                <SelectTrigger
+                  className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right w-full">
                   <SelectValue placeholder="Seleccionar CP" />
                 </SelectTrigger>
                 <SelectContent>
@@ -412,8 +481,199 @@ export function AddHealthInsurances(props: {
                 </SelectContent>
               </Select>
             </div>
+            <div>
+              <Label htmlFor="address" className="text-xs text-gray-500">
+                PAÍS
+              </Label>
+              <Input
+                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right w-full"
+                id="address"
+                placeholder="..."
+                value={fiscalCountry}
+                onChange={(e) => setFiscalCountry(e.target.value)}
+              />
+            </div>
 
-            {OS ? null : (
+            <p className="col-span-4 mt-3 p-3 justify-start text-black font-xs text-sm font-semibold">
+              Datos de Contacto
+            </p>
+            <div>
+              <Label htmlFor="address" className="text-xs text-gray-500">
+                DOMICILIO COMERCIAL
+              </Label>
+              <Input
+                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                id="address"
+                placeholder="..."
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="address" className="text-xs text-gray-500">
+                PISO
+              </Label>
+              <Input
+                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                id="address"
+                placeholder="..."
+                value={floor}
+                onChange={(e) => setFloor(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="address" className="text-xs text-gray-500">
+                OFICINA
+              </Label>
+              <Input
+                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right w-full"
+                id="address"
+                placeholder="..."
+                value={office}
+                onChange={(e) => setOffice(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="locality" className="text-xs text-gray-500">
+                LOCALIDAD
+              </Label>
+              <Input
+                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                id="locality"
+                placeholder="..."
+                value={locality}
+                onChange={(e) => setLocality(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="province" className="text-xs text-gray-500">
+                PROVINCIA
+              </Label>
+              <Input
+                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                id="province"
+                placeholder="..."
+                value={province}
+                onChange={(e) => setProvince(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="postal_code" className="text-xs text-gray-500">
+                CÓDIGO POSTAL
+              </Label>
+              <Select onValueChange={setPostalCode} value={postalCode}>
+                <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
+                  <SelectValue placeholder="Seleccionar CP" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cps?.map((cp) => (
+                    <SelectItem key={cp.id} value={cp.id}>
+                      {cp.cp}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="address" className="text-xs text-gray-500">
+                TELÉFONO
+              </Label>
+              <Input
+                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                id="address"
+                placeholder="..."
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="address" className="text-xs text-gray-500">
+                E-MAIL
+              </Label>
+              <Input
+                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                id="address"
+                placeholder="..."
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <p className="col-span-4 mt-3 p-3 justify-start text-black font-xs text-sm font-semibold">
+              Información de la cuenta
+            </p>
+            <div>
+              <Label htmlFor="postal_code" className="text-xs text-gray-500">
+                ESTADO
+              </Label>
+              <Select onValueChange={setState} value={state}>
+                <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
+                  <SelectValue placeholder="Seleccionar CP" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ACTIVO">ACTIVO</SelectItem>
+                  <SelectItem value="INACTIVO">INACTIVO</SelectItem>
+                  <SelectItem value="BAJA">BAJA</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="postal_code" className="text-xs text-gray-500">
+                FECHA DE ESTADO
+              </Label>
+              <Popover>
+                <PopoverTrigger asChild={true}>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "text-left flex justify-between font-medium w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none pr-0 pl-0",
+                      !dateState && "text-muted-foreground"
+                    )}>
+                    {dateState ? (
+                      format(dateState, "PPP")
+                    ) : (
+                      <span>Seleccionar fecha</span>
+                    )}
+                    <Calendar01Icon className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className=" p-0 overflow-y-scroll">
+                  <Calendar
+                    mode="single"
+                    selected={dateState}
+                    onSelect={(e) => setDateState(e)}
+                    initialFocus={true}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div>
+              <Label htmlFor="user" className="text-xs text-gray-500">
+                USUARIO
+              </Label>
+              <Input
+                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                id="user"
+                placeholder="..."
+                value={user}
+                onChange={(e) => setUser(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="cancelMotive" className="text-xs text-gray-500">
+                MOTIVO DE BAJA
+              </Label>
+              <Input
+                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                id="cancelMotive"
+                placeholder="..."
+                value={cancelMotive}
+                onChange={(e) => setCancelMotive(e.target.value)}
+              />
+            </div>
+
+            {/* {OS ? null : (
               <div>
                 <Label htmlFor="initialValue">Saldo inicial</Label>
                 <Input
@@ -423,7 +683,7 @@ export function AddHealthInsurances(props: {
                   onChange={(e) => setInitialValue(e.target.value)}
                 />
               </div>
-            )}
+            )} */}
             <div className="flex items-center justify-center">
               {error && (
                 <span className="text-red-600 text-xs text-center">
@@ -432,21 +692,33 @@ export function AddHealthInsurances(props: {
               )}
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex justify-self-start">
             {OS ? (
-              <Button disabled={isPending} onClick={handleEdit}>
+              <Button
+                disabled={isPending}
+                onClick={handleEdit}
+                className="mt-7 font-medium mb-2 rounded-full w-fit bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3E3E3E] flex items-center justify-start justify-left">
                 {isPending ? (
                   <Loader2Icon className="mr-2 animate-spin" size={20} />
                 ) : (
-                  "Actualizar"
+                  <>
+                    <Edit02Icon className="mr-2 h-4" />
+                    Actualizar
+                  </>
                 )}
               </Button>
             ) : (
-              <Button disabled={isLoading} onClick={handleCreate}>
+              <Button
+                disabled={isLoading}
+                onClick={handleCreate}
+                className="mt-7 font-medium mb-2 rounded-full w-fit bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3E3E3E] flex items-center self-start">
                 {isLoading ? (
                   <Loader2Icon className="mr-2 animate-spin" size={20} />
                 ) : (
-                  "Crear"
+                  <>
+                    <CirclePlus className="mr-2" size={20} />
+                    Alta de obra social
+                  </>
                 )}
               </Button>
             )}

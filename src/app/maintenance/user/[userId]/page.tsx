@@ -46,11 +46,15 @@ export default function UserPage(props: { params: { userId: string } }) {
     id: props.params.userId,
   });
   const { mutateAsync: editUser, isLoading } = api.clerk.editUser.useMutation();
+  const {data:orgs } = api.companies.list.useQuery();
+  const {data:relOrgs} = api.clerk.relatedOrgs.useQuery({userId: props.params.userId});
+  console.log(relOrgs);
+  // const relCompanies = orgs?.map(x=> x.)
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [username, setUsername] = useState("");
   const [role, setRole] = useState("");
-
+  const relatedOrgs: Map<string,boolean> = new Map<string,boolean>();
   useEffect(() => {
     if (user) {
       setFirstName(user?.firstName ?? "");
@@ -61,12 +65,17 @@ export default function UserPage(props: { params: { userId: string } }) {
   }, [user]);
   async function handleChange() {
     try {
+      const entities = Array.from(relatedOrgs.entries()).map(([k,v]) => 
+      {
+        if(v && k) return k;
+      }) ?? [];
       const res = await editUser({
         userId: props.params.userId,
         role,
         firstName,
         lastName,
         username,
+        entities
       });
       if (res.message) {
         toast.error(res.message);
@@ -160,6 +169,34 @@ export default function UserPage(props: { params: { userId: string } }) {
                 </Card>
               </AccordionContent>
             </AccordionItem>
+            <AccordionItem value="item-3">
+            <AccordionTrigger>
+              <h2 className="text-md">Agregar a entidad</h2>
+            </AccordionTrigger>
+            <AccordionContent>
+              <List>
+                {orgs?.map((company) => {
+                  const isChecked = (relOrgs?.orgIds ?? []).some(
+                    (c) => c === company?.id
+                  );
+                  return (
+                    <ListTile 
+                      key={company?.id}
+                      title={company?.name}
+                      trailing={
+                        <Switch
+                          checked={isChecked}
+                          onCheckedChange={(required) =>
+                            relatedOrgs.set(company?.id, required)
+                          }
+                        />
+                      }
+                    />
+                  );
+                })}
+              </List>
+            </AccordionContent>
+          </AccordionItem>
           </Accordion>
         </section>
       )}

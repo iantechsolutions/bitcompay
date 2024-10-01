@@ -34,6 +34,7 @@ export default async function page({
   });
 
   // Productos del canal
+  console.log(channel.products, "test");
   const productsNumbers = channel.products.map((p) => p.product.number);
 
   // Pagos que no tienen archivo de salida que corresponden a la marca y los productos del canal
@@ -44,18 +45,17 @@ export default async function page({
     where: eq(schema.paymentStatus.code, "90"),
   });
   const statusEnviado = await db.query.paymentStatus.findFirst({
+    where: eq(schema.paymentStatus.code, "92"),
+  });
+  const statusCargado = await db.query.paymentStatus.findFirst({
     where: eq(schema.paymentStatus.code, "00"),
   });
-
-  // const statusGenerado = await db.query.paymentStatus.findFirst({
-  //   where: eq(schema.paymentStatus.code, "91"),
-  // });
 
   const payments = await db.query.payments.findMany({
     where: and(
       and(
         eq(schema.payments.companyId, company.id),
-        inArray(schema.payments.product_number, productsNumbers) // Solo los productos de la marca y producto -> (los productos salen del canal)
+        inArray(schema.payments.product_number, productsNumbers)
       )
     ),
   });
@@ -72,10 +72,12 @@ export default async function page({
   ];
 
   for (const transaction of payments.filter(
-    (x) => x.statusId != statusCancelado?.id && x.statusId != statusEnviado?.id
+    (x) =>
+      x.statusId != statusCancelado?.id &&
+      x.statusId != statusEnviado?.id &&
+      x.statusId != statusCargado?.id
   )) {
     if (channel.name.includes("DEBITO AUTOMATICO")) {
-      console.log("Entro como caballo");
       if (
         !transaction.genChannels.includes(channel.id) &&
         transaction.g_c === brand.number

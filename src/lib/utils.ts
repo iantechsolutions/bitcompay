@@ -12,6 +12,14 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export const valueToNameComprobanteMap: Record<string, string> = {
+  "0": "Recibo",
+  "1": "Factura",
+  "3": "Nota de crédito",
+  "6": "Factura",
+  "8": "Recibo",
+};
+
 export function nameInitials(name: string) {
   const [firstName, lastName] = name.split(" ");
   return `${firstName?.[0] ?? ""}${lastName ? lastName[0] : ""}`;
@@ -1006,3 +1014,11 @@ export const reverseConceptDictionary: { [key: number]: string } = {
   3: "Productos y Servicios",
   0: "",
 };
+
+export function visualizationSwitcher(
+  visualization: boolean,
+  editFormComponent: React.ReactNode,
+  viewFormComponent: React.ReactNode
+) {
+  return visualization ? viewFormComponent : editFormComponent;
+}

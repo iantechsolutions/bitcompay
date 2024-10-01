@@ -86,7 +86,7 @@ export function DataTable<TData, TValue>({
     setOpen(!open);
   };
 
-  const desiredColumns = ["modo", "Plan"];
+  const desiredColumns = ["modo", "Plan", "UN"];
   const filteredColumns = Array.from(table.getAllColumns()).filter((column) =>
     desiredColumns.includes(column.id!)
   );

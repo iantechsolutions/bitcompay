@@ -59,6 +59,8 @@ export default function BrandPage({
   const [concept, setConcept] = useState(brand.concept ?? "");
   const [code, setCode] = useState(brand.prisma_code ?? "");
   const [iva, setIva] = useState<string>(brand.iva ?? "");
+  const [utility, setUtility] = useState<string>(brand.utility ?? "");
+
   const [billType, setBillType] = useState<string>(brand.bill_type ?? "");
 
   const [description, setDescription] = useState(brand.description ?? "");
@@ -96,7 +98,7 @@ export default function BrandPage({
     if (!reducedDescription) errors.push("Descripción Reducida");
     if (!concept) errors.push("Concepto");
     if (!iva) errors.push("IVA");
-    if (!code) errors.push("Código");
+    // if (!code) errors.push("Código");
     // if (!billType) errors.push("Tipo de Factura");
 
     return errors;
@@ -108,6 +110,10 @@ export default function BrandPage({
       toast.error(
         `Los siguientes campos están vacíos: ${validationErrors.join(", ")}`
       );
+      return;
+    }
+    if (!utility || utility.length != 8) {
+      toast.error("No ha ingresado una utilidad de senapsa valida");
       return;
     }
     try {
@@ -127,10 +133,11 @@ export default function BrandPage({
         reducedDescription,
         companiesId,
         code,
+        utility,
         brandId: brand.id,
         concept,
       });
-      toast.success("Se han guardado los cambios los");
+      toast.success("Se han guardado los cambios");
       router.refresh();
     } catch (e) {
       const error = asTRPCError(e)!;
@@ -187,12 +194,23 @@ export default function BrandPage({
                       maxLength={4}
                     />
                   </div>
-                  <div className="col-span-2">
+                  <div>
                     <Label htmlFor="description">Descripción</Label>
                     <Input
                       id="description"
                       value={description}
+                      minLength={8}
                       onChange={(e) => setDescription(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="utility">
+                      Codigo de utilidad(8 otorgada por senapsa)
+                    </Label>
+                    <Input
+                      id="utility"
+                      value={utility}
+                      onChange={(e) => setUtility(e.target.value)}
                     />
                   </div>
                   <div className="col-span-2">

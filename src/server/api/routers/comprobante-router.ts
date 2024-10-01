@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray, lt } from "drizzle-orm";
 import Afip from "@afipsdk/afip.js";
 import { z } from "zod";
 import { db, schema } from "~/server/db";
@@ -27,6 +27,7 @@ import { utapi } from "~/server/uploadthing";
 import { id } from "date-fns/locale";
 import { Events } from "./events-router";
 import { datetime } from "drizzle-orm/mysql-core";
+import { Console } from "console";
 // import chromium from "chrome-aws-lambda";
 
 type Bonus = {
@@ -291,6 +292,7 @@ async function approbatecomprobante(liquidationId: string) {
               )
             );
         } else {
+          console.log("Encontro?");
           const payment = await db
             .insert(schema.payments)
             .values({
@@ -725,6 +727,7 @@ async function createcomprobanteItem(
       comprobante_id: comprobanteId,
     })
     .returning();
+  console.log("Llegaron", concept, amount, ivaFloat, abonoItem);
 }
 async function getGroupAmount(grupo: grupoCompleto, date: Date) {
   let importe = 0;
@@ -757,6 +760,8 @@ async function getGroupAmount(grupo: grupoCompleto, date: Date) {
       }
     });
   }
+
+  console.log("La casa", importe);
   return importe;
 }
 async function getGroupContribution(grupo: grupoCompleto) {
@@ -913,6 +918,17 @@ export const comprobantesRouter = createTRPCRouter({
       const grupos = await getGruposForLiquidation(input.brandId, input.date);
       return grupos;
     }),
+
+  getLastComprobante: protectedProcedure.query(async ({}) => {
+    const ulticomprobante = await db.query.comprobantes.findFirst({
+      where: eq(schema.comprobantes.origin, "Factura"),
+      with: {
+        items: true,
+      },
+    });
+    return ulticomprobante;
+  }),
+
   getComprobanteByEvent: protectedProcedure
     .input(z.object({ eventId: z.string() }))
     .query(async ({ input }) => {
@@ -928,6 +944,7 @@ export const comprobantesRouter = createTRPCRouter({
         return events?.comprobantes;
       }
     }),
+
   getByLiquidation: protectedProcedure
     .input(z.object({ liquidationId: z.string() }))
     .query(async ({ input }) => {
@@ -1029,6 +1046,8 @@ export const comprobantesRouter = createTRPCRouter({
             ),
           });
           console.log("Encontro producto");
+          console.log("Entro?");
+
           const payment = await db
             .insert(schema.payments)
             .values({
@@ -1098,6 +1117,7 @@ export const comprobantesRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
+      // const user = input.user;
       const companyId = ctx.session.orgId;
       const grupos = await getGruposForLiquidation(
         input.brandId,
@@ -1156,7 +1176,8 @@ export const comprobantesRouter = createTRPCRouter({
         input.dateDue,
         input.pv,
         liquidation!.id,
-        input.interest ?? 0
+        input.interest ?? 0,
+        user?.id ?? ""
       );
       return liquidation;
     }),
@@ -1217,13 +1238,22 @@ export async function preparateComprobante(
   dateVencimiento: Date | undefined,
   pv: string,
   liquidationId: string,
-  interes: number
+  interes: number,
+  user: string
 ) {
-  const user = currentUser();
-
-  for (let i = 0; i < grupos.length; i++) {
-    const grupo = grupos[i];
-    if (grupo) {
+  // const user = currentUser();
+  let groupIds = grupos.map((grupo) => grupo.cc?.id ?? "");
+  const events = await db.query.events.findMany({
+    where: and(
+      inArray(schema.events.currentAccount_id, groupIds),
+      lt(schema.events.createdAt, new Date())
+    ),
+  });
+  console.log("lele", events.length);
+  await Promise.all(
+    grupos.map(async (grupo) => {
+      // const grupo = grupos[i];
+      // if (grupo) {
       //calculate iva
 
       let iva =
@@ -1233,7 +1263,7 @@ export async function preparateComprobante(
 
       //calculate ppb
       const abono = await getGroupAmount(grupo, dateDesde!);
-
+      console.log("lele", abono);
       //calculate bonification
       const today = new Date();
       const bonificacion =
@@ -1259,21 +1289,30 @@ export async function preparateComprobante(
         dateDesde!
       );
       let saldo = 0;
-      //calculate saldo
-      let events = await db.query.events.findMany({
-        where: eq(schema.events.currentAccount_id, grupo.cc?.id ?? ""),
-      });
-      events = events?.filter(
-        (x) => x.createdAt.getTime() < new Date().getTime()
+
+      console.log(
+        "lele",
+        differential_amount,
+        contribution,
+        abono,
+        bonificacion
       );
-      if (events && events.length > 0) {
-        const lastEvent = events.reduce((prev, current) => {
+      //calculate saldo
+      // let events = await db.query.events.findMany({
+      //   where: eq(schema.events.currentAccount_id, grupo.cc?.id ?? ""),
+      // });
+      // events = events?.filter(
+      //   (x) => x.createdAt.getTime() < new Date().getTime()
+      // );
+
+      const lastEvent = events
+        .filter((x) => x.currentAccount_id == grupo.cc?.id)
+        .reduce((prev, current) => {
           return new Date(prev.createdAt) > new Date(current.createdAt)
             ? prev
             : current;
         });
-        saldo = lastEvent.current_amount * -1;
-      }
+      saldo = lastEvent.current_amount * -1;
 
       //calculate interest
       let interest = 0;
@@ -1326,7 +1365,7 @@ export async function preparateComprobante(
           previous_bill,
           saldo
         );
-
+      console.log("lelelel", importe, ivaPostFiltro);
       if (ivaPostFiltro && ivaPostFiltro == "3") {
         ivaFloat = 1;
       }
@@ -1422,6 +1461,14 @@ export async function preparateComprobante(
           interest / ivaFloatAnterior
         );
       }
+      if (differential_amount != 0) {
+        createcomprobanteItem(
+          ivaFloatAnterior,
+          comprobante[0]?.id ?? "",
+          "Diferencial",
+          differential_amount
+        );
+      }
       if (previous_bill != 0) {
         createcomprobanteItem(
           ivaFloatAnterior,
@@ -1444,6 +1491,7 @@ export async function preparateComprobante(
         "Total factura",
         (comprobante[0]?.importe ?? 0) / ivaFloat
       );
+
       // await createcomprobanteItem(
       //   ivaFloat,
       //   comprobante[0]?.id ?? "",
@@ -1458,9 +1506,8 @@ export async function preparateComprobante(
           (previous_bill - saldo) * -1
         );
       }
-    }
-  }
-
+    })
+  );
   return "OK";
 }
 async function calculateAmount(

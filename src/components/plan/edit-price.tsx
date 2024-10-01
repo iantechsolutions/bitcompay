@@ -40,8 +40,6 @@ export default function EditPrice({
     api.pricePerCondition.create.useMutation();
   const router = useRouter();
 
-  console.log("fechitas", fecha);
-
   async function handleUpdatePrice() {
     if (plan?.pricesPerCondition) {
       if (

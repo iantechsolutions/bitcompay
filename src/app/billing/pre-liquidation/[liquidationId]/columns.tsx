@@ -8,6 +8,7 @@ import { RouterOutputs } from "~/trpc/shared";
 export type TableRecord = {
   id: string;
   nroGF: number | string;
+  UN: string;
   nombre: string;
   cuit: string;
   "saldo anterior": number;
@@ -30,7 +31,7 @@ export const columns: ColumnDef<TableRecord>[] = [
     accessorKey: "nroGF",
     header: () => (
       <div className="text-center whitespace-nowrap text-medium px-7">
-        N° GF
+        Nro
       </div>
     ),
     cell: ({ row }) => {
@@ -94,7 +95,7 @@ export const columns: ColumnDef<TableRecord>[] = [
         style: "currency",
         currency: "ARS",
         currencyDisplay: "narrowSymbol",
-      }).format(amount);
+      }).format(Math.abs(amount));
 
       return <div className="text-center  ">{formatted}</div>;
     },
@@ -166,7 +167,7 @@ export const columns: ColumnDef<TableRecord>[] = [
         style: "currency",
         currency: "ARS",
         currencyDisplay: "narrowSymbol",
-      }).format(amount);
+      }).format(Math.abs(amount));
 
       return <div className="text-center  ">{formatted}</div>;
     },
@@ -200,7 +201,7 @@ export const columns: ColumnDef<TableRecord>[] = [
         style: "currency",
         currency: "ARS",
         currencyDisplay: "narrowSymbol",
-      }).format(amount);
+      }).format(Math.abs(amount));
 
       return <div className="text-center  ">{formatted}</div>;
     },
@@ -239,4 +240,12 @@ export const columns: ColumnDef<TableRecord>[] = [
       return value.includes(row.getValue(id));
     },
   },
+  {
+    accessorKey: "UN", 
+    header: () => null,
+    cell: () => null,
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id));
+    }
+  }
 ];

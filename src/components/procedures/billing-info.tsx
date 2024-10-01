@@ -333,7 +333,21 @@ export default function BillingInfo({ data, form }: propsBillingInfo) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>IVA</FormLabel>
-                    <Input {...field} placeholder="ingrese su iva" />
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      // disabled={isBillingResponsible}
+                      >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="ingrese su iva"/>
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="cuit">10%</SelectItem>
+                        <SelectItem value="cuil">20%</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </FormItem>
                 )}
               />

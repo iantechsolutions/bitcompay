@@ -19,13 +19,34 @@ import {
 import { RouterOutputs } from "~/trpc/shared";
 import { useState } from "react";
 import { api } from "~/trpc/react";
+import ContentTable from "~/app/billing/liquidation/[liquidationId]/content-table";
 
 type DetailSheetProps = {
-  
+  data?: {
+    date: Date;
+    description: string;
+    amount: number;
+    comprobanteType: string;
+    comprobanteNumber: string;
+    status: "Pagada" | "Pendiente";
+    iva: number;
+    comprobantes?: RouterOutputs["comprobantes"]["getByLiquidation"];
+    currentAccountAmount: number;
+    saldo_a_pagar: number;
+    nombre: string;
+    cuit: string;
+    [index: string]: any;
+  };
   open: boolean;
   setOpen: (open: boolean) => void;
 };
-export default function DetailSheet({ open, setOpen }: DetailSheetProps) {
+
+type comprobantes = RouterOutputs["comprobantes"]["getByLiquidation"];
+
+export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
+  
+  let comprobanteFCReciente = data?.comprobantes ;
+  
  return (
   <Sheet open={open} onOpenChange={setOpen}>
   <SheetContent className="sm:max-w-[550px] px-10 py-12 overflow-y-scroll">
@@ -37,12 +58,12 @@ export default function DetailSheet({ open, setOpen }: DetailSheetProps) {
         <ul className="mt-2">
               <li className="text-xs"> RECEPTOR </li>
               <li className="font-medium-medium text-[#3e3e3e]">
-                Natuti Marc
+              {data?.nombre ?? "-"}
               </li>
               <br />
               <li className="text-xs"> CUIL/CUIT </li>
               <li className="font-medium-medium text-[#3e3e3e]">
-                987654321
+              {data?.cuit ?? "-"}
                 </li>
               <br />
             </ul>
@@ -52,62 +73,21 @@ export default function DetailSheet({ open, setOpen }: DetailSheetProps) {
     <div className="flex flex-row border justify-between items-center px-4 py-5 gap-2 rounded-md mt-3">
           <p className="text-base whitespace-nowrap font-medium-medium ">Saldo actual </p>
           <p className="text-[#6952EB] whitespace-nowrap font-semibold text-lg">
-            $123.456.789 
+          $ {data?.currentAccountAmount}
           </p>
         </div>
-        <div className="mt-5">
-        {/* Acá poner Content Table, este es solo un ejemplo */}
-            <Table>
-            <TableHeader className="bg-[#F7F7F7] rounded-lg">
-              <TableHead className="pl-4 "> Concepto </TableHead>
-              <TableHead className=" "> Importe </TableHead>
-              <TableHead className=" "> IVA</TableHead>
-              <TableHead className="">TOTAL</TableHead>
-            </TableHeader>
-            <TableRow className="border-b ">
-                    <TableCell className="pl-4 ">Bonificación</TableCell>
-                    <TableCell className=" ">
-                    -$12.345
-                    </TableCell>
-                    <TableCell className=" ">
-                    -$12.345
-                    </TableCell>
-                    <TableCell className=" ">
-                    -$12.345
-                    </TableCell>
-                  </TableRow>
-                  <TableRow className="border-b ">
-                    <TableCell className="pl-4 ">Abono</TableCell>
-                    <TableCell className=" ">
-                      $123.456
-                    </TableCell>
-                    <TableCell className=" ">
-                    $123.456
-                    </TableCell>
-                    <TableCell className=" ">
-                    $123.456
-                    </TableCell>
-                  </TableRow>
-                  <TableRow className="border-b ">
-                    <TableCell className="pl-4 ">Facturación anterior</TableCell>
-                    <TableCell className=" ">
-                      $123.456
-                    </TableCell>
-                    <TableCell className=" ">
-                    $123.456
-                    </TableCell>
-                    <TableCell className=" ">
-                    $123.456
-                    </TableCell>
-                  </TableRow>
-          </Table>
-        </div>
+        
+        {/* {data?.comprobantes && <div className="mt-5">
+          <ContentTable comprobante={comprobanteFCReciente} />
+          </div>
+          } */}
+       
         <div className="bg-[#DEF5DD] flex flex-row justify-between items-center py-4 px-6 rounded-md mt-4">
             <p className=" text-[#6952EB] font-semibold">
               Importe total:{" "}
             </p>
             <p className="text-[#6952EB] font-semibold">
-              $123.456.789
+              {data?.saldo_a_pagar}
             </p>
           </div>
   </SheetContent>

@@ -14,16 +14,26 @@ export const liquidationsRouter = createTRPCRouter({
           comprobantes: {
             with: {
               items: true,
+              payments: true,
               family_group: {
                 with: {
+                  plan: true,
+                  modo: true,
                   integrants: {
+                    with: { differentialsValues: true },
                     where: eq(schema.integrants.isBillResponsible, true),
                   },
-                  plan: true,
                   cc: true,
+                  businessUnitData: true,
+                  comprobantes: {
+                    with: {
+                      items: true,
+                    },
+                  },
                 },
               },
               liquidations: true,
+              //
             },
           },
           bussinessUnits: true,

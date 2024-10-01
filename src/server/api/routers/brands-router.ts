@@ -17,6 +17,7 @@ export const brandsRouter = createTRPCRouter({
       const brand = await db.query.brands.findFirst({
         where: eq(schema.brands.id, input.brandId),
         with: {
+          establishments: true,
           company: {
             columns: {
               companyId: false,
@@ -43,9 +44,8 @@ export const brandsRouter = createTRPCRouter({
   }),
 
   list: protectedProcedure.query(async ({ ctx }) => {
-    const companyId = ctx.session.orgId;
     const brands = await db.query.brands.findMany({
-      with: { company: true },
+      with: { company: true, establishments: true },
     });
 
     return brands.filter((x) =>
@@ -86,6 +86,7 @@ export const brandsRouter = createTRPCRouter({
         redescription: z.string().min(0).max(10),
         iva: z.string().optional(),
         billType: z.string().optional(),
+        utility: z.string().optional(),
         concept: z.string().optional(),
         code: z.string().optional(),
       })
@@ -113,6 +114,7 @@ export const brandsRouter = createTRPCRouter({
         iva: z.string().optional(),
         billType: z.string().optional(),
         code: z.string().optional(),
+        utility: z.string().optional(),
         companiesId: z.set(z.string()),
         concept: z.string().optional(),
         razon_social: z.string().optional(),
@@ -129,6 +131,7 @@ export const brandsRouter = createTRPCRouter({
           prisma_code: input.code,
           bill_type: input.billType,
           concept: input.concept,
+          utility: input.utility,
           razon_social: input.razon_social,
         })
         .where(eq(schema.brands.id, input.brandId));

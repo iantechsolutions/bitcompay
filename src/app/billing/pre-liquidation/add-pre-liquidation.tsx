@@ -41,6 +41,7 @@ import { ComboboxDemo } from "~/components/ui/combobox";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { asTRPCError } from "~/lib/errors";
+import { useUser } from "@clerk/nextjs";
 export default function AddPreLiquidation() {
   const [open, setOpen] = useState(false);
   const [fechaVencimiento1, setFechaVencimiento1] = useState<Date>();
@@ -63,47 +64,52 @@ export default function AddPreLiquidation() {
   const { mutateAsync: createLiquidation, isLoading } =
     api.comprobantes.createPreLiquidation.useMutation();
 
+  function validateFields() {
+    const errors: string[] = [];
+    if (!puntoVenta) errors.push("Punto de venta");
+    if (!brandId) errors.push("Marca");
+    if (!fechaVencimiento2 || !fechaVencimiento1) errors.push("Vencimientos");
+    if (!mes) errors.push("Mes de vigencia");
+
+    return errors;
+  }
+
   async function handleCreate() {
-    try{
-      if (!puntoVenta || !brandId || !fechaVencimiento2) {
-        toast.error("Ingrese los valores requeridos");
-      } else {
-        if (mes && anio && anio >= new Date().getFullYear()) {
-          const liquidation = await createLiquidation({
-            pv: puntoVenta,
-            brandId: brandId,
-            dateDesde: new Date(anio, mes - 1, 1),
-            dateHasta: new Date(anio, mes, 0),
-            dateDue: fechaVencimiento2,
-            interest: interest ?? 0,
-            logo_url: logo_url ?? undefined,
-          });
-          if ("error" in liquidation!) {
-            console.log("liquidation", liquidation);
-            toast.error(liquidation.error);
-          } else if (liquidation) {
-            queryClient.invalidateQueries();
-            toast.success("Pre-Liquidación creada correctamente");
-            setOpen(false);
-          } else {
-            toast.error("Error al crear la Pre-Liquidación");
-          }
-        }
-        if (!mes) {
-          toast.error("Seleccione un mes");
-        } else if (!anio || anio < new Date().getFullYear()) {
-          toast.error("El año seleccionado no es válido");
+    const validationErrors = validateFields();
+    if (validationErrors.length > 0) {
+      return toast.error(
+        `Los siguientes campos están vacíos y sin obligatorios: ${validationErrors.join(
+          ", "
+        )}`
+      );
+    }
+
+    try {
+      if (mes && anio && anio >= new Date().getFullYear()) {
+        const liquidation = await createLiquidation({
+          pv: puntoVenta,
+          brandId: brandId,
+          dateDesde: new Date(anio, mes - 1, 1),
+          dateHasta: new Date(anio, mes, 0),
+          dateDue: fechaVencimiento2,
+          interest: interest ?? 0,
+          logo_url: logo_url ?? undefined,
+        });
+        if ("error" in liquidation!) {
+          toast.error(liquidation.error);
+        } else if (liquidation) {
+          queryClient.invalidateQueries();
+          toast.success("Pre-Liquidación creada correctamente");
+          setOpen(false);
+        } else {
+          toast.error("Error al crear la Pre-Liquidación");
         }
       }
-      setOpen(false);
-      toast.success("Pre-Liquidación creada correctamente");
-    }
-    catch(e){
+    } catch (e) {
       console.log("error", e);
       const error = asTRPCError(e)!;
       toast.error(error.message);
     }
-   
 
     //TODO CORREGIR ESTO
     // await new Promise((resolve) => setTimeout(resolve, 500));
@@ -126,7 +132,8 @@ export default function AddPreLiquidation() {
       {/* <Button onClick={() => setOpen(true)}>
         <PlusCircleIcon className="mr-2" /> Crear Pre liquidacion
       </Button> */}
-      <AddElementButton onClick={() => setOpen(true)}>
+      <AddElementButton onClick={() => setOpen(true)} className="rounded-full gap-1 p-4 text-base text-[#3E3E3E] bg-[#BEF0BB] ">
+        <PlusCircleIcon className="h-4" />
         Agregar Pre-Liquidación
       </AddElementButton>
 
@@ -156,8 +163,8 @@ export default function AddPreLiquidation() {
               </SelectContent>
             </Select>
           </div>
-          <div className="w-full flex flex-row gap-2 text-gray-500">
-            <div className="w-1/2 m-3 mr-3">
+          <div className="max-w-md w-full flex flex-row gap-2 text-gray-500 p-3 mr-1 pl-2">
+            <div className="w-1/2 m-3 mr-2 ml-2 pr-2">
               <Label className="text-xs">1° FECHA DE VENCIMIENTO</Label>
               <br />
               <Popover open={popover1Open} onOpenChange={setPopover1Open}>
@@ -165,7 +172,7 @@ export default function AddPreLiquidation() {
                   <Button
                     variant={"form"}
                     className={cn(
-                      "w-full border-b-2 border-green-200 pl-3 text-left font-normal hover:bg-none hover:bg-transparent shadow-none",
+                      "w-full border-b-2 border-green-200 pl-3 text-left font-normal hover:bg-none hover:bg-transparent shadow-none overflow-hidden text-ellipsis whitespace-nowrap",
                       !fechaVencimiento1 && "text-muted-foreground"
                     )}>
                     <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[#3E3E3E]">
@@ -175,7 +182,7 @@ export default function AddPreLiquidation() {
                         <span>Seleccione una fecha</span>
                       )}
                     </p>
-                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    <CalendarIcon className="ml-2 h-4 w-4 opacity-50" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -193,7 +200,7 @@ export default function AddPreLiquidation() {
                 </PopoverContent>
               </Popover>
             </div>
-            <div className="w-1/2 text-gray-500 m-3 ml-3 ">
+            <div className="w-1/2 m-3 mr-2 ml-2 pr-2">
               <Label className="text-xs">2° FECHA DE VENCIMIENTO</Label>
               <br />
               <Popover open={popover2Open} onOpenChange={setPopover2Open}>
@@ -211,7 +218,7 @@ export default function AddPreLiquidation() {
                         <span>Seleccione una fecha</span>
                       )}
                     </p>
-                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    <CalendarIcon className="ml-2 h-4 w-4 opacity-50" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -298,7 +305,7 @@ export default function AddPreLiquidation() {
               <Select
                 onValueChange={(e) => setMes(Number(e))}
                 defaultValue={mes?.toString()}>
-                <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none focus-visible:ring-green-400">
+                <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none">
                   <SelectValue placeholder="Seleccione un mes" />
                 </SelectTrigger>
                 <SelectContent>
@@ -368,7 +375,7 @@ export default function AddPreLiquidation() {
             <div className="w-1/2 m-3 ml-3">
               <Label className="text-xs">AÑO DE VIGENCIA</Label>
               <Input
-                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none"
                 type="number"
                 min={new Date().getFullYear()}
                 value={anio}
@@ -399,7 +406,7 @@ export default function AddPreLiquidation() {
             <div className="w-2/4 text-gray-500 m-3 ml-3 pr-">
               <Label htmlFor="interest" className="text-xs">
                 {" "}
-                INTERÉS (%){" "}
+                INTERÉS (%)*{" "}
               </Label>
               <Input
                 className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
@@ -413,15 +420,22 @@ export default function AddPreLiquidation() {
               />
             </div>
           </div>
+          <div>
+            <h3 className="text-[#3E3E3E] font-thin text-opacity-80 text-[10px] italic justify-center">
+              *Aplica sobre saldos adeudados de períodos anteriores. Completar
+              con alícuota como porcentaje directo sobre la base del cálculo.
+            </h3>
+          </div>
           <Button
             type="submit"
             className="m-5 mb-2 rounded-full w-fit justify-self-center bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#DEF5DD]"
             disabled={isLoading}
             onClick={handleCreate}>
-            {isLoading && (
+            {isLoading ? (
               <Loader2Icon className="mr-2 animate-spin" size={20} />
+            ) : (
+              <CirclePlus className="mr-2" />
             )}
-            <CirclePlus className="mr-2" />
             Crear Pre-Liquidación
           </Button>
         </DialogContent>
