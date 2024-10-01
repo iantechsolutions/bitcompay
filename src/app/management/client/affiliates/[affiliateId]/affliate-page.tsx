@@ -42,6 +42,8 @@ export default function AffiliatePage(props: {
     family_groupsId: grupos!,
   });
 
+  const {data:productos} = api.products.list.useQuery();
+
   const { data: cc } = api.currentAccount.getByFamilyGroup.useQuery({
     familyGroupId: grupos ?? "",
   });
@@ -89,9 +91,9 @@ export default function AffiliatePage(props: {
     Vigencia: grupo?.validity
       ? dayjs(grupo?.validity).format("DD-MM-YYYY")
       : "-",
-    "O.S Asignada": "",
-    "O.S Origen": "",
-    Zona: "",
+    "O.S Asignada": billResponsible?.healthInsurances?.identificationNumber ?? "-",
+    "O.S Origen": billResponsible?.originatingHealthInsurances?.identificationNumber ?? "-",
+    Zona: "-",
     Estado: grupo?.state,
     "Fecha estado": "",
     "Motivo baja": "",
@@ -180,16 +182,21 @@ export default function AffiliatePage(props: {
       <img src="/landing_images/MASTERCARD.png" className="h-4 w-auto ml-2" />
     ),
   };
-  const paymentMethod: Record<string, React.ReactNode> = {
-    "Débito Directo": (
+
+  const prodId = billResponsible?.pa[0]?.product_id;
+  const prod = productos?.find((x) => x.id === prodId);
+
+  const paymentMethod = new Map<string, React.ReactNode>([
+    [
+      "Débito Directo",
       <>
         <div className="flex items-start gap-1">
           <ElementCard
-            element={{ key: "CBU", value: "0000000000000000000000" }}
+            element={{ key: "CBU", value: billResponsible?.pa[0]?.CBU ?? "0000000000000000000000" }}
           />
           <ElementCard element={{ key: "ALIAS", value: "AAAA.AAA.AAA" }} />
         </div>
-
+  
         <div className="mt-3">
           <ElementCard
             element={{
@@ -204,9 +211,10 @@ export default function AffiliatePage(props: {
             }}
           />
         </div>
-      </>
-    ),
-    Voluntario: (
+      </>,
+    ],
+    [
+      "Voluntario",
       <div className="p-0">
         <h2 className="font-bold text-base mb-2">Redes Habilitadas: </h2>
         <div className="flex gap-4 items-center justify-start">
@@ -223,15 +231,16 @@ export default function AffiliatePage(props: {
             Pagomiscuentas
           </div>
         </div>
-      </div>
-    ),
-    "Débito Automático": (
+      </div>,
+    ],
+    [
+      "Débito Automático",
       <div className="pl-4">
         <div className="flex justify-between">
           <ElementCard
             element={{
               key: "NOMBRE DE LA TARJETA",
-              value: "Claudia Alejandra Perea",
+              value: billResponsible?.name ?? "Claudia Alejandra Perea",
             }}
           />
           <ElementCard
@@ -239,21 +248,23 @@ export default function AffiliatePage(props: {
               key: "NÚMERO DE TARJETA",
               value: (
                 <div className="flex justify-between items-center">
-                  **** **** **** 1234 {cardLogoMap["Visa"]}
+                  **** **** **** 
+                  {billResponsible?.pa[0] ? billResponsible?.pa[0].card_number?.slice(12,16)  ?? "1234" : "1234"}
+                  {cardLogoMap["Visa"]}
                 </div>
               ),
             }}
           />
         </div>
         <div className="flex justify-start gap-3 mt-3">
-          <ElementCard element={{ key: "TIPO DE TARJETA", value: "Débito" }} />
+          <ElementCard element={{ key: "TIPO DE TARJETA", value: billResponsible?.pa[0]?.card_type ?? "Débito" }} />
           <ElementCard
-            element={{ key: "FECHA DE VENC.", value: "01/12/2024" }}
+            element={{ key: "FECHA DE VENC.", value: dayjs(billResponsible?.pa[0]?.expire_date).format("DD/MM/YYYY") ?? "01/12/2024" }}
           />
         </div>
-      </div>
-    ),
-  };
+      </div>,
+    ],
+  ]);
 
   const goToCCDetail = (id: string | undefined) => {
     if (!id) return;
@@ -426,7 +437,19 @@ export default function AffiliatePage(props: {
                     <h2 className="mb-3 text-lg font-normal">
                       Detalles del pago
                     </h2>
-                    {paymentMethod["Voluntario"]}
+                    {
+                    (paymentMethod && paymentMethod?.has(prod?.name ?? "") ) ? 
+                    (
+                      <div className="flex gap-4 items-start">
+                        {paymentMethod.get(prod?.name ?? "")}
+                      </div>
+                    ) : (
+                      <div className="flex gap-4 items-start">
+                        {paymentMethod.get("Voluntario")}
+                      </div>
+                    )}
+                    
+                    {/* paymentMethod["Voluntario"]} */}
                   </div>
                 </div>
 

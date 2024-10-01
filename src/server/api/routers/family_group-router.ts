@@ -203,6 +203,8 @@ export const family_groupsRouter = createTRPCRouter({
               contribution: true,
               differentialsValues: true,
               pa: true,
+              healthInsurances: true,
+              originatingHealthInsurances: true,
             },
           },
         },
