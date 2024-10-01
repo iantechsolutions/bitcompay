@@ -41,15 +41,12 @@ export default function HealthInsurancePage(props: {
   let currentAmount = 0;
 
   let lastEvent;
-  if (cc?.events && cc.events.length > 0) {
+  if (cc?.events) {
     lastEvent = cc?.events.reduce((prev, current) => {
       return new Date(prev.createdAt) > new Date(current.createdAt)
         ? prev
         : current;
     });
-    currentAmount = lastEvent?.current_amount ?? 0;
-  } else {
-    currentAmount = 0;
   }
   currentAmount = lastEvent?.current_amount ?? 0;
   const [openBasicData, setOpenBasicData] = useState<boolean>(false);
@@ -135,27 +132,17 @@ export default function HealthInsurancePage(props: {
   };
 
   return (
-    <div>
-      <Link
-        className=" font-monserrat w-20 h-auto flex justify-between"
-        href={`/management/client/health_insurances`}>
-        <ArrowLeftIcon className="mb-2" /> Volver
-      </Link>
-      <LayoutContainer>
-        <section className="space-y-2">
-          <div className="flex w-full justify-between">
-            <h2 className="text-lg font-monserrat font-semibold mt-2">
+    <LayoutContainer>
+      <section>
+        <div className="flex flex-row justify-between mt-4">
+          <div className="flex flex-row  gap-6">
+            <h2 className="flex items-center text-2xl font-semibold">
               Obra Social
             </h2>
-            <div>
-              <AddHealthInsurances healthInsurance={props?.healthInsurance} />
-              <Button
-                variant={"destructive"}
-                className="ml-10"
-                onClick={() => setOpenDelete(true)}>
-                Eliminar
-              </Button>
-            </div>
+            <h3 className="flex items-center text-lg font-medium">
+              {props.healthInsurance?.identificationNumber}{" "}
+              {props.healthInsurance?.initials}
+            </h3>
           </div>
           <AddHealthInsurances healthInsurance={props?.healthInsurance} />
         </div>
@@ -168,35 +155,35 @@ export default function HealthInsurancePage(props: {
                   $ {currentAmount}
                 </span>
               </div>
-              <Button
-                className="flex flex-row bg-[#F7F7F7] hover:bg-[#DEF5DD] text-black font-medium-medium text-xs rounded-2xl py-1 px-3"
-                onClick={() => {
-                  if (!props.ccId) {
-                    alert("ccId is undefined");
-                    return;
-                  }
-                  router.push(
-                    `/management/client/health_insurances/${props.healthInsuranceId}/cc/${props.ccId}`
-                  );
-                }}>
-                <Eye className="mr-2 w-4 h-4" />
-                Ver movimientos
-              </Button>
+              <div>
+                <Button
+                  className="flex flex-row bg-[#F7F7F7] hover:bg-[#DEF5DD] text-[#3e3e3e] font-medium text-xs rounded-full py-1 px-5"
+                  onClick={() => {
+                    if (!props.ccId) {
+                      alert("ccId is undefined");
+                      return;
+                    }
+                    router.push(
+                      `/management/client/health_insurances/${props.healthInsuranceId}/cc/${props.ccId}`
+                    );
+                  }}>
+                  <Eye className="mr-2 w-4 h-4" />
+                  Ver movimientos
+                </Button>
+              </div>
             </div>
-          </div>
-
-          <div className="border rounded-lg border-gray-200 p-4 w-full relative">
-            <div className="flex justify-between items-center">
-              <h2 className="text-md font-semibold">Datos Básicos</h2>
-              <button
-                onClick={() => setOpenBasicData(!openBasicData)}
-                className="absolute top-0 right-0 mt-4 mr-4 text-gray-400">
-                {openBasicData ? (
-                  <CircleChevronUp className="w-5 h-5" />
-                ) : (
-                  <CircleChevronDown className="w-5 h-5" />
-                )}
-              </button>
+          </Card>
+          <Card className="py-4 px-9 bg-[#DEF5DD] w-1/2 flex flex-col justify-center">
+            <div className="flex flex-row place-items-center justify-between">
+              <p className="text-base font-[550] block place-content-center text-[#3e3e3e]">
+                Soportes
+              </p>
+              <Button
+                variant="bitcompay"
+                className="bg-[#85CE81] text-sm px-4 h-7 gap-2 text-[#ffffff] rounded-full font-normal">
+                <Upload02Icon className="h-4" />
+                Subir archivo
+              </Button>
             </div>
           </Card>
         </div>
@@ -224,35 +211,12 @@ export default function HealthInsurancePage(props: {
                     <ElementCard key={key} element={{ key, value }} />
                   ))}
                 </div>
-              </div>
-            )}
-          </div>
-
-          <div className="border rounded-lg border-gray-200 p-4 w-full relative">
-            <div className="flex justify-between items-center">
-              <h2 className="text-md font-semibold">Facturación</h2>
-              <button
-                onClick={() => setOpenFacturacion(!openFacturacion)}
-                className="absolute top-0 right-0 mt-4 mr-4 text-gray-400">
-                {openFacturacion ? (
-                  <CircleChevronUp className="w-5 h-5" />
-                ) : (
-                  <CircleChevronDown className="w-5 h-5" />
-                )}
-              </button>
-            </div>
-            {openFacturacion && (
-              <div className="px-6 py-5">
-                <div className="grid grid-cols-4 gap-4">
-                  {Object.entries(facturacion).map(([key, value]) => (
-                    <div key={key} className="flex flex-col">
-                      <p className="font-extrabold text-sm text-[#3e3e3e]">
-                        {key}:
-                      </p>
-                      <div className="text-sm text-[#3e3e3e] opacity-75">
-                        {value}
-                      </div>
-                    </div>
+                <h3 className="font-bold text-md my-4">
+                  Información de la cuenta
+                </h3>
+                <div className="grid grid-cols-4 gap-6 p-3 rounded-md">
+                  {Object.entries(accountInfo).map(([key, value]) => (
+                    <ElementCard key={key} element={{ key, value }} />
                   ))}
                 </div>
               </AccordionContent>
