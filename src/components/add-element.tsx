@@ -9,7 +9,7 @@ interface AddElementButtonProps {
 }
 export default function AddElementButton({
   children,
-  isLoading,
+  isLoading = false,
   onClick,
   className,
 }: AddElementButtonProps) {

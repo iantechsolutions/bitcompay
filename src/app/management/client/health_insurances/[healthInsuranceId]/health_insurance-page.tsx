@@ -21,6 +21,7 @@ import { AddHealthInsurances } from "../AddHealthInsurances";
 import { Card } from "~/components/ui/card";
 import Upload02Icon from "~/components/icons/upload-02-stroke-rounded";
 import ElementCard from "~/components/affiliate-page/element-card";
+import Link from "next/link";
 dayjs.extend(utc);
 dayjs.locale("es");
 
@@ -34,6 +35,11 @@ export default function HealthInsurancePage(props: {
   const [idNumber, setIdNumber] = useState(
     props.healthInsurance!.identificationNumber!
   );
+
+  const { data: bussinesUnit } = api.bussinessUnits.get.useQuery({
+    bussinessUnitId: props.healthInsurance?.businessUnit ?? "",
+  });
+
   const [isPending, setIsLoading] = useState<boolean>(false);
   const { data: cc } = api.currentAccount.getByHealthInsurance.useQuery({
     healthInsuranceId: props.healthInsurance?.id ?? "",
@@ -58,7 +64,7 @@ export default function HealthInsurancePage(props: {
   async function handleUpdate() {
     try {
       await updateHealthInsurance({
-        healthInsuranceId: props.healthInsurance!.id,
+        id: props.healthInsurance!.id,
         name,
         identificationNumber: idNumber,
       });
@@ -70,31 +76,8 @@ export default function HealthInsurancePage(props: {
       toast.error(error.message);
     }
   }
-
-  // const { mutateAsync: deleteHealthInsurance, isLoading: isDeleting } =
-  //   api.healthInsurances.delete.useMutation();
-
-  // const [openDelete, setOpenDelete] = useState<boolean>(false);
-
-  // async function handleDelete() {
-  //   try {
-  //     setIsLoading(true);
-  //     const os = await deleteHealthInsurance({
-  //       healthInsuranceId: props.healthInsurance!.id,
-  //     });
-
-  //     toast.success("Obra social eliminada correctamente");
-  //     router.push("./");
-  //   } catch (e) {
-  //     const error = asTRPCError(e)!;
-  //     toast.error(
-  //       "No puede eliminarse obras sociiales con afiliados asociados"
-  //     );
-  //   }
-  // }
-
   const fiscalData = {
-    "Unidad de negocio": props.healthInsurance?.businessUnit,
+    "Unidad de negocio": bussinesUnit?.description,
     "Razón Social": props.healthInsurance?.responsibleName,
     CUIT: props.healthInsurance?.fiscal_id_number,
     "Condición AFIP": props.healthInsurance?.afip_status,
@@ -178,12 +161,15 @@ export default function HealthInsurancePage(props: {
               <p className="text-base font-[550] block place-content-center text-[#3e3e3e]">
                 Soportes
               </p>
-              <Button
-                variant="bitcompay"
-                className="bg-[#85CE81] text-sm px-4 h-7 gap-2 text-[#ffffff] rounded-full font-normal">
-                <Upload02Icon className="h-4" />
-                Subir archivo
-              </Button>
+              <Link
+                href={`/management/client/health_insurances/${props.healthInsuranceId}/massive-upload`}>
+                <Button
+                  variant="bitcompay"
+                  className="bg-[#85CE81] text-sm px-4 h-7 gap-2 text-[#ffffff] rounded-full font-normal">
+                  <Upload02Icon className="h-4" />
+                  Subir archivo
+                </Button>
+              </Link>
             </div>
           </Card>
         </div>
@@ -227,3 +213,25 @@ export default function HealthInsurancePage(props: {
     </LayoutContainer>
   );
 }
+
+// const { mutateAsync: deleteHealthInsurance, isLoading: isDeleting } =
+//   api.healthInsurances.delete.useMutation();
+
+// const [openDelete, setOpenDelete] = useState<boolean>(false);
+
+// async function handleDelete() {
+//   try {
+//     setIsLoading(true);
+//     const os = await deleteHealthInsurance({
+//       healthInsuranceId: props.healthInsurance!.id,
+//     });
+
+//     toast.success("Obra social eliminada correctamente");
+//     router.push("./");
+//   } catch (e) {
+//     const error = asTRPCError(e)!;
+//     toast.error(
+//       "No puede eliminarse obras sociiales con afiliados asociados"
+//     );
+//   }
+// }

@@ -156,6 +156,47 @@ const bonusAsString = z
     message: "Caracteres incorrectos en columna:",
   });
 
+export const recRowsTransformerOS = (rows: Record<string, unknown>[]) => {
+  let finishedArrayOS: {
+    name: string | null;
+    cuil: string | null;
+    periodo: Date | null;
+    modalidad: string | null;
+    aporte: string | null;
+    contribucion: string | null;
+    monotributo: string | null;
+    otros: string | null;
+    subsidio: string | null;
+    total: string | null;
+  }[] = [];
+  let errorsOS: z.ZodError<
+    {
+      name: string | null;
+      cuil: string | number | null | undefined;
+      periodo: Date | null;
+      modalidad: string | null | undefined;
+      aporte: string | number | null | undefined;
+      contribucion: string | number | null | undefined;
+      monotributo: string | number | null | undefined;
+      subsidio: string | number | null | undefined;
+      otros: string | number | null | undefined;
+      total: string | number | null | undefined;
+    }[]
+  >[] = [];
+
+  rows.map((row) => {
+    const resultOS = z.array(recDocumentValidatorOS).safeParse([row]);
+    if (resultOS.success) {
+      const item = resultOS.data[0];
+      if (item) {
+        finishedArrayOS.push(item);
+      }
+    } else {
+      errorsOS.push(resultOS.error);
+    }
+  });
+  return { finishedArrayOS, errorsOS };
+};
 export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
   let finishedArray: {
     business_unit: string | null;
@@ -305,6 +346,35 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
 };
 
 const customEmailRegex = /^[\wñÑ._%+-]+@[a-zñÑ0-9.-]+\.[a-z]{2,}$/i;
+
+export const recDocumentValidatorOS = z
+  .object({
+    NOMBRE: allToString.nullable(),
+    CUIL: allToString.nullable(),
+    PERIODO: stringAsDate.nullable().optional(),
+    MODALIDAD: allToString.nullable().optional(),
+    APORTE: allToString.nullable().optional(),
+    CONTRIBUCION: allToString.nullable().optional(),
+    MONOTRIBUTO: allToString.nullable().optional(),
+    SUBSIDIO: allToString.nullable().optional(),
+    OTROS: allToString.nullable().optional(),
+
+    TOTAL: allToString.nullable(),
+  })
+  .transform((value) => {
+    return {
+      name: value["NOMBRE"] ?? null,
+      cuil: value["CUIL"] ?? null,
+      periodo: value["PERIODO"] ?? null,
+      modalidad: value["MODALIDAD"] ?? null,
+      aporte: value["APORTE"] ?? null,
+      contribucion: value["CONTRIBUCION"] ?? null,
+      monotributo: value["MONOTRIBUTO"] ?? null,
+      subsidio: value["SUBSIDIO"] ?? null,
+      otros: value["OTROS"] ?? null,
+      total: value["TOTAL"] ?? null,
+    };
+  });
 
 export const recDocumentValidator = z
   .object({
@@ -558,6 +628,26 @@ export const recHeaders: TableHeaders = [
   { key: "import", label: "IMPORTE", width: 140 },
 ];
 
+export const recHeadersOS: TableHeaders = [
+  { key: "name", label: "NOMBRE", width: 140 },
+  { key: "cuil", label: "CUIT", width: 140 },
+  { key: "periodo", label: "PERIODO", width: 140 },
+  { key: "modalidad", label: "MODALIDAD", width: 140 },
+  { key: "aporte", label: "APORTE", width: 140 },
+  { key: "contribucion", label: "CONTRIBUCION", width: 140 },
+  { key: "monotributo", label: "MONOTRIBUTO", width: 140 },
+  { key: "subsidio", label: "SUBSIDIO", width: 140 },
+  { key: "total", label: "TOTAL", width: 140 },
+];
+
+export const requiredColumnsOS = [
+  { key: "name", label: "NOMBRE", width: 140 },
+  { key: "cuil", label: "CUIL/CUIT", width: 140 },
+  { key: "periodo", label: "PERIODO", width: 140 },
+  { key: "modalidad", label: "MODALIDAD", width: 140 },
+  { key: "total", label: "TOTAL", width: 140 },
+];
+
 export const requiredColumns = [
   { key: "business_unit", label: "UNIDAD DE NEGOCIO" },
   // { key: "os", label: "OS" },
@@ -584,7 +674,7 @@ export const requiredColumns = [
   // { key: "cellphone", label: "CELULAR" },
   { key: "plan", label: "PLAN" },
   { key: "product", label: "PRODUCTO" },
-  { key: "sale_condition", label: "CONDICION DE VENTA" },
+  // { key: "sale_condition", label: "CONDICION DE VENTA" },
 ];
 
 export const columnLabelByKey = Object.fromEntries(

@@ -20,6 +20,7 @@ import {
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { literal, number, type z } from "zod";
 import { he } from "date-fns/locale";
+import { date } from "drizzle-orm/mysql-core";
 
 export const documentUploads = pgTable(
   "document_upload",
@@ -553,7 +554,6 @@ export const healthInsurances = pgTable("health_insurances", {
   floor: varchar("floor", { length: 255 }),
   office: varchar("office", { length: 255 }),
   dateState: timestamp("dateState", { mode: "date" }),
-
 });
 
 export const healthInsurancesRelations = relations(
@@ -565,6 +565,7 @@ export const healthInsurancesRelations = relations(
     }),
     comprobantes: many(comprobantes),
     cc: one(currentAccount),
+    affiliate_os: many(affiliate_os),
   })
 );
 
@@ -1331,3 +1332,28 @@ export const selectrelativeSchema = createSelectSchema(relative);
 //   relation:true,
 // })
 export type Relative = z.infer<typeof selectrelativeSchema>;
+
+export const affiliate_os = pgTable("affiliate_os", {
+  id: columnId,
+  name: varchar("name", { length: 255 }).notNull(),
+  cuil: varchar("cuil", { length: 255 }).notNull(),
+  periodo: timestamp("Periodo"),
+  total: varchar("Total", { length: 255 }).notNull(),
+  aporte: varchar("Aporte", { length: 255 }).notNull(),
+  contribucion: varchar("Contribucion", { length: 255 }).notNull(),
+  subsidio: varchar("Subsidio", { length: 255 }).notNull(),
+  monotributo: varchar("Monotributo", { length: 255 }).notNull(),
+  modalidad: varchar("Modalidad", { length: 255 }).notNull(),
+  otros: varchar("Otros", { length: 255 }).notNull(),
+  healthInsurances_id: varchar("healthInsurances_id", {
+    length: 255,
+  }).notNull(),
+  createdAt,
+});
+
+export const affiliate_os_Relations = relations(affiliate_os, ({ one }) => ({
+  healthInsurances: one(healthInsurances, {
+    fields: [affiliate_os.healthInsurances_id],
+    references: [healthInsurances.id],
+  }),
+}));

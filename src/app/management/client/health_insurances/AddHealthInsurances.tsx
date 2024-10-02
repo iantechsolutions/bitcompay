@@ -37,6 +37,7 @@ import Calendar01Icon from "~/components/icons/calendar-01-stroke-rounded";
 import { Calendar } from "~/components/ui/calendar";
 import { bussinessUnits } from "~/server/db/schema";
 import Edit02Icon from "~/components/icons/edit-02-stroke-rounded";
+import { fi } from "date-fns/locale";
 
 export function AddHealthInsurances(props: {
   healthInsurance: RouterOutputs["healthInsurances"]["get"] | null;
@@ -46,20 +47,24 @@ export function AddHealthInsurances(props: {
   // const { data: OS } = api.healthInsurances.get.useQuery({
   //   healthInsuranceId: OSId ?? "",
   // });
+  // const { mutateAsync: startCC } =
+  //   api.currentAccount.createInitial.useMutation();
   const { mutateAsync: createHealtinsurances, isLoading } =
     api.healthInsurances.create.useMutation();
 
   const { mutateAsync: UploadhealthInsurances, isLoading: isPending } =
     api.healthInsurances.change.useMutation();
-  const { mutateAsync: startCC } =
-    api.currentAccount.createInitial.useMutation();
+
   const { data: cps } = api.postal_code.list.useQuery();
   const { data: businessUnits } = api.bussinessUnits.list.useQuery();
   // const { data: company } = api.companies.get.useQuery();
   // State management for the form fields
   // const [name, setName] = useState(OS?.name ?? "");
-  const [idNumber, setIdNumber] = useState(OS?.identificationNumber ?? "");
+  const [identificationNumber, setIdentificationNumber] = useState(
+    OS?.identificationNumber ?? ""
+  );
   const [address, setAddress] = useState(OS?.adress ?? "");
+
   const [afipStatus, setAfipStatus] = useState(
     OS?.afip_status ?? "monotributista"
   );
@@ -69,16 +74,13 @@ export function AddHealthInsurances(props: {
   const [fiscalIdType, setFiscalIdType] = useState(
     OS?.fiscal_id_number ?? "CUIT"
   );
-  const [responsibleName, setResponsibleName] = useState(
-    OS?.responsibleName ?? ""
-  );
+
   const [locality, setLocality] = useState(OS?.locality ?? "");
   const [province, setProvince] = useState(OS?.province ?? "");
   const [postalCode, setPostalCode] = useState(OS?.postal_code ?? "");
-  const [initialValue, setInitialValue] = useState("0");
   const [initials, setInitials] = useState(OS?.initials ?? "");
   const [businessUnit, setBusinessUnit] = useState(OS?.businessUnit ?? "");
-  const [businessName, setBusinessName] = useState(OS?.businessName ?? "");
+  const [razonsocial, setRazonsocial] = useState(OS?.businessName ?? "");
   const [fiscalAddress, setFiscalAddress] = useState(OS?.fiscalAddress ?? "");
   const [fiscalFloor, setFiscalFloor] = useState(OS?.fiscalFloor ?? "");
   const [fiscalOffice, setFiscalOffice] = useState(OS?.fiscalOffice ?? "");
@@ -112,10 +114,15 @@ export function AddHealthInsurances(props: {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
+  const [responsibleName, setResponsibleName] = useState(
+    OS?.responsibleName ?? ""
+  );
+  const [initialValue, setInitialValue] = useState("0");
+
   function validateFields() {
     const errors: string[] = [];
-    if (!businessName) errors.push("RAZON SOCIAL");
-    if (!idNumber) errors.push("CODIGO");
+    if (!razonsocial) errors.push("RAZON SOCIAL");
+    if (!identificationNumber) errors.push("CODIGO");
     // if (!fiscalIdNumber) errors.push("NRO DOC. FISCAL");
     if (!fiscalIdType) errors.push("TIPO DOC FISCAL");
     if (!afipStatus) errors.push("ESTADO AFIP");
@@ -137,18 +144,47 @@ export function AddHealthInsurances(props: {
     try {
       // Creating a health insurance product
       const healthInsurance = await createHealtinsurances({
-        name: businessName,
-        identificationNumber: idNumber,
-        isClient: true,
-        adress: address,
-        afip_status: afipStatus,
+        identificationNumber: identificationNumber,
+        initials: initials,
+
+        businessUnit: businessUnit,
+        businessName: razonsocial,
         fiscal_id_number: fiscalIdNumber.toString(),
-        fiscal_id_type: fiscalIdType,
-        responsibleName: responsibleName,
+        afip_status: afipStatus,
+        IIBBStatus: IIBBStatus,
+        IIBBNumber: IIBBNumber,
+        sellCondition: sellCondition,
+        fiscalAddress: fiscalAddress,
+        fiscalFloor: fiscalFloor,
+        fiscalOffice: fiscalOffice,
+        fiscalLocality: fiscalLocality,
+        fiscalProvince: fiscalProvince,
+        fiscalPostalCode: fiscalPostalCode,
+        fiscalCountry: fiscalCountry,
+
+        adress: address,
+        floor: floor,
+        office: office,
         locality: locality,
         province: province,
         postal_code: postalCode,
         initialValue: initialValue,
+
+        phoneNumber: phoneNumber,
+        email: email,
+        state: state,
+        user: user,
+        cancelMotive: cancelMotive,
+
+        isClient: true,
+        dateState: dateState,
+        responsibleName: responsibleName,
+        // initialValue: initialValue,
+        // responsibleName: responsibleName,
+        // sellCondition: sellCondition,
+        // user: user,
+        // cancelMotive: cancelMotive,
+        // fiscal_id_type: fiscalIdType,
       });
 
       toast.success("Obra social creada correctamente");
@@ -173,17 +209,40 @@ export function AddHealthInsurances(props: {
     try {
       // Creating a health insurance product
       const healthInsurance = await UploadhealthInsurances({
-        healthInsuranceId: OS?.id ?? "",
-        name: businessName,
-        identificationNumber: idNumber,
-        adress: address,
-        afip_status: afipStatus,
+        id: OS?.id ?? "",
+        identificationNumber: identificationNumber,
+        initials: initials,
+
+        businessUnit: businessUnit,
+        businessName: razonsocial,
         fiscal_id_number: fiscalIdNumber.toString(),
-        fiscal_id_type: fiscalIdType,
-        responsibleName: responsibleName,
+        afip_status: afipStatus,
+        IIBBStatus: IIBBStatus,
+        IIBBNumber: IIBBNumber,
+        sellCondition: sellCondition,
+        fiscalAddress: fiscalAddress,
+        fiscalFloor: fiscalFloor,
+        fiscalOffice: fiscalOffice,
+        fiscalLocality: fiscalLocality,
+        fiscalProvince: fiscalProvince,
+        fiscalPostalCode: fiscalPostalCode,
+        fiscalCountry: fiscalCountry,
+
+        adress: address,
+        floor: floor,
+        office: office,
         locality: locality,
         province: province,
         postal_code: postalCode,
+        phoneNumber: phoneNumber,
+        email: email,
+
+        isClient: true,
+        state: state,
+        dateState: dateState,
+        responsibleName: user,
+        cancelMotive: cancelMotive,
+        // initialValue: initialValue,
       });
 
       toast.success("Datos actualizados");
@@ -237,9 +296,11 @@ export function AddHealthInsurances(props: {
                 id="code"
                 className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 placeholder=""
+                value={identificationNumber}
+                onChange={(e) => setIdentificationNumber(e.target.value)}
               />
 
-              {/* <Select onValueChange={setIdNumber}>
+              {/* <Select onValueChange={setIdentificationNumber}>
                 <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
                   <SelectValue placeholder="..." />
                 </SelectTrigger>
@@ -253,9 +314,11 @@ export function AddHealthInsurances(props: {
             <div>
               <Label className="text-xs text-gray-500">SIGLA</Label>
               <Input
-                id="importe"
+                id="initials"
                 className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 placeholder=""
+                value={initials}
+                onChange={(e) => setInitials(e.target.value)}
               />
               {/* <Select>
                 <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
@@ -282,10 +345,7 @@ export function AddHealthInsurances(props: {
                 className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 placeholder="Ej: 121234"
               /> */}
-              <Select
-                onValueChange={setBusinessUnit}
-                value={businessUnit}
-                >
+              <Select onValueChange={setBusinessUnit} value={businessUnit}>
                 <SelectTrigger
                   className="w-fit mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right">
@@ -308,8 +368,8 @@ export function AddHealthInsurances(props: {
                 className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 id="name"
                 placeholder="..."
-                value={businessName}
-                onChange={(e) => setBusinessName(e.target.value)}
+                value={razonsocial}
+                onChange={(e) => setRazonsocial(e.target.value)}
               />
             </div>
 
@@ -320,6 +380,8 @@ export function AddHealthInsurances(props: {
                 id="importe"
                 className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 placeholder="XX-XXXXXXXX-X"
+                value={fiscalIdNumber}
+                onChange={(e) => setFiscalIdNumber(e.target.value)}
               />
             </div>
             <div>
@@ -600,7 +662,7 @@ export function AddHealthInsurances(props: {
               </Label>
               <Select onValueChange={setState} value={state}>
                 <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
-                  <SelectValue placeholder="Seleccionar CP" />
+                  <SelectValue placeholder="Seleccionar estado" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ACTIVO">ACTIVO</SelectItem>
@@ -663,7 +725,18 @@ export function AddHealthInsurances(props: {
                 onChange={(e) => setCancelMotive(e.target.value)}
               />
             </div>
-
+            <div>
+              <Label htmlFor="user" className="text-xs text-gray-500">
+                NOMBRE DEL RESPONSABLE
+              </Label>
+              <Input
+                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                id="user"
+                placeholder="..."
+                value={responsibleName}
+                onChange={(e) => setResponsibleName(e.target.value)}
+              />
+            </div>
             {/* {OS ? null : (
               <div>
                 <Label htmlFor="initialValue">Saldo inicial</Label>
