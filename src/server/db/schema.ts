@@ -857,7 +857,7 @@ export const ComprobantesSchemaDB = insertComprobantesSchema.pick({
   origin: true,
   previous_facturaId: true,
 });
-export type Comprobantes = z.infer<typeof selectComprobantesSchema>;
+export type Comprobante = z.infer<typeof selectComprobantesSchema>;
 
 export const items = pgTable("items", {
   id: columnId,

@@ -39,7 +39,6 @@ import {
 } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
-import { Comprobante } from "./facturaGenerada";
 import LayoutContainer from "~/components/layout-container";
 import { Title } from "~/components/title";
 import { useRouter } from "next/navigation";
@@ -77,13 +76,14 @@ import OtherTributes from "~/components/manual_issuance/other-tributes";
 import ConfirmationPage from "~/components/manual_issuance/confirmation-page";
 import ReceptorCard from "~/components/manual_issuance/receptor-card";
 import Totals from "~/components/manual_issuance/totals";
-
-type Totals = {
-  subTotal: number;
-  iva: number;
-  otherAttributes: number;
-};
-
+import {
+  type ConceptsForm,
+  type ManualGenInputs,
+  type OtherTributesForm,
+  type AsociatedFCForm,
+  type otherConceptsForm,
+} from "~/lib/types/app";
+import { type Comprobante } from "~/server/db/schema";
 function formatDate(date: Date | undefined) {
   if (date) {
     const year = date.getFullYear();
@@ -108,11 +108,12 @@ export default function Page() {
   const { data: marcas } = api.brands.list.useQuery();
   const { data: gruposFamiliar } = api.family_groups.list.useQuery();
   const { data: obrasSociales } = api.healthInsurances.list.useQuery();
-  const [subTotal, setSubTotal]= useState<number>(0);
-  const [ivaTotal, setIvaTotal]= useState<number>(0);
-  const [otherAttributes, setOtherAttributes]= useState<number>(0);
+  const [subTotal, setSubTotal] = useState<number>(0);
+  const [ivaTotal, setIvaTotal] = useState<number>(0);
+  const [otherAttributes, setOtherAttributes] = useState<number>(0);
   const [logo, setLogo] = useState("");
   const [fcSelec, setFCSelec] = useState("");
+  const [fcSeleccionada, setFcSeleccionada] = useState<Comprobante[]>([]);
   const [comprobantes, setComprobantes] = useState<any[]>();
   const [selectedComprobante, setSelectedComprobante] = useState<any>(null);
   const [comprobanteCreado, setComprobanteCreado] = useState<any>(null);
@@ -130,16 +131,16 @@ export default function Page() {
     loginAfip();
   }, []);
 
+  
   function computeTotals() {
-    let subTotal=0;
-    let ivaTotal=0;
-    let otherAttributes=0;
-    const res = otherTributesForm.getValues()
-    console.log("res", res)
+    let subTotal = 0;
+    let ivaTotal = 0;
+    let otherAttributes = 0;
+    const res = otherTributesForm.getValues();
     for (const attribute of res.tributes) {
       otherAttributes += Number(attribute.amount);
     }
-
+    
     switch (valueToNameComprobanteMap[tipoComprobante]) {
       case "Factura":
         for (const concept of conceptsForm.getValues().concepts) {
@@ -150,9 +151,14 @@ export default function Page() {
         for (const concepts of otherConceptsForm.getValues().otherConcepts) {
           subTotal += Number(concepts.importe);
         }
-      case "Nota de Crédito":
-      // implementar logica de factura asociada
+      case "Nota de crédito":
+        for (const comprobante of asociatedFCForm.getValues().comprobantes) {
+          console.log("comprobante del forms",comprobante)
+          subTotal += Number(comprobante.importe);
+          ivaTotal += Number(comprobante.iva) * Number(comprobante.iva);
+        }
     }
+    console.log("subtotal", subTotal)
     setSubTotal(subTotal);
     setIvaTotal(ivaTotal);
     setOtherAttributes(otherAttributes);
@@ -506,25 +512,6 @@ export default function Page() {
     }
   }
 
-  type ManualGenInputs = {
-    puntoVenta: string;
-    tipoDeConcepto: string;
-    alicuota: string;
-    dateEmision: Date;
-    dateVencimiento: Date;
-    dateDesde: Date;
-    dateHasta: Date;
-    facturasEmitidas: Number;
-  };
-  type ConceptsForm = {
-    concepts: {
-      concepto: string;
-      importe: number;
-      iva: number;
-      total: number;
-    }[];
-  };
-
   const [tipoComprobante, setTipoComprobante] = useState("");
   const [concepto, setConcepto] = useState("");
   const [tipoDocumento, setTipoDocumento] = useState("");
@@ -556,15 +543,7 @@ export default function Page() {
       concepts: [{ concepto: "", importe: 0, iva: 0, total: 0 }],
     },
   });
-  type OtherTributesForm = {
-    tributes: {
-      tribute: string;
-      jurisdiccion: string;
-      base: number;
-      aliquot: number;
-      amount: number;
-    }[];
-  };
+
   const otherTributesForm = useForm<OtherTributesForm>({
     defaultValues: {
       tributes: [
@@ -572,14 +551,7 @@ export default function Page() {
       ],
     },
   });
-  type AsociatedFCForm = {
-    comprobantes: {
-      tipoComprobante: string;
-      puntoVenta: string;
-      nroComprobante: string;
-      dateEmision: Date;
-    }[];
-  };
+  console.log("comprobante tipo",valueToNameComprobanteMap[tipoComprobante])
   const asociatedFCForm = useForm<AsociatedFCForm>({
     defaultValues: {
       comprobantes: [
@@ -588,36 +560,22 @@ export default function Page() {
           puntoVenta: "",
           nroComprobante: "",
           dateEmision: new Date(),
+          importe: 0,
+          iva: 0,
         },
       ],
     },
   });
 
-  type otherConceptsForm = {
-    otherConcepts: {
-      description: string;
-      importe: number;
-    }[];
-  };
   const otherConceptsForm = useForm<otherConceptsForm>({
     defaultValues: { otherConcepts: [{ description: "", importe: 0 }] },
   });
-    // useEffect(() => {
-    //   console.log("preComputeTotals");
-    //   computeTotals();
-    //   console.log("computeTotals");
-    //   console.log("total otros tributos", otherAttributes);
-    // }, [
-    //   otherTributesForm.watch("tributes"),
-    //   conceptsForm.watch("concepts"),
-    //   otherConceptsForm.watch("otherConcepts"),
-    // ]);
+
   const [page, setPage] = useState<"formPage" | "confirmationPage">("formPage");
   function handlePageChange(page: "formPage" | "confirmationPage") {
     setPage(page);
   }
 
-  const products = api.products.list.useQuery().data;
   const [brandId, setBrandId] = useState("");
   function handleGrupoFamilarChange(value: string) {
     setGrupoFamiliarId(value);
@@ -798,6 +756,9 @@ export default function Page() {
             />
 
             <AdditionalInfoCard
+              fcSeleccionada={fcSeleccionada}
+              setFcSeleccionada={setFcSeleccionada}
+              grupoFamiliarId={grupoFamiliarId}
               onValueChange={computeTotals}
               visualization={false}
               tipoComprobante={tipoComprobante}
@@ -813,7 +774,11 @@ export default function Page() {
               onAdd={computeTotals}
             />
 
-            <Totals subTotal={subTotal} iva={ivaTotal} otherAttributes={otherAttributes}/>
+            <Totals
+              subTotal={subTotal}
+              iva={ivaTotal}
+              otherAttributes={otherAttributes}
+            />
             <Button
               variant="outline"
               className="flex justify-between px-4 py-4 rounded-full self-end bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e]"
@@ -826,6 +791,8 @@ export default function Page() {
         {page === "confirmationPage" && (
           <ConfirmationPage
             form={form}
+            fcSeleccionada={fcSeleccionada}
+            setFcSeleccionada={setFcSeleccionada}
             conceptsForm={conceptsForm}
             otherConcepts={otherConceptsForm}
             setTipoComprobante={setTipoComprobante}
