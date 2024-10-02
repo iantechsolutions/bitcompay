@@ -565,6 +565,7 @@ export const healthInsurancesRelations = relations(
     }),
     comprobantes: many(comprobantes),
     cc: one(currentAccount),
+    affiliate_os: many(affiliate_os),
   })
 );
 
@@ -1336,14 +1337,14 @@ export const affiliate_os = pgTable("affiliate_os", {
   id: columnId,
   name: varchar("name", { length: 255 }).notNull(),
   cuil: varchar("cuil", { length: 255 }).notNull(),
-  Periodo: timestamp("Periodo"),
-  Total: varchar("Total", { length: 255 }).notNull(),
-  Aporte: varchar("Aporte", { length: 255 }).notNull(),
-  Contribucion: varchar("Contribucion", { length: 255 }).notNull(),
-  Subsidio: varchar("Subsidio", { length: 255 }).notNull(),
-  Monotributo: varchar("Monotributo", { length: 255 }).notNull(),
-  Modalidad: varchar("Modalidad", { length: 255 }).notNull(),
-  Otros: varchar("Otros", { length: 255 }).notNull(),
+  periodo: timestamp("Periodo"),
+  total: varchar("Total", { length: 255 }).notNull(),
+  aporte: varchar("Aporte", { length: 255 }).notNull(),
+  contribucion: varchar("Contribucion", { length: 255 }).notNull(),
+  subsidio: varchar("Subsidio", { length: 255 }).notNull(),
+  monotributo: varchar("Monotributo", { length: 255 }).notNull(),
+  modalidad: varchar("Modalidad", { length: 255 }).notNull(),
+  otros: varchar("Otros", { length: 255 }).notNull(),
   healthInsurances_id: varchar("healthInsurances_id", {
     length: 255,
   }).notNull(),

@@ -23,32 +23,35 @@ export const affiliate_osRouter = createTRPCRouter({
 
       return affiliate_os;
     }),
-  //   getByGroup: protectedProcedure
-  //     .input(
-  //       z.object({
-  //         family_group_id: z.string(),
-  //       })
-  //     )
-  //     .query(async ({ input }) => {
-  //       const affiliate_os = await db.query.affiliate_os.findMany({
-  //         where: eq(schema.affiliate_os.family_group_id, input.family_group_id),
-  //       });
-  //       return affiliate_os;
-  //     }),
+  getByOS: protectedProcedure
+    .input(
+      z.object({
+        healthInsurances_id: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      const affiliate_os = await db.query.affiliate_os.findMany({
+        where: eq(
+          schema.affiliate_os.healthInsurances_id,
+          input.healthInsurances_id
+        ),
+      });
+      return affiliate_os;
+    }),
   create: protectedProcedure
     .input(
       z.object({
         name: z.string(),
         cuil: z.string(),
-        Periodo: z.date(),
-        Total: z.string(),
-        Aporte: z.string(),
-        Contribucion: z.string(),
-        Subsidio: z.string(),
-        Monotributo: z.string(),
-        Modalidad: z.string(),
+        periodo: z.date(),
+        total: z.string(),
+        aporte: z.string(),
+        contribucion: z.string(),
+        subsidio: z.string(),
+        monotributo: z.string(),
+        modalidad: z.string(),
         healthInsurances_id: z.string(),
-        Otros: z.string(),
+        otros: z.string(),
       })
     )
     .mutation(async ({ input }) => {
