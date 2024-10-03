@@ -35,7 +35,6 @@ export function AddBrandDialog() {
   const [utility, setUtility] = useState("");
 
   const [code, setCode] = useState("");
-  const [razonSocial, setRazonSocial] = useState("");
   const [concept, setConcepto] = useState("");
 
   // const [billType, setBillType] = useState<string>("");
@@ -105,7 +104,7 @@ export function AddBrandDialog() {
               />
             </div>
 
-            <div>
+            {/* <div>
               <Label htmlFor="razonSocial">Razon social la marca</Label>
               <Input
                 id="razonSocial"
@@ -114,7 +113,7 @@ export function AddBrandDialog() {
                 onChange={(e) => setRazonSocial(e.target.value)}
                 required
               />
-            </div>
+            </div> */}
             <div>
               <Label htmlFor="concept">Concepto</Label>
               <Select

@@ -156,7 +156,10 @@ const bonusAsString = z
     message: "Caracteres incorrectos en columna:",
   });
 
-export const recRowsTransformerOS = (rows: Record<string, unknown>[]) => {
+export const recRowsTransformerOS = (
+  rows: Record<string, unknown>[],
+  date: Date
+) => {
   let finishedArrayOS: {
     name: string | null;
     cuil: string | null;
@@ -187,8 +190,12 @@ export const recRowsTransformerOS = (rows: Record<string, unknown>[]) => {
   rows.map((row) => {
     const resultOS = z.array(recDocumentValidatorOS).safeParse([row]);
     if (resultOS.success) {
-      const item = resultOS.data[0];
+      let item = resultOS.data[0];
       if (item) {
+        // Verifica si el campo periodo está vacío y asigna date si es necesario
+        if (!item.periodo) {
+          item.periodo = date;
+        }
         finishedArrayOS.push(item);
       }
     } else {

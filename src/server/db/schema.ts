@@ -261,7 +261,6 @@ export const brands = pgTable(
     redescription: varchar("redescription", { length: 10 })
       .notNull()
       .default(""),
-    razon_social: varchar("razon_social"),
     iva: varchar("iva"),
     bill_type: varchar("bill_type"),
     concept: varchar("concept"),

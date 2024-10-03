@@ -1156,7 +1156,6 @@ export const comprobantesRouter = createTRPCRouter({
         .values({
           brandId: input.brandId,
           createdAt: new Date(),
-          razon_social: brand?.razon_social ?? "",
           estado: "pendiente",
           cuit: company?.cuit ?? "",
           period: input.dateDesde,

@@ -36,12 +36,20 @@ export const excelDeserializationRouter = createTRPCRouter({
         type: z.string(),
         id: z.string(),
         OSid: z.string().optional(),
+        date: z.date().optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
       let contents;
       if (input.type === "OS") {
-        contents = await readExcelFileOS(db, input.id, input.type, ctx);
+        contents = await readExcelFileOS(
+          db,
+          input.id,
+          input.type,
+          input.date ?? null,
+          input.OSid ?? null,
+          ctx
+        );
       } else if (input.type === "rec") {
         contents = await readExcelFile(db, input.id, input.type, ctx);
       }
@@ -56,6 +64,7 @@ export const excelDeserializationRouter = createTRPCRouter({
         type: z.string(),
         uploadId: z.string(),
         OSid: z.string().optional(),
+        date: z.date().optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -64,29 +73,99 @@ export const excelDeserializationRouter = createTRPCRouter({
           db,
           input.uploadId,
           input.type,
+          input.date ?? null,
+          input.OSid ?? null,
           ctx
         );
-        await db.transaction(async (db) => {
-          contents.map(async (row) => {
-            const affiliate_os = await db
-              .insert(schema.affiliate_os)
-              .values({
-                name: row.name ?? "",
-                aporte: row.aporte ?? "",
-                contribucion: row.contribucion ?? "",
-                cuil: row.cuil ?? "",
-                healthInsurances_id: input.OSid ?? "",
-                modalidad: row.modalidad ?? "",
-                monotributo: row.monotributo ?? "",
-                periodo: row.periodo,
-                otros: row.otros ?? "",
-                subsidio: row.subsidio ?? "",
-                total: row.total ?? "",
-              })
-              .returning();
 
-            console.log("afiliado: ", affiliate_os);
+        let monto_total = 0;
+
+        await db.transaction(async (db) => {
+          // Usamos for...of para manejar promesas de forma adecuada
+          for (const row of contents) {
+            const existingAffiliate = await db.query.affiliate_os.findFirst({
+              where: eq(schema.affiliate_os.cuil, row.cuil ?? ""),
+            });
+
+            if (existingAffiliate) {
+              console.log("Afiliado existente encontrado:", existingAffiliate);
+
+              await db
+                .update(schema.affiliate_os)
+                .set({
+                  name: row.name ?? existingAffiliate.name,
+                  aporte: row.aporte ?? existingAffiliate.aporte,
+                  contribucion:
+                    row.contribucion ?? existingAffiliate.contribucion,
+                  healthInsurances_id:
+                    input.OSid ?? existingAffiliate.healthInsurances_id,
+                  modalidad: row.modalidad ?? existingAffiliate.modalidad,
+                  monotributo: row.monotributo ?? existingAffiliate.monotributo,
+                  periodo:
+                    input.date ?? row.periodo ?? existingAffiliate.periodo,
+                  otros: row.otros ?? existingAffiliate.otros,
+                  subsidio: row.subsidio ?? existingAffiliate.subsidio,
+                  total: row.total ?? existingAffiliate.total,
+                })
+                .where(eq(schema.affiliate_os.cuil, row.cuil ?? ""));
+
+              monto_total += parseFloat(row.total ?? "0");
+              console.log("Actualizado afiliado: ", monto_total);
+            } else {
+              console.log("No se encontró afiliado, creando nuevo...");
+
+              const affiliate_os = await db
+                .insert(schema.affiliate_os)
+                .values({
+                  name: row.name ?? "",
+                  aporte: row.aporte ?? "",
+                  contribucion: row.contribucion ?? "",
+                  cuil: row.cuil ?? "",
+                  healthInsurances_id: input.OSid ?? "",
+                  modalidad: row.modalidad ?? "",
+                  monotributo: row.monotributo ?? "",
+                  periodo: input.date ?? row.periodo,
+                  otros: row.otros ?? "",
+                  subsidio: row.subsidio ?? "",
+                  total: row.total ?? "",
+                })
+                .returning();
+
+              console.log("Nuevo afiliado creado: ", affiliate_os);
+              monto_total += parseFloat(row.total ?? "0");
+            }
+          }
+        });
+
+        console.log("Monto total procesado: ", monto_total);
+
+        const cc = await db.query.currentAccount.findFirst({
+          where: eq(schema.currentAccount.health_insurance, input.OSid ?? ""),
+        });
+
+        let historicEvents = await db.query.events.findMany({
+          where: eq(schema.events.currentAccount_id, cc?.id ?? ""),
+        });
+
+        if (historicEvents && historicEvents.length > 0) {
+          const lastEvent = historicEvents.reduce((prev, current) => {
+            return new Date(prev.createdAt) > new Date(current.createdAt)
+              ? prev
+              : current;
           });
+
+          const event = await db
+            .insert(schema.events)
+            .values({
+              currentAccount_id: cc?.id,
+              event_amount: monto_total,
+              current_amount: lastEvent.current_amount + monto_total,
+              description: "Pago afiliados",
+              type: "FC",
+              createdAt: new Date(),
+            })
+            .returning();
+
           await db
             .update(schema.excelBilling)
             .set({
@@ -94,7 +173,7 @@ export const excelDeserializationRouter = createTRPCRouter({
               confirmedAt: new Date(),
             })
             .where(eq(schema.excelBilling.id, input.uploadId));
-        });
+        }
       } else if (input.type === "rec") {
         const contents = await readExcelFile(
           db,
@@ -454,6 +533,8 @@ async function readExcelFileOS(
   db: DBTX,
   id: string,
   type: string | undefined,
+  date: Date | null,
+  OSid: string | null,
   ctx: any,
   batchSize = 100
 ) {
@@ -486,7 +567,7 @@ async function readExcelFileOS(
   console.log("we did it");
   const trimmedRows = rows.map(trimObject);
   const { finishedArrayOS: transformedRows, errorsOS: errorsTransform } =
-    recRowsTransformerOS(trimmedRows);
+    recRowsTransformerOS(trimmedRows, date ?? new Date());
   console.log("rows", transformedRows);
   if (trimmedRows.length === 0) {
     throw new TRPCError({

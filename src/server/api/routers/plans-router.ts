@@ -8,18 +8,21 @@ import { RouterOutputs } from "~/trpc/shared";
 export const plansRouter = createTRPCRouter({
   get: protectedProcedure
     .input(z.object({ planId: z.string() }))
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
       console.log("input", input);
-      const planes = await db.query.plans.findMany();
-      console.log("planes", planes);
       const plan_found = await db.query.plans.findFirst({
         where: eq(schema.plans.id, input.planId),
         with: {
           pricesPerCondition: true,
+          brands: true,
         },
       });
       console.log("plan_found", plan_found);
-      return plan_found;
+      if (plan_found?.brands?.companyId == ctx.session.orgId) {
+        return plan_found;
+      } else {
+        return null;
+      }
     }),
   list: protectedProcedure.query(async ({ ctx }) => {
     const plans = await db.query.plans.findMany({
