@@ -37,11 +37,14 @@ import Calendar01Icon from "~/components/icons/calendar-01-stroke-rounded";
 import { Calendar } from "~/components/ui/calendar";
 import { bussinessUnits } from "~/server/db/schema";
 import Edit02Icon from "~/components/icons/edit-02-stroke-rounded";
-import { fi } from "date-fns/locale";
+import { es } from 'date-fns/locale'
+import { setDefaultOptions } from "date-fns";
+
 
 export function AddHealthInsurances(props: {
   healthInsurance: RouterOutputs["healthInsurances"]["get"] | null;
 }) {
+  setDefaultOptions({ locale: es })
   const OS = props?.healthInsurance;
 
   // const { data: OS } = api.healthInsurances.get.useQuery({
@@ -279,7 +282,7 @@ export function AddHealthInsurances(props: {
       </AddElementButton>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-[1000px] max-h-[95vh] gap-4 rounded-2xl p-6 overflow-y-scroll">
+        <DialogContent className="max-w-[1000px] max-h-[95vh] gap-4 rounded-2xl py-8 px-14 overflow-y-scroll">
           <DialogHeader>
             {OS ? (
               <DialogTitle>Editar obra social</DialogTitle>
@@ -294,14 +297,14 @@ export function AddHealthInsurances(props: {
               </Label>
               <Input
                 id="code"
-                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 placeholder=""
                 value={identificationNumber}
                 onChange={(e) => setIdentificationNumber(e.target.value)}
               />
 
               {/* <Select onValueChange={setIdentificationNumber}>
-                <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
+                <SelectTrigger className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
                   <SelectValue placeholder="..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -315,13 +318,13 @@ export function AddHealthInsurances(props: {
               <Label className="text-xs text-gray-500">SIGLA</Label>
               <Input
                 id="initials"
-                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 placeholder=""
                 value={initials}
                 onChange={(e) => setInitials(e.target.value)}
               />
               {/* <Select>
-                <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
+                <SelectTrigger className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
                   <SelectValue placeholder="..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -334,7 +337,7 @@ export function AddHealthInsurances(props: {
             <div />
             <div />
 
-            <p className="col-span-4 mt-3 p-3 justify-start text-black font-xs text-sm font-semibold">
+            <p className="col-span-4 mt-3 px-1 py-2 justify-start text-black font-xs text-sm font-semibold">
               Datos fiscales
             </p>
             <div>
@@ -342,12 +345,12 @@ export function AddHealthInsurances(props: {
               {/* <Input
                 type="number"
                 id="importe"
-                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 placeholder="Ej: 121234"
               /> */}
               <Select onValueChange={setBusinessUnit} value={businessUnit}>
                 <SelectTrigger
-                  className="w-fit mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+                  className="w-fit mb-2 border-[#bef0bb] border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right">
                   <SelectValue placeholder="Seleccione una UN" />
                 </SelectTrigger>
@@ -365,7 +368,7 @@ export function AddHealthInsurances(props: {
                 RAZON SOCIAL
               </Label>
               <Input
-                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 id="name"
                 placeholder="..."
                 value={razonsocial}
@@ -378,7 +381,7 @@ export function AddHealthInsurances(props: {
               <Input
                 type="number"
                 id="importe"
-                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 placeholder="XX-XXXXXXXX-X"
                 value={fiscalIdNumber}
                 onChange={(e) => setFiscalIdNumber(e.target.value)}
@@ -387,7 +390,7 @@ export function AddHealthInsurances(props: {
             <div>
               <Label className="text-xs text-gray-500">CONDICIÓN AFIP</Label>
               <Select onValueChange={setAfipStatus} value={afipStatus}>
-                <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none">
+                <SelectTrigger className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none">
                   <SelectValue placeholder="Seleccione uno" />
                 </SelectTrigger>
                 <SelectContent>
@@ -406,7 +409,7 @@ export function AddHealthInsurances(props: {
             <div>
               <Label className="text-xs text-gray-500">CONDICIÓN IIBB</Label>
               <Select onValueChange={setIIBBStatus} value={IIBBStatus}>
-                <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none">
+                <SelectTrigger className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none">
                   <SelectValue placeholder="Seleccione uno" />
                 </SelectTrigger>
                 <SelectContent>
@@ -428,7 +431,7 @@ export function AddHealthInsurances(props: {
               </Label>
               <Input
                 id="IdNumber"
-                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none"
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none"
                 placeholder="..."
                 value={IIBBNumber}
                 onChange={(e) => setIIBBNumber(e.target.value)}
@@ -441,7 +444,7 @@ export function AddHealthInsurances(props: {
               </Label>
               <Input
                 id="IdNumber"
-                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none"
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none"
                 placeholder="..."
                 value={sellCondition}
                 onChange={(e) => setSellCondition(e.target.value)}
@@ -453,7 +456,7 @@ export function AddHealthInsurances(props: {
                 DOMICILIO FISCAL
               </Label>
               <Input
-                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+                className=" mb-2 border-[#bef0bb] border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right w-full"
                 id="address"
                 placeholder="..."
@@ -466,7 +469,7 @@ export function AddHealthInsurances(props: {
                 PISO
               </Label>
               <Input
-                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+                className=" mb-2 border-[#bef0bb] border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right w-full"
                 id="address"
                 placeholder="..."
@@ -479,7 +482,7 @@ export function AddHealthInsurances(props: {
                 OFICINA
               </Label>
               <Input
-                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+                className=" mb-2 border-[#bef0bb] border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right w-full"
                 id="address"
                 placeholder="..."
@@ -492,7 +495,7 @@ export function AddHealthInsurances(props: {
                 LOCALIDAD
               </Label>
               <Input
-                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+                className=" mb-2 border-[#bef0bb] border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right w-full"
                 id="address"
                 placeholder="..."
@@ -505,7 +508,7 @@ export function AddHealthInsurances(props: {
                 PROVINCIA
               </Label>
               <Input
-                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+                className=" mb-2 border-[#bef0bb] border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right w-full"
                 id="address"
                 placeholder="..."
@@ -521,7 +524,7 @@ export function AddHealthInsurances(props: {
                 onValueChange={setFiscalPostalCode}
                 value={fiscalPostalCode}>
                 <SelectTrigger
-                  className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+                  className=" mb-2 border-[#bef0bb] border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right w-full">
                   <SelectValue placeholder="Seleccionar CP" />
                 </SelectTrigger>
@@ -539,7 +542,7 @@ export function AddHealthInsurances(props: {
                 PAÍS
               </Label>
               <Input
-                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+                className=" mb-2 border-[#bef0bb] border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right w-full"
                 id="address"
                 placeholder="..."
@@ -548,7 +551,7 @@ export function AddHealthInsurances(props: {
               />
             </div>
 
-            <p className="col-span-4 mt-3 p-3 justify-start text-black font-xs text-sm font-semibold">
+            <p className="col-span-4 mt-3 px-1 py-2 justify-start text-black font-xs text-sm font-semibold">
               Datos de Contacto
             </p>
             <div>
@@ -556,7 +559,7 @@ export function AddHealthInsurances(props: {
                 DOMICILIO COMERCIAL
               </Label>
               <Input
-                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 id="address"
                 placeholder="..."
                 value={address}
@@ -568,7 +571,7 @@ export function AddHealthInsurances(props: {
                 PISO
               </Label>
               <Input
-                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 id="address"
                 placeholder="..."
                 value={floor}
@@ -580,7 +583,7 @@ export function AddHealthInsurances(props: {
                 OFICINA
               </Label>
               <Input
-                className=" mb-2 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+                className=" mb-2 border-[#bef0bb] border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right w-full"
                 id="address"
                 placeholder="..."
@@ -593,7 +596,7 @@ export function AddHealthInsurances(props: {
                 LOCALIDAD
               </Label>
               <Input
-                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 id="locality"
                 placeholder="..."
                 value={locality}
@@ -605,7 +608,7 @@ export function AddHealthInsurances(props: {
                 PROVINCIA
               </Label>
               <Input
-                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 id="province"
                 placeholder="..."
                 value={province}
@@ -617,7 +620,7 @@ export function AddHealthInsurances(props: {
                 CÓDIGO POSTAL
               </Label>
               <Select onValueChange={setPostalCode} value={postalCode}>
-                <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
+                <SelectTrigger className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
                   <SelectValue placeholder="Seleccionar CP" />
                 </SelectTrigger>
                 <SelectContent>
@@ -634,7 +637,7 @@ export function AddHealthInsurances(props: {
                 TELÉFONO
               </Label>
               <Input
-                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 id="address"
                 placeholder="..."
                 value={phoneNumber}
@@ -646,14 +649,14 @@ export function AddHealthInsurances(props: {
                 E-MAIL
               </Label>
               <Input
-                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 id="address"
                 placeholder="..."
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
-            <p className="col-span-4 mt-3 p-3 justify-start text-black font-xs text-sm font-semibold">
+            <p className="col-span-4 mt-3 px-1 py-2 justify-start text-black font-xs text-sm font-semibold">
               Información de la cuenta
             </p>
             <div>
@@ -661,7 +664,7 @@ export function AddHealthInsurances(props: {
                 ESTADO
               </Label>
               <Select onValueChange={setState} value={state}>
-                <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
+                <SelectTrigger className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
                   <SelectValue placeholder="Seleccionar estado" />
                 </SelectTrigger>
                 <SelectContent>
@@ -680,7 +683,7 @@ export function AddHealthInsurances(props: {
                   <Button
                     variant={"outline"}
                     className={cn(
-                      "text-left flex justify-between font-medium w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none pr-0 pl-0",
+                      "text-left flex justify-between font-medium w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none pr-0 pl-0",
                       !dateState && "text-muted-foreground"
                     )}>
                     {dateState ? (
@@ -706,7 +709,7 @@ export function AddHealthInsurances(props: {
                 USUARIO
               </Label>
               <Input
-                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 id="user"
                 placeholder="..."
                 value={user}
@@ -718,7 +721,7 @@ export function AddHealthInsurances(props: {
                 MOTIVO DE BAJA
               </Label>
               <Input
-                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 id="cancelMotive"
                 placeholder="..."
                 value={cancelMotive}
@@ -730,7 +733,7 @@ export function AddHealthInsurances(props: {
                 NOMBRE DEL RESPONSABLE
               </Label>
               <Input
-                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 id="user"
                 placeholder="..."
                 value={responsibleName}

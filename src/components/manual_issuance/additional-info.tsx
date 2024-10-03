@@ -8,13 +8,13 @@ import {
 } from "../ui/select";
 import { cn, valueToNameComprobanteMap } from "~/lib/utils";
 import GeneralCard from "./general-card";
-import { UseFormReturn } from "react-hook-form";
+import { useFormContext, UseFormReturn } from "react-hook-form";
 import { useFieldArray } from "react-hook-form";
 import CancelCircleIcon from "../icons/cancel-circle-stroke-rounded";
 import AddCircleIcon from "../icons/add-circle-stroke-rounded";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { Form, FormField } from "../ui/form";
+import { Form, FormControl, FormField, FormItem } from "../ui/form";
 import { RouterOutputs } from "~/trpc/shared";
 import PaymentMethods from "./payment-methods";
 import { visualizationSwitcher } from "~/lib/utils";
@@ -24,57 +24,55 @@ import { Calendar } from "../ui/calendar";
 import Calendar01Icon from "../icons/calendar-01-stroke-rounded";
 import { format } from "date-fns";
 import { useEffect, useState } from "react";
-type ConceptsForm = {
-  concepts: {
-    concepto: string;
-    importe: number;
-    iva: number;
-    total: number;
-  }[];
-};
-type ManualGenInputs = {
-  puntoVenta: string;
-  tipoDeConcepto: string;
-  alicuota: string;
-  dateEmision: Date;
-  dateVencimiento: Date;
-  dateDesde: Date;
-  dateHasta: Date;
-  facturasEmitidas: Number;
-};
-type AsociatedFCForm = {
-  comprobantes: {
-    tipoComprobante: string;
-    puntoVenta: string;
-    nroComprobante: string;
-    dateEmision: Date;
-  }[];
-};
-type otherConceptsForm = {
-  otherConcepts: {
-    description: string;
-    importe: number;
-  }[];
-};
+import { api } from "~/trpc/react";
+import { reverseComprobanteDictionary } from "~/lib/utils";
+import { Comprobante } from "~/server/db/schema";
+import {
+  AsociatedFCForm,
+  ConceptsForm,
+  ManualGenInputs,
+  otherConceptsForm,
+} from "~/lib/types/app";
+
 type AdditionalInfoProps = {
   onValueChange?: () => void;
+  fcSeleccionada: Comprobante[];
+  setFcSeleccionada: (comprobante: Comprobante[]) => void;
   visualization: boolean;
   tipoComprobante: string;
   conceptsForm: UseFormReturn<ConceptsForm>;
   form: UseFormReturn<ManualGenInputs>;
   asociatedFCForm: UseFormReturn<AsociatedFCForm>;
   otherConceptsForm: UseFormReturn<otherConceptsForm>;
-  grupoFamiliar?: RouterOutputs["family_groups"]["list"][number];
+  grupoFamiliarId?: string;
 };
 export default function AdditionalInfoCard({
   onValueChange,
+  fcSeleccionada,
+  setFcSeleccionada,
   conceptsForm,
   asociatedFCForm,
   form,
   tipoComprobante,
   otherConceptsForm,
   visualization,
+  grupoFamiliarId,
 }: AdditionalInfoProps) {
+  const { data: comprobantes } = api.comprobantes.getByEntity.useQuery({
+    familyGroup: grupoFamiliarId,
+    healthInsurance: null,
+    tipoComprobante: null,
+  });
+  function getComprobantesOptions(tipoComprobante: string) {
+    return comprobantes
+      ?.slice(0, 10)
+      .filter((comprobante) => comprobante.tipoComprobante === tipoComprobante)
+      .map((comprobante) => (
+        <SelectItem key={comprobante.id} value={comprobante.id}>
+          {comprobante.nroComprobante}
+        </SelectItem>
+      ));
+  }
   const { fields, remove, append } = useFieldArray({
     control: conceptsForm.control,
     name: "concepts",
@@ -108,6 +106,7 @@ export default function AdditionalInfoCard({
     // Guardar el valor en localStorage cuando paymentMethod cambie
     localStorage.setItem("paymentMethod", JSON.stringify(paymentMethod));
   }, [paymentMethod]);
+
   const AdditionalInfoMap: Record<string, React.ReactNode> = {
     default: <></>,
     Factura: (
@@ -271,140 +270,229 @@ export default function AdditionalInfoCard({
             </Button>
           </div>
         )}
-        {asocFields.map((fieldElement, index) => (
-          <div className="w-full grid grid-flow-col gap-5 justify-stretch items-center">
-            <ElementCard
-              className="pr-1 pb-0 border-[#bef0bb]"
-              element={{
-                key: "COMPROBANTE ASOCIADO",
-                value: visualizationSwitcher(
-                  visualization,
-                  <FormField
-                    control={asociatedFCForm.control}
-                    name={`comprobantes.${index}.tipoComprobante`}
-                    render={({ field }) => (
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8">
-                          <SelectValue placeholder="Seleccionar tipo comprobante..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectContent>
-                            <SelectItem value="0">RECIBO</SelectItem>
-                            <SelectItem value="1">FACTURA A</SelectItem>
-                            <SelectItem value="3">NOTA DE CREDITO A</SelectItem>
-                            <SelectItem value="6">FACTURA B</SelectItem>
-                            <SelectItem value="8">NOTA DE CREDITO B</SelectItem>
-                          </SelectContent>
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />,
-                  fieldElement.tipoComprobante
-                ),
-              }}
-            />
-            <ElementCard
-              className="pr-1 pb-0 border-[#bef0bb]"
-              element={{
-                key: "PTO. VTA.",
-                value: visualizationSwitcher(
-                  visualization,
-                  <FormField
-                    control={asociatedFCForm.control}
-                    name={`comprobantes.${index}.puntoVenta`}
-                    render={({ field }) => <Input type="number" {...field} />}
-                  />,
-                  fieldElement.puntoVenta
-                ),
-              }}
-            />
-            <ElementCard
-              className="pr-1 pb-0 border-[#bef0bb]"
-              element={{
-                key: "COMPROBANTE",
-                value: visualizationSwitcher(
-                  visualization,
-                  <FormField
-                    control={asociatedFCForm.control}
-                    name={`comprobantes.${index}.nroComprobante`}
-                    render={({ field }) => <Input type="number" {...field} />}
-                  />,
-                  fieldElement.nroComprobante
-                ),
-              }}
-            />
+        <Form {...asociatedFCForm}>
+          <form>
+            {asocFields.map((fieldElement, index) => (
+              <div
+                className="w-full grid grid-flow-col gap-5 justify-stretch items-center"
+                key={index}
+              >
+                <ElementCard
+                  className="pr-1 pb-0 border-[#bef0bb]"
+                  element={{
+                    key: "COMPROBANTE ASOCIADO",
+                    value: visualizationSwitcher(
+                      visualization,
+                      <FormField
+                        control={asociatedFCForm.control}
+                        name={`comprobantes.${index}.tipoComprobante`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <Select
+                              onValueChange={(e) => {
+                                asociatedFCForm.setValue(
+                                  `comprobantes.${index}.tipoComprobante`,
+                                  reverseComprobanteDictionary[Number(e)]!
+                                );
+                              }}
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8">
+                                  <SelectValue placeholder="Seleccionar tipo comprobante..." />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectContent>
+                                  <SelectItem value="0">RECIBO</SelectItem>
+                                  <SelectItem value="1">FACTURA A</SelectItem>
+                                  <SelectItem value="3">
+                                    NOTA DE CREDITO A
+                                  </SelectItem>
+                                  <SelectItem value="6">FACTURA B</SelectItem>
+                                  <SelectItem value="8">
+                                    NOTA DE CREDITO B
+                                  </SelectItem>
+                                </SelectContent>
+                              </SelectContent>
+                            </Select>
+                          </FormItem>
+                        )}
+                      />,
+                      fieldElement.tipoComprobante
+                    ),
+                  }}
+                />
+                <ElementCard
+                  className="pr-1 pb-0 border-[#bef0bb]"
+                  element={{
+                    key: "PTO. VTA.",
+                    value: visualizationSwitcher(
+                      visualization,
+                      <FormField
+                        control={asociatedFCForm.control}
+                        name={`comprobantes.${index}.puntoVenta`}
+                        render={({ field }) => (
+                          <Input
+                            {...field}
+                            placeholder="Punto de venta"
+                            disabled
+                          />
+                        )}
+                      />,
+                      fieldElement.puntoVenta
+                    ),
+                  }}
+                />
+                <ElementCard
+                  className="pr-1 pb-0 border-[#bef0bb]"
+                  element={{
+                    key: "COMPROBANTE",
+                    value: visualizationSwitcher(
+                      visualization,
+                      <FormField
+                        control={asociatedFCForm.control}
+                        name={`comprobantes.${index}.nroComprobante`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <Select
+                              onValueChange={(e) => {
+                                for (const comprobante of comprobantes!) {
+                                  console.log(comprobante.id);
+                                  if (comprobante.id === e) {
+                                    setFcSeleccionada([
+                                      ...fcSeleccionada,
+                                      comprobante,
+                                    ]);
 
-            <ElementCard
-              className="pr-1 pb-0 border-[#bef0bb]"
-              element={{
-                key: "FECHA DE EMISION",
-                value: visualizationSwitcher(
-                  visualization,
-                  <FormField
-                    control={asociatedFCForm.control}
-                    name={`comprobantes.${index}.dateEmision`}
-                    render={({ field }) => (
-                      <Popover>
-                        <PopoverTrigger asChild={true}>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "dd/MM/yyyy")
-                            ) : (
-                              <span>Seleccionar fecha</span>
-                            )}
-                            <Calendar01Icon className="h-4 w-4" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                          <Calendar mode="single" initialFocus={true} />
-                        </PopoverContent>
-                      </Popover>
-                    )}
-                  />,
-                  dayjs(fieldElement.dateEmision).format("DD/MM/YYYY")
-                ),
-              }}
-            />
-            {visualization ? null : (
-              <div className="w-20 flex gap-1">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  type="button"
-                  className="bg-transparent hover:bg-transparent border-none shadow-none"
-                  onClick={() => asocRemove(index)}
-                >
-                  <CancelCircleIcon className="text-[#ed4444]" />
-                </Button>
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="outline"
-                  className="bg-transparent hover:bg-transparent border-none shadow-none"
-                  onClick={() =>
-                    asocAppend({
-                      tipoComprobante: "",
-                      puntoVenta: "",
-                      nroComprobante: "",
-                      dateEmision: new Date(),
-                    })
-                  }
-                >
-                  <AddCircleIcon className="text-[#8bd087]" />
-                </Button>
+                                    asociatedFCForm.setValue(
+                                      `comprobantes.${index}.nroComprobante`,
+                                      comprobante.nroComprobante.toString()
+                                    );
+                                    asociatedFCForm.setValue(
+                                      `comprobantes.${index}.puntoVenta`,
+                                      comprobante.ptoVenta.toString()
+                                    );
+                                    asociatedFCForm.setValue(
+                                      `comprobantes.${index}.dateEmision`,
+                                      comprobante.generated
+                                    );
+
+                                    asociatedFCForm.setValue(
+                                      `comprobantes.${index}.importe`,
+                                      comprobante.importe
+                                    );
+                                    asociatedFCForm.setValue(
+                                      `comprobantes.${index}.iva`,
+                                      Number(comprobante.iva)
+                                    );
+
+                                    if (onValueChange) onValueChange();
+                                  }
+                                }
+                              }}
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Seleccionar comprobante..." />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {getComprobantesOptions(
+                                  asociatedFCForm.watch(
+                                    `comprobantes.${index}.tipoComprobante`
+                                  )
+                                )}
+                              </SelectContent>
+                            </Select>
+                          </FormItem>
+                        )}
+                      />,
+                      fieldElement.nroComprobante
+                    ),
+                  }}
+                />
+
+                <ElementCard
+                  className="pr-1 pb-0 border-[#bef0bb]"
+                  element={{
+                    key: "FECHA DE EMISION",
+                    value: visualizationSwitcher(
+                      visualization,
+                      <FormField
+                        control={asociatedFCForm.control}
+                        name={`comprobantes.${index}.dateEmision`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <Popover>
+                              <PopoverTrigger asChild={true}>
+                                <FormControl>
+                                  <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                      "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
+                                      !field.value && "text-muted-foreground"
+                                    )}
+                                    disabled
+                                  >
+                                    {field.value ? (
+                                      format(field.value, "dd/MM/yyyy")
+                                    ) : (
+                                      <span>Seleccionar fecha</span>
+                                    )}
+                                    <Calendar01Icon className="h-4 w-4" />
+                                  </Button>
+                                </FormControl>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0">
+                                <Calendar mode="single" initialFocus={true} />
+                              </PopoverContent>
+                            </Popover>
+                          </FormItem>
+                        )}
+                      />,
+                      dayjs(fieldElement.dateEmision).format("DD/MM/YYYY")
+                    ),
+                  }}
+                />
+
+                {visualization ? null : (
+                  <div className="w-20 flex gap-1">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      type="button"
+                      className="bg-transparent hover:bg-transparent border-none shadow-none"
+                      onClick={() => {
+                        asocRemove(index);
+                        if (onValueChange) onValueChange();
+                      }}
+                    >
+                      <CancelCircleIcon className="text-[#ed4444]" />
+                    </Button>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="outline"
+                      className="bg-transparent hover:bg-transparent border-none shadow-none"
+                      onClick={() =>
+                        asocAppend({
+                          tipoComprobante: "",
+                          puntoVenta: "",
+                          nroComprobante: "",
+                          dateEmision: new Date(),
+                        })
+                      }
+                    >
+                      <AddCircleIcon className="text-[#8bd087]" />
+                    </Button>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        ))}
+            ))}
+          </form>
+        </Form>
       </GeneralCard>
     ),
     Recibo: (
@@ -495,7 +583,7 @@ export default function AdditionalInfoCard({
                     size="icon"
                     className="bg-transparent hover:bg-transparent border-none shadow-none"
                     onClick={(e) => {
-                      otherConceptsRemove(index)
+                      otherConceptsRemove(index);
                       if (onValueChange) onValueChange();
                     }}
                   >
