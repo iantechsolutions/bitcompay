@@ -41,8 +41,7 @@ export default function AffiliatePage(props: {
   const { data: grupo } = api.family_groups.get.useQuery({
     family_groupsId: grupos!,
   });
-
-  const {data:productos} = api.products.list.useQuery();
+  const { data: productos } = api.products.list.useQuery();
 
   const { data: cc } = api.currentAccount.getByFamilyGroup.useQuery({
     familyGroupId: grupos ?? "",
@@ -67,6 +66,7 @@ export default function AffiliatePage(props: {
   );
 
   const billResponsible = grupo?.integrants.find((x) => x.isBillResponsible);
+  const grupoPaymentMethod = billResponsible?.pa[0]?.product?.name;
   const paymentResponsible = grupo?.integrants.find((x) => x.isPaymentHolder);
   let pa: RouterOutputs["pa"]["get"];
   if (paymentResponsible?.pa && paymentResponsible.pa.length > 0) {
@@ -91,8 +91,10 @@ export default function AffiliatePage(props: {
     Vigencia: grupo?.validity
       ? dayjs(grupo?.validity).format("DD-MM-YYYY")
       : "-",
-    "O.S Asignada": billResponsible?.healthInsurances?.identificationNumber ?? "-",
-    "O.S Origen": billResponsible?.originatingHealthInsurances?.identificationNumber ?? "-",
+    "O.S Asignada":
+      billResponsible?.healthInsurances?.identificationNumber ?? "-",
+    "O.S Origen":
+      billResponsible?.originatingHealthInsurances?.identificationNumber ?? "-",
     Zona: "-",
     Estado: grupo?.state,
     "Fecha estado": "",
@@ -188,15 +190,18 @@ export default function AffiliatePage(props: {
 
   const paymentMethod = new Map<string, React.ReactNode>([
     [
-      "Débito Directo",
+      "DEBITO DIRECTO",
       <>
         <div className="flex items-start gap-1">
           <ElementCard
-            element={{ key: "CBU", value: billResponsible?.pa[0]?.CBU ?? "0000000000000000000000" }}
+            element={{
+              key: "CBU",
+              value: billResponsible?.pa[0]?.CBU ?? "0000000000000000000000",
+            }}
           />
           <ElementCard element={{ key: "ALIAS", value: "AAAA.AAA.AAA" }} />
         </div>
-  
+
         <div className="mt-3">
           <ElementCard
             element={{
@@ -214,7 +219,7 @@ export default function AffiliatePage(props: {
       </>,
     ],
     [
-      "Voluntario",
+      "PAGO VOLUNTARIO",
       <div className="p-0">
         <h2 className="font-bold text-base mb-2">Redes Habilitadas: </h2>
         <div className="flex gap-4 items-center justify-start">
@@ -233,8 +238,29 @@ export default function AffiliatePage(props: {
         </div>
       </div>,
     ],
+
     [
-      "Débito Automático",
+      "EFECTIVO",
+      <div className="p-0">
+        <h2 className="font-bold text-base mb-2">Redes Habilitadas: </h2>
+        <div className="flex gap-4 items-center justify-start">
+          <div className="flex gap-2 items-center">
+            <img src="/public/affiliates/rapipago.png" className="h-5" />{" "}
+            Rapipago
+          </div>
+          <div className="flex gap-2">
+            <img src="/public/affiliates/pagofacil.png" className="h-5" />
+            Pago Fácil
+          </div>
+          {/* <div className="flex gap-2">
+            <img src="/public/affiliates/pagomiscuentas.png" className="h-5" />{" "}
+            Pagomiscuentas
+          </div> */}
+        </div>
+      </div>,
+    ],
+    [
+      "DEBITO AUTOMATICO",
       <div className="pl-4">
         <div className="flex justify-between">
           <ElementCard
@@ -248,8 +274,11 @@ export default function AffiliatePage(props: {
               key: "NÚMERO DE TARJETA",
               value: (
                 <div className="flex justify-between items-center">
-                  **** **** **** 
-                  {billResponsible?.pa[0] ? billResponsible?.pa[0].card_number?.slice(12,16)  ?? "1234" : "1234"}
+                  **** **** ****
+                  {billResponsible?.pa[0]
+                    ? billResponsible?.pa[0].card_number?.slice(12, 16) ??
+                      "1234"
+                    : "1234"}
                   {cardLogoMap["Visa"]}
                 </div>
               ),
@@ -257,9 +286,20 @@ export default function AffiliatePage(props: {
           />
         </div>
         <div className="flex justify-start gap-3 mt-3">
-          <ElementCard element={{ key: "TIPO DE TARJETA", value: billResponsible?.pa[0]?.card_type ?? "Débito" }} />
           <ElementCard
-            element={{ key: "FECHA DE VENC.", value: dayjs(billResponsible?.pa[0]?.expire_date).format("DD/MM/YYYY") ?? "01/12/2024" }}
+            element={{
+              key: "TIPO DE TARJETA",
+              value: billResponsible?.pa[0]?.card_type ?? "Débito",
+            }}
+          />
+          <ElementCard
+            element={{
+              key: "FECHA DE VENC.",
+              value:
+                dayjs(billResponsible?.pa[0]?.expire_date).format(
+                  "DD/MM/YYYY"
+                ) ?? "01/12/2024",
+            }}
           />
         </div>
       </div>,
@@ -282,21 +322,21 @@ export default function AffiliatePage(props: {
 
         <div className="flex gap-3 mt-5 mb-10">
           <Card className="flex-auto py-4 px-6 w-1/2  items-center">
-          <div className=" grid grid-cols-2 items-center">
+            <div className=" grid grid-cols-2 items-center">
               <div>
-              <p className="text-sm">SALDO ACTUAL</p>
-              <span className="text-[#EB2727] text-xl font-bold">
-                $
-                {lastEvent?.current_amount !== undefined
-                  ? lastEvent.current_amount.toFixed(2)
-                  : "0.00"}
-              </span>
+                <p className="text-sm">SALDO ACTUAL</p>
+                <span className="text-[#EB2727] text-xl font-bold">
+                  $
+                  {lastEvent?.current_amount !== undefined
+                    ? lastEvent.current_amount.toFixed(2)
+                    : "0.00"}
+                </span>
               </div>
-            <SaldoPopoverAffiliates
-              ccId={cc?.id}
-              healthInsuranceId={props.params.affiliateId}
+              <SaldoPopoverAffiliates
+                ccId={cc?.id}
+                healthInsuranceId={props.params.affiliateId}
               />
-              </div>
+            </div>
           </Card>
           <Card className="py-4 px-9 bg-[#DEF5DD] w-1/2 flex flex-col justify-center">
             <div className="flex flex-col  justify-center">
@@ -315,7 +355,8 @@ export default function AffiliatePage(props: {
           >
             <AccordionItem value="item-1">
               <AccordionTrigger className="font-semibold" name="editIcon">
-                Datos del grupo familiar</AccordionTrigger>
+                Datos del grupo familiar
+              </AccordionTrigger>
               <AccordionContent className="pt-6 pl-5">
                 <div className="grid grid-cols-5 gap-6 p-3 rounded-md">
                   {Object.entries(familyGroupData).map(([key, value]) => (
@@ -325,7 +366,10 @@ export default function AffiliatePage(props: {
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2">
-              <AccordionTrigger className="font-semibold rounded-md overflow-hidden" name="editIcon">
+              <AccordionTrigger
+                className="font-semibold rounded-md overflow-hidden"
+                name="editIcon"
+              >
                 Integrantes
               </AccordionTrigger>
               <AccordionContent className="pt-6 pl-5">
@@ -381,7 +425,10 @@ export default function AffiliatePage(props: {
                           ).map(([key, value]) => {
                             if (key === "Estado" && value === "Activo") {
                               return (
-                                <ElementCard key={key} element={{ key, value }} />
+                                <ElementCard
+                                  key={key}
+                                  element={{ key, value }}
+                                />
                               );
                             }
                             return (
@@ -396,7 +443,9 @@ export default function AffiliatePage(props: {
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-3">
-              <AccordionTrigger className="font-semibold">Datos de facturación</AccordionTrigger>
+              <AccordionTrigger className="font-semibold">
+                Datos de facturación
+              </AccordionTrigger>
               <AccordionContent className="pt-8 pl-8">
                 <div className="flex gap-2">
                   <div className="flex flex-col gap-1 bg-[#DEF5DD] pl-5 pr-6 pt-5 pb-14 w-1/3 rounded-lg">
@@ -430,26 +479,22 @@ export default function AffiliatePage(props: {
                     </div>
                     <p className="font-semibold pl-7 opacity-80">
                       {" "}
-                      Debito Directo
+                      {prod?.name ?? "no se pudo encontrar el producto"}
                     </p>
                   </div>
                   <div className="w-2/3 bg-[#DEF5DD] px-6 pt-5 pb-10 rounded-lg">
                     <h2 className="mb-3 text-lg font-normal">
                       Detalles del pago
                     </h2>
-                    {
-                    (paymentMethod && paymentMethod?.has(prod?.name ?? "") ) ? 
-                    (
+                    {paymentMethod && paymentMethod?.has(prod?.name ?? "") ? (
                       <div className="flex gap-4 items-start">
                         {paymentMethod.get(prod?.name ?? "")}
                       </div>
                     ) : (
                       <div className="flex gap-4 items-start">
-                        {paymentMethod.get("Voluntario")}
+                        {paymentMethod.get("Pago Voluntario")}
                       </div>
                     )}
-                    
-                    {/* paymentMethod["Voluntario"]} */}
                   </div>
                 </div>
 
