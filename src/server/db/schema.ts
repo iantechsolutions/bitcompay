@@ -529,6 +529,7 @@ export const healthInsurances = pgTable("health_insurances", {
   ),
   name: varchar("name", { length: 255 }).notNull(),
   identificationNumber: varchar("identificationNumber", { length: 255 }),
+  description: varchar("description", { length: 255 }),
   isClient: boolean("isClient").notNull().default(false),
   fiscal_id_type: varchar("fiscal_id_type", { length: 255 }),
   fiscal_id_number: varchar("fiscal_id_number"),

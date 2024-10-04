@@ -221,7 +221,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     own_id_type: "DNI" | "PASAPORTE" | null;
     own_id_number: string | null;
     affiliate_number: string | number | null;
-    extension: string | null;
+    extention: string | null;
     relationship: string | null;
     birth_date: Date | null;
     gender: "MASCULINO" | "FEMENINO" | "OTRO" | null;
@@ -259,9 +259,6 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     is_new: boolean | null;
     card_number: string | null;
     card_type: string | null;
-    import: string | null;
-    remuneration: string | null;
-    monotributo: string | null;
   }[] = [];
   let errors: z.ZodError<
     {
@@ -333,9 +330,6 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
       "ALTA NUEVA"?: string | boolean | null | undefined;
       "NRO. TARJETA"?: number | null | undefined;
       "TIPO DE TARJETA"?: string | null | undefined;
-      IMPORTE?: string | number | null | undefined;
-      REMUNERACION?: string | number | null | undefined;
-      MONOTRIBUTO?: string | number | null | undefined;
     }[]
   >[] = [];
   rows.map((row) => {
@@ -417,8 +411,8 @@ export const recDocumentValidator = z
       .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
       .nullable()
       .optional(),
-    "NRO AFILIADO": allToString.nullable().optional(),
-    EXTENSION: allToString.nullable().optional(),
+    "NRO AFILIADO": numberAsString.nullable().optional(),
+    EXTENSION: z.string().optional(),
     "TIPO DOC PROPIO": z
       .enum(["DNI", "PASAPORTE"])
       .refine((value) => ["DNI", "PASAPORTE"].includes(value), {
@@ -539,7 +533,7 @@ export const recDocumentValidator = z
       own_id_number: value["NRO DOC PROPIO"] ?? null,
       own_id_type: value["TIPO DOC PROPIO"] ?? null,
       affiliate_number: value["NRO AFILIADO"] ?? null,
-      extension: value.EXTENSION ?? null,
+      extention: value["EXTENSION"] ?? null,
       // du_number: value["NRO DOC PROPIO"] ?? null,
       relationship: value.PAR ?? null,
       birth_date: value["FECHA NACIMIENTO"] ?? null,
@@ -574,10 +568,6 @@ export const recDocumentValidator = z
       is_new: value["ALTA NUEVA"] ?? null,
       card_number: value["NRO. TARJETA"] ?? null,
       card_type: value["TIPO DE TARJETA"] ?? null,
-      remuneration: value["REMUNERACION"] ?? null,
-      monotributo: value["MONOTRIBUTO"] ?? null,
-      otros: value["OTROS"] ?? null,
-      import: value["IMPORTE"] ?? null,
     };
   });
 
@@ -594,7 +584,7 @@ export const recHeaders: TableHeaders = [
   { key: "holder_id_number", label: "NRO DOC TITULAR", width: 140 },
   { key: "name", label: "NOMBRE", width: 140 },
   { key: "affiliate_number", label: "NRO AFILIADO", width: 140 },
-  { key: "extension", label: "EXTENSION", width: 140 },
+  { key: "extention", label: "EXTENSION", width: 140 },
   { key: "own_id_type", label: "TIPO DOC PROPIO", width: 140 },
   { key: "own_id_number", label: "NRO DOC PROPIO", width: 140 },
   { key: "relationship", label: "PAR", width: 140 },
@@ -629,10 +619,6 @@ export const recHeaders: TableHeaders = [
   { key: "card_type", label: "TIPO DE TARJETA", width: 140 },
   { key: "card_number", label: "Nro. TARJETA", width: 140 },
   { key: "sale_condition", label: "CONDICION DE VENTA", width: 140 },
-  { key: "remuneration", label: "REMUNERACION", width: 140 },
-  { key: "monotributo", label: "MONOTRIBUTO", width: 140 },
-  { key: "otros", label: "OTROS", width: 140 },
-  { key: "import", label: "IMPORTE", width: 140 },
 ];
 
 export const recHeadersOS: TableHeaders = [
@@ -666,7 +652,7 @@ export const requiredColumns = [
   { key: "own_id_type", label: "TIPO DOC PROPIO" },
   { key: "own_id_number", label: "NRO DOC PROPIO" },
   // { key: "affiliate_number", label: "NRO AFILIADO" },
-  { key: "extension", label: "EXTENSION" },
+  { key: "extention", label: "EXTENSION" },
   { key: "relationship", label: "PAR" },
   { key: "birth_date", label: "FECHA NACIMIENTO" },
   { key: "gender", label: "GENERO" },
