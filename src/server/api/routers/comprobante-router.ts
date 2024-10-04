@@ -363,7 +363,7 @@ async function approbatecomprobante(liquidationId: string) {
           comprobante,
           comprobante.family_group?.businessUnitData!.company,
           producto,
-          last_voucher + 1 ?? 0,
+          last_voucher + 1,
           comprobante.family_group?.businessUnitData!.brand,
           billResponsible?.name ?? "",
           (billResponsible?.address ?? "") +
