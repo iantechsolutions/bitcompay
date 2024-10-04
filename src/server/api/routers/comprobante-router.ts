@@ -363,7 +363,7 @@ async function approbatecomprobante(liquidationId: string) {
           comprobante,
           comprobante.family_group?.businessUnitData!.company,
           producto,
-          last_voucher + 1 ?? 0,
+          last_voucher + 1,
           comprobante.family_group?.businessUnitData!.brand,
           billResponsible?.name ?? "",
           (billResponsible?.address ?? "") +
@@ -1180,9 +1180,32 @@ export const comprobantesRouter = createTRPCRouter({
       // console.log("Estop", bussinessUnits);
 
       const company = await db.query.companies.findFirst({
-        where: eq(schema.companies.id, companyId!),
+        where: eq(schema.companies.id, companyId ?? ""),
       });
-      const randomNumberLiq = Math.floor(Math.random() * (1000 - 10 + 1)) + 10;
+      // const randomNumberLiq = Math.floor(Math.random() * (1000 - 10 + 1)) + 10;
+
+      let number;
+      const liquidations_counter =
+        await db.query.liquidations_counter.findFirst({
+          where: eq(schema.liquidations_counter.companies_id, companyId ?? ""),
+        });
+
+      if (!liquidations_counter) {
+        const liquidations_counters = await db
+          .insert(schema.liquidations_counter)
+          .values({
+            companies_id: companyId ?? "",
+            number: 1,
+          })
+          .returning();
+
+        number = liquidations_counters[0]?.number;
+      } else {
+        number = liquidations_counter.number + 1;
+        await db.update(schema.liquidations_counter).set({
+          number: number,
+        });
+      }
 
       const [liquidation] = await db
         .insert(schema.liquidations)
@@ -1194,6 +1217,7 @@ export const comprobantesRouter = createTRPCRouter({
           period: input.dateDesde,
           userCreated: user?.id ?? "",
           userApproved: "",
+          number: number ?? 0,
           pdv: parseInt(input.pv),
           interest: input.interest,
           logo_url: input.logo_url,

@@ -248,6 +248,7 @@ export const companiesRelations = relations(companies, ({ many }) => ({
   brands: many(companiesToBrands),
   products: many(companyProducts),
   bussinessUnits: many(bussinessUnits),
+  plans: many(plans),
 }));
 export const selectCompanySchema = createSelectSchema(companies);
 export type Company = z.infer<typeof selectCompanySchema>;
@@ -476,6 +477,9 @@ export const plans = pgTable("plans", {
   plan_code: varchar("plan_code", { length: 255 }).notNull(),
   description: varchar("description", { length: 255 }).notNull(),
   brand_id: varchar("brand_id", { length: 255 }).references(() => brands.id),
+  companies_id: varchar("companies_id", { length: 255 }).references(
+    () => companies.id
+  ),
 });
 
 export const plansRelations = relations(plans, ({ many, one }) => ({
@@ -483,6 +487,10 @@ export const plansRelations = relations(plans, ({ many, one }) => ({
   brands: one(brands, {
     fields: [plans.brand_id],
     references: [brands.id],
+  }),
+  companies: one(companies, {
+    fields: [plans.companies_id],
+    references: [companies.id],
   }),
 }));
 
@@ -1099,7 +1107,7 @@ export const liquidations = pgTable("liquidations", {
   cuit: varchar("cuit", { length: 255 }),
   pdv: integer("pdv").notNull(),
   period: timestamp("period", { mode: "date" }),
-  number: serial("autoincrementNumber"),
+  number: integer("autoincrementNumber"),
   interest: real("interest"),
   bussinessUnits_id: varchar("bussinessUnits_id", { length: 255 }).references(
     () => bussinessUnits.id
@@ -1118,6 +1126,24 @@ export const liquidationsRelations = relations(
       references: [brands.id],
     }),
     comprobantes: many(comprobantes),
+  })
+);
+
+export const liquidations_counter = pgTable("liquidations_counter", {
+  id: columnId,
+  companies_id: varchar("companies_id", { length: 255 })
+    .references(() => companies.id)
+    .notNull(),
+  number: integer("number").notNull(),
+});
+
+export const liquidations_counterRelations = relations(
+  liquidations_counter,
+  ({ one }) => ({
+    companies: one(companies, {
+      fields: [liquidations_counter.companies_id],
+      references: [companies.id],
+    }),
   })
 );
 
