@@ -12,13 +12,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const valueToNameComprobanteMap: Record<string, string> = {
-  "0": "Recibo",
-  "1": "Factura",
-  "3": "Nota de crédito",
-  "6": "Factura",
-  "8": "Recibo",
-};
+
 
 export function nameInitials(name: string) {
   const [firstName, lastName] = name.split(" ");
@@ -901,6 +895,14 @@ function obtenerDecimales(numero: number | undefined) {
   }
   return "00"; // Retorna "00" si no hay parte decimal
 }
+
+export const valueToNameComprobanteMap: Record<string, string> = {
+  "0": "Recibo",
+  "1": "Factura",
+  "3": "Nota de crédito",
+  "6": "Factura",
+  "8": "Recibo",
+};
 export const comprobanteDictionary: { [key: string]: number } = {
   "FACTURA A": 1,
   "FACTURA B": 6,
@@ -1022,3 +1024,5 @@ export function visualizationSwitcher(
 ) {
   return visualization ? viewFormComponent : editFormComponent;
 }
+
+

@@ -266,7 +266,7 @@ export default function BrandPage({
                           { value: "FACTURA D", label: "FACTURA M" },
                           { value: "FACTURA E", label: "FACTURA E" },
                         ]}
-                        onSelectionChange={(e) => setBillType(e)}
+                        onionChange={(e) => setBillType(e)}
                       />
                     </div>
                   </div> */}

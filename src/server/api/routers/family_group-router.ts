@@ -202,7 +202,11 @@ export const family_groupsRouter = createTRPCRouter({
             with: {
               contribution: true,
               differentialsValues: true,
-              pa: true,
+              pa: {
+                with: {
+                  product: true,
+                },
+              },
               healthInsurances: true,
               originatingHealthInsurances: true,
             },
@@ -233,7 +237,7 @@ export const family_groupsRouter = createTRPCRouter({
         },
       });
       const fgCompany = fg.filter(
-        (x) => x.businessUnitData?.companyId === ctx.session.orgId ?? ""
+        (x) => x.businessUnitData?.companyId === ctx.session.orgId
       );
 
       // Filtra los comprobantes por `liquidationId` dentro de cada grupo familiar
@@ -278,7 +282,8 @@ export const family_groupsRouter = createTRPCRouter({
       const family_group = await db.query.family_groups.findFirst({
         where: eq(schema.family_groups.plan, input.planId),
       });
-      return family_group;
+
+      return family_group ? { data: family_group } : { data: null };
     }),
   getByBrand: protectedProcedure
     .input(

@@ -8,18 +8,28 @@ import { RouterOutputs } from "~/trpc/shared";
 export const plansRouter = createTRPCRouter({
   get: protectedProcedure
     .input(z.object({ planId: z.string() }))
-    .query(async ({ input }) => {
-      console.log("input", input);
-      const planes = await db.query.plans.findMany();
-      console.log("planes", planes);
+    .query(async ({ input, ctx }) => {
       const plan_found = await db.query.plans.findFirst({
         where: eq(schema.plans.id, input.planId),
         with: {
           pricesPerCondition: true,
+          brands: {
+            with: {
+              company: true,
+            },
+          },
         },
       });
-      console.log("plan_found", plan_found);
-      return plan_found;
+
+      if (
+        plan_found?.brands?.company.some(
+          (company) => company.companyId === ctx.session.orgId
+        )
+      ) {
+        return plan_found;
+      } else {
+        return null;
+      }
     }),
   list: protectedProcedure.query(async ({ ctx }) => {
     const plans = await db.query.plans.findMany({
@@ -32,12 +42,14 @@ export const plansRouter = createTRPCRouter({
         },
       },
     });
+
     const plan_reduced = plans.filter((plan) => {
       return plan.brands?.company.some(
-        (company) => company.companyId == ctx.session.orgId!
+        (company) => company.companyId === ctx.session.orgId!
       );
     });
-    return plan_reduced;
+
+    return plan_reduced.length > 0 ? plan_reduced : [];
   }),
   getByBrand: protectedProcedure
     .input(z.object({ brandId: z.string() }))
@@ -47,7 +59,7 @@ export const plansRouter = createTRPCRouter({
         with: { pricesPerCondition: true },
       });
 
-      return planes;
+      return planes.length > 0 ? planes : [];
     }),
   create: protectedProcedure
     .input(

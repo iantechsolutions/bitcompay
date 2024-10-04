@@ -15,6 +15,7 @@ export const healthInsurancesRouter = createTRPCRouter({
         ),
         with: {
           cpData: true,
+          affiliate_os: true,
         },
       });
       return healthInsurance_found;
@@ -31,6 +32,8 @@ export const healthInsurancesRouter = createTRPCRouter({
           comprobantes: true,
           cc: true,
           cpData: true,
+          affiliate_os: true,
+
           // {
           // with:{
           //   items:true
@@ -66,7 +69,7 @@ export const healthInsurancesRouter = createTRPCRouter({
     const companyId = ctx.session.orgId;
     const healthInsurances = await db.query.healthInsurances.findMany({
       where: eq(schema.healthInsurances.companyId, companyId!),
-      with: { cpData: true },
+      with: { cpData: true, affiliate_os: true },
     });
     return healthInsurances;
   }),

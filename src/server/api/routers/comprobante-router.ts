@@ -944,7 +944,40 @@ export const comprobantesRouter = createTRPCRouter({
         return events?.comprobantes;
       }
     }),
-
+  getByEntity: protectedProcedure
+    .input(
+      z.object({
+        healthInsurance: z.string().optional().nullable(),
+        familyGroup: z.string().optional().nullable(),
+        tipoComprobante: z.string().nullable(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      console.log("orgId", ctx.session.orgId);
+      const bussinessUnits = await db.query.bussinessUnits.findMany({
+        where: eq(schema.bussinessUnits.companyId, ctx.session.orgId!),
+        with: {
+          ls: {
+            with: {
+              comprobantes: true,
+            },
+          },
+        },
+      });
+      let comprobantes = bussinessUnits.flatMap((bu) =>
+        bu.ls.flatMap((ls) => ls.comprobantes)
+      );
+      if (input.familyGroup) {
+        comprobantes = comprobantes.filter(
+          (comprobante) => comprobante.family_group_id === input.familyGroup
+        );
+      } else if (input.tipoComprobante) {
+        comprobantes = comprobantes.filter(
+          (comprobante) => comprobante.tipoComprobante === input.tipoComprobante
+        );
+      }
+      return comprobantes;
+    }),
   getByLiquidation: protectedProcedure
     .input(z.object({ liquidationId: z.string() }))
     .query(async ({ input }) => {
@@ -1156,7 +1189,6 @@ export const comprobantesRouter = createTRPCRouter({
         .values({
           brandId: input.brandId,
           createdAt: new Date(),
-          razon_social: brand?.razon_social ?? "",
           estado: "pendiente",
           cuit: company?.cuit ?? "",
           period: input.dateDesde,
