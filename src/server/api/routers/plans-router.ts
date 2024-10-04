@@ -41,15 +41,10 @@ export const plansRouter = createTRPCRouter({
           },
         },
       },
+      where: eq(schema.plans.companies_id, ctx.session.orgId ?? ""),
     });
 
-    const plan_reduced = plans.filter((plan) => {
-      return plan.brands?.company.some(
-        (company) => company.companyId === ctx.session.orgId!
-      );
-    });
-
-    return plan_reduced.length > 0 ? plan_reduced : [];
+    return plans.length > 0 ? plans : [];
   }),
   getByBrand: protectedProcedure
     .input(z.object({ brandId: z.string() }))
@@ -69,7 +64,7 @@ export const plansRouter = createTRPCRouter({
         brand_id: z.string().max(255),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const user = await currentUser();
       const new_plan = await db
         .insert(schema.plans)
@@ -78,6 +73,7 @@ export const plansRouter = createTRPCRouter({
           plan_code: input.plan_code,
           description: input.description,
           brand_id: input.brand_id,
+          companies_id: ctx.session.orgId,
         })
         .returning();
       return new_plan;

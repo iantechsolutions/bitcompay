@@ -307,7 +307,7 @@ export default function AddPlanPricesComponent({
                     from_age: null,
                     to_age: null,
                     condition: "",
-                    isAmountByAge: false,
+                    isAmountByAge: true,
                     plan_id: "",
                     amount: 0,
                   })

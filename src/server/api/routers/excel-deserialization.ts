@@ -254,8 +254,9 @@ export const excelDeserializationRouter = createTRPCRouter({
                   receipt: " ",
                   state: "ACTIVO",
                   procedureId: procedure[0]?.id ?? "",
-                  entry_date: new Date(),
                   sale_condition: row.sale_condition ?? "",
+                  charged_date: new Date(),
+                  user_charged: ctx.session.user.id ?? "",
                 })
                 .returning();
               familyGroupMap.set(row.holder_id_number, familygroup[0]!.id);
@@ -332,16 +333,23 @@ export const excelDeserializationRouter = createTRPCRouter({
                 relation: row.relationship,
               });
             }
-            console.log("creando integrante");
-            let affiliateNumber = row?.plan ?? "" + row?.own_id_number ?? "";
-            if (row.own_id_type === "PASAPORTE") {
-              affiliateNumber = "00" + affiliateNumber;
+            let affiliate_number;
+
+            if (row.own_id_type === "DNI" && row.plan && row.fiscal_id_number) {
+              affiliate_number = row.plan + row.fiscal_id_number;
+            }
+            if (
+              row.own_id_type === "PASAPORTE" &&
+              row.plan &&
+              row.fiscal_id_number
+            ) {
+              affiliate_number = "00" + row.plan + row.fiscal_id_number;
             }
             console.log("testigo", row.own_id_type);
             const new_integrant = await db
               .insert(schema.integrants)
               .values({
-                affiliate_type: "type",
+                affiliate_type: row.relationship,
                 relationship: row.relationship,
                 name: row.name ?? "",
                 id_type: row.own_id_type,
@@ -370,8 +378,8 @@ export const excelDeserializationRouter = createTRPCRouter({
                 isBillResponsible: row.isPaymentResponsible == true,
                 age: age,
                 family_group_id: familyGroupId,
-                affiliate_number: affiliateNumber,
-                extention: " ",
+                affiliate_number: affiliate_number,
+                extention: row.extention,
                 postal_codeId: postal_code_schema?.id,
                 health_insuranceId: health_insurance?.id ?? null,
                 originating_health_insuranceId:
@@ -459,7 +467,9 @@ export const excelDeserializationRouter = createTRPCRouter({
               console.log(row.differential_value);
               console.log(precioIntegrante);
               const precioDiferencial =
-                (precioIntegrante && precioIntegrante != 0) ? parseFloat(row.differential_value ?? "0") / precioIntegrante : 0;
+                precioIntegrante && precioIntegrante != 0
+                  ? parseFloat(row.differential_value ?? "0") / precioIntegrante
+                  : 0;
               // precioIntegrante;
               console.log("precioDiferencial", precioDiferencial);
               const differentialValue = await db

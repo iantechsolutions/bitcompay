@@ -10,7 +10,6 @@ import SeeButton from "~/components/plan/see-plan";
 
 export default function Page() {
   const { data: planes } = api.plans.list.useQuery();
-  console.log(planes);
 
   return (
     <LayoutContainer>
