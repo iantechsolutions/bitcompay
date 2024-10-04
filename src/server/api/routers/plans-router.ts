@@ -9,16 +9,23 @@ export const plansRouter = createTRPCRouter({
   get: protectedProcedure
     .input(z.object({ planId: z.string() }))
     .query(async ({ input, ctx }) => {
-      console.log("input", input);
       const plan_found = await db.query.plans.findFirst({
         where: eq(schema.plans.id, input.planId),
         with: {
           pricesPerCondition: true,
-          brands: true,
+          brands: {
+            with: {
+              company: true,
+            },
+          },
         },
       });
-      console.log("plan_found", plan_found);
-      if (plan_found?.brands?.companyId == ctx.session.orgId) {
+
+      if (
+        plan_found?.brands?.company.some(
+          (company) => company.companyId === ctx.session.orgId
+        )
+      ) {
         return plan_found;
       } else {
         return null;
@@ -35,12 +42,14 @@ export const plansRouter = createTRPCRouter({
         },
       },
     });
+
     const plan_reduced = plans.filter((plan) => {
       return plan.brands?.company.some(
-        (company) => company.companyId == ctx.session.orgId!
+        (company) => company.companyId === ctx.session.orgId!
       );
     });
-    return plan_reduced;
+
+    return plan_reduced.length > 0 ? plan_reduced : [];
   }),
   getByBrand: protectedProcedure
     .input(z.object({ brandId: z.string() }))
@@ -50,7 +59,7 @@ export const plansRouter = createTRPCRouter({
         with: { pricesPerCondition: true },
       });
 
-      return planes;
+      return planes.length > 0 ? planes : [];
     }),
   create: protectedProcedure
     .input(
