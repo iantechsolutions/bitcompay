@@ -24,12 +24,17 @@ import {
   ingresarAfip,
 } from "~/lib/utils";
 import { utapi } from "~/server/uploadthing";
-import { id } from "date-fns/locale";
-import { Events } from "./events-router";
-import { datetime } from "drizzle-orm/mysql-core";
-import { Console } from "console";
-// import chromium from "chrome-aws-lambda";
 
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+// Extiende dayjs con los plugins necesarios
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+// Configura la zona horaria de Buenos Aires
+const buenosAiresTime = dayjs().tz("America/Argentina/Buenos_Aires").toDate();
 type Bonus = {
   id: string;
   appliedUser: string;
@@ -1211,7 +1216,7 @@ export const comprobantesRouter = createTRPCRouter({
         .insert(schema.liquidations)
         .values({
           brandId: input.brandId,
-          createdAt: new Date(),
+          createdAt: buenosAiresTime,
           estado: "pendiente",
           cuit: company?.cuit ?? "",
           period: input.dateDesde,

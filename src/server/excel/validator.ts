@@ -210,6 +210,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     os: string | null;
     "originating os": string | null;
     validity: Date | null;
+    state_date: Date | null;
     mode: string | null;
     bonus: string | null;
     balance: string | null;
@@ -266,7 +267,8 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
       "SALDO CUENTA CORRIENTE"?: string | number | null | undefined;
       OS?: string | null | undefined;
       "OS ORIGEN"?: string | null | undefined;
-      VIGENCIA?: string | number | null | undefined;
+      "FECHA DE VIGENCIA"?: string | number | null | undefined;
+      "FECHA DE ESTADO"?: string | number | null | undefined;
       MODO?: string | null | undefined;
       BONIFICACION?: string | null | undefined;
       "DESDE BONIF."?: string | number | null | undefined;
@@ -387,7 +389,8 @@ export const recDocumentValidator = z
       .optional(),
     OS: allToString.nullable().optional(),
     "OS ORIGEN": allToString.nullable().optional(),
-    VIGENCIA: stringAsDate.nullable().optional(),
+    "FECHA DE VIGENCIA": stringAsDate.nullable().optional(),
+    "FECHA DE ESTADO": stringAsDate.nullable().optional(),
     MODO: z
       .string()
       .min(0)
@@ -522,7 +525,8 @@ export const recDocumentValidator = z
       business_unit: value["UNIDAD DE NEGOCIO"] ?? null,
       os: value.OS ?? null,
       "originating os": value["OS ORIGEN"] ?? null,
-      validity: value.VIGENCIA ?? null,
+      validity: value["FECHA DE VIGENCIA"] ?? null,
+      state_date: value["FECHA DE ESTADO"] ?? null,
       mode: value.MODO ?? null,
       bonus: value.BONIFICACION ?? "0",
       "from bonus": value["DESDE BONIF."] ?? null,
@@ -575,7 +579,8 @@ export const recHeaders: TableHeaders = [
   { key: "business_unit", label: "UNIDAD DE NEGOCIO", width: 140 },
   { key: "os", label: "OS", width: 140 },
   { key: "originating os", label: "OS ORIGEN", width: 140 },
-  { key: "validity", label: "VIGENCIA", width: 140 },
+  { key: "validity", label: "FECHA DE VIGENCIA", width: 140 },
+  { key: "state_date", label: "FECHA ESTADO", width: 140 },
   { key: "mode", label: "MODO", width: 140 },
   { key: "bonus", label: "BONIFICACION" },
   { key: "from bonus", label: "DESDE BONIF." },
@@ -644,7 +649,7 @@ export const requiredColumnsOS = [
 export const requiredColumns = [
   { key: "business_unit", label: "UNIDAD DE NEGOCIO" },
   // { key: "os", label: "OS" },
-  { key: "validity", label: "VIGENCIA" },
+  { key: "validity", label: "FECHA DE VIGENCIA" },
   { key: "mode", label: "MODO" },
   { key: "state", label: "ESTADO" },
   { key: "holder_id_number", label: "NRO DOC TITULAR" },

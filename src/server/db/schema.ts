@@ -907,9 +907,10 @@ export const family_groups = pgTable("family_groups", {
   ),
   state: varchar("state", { length: 255 }),
   sale_condition: varchar("sale_condition", { length: 255 }),
-  entry_date: timestamp("entry_date", { mode: "date" }),
   payment_status: varchar("payment_status", { length: 255 }).default("pending"),
   numericalId: serial("autoincrementNumber"),
+  charged_date: timestamp("charged_date", { mode: "date" }),
+  user_charged: varchar("user_charged", { length: 255 }),
 });
 
 export const family_groupsRelations = relations(

@@ -71,6 +71,7 @@ export type InputsMembers = {
   depto: string;
   localidad: string;
   county: string;
+  extention: string;
   // state: string;
   province: string;
   cp: string;
