@@ -421,7 +421,7 @@ async function approbatecomprobante(liquidationId: string) {
               comprobante_id: comprobante.id,
               event_amount: comprobante.importe * -1,
               current_amount: lastEvent.current_amount - comprobante.importe,
-              description: "Factura aprobadas",
+              description: "Factura aprobada",
               type: "FC",
             });
           }

@@ -126,7 +126,7 @@ export const columns: ColumnDef<TableRecord>[] = [
             {formatted}
           </div>
           <div className="absolute top-1/2 transform translate-y-4 text-[#c4c4c4] text-xs">
-            IVA: {(row.getValue("iva") as number) * 100} %
+            IVA: {Math.round((row.getValue("iva") as number) * 100)} %
           </div>
         </div>
       );

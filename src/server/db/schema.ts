@@ -912,6 +912,9 @@ export const family_groups = pgTable("family_groups", {
   numericalId: serial("autoincrementNumber"),
   charged_date: timestamp("charged_date", { mode: "date" }),
   user_charged: varchar("user_charged", { length: 255 }),
+  seller: varchar("seller", { length: 255 }),
+  supervisor: varchar("supervisor", { length: 255 }),
+  gerency: varchar("gerency", { length: 255 }),
 });
 
 export const family_groupsRelations = relations(

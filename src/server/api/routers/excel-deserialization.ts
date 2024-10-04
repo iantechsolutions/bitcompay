@@ -257,6 +257,9 @@ export const excelDeserializationRouter = createTRPCRouter({
                   sale_condition: row.sale_condition ?? "",
                   charged_date: new Date(),
                   user_charged: ctx.session.user.id ?? "",
+                  seller: row.seller ?? null,
+                  supervisor: row.supervisor ?? null,
+                  gerency: row.gerency ?? null,
                 })
                 .returning();
               familyGroupMap.set(row.holder_id_number, familygroup[0]!.id);

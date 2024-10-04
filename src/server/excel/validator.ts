@@ -260,6 +260,9 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     is_new: boolean | null;
     card_number: string | null;
     card_type: string | null;
+    seller: string | null;
+    supervisor: string | null;
+    gerency: string | null;
   }[] = [];
   let errors: z.ZodError<
     {
@@ -332,6 +335,9 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
       "ALTA NUEVA"?: string | boolean | null | undefined;
       "NRO. TARJETA"?: number | null | undefined;
       "TIPO DE TARJETA"?: string | null | undefined;
+      VENDEDOR?: string | null | undefined;
+      SUPERVISOR?: string | null | undefined;
+      GERENCIA?: string | null | undefined;
     }[]
   >[] = [];
   rows.map((row) => {
@@ -389,6 +395,9 @@ export const recDocumentValidator = z
       .optional(),
     OS: allToString.nullable().optional(),
     "OS ORIGEN": allToString.nullable().optional(),
+    VENDEDOR: allToString.nullable().optional(),
+    SUPERVISOR: allToString.nullable().optional(),
+    GERENCIA: allToString.nullable().optional(),
     "FECHA DE VIGENCIA": stringAsDate.nullable().optional(),
     "FECHA DE ESTADO": stringAsDate.nullable().optional(),
     MODO: z
@@ -525,6 +534,9 @@ export const recDocumentValidator = z
       business_unit: value["UNIDAD DE NEGOCIO"] ?? null,
       os: value.OS ?? null,
       "originating os": value["OS ORIGEN"] ?? null,
+      "seller": value.VENDEDOR ?? null,
+      "supervisor": value.SUPERVISOR ?? null,
+      "gerency": value.GERENCIA ?? null,
       validity: value["FECHA DE VIGENCIA"] ?? null,
       state_date: value["FECHA DE ESTADO"] ?? null,
       mode: value.MODO ?? null,
@@ -579,6 +591,9 @@ export const recHeaders: TableHeaders = [
   { key: "business_unit", label: "UNIDAD DE NEGOCIO", width: 140 },
   { key: "os", label: "OS", width: 140 },
   { key: "originating os", label: "OS ORIGEN", width: 140 },
+  { key: "seller", label: "VENDEDOR", width: 140 },
+  { key: "supervisor", label: "SUPERVISOR", width: 140 },
+  { key: "gerency", label: "GERENCIA", width: 140 },
   { key: "validity", label: "FECHA DE VIGENCIA", width: 140 },
   { key: "state_date", label: "FECHA ESTADO", width: 140 },
   { key: "mode", label: "MODO", width: 140 },
