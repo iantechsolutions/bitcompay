@@ -52,7 +52,7 @@ export function AddBrandDialog() {
 
   async function handleCreate() {
     try {
-      if (!name || !code || !description || !iva || !reducedDescription) {
+      if (!name || !code || !iva || !reducedDescription) {
         setError("Todos los campos son obligatorios.");
         return;
       }
@@ -73,7 +73,7 @@ export function AddBrandDialog() {
       setOpen(false);
     } catch (e) {
       setError(
-        "No se puede asignar una descripcion reducidad de mas de 10 caracteres"
+        "No se puede asignar una descripcion reducida de mas de 10 caracteres"
       );
       const error = asTRPCError(e)!;
       toast.error(error.message);
@@ -106,7 +106,7 @@ export function AddBrandDialog() {
             </div>
 
             <div>
-              <Label htmlFor="razonSocial">Razon social la marca</Label>
+              <Label htmlFor="razonSocial">Razon social de la marca</Label>
               <Input
                 id="razonSocial"
                 placeholder="..."
@@ -133,7 +133,7 @@ export function AddBrandDialog() {
             {/* Código de marca */}
             <div className="flex">
               <div className="w-[250px] font-bold">
-                <Label htmlFor="code">Código de marca(max. 4 carac)</Label>
+                <Label htmlFor="code">Código PRISMA(max. 4 carac)</Label>
                 <Input
                   id="code"
                   placeholder="..."
