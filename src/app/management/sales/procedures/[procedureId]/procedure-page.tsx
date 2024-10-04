@@ -149,6 +149,7 @@ export default function ProcedurePage(props: ProcedurePageProps) {
             isPaymentHolder: member.isPaymentResponsible,
             isBillResponsible: member.isBillResponsible,
             family_group_id: props.family_group.id,
+            validity: member.validity ?? undefined,
           });
         } else {
           await createIntegrant({
@@ -183,6 +184,7 @@ export default function ProcedurePage(props: ProcedurePageProps) {
             isHolder: member.isHolder,
             isPaymentHolder: member.isPaymentResponsible,
             isBillResponsiblee: member.isBillResponsible,
+            validity: member.validity ?? new Date(),
           });
         }
       }
@@ -266,6 +268,7 @@ export default function ProcedurePage(props: ProcedurePageProps) {
           isBillResponsible: integrant.isBillResponsible ?? "",
           mail: integrant.email ?? "",
           isPaymentResponsible: integrant.isPaymentHolder ?? "",
+          validity: integrant.validity,
         };
       })
     );

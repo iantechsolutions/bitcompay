@@ -77,6 +77,7 @@ export const integrantsRouter = createTRPCRouter({
         isBillResponsiblee: z.boolean().optional(),
         family_group_id: z.string().optional(),
         postal_codeId: z.string(),
+        validity: z.date().optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -120,6 +121,7 @@ export const integrantsRouter = createTRPCRouter({
         isBillResponsible: z.boolean(),
         family_group_id: z.string(),
         postal_codeId: z.string(),
+        validity: z.date().optional(),
       })
     )
     .mutation(async ({ input: { id, ...input } }) => {

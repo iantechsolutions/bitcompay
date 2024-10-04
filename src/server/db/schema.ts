@@ -651,6 +651,7 @@ export const integrants = pgTable("integrant", {
   originating_health_insuranceId: varchar("originating_health_insuranceId", {
     length: 255,
   }).references(() => healthInsurances.id),
+  validity: timestamp("validity", { mode: "date" }),
 });
 
 export const integrantsRelations = relations(integrants, ({ one, many }) => ({

@@ -84,6 +84,7 @@ export type InputsMembers = {
   isBillResponsible: boolean;
   isPaymentResponsible: boolean;
   isAffiliate: boolean;
+  validity: Date | null;
 };
 
 interface AddMembersProps {

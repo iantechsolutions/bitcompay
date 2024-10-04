@@ -114,8 +114,9 @@ export default function Page() {
         iva: member.iva,
         family_group_id: family_groupId,
         isHolder: member.isHolder,
-        isPaymentHolder: member.isPaymentResponsible || isAdultHolder,
-        isBillResponsiblee: member.isBillResponsible || isAdultHolder,
+        isPaymentHolder: member.isPaymentResponsible ?? isAdultHolder,
+        isBillResponsiblee: member.isBillResponsible ?? isAdultHolder,
+        validity: member.validity ?? new Date(),
       });
     });
 
@@ -131,7 +132,7 @@ export default function Page() {
         validity: valuesForm.validity,
         plan: valuesForm.plan,
         modo: valuesForm.mode,
-        entry_date: new Date(),
+        charged_date: new Date(),
         sale_condition: "VENTA",
       });
       const family_groupId = result[0]!.id;
