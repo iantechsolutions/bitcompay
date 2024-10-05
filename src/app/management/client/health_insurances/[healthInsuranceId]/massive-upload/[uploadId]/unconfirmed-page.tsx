@@ -12,6 +12,7 @@ import { useState } from "react";
 import { recHeaders, recHeadersOS } from "~/server/excel/validator";
 import { LargeTable } from "~/components/table";
 import { useRouter } from "next/navigation";
+import AddDate from "./addDate";
 
 // export const maxDuration = 60;
 
@@ -25,6 +26,9 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
   const healthInsuranceId = props.healthInsuranceId;
   const { mutateAsync: deleteUpload } = api.uploads.delete.useMutation();
   const [confirmed, setConfirmed] = useState(upload!.confirmed);
+
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
   const [data, setData] = useState<
     RouterOutputs["excelDeserialization"]["deserialization"] | null
   >(null);
@@ -46,6 +50,7 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
       type: "OS",
       id: upload!.id,
       OSid: healthInsuranceId,
+      date: selectedDate ?? undefined,
     });
     setData(data);
   }
@@ -54,6 +59,7 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
       type: "OS",
       uploadId: upload!.id,
       OSid: healthInsuranceId,
+      date: selectedDate ?? undefined,
     });
     toast.success("Datos subidos correctamente");
     router.push(`./`);
@@ -64,6 +70,10 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
       await deleteUpload({ uploadId: props.upload!.id });
       router.back();
     } catch (_error) {}
+  }
+
+  function handleDateSelected(date: Date) {
+    setSelectedDate(date);
   }
 
   return (
@@ -88,6 +98,7 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
         <Button onClick={handleConfirm} disabled={isDataLoading}>
           Escribir a la base de datos
         </Button>
+        <AddDate onDateSelected={handleDateSelected} />
         <Button variant="destructive" onClick={handleDelete}>
           Cancelar y eliminar
         </Button>

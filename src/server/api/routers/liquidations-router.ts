@@ -88,6 +88,7 @@ export const liquidationsRouter = createTRPCRouter({
         periodo: z.date(),
         cuit: z.string(),
         pdv: z.number(),
+        number: z.number(),
         interest: z.number().optional(),
         logo_url: z.string().optional(),
       })
@@ -101,6 +102,7 @@ export const liquidationsRouter = createTRPCRouter({
         period: input.periodo,
         cuit: input.cuit,
         pdv: input.pdv,
+        number: input.number,
         interest: input.interest ?? 0,
         logo_url: input.logo_url,
       });
@@ -116,6 +118,7 @@ export const liquidationsRouter = createTRPCRouter({
         razonSocial: z.string(),
         periodo: z.date(),
         cuit: z.string(),
+        number: z.number(),
         pdv: z.number(),
         logo_url: z.string().optional(),
       })
@@ -130,8 +133,8 @@ export const liquidationsRouter = createTRPCRouter({
           razon_social: input.razonSocial,
           period: input.periodo,
           cuit: input.cuit,
+          number: input.number,
           pdv: input.pdv,
-          number: 1,
           logo_url: input.logo_url,
         })
         .where(eq(schema.liquidations.id, input.id));

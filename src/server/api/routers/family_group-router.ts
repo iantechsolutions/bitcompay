@@ -203,9 +203,9 @@ export const family_groupsRouter = createTRPCRouter({
               contribution: true,
               differentialsValues: true,
               pa: {
-                with:{
-                  product:true,
-                }
+                with: {
+                  product: true,
+                },
               },
               healthInsurances: true,
               originatingHealthInsurances: true,
@@ -237,7 +237,7 @@ export const family_groupsRouter = createTRPCRouter({
         },
       });
       const fgCompany = fg.filter(
-        (x) => x.businessUnitData?.companyId === ctx.session.orgId ?? ""
+        (x) => x.businessUnitData?.companyId === ctx.session.orgId
       );
 
       // Filtra los comprobantes por `liquidationId` dentro de cada grupo familiar
@@ -282,7 +282,8 @@ export const family_groupsRouter = createTRPCRouter({
       const family_group = await db.query.family_groups.findFirst({
         where: eq(schema.family_groups.plan, input.planId),
       });
-      return family_group;
+
+      return family_group ? { data: family_group } : { data: null };
     }),
   getByBrand: protectedProcedure
     .input(
@@ -346,8 +347,9 @@ export const family_groupsRouter = createTRPCRouter({
         procedureId: z.string().optional(),
         state: z.string().optional(),
         payment_status: z.string().optional(),
-        entry_date: z.date(),
+        charged_date: z.date(),
         sale_condition: z.string().optional(),
+        user_charged: z.string().optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -374,6 +376,7 @@ export const family_groupsRouter = createTRPCRouter({
         state: z.string().nullable().optional(),
         payment_status: z.string().nullable().optional(),
         sale_condition: z.string().optional(),
+        user_charged: z.string().optional(),
       })
     )
     .mutation(async ({ input: { id, ...input } }) => {

@@ -156,7 +156,10 @@ const bonusAsString = z
     message: "Caracteres incorrectos en columna:",
   });
 
-export const recRowsTransformerOS = (rows: Record<string, unknown>[]) => {
+export const recRowsTransformerOS = (
+  rows: Record<string, unknown>[],
+  date: Date
+) => {
   let finishedArrayOS: {
     name: string | null;
     cuil: string | null;
@@ -187,8 +190,12 @@ export const recRowsTransformerOS = (rows: Record<string, unknown>[]) => {
   rows.map((row) => {
     const resultOS = z.array(recDocumentValidatorOS).safeParse([row]);
     if (resultOS.success) {
-      const item = resultOS.data[0];
+      let item = resultOS.data[0];
       if (item) {
+        // Verifica si el campo periodo está vacío y asigna date si es necesario
+        if (!item.periodo) {
+          item.periodo = date;
+        }
         finishedArrayOS.push(item);
       }
     } else {
@@ -203,6 +210,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     os: string | null;
     "originating os": string | null;
     validity: Date | null;
+    state_date: Date | null;
     mode: string | null;
     bonus: string | null;
     balance: string | null;
@@ -214,7 +222,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     own_id_type: "DNI" | "PASAPORTE" | null;
     own_id_number: string | null;
     affiliate_number: string | number | null;
-    extension: string | null;
+    extention: string | null;
     relationship: string | null;
     birth_date: Date | null;
     gender: "MASCULINO" | "FEMENINO" | "OTRO" | null;
@@ -252,9 +260,9 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     is_new: boolean | null;
     card_number: string | null;
     card_type: string | null;
-    import: string | null;
-    remuneration: string | null;
-    monotributo: string | null;
+    seller: string | null;
+    supervisor: string | null;
+    gerency: string | null;
   }[] = [];
   let errors: z.ZodError<
     {
@@ -262,7 +270,8 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
       "SALDO CUENTA CORRIENTE"?: string | number | null | undefined;
       OS?: string | null | undefined;
       "OS ORIGEN"?: string | null | undefined;
-      VIGENCIA?: string | number | null | undefined;
+      "FECHA DE VIGENCIA"?: string | number | null | undefined;
+      "FECHA DE ESTADO"?: string | number | null | undefined;
       MODO?: string | null | undefined;
       BONIFICACION?: string | null | undefined;
       "DESDE BONIF."?: string | number | null | undefined;
@@ -326,9 +335,9 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
       "ALTA NUEVA"?: string | boolean | null | undefined;
       "NRO. TARJETA"?: number | null | undefined;
       "TIPO DE TARJETA"?: string | null | undefined;
-      IMPORTE?: string | number | null | undefined;
-      REMUNERACION?: string | number | null | undefined;
-      MONOTRIBUTO?: string | number | null | undefined;
+      VENDEDOR?: string | null | undefined;
+      SUPERVISOR?: string | null | undefined;
+      GERENCIA?: string | null | undefined;
     }[]
   >[] = [];
   rows.map((row) => {
@@ -386,7 +395,11 @@ export const recDocumentValidator = z
       .optional(),
     OS: allToString.nullable().optional(),
     "OS ORIGEN": allToString.nullable().optional(),
-    VIGENCIA: stringAsDate.nullable().optional(),
+    VENDEDOR: allToString.nullable().optional(),
+    SUPERVISOR: allToString.nullable().optional(),
+    GERENCIA: allToString.nullable().optional(),
+    "FECHA DE VIGENCIA": stringAsDate.nullable().optional(),
+    "FECHA DE ESTADO": stringAsDate.nullable().optional(),
     MODO: z
       .string()
       .min(0)
@@ -410,8 +423,8 @@ export const recDocumentValidator = z
       .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
       .nullable()
       .optional(),
-    "NRO AFILIADO": allToString.nullable().optional(),
-    EXTENSION: allToString.nullable().optional(),
+    "NRO AFILIADO": numberAsString.nullable().optional(),
+    EXTENSION: z.string().optional(),
     "TIPO DOC PROPIO": z
       .enum(["DNI", "PASAPORTE"])
       .refine((value) => ["DNI", "PASAPORTE"].includes(value), {
@@ -521,7 +534,11 @@ export const recDocumentValidator = z
       business_unit: value["UNIDAD DE NEGOCIO"] ?? null,
       os: value.OS ?? null,
       "originating os": value["OS ORIGEN"] ?? null,
-      validity: value.VIGENCIA ?? null,
+      "seller": value.VENDEDOR ?? null,
+      "supervisor": value.SUPERVISOR ?? null,
+      "gerency": value.GERENCIA ?? null,
+      validity: value["FECHA DE VIGENCIA"] ?? null,
+      state_date: value["FECHA DE ESTADO"] ?? null,
       mode: value.MODO ?? null,
       bonus: value.BONIFICACION ?? "0",
       "from bonus": value["DESDE BONIF."] ?? null,
@@ -532,7 +549,7 @@ export const recDocumentValidator = z
       own_id_number: value["NRO DOC PROPIO"] ?? null,
       own_id_type: value["TIPO DOC PROPIO"] ?? null,
       affiliate_number: value["NRO AFILIADO"] ?? null,
-      extension: value.EXTENSION ?? null,
+      extention: value["EXTENSION"] ?? null,
       // du_number: value["NRO DOC PROPIO"] ?? null,
       relationship: value.PAR ?? null,
       birth_date: value["FECHA NACIMIENTO"] ?? null,
@@ -567,10 +584,6 @@ export const recDocumentValidator = z
       is_new: value["ALTA NUEVA"] ?? null,
       card_number: value["NRO. TARJETA"] ?? null,
       card_type: value["TIPO DE TARJETA"] ?? null,
-      remuneration: value["REMUNERACION"] ?? null,
-      monotributo: value["MONOTRIBUTO"] ?? null,
-      otros: value["OTROS"] ?? null,
-      import: value["IMPORTE"] ?? null,
     };
   });
 
@@ -578,7 +591,11 @@ export const recHeaders: TableHeaders = [
   { key: "business_unit", label: "UNIDAD DE NEGOCIO", width: 140 },
   { key: "os", label: "OS", width: 140 },
   { key: "originating os", label: "OS ORIGEN", width: 140 },
-  { key: "validity", label: "VIGENCIA", width: 140 },
+  { key: "seller", label: "VENDEDOR", width: 140 },
+  { key: "supervisor", label: "SUPERVISOR", width: 140 },
+  { key: "gerency", label: "GERENCIA", width: 140 },
+  { key: "validity", label: "FECHA DE VIGENCIA", width: 140 },
+  { key: "state_date", label: "FECHA ESTADO", width: 140 },
   { key: "mode", label: "MODO", width: 140 },
   { key: "bonus", label: "BONIFICACION" },
   { key: "from bonus", label: "DESDE BONIF." },
@@ -587,7 +604,7 @@ export const recHeaders: TableHeaders = [
   { key: "holder_id_number", label: "NRO DOC TITULAR", width: 140 },
   { key: "name", label: "NOMBRE", width: 140 },
   { key: "affiliate_number", label: "NRO AFILIADO", width: 140 },
-  { key: "extension", label: "EXTENSION", width: 140 },
+  { key: "extention", label: "EXTENSION", width: 140 },
   { key: "own_id_type", label: "TIPO DOC PROPIO", width: 140 },
   { key: "own_id_number", label: "NRO DOC PROPIO", width: 140 },
   { key: "relationship", label: "PAR", width: 140 },
@@ -622,10 +639,6 @@ export const recHeaders: TableHeaders = [
   { key: "card_type", label: "TIPO DE TARJETA", width: 140 },
   { key: "card_number", label: "Nro. TARJETA", width: 140 },
   { key: "sale_condition", label: "CONDICION DE VENTA", width: 140 },
-  { key: "remuneration", label: "REMUNERACION", width: 140 },
-  { key: "monotributo", label: "MONOTRIBUTO", width: 140 },
-  { key: "otros", label: "OTROS", width: 140 },
-  { key: "import", label: "IMPORTE", width: 140 },
 ];
 
 export const recHeadersOS: TableHeaders = [
@@ -651,7 +664,7 @@ export const requiredColumnsOS = [
 export const requiredColumns = [
   { key: "business_unit", label: "UNIDAD DE NEGOCIO" },
   // { key: "os", label: "OS" },
-  { key: "validity", label: "VIGENCIA" },
+  { key: "validity", label: "FECHA DE VIGENCIA" },
   { key: "mode", label: "MODO" },
   { key: "state", label: "ESTADO" },
   { key: "holder_id_number", label: "NRO DOC TITULAR" },
@@ -659,7 +672,7 @@ export const requiredColumns = [
   { key: "own_id_type", label: "TIPO DOC PROPIO" },
   { key: "own_id_number", label: "NRO DOC PROPIO" },
   // { key: "affiliate_number", label: "NRO AFILIADO" },
-  { key: "extension", label: "EXTENSION" },
+  { key: "extention", label: "EXTENSION" },
   { key: "relationship", label: "PAR" },
   { key: "birth_date", label: "FECHA NACIMIENTO" },
   { key: "gender", label: "GENERO" },

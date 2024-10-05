@@ -24,12 +24,17 @@ import {
   ingresarAfip,
 } from "~/lib/utils";
 import { utapi } from "~/server/uploadthing";
-import { id } from "date-fns/locale";
-import { Events } from "./events-router";
-import { datetime } from "drizzle-orm/mysql-core";
-import { Console } from "console";
-// import chromium from "chrome-aws-lambda";
 
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+// Extiende dayjs con los plugins necesarios
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+// Configura la zona horaria de Buenos Aires
+const buenosAiresTime = dayjs().tz("America/Argentina/Buenos_Aires").toDate();
 type Bonus = {
   id: string;
   appliedUser: string;
@@ -363,7 +368,7 @@ async function approbatecomprobante(liquidationId: string) {
           comprobante,
           comprobante.family_group?.businessUnitData!.company,
           producto,
-          last_voucher + 1 ?? 0,
+          last_voucher + 1,
           comprobante.family_group?.businessUnitData!.brand,
           billResponsible?.name ?? "",
           (billResponsible?.address ?? "") +
@@ -416,7 +421,7 @@ async function approbatecomprobante(liquidationId: string) {
               comprobante_id: comprobante.id,
               event_amount: comprobante.importe * -1,
               current_amount: lastEvent.current_amount - comprobante.importe,
-              description: "Factura aprobadas",
+              description: "Factura aprobada",
               type: "FC",
             });
           }
@@ -1180,21 +1185,44 @@ export const comprobantesRouter = createTRPCRouter({
       // console.log("Estop", bussinessUnits);
 
       const company = await db.query.companies.findFirst({
-        where: eq(schema.companies.id, companyId!),
+        where: eq(schema.companies.id, companyId ?? ""),
       });
-      const randomNumberLiq = Math.floor(Math.random() * (1000 - 10 + 1)) + 10;
+      // const randomNumberLiq = Math.floor(Math.random() * (1000 - 10 + 1)) + 10;
+
+      let number;
+      const liquidations_counter =
+        await db.query.liquidations_counter.findFirst({
+          where: eq(schema.liquidations_counter.companies_id, companyId ?? ""),
+        });
+
+      if (!liquidations_counter) {
+        const liquidations_counters = await db
+          .insert(schema.liquidations_counter)
+          .values({
+            companies_id: companyId ?? "",
+            number: 1,
+          })
+          .returning();
+
+        number = liquidations_counters[0]?.number;
+      } else {
+        number = liquidations_counter.number + 1;
+        await db.update(schema.liquidations_counter).set({
+          number: number,
+        });
+      }
 
       const [liquidation] = await db
         .insert(schema.liquidations)
         .values({
           brandId: input.brandId,
-          createdAt: new Date(),
-          razon_social: brand?.razon_social ?? "",
+          createdAt: buenosAiresTime,
           estado: "pendiente",
           cuit: company?.cuit ?? "",
           period: input.dateDesde,
           userCreated: user?.id ?? "",
           userApproved: "",
+          number: number ?? 0,
           pdv: parseInt(input.pv),
           interest: input.interest,
           logo_url: input.logo_url,

@@ -248,6 +248,7 @@ export const companiesRelations = relations(companies, ({ many }) => ({
   brands: many(companiesToBrands),
   products: many(companyProducts),
   bussinessUnits: many(bussinessUnits),
+  plans: many(plans),
 }));
 export const selectCompanySchema = createSelectSchema(companies);
 export type Company = z.infer<typeof selectCompanySchema>;
@@ -261,7 +262,6 @@ export const brands = pgTable(
     redescription: varchar("redescription", { length: 10 })
       .notNull()
       .default(""),
-    razon_social: varchar("razon_social"),
     iva: varchar("iva"),
     bill_type: varchar("bill_type"),
     concept: varchar("concept"),
@@ -477,6 +477,9 @@ export const plans = pgTable("plans", {
   plan_code: varchar("plan_code", { length: 255 }).notNull(),
   description: varchar("description", { length: 255 }).notNull(),
   brand_id: varchar("brand_id", { length: 255 }).references(() => brands.id),
+  companies_id: varchar("companies_id", { length: 255 }).references(
+    () => companies.id
+  ),
 });
 
 export const plansRelations = relations(plans, ({ many, one }) => ({
@@ -484,6 +487,10 @@ export const plansRelations = relations(plans, ({ many, one }) => ({
   brands: one(brands, {
     fields: [plans.brand_id],
     references: [brands.id],
+  }),
+  companies: one(companies, {
+    fields: [plans.companies_id],
+    references: [companies.id],
   }),
 }));
 
@@ -522,6 +529,7 @@ export const healthInsurances = pgTable("health_insurances", {
   ),
   name: varchar("name", { length: 255 }).notNull(),
   identificationNumber: varchar("identificationNumber", { length: 255 }),
+  description: varchar("description", { length: 255 }),
   isClient: boolean("isClient").notNull().default(false),
   fiscal_id_type: varchar("fiscal_id_type", { length: 255 }),
   fiscal_id_number: varchar("fiscal_id_number"),
@@ -643,6 +651,7 @@ export const integrants = pgTable("integrant", {
   originating_health_insuranceId: varchar("originating_health_insuranceId", {
     length: 255,
   }).references(() => healthInsurances.id),
+  validity: timestamp("validity", { mode: "date" }),
 });
 
 export const integrantsRelations = relations(integrants, ({ one, many }) => ({
@@ -899,9 +908,13 @@ export const family_groups = pgTable("family_groups", {
   ),
   state: varchar("state", { length: 255 }),
   sale_condition: varchar("sale_condition", { length: 255 }),
-  entry_date: timestamp("entry_date", { mode: "date" }),
   payment_status: varchar("payment_status", { length: 255 }).default("pending"),
   numericalId: serial("autoincrementNumber"),
+  charged_date: timestamp("charged_date", { mode: "date" }),
+  user_charged: varchar("user_charged", { length: 255 }),
+  seller: varchar("seller", { length: 255 }),
+  supervisor: varchar("supervisor", { length: 255 }),
+  gerency: varchar("gerency", { length: 255 }),
 });
 
 export const family_groupsRelations = relations(
@@ -1100,7 +1113,7 @@ export const liquidations = pgTable("liquidations", {
   cuit: varchar("cuit", { length: 255 }),
   pdv: integer("pdv").notNull(),
   period: timestamp("period", { mode: "date" }),
-  number: serial("autoincrementNumber"),
+  number: integer("autoincrementNumber"),
   interest: real("interest"),
   bussinessUnits_id: varchar("bussinessUnits_id", { length: 255 }).references(
     () => bussinessUnits.id
@@ -1119,6 +1132,24 @@ export const liquidationsRelations = relations(
       references: [brands.id],
     }),
     comprobantes: many(comprobantes),
+  })
+);
+
+export const liquidations_counter = pgTable("liquidations_counter", {
+  id: columnId,
+  companies_id: varchar("companies_id", { length: 255 })
+    .references(() => companies.id)
+    .notNull(),
+  number: integer("number").notNull(),
+});
+
+export const liquidations_counterRelations = relations(
+  liquidations_counter,
+  ({ one }) => ({
+    companies: one(companies, {
+      fields: [liquidations_counter.companies_id],
+      references: [companies.id],
+    }),
   })
 );
 

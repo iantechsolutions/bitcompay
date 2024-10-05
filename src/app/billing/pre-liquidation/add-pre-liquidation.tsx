@@ -91,7 +91,7 @@ export default function AddPreLiquidation() {
           brandId: brandId,
           dateDesde: new Date(anio, mes - 1, 1),
           dateHasta: new Date(anio, mes, 0),
-          dateDue: fechaVencimiento2,
+          dateDue: fechaVencimiento1,
           interest: interest ?? 0,
           logo_url: logo_url ?? undefined,
         });
@@ -132,7 +132,9 @@ export default function AddPreLiquidation() {
       {/* <Button onClick={() => setOpen(true)}>
         <PlusCircleIcon className="mr-2" /> Crear Pre liquidacion
       </Button> */}
-      <AddElementButton onClick={() => setOpen(true)} className="rounded-full gap-1 p-4 text-base text-[#3E3E3E] bg-[#BEF0BB] ">
+      <AddElementButton
+        onClick={() => setOpen(true)}
+        className="rounded-full gap-1 p-4 text-base text-[#3E3E3E] bg-[#BEF0BB] ">
         <PlusCircleIcon className="h-4" />
         Agregar Pre-Liquidación
       </AddElementButton>

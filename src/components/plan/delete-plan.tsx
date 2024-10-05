@@ -48,8 +48,7 @@ export default function DeleteButton(props: { id: string }) {
       <Button
         variant="bitcompay"
         className="text-[#3e3e3e] bg-stone-100 hover:bg-stone-200"
-        onClick={() => setOpenDelete(true)}
-      >
+        onClick={() => setOpenDelete(true)}>
         <Delete02Icon className="mr-2" /> Eliminar
       </Button>
       <Dialog open={openDelete} onOpenChange={setOpenDelete}>
@@ -59,20 +58,12 @@ export default function DeleteButton(props: { id: string }) {
               ¿Seguro que desea eliminar el plan?
             </DialogTitle>
           </DialogHeader>
-
-          {error && (
-            <p className="text-red-500 text-center">
-              {" "}
-              Hay grupos familiares relacionados a este plan
-            </p>
-          )}
           <div className="w-full flex justify-center">
             <Button
               type="submit"
               className="rounded-full bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#BEF0BB]"
               disabled={isLoading || error}
-              onClick={handleDelete}
-            >
+              onClick={handleDelete}>
               {isLoading && (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}
