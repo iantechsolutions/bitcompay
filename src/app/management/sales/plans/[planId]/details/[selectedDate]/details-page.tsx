@@ -49,6 +49,7 @@ import { toast } from "sonner";
 import { GoBackButton } from "~/components/goback-button";
 import DeletePrice from "~/components/plan/delete-price";
 import { asTRPCError } from "~/lib/errors";
+import Edit02Icon from "~/components/icons/edit-02-stroke-rounded";
 // import AddPlanDialogPerPrice from "./AddPlanDialog";
 
 dayjs.extend(utc);
@@ -276,8 +277,9 @@ export default function DetailsPage(props: {
             {editable && (
               <Button
                 onClick={() => handleUpdatePrice("edit")}
-                className="ml-10">
+                className="ml-10 rounded-2xl bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e]">
                 {" "}
+                <Edit02Icon className="mr-2 h-5" />
                 Editar precio
               </Button>
             )}
