@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
 import { string } from "zod";
@@ -52,7 +53,7 @@ export default function BreadcrumbComp(props: { pageName?: string }) {
     management: "GESTIÓN",
     client: "CLIENTES",
     affiliates: "AFILIADOS",
-    cc:"CUENTA CORRIENTE",
+    cc: "CUENTA CORRIENTE",
     health_insurances: "OBRAS SOCIALES",
     documents: "DOCUMENTOS",
     "masive-upload": "CARGA MASIVA",
@@ -78,24 +79,39 @@ export default function BreadcrumbComp(props: { pageName?: string }) {
     current_count: "CUENTA CORRIENTE",
     payments: "PAGOS",
   };
+
   return (
     <Breadcrumb>
       <BreadcrumbList>
         {pathnames.map((value, index) => {
-          let translatedValue : string | null = null
+          let translatedValue: string | null = null;
           translatedValue = breadcrumbMapping[value] || props.pageName || null;
           // const href = `/${pathnames.slice(1, index + 1).join("/")}`;
           let isLast = false;
           if (index === pathnames.length - 1) {
             isLast = true;
-          } else if (!((pathnames[index + 1] ?? "") in breadcrumbMapping) && !props.pageName) {
+          } else if (
+            !((pathnames[index + 1] ?? "") in breadcrumbMapping) &&
+            !props.pageName
+          ) {
             isLast = true;
           }
 
           return (
             <React.Fragment key={translatedValue}>
               <BreadcrumbItem>
-                <BreadcrumbPage>{translatedValue}</BreadcrumbPage>
+                {breadcrumbUrlsMapping[value] ? (
+                  <BreadcrumbLink asChild={true}>
+                    <Link href={breadcrumbUrlsMapping[value]}>
+                      {translatedValue}
+                    </Link>
+                  </BreadcrumbLink>
+                ) : (
+                  <BreadcrumbPage>
+                    {translatedValue}
+                  </BreadcrumbPage>
+                )}
+              
               </BreadcrumbItem>
               {!isLast && <BreadcrumbSeparator />}
             </React.Fragment>
@@ -105,3 +121,52 @@ export default function BreadcrumbComp(props: { pageName?: string }) {
     </Breadcrumb>
   );
 }
+
+const breadcrumbUrlsMapping: Record<string, string> = {
+  brands: "/administration/brands",
+  channels: "/administration/channels",
+  companies: "/administration/companies",
+  products: "/administration/products",
+
+  audit: "/audit",
+  administrative: "/administrative",
+  benefits: "/benefits",
+  fixed_eventual: "/fixed_eventual",
+  medical: "/medical",
+  operations: "/operations",
+  telefonica: "/telefonica",
+
+  liquidation: "/billing/liquidation",
+  "pre-liquidation": "/billing/pre-liquidation",
+  manual_issuance: "/billing/manual_issuance",
+
+  maintenance: "/maintenance",
+  roles: "/maintenance/roles",
+  tables: "/maintenance/tables",
+  user: "/maintenance/user",
+
+  affiliates: "/management/client/affiliates",
+  cc: "/management/client/affiliates/cc",
+  health_insurances: "/management/client/health_insurances",
+  "massive-upload": "/management/documents/massive-upload",
+  output: "/management/documents/output",
+  "rec-upload": "/management/documents/rec-upload",
+  response: "/management/documents/response",
+
+  sales: "/sales",
+  advisors: "/sales/advisors",
+  bonuses: "/sales/bonuses",
+  comissions: "/sales/comissions",
+  differentials: "/sales/differentials",
+  plans: "/sales/plans",
+  procedures: "/sales/procedures",
+
+  abm: "/management/suppliers/abm",
+  "comprobants-upload": "/management/suppliers/comprobants-upload",
+  "current-acounts": "/management/suppliers/current-acounts",
+  due_dates: "/management/suppliers/due_dates",
+  orders: "/management/suppliers/orders",
+
+  collection: "/treasury/collection",
+  payments: "/treasury/payments",
+};
