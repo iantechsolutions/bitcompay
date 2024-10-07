@@ -953,6 +953,12 @@ export const family_groupsSchemaDB = insertfamily_groupsSchema.pick({
   state: true,
   payment_status: true,
   receipt: true,
+  seller:true,
+  supervisor:true,
+  gerency:true,
+  sale_condition:true,
+  user_charged:true,
+  charged_date:true,
 });
 export type FamilyGroup = z.infer<typeof selectfamily_groupsSchema>;
 
