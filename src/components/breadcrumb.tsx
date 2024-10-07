@@ -70,7 +70,7 @@ export default function BreadcrumbComp(props: { pageName?: string }) {
     suppliers: "PROVEEDORES",
     abm: "ABM",
     "comprobants-upload": "ALTA COMPROBANTES",
-    "current-acounts": "CUENTAS CORRIENTES",
+    currentAccounts: "CUENTAS CORRIENTES",
     due_dates: "AGENDA DE VENCIMIENTOS",
     orders: "ORDENES DE PAGO",
 
@@ -128,25 +128,22 @@ const breadcrumbUrlsMapping: Record<string, string> = {
   companies: "/administration/companies",
   products: "/administration/products",
 
-  audit: "/audit",
-  administrative: "/administrative",
-  benefits: "/benefits",
-  fixed_eventual: "/fixed_eventual",
-  medical: "/medical",
-  operations: "/operations",
-  telefonica: "/telefonica",
+  administrative: "/audit/administrative",
+  benefits: "/audit/benefits",
+  fixed_eventual: "/audit/fixed_eventual",
+  medical: "/audit/medical",
+  operations: "/audit/operations",
+  telefonica: "/audit/telefonica",
 
   liquidation: "/billing/liquidation",
   "pre-liquidation": "/billing/pre-liquidation",
   manual_issuance: "/billing/manual_issuance",
 
-  maintenance: "/maintenance",
   roles: "/maintenance/roles",
   tables: "/maintenance/tables",
   user: "/maintenance/user",
 
   affiliates: "/management/client/affiliates",
-  cc: "/management/client/affiliates/cc",
   health_insurances: "/management/client/health_insurances",
   "massive-upload": "/management/documents/massive-upload",
   output: "/management/documents/output",
@@ -162,7 +159,7 @@ const breadcrumbUrlsMapping: Record<string, string> = {
 
   abm: "/management/suppliers/abm",
   "comprobants-upload": "/management/suppliers/comprobants-upload",
-  "current-acounts": "/management/suppliers/current-acounts",
+  currentAccounts: "/management/suppliers/currentAccounts",
   due_dates: "/management/suppliers/due_dates",
   orders: "/management/suppliers/orders",
 
