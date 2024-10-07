@@ -85,11 +85,22 @@ export function DataTable({ columns, summary, liquidationId }: DataTableProps) {
 
   useEffect(() => {
     const cursor = pagination.pageIndex * pagination.pageSize;
+
     let filter: string | undefined = undefined;
+    let filterModo: string | undefined = undefined;
+    let filterPlan: string | undefined = undefined;
+    let filterUN: string | undefined = undefined;
+
     for (const f of columnFilters) {
-      if (f.id.toLowerCase() === "nombre") {
+      const id = f.id.toLowerCase();
+      if (id === "nombre") {
         filter = f.value as string;
-        break;
+      } else if (id === "modo") {
+        filterModo = f.value as string;
+      } else if (id === "plan") {
+        filterPlan = f.value as string;
+      } else if (id === "un") {
+        filterUN = f.value as string;
       }
     }
 
@@ -113,6 +124,9 @@ export function DataTable({ columns, summary, liquidationId }: DataTableProps) {
           cursor: pagination.pageIndex * pagination.pageSize,
           id_number_startsWith: filterNumber,
           name_contains: filterName,
+          modoDesc: filterModo,
+          plan: filterPlan,
+          UN: filterUN,
         });
       },
       columnFilters.length > 0

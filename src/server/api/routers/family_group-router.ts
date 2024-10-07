@@ -432,6 +432,9 @@ export const family_groupsRouter = createTRPCRouter({
         cursor: z.number().int().nonnegative().optional(),
         id_number_startsWith: z.string().min(1).max(255).optional(),
         name_contains: z.string().min(1).max(255).optional(),
+        modoDesc: z.string().min(1).max(255).optional(),
+        plan: z.string().min(1).max(255).optional(),
+        UN: z.string().min(1).max(255).optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -481,7 +484,16 @@ export const family_groupsRouter = createTRPCRouter({
         (x) =>
           x.businessUnitData?.companyId === ctx.session.orgId &&
           x.comprobantes.length > 0 &&
-          x.integrants.length > 0
+          x.integrants.length > 0 &&
+          (input.modoDesc !== undefined
+            ? x.modo?.description === input.modoDesc
+            : true) &&
+          (input.plan !== undefined
+            ? x.plan?.plan_code === input.plan
+            : true) &&
+          (input.UN !== undefined
+            ? x.businessUnitData?.description === input.UN
+            : true)
       );
 
       return {
