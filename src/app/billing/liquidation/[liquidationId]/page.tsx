@@ -51,9 +51,19 @@ export default async function Home(props: {
   //   preliquidation?.userCreated ?? "user_2iy8lXXdnoa2f5wHjRh5nj3W0fU"
   // );
   if (!preliquidation) return <Title>Preliquidacion no encotrada</Title>;
-  const familyGroups = await api.family_groups.getByLiquidation.query({
+  const familyGroupsData = await api.family_groups.getByLiquidation.query({
     liquidationId: props.params.liquidationId,
+    summary: true,
   });
+
+  if (
+    Array.isArray(familyGroupsData) ||
+    typeof familyGroupsData?.summary !== "object"
+  ) {
+    throw new Error("getByLiquidation failed to generate summary");
+  }
+
+  const { familyGroups, summary } = familyGroupsData;
 
   // const fg = await api.family_groups.getWithFilteredComprobantes.query({
 
@@ -70,8 +80,7 @@ export default async function Home(props: {
   //   label: modo?.description ?? "modo sin nombre",
   // })) || [{ value: "", label: "" }];
 
-  const periodo =
-    dayjs.utc(preliquidation?.period).format("MM/YYYY") ?? "-";
+  const periodo = dayjs.utc(preliquidation?.period).format("MM/YYYY") ?? "-";
   const headers = [
     "NRO. GF",
     "Nombre",
@@ -87,17 +96,6 @@ export default async function Home(props: {
     "Total",
   ];
   if (preliquidation?.estado !== "pendiente") headers.push("Factura");
-  const summary = {
-    "Saldo anterior": 0,
-    "Cuota Planes": 0,
-    Bonificación: 0,
-    Diferencial: 0,
-    Aporte: 0,
-    Interés: 0,
-    "Sub Total": 0,
-    IVA: 0,
-    "Total a facturar": 0,
-  };
 
   const toNumberOrZero = (value: any) => {
     const number = Number(value);
@@ -130,32 +128,27 @@ export default async function Home(props: {
     //     x.createdAt < preliquidation?.createdAt
     // );
 
-
-
     // summary["Saldo anterior"] += eventPreComprobante?.current_amount ?? 0;
     // excelRow.push(eventPreComprobante?.current_amount ?? 0);
-    
+
     const saldo_anterior = toNumberOrZero(
       original_comprobante?.items.find(
         (item) => item.concept === "Factura Anterior"
       )?.amount
     );
-    console.log("saldo_anterior",saldo_anterior)
-    summary["Saldo anterior"] += saldo_anterior
+    console.log("saldo_anterior", saldo_anterior);
     excelRow.push(saldo_anterior);
 
     const cuota_planes = toNumberOrZero(
       original_comprobante?.items.find((item) => item.concept === "Abono")
         ?.amount
     );
-    summary["Cuota Planes"] += cuota_planes;
     excelRow.push(cuota_planes);
     const bonificacion = toNumberOrZero(
       original_comprobante?.items.find(
         (item) => item.concept === "Bonificación"
       )?.amount
     );
-    summary["Bonificación"] += bonificacion;
     excelRow.push(bonificacion);
 
     // const diferencial = fg.integrants.reduce((sum, integrant) => {
@@ -165,14 +158,11 @@ export default async function Home(props: {
     //   return sum + differentialAmount;
     // }, 0);
 
-
     const diferencial = toNumberOrZero(
       original_comprobante?.items.find((item) => item.concept === "Diferencial")
         ?.amount
-    )
+    );
 
-
-    summary["Diferencial"] += diferencial;
     excelRow.push(diferencial);
 
     const Aporte = toNumberOrZero(
@@ -180,27 +170,22 @@ export default async function Home(props: {
         ?.amount
     );
 
-    summary["Aporte"] += Aporte;
     excelRow.push(Aporte);
     const interes = toNumberOrZero(
       original_comprobante?.items.find((item) => item.concept === "Interes")
         ?.amount ?? "0"
     );
-    summary["Interés"] += interes;
     excelRow.push(interes);
     const total = toNumberOrZero(
       parseFloat(original_comprobante?.importe?.toFixed(2) ?? "0")
     );
-    summary["Total a facturar"] += total;
     excelRow.push(total);
     const subTotal = computeBase(
       total,
       Number(original_comprobante?.iva ?? "0")
     );
-    summary["Sub Total"] += subTotal;
     excelRow.push(subTotal);
     const iva = computeIva(total, Number(original_comprobante?.iva ?? "0"));
-    summary.IVA += iva;
     excelRow.push(iva);
     excelRows.push(excelRow);
     // const lastEvent = await api.events.getLastByDateAndCC.query({
@@ -234,8 +219,7 @@ export default async function Home(props: {
       Plan: plan,
       modo,
     });
-    
-  })
+  });
 
   return (
     <LayoutContainer>
@@ -261,7 +245,9 @@ export default async function Home(props: {
           <li className="">
             <span className="">RAZÓN SOCIAL</span>
             <br />
-            <p className="font-medium text-sm">{companyData?.razon_social ?? "-"}</p>
+            <p className="font-medium text-sm">
+              {companyData?.razon_social ?? "-"}
+            </p>
           </li>
           <li>
             <span className="">CUIT</span>
@@ -271,7 +257,9 @@ export default async function Home(props: {
           <li>
             <span className="">MARCA</span>
             <br />
-            <p className="font-medium text-sm">{preliquidation?.brand?.name ?? "-"}</p>
+            <p className="font-medium text-sm">
+              {preliquidation?.brand?.name ?? "-"}
+            </p>
           </li>
           <li>
             <span className="">PERÍODO</span>
@@ -281,27 +269,30 @@ export default async function Home(props: {
           <li>
             <span className="">N° PRE-LIQUIDACIÓN</span>
             <br />
-            <p className="font-medium  text-sm">{preliquidation?.number ?? "-"}</p>
+            <p className="font-medium  text-sm">
+              {preliquidation?.number ?? "-"}
+            </p>
           </li>
           <li>
             <span className="">FECHA DE PROCESO</span>
             <br />
             <p className="font-medium text-sm">
-            {dayjs.utc(preliquidation?.period).format("DD/MM/YYYY hh:mm") ?? "-"}
+              {dayjs.utc(preliquidation?.period).format("DD/MM/YYYY hh:mm") ??
+                "-"}
             </p>
           </li>
           <li className="">
             <span className="">UNIDAD DE NEGOCIOS</span>
             <br />
             <p className="font-medium text-sm">
-            {(preliquidation?.bussinessUnits?.description) ?? "-"}
+              {preliquidation?.bussinessUnits?.description ?? "-"}
             </p>
           </li>
           <li>
             <span className="">FECHA DE EMISIÓN</span>
             <br />
             <p className="font-medium text-sm">
-            {dayjs.utc(preliquidation?.createdAt).format("DD/MM/YYYY") ?? "-"}
+              {dayjs.utc(preliquidation?.createdAt).format("DD/MM/YYYY") ?? "-"}
             </p>
           </li>
           <li>
@@ -313,14 +304,22 @@ export default async function Home(props: {
             <span className="">1° FECHA DE VENCIMIENTO</span>
             <br />
             <p className="font-medium text-sm">
-            {dayjs.utc(preliquidation?.comprobantes[0]?.payments[0]?.first_due_date).format("DD/MM/YYYY") ?? "-"}
-              </p>
+              {dayjs
+                .utc(
+                  preliquidation?.comprobantes[0]?.payments[0]?.first_due_date
+                )
+                .format("DD/MM/YYYY") ?? "-"}
+            </p>
           </li>
           <li>
             <span className="">2° FECHA DE VENCIMIENTO</span>
             <br />
             <p className="font-medium text-sm">
-            {dayjs.utc(preliquidation?.comprobantes[0]?.payments[0]?.second_due_date).format("DD/MM/YYYY") ?? "-"}
+              {dayjs
+                .utc(
+                  preliquidation?.comprobantes[0]?.payments[0]?.second_due_date
+                )
+                .format("DD/MM/YYYY") ?? "-"}
             </p>
           </li>
           <li>
@@ -338,7 +337,7 @@ export default async function Home(props: {
       </div>
 
       <div className="relative">
-        <DataTable columns={columns} data={tableRows} />
+        <DataTable columns={columns} data={tableRows} summary={summary} />
         <DownloadExcelButton rows={excelRows} period={preliquidation?.period} />
       </div>
     </LayoutContainer>

@@ -9,9 +9,10 @@ import type { RouterOutputs } from "~/trpc/shared";
 import { api } from "~/trpc/react";
 import { computeBase, computeIva } from "~/lib/utils";
 import Link from "next/link";
+import { FamilyListLiquidationId } from "~/server/api/routers/family_group-router";
 type propsTableRowContainer = {
   preliquidation: RouterOutputs["liquidations"]["get"];
-  family_group: RouterOutputs["family_groups"]["getByLiquidation"][number];
+  family_group: FamilyListLiquidationId;
   periodo: string;
 };
 
