@@ -247,7 +247,7 @@ export default function PlanPage(props: {
                           <ChevronDown className="h-5" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent>
+                      <DropdownMenuContent className="bg-[#f7f7f7]">
                         <DropdownMenuItem>
                           <Button
                             onClick={() =>

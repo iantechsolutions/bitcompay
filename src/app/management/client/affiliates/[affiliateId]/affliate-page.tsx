@@ -21,10 +21,10 @@ import { Card } from "~/components/ui/card";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
-
+import "dayjs/locale/es"
 dayjs.extend(utc);
 dayjs.extend(timezone);
-
+dayjs.locale("es");
 import { getDifferentialAmount, getGroupContribution } from "~/lib/utils";
 import { RouterOutputs } from "~/trpc/shared";
 import { useRouter } from "next/navigation";
