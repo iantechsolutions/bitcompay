@@ -41,7 +41,7 @@ export function SidenavItem(props: {
   : false;
 
   const activeColor = props.IsChild ? "bg-[#DEF5DD]" : "bg-[#BEF0BB]";
-  const className = `flex w-fit gap-[0.3vw] px-[1vw] py-[0.5vh] items-center rounded-full max-w-60
+  const className = `flex w-fit gap-[0.3vw] px-[1vw] py-[1vh] items-center rounded-full max-w-60
   md:text-sm lg:text-base xl:text-lg xxl:text-xl w-full mr-[1vw] ${isActive ? activeColor : ""} ${props.className}`;
     
   const content = (

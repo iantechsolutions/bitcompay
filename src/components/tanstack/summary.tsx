@@ -18,8 +18,8 @@ export default function DataTableSummary<TData>({
   });
 
   return (
-    <ScrollArea className="w-full border rounded-lg">
-      <div className="flex flex-auto flex-row justify-center pt-5 px-2 pb-0 w-max">
+    <ScrollArea className="w-full border rounded-lg py-5">
+      <div className="flex flex-auto flex-row justify-center px-2 pb-0 w-max">
         {Object.entries(summaryData).map(([key, value], index, array) => (
           <div
             className={`${

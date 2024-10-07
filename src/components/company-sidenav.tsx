@@ -426,11 +426,11 @@ export default function CompanySidenav() {
               <Accordion type="single" collapsible>
                 <AccordionItem value="item-1" className="border-none max-w-60">
                   <AccordionTrigger
-                    className={
-                      isActive("Ventas")
-                        ? "bg-[#BEF0BB]   hover:no-underline"
-                        : "  hover:no-underline"
-                    }>
+                    className={`py-[1vh] my-[0.5vh] hover:no-underline ${ isActive("Ventas")
+                      ? `bg-[#BEF0BB]`
+                      : ``
+                  }`}
+                     >
                     <SideNavTrigger
                       icon={
                         <img
@@ -583,11 +583,10 @@ export default function CompanySidenav() {
               <Accordion type="single" collapsible className="">
                 <AccordionItem value="item-1" className="border-none max-w-60">
                   <AccordionTrigger
-                    className={
-                      isActive("Clientes")
-                        ? "bg-[#BEF0BB]  hover:no-underline"
-                        : "  hover:no-underline"
-                    }>
+                    className={`py-[1vh] my-[0.5vh] hover:no-underline ${ isActive("Clientes")
+                      ? `bg-[#BEF0BB]`
+                      : ``
+                  }`}>
                     <SideNavTrigger
                       icon={
                         <img
@@ -657,11 +656,10 @@ export default function CompanySidenav() {
               <Accordion type="single" collapsible className="">
                 <AccordionItem value="item-1" className="border-none max-w-60">
                   <AccordionTrigger
-                    className={
-                      isActive("Proveedores")
-                        ? " bg-[#BEF0BB] hover:no-underline"
-                        : " hover:no-underline"
-                    }>
+                    className={`py-[1vh] my-[0.5vh] hover:no-underline ${ isActive("Proveedores")
+                      ? `bg-[#BEF0BB]`
+                      : ``
+                  }`}>
                     <SideNavTrigger className="text-sideNav">
                       Proveedores
                     </SideNavTrigger>
@@ -715,11 +713,10 @@ export default function CompanySidenav() {
               <Accordion type="single" collapsible className="">
                 <AccordionItem value="item-1" className="border-none max-w-60">
                   <AccordionTrigger
-                    className={
-                      isActive("Documentos")
-                        ? " bg-[#BEF0BB] px-0 hover:no-underline"
-                        : "      hover:no-underline"
-                    }>
+                    className={`py-[1vh] my-[0.5vh] hover:no-underline ${ isActive("Documentos")
+                      ? `bg-[#BEF0BB]`
+                      : ``
+                  }`}>
                     <SideNavTrigger
                       icon={
                         <Files strokeWidth={1} className="w-5 h-auto" />
