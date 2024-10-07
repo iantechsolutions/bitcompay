@@ -21,10 +21,10 @@ import { Card } from "~/components/ui/card";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
-
+import "dayjs/locale/es"
 dayjs.extend(utc);
 dayjs.extend(timezone);
-
+dayjs.locale("es");
 import { getDifferentialAmount, getGroupContribution } from "~/lib/utils";
 import { RouterOutputs } from "~/trpc/shared";
 import { useRouter } from "next/navigation";
@@ -99,8 +99,8 @@ export default function AffiliatePage(props: {
     Estado: grupo?.state,
     "Fecha estado": "",
     "Motivo baja": "",
-    "Fecha alta": grupo?.entry_date
-      ? dayjs.utc(grupo?.entry_date).startOf("day").format("DD-MM-YYYY")
+    "Fecha alta": grupo?.charged_date
+      ? dayjs.utc(grupo?.charged_date).startOf("day").format("DD-MM-YYYY")
       : "-",
     "Usuario alta": "",
     Vendedor: "",
@@ -351,8 +351,7 @@ export default function AffiliatePage(props: {
           <Accordion
             className="w-full"
             defaultValue={["item-1", "item-2", "item-3"]}
-            type="multiple"
-          >
+            type="multiple">
             <AccordionItem value="item-1">
               <AccordionTrigger className="font-semibold" name="editIcon">
                 Datos del grupo familiar
@@ -368,21 +367,18 @@ export default function AffiliatePage(props: {
             <AccordionItem value="item-2">
               <AccordionTrigger
                 className="font-semibold rounded-md overflow-hidden"
-                name="editIcon"
-              >
+                name="editIcon">
                 Integrantes
               </AccordionTrigger>
               <AccordionContent className="pt-6 pl-5">
                 <AccordionIntegrant
                   type="multiple"
-                  className="rounded-md overflow-hidden"
-                >
+                  className="rounded-md overflow-hidden">
                   {integrant?.map((int) => (
                     <AccordionItemIntegrant value={int.id}>
                       <AccordionTriggerIntegrant
                         relationship={int?.relationship}
-                        affiliate={int}
-                      >
+                        affiliate={int}>
                         {int.name}
                       </AccordionTriggerIntegrant>
                       <AccordionContentIntegrant>

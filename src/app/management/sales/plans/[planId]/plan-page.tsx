@@ -1,10 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import {
-  Trash2,
-  ChevronDown,
-  PlusCircleIcon,
-} from "lucide-react";
+import { Trash2, ChevronDown, PlusCircleIcon } from "lucide-react";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
 import {
@@ -60,6 +56,7 @@ export default function PlanPage(props: {
   plan: RouterOutputs["plans"]["get"];
 }) {
   const plan = props.plan;
+
   const router = useRouter();
   const formatter = new Intl.DateTimeFormat("es-ES", {
     weekday: "long",
@@ -150,7 +147,7 @@ export default function PlanPage(props: {
       toast.error(error.message);
     }
   }
-  const planName= plan?.description;
+  const planName = plan?.description;
   return (
     <LayoutContainer pageName={planName}>
       <section className="space-y-2">
@@ -205,9 +202,15 @@ export default function PlanPage(props: {
                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                   <DropdownMenuItem>
                     <Link
-                      href={`/management/sales/plans/${plan?.id}/editPrice`}
+                      href={`/management/sales/plans/${
+                        plan?.id ?? ""
+                      }/editPrice`}
                       className="p-0 text-[#3e3e3e] font-medium shadow-none h-5 flex">
-                    <PlusCircleIcon className="mr-2" size={20} strokeWidth={1} />
+                      <PlusCircleIcon
+                        className="mr-2"
+                        size={20}
+                        strokeWidth={1}
+                      />
                       Agregar precio
                     </Link>
                   </DropdownMenuItem>
@@ -222,7 +225,7 @@ export default function PlanPage(props: {
                   className="pl-7 hover:cursor-default"
                   leading={
                     <Badge
-                      className={`w-24 ${
+                      className={`w-24 rounded-2xl ${
                         fecha === vigente
                           ? "bg-[#DDF9CC] text-[#4E9F1D]"
                           : "bg-[#f9bcbc] text-[#ec3c3c]"
@@ -244,7 +247,7 @@ export default function PlanPage(props: {
                           <ChevronDown className="h-5" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent>
+                      <DropdownMenuContent className="bg-[#f7f7f7]">
                         <DropdownMenuItem>
                           <Button
                             onClick={() =>

@@ -56,6 +56,7 @@ export const integrantsRouter = createTRPCRouter({
           .optional(),
         nationality: z.string().optional(),
         afip_status: z.string().optional(),
+        extention: z.string().optional(),
         fiscal_id_type: z.string().optional(),
         fiscal_id_number: z.string().optional(),
         address: z.string().optional(),
@@ -76,6 +77,7 @@ export const integrantsRouter = createTRPCRouter({
         isBillResponsiblee: z.boolean().optional(),
         family_group_id: z.string().optional(),
         postal_codeId: z.string(),
+        validity: z.date().optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -97,6 +99,7 @@ export const integrantsRouter = createTRPCRouter({
         gender: z.enum(["MASCULINO", "FEMENINO", "OTRO"]),
         civil_status: z.enum(["SOLTERO", "CASADO", "DIVORCIADO", "VIUDO"]),
         nationality: z.string(),
+        extention: z.string(),
         afip_status: z.string(),
         fiscal_id_type: z.string(),
         fiscal_id_number: z.string(),
@@ -118,6 +121,7 @@ export const integrantsRouter = createTRPCRouter({
         isBillResponsible: z.boolean(),
         family_group_id: z.string(),
         postal_codeId: z.string(),
+        validity: z.date().optional(),
       })
     )
     .mutation(async ({ input: { id, ...input } }) => {

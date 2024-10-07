@@ -19,6 +19,9 @@ export const eventsRouter = createTRPCRouter({
       const events = await db.query.events.findMany({
         where: eq(schema.events.currentAccount_id, input.ccId),
         orderBy: [desc(schema.events.createdAt)],
+        with: {
+          comprobantes: true,
+        }
       });
       return events;
     }),

@@ -36,6 +36,7 @@ import DataTableSummary from "~/components/tanstack/summary";
 import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
+  summary: RouterOutputs["family_groups"]["getSummaryByLiqId"]["summary"];
   data: TData[];
 }
 
@@ -49,6 +50,7 @@ interface DetailData {
 
 export function DataTable<TData, TValue>({
   columns,
+  summary,
   data,
 }: DataTableProps<TData, TValue>) {
   const [open, setOpen] = useState(false);
@@ -82,7 +84,7 @@ export function DataTable<TData, TValue>({
         detailData[key] = row.original[key];
       }
     }
-    
+
     setDetailData(detailData);
     setOpen(!open);
   };
@@ -91,9 +93,10 @@ export function DataTable<TData, TValue>({
   const filteredColumns = Array.from(table.getAllColumns()).filter((column) =>
     desiredColumns.includes(column.id!)
   );
+
   return (
     <>
-      <DataTableSummary table={table} />
+      <DataTableSummary summary={summary} />
       <TableToolbar
         table={table}
         searchColumn={"nombre"}

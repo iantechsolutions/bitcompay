@@ -52,7 +52,7 @@ import {
   AccordionItem,
   AccordionContent,
   AccordionTrigger,
-} from "./ui/accordion";
+} from "./sidenav/accordion";
 import { ScrollArea } from "./ui/scroll-area";
 import { usePathname } from "next/navigation";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";

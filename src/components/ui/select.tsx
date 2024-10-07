@@ -1,13 +1,12 @@
 "use client";
 
 import {
-  CaretSortIcon,
   CheckIcon,
   ChevronDownIcon,
   ChevronUpIcon,
 } from "@radix-ui/react-icons";
 import * as SelectPrimitive from "@radix-ui/react-select";
-import { ChevronDown, ChevronUp, CircleChevronDown, CircleChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import * as React from "react";
 
 import { cn } from "~/lib/utils";
@@ -26,31 +25,30 @@ const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> &
     CustomSelectTriggerProps
->(({ className, children, rightIcon = null, ...props }, ref) =>  {
+>(({ className, children, rightIcon = null, ...props }, ref) => {
   const [open, setOpen] = React.useState(false);
   return (
-
-  <SelectPrimitive.Trigger
-    ref={ref}
-    className={cn(
-      "flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md bg-transparent px-3 py-2 text-sm ring-offset-background [&>span]:line-clamp-1 disabled:cursor-not-allowed placeholder:text-muted-foreground disabled:opacity-50 focus:outline-none ",
-      className
-    )}
-    onClick={() => setOpen(!open)}
-    {...props}
-  >
-    {children}
-    <SelectPrimitive.Icon asChild={true} className="ml-1">
-    {rightIcon ? (
+    <SelectPrimitive.Trigger
+      ref={ref}
+      className={cn(
+        "flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md bg-transparent px-3 py-2 text-sm ring-offset-background [&>span]:line-clamp-1 disabled:cursor-not-allowed placeholder:text-muted-foreground  focus:outline-none disabled:opacity-100",
+        className
+      )}
+      onClick={() => setOpen(!open)}
+      {...props}
+    >
+      {children}
+      <SelectPrimitive.Icon asChild={true} className="ml-1">
+        {rightIcon ? (
           rightIcon
         ) : open ? (
           <ChevronUp className="h-4 w-4 opacity-50 ml-10" />
         ) : (
           <ChevronDown className="h-4 w-4 opacity-50 ml-10" />
         )}
-    </SelectPrimitive.Icon>
-  </SelectPrimitive.Trigger>
-)
+      </SelectPrimitive.Icon>
+    </SelectPrimitive.Trigger>
+  );
 });
 SelectTrigger.displayName = SelectPrimitive.Trigger.displayName;
 
@@ -83,7 +81,7 @@ const SelectScrollDownButton = React.forwardRef<
     )}
     {...props}
   >
-    <ChevronDownIcon className="pl-3"/>
+    <ChevronDownIcon className="pl-3" />
   </SelectPrimitive.ScrollDownButton>
 ));
 SelectScrollDownButton.displayName =

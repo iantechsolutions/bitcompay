@@ -37,14 +37,13 @@ import Calendar01Icon from "~/components/icons/calendar-01-stroke-rounded";
 import { Calendar } from "~/components/ui/calendar";
 import { bussinessUnits } from "~/server/db/schema";
 import Edit02Icon from "~/components/icons/edit-02-stroke-rounded";
-import { es } from 'date-fns/locale'
+import { es } from "date-fns/locale";
 import { setDefaultOptions } from "date-fns";
-
 
 export function AddHealthInsurances(props: {
   healthInsurance: RouterOutputs["healthInsurances"]["get"] | null;
 }) {
-  setDefaultOptions({ locale: es })
+  setDefaultOptions({ locale: es });
   const OS = props?.healthInsurance;
 
   // const { data: OS } = api.healthInsurances.get.useQuery({
@@ -97,6 +96,8 @@ export function AddHealthInsurances(props: {
     OS?.fiscalPostalCode ?? ""
   );
   const [fiscalCountry, setFiscalCountry] = useState(OS?.fiscalCountry ?? "");
+  const [description, setDescripcion] = useState(OS?.description ?? "");
+
   const [IIBBStatus, setIIBBStatus] = useState(OS?.IIBBStatus ?? "");
   const [IIBBNumber, setIIBBNumber] = useState(OS?.IIBBNumber ?? "");
   const [sellCondition, setSellCondition] = useState(OS?.sellCondition ?? "");
@@ -107,6 +108,8 @@ export function AddHealthInsurances(props: {
   const [cancelMotive, setCancelMotive] = useState(OS?.cancelMotive ?? "");
   const [floor, setFloor] = useState(OS?.floor ?? "");
   const [office, setOffice] = useState(OS?.office ?? "");
+  const [isClient, setIsClient] = useState<boolean>(OS?.isClient ?? false);
+
   const [dateState, setDateState] = useState<Date | undefined>(
     OS?.dateState ?? undefined
   );
@@ -126,12 +129,9 @@ export function AddHealthInsurances(props: {
     const errors: string[] = [];
     if (!razonsocial) errors.push("RAZON SOCIAL");
     if (!identificationNumber) errors.push("CODIGO");
-    // if (!fiscalIdNumber) errors.push("NRO DOC. FISCAL");
     if (!fiscalIdType) errors.push("TIPO DOC FISCAL");
     if (!afipStatus) errors.push("ESTADO AFIP");
-    // if (!responsibleName) errors.push("Nombre de facturacion");
-    // if (!code) errors.push("Código");
-    // if (!billType) errors.push("Tipo de Factura");
+    if (!description) errors.push("DESCRIPCION");
 
     return errors;
   }
@@ -149,7 +149,8 @@ export function AddHealthInsurances(props: {
       const healthInsurance = await createHealtinsurances({
         identificationNumber: identificationNumber,
         initials: initials,
-
+        name: razonsocial,
+        description: description,
         businessUnit: businessUnit,
         businessName: razonsocial,
         fiscal_id_number: fiscalIdNumber.toString(),
@@ -215,6 +216,8 @@ export function AddHealthInsurances(props: {
         id: OS?.id ?? "",
         identificationNumber: identificationNumber,
         initials: initials,
+        name: razonsocial,
+        description: description,
 
         businessUnit: businessUnit,
         businessName: razonsocial,
@@ -314,6 +317,21 @@ export function AddHealthInsurances(props: {
                 </SelectContent>
               </Select> */}
             </div>
+
+            <div>
+              <Label className="text-xs text-gray-500">
+                Tipo de obra social
+              </Label>
+              <Select onValueChange={(value) => setIsClient(value === "true")}>
+                <SelectTrigger className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none">
+                  <SelectValue placeholder="..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="true">Cliente</SelectItem>
+                  <SelectItem value="false">No cliente</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <div>
               <Label className="text-xs text-gray-500">SIGLA</Label>
               <Input
@@ -333,6 +351,16 @@ export function AddHealthInsurances(props: {
                   <SelectItem value="3">UTHGRA</SelectItem>
                 </SelectContent>
               </Select> */}
+            </div>
+            <div>
+              <Label className="text-xs text-gray-500">Descripcion</Label>
+              <Input
+                id="description"
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                placeholder=""
+                value={description}
+                onChange={(e) => setDescripcion(e.target.value)}
+              />
             </div>
             <div />
             <div />

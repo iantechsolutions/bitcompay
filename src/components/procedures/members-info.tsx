@@ -71,6 +71,7 @@ export type InputsMembers = {
   depto: string;
   localidad: string;
   county: string;
+  extention: string;
   // state: string;
   province: string;
   cp: string;
@@ -83,6 +84,7 @@ export type InputsMembers = {
   isBillResponsible: boolean;
   isPaymentResponsible: boolean;
   isAffiliate: boolean;
+  validity: Date | null;
 };
 
 interface AddMembersProps {

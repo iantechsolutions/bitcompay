@@ -46,6 +46,8 @@ export default function InsurancesForm({
     await createInsurance({
       ...parsedData,
       identificationNumber: "",
+      isClient: false,
+      initials: "",
     });
 
     if (setOpen) {

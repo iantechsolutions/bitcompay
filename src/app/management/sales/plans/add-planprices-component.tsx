@@ -35,7 +35,7 @@ import { RouterOutputs } from "~/trpc/shared";
 import { CircleX, Loader2Icon, PlusCircle } from "lucide-react";
 import Edit02Icon from "~/components/icons/edit-02-stroke-rounded";
 import { GoBackButton } from "~/components/goback-button";
-
+import Bookmark02Icon from "~/components/icons/bookmark-02-stroke-rounded";
 dayjs.extend(utc);
 dayjs.locale("es");
 
@@ -49,7 +49,7 @@ type FormValues = {
     condition: string | null;
     isAmountByAge: boolean;
     plan_id: string | null;
-    amount: number;
+    amount: string | number;
   }[];
 };
 
@@ -78,7 +78,7 @@ export default function AddPlanPricesComponent({
   const [formData, setFormData] = useState<FormValues>({
     prices: initialPrices || [],
   });
-  
+
   const router = useRouter();
   const [working, setWorking] = useState(false);
   const form = useForm<FormValues>({
@@ -119,24 +119,6 @@ export default function AddPlanPricesComponent({
     }
   );
 
-  const Bookmark02Icon = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      width={24}
-      height={24}
-      color={"#000000"}
-      fill={"none"}
-      {...props}>
-      <path
-        d="M4 17.9808V9.70753C4 6.07416 4 4.25748 5.17157 3.12874C6.34315 2 8.22876 2 12 2C15.7712 2 17.6569 2 18.8284 3.12874C20 4.25748 20 6.07416 20 9.70753V17.9808C20 20.2867 20 21.4396 19.2272 21.8523C17.7305 22.6514 14.9232 19.9852 13.59 19.1824C12.8168 18.7168 12.4302 18.484 12 18.484C11.5698 18.484 11.1832 18.7168 10.41 19.1824C9.0768 19.9852 6.26947 22.6514 4.77285 21.8523C4 21.4396 4 20.2867 4 17.9808Z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
 
   const { mutateAsync: createPricePerCondition } =
     api.pricePerCondition.create.useMutation();
@@ -203,14 +185,17 @@ export default function AddPlanPricesComponent({
         }
         if (allowed) {
           for (const item of data.prices) {
+            const amount =
+              typeof item.amount === "string"
+                ? parseFloat(item.amount.replace(",", "."))
+                : item.amount;
             if (edit && item.id !== "") {
-              // if (!pricesToDelete.includes(item.id)) {
               if (item.isAmountByAge) {
                 await updatePricePerCondition({
                   id: item.id,
                   from_age: Number(item.from_age),
                   to_age: Number(item.to_age),
-                  amount: Number(item.amount),
+                  amount: amount,
                   plan_id: planId ?? "",
                   isAmountByAge: true,
                   validy_date: dayjs.utc(validity_date).toDate(),
@@ -219,7 +204,7 @@ export default function AddPlanPricesComponent({
                 await updatePricePerCondition({
                   id: item.id,
                   condition: item.condition ?? "",
-                  amount: Number(item.amount),
+                  amount: amount,
                   plan_id: planId ?? "",
                   isAmountByAge: false,
                   validy_date: dayjs.utc(validity_date).toDate(),
@@ -230,7 +215,7 @@ export default function AddPlanPricesComponent({
                 await createPricePerCondition({
                   from_age: Number(item.from_age),
                   to_age: Number(item.to_age),
-                  amount: Number(item.amount),
+                  amount: amount,
                   plan_id: planId ?? "",
                   isAmountByAge: true,
                   validy_date: dayjs.utc(validity_date).toDate(),
@@ -238,7 +223,7 @@ export default function AddPlanPricesComponent({
               } else {
                 await createPricePerCondition({
                   condition: item.condition ?? "",
-                  amount: Number(item.amount),
+                  amount: amount,
                   plan_id: planId ?? "",
                   isAmountByAge: false,
                   validy_date: dayjs.utc(validity_date).toDate(),
@@ -295,7 +280,7 @@ export default function AddPlanPricesComponent({
             {fields.length === 0 && (
               <Button
                 type="button"
-                className="float-right bg-[#1bdfb7] hover:bg-[#1bdfb7] rounded-full"
+                className="float-right bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] rounded-full"
                 onClick={() =>
                   append({
                     id: "",
@@ -304,12 +289,12 @@ export default function AddPlanPricesComponent({
                     from_age: null,
                     to_age: null,
                     condition: "",
-                    isAmountByAge: false,
+                    isAmountByAge: true,
                     plan_id: "",
                     amount: 0,
                   })
                 }>
-                <PlusCircle className="text-green-500 left-0" size={20} />
+                <PlusCircle className="text-[#3e3e3e] left-0 mr-2" size={20} />
                 Agregar Precio
               </Button>
             )}
@@ -324,7 +309,7 @@ export default function AddPlanPricesComponent({
                   disabled={edit}
                   onValueChange={(e) => setMes(Number(e))}
                   defaultValue={mes?.toString() || "0"}>
-                  <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none hover:bg-transparent">
+                  <SelectTrigger className="w-full border-[#BEF0BB] border-b-2 text-[#3E3E3E] bg-background rounded-none hover:bg-transparent">
                     <SelectValue placeholder="Seleccione un mes" />
                   </SelectTrigger>
                   <SelectContent className="max-h-[45vh] mb-2">
@@ -394,11 +379,11 @@ export default function AddPlanPricesComponent({
             </div>
             <div className="w-1/4 ml-3 mt-2 whitespace-nowrap max-w-fit">
               <Label className="text-xs">AÑO DE VIGENCIA</Label>
-              <FormItem className="w-full max-w-24 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none hover:bg-transparent">
+              <FormItem className="w-full max-w-24 text-[#3E3E3E] bg-background rounded-none hover:bg-transparent">
                 <FormControl>
                   <Input
-                    disabled={edit}
-                    className="border-green-300 focus-visible:ring-green-400 w-[100px]"
+                    readOnly={edit}
+                    className="border-[#BEF0BB] border-b-2 w-[100px]"
                     type="number"
                     value={anio?.toString()}
                     onChange={(e) => setAnio(Number(e.target.value))}
@@ -418,7 +403,7 @@ export default function AddPlanPricesComponent({
             fields.map((item, index) => {
               const isAmountByAge = form.watch(`prices.${index}.isAmountByAge`);
               return (
-                <div key={item.id} className="flex items-center gap-5">
+                <div key={item.id} className="flex gap-5 items-center">
                   <FormField
                     control={form.control}
                     name={`prices.${index}.isAmountByAge`}
@@ -449,7 +434,7 @@ export default function AddPlanPricesComponent({
                               : "false"
                           }>
                           <FormControl>
-                            <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none hover:bg-transparent">
+                            <SelectTrigger className="w-full border-[#BEF0BB] border-b-2 text-[#3E3E3E] bg-background rounded-none hover:bg-transparent">
                               <SelectValue placeholder="Seleccione una opción" />
                             </SelectTrigger>
                           </FormControl>
@@ -482,7 +467,7 @@ export default function AddPlanPricesComponent({
                             <Select
                               onValueChange={field.onChange}
                               value={field.value ?? ""}>
-                              <SelectTrigger className="w-full px-3 max-w-fit border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none hover:bg-transparent">
+                              <SelectTrigger className="w-full px-3 max-w-fit border-[#BEF0BB] border-b-2 text-[#3E3E3E] bg-background rounded-none hover:bg-transparent">
                                 <SelectValue placeholder="Seleccione una opción" />
                               </SelectTrigger>
                               <SelectContent>
@@ -514,8 +499,10 @@ export default function AddPlanPricesComponent({
                             </FormLabel>
                             <FormControl>
                               <Input
-                                className="w-full max-w-24 border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none hover:bg-transparent"
+                                className="w-full max-w-24 border-[#BEF0BB] border-b-2 text-[#3E3E3E] bg-background rounded-none hover:bg-transparent"
                                 type="number"
+                                min="0"
+                                max="120"
                                 {...field}
                                 value={field.value ?? ""}
                               />
@@ -536,8 +523,10 @@ export default function AddPlanPricesComponent({
                             </FormLabel>
                             <FormControl>
                               <Input
-                                className="w-full max-w-24 border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none hover:bg-transparent"
+                                className="w-full max-w-24 border-[#BEF0BB] border-b-2 text-[#3E3E3E] bg-background rounded-none hover:bg-transparent"
                                 type="number"
+                                min="0"
+                                max="120"
                                 {...field}
                                 value={field.value ?? ""}
                               />
@@ -560,9 +549,10 @@ export default function AddPlanPricesComponent({
                         </FormLabel>
                         <FormControl>
                           <Input
-                            className="w-full max-w-24 border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none
-              hover:none justify-self-right pr-0 hover:bg-transparent"
                             type="number"
+                            step="0.01"
+                            className="w-full max-w-24 border-[#BEF0BB] border-b-2 text-[#3E3E3E] bg-background rounded-none
+              hover:none justify-self-right pr-0 hover:bg-transparent"
                             min="0"
                             {...field}
                             value={field.value?.toString()}
@@ -572,11 +562,12 @@ export default function AddPlanPricesComponent({
                       </FormItem>
                     )}
                   />
-                  <div className="flex gap-2">
+                  <div className="w-24 flex gap-1">
                     <Button
                       variant="ghost"
                       type="button"
-                      className="relative top-3 hover:bg-transparent"
+                      size="icon"
+                      className="relative top-3 hover:bg-transparent w-7"
                       onClick={() =>
                         append({
                           id: "",
@@ -597,7 +588,7 @@ export default function AddPlanPricesComponent({
                         />
                       ) : (
                         <PlusCircle
-                          className="text-green-500 left-0"
+                          className="text-[#BEF0BB] left-0"
                           size={20}
                         />
                       )}
@@ -606,7 +597,8 @@ export default function AddPlanPricesComponent({
                     <Button
                       variant="ghost"
                       type="button"
-                      className="relative top-3 hover:bg-transparent"
+                      size="icon"
+                      className="relative top-3 hover:bg-transparent w-7"
                       onClick={() => handleDelete(index)}>
                       {isButtonDisabled || working ? (
                         <Loader2Icon
@@ -614,7 +606,7 @@ export default function AddPlanPricesComponent({
                           size={20}
                         />
                       ) : (
-                        <CircleX className="text-red-500 left-0" size={20} />
+                        <CircleX className="text-[#EB2727] left-0" size={20} />
                       )}
                     </Button>
                   </div>
@@ -630,8 +622,8 @@ export default function AddPlanPricesComponent({
           <Button
             type="submit"
             disabled={working || isButtonDisabled}
-            className="mr-7 mt-15 pl-16 pr-16 font-medium rounded-full w-fit justify-self-right
-          text-lg bg-[#BEF0BB] hover:bg-[#DDF9CC] text-[#3E3E3E]">
+            className="mr-7 mt-15 px-14 py-3 font-medium rounded-full w-fit justify-self-right
+          text-lg bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3E3E3E]">
             {" "}
             {working && <Loader2Icon className="mr-2 animate-spin" size={16} />}
             {edit ? (
