@@ -1,15 +1,11 @@
 "use client";
 
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { useUser, useClerk, SignInButton } from "@clerk/nextjs";
+import { useUser, useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
-import Link from "next/link";
 import { Button } from "../ui/button";
 import {
-  CircleUserRound,
   LogIn,
-  LogOut,
   ChevronDown,
   ChevronUp,
 } from "lucide-react";

@@ -1,37 +1,6 @@
 // LandingPage.jsx
-import Link from 'next/link';
 import React from 'react';
 import './landing.css'; // Archivo CSS para estilos
-import Image from 'next/image';
-import logo from "../../public/landing_images/logo bitcom.png";
-import cotizar from "../../public/landing_images/COTIZAR SERVICIO (3).png";
-import compu1 from "../../public/landing_images/compu (1).png";
-import tarjeta1 from "../../public/landing_images/tarjeta 1.png";
-import tarjeta2 from "../../public/landing_images/tarjeta 2.png";
-import tarjeta3 from "../../public/landing_images/tarjeta 3.png";
-import tarjeta4 from "../../public/landing_images/tarjeta 4.png";
-import tarjeta5 from "../../public/landing_images/tarjeta 5.png";
-import tarjeta6 from "../../public/landing_images/tarjeta 6.png";
-import sinTitulo3 from "../../public/landing_images/Sin título-3.png";
-import alimentar from "../../public/landing_images/ALIMENTAR.png";
-import americanExpress from "../../public/landing_images/AMERICAN EXPRESS.png";
-import cabal from "../../public/landing_images/CABAL.png";
-import maestro from "../../public/landing_images/MAESTRO.png";
-import mastercard from "../../public/landing_images/MASTERCARD.png";
-import naranjax from "../../public/landing_images/NARANJA X.png";
-import naranja from "../../public/landing_images/NARANJA.png";
-import ctadni from "../../public/landing_images/CUENTA DNI.png";
-import dinersclub from "../../public/landing_images/DINERSCLUB.png";
-import modo from "../../public/landing_images/MODO.png";
-import pagocuentas from "../../public/landing_images/PAGO MIS CUENTAS.png";
-import rapipago from "../../public/landing_images/RAPIPAGO.png";
-import uala from "../../public/landing_images/UALA.png";
-import pagar from "../../public/landing_images/PAGAR.png";
-import mp from "../../public/landing_images/MERCADO PAGO.png";
-import pay from "../../public/landing_images/PAY.png";
-import payway from "../../public/landing_images/PAYWAY.png";
-import wp from "../../public/landing_images/wp (1).png";
-import botonlenguaje from "../../public/landing_images/botonLenguaje.png";
 
 const LandingPage = () => {
   return (
