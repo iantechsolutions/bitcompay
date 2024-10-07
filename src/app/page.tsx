@@ -12,7 +12,7 @@ export default function Home() {
             Simplifique la gestión de tesorería de su empresa
           </h2>
           <p className="text-startP">
-            Acceda desde el menú lateral a todas nuestras funciones.
+            Acceda a todas nuestras funciones desde el menú lateral.
           </p>
         </div>
       </div>

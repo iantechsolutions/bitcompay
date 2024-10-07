@@ -164,7 +164,7 @@ export function AddCompanyDialog() {
               <Label htmlFor="cuit">CUIL/CUIT</Label>
               <Input
                 id="cuit"
-                placeholder="..."
+                placeholder="0"
                 value={cuit}
                 onChange={(e) => setCuit(e.target.value)}
               />
@@ -174,7 +174,7 @@ export function AddCompanyDialog() {
               <Label htmlFor="afipKey">Clave fiscal</Label>
               <Input
                 id="afipKey"
-                placeholder="..."
+                placeholder="0"
                 value={afipKey}
                 onChange={(e) => setAfipKey(e.target.value)}
               />

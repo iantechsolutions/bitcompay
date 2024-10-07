@@ -175,7 +175,7 @@ export default function AddBonusDialog() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Monto</FormLabel>
-                      <Input {...field} placeholder="Ingrese el monto" />
+                      <Input {...field} placeholder="0,00" />
                     </FormItem>
                   )}
                 />

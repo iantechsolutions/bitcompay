@@ -120,7 +120,7 @@ export default function EditCompany() {
             <Label htmlFor="afipKey">Clave fiscal</Label>
             <Input
               id="afipKey"
-              placeholder="Enter AFIP Key"
+              placeholder="0"
               value={afipKey}
               onChange={(e) => setAfipKey(e.target.value)}
             />
@@ -205,7 +205,7 @@ export default function EditCompany() {
                 <br />
                 <Select onValueChange={(e) => setIva(e)} value={iva ?? ""}>
                   <SelectTrigger className="w-[180px] font-bold">
-                    <SelectValue placeholder="Seleccionar IVA" />
+                    <SelectValue placeholder="0,00" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="3">0%</SelectItem>

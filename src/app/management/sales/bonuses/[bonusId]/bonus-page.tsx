@@ -225,7 +225,7 @@ export default function BonusPage(props: BonusPageProps) {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Cantidad</FormLabel>
-                            <Input {...field} placeholder="ingrese cantidad" />
+                            <Input {...field} placeholder="0" />
                           </FormItem>
                         )}
                       />

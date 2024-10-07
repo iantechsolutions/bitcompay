@@ -326,7 +326,7 @@ export default function Page() {
           comprobante = await createComprobante({
             billLink: "",
             concepto: Number(concepto) ?? 0,
-            importe: Number(importe) * ivaFloat + Number(tributos) ?? 0,
+            importe: Number(importe) * ivaFloat + Number(tributos),
             iva: iva ?? "0",
             nroDocumento: Number(nroDocumento) ?? 0,
             ptoVenta: Number(form.getValues().puntoVenta) ?? 0,
@@ -406,7 +406,7 @@ export default function Page() {
           comprobante = await createComprobante({
             billLink: "", //deberiamos poner un link ?
             concepto: Number(concepto) ?? 0,
-            importe: Number(importe) * ivaFloat + Number(tributos) ?? 0,
+            importe: Number(importe) * ivaFloat + Number(tributos),
             iva: "0",
             nroDocumento: Number(nroDocumento) ?? 0,
             ptoVenta: Number(form.getValues().puntoVenta) ?? 0,
@@ -594,7 +594,7 @@ export default function Page() {
     setObraSocialId(value);
     let obra = obrasSociales?.find((x) => x.id == value);
     setNroDocumento(obra?.fiscal_id_number?.toString() ?? "0");
-    setNroDocumentoDNI("0" ?? "");
+    setNroDocumentoDNI("0");
     setNombre(obra?.responsibleName ?? "");
     setTipoDocumento(obra?.fiscal_id_type ?? "");
   }
