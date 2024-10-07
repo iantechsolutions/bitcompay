@@ -136,7 +136,7 @@ export function AddBrandDialog() {
                 <Label htmlFor="code">Código PRISMA(max. 4 carac)</Label>
                 <Input
                   id="code"
-                  placeholder="..."
+                  placeholder="0"
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
                   required
@@ -147,7 +147,7 @@ export function AddBrandDialog() {
                 <Label htmlFor="utility">Código de utilidad(senapsa)</Label>
                 <Input
                   id="utility"
-                  placeholder="..."
+                  placeholder="0"
                   value={utility}
                   onChange={(e) => setUtility(e.target.value)}
                   maxLength={8}
@@ -172,7 +172,7 @@ export function AddBrandDialog() {
                 <Label htmlFor="iva">IVA</Label>
                 <Select onValueChange={(e) => setIva(e)}>
                   <SelectTrigger className="w-[180px] font-bold">
-                    <SelectValue placeholder="Seleccionar IVA" />
+                    <SelectValue placeholder="0,00" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="3">0%</SelectItem>

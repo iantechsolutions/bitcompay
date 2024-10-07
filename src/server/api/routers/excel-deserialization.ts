@@ -659,7 +659,7 @@ async function readExcelFile(
     });
   }
   const errors: string[] = [];
-  errorsTransform.forEach((error) => {
+   errorsTransform.forEach((error) => {
     errors.push(
       (error.errors.at(0)?.message ?? "") +
         " " +

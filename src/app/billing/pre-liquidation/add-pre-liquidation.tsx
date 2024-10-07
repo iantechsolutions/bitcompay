@@ -77,11 +77,15 @@ export default function AddPreLiquidation() {
   async function handleCreate() {
     const validationErrors = validateFields();
     if (validationErrors.length > 0) {
-      return toast.error(
-        `Los siguientes campos están vacíos y sin obligatorios: ${validationErrors.join(
-          ", "
-        )}`
-      );
+      if (validationErrors.length > 0) {
+        const errorMessages = validationErrors.length
+          ? validationErrors.join(", ")
+          : "No se encontraron errores específicos.";
+    
+        return toast.error(
+          `Los siguientes campos están vacíos y son obligatorios: ${errorMessages}`
+        );
+      };
     }
 
     try {
@@ -95,11 +99,12 @@ export default function AddPreLiquidation() {
           interest: interest ?? 0,
           logo_url: logo_url ?? undefined,
         });
+  
         if ("error" in liquidation!) {
           toast.error(liquidation.error);
         } else if (liquidation) {
-          queryClient.invalidateQueries();
           toast.success("Pre-Liquidación creada correctamente");
+          queryClient.invalidateQueries();
           setOpen(false);
         } else {
           toast.error("Error al crear la Pre-Liquidación");
@@ -386,15 +391,14 @@ export default function AddPreLiquidation() {
             </div>
           </div>
           <div className="w-full flex flex-row  gap-2 text-gray-500">
-            <div className="m-3 ml-2 mr-3 mb-3">
+            <div className="m-3 ml-2 mr-3 mb-3 text-nowrap">
               <Label htmlFor="name" className="text-xs">
                 PUNTO DE VENTA A UTILIZAR
               </Label>
               <br />
               <ComboboxDemo
                 title="Seleccionar PV..."
-                classNameButton="w-full gap-10 p-4 border-green-300 border-0 border-b text-[#3E3E3E] justify-self-right whitespace-nowrap
-              hover:none"
+                classNameButton="w-full flex justify-between items-center p-4 border-green-300 border-0 border-b text-[#3E3E3E]"
                 placeholder="_"
                 options={[
                   { value: "1", label: "1" },
@@ -413,6 +417,7 @@ export default function AddPreLiquidation() {
               <Input
                 className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 type="number"
+                placeholder="0,00"
                 value={interest ?? 0}
                 onChange={(e) => {
                   Number(e.target.value) >= 0 || e.target.value === ""
@@ -437,9 +442,11 @@ export default function AddPreLiquidation() {
               <Loader2Icon className="mr-2 animate-spin" size={20} />
             ) : (
               <CirclePlus className="mr-2" />
-            )}
+
+            )} 
             Crear Pre-Liquidación
           </Button>
+
         </DialogContent>
       </Dialog>
     </>

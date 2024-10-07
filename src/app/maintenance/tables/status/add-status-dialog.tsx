@@ -62,7 +62,7 @@ export function AddStatusDialog() {
             <Label htmlFor="code">Codigo de Estado</Label>
             <Input
               id="code"
-              placeholder="..."
+              placeholder="0"
               value={code}
               onChange={(e) => setCode(e.target.value)}
             />

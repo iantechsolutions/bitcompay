@@ -25,11 +25,11 @@ interface DataTablePaginationProps<TData> {
 
 export function DataTablePagination<TData>({
   table,
-  containerClassName
+  containerClassName,
 }: DataTablePaginationProps<TData>) {
   const [pages, setPages] = useState<(number | string)[]>([]);
   const { pageIndex, pageSize } = table.getState().pagination;
-  const totalRows = table.getFilteredRowModel().rows.length;
+  const totalRows = table.getRowCount();
   const totalPages = Math.ceil(totalRows / pageSize);
   useEffect(() => {
     const getPageNumbers = () => {
@@ -79,7 +79,12 @@ export function DataTablePagination<TData>({
   };
 
   return (
-    <div className={cn('flex items-center justify-between px-2 mt-2 w-full',containerClassName)}>
+    <div
+      className={cn(
+        "flex items-center justify-between px-2 mt-2 w-full",
+        containerClassName
+      )}
+    >
       <div className="flex items-center space-x-2">
         <p className="text-sm text-muted-foreground ">Mostrar</p>
         <Select

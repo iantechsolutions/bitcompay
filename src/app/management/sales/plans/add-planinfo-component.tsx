@@ -130,6 +130,7 @@ export default function AddPlanInfoComponent({
         <Input
           className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none hover:none justify-self-right"
           type="text"
+          placeholder="0"
           value={codigo}
           onChange={(e) => setCodigo(e.target.value)}
         />

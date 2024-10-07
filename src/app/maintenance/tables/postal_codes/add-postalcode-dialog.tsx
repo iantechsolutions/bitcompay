@@ -122,7 +122,7 @@ export function AddPostalCode() {
             <Input
               id="cp"
               type="number"
-              placeholder="..."
+              placeholder="0"
               value={cp}
               onChange={(e) => setCp(e.target.value)}
             />

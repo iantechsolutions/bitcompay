@@ -225,7 +225,7 @@ export default function PlanPage(props: {
                   className="pl-7 hover:cursor-default"
                   leading={
                     <Badge
-                      className={`w-24 ${
+                      className={`w-24 rounded-2xl ${
                         fecha === vigente
                           ? "bg-[#DDF9CC] text-[#4E9F1D]"
                           : "bg-[#f9bcbc] text-[#ec3c3c]"
@@ -247,7 +247,7 @@ export default function PlanPage(props: {
                           <ChevronDown className="h-5" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent>
+                      <DropdownMenuContent className="bg-[#f7f7f7]">
                         <DropdownMenuItem>
                           <Button
                             onClick={() =>

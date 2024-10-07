@@ -20,7 +20,8 @@ import {
 import { toast } from "sonner";
 
 type Inputs = {
-  username: string;
+ firstName: string;
+ lastName: string;
   password: string;
   mail: string;
 };
@@ -41,11 +42,11 @@ export default function RegisterForm({ setShowRegister }: RegisterFormProps) {
   const router = useRouter();
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    const { username, password, mail } = data;
+    const { password, mail, firstName, lastName } = data;
     if (!isLoaded) return;
     try {
-      await signUp.create({ emailAddress: mail, password });
-      await signUp.prepareEmailAddressVerification({
+      await signUp.create({ emailAddress: mail, password, firstName, lastName });
+            await signUp.prepareEmailAddressVerification({
         strategy: "email_code",
       });
       setErrors([]);
@@ -174,19 +175,33 @@ export default function RegisterForm({ setShowRegister }: RegisterFormProps) {
           className="space-y-8 w-full flex flex-col items-center"
         >
           <FormField
-            control={form.control}
-            name="username"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel className="text-muted-foreground text-sm opacity-70 font-medium-medium ">
-                  Usuario
-                </FormLabel>
+           control={form.control}
+           name="firstName"
+               render={({ field }) => (
+        <FormItem className="w-full">
+      <FormLabel className="text-muted-foreground text-sm opacity-70 font-medium-medium">
+        Nombre
+      </FormLabel>
+      <FormControl>
+        <Input {...field} className="w-full" />
+          </FormControl>
+            </FormItem>
+                )}
+                 />
+            <FormField
+              control={form.control}
+                 name="lastName"
+              render={({ field }) => (
+             <FormItem className="w-full">
+                 <FormLabel className="text-muted-foreground text-sm opacity-70 font-medium-medium">
+                       Apellido
+                 </FormLabel>
                 <FormControl>
-                  <Input {...field} className="w-full" />
-                </FormControl>
-              </FormItem>
+                <Input {...field} className="w-full" />
+               </FormControl>
+                </FormItem>
             )}
-          />
+           />
           <FormField
             control={form.control}
             name="mail"

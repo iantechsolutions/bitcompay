@@ -7,10 +7,10 @@ import AddPlanDialog from "./AddPlanDialog";
 import { Button } from "~/components/ui/button";
 import DeleteButton from "~/components/plan/delete-plan";
 import SeeButton from "~/components/plan/see-plan";
+import { auth } from "@clerk/nextjs/server";
 
 export default function Page() {
-  const { data: planes } = api.plans.list.useQuery();
-
+  const { data: planes, isLoading } = api.plans.list.useQuery();
   return (
     <LayoutContainer>
       <section className="space-y-2">
@@ -18,9 +18,11 @@ export default function Page() {
           <Title>Planes</Title>
           <AddPlanDialog />
         </div>
-        <List>
-          {planes ? (
-            planes?.map((planes) => (
+        {isLoading && <p>Cargando...</p>}
+        {!planes && !isLoading && <p>No hay planes</p>}
+        {planes && (
+          <List>
+            {planes?.map((planes) => (
               <ListTile
                 className="pl-10 pr-5 "
                 key={planes.id}
@@ -32,11 +34,9 @@ export default function Page() {
                   </div>
                 }
               />
-            ))
-          ) : (
-            <div>No existen planes</div>
-          )}
-        </List>
+            ))}
+          </List>
+        )}
       </section>
     </LayoutContainer>
   );

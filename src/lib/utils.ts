@@ -12,7 +12,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-
+export const toNumberOrZero = (value: any) => {
+  const number = Number(value);
+  return isNaN(number) ? 0 : number; // Check if the result is NaN (Not a Number)
+};
 
 export function nameInitials(name: string) {
   const [firstName, lastName] = name.split(" ");
@@ -1024,5 +1027,3 @@ export function visualizationSwitcher(
 ) {
   return visualization ? viewFormComponent : editFormComponent;
 }
-
-

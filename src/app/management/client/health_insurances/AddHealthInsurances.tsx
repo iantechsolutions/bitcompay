@@ -301,7 +301,7 @@ export function AddHealthInsurances(props: {
               <Input
                 id="code"
                 className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
-                placeholder=""
+                placeholder="0"
                 value={identificationNumber}
                 onChange={(e) => setIdentificationNumber(e.target.value)}
               />
@@ -460,7 +460,7 @@ export function AddHealthInsurances(props: {
               <Input
                 id="IdNumber"
                 className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none"
-                placeholder="..."
+                placeholder="0"
                 value={IIBBNumber}
                 onChange={(e) => setIIBBNumber(e.target.value)}
               />
@@ -473,7 +473,7 @@ export function AddHealthInsurances(props: {
               <Input
                 id="IdNumber"
                 className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none"
-                placeholder="..."
+                placeholder="0"
                 value={sellCondition}
                 onChange={(e) => setSellCondition(e.target.value)}
               />
@@ -500,7 +500,7 @@ export function AddHealthInsurances(props: {
                 className=" mb-2 border-[#bef0bb] border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right w-full"
                 id="address"
-                placeholder="..."
+                placeholder="0"
                 value={fiscalFloor}
                 onChange={(e) => setFiscalFloor(e.target.value)}
               />
@@ -513,7 +513,7 @@ export function AddHealthInsurances(props: {
                 className=" mb-2 border-[#bef0bb] border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right w-full"
                 id="address"
-                placeholder="..."
+                placeholder="0"
                 value={fiscalOffice}
                 onChange={(e) => setFiscalOffice(e.target.value)}
               />
@@ -554,7 +554,7 @@ export function AddHealthInsurances(props: {
                 <SelectTrigger
                   className=" mb-2 border-[#bef0bb] border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right w-full">
-                  <SelectValue placeholder="Seleccionar CP" />
+                  <SelectValue placeholder="0" />
                 </SelectTrigger>
                 <SelectContent>
                   {cps?.map((cp) => (
@@ -601,7 +601,7 @@ export function AddHealthInsurances(props: {
               <Input
                 className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 id="address"
-                placeholder="..."
+                placeholder="0"
                 value={floor}
                 onChange={(e) => setFloor(e.target.value)}
               />
@@ -614,7 +614,7 @@ export function AddHealthInsurances(props: {
                 className=" mb-2 border-[#bef0bb] border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right w-full"
                 id="address"
-                placeholder="..."
+                placeholder="0"
                 value={office}
                 onChange={(e) => setOffice(e.target.value)}
               />
@@ -649,7 +649,7 @@ export function AddHealthInsurances(props: {
               </Label>
               <Select onValueChange={setPostalCode} value={postalCode}>
                 <SelectTrigger className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
-                  <SelectValue placeholder="Seleccionar CP" />
+                  <SelectValue placeholder="0" />
                 </SelectTrigger>
                 <SelectContent>
                   {cps?.map((cp) => (
@@ -667,7 +667,7 @@ export function AddHealthInsurances(props: {
               <Input
                 className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 id="address"
-                placeholder="..."
+                placeholder="0"
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
               />

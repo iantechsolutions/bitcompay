@@ -1,15 +1,11 @@
 "use client";
 
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { useUser, useClerk, SignInButton } from "@clerk/nextjs";
+import { useUser, useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
-import Link from "next/link";
 import { Button } from "../ui/button";
 import {
-  CircleUserRound,
   LogIn,
-  LogOut,
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
@@ -40,14 +36,14 @@ const UserButtonAndMenu = ({
             alt="user logo"
             className="h-[4.5vh]  mr-[1vw]"
           />
-          <div className="flex-1 flex flex-col justify-center">
-            <div className="text-startP font-medium mb-[0.4vh] whitespace-nowrap">
-              {companyName ?? " "}
+           <div className="flex-1 flex flex-col justify-center">
+            <div className="text-startP text-left color-[#b5b5b5] opacity-50">
+              {user?.firstName && user?.lastName
+                ? `${user.lastName} ${user.firstName}`
+                : "Sin nombre"}
             </div>
             <div className="text-startP text-left color-[#b5b5b5] opacity-50">
-              {user?.fullName
-                ? trimName(user.fullName)
-                : user?.primaryEmailAddress?.emailAddress!}
+              {user?.primaryEmailAddress?.emailAddress ?? ""}
             </div>
           </div>
           <div className="ml-[2vw] border-none">

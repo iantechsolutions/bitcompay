@@ -75,7 +75,7 @@ export default function EditPrice({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button className="bg-transparent hover:bg-transparent p-0 text-[#3e3e3e] shadow-none h-5">
-            <CreditCardPosIcon className="mr-1 h-4" /> Actualizar Precio
+            <CreditCardPosIcon className="mr-1 h-4" /> Actualizar precio
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
