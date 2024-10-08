@@ -50,6 +50,7 @@ import { GoBackButton } from "~/components/goback-button";
 import DeletePrice from "~/components/plan/delete-price";
 import { asTRPCError } from "~/lib/errors";
 import Edit02Icon from "~/components/icons/edit-02-stroke-rounded";
+import { formatCurrency } from "~/app/billing/pre-liquidation/[liquidationId]/detail-sheet";
 // import AddPlanDialogPerPrice from "./AddPlanDialog";
 
 dayjs.extend(utc);
@@ -342,7 +343,7 @@ export default function DetailsPage(props: {
                             {price.condition}
                           </TableCell>
                           <TableCell className="text-center font-medium opacity-60">
-                            ${price.amount}
+                          ${formatCurrency(price.amount)}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -383,7 +384,7 @@ export default function DetailsPage(props: {
                             {price.to_age} {price.to_age == 1 ? "año" : "años"}
                           </TableCell>
                           <TableCell className="px-[7vw] text-center font-medium opacity-60">
-                            ${price.amount}
+                          ${formatCurrency(price.amount)}
                           </TableCell>
                         </TableRow>
                       ))}

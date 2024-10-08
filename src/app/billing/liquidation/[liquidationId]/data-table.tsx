@@ -28,16 +28,23 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { DataTablePagination } from "~/components/tanstack/pagination";
 import TableToolbar from "~/components/tanstack/table-toolbar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DetailSheet from "./detail-sheet";
 import { RouterOutputs } from "~/trpc/shared";
 import { TableRecord } from "./columns";
 import DataTableSummary from "~/components/tanstack/summary";
 import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  summary: RouterOutputs["family_groups"]["getSummaryByLiqId"]["summary"];
-  data: TData[];
+import { api } from "~/trpc/react";
+import { cachedAsyncFetch } from "~/lib/cache";
+import { makeExcelRows } from "./utils";
+
+type TData =
+  RouterOutputs["family_groups"]["getByLiquidationFiltered"]["results"][0];
+
+interface DataTableProps {
+  columns: ColumnDef<TableRecord>[];
+  summary: RouterOutputs["family_groups"]["getSummaryByLiqId"];
+  liquidationId: string;
 }
 
 interface DetailData {
@@ -51,22 +58,35 @@ interface DetailData {
 export function DataTable<TData, TValue>({
   columns,
   summary,
-  data,
-}: DataTableProps<TData, TValue>) {
+  liquidationId,
+}: DataTableProps) {
   const [open, setOpen] = useState(false);
   const [detailData, setDetailData] = useState<DetailData | null>(null);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
+  const [data, setData] = useState<TableRecord[]>([]);
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+
+  const paginatedQuery =
+    api.family_groups.getByLiquidationFiltered.useMutation();
+
   const table = useReactTable({
     data,
     columns,
+    manualPagination: true,
+    manualFiltering: true,
+    rowCount: summary.totalRows,
+    pageCount: Math.ceil(summary.totalRows / pagination.pageSize),
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     onColumnFiltersChange: setColumnFilters,
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-    getFilteredRowModel: getFilteredRowModel(),
+    autoResetPageIndex: false,
+    onPaginationChange: setPagination,
     state: {
       columnFilters,
+      pagination,
     },
   });
 
@@ -77,11 +97,67 @@ export function DataTable<TData, TValue>({
     "cuit",
   ];
 
-  const handleRowClick = (row: Row<TData>) => {
+  useEffect(() => {
+    const cursor = pagination.pageIndex * pagination.pageSize;
+
+    let filter: string | undefined = undefined;
+    let filterModo: string | undefined = undefined;
+    let filterPlan: string | undefined = undefined;
+    let filterUN: string | undefined = undefined;
+
+    for (const f of columnFilters) {
+      const id = f.id.toLowerCase();
+      if (id === "nombre") {
+        filter = f.value as string;
+      } else if (id === "modo") {
+        filterModo = f.value as string;
+      } else if (id === "plan") {
+        filterPlan = f.value as string;
+      } else if (id === "un") {
+        filterUN = f.value as string;
+      }
+    }
+
+    const filterN = Number(filter);
+
+    let filterNumber: undefined | string = undefined;
+    let filterName: undefined | string = undefined;
+    if (Number.isFinite(filterN) && !Number.isNaN(filterN)) {
+      filterNumber = filter;
+    } else {
+      filterName = filter;
+    }
+
+    cachedAsyncFetch(
+      `liq-pq-${cursor}-${pagination.pageSize}`,
+      60000,
+      async () => {
+        return await paginatedQuery.mutateAsync({
+          liquidationId,
+          limit: pagination.pageSize,
+          cursor: pagination.pageIndex * pagination.pageSize,
+          id_number_startsWith: filterNumber,
+          name_contains: filterName,
+          modoDesc: filterModo,
+          plan: filterPlan,
+          UN: filterUN,
+        });
+      },
+      columnFilters.length > 0
+    ).then((data) => {
+      const dataArray: TableRecord[] = [];
+      makeExcelRows(data, null, dataArray);
+      setData(dataArray);
+    });
+  }, [pagination, columnFilters]);
+
+  const handleRowClick = (row: Row<TableRecord>) => {
     let detailData = {} as DetailData;
     for (const key in row.original) {
       if (hiddenDataKeys.includes(key)) {
-        detailData[key] = row.original[key];
+        detailData[key] = (
+          row.original as unknown as Record<string, DetailData>
+        )[key];
       }
     }
 
@@ -96,7 +172,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <>
-      <DataTableSummary summary={summary} />
+      <DataTableSummary summary={summary.summary} />
       <TableToolbar
         table={table}
         searchColumn={"nombre"}

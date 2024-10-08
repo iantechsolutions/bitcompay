@@ -25,6 +25,7 @@ type DetailSheetProps = {
   setOpen: (open: boolean) => void;
 };
 import Download02Icon from "~/components/icons/download-02-stroke-rounded";
+import { formatCurrency } from "../../pre-liquidation/[liquidationId]/detail-sheet";
 
 type Comprobante = RouterOutputs["comprobantes"]["getByLiquidation"][number];
 
@@ -39,7 +40,7 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
   );
 
   let FCTotal = null;
-  let NCTotal = null;
+  let NCTotal = null; 
   if (comprobanteFCReciente) {
     FCTotal = comprobanteFCReciente.items.find(
       (item) => item.concept === "Total factura"
@@ -83,7 +84,7 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
         <div className="flex flex-row border justify-between items-center p-5 rounded-md mt-3 bg-[#f7f7f7]">
           <p className="text-lg font-medium-medium">Saldo actual </p>
           <p className="text-[#6952EB] font-semibold text-xl">
-            $ {data.currentAccountAmount}
+            {formatCurrency(data.currentAccountAmount)} 
           </p>
         </div>
         <div className="mt-5">
@@ -99,7 +100,7 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
                     Total:{" "}
                   </p>
                   <p className="text-[#6952EB] font-semibold">
-                    {NCTotal ? `$ ${NCTotal}` : "N/A"}
+                    {NCTotal ? `${formatCurrency(NCTotal)}` : "N/A"}
                   </p>
                 </div>
               </div>
@@ -136,7 +137,7 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
                     Saldo a pagar:{" "}
                   </p>
                   <p className="text-[#6952EB] font-semibold ">
-                    {saldo_a_pagar ? `$ ${saldo_a_pagar}` : "N/A"}
+                  {saldo_a_pagar ? `${formatCurrency(saldo_a_pagar)}` : "N/A"}
                   </p>
                 </div>
               </div>

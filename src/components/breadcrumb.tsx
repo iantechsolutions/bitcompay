@@ -42,7 +42,7 @@ export default function BreadcrumbComp(props: { pageName?: string }) {
     consults: "CONSULTAS",
     information: "INFORMACIÓN",
     liquidation: "LIQUIDACIÓN",
-    "pre-liquidation": "PRE-LIQUIDACIÓN",
+    "pre-liquidation": "PRELIQUIDACIÓN",
     manual_issuance: "GENERACION MANUAL",
 
     maintenance: "MANTENIMIENTO",

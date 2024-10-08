@@ -119,6 +119,8 @@ export const columns: ColumnDef<TableRecord>[] = [
       const formatted = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
       }).format(amount);
       return (
         <div className="relative h-full flex flex-col justify-center items-center mx-10 mr-14">

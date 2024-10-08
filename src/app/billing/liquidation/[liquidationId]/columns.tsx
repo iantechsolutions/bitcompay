@@ -70,6 +70,8 @@ export const columns: ColumnDef<TableRecord>[] = [
       const formatted = new Intl.NumberFormat("es-AR", {
         style: "currency",
         currency: "ARS",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
         currencyDisplay: "narrowSymbol",
       }).format(amount);
 
@@ -106,6 +108,8 @@ export const columns: ColumnDef<TableRecord>[] = [
       const formatted = new Intl.NumberFormat("es-AR", {
         style: "currency",
         currency: "ARS",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
         currencyDisplay: "narrowSymbol",
       }).format(amount);
 
@@ -124,6 +128,8 @@ export const columns: ColumnDef<TableRecord>[] = [
       const formatted = new Intl.NumberFormat("es-AR", {
         style: "currency",
         currency: "ARS",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
         currencyDisplay: "narrowSymbol",
       }).format(amount);
 
@@ -141,6 +147,8 @@ export const columns: ColumnDef<TableRecord>[] = [
       const formatted = new Intl.NumberFormat("es-AR", {
         style: "currency",
         currency: "ARS",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
         currencyDisplay: "narrowSymbol",
       }).format(amount);
 
@@ -158,6 +166,8 @@ export const columns: ColumnDef<TableRecord>[] = [
       const formatted = new Intl.NumberFormat("es-AR", {
         style: "currency",
         currency: "ARS",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
         currencyDisplay: "narrowSymbol",
       }).format(Math.abs(amount));
 
@@ -175,6 +185,8 @@ export const columns: ColumnDef<TableRecord>[] = [
       const formatted = new Intl.NumberFormat("es-AR", {
         style: "currency",
         currency: "ARS",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
         currencyDisplay: "narrowSymbol",
       }).format(amount);
 
@@ -192,6 +204,8 @@ export const columns: ColumnDef<TableRecord>[] = [
       const formatted = new Intl.NumberFormat("es-AR", {
         style: "currency",
         currency: "ARS",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
         currencyDisplay: "narrowSymbol",
       }).format(Math.abs(amount));
 
@@ -208,6 +222,8 @@ export const columns: ColumnDef<TableRecord>[] = [
       const formatted = new Intl.NumberFormat("es-AR", {
         style: "currency",
         currency: "ARS",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
         currencyDisplay: "narrowSymbol",
       }).format(amount);
 
