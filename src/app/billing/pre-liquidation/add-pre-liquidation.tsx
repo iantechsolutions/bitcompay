@@ -3,7 +3,14 @@ import dayjs from "dayjs";
 import "dayjs/locale/es";
 import { Input } from "~/components/ui/input";
 import utc from "dayjs/plugin/utc";
-import { AwaitedReactNode, JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useState } from "react";
+import {
+  // JSXElementConstructor,
+  // Key,
+  // ReactElement,
+  // ReactNode,
+  // ReactPortal,
+  useState,
+} from "react";
 import {
   PlusCircleIcon,
   Loader2Icon,
@@ -81,11 +88,11 @@ export default function AddPreLiquidation() {
         const errorMessages = validationErrors.length
           ? validationErrors.join(", ")
           : "No se encontraron errores específicos.";
-    
+
         return toast.error(
           `Los siguientes campos están vacíos y son obligatorios: ${errorMessages}`
         );
-      };
+      }
     }
 
     try {
@@ -99,7 +106,7 @@ export default function AddPreLiquidation() {
           interest: interest ?? 0,
           logo_url: logo_url ?? undefined,
         });
-  
+
         if ("error" in liquidation!) {
           toast.error(liquidation.error);
         } else if (liquidation) {
@@ -442,11 +449,9 @@ export default function AddPreLiquidation() {
               <Loader2Icon className="mr-2 animate-spin" size={20} />
             ) : (
               <CirclePlus className="mr-2" />
-
-            )} 
+            )}
             Crear Preliquidación
           </Button>
-
         </DialogContent>
       </Dialog>
     </>

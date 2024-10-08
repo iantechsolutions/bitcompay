@@ -1386,13 +1386,13 @@ export const aportes_os = pgTable("aportes_os", {
     .references(() => integrants.id)
     .notNull(),
   cuil: varchar("cuil", { length: 255 }).notNull(),
-  process_date: timestamp("support_date", { mode: "date" }).notNull(),
-  contribution_date: timestamp("support_date", { mode: "date" }).notNull(),
-  support_date: timestamp("support_date", { mode: "date" }).notNull(),
+  process_date: timestamp("support_date", { mode: "date" }),
+  contribution_date: timestamp("support_date", { mode: "date" }),
+  support_date: timestamp("support_date", { mode: "date" }),
   amount: varchar("amount").notNull(),
   emploter_document_number: varchar("emploter_document_number", {
     length: 255,
-  }).notNull(),
+  }),
 
   healthInsurances_id: varchar("healthInsurances_id", {
     length: 255,
@@ -1400,7 +1400,7 @@ export const aportes_os = pgTable("aportes_os", {
   createdAt,
 });
 
-export const affiliate_os_Relations = relations(aportes_os, ({ one }) => ({
+export const aportes_os_Relations = relations(aportes_os, ({ one }) => ({
   healthInsurances: one(healthInsurances, {
     fields: [aportes_os.healthInsurances_id],
     references: [healthInsurances.id],

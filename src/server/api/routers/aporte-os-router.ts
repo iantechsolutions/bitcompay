@@ -43,11 +43,11 @@ export const aportes_osRouter = createTRPCRouter({
       z.object({
         id_affiliate: z.string(),
         cuil: z.string(),
-        process_date: z.date(),
-        contribution_date: z.date(),
-        support_date: z.date(),
+        process_date: z.date().optional(),
+        contribution_date: z.date().optional(),
+        support_date: z.date().optional(),
         amount: z.string(),
-        emploter_document_number: z.string(),
+        emploter_document_number: z.string().optional(),
         healthInsurances_id: z.string(),
       })
     )
@@ -60,14 +60,14 @@ export const aportes_osRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string(),
-        id_affiliate: z.string(),
-        cuil: z.string(),
-        process_date: z.date(),
-        contribution_date: z.date(),
-        support_date: z.date(),
-        amount: z.string(),
-        emploter_document_number: z.string(),
-        healthInsurances_id: z.string(),
+        id_affiliate: z.string().optional(),
+        cuil: z.string().optional(),
+        process_date: z.date().optional(),
+        contribution_date: z.date().optional(),
+        support_date: z.date().optional(),
+        amount: z.string().optional(),
+        emploter_document_number: z.string().optional(),
+        healthInsurances_id: z.string().optional(),
       })
     )
     .mutation(async ({ input: { id, ...input } }) => {

@@ -161,29 +161,21 @@ export const recRowsTransformerOS = (
   date: Date
 ) => {
   let finishedArrayOS: {
-    name: string | null;
     cuil: string | null;
-    periodo: Date | null;
-    modalidad: string | null;
-    aporte: string | null;
-    contribucion: string | null;
-    monotributo: string | null;
-    otros: string | null;
-    subsidio: string | null;
-    total: string | null;
+    // process_date: Date | null;
+    contribution_date: Date | null;
+    support_date: Date | null;
+    amount: string | null;
+    emploter_document_number: string | null;
   }[] = [];
   let errorsOS: z.ZodError<
     {
-      name: string | null;
-      cuil: string | number | null | undefined;
-      periodo: Date | null;
-      modalidad: string | null | undefined;
-      aporte: string | number | null | undefined;
-      contribucion: string | number | null | undefined;
-      monotributo: string | number | null | undefined;
-      subsidio: string | number | null | undefined;
-      otros: string | number | null | undefined;
-      total: string | number | null | undefined;
+      cuil: string | null | undefined | number;
+      // process_date: Date | null;
+      contribution_date: Date | null;
+      support_date: Date | null;
+      amount: string | null | undefined;
+      emploter_document_number: string | null | undefined | number;
     }[]
   >[] = [];
 
@@ -192,9 +184,8 @@ export const recRowsTransformerOS = (
     if (resultOS.success) {
       let item = resultOS.data[0];
       if (item) {
-        // Verifica si el campo periodo está vacío y asigna date si es necesario
-        if (!item.periodo) {
-          item.periodo = date;
+        if (!item.support_date) {
+          item.support_date = date;
         }
         finishedArrayOS.push(item);
       }
@@ -358,30 +349,29 @@ const customEmailRegex = /^[\wñÑ._%+-]+@[a-zñÑ0-9.-]+\.[a-z]{2,}$/i;
 
 export const recDocumentValidatorOS = z
   .object({
-    NOMBRE: allToString.nullable(),
     CUIL: allToString.nullable(),
-    PERIODO: stringAsDate.nullable().optional(),
-    MODALIDAD: allToString.nullable().optional(),
-    APORTE: allToString.nullable().optional(),
-    CONTRIBUCION: allToString.nullable().optional(),
-    MONOTRIBUTO: allToString.nullable().optional(),
-    SUBSIDIO: allToString.nullable().optional(),
-    OTROS: allToString.nullable().optional(),
+    "PERIODO DE CONTRIBUCION": allToString.nullable(),
+    "PERIODO DE SOPORTE": stringAsDate.nullable().optional(),
+    MONTO: allToString.nullable().optional(),
+    "CUIT EMPLEADOR": allToString.nullable().optional(),
 
-    TOTAL: allToString.nullable(),
+    // cuil: string | null | undefined | number;
+    //   process_date: Date | null;
+    //   contribution_date: Date | null;
+    //   support_date: Date | null;
+    //   amount: string | null | undefined | number;
+    //   emploter_document_number: string | null | undefined | number;
+    // CUIL: value["CUIL"] ?? null,
+    // P
   })
   .transform((value) => {
     return {
-      name: value["NOMBRE"] ?? null,
+      // name: value["NOMBRE"] ?? null,
       cuil: value["CUIL"] ?? null,
-      periodo: value["PERIODO"] ?? null,
-      modalidad: value["MODALIDAD"] ?? null,
-      aporte: value["APORTE"] ?? null,
-      contribucion: value["CONTRIBUCION"] ?? null,
-      monotributo: value["MONOTRIBUTO"] ?? null,
-      subsidio: value["SUBSIDIO"] ?? null,
-      otros: value["OTROS"] ?? null,
-      total: value["TOTAL"] ?? null,
+      contribution_date: value["PERIODO DE SOPORTE"] ?? null,
+      support_date: value["PERIODO DE SOPORTE"] ?? null,
+      amount: value["MONTO"] ?? null,
+      emploter_document_number: value["CUIT EMPLEADOR"] ?? null,
     };
   });
 
@@ -534,9 +524,9 @@ export const recDocumentValidator = z
       business_unit: value["UNIDAD DE NEGOCIO"] ?? null,
       os: value.OS ?? null,
       "originating os": value["OS ORIGEN"] ?? null,
-      "seller": value.VENDEDOR ?? null,
-      "supervisor": value.SUPERVISOR ?? null,
-      "gerency": value.GERENCIA ?? null,
+      seller: value.VENDEDOR ?? null,
+      supervisor: value.SUPERVISOR ?? null,
+      gerency: value.GERENCIA ?? null,
       validity: value["FECHA DE VIGENCIA"] ?? null,
       state_date: value["FECHA DE ESTADO"] ?? null,
       mode: value.MODO ?? null,

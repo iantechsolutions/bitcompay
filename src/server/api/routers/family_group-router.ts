@@ -335,24 +335,34 @@ export const family_groupsRouter = createTRPCRouter({
       // Filtra los comprobantes por `liquidationId` dentro de cada grupo familiar
       const fgFiltered = fgCompany
         .map((group) => {
+          // Filtra los comprobantes según el liquidation_id
           const filteredComprobantes = group.comprobantes.filter(
             (comprobante) => comprobante.liquidation_id === input.liquidationId
           );
+
           // Si hay comprobantes filtrados, devuelve el grupo con los comprobantes filtrados
           if (filteredComprobantes.length > 0) {
             return {
               ...group,
-              comprobantes: filteredComprobantes,
+              comprobantes: filteredComprobantes.map((comprobante) => ({
+                items: comprobante.items.map((item) => ({
+                  amount: item.amount ?? 0,
+                  concept: item.concept ?? "",
+                })),
+                importe: comprobante.importe ?? 0,
+                iva: comprobante.iva ?? "0%",
+              })),
             };
           }
           return null;
         })
         .filter((group) => group !== null); // Filtra los grupos nulos
 
+      // Retorna un objeto con el formato esperado
       return input.summary
         ? {
             familyGroups: fgFiltered,
-            summary: makeSummary(fgFiltered),
+            summary: makeSummary(fgFiltered as any), // Puedes ajustar el tipo según el uso
           }
         : fgFiltered;
     }),

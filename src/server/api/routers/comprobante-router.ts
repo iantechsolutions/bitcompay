@@ -750,11 +750,14 @@ async function PDFFromHtml(
     options: options,
   });
   const upload = await utapi.uploadFilesFromUrl(res.file);
-  console.log(upload);
+
+  // Verifica si 'upload' es un array o un objeto
+  const uploadData = Array.isArray(upload) ? upload[0]?.data : upload?.data;
+
   await db
     .update(schema.comprobantes)
     .set({
-      billLink: upload.data?.url ?? res.file ?? "",
+      billLink: uploadData?.url ?? res.file ?? "",
       estado: "pendiente",
       nroComprobante: voucher,
     })

@@ -102,16 +102,13 @@ export default function BreadcrumbComp(props: { pageName?: string }) {
               <BreadcrumbItem>
                 {breadcrumbUrlsMapping[value] ? (
                   <BreadcrumbLink asChild={true}>
-                    <Link href={breadcrumbUrlsMapping[value]}>
+                    <Link href={breadcrumbUrlsMapping[value] ?? ""}>
                       {translatedValue}
                     </Link>
                   </BreadcrumbLink>
                 ) : (
-                  <BreadcrumbPage>
-                    {translatedValue}
-                  </BreadcrumbPage>
+                  <BreadcrumbPage>{translatedValue}</BreadcrumbPage>
                 )}
-              
               </BreadcrumbItem>
               {!isLast && <BreadcrumbSeparator />}
             </React.Fragment>
