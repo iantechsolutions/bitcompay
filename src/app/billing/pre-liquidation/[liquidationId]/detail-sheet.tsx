@@ -15,6 +15,7 @@ import { RouterOutputs } from "~/trpc/shared";
 import { useState } from "react";
 import { api } from "~/trpc/react";
 import Download02Icon from "~/components/icons/download-02-stroke-rounded";
+import { format } from "path";
 type DetailSheetProps = {
   data: {
     comprobantes: RouterOutputs["comprobantes"]["getByLiquidation"];
@@ -27,6 +28,16 @@ type DetailSheetProps = {
 };
 
 type Comprobante = RouterOutputs["comprobantes"]["getByLiquidation"][number];
+
+export function formatCurrency(amount: number) {
+  return (Intl.NumberFormat("es-AR", {
+    style: "currency",
+    currency: "ARS",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+    currencyDisplay: "narrowSymbol",
+  }).format(amount));
+}; 
 export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
   const [openFCAccordion, setOpenFCAccordion] = useState(true); // Qué es esto??
   const [openNCAccordion, setOpenNCAccordion] = useState(false);
@@ -57,6 +68,8 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
   if (FCTotal && total_a_pagar) {
     saldo_a_pagar = FCTotal - total_a_pagar;
   }
+  
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetContent className="sm:max-w-[550px] px-10 py-12 overflow-y-scroll">
@@ -119,7 +132,7 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
                     Saldo a pagar:{" "}
                   </p>
                   <p className="text-[#6952EB] font-[550] ">
-                    {saldo_a_pagar ? `$ ${saldo_a_pagar}` : "N/A"}
+                    {saldo_a_pagar ? `${formatCurrency(saldo_a_pagar)}` : "N/A"}
                   </p>
                 </div>
               </div>

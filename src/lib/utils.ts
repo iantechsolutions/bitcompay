@@ -971,7 +971,7 @@ export const reversedIdDictionary: { [key: number]: string } = {
   99: "Consumidor Final",
 };
 
-export function getDifferentialAmount(grupo: any, fechaPreliq: Date) {
+export function getDifferentialAmount(grupo: any, isAdmin: boolean, fechaPreliq: Date) {
   let importe = 0;
   grupo.integrants?.forEach((integrant: any) => {
     if (integrant.birth_date == null) return 0;

@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import "dayjs/locale/es";
 import { Input } from "~/components/ui/input";
 import utc from "dayjs/plugin/utc";
-import { useState } from "react";
+import { AwaitedReactNode, JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useState } from "react";
 import {
   PlusCircleIcon,
   Loader2Icon,
@@ -38,10 +38,10 @@ import { CalendarIcon } from "lucide-react";
 import { Label } from "~/components/ui/label";
 import { api } from "~/trpc/react";
 import { ComboboxDemo } from "~/components/ui/combobox";
-import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { asTRPCError } from "~/lib/errors";
 import { useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 export default function AddPreLiquidation() {
   const [open, setOpen] = useState(false);
   const [fechaVencimiento1, setFechaVencimiento1] = useState<Date>();
@@ -159,7 +159,7 @@ export default function AddPreLiquidation() {
               </SelectTrigger>
               <SelectContent>
                 {marcas &&
-                  marcas.map((marca) => (
+                  marcas.map((marca: any) => (
                     <SelectItem
                       key={marca?.id}
                       value={marca?.id}

@@ -19,6 +19,7 @@ import DataTable from "./data-table";
 import { Card } from "~/components/ui/card";
 import Download02Icon from "~/components/icons/download-02-stroke-rounded";
 import { RouterOutputs } from "~/trpc/shared";
+import BonusDialog from "./components_acciones/bonusDialog";
 
 export default function CCDetail(props: {
   params: { ccId: string; affiliateId: string };
@@ -39,6 +40,12 @@ export default function CCDetail(props: {
   });
   const comprobantes = grupo.data?.comprobantes;
 
+const formatCurrency = (amount: { toLocaleString: (arg0: string, arg1: { minimumFractionDigits: number; maximumFractionDigits: number; }) => any; }) => {
+  return amount.toLocaleString('es-AR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+};
   let comprobanteNCReciente = comprobantes?.find(
     (comprobante) => comprobante.origin === "Nota de credito"
   );
@@ -81,15 +88,15 @@ export default function CCDetail(props: {
       tableRows.push({
         date: event.createdAt,
         description: event.description,
-        amount: event.event_amount,
+        amount:formatCurrency(event.event_amount),
         // comprobanteType: "Nota de credito A",
         comprobanteType: event.comprobantes?.tipoComprobante ?? "FACTURA A",
         comprobanteNumber: event.comprobantes?.ptoVenta.toString().padStart(5) + "-" + event.comprobantes?.nroComprobante.toString().padStart(8),
         status: "Pendiente",
         iva: (Number(event.comprobantes?.iva ?? 1.21) -1 ),
         comprobantes: comprobantesTable,
-        currentAccountAmount: NCTotal ?? 0,
-        saldo_a_pagar: saldo_a_pagar ?? 0,
+        currentAccountAmount: formatCurrency(NCTotal ?? 0),
+        saldo_a_pagar:  formatCurrency(saldo_a_pagar ?? 0),
         nombre: afiliado?.name ?? "",
         cuit: afiliado?.fiscal_id_number ?? "",
       });
