@@ -45,12 +45,12 @@ export default async function Home(props: {
   const liquidationId = props.params.liquidationId;
   const userActual = await currentUser();
 
-  const [companyData, preliquidation] = await Promise.all([
-    api.companies.get.query(),
-    api.liquidations.get.query({
-      id: liquidationId,
-    }),
-  ]);
+  const companyData = await api.companies.get.query();
+
+  const preliquidation = await api.liquidations.getLite.query({
+    id: liquidationId,
+  });
+
   // const eventos = await api.events.list.query();
   // const businessUnit = preliquidation?.bussinessUnits;
   // const user = await clerkClient.users.getUser(

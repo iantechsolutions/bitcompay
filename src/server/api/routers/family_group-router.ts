@@ -404,14 +404,10 @@ export const family_groupsRouter = createTRPCRouter({
         offset: input.cursor,
       });
 
-      const fgCompany = fg.filter(
-        (x) => x.businessUnitData?.companyId === ctx.session.orgId
-      );
-
       // Filtra los comprobantes por `liquidationId` dentro de cada grupo familiar
       // Si hay comprobantes filtrados, devuelve el grupo con los comprobantes filtrados
       // se filtran los comprobantes en la query
-      const fgFiltered = fgCompany.filter(
+      const fgFiltered = fg.filter(
         (x) =>
           x.businessUnitData?.companyId === ctx.session.orgId &&
           x.comprobantes.length > 0 &&
