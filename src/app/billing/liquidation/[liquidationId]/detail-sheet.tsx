@@ -84,7 +84,7 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
         <div className="flex flex-row border justify-between items-center p-5 rounded-md mt-3 bg-[#f7f7f7]">
           <p className="text-lg font-medium-medium">Saldo actual </p>
           <p className="text-[#6952EB] font-semibold text-xl">
-            $ {formatCurrency(data.currentAccountAmount)} 
+            {formatCurrency(data.currentAccountAmount)} 
           </p>
         </div>
         <div className="mt-5">
@@ -100,7 +100,7 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
                     Total:{" "}
                   </p>
                   <p className="text-[#6952EB] font-semibold">
-                    {NCTotal ? `$ ${formatCurrency(NCTotal)}` : "N/A"}
+                    {NCTotal ? `${formatCurrency(NCTotal)}` : "N/A"}
                   </p>
                 </div>
               </div>
