@@ -74,7 +74,7 @@ export default function DialogCC ({ open, setOpen }: DialogCCProps){
         <DialogTitle className="whitespace-nowrap">Ajustes</DialogTitle>
       </div>
     </DialogHeader>
-    <h1 className="text-xs block ml-2 pl-2">CUENTA CORRIENTE N° XXXX</h1>
+    <h1 className="text-xs block ml-2 pl-2">CUENTA CORRIENTE N°</h1>
 
     <div className="flex justify-between p-2">
       <div className="w-1/2 mr-2 ml-2 ">

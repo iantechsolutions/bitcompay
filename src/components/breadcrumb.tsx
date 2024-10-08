@@ -42,7 +42,7 @@ export default function BreadcrumbComp(props: { pageName?: string }) {
     consults: "CONSULTAS",
     information: "INFORMACIÓN",
     liquidation: "LIQUIDACIÓN",
-    "pre-liquidation": "PRE-LIQUIDACIÓN",
+    "pre-liquidation": "PRELIQUIDACIÓN",
     manual_issuance: "GENERACION MANUAL",
 
     maintenance: "MANTENIMIENTO",
@@ -102,16 +102,13 @@ export default function BreadcrumbComp(props: { pageName?: string }) {
               <BreadcrumbItem>
                 {breadcrumbUrlsMapping[value] ? (
                   <BreadcrumbLink asChild={true}>
-                    <Link href={breadcrumbUrlsMapping[value]}>
+                    <Link href={breadcrumbUrlsMapping[value] ?? ""}>
                       {translatedValue}
                     </Link>
                   </BreadcrumbLink>
                 ) : (
-                  <BreadcrumbPage>
-                    {translatedValue}
-                  </BreadcrumbPage>
+                  <BreadcrumbPage>{translatedValue}</BreadcrumbPage>
                 )}
-              
               </BreadcrumbItem>
               {!isLast && <BreadcrumbSeparator />}
             </React.Fragment>

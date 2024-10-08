@@ -83,97 +83,89 @@ export const excelDeserializationRouter = createTRPCRouter({
         await db.transaction(async (db) => {
           // Usamos for...of para manejar promesas de forma adecuada
           for (const row of contents) {
-            const existingAffiliate = await db.query.affiliate_os.findFirst({
-              where: eq(schema.affiliate_os.cuil, row.cuil ?? ""),
+            const existingAffiliate = await db.query.aportes_os.findFirst({
+              where: eq(schema.aportes_os.cuil, row.cuil ?? ""),
             });
 
-            if (existingAffiliate) {
-              console.log("Afiliado existente encontrado:", existingAffiliate);
-
-              await db
-                .update(schema.affiliate_os)
-                .set({
-                  name: row.name ?? existingAffiliate.name,
-                  aporte: row.aporte ?? existingAffiliate.aporte,
-                  contribucion:
-                    row.contribucion ?? existingAffiliate.contribucion,
-                  healthInsurances_id:
-                    input.OSid ?? existingAffiliate.healthInsurances_id,
-                  modalidad: row.modalidad ?? existingAffiliate.modalidad,
-                  monotributo: row.monotributo ?? existingAffiliate.monotributo,
-                  periodo:
-                    input.date ?? row.periodo ?? existingAffiliate.periodo,
-                  otros: row.otros ?? existingAffiliate.otros,
-                  subsidio: row.subsidio ?? existingAffiliate.subsidio,
-                  total: row.total ?? existingAffiliate.total,
-                })
-                .where(eq(schema.affiliate_os.cuil, row.cuil ?? ""));
-
-              monto_total += parseFloat(row.total ?? "0");
-              console.log("Actualizado afiliado: ", monto_total);
-            } else {
+            if (!existingAffiliate) {
               console.log("No se encontró afiliado, creando nuevo...");
-
-              const affiliate_os = await db
-                .insert(schema.affiliate_os)
-                .values({
-                  name: row.name ?? "",
-                  aporte: row.aporte ?? "",
-                  contribucion: row.contribucion ?? "",
-                  cuil: row.cuil ?? "",
-                  healthInsurances_id: input.OSid ?? "",
-                  modalidad: row.modalidad ?? "",
-                  monotributo: row.monotributo ?? "",
-                  periodo: input.date ?? row.periodo,
-                  otros: row.otros ?? "",
-                  subsidio: row.subsidio ?? "",
-                  total: row.total ?? "",
-                })
-                .returning();
-
-              console.log("Nuevo afiliado creado: ", affiliate_os);
-              monto_total += parseFloat(row.total ?? "0");
+            } else {
+              // const aportes_os = await db
+              //       .insert(schema.aportes_os)
+              //       .values({
+              //         cuil: row.cuil ?? "",
+              //         process_date: new Date(),
+              //         contribution_date: row.contribution_date ?? null,
+              //         support_date: row.support_date ?? null,
+              //         amount: row.amount ?? "0",
+              //         emploter_document_number: row.emploter_document_number ?? "",
+              //         healthInsurances_id: input.OSid ?? "",
+              //         id_affiliate: existingAffiliate?.id ?? "",
+              //       })
+              //       .returning();
+              //     console.log("Nuevo afiliado creado: ", aportes_os);
+              //     monto_total += parseFloat(row.amount ?? "0");
+              //   }
             }
+
+            console.log("Afiliado existente encontrado:", existingAffiliate);
+
+            await db
+              .update(schema.aportes_os)
+              .set({
+                cuil: row.cuil ?? "",
+                process_date: new Date(),
+                contribution_date: row.contribution_date ?? null,
+                support_date: row.support_date ?? null,
+                amount: row.amount ?? "0",
+                emploter_document_number: row.emploter_document_number ?? "",
+                healthInsurances_id: input.OSid ?? "",
+                id_affiliate: existingAffiliate?.id ?? "",
+              })
+              .where(eq(schema.aportes_os.cuil, row.cuil ?? ""));
+
+            monto_total += parseFloat(row.amount ?? "0");
+            console.log("Actualizado afiliado: ", monto_total);
           }
-        });
 
-        console.log("Monto total procesado: ", monto_total);
+          console.log("Monto total procesado: ", monto_total);
 
-        const cc = await db.query.currentAccount.findFirst({
-          where: eq(schema.currentAccount.health_insurance, input.OSid ?? ""),
-        });
-
-        let historicEvents = await db.query.events.findMany({
-          where: eq(schema.events.currentAccount_id, cc?.id ?? ""),
-        });
-
-        if (historicEvents && historicEvents.length > 0) {
-          const lastEvent = historicEvents.reduce((prev, current) => {
-            return new Date(prev.createdAt) > new Date(current.createdAt)
-              ? prev
-              : current;
+          const cc = await db.query.currentAccount.findFirst({
+            where: eq(schema.currentAccount.health_insurance, input.OSid ?? ""),
           });
 
-          const event = await db
-            .insert(schema.events)
-            .values({
-              currentAccount_id: cc?.id,
-              event_amount: monto_total,
-              current_amount: lastEvent.current_amount + monto_total,
-              description: "Pago afiliados",
-              type: "FC",
-              createdAt: new Date(),
-            })
-            .returning();
+          let historicEvents = await db.query.events.findMany({
+            where: eq(schema.events.currentAccount_id, cc?.id ?? ""),
+          });
 
-          await db
-            .update(schema.excelBilling)
-            .set({
-              confirmed: true,
-              confirmedAt: new Date(),
-            })
-            .where(eq(schema.excelBilling.id, input.uploadId));
-        }
+          if (historicEvents && historicEvents.length > 0) {
+            const lastEvent = historicEvents.reduce((prev, current) => {
+              return new Date(prev.createdAt) > new Date(current.createdAt)
+                ? prev
+                : current;
+            });
+
+            const event = await db
+              .insert(schema.events)
+              .values({
+                currentAccount_id: cc?.id,
+                event_amount: monto_total,
+                current_amount: lastEvent.current_amount + monto_total,
+                description: "Pago afiliados",
+                type: "FC",
+                createdAt: new Date(),
+              })
+              .returning();
+
+            await db
+              .update(schema.excelBilling)
+              .set({
+                confirmed: true,
+                confirmedAt: new Date(),
+              })
+              .where(eq(schema.excelBilling.id, input.uploadId));
+          }
+        });
       } else if (input.type === "rec") {
         const contents = await readExcelFile(
           db,
@@ -659,7 +651,7 @@ async function readExcelFile(
     });
   }
   const errors: string[] = [];
-   errorsTransform.forEach((error) => {
+  errorsTransform.forEach((error) => {
     errors.push(
       (error.errors.at(0)?.message ?? "") +
         " " +

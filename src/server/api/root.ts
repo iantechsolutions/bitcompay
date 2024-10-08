@@ -38,7 +38,7 @@ import { currentAccountRouter } from "./routers/currentAccount-router";
 import { eventsRouter } from "./routers/events-router";
 import { clerkRouter } from "./routers/clerk-router";
 import { zoneRouter } from "./routers/zone-router";
-import { affiliate_osRouter } from "./routers/affiliate-os-router";
+import { aportes_osRouter } from "./routers/aporte-os-router";
 import { liquidations_countersRouter } from "./routers/liquidationCounter-router";
 
 /**
@@ -86,7 +86,7 @@ export const appRouter = createTRPCRouter({
   events: eventsRouter,
   clerk: clerkRouter,
   zone: zoneRouter,
-  affiliate_os: affiliate_osRouter,
+  aportes_os: aportes_osRouter,
   liquidations_counter: liquidations_countersRouter,
 });
 

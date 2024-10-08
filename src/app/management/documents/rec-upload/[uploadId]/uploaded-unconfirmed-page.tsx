@@ -251,7 +251,7 @@ export default function UploadUnconfirmedPage(props: UploadedPageProps) {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Producto</TableHead>
-                    <TableHead>Cant. Transacciones</TableHead>
+                    <TableHead>Cant. de Transacciones</TableHead>
                     <TableHead>Recaudado por producto</TableHead>
                   </TableRow>
                 </TableHeader>

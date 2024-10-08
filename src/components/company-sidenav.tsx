@@ -942,7 +942,7 @@ export default function CompanySidenav() {
                 }
                 href={`/billing/pre-liquidation`}
                 className="text-sideNav">
-                Pre-Liquidacion
+                Preliquidación
               </SidenavItem>
             )}
             {canSeeLiquidation && (

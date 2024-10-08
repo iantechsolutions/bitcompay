@@ -3,7 +3,14 @@ import dayjs from "dayjs";
 import "dayjs/locale/es";
 import { Input } from "~/components/ui/input";
 import utc from "dayjs/plugin/utc";
-import { useState } from "react";
+import {
+  // JSXElementConstructor,
+  // Key,
+  // ReactElement,
+  // ReactNode,
+  // ReactPortal,
+  useState,
+} from "react";
 import {
   PlusCircleIcon,
   Loader2Icon,
@@ -38,10 +45,10 @@ import { CalendarIcon } from "lucide-react";
 import { Label } from "~/components/ui/label";
 import { api } from "~/trpc/react";
 import { ComboboxDemo } from "~/components/ui/combobox";
-import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { asTRPCError } from "~/lib/errors";
 import { useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 export default function AddPreLiquidation() {
   const [open, setOpen] = useState(false);
   const [fechaVencimiento1, setFechaVencimiento1] = useState<Date>();
@@ -81,11 +88,11 @@ export default function AddPreLiquidation() {
         const errorMessages = validationErrors.length
           ? validationErrors.join(", ")
           : "No se encontraron errores específicos.";
-    
+
         return toast.error(
           `Los siguientes campos están vacíos y son obligatorios: ${errorMessages}`
         );
-      };
+      }
     }
 
     try {
@@ -99,15 +106,15 @@ export default function AddPreLiquidation() {
           interest: interest ?? 0,
           logo_url: logo_url ?? undefined,
         });
-  
+
         if ("error" in liquidation!) {
           toast.error(liquidation.error);
         } else if (liquidation) {
-          toast.success("Pre-Liquidación creada correctamente");
+          toast.success("Preliquidación creada correctamente");
           queryClient.invalidateQueries();
           setOpen(false);
         } else {
-          toast.error("Error al crear la Pre-Liquidación");
+          toast.error("Error al crear la Preliquidación");
         }
       }
     } catch (e) {
@@ -141,13 +148,13 @@ export default function AddPreLiquidation() {
         onClick={() => setOpen(true)}
         className="rounded-full gap-1 p-4 text-base text-[#3E3E3E] bg-[#BEF0BB] ">
         <PlusCircleIcon className="h-4" />
-        Agregar Pre-Liquidación
+        Agregar Preliquidación
       </AddElementButton>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Crear Pre-Liquidación</DialogTitle>
+            <DialogTitle>Crear Preliquidación</DialogTitle>
           </DialogHeader>
           <div className="w-flex flex-auto text-gray-500 m-3 pr-2 ">
             <Label className="text-xs">MARCA</Label>
@@ -159,7 +166,7 @@ export default function AddPreLiquidation() {
               </SelectTrigger>
               <SelectContent>
                 {marcas &&
-                  marcas.map((marca) => (
+                  marcas.map((marca: any) => (
                     <SelectItem
                       key={marca?.id}
                       value={marca?.id}
@@ -442,11 +449,9 @@ export default function AddPreLiquidation() {
               <Loader2Icon className="mr-2 animate-spin" size={20} />
             ) : (
               <CirclePlus className="mr-2" />
-
-            )} 
-            Crear Pre-Liquidación
+            )}
+            Crear Preliquidación
           </Button>
-
         </DialogContent>
       </Dialog>
     </>
