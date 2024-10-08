@@ -140,8 +140,7 @@ export default function AffiliatePage(props: {
     "FECHA APORTES": "-",
     "PERIODO APORTADO": "-",
     "CUIT EMPLEADOR": "",
-    DIFERENCIAL: grupo
-      ? getDifferentialAmount(grupo, new Date())?.toString()
+    DIFERENCIAL: grupo? getDifferentialAmount(grupo,new Date())?.toString()
       : "-",
   };
   for (const integrant of grupo?.integrants ?? []) {
