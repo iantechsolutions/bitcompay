@@ -59,6 +59,13 @@ export default function AffiliatePage(props: {
       ? prev
       : current;
   });
+  
+  const lastComprobante= grupo?.comprobantes?.reduce((prev,current)=>{
+    return new Date(prev.due_date ?? 0) > new Date(current.due_date ?? 0)
+      ? prev
+      : current;
+  })
+  const nextExpirationDate= lastComprobante?.due_date ;
   const { data: integrant } = api.integrants.getByGroup.useQuery({
     family_group_id: grupos!,
   });
@@ -361,7 +368,7 @@ export default function AffiliatePage(props: {
             <div className="flex flex-col  justify-center">
               <p className="text-sm font-medium block">PRÓXIMO VENCIMIENTO</p>
               <span className="text-[#3E3E3E] font-semibold text-xl">
-                10/09/2024
+                {dayjs(nextExpirationDate).format("DD-MM-YYYY")}
               </span>
             </div>
           </Card>
