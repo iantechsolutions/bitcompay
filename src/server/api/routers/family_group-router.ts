@@ -440,7 +440,7 @@ export const family_groupsRouter = createTRPCRouter({
 
       if (typeof input.id_number_startsWith === "string") {
         integrantsConditions.push(
-          like(schema.integrants.id_number, `%${input.id_number_startsWith}`)
+          like(schema.integrants.id_number, `${input.id_number_startsWith}%`)
         );
       }
 

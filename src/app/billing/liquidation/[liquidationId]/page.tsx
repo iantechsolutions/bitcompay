@@ -42,28 +42,20 @@ export default async function Home(props: {
 }) {
   const userActual = await currentUser();
   const companyData = await api.companies.get.query();
+
   // const eventos = await api.events.list.query();
   const preliquidation = await api.liquidations.getLite.query({
     id: props.params.liquidationId,
   });
+
   // const businessUnit = preliquidation?.bussinessUnits;
   // const user = await clerkClient.users.getUser(
   //   preliquidation?.userCreated ?? "user_2iy8lXXdnoa2f5wHjRh5nj3W0fU"
   // );
   if (!preliquidation) return <Title>Preliquidacion no encotrada</Title>;
-  const familyGroupsData = await api.family_groups.getByLiquidation.query({
+  const summary = await api.family_groups.getSummaryByLiqId.query({
     liquidationId: props.params.liquidationId,
-    summary: true,
   });
-
-  if (
-    Array.isArray(familyGroupsData) ||
-    typeof familyGroupsData?.summary !== "object"
-  ) {
-    throw new Error("getByLiquidation failed to generate summary");
-  }
-
-  const { familyGroups, summary } = familyGroupsData;
 
   // const fg = await api.family_groups.getWithFilteredComprobantes.query({
 
@@ -95,131 +87,10 @@ export default async function Home(props: {
     "IVA",
     "Total",
   ];
-  if (preliquidation?.estado !== "pendiente") headers.push("Factura");
 
-  const toNumberOrZero = (value: any) => {
-    const number = Number(value);
-    return isNaN(number) ? 0 : number; // Check if the result is NaN (Not a Number)
-  };
-  const excelRows: (string | number)[][] = [[...headers]];
-  const tableRows: TableRecord[] = [];
-  familyGroups.map((fg) => {
-    const excelRow = [];
-    const billResponsible = fg?.integrants?.find(
-      (integrante) => integrante?.isBillResponsible
-    );
-    const name = billResponsible?.name ?? "";
-    const cuit = billResponsible?.id_number ?? "";
-    const businessUnit = fg?.businessUnitData?.description ?? "";
-    excelRow.push(fg?.numericalId ?? "");
-    excelRow.push(name);
-    excelRow.push(cuit);
-    const original_comprobante = fg?.comprobantes?.find(
-      (comprobante) => comprobante?.origin?.toLowerCase() === "factura"
-    );
-    // const saldo_anterior = toNumberOrZero(
-    //   original_comprobante?.items.find(
-    //     (item) => item.concept === "Saldo anterior"
-    //   )?.amount
-    // );
-    // const eventPreComprobante = eventos.find(
-    //   (x) =>
-    //     x.currentAccount_id === fg?.cc?.id &&
-    //     x.createdAt < preliquidation?.createdAt
-    // );
-
-    // summary["Saldo anterior"] += eventPreComprobante?.current_amount ?? 0;
-    // excelRow.push(eventPreComprobante?.current_amount ?? 0);
-
-    const saldo_anterior = toNumberOrZero(
-      original_comprobante?.items.find(
-        (item) => item.concept === "Factura Anterior"
-      )?.amount
-    );
-    console.log("saldo_anterior", saldo_anterior);
-    excelRow.push(saldo_anterior);
-
-    const cuota_planes = toNumberOrZero(
-      original_comprobante?.items.find((item) => item.concept === "Abono")
-        ?.amount
-    );
-    excelRow.push(cuota_planes);
-    const bonificacion = toNumberOrZero(
-      original_comprobante?.items.find(
-        (item) => item.concept === "Bonificación"
-      )?.amount
-    );
-    excelRow.push(bonificacion);
-
-    // const diferencial = fg.integrants.reduce((sum, integrant) => {
-    //   const differentialAmount = toNumberOrZero(
-    //     integrant.differentialsValues[0]?.amount
-    //   );
-    //   return sum + differentialAmount;
-    // }, 0);
-
-    const diferencial = toNumberOrZero(
-      original_comprobante?.items.find((item) => item.concept === "Diferencial")
-        ?.amount
-    );
-
-    excelRow.push(diferencial);
-
-    const Aporte = toNumberOrZero(
-      original_comprobante?.items.find((item) => item.concept === "Aporte")
-        ?.amount
-    );
-
-    excelRow.push(Aporte);
-    const interes = toNumberOrZero(
-      original_comprobante?.items.find((item) => item.concept === "Interes")
-        ?.amount ?? "0"
-    );
-    excelRow.push(interes);
-    const total = toNumberOrZero(
-      parseFloat(original_comprobante?.importe?.toFixed(2) ?? "0")
-    );
-    excelRow.push(total);
-    const subTotal = computeBase(
-      total,
-      Number(original_comprobante?.iva ?? "0")
-    );
-    excelRow.push(subTotal);
-    const iva = computeIva(total, Number(original_comprobante?.iva ?? "0"));
-    excelRow.push(iva);
-    excelRows.push(excelRow);
-    // const lastEvent = await api.events.getLastByDateAndCC.query({
-    //   ccId: fg?.cc?.id!,
-    //   date: preliquidation?.createdAt ?? new Date(),
-    // });
-    const currentAccountAmount =
-      // lastEvent?.current_amount ??
-      0;
-    const plan = fg?.plan?.description ?? "";
-    const modo = fg?.modo?.description ?? "";
-    tableRows.push({
-      id: fg?.id!,
-      nroGF: fg?.numericalId ?? "N/A",
-      UN: businessUnit,
-      nombre: name,
-      cuit,
-      "saldo anterior":
-        //  eventPreComprobante?.current_amount ??
-        saldo_anterior,
-      "cuota plan": cuota_planes,
-      bonificacion,
-      diferencial: diferencial,
-      Aporte,
-      interes,
-      subtotal: subTotal,
-      iva,
-      total,
-      comprobantes: fg?.comprobantes!,
-      currentAccountAmount,
-      Plan: plan,
-      modo,
-    });
-  });
+  if (preliquidation?.estado !== "pendiente") {
+    headers.push("Factura");
+  }
 
   return (
     <LayoutContainer>
@@ -337,8 +208,16 @@ export default async function Home(props: {
       </div>
 
       <div className="relative">
-        <DataTable columns={columns} data={tableRows} summary={summary} />
-        <DownloadExcelButton rows={excelRows} period={preliquidation?.period} />
+        <DataTable
+          columns={columns}
+          liquidationId={props.params.liquidationId}
+          summary={summary}
+        />
+        <DownloadExcelButton
+          liquidationId={props.params.liquidationId}
+          period={preliquidation?.period}
+          excelHeaders={headers}
+        />
       </div>
     </LayoutContainer>
   );
