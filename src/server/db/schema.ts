@@ -565,10 +565,10 @@ export const healthInsurances = pgTable("health_insurances", {
   excelDocument: varchar("excelDocument", { length: 255 }),
   excelAmount: varchar("excelAmount"),
   excelEmployerDocument: varchar("excelEmployerDocument", { length: 255 }),
-  // excelSupportPeriod: timestamp("excelSupportPeriod", { mode: "date" }),
-  // excelContributionperiod: timestamp("excelContributionperiod", {
-  //   mode: "date",
-  // }),
+  excelSupportPeriod: timestamp("excelSupportPeriod", { mode: "date" }),
+  excelContributionperiod: timestamp("excelContributionperiod", {
+    mode: "date",
+  }),
 });
 
 export const healthInsurancesRelations = relations(
