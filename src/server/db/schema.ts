@@ -562,6 +562,15 @@ export const healthInsurances = pgTable("health_insurances", {
   floor: varchar("floor", { length: 255 }),
   office: varchar("office", { length: 255 }),
   dateState: timestamp("dateState", { mode: "date" }),
+  excelDocument: varchar("excelDocument", { length: 255 }),
+  excelAmount: varchar("excelAmount"),
+  excelEmployerDocument: varchar("excelEmployerDocument", { length: 255 }),
+  excelSupportPeriod: timestamp("excelSupportPeriod", {
+    mode: "date",
+  }),
+  excelContributionperiod: timestamp("excelContributionperiod", {
+    mode: "date",
+  }),
 });
 
 export const healthInsurancesRelations = relations(
@@ -573,7 +582,7 @@ export const healthInsurancesRelations = relations(
     }),
     comprobantes: many(comprobantes),
     cc: one(currentAccount),
-    affiliate_os: many(affiliate_os),
+    aportes_os: many(aportes_os),
   })
 );
 
@@ -672,6 +681,7 @@ export const integrantsRelations = relations(integrants, ({ one, many }) => ({
     references: [healthInsurances.id],
   }),
   pa: many(pa),
+  aportes_os: many(aportes_os),
   contribution: one(contributions),
   differentialsValues: many(differentialsValues),
 }));
@@ -953,12 +963,12 @@ export const family_groupsSchemaDB = insertfamily_groupsSchema.pick({
   state: true,
   payment_status: true,
   receipt: true,
-  seller:true,
-  supervisor:true,
-  gerency:true,
-  sale_condition:true,
-  user_charged:true,
-  charged_date:true,
+  seller: true,
+  supervisor: true,
+  gerency: true,
+  sale_condition: true,
+  user_charged: true,
+  charged_date: true,
 });
 export type FamilyGroup = z.infer<typeof selectfamily_groupsSchema>;
 
@@ -1370,27 +1380,33 @@ export const selectrelativeSchema = createSelectSchema(relative);
 // })
 export type Relative = z.infer<typeof selectrelativeSchema>;
 
-export const affiliate_os = pgTable("affiliate_os", {
+export const aportes_os = pgTable("aportes_os", {
   id: columnId,
-  name: varchar("name", { length: 255 }).notNull(),
+  id_affiliate: varchar("id_affiliate", { length: 255 })
+    .references(() => integrants.id)
+    .notNull(),
   cuil: varchar("cuil", { length: 255 }).notNull(),
-  periodo: timestamp("Periodo"),
-  total: varchar("Total", { length: 255 }).notNull(),
-  aporte: varchar("Aporte", { length: 255 }).notNull(),
-  contribucion: varchar("Contribucion", { length: 255 }).notNull(),
-  subsidio: varchar("Subsidio", { length: 255 }).notNull(),
-  monotributo: varchar("Monotributo", { length: 255 }).notNull(),
-  modalidad: varchar("Modalidad", { length: 255 }).notNull(),
-  otros: varchar("Otros", { length: 255 }).notNull(),
+  process_date: timestamp("support_date", { mode: "date" }).notNull(),
+  contribution_date: timestamp("support_date", { mode: "date" }).notNull(),
+  support_date: timestamp("support_date", { mode: "date" }).notNull(),
+  amount: varchar("amount").notNull(),
+  emploter_document_number: varchar("emploter_document_number", {
+    length: 255,
+  }).notNull(),
+
   healthInsurances_id: varchar("healthInsurances_id", {
     length: 255,
   }).notNull(),
   createdAt,
 });
 
-export const affiliate_os_Relations = relations(affiliate_os, ({ one }) => ({
+export const affiliate_os_Relations = relations(aportes_os, ({ one }) => ({
   healthInsurances: one(healthInsurances, {
-    fields: [affiliate_os.healthInsurances_id],
+    fields: [aportes_os.healthInsurances_id],
     references: [healthInsurances.id],
+  }),
+  affiliate: one(integrants, {
+    fields: [aportes_os.id_affiliate],
+    references: [integrants.id],
   }),
 }));
