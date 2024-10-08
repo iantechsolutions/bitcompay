@@ -160,7 +160,7 @@ export default function AddPreLiquidation() {
             <Label className="text-xs">MARCA</Label>
             <Select onValueChange={handleBrandChange}>
               <SelectTrigger
-                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+                className="w-full  border-[#BEF0BB] border-0 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right">
                 <SelectValue placeholder="Seleccione una marca" />
               </SelectTrigger>
@@ -255,7 +255,7 @@ export default function AddPreLiquidation() {
                 <Button
                   variant={"form"}
                   className={cn(
-                    "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
+                    "w-[240px]  border-[#BEF0BB] pl-3 text-left font-normal focus-visible:ring-green-400",
                     !fechaDesde && "text-muted-foreground"
                   )}
                 >
@@ -287,7 +287,7 @@ export default function AddPreLiquidation() {
                 <Button
                   variant={"form"}
                   className={cn(
-                    "w-[240px] border-green-300 pl-3 text-left font-normal focus-visible:ring-green-400",
+                    "w-[240px]  border-[#BEF0BB] pl-3 text-left font-normal focus-visible:ring-green-400",
                     !fechaHasta && "text-muted-foreground"
                   )}
                 >
@@ -319,7 +319,7 @@ export default function AddPreLiquidation() {
               <Select
                 onValueChange={(e) => setMes(Number(e))}
                 defaultValue={mes?.toString()}>
-                <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none">
+                <SelectTrigger className="w-full  border-[#BEF0BB] border-0 border-b text-[#3E3E3E] bg-background rounded-none">
                   <SelectValue placeholder="Seleccione un mes" />
                 </SelectTrigger>
                 <SelectContent>
@@ -389,7 +389,7 @@ export default function AddPreLiquidation() {
             <div className="w-1/2 m-3 ml-3">
               <Label className="text-xs">AÑO DE VIGENCIA</Label>
               <Input
-                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none"
+                className="w-full  border-[#BEF0BB] border-0 border-b text-[#3E3E3E] bg-background rounded-none"
                 type="number"
                 min={new Date().getFullYear()}
                 value={anio}
@@ -405,7 +405,7 @@ export default function AddPreLiquidation() {
               <br />
               <ComboboxDemo
                 title="Seleccionar PV..."
-                classNameButton="w-full flex justify-between items-center p-4 border-green-300 border-0 border-b text-[#3E3E3E]"
+                classNameButton="w-full flex justify-between items-center p-4  border-[#BEF0BB] border-0 border-b text-[#3E3E3E]"
                 placeholder="_"
                 options={[
                   { value: "1", label: "1" },
@@ -422,7 +422,7 @@ export default function AddPreLiquidation() {
                 INTERÉS (%)*{" "}
               </Label>
               <Input
-                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                className="w-full  border-[#BEF0BB] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
                 type="number"
                 placeholder="0,00"
                 value={interest ?? 0}

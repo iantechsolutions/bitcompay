@@ -27,6 +27,7 @@ const items = [
   { es: "Rubros", en: "items" },
   { es: "Unidades de negocio", en: "bussiness_unit" },
   { es: "Zonas", en: "zone" },
+  {es: "Obras sociales no clientes", en: "no-client-os"}
 ];
 
 export default async function Maintenance() {
