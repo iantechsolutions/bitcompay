@@ -43,7 +43,6 @@ export default function AffiliatePage(props: {
   // const company = props.params.companyId;
   const grupos = props.params.affiliateId;
 
-
   const { data: grupo } = api.family_groups.get.useQuery({
     family_groupsId: grupos!,
   });
@@ -59,13 +58,16 @@ export default function AffiliatePage(props: {
       ? prev
       : current;
   });
-  
-  const lastComprobante= grupo?.comprobantes?.reduce((prev,current)=>{
-    return new Date(prev.due_date ?? 0) > new Date(current.due_date ?? 0)
-      ? prev
-      : current;
-  })
-  const nextExpirationDate= lastComprobante?.due_date ;
+
+  let lastComprobante;
+  if (grupo?.comprobantes && grupo?.comprobantes?.length! > 0) {
+    lastComprobante = grupo?.comprobantes?.reduce((prev, current) => {
+      return new Date(prev.due_date ?? 0) > new Date(current.due_date ?? 0)
+        ? prev
+        : current;
+    });
+  }
+  const nextExpirationDate = lastComprobante?.due_date ? dayjs(lastComprobante?.due_date).format("DD-MM-YYYY") : "-";
   const { data: integrant } = api.integrants.getByGroup.useQuery({
     family_group_id: grupos!,
   });
@@ -147,7 +149,8 @@ export default function AffiliatePage(props: {
     "FECHA APORTES": "-",
     "PERIODO APORTADO": "-",
     "CUIT EMPLEADOR": "",
-    DIFERENCIAL: grupo? getDifferentialAmount(grupo,new Date())?.toString()
+    DIFERENCIAL: grupo
+      ? getDifferentialAmount(grupo, new Date())?.toString()
       : "-",
   };
   for (const integrant of grupo?.integrants ?? []) {
@@ -157,7 +160,7 @@ export default function AffiliatePage(props: {
       "Nº AFILIADO": integrant.affiliate_number ?? "-",
       EXTENSION: integrant.extention ? integrant?.extention : "-",
       "Nº. CREDENCIAL":
-        (integrant.affiliate_number && integrant.extention)
+        integrant.affiliate_number && integrant.extention
           ? `${integrant.affiliate_number}-${integrant.extention}`
           : "-",
       "FECHA DE NAC": dayjs(integrant.birth_date).format("DD-MM-YYYY") ?? "-",
@@ -368,7 +371,7 @@ export default function AffiliatePage(props: {
             <div className="flex flex-col  justify-center">
               <p className="text-sm font-medium block">PRÓXIMO VENCIMIENTO</p>
               <span className="text-[#3E3E3E] font-semibold text-xl">
-                {dayjs(nextExpirationDate).format("DD-MM-YYYY")}
+                {nextExpirationDate}
               </span>
             </div>
           </Card>
@@ -517,7 +520,9 @@ export default function AffiliatePage(props: {
                       />
                       Condición de Venta:
                     </div>
-                    <p className="font-semibold pl-7 opacity-80">{grupo?.sale_condition ?? "-"}</p>
+                    <p className="font-semibold pl-7 opacity-80">
+                      {grupo?.sale_condition ?? "-"}
+                    </p>
                     <div className="flex items-center gap-2">
                       <img
                         src="/public/affiliates/modalityIcon.png"
@@ -557,7 +562,6 @@ export default function AffiliatePage(props: {
                     return <ElementCard key={key} element={{ key, value }} />;
                   })}
                 </div>
-                
               </AccordionContent>
             </AccordionItem>
           </Accordion>
