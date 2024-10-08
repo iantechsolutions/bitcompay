@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, lt } from "drizzle-orm";
+import { and, desc, eq, inArray, InferSelectModel, lt } from "drizzle-orm";
 import Afip from "@afipsdk/afip.js";
 import { z } from "zod";
 import { db, schema } from "~/server/db";
@@ -56,6 +56,16 @@ const ivaDictionary: { [key: number]: string } = {
   8: "5",
   9: "2.5",
   0: "",
+};
+
+const ivaDictionaryInverso: { [key: string]: number } = {
+  "0": 3,
+  "10.5": 4,
+  "21": 5,
+  "27": 6,
+  "5": 8,
+  "2.5": 9,
+  "": 0,
 };
 
 const fcAnc: { [key: string]: string } = {
@@ -135,6 +145,7 @@ const idDictionary: { [key: string]: number } = {
 // }
 
 async function approbatecomprobante(liquidationId: string) {
+  const start = Date.now();
   const liquidation = await db.query.liquidations.findFirst({
     where: eq(schema.liquidations.id, liquidationId),
     with: {
@@ -146,7 +157,10 @@ async function approbatecomprobante(liquidationId: string) {
               integrants: {
                 with: {
                   pa: true,
+                  postal_code: true, // para evitar la recarga de integrants
                 },
+                // este filtrado lo hago para acortar el .find, total solo lo usamos ahi
+                where: eq(schema.integrants.isBillResponsible, true),
               },
               businessUnitData: {
                 with: {
@@ -175,14 +189,26 @@ async function approbatecomprobante(liquidationId: string) {
     console.log("Ingresando afip");
     const afip = await ingresarAfip();
     console.log("Fin ingreso");
-    const status = await db.query.paymentStatus.findFirst({
-      where: eq(schema.paymentStatus.code, "91"),
-    });
-    const statusCancelado = await db.query.paymentStatus.findFirst({
-      where: eq(schema.paymentStatus.code, "90"),
-    });
+
+    const [status, statusCancelado, productos] = await Promise.all([
+      db.query.paymentStatus.findFirst({
+        where: eq(schema.paymentStatus.code, "91"),
+      }),
+      db.query.paymentStatus.findFirst({
+        where: eq(schema.paymentStatus.code, "90"),
+      }),
+      db.query.products.findMany(),
+    ]);
+
+    const productosMap = new Map<
+      string,
+      InferSelectModel<typeof schema.products>
+    >();
+    for (const prod of productos) {
+      productosMap.set(prod.id, prod);
+    }
+
     let last_voucher;
-    const productos = await db.query.products.findMany();
     // const browser = await chromium.puppeteer.launch({
     //   args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
     //   defaultViewport: chromium.defaultViewport,
@@ -191,12 +217,12 @@ async function approbatecomprobante(liquidationId: string) {
     //   ignoreHTTPSErrors: true,
     // });
     // const page = await browser.newPage();
-    const { results, errors } = await PromisePool.for(liquidation?.comprobantes)
-      .withConcurrency(1000)
-      .process(async (comprobante: any) => {
-        console.log("0");
+    const { results, errors } = await PromisePool.withConcurrency(1000)
+      .for(liquidation?.comprobantes)
+      .process(async (comprobante, index) => {
         const comprobanteCod =
           comprobanteDictionary[comprobante.tipoComprobante ?? ""];
+
         try {
           // last_voucher = await afip.ElectronicBilling.getLastVoucher(
           //   comprobante?.ptoVenta,
@@ -206,36 +232,50 @@ async function approbatecomprobante(liquidationId: string) {
         } catch {
           last_voucher = 0;
         }
-        console.log("1");
+
         const randomNumber =
           Math.floor(Math.random() * (100000 - 1000 + 1)) + 1000;
-        // const billResponsible = comprobante.family_group?.integrants.find(
-        //   (integrant) => integrant.isBillResponsible
-        // );
-        const billResponsible = await db.query.integrants.findFirst({
-          where: and(
-            eq(
-              schema.integrants.family_group_id,
+
+        // dejo el filtrado del find por las dudas pero esto ya llega filtrado de antes
+        const cachedBillResponsible =
+          comprobante.family_group?.integrants?.find(
+            (k) =>
+              k.isBillResponsible &&
+              comprobante.family_group?.id === k.family_group_id
+          );
+
+        const billResponsible =
+          cachedBillResponsible ??
+          (await db.query.integrants.findFirst({
+            where: and(
+              eq(
+                schema.integrants.family_group_id,
+                comprobante.family_group?.id ?? ""
+              ),
+              eq(schema.integrants.isBillResponsible, true)
+            ),
+            with: {
+              postal_code: true,
+              pa: true,
+            },
+          }));
+
+        // de complejidad cuadrática a lineal
+        // O(n) * O(1) vs O(n) * O(n)
+        let producto = undefined;
+        if (typeof billResponsible?.pa[0]?.product_id === "string") {
+          producto = productosMap.get(billResponsible?.pa[0]?.product_id);
+        }
+
+        const cachedCc = comprobante.family_group?.cc;
+        const cc =
+          cachedCc ??
+          (await db.query.currentAccount.findFirst({
+            where: eq(
+              schema.currentAccount.family_group,
               comprobante.family_group?.id ?? ""
             ),
-            eq(schema.integrants.isBillResponsible, true)
-          ),
-          with: {
-            postal_code: true,
-            pa: true,
-          },
-        });
-        console.log("2");
-
-        const producto = productos.find(
-          (x) => x.id == billResponsible?.pa[0]?.product_id
-        );
-        const cc = await db.query.currentAccount.findFirst({
-          where: eq(
-            schema.currentAccount.family_group,
-            comprobante.family_group?.id ?? ""
-          ),
-        });
+          }));
 
         const fecha = new Date(
           Date.now() - new Date().getTimezoneOffset() * 60000
@@ -243,13 +283,16 @@ async function approbatecomprobante(liquidationId: string) {
           .toISOString()
           .split("T")[0];
 
-        const listado = Object.entries(ivaDictionary).find(
-          ([_, value]) => value === comprobante?.iva
-        );
-        console.log("6");
-        const iva = listado ? listado[0] : "0";
+        const ivaByValue = ivaDictionaryInverso[comprobante?.iva];
+        const listado: [number, string] | undefined =
+          typeof ivaByValue === "number"
+            ? [ivaByValue, comprobante.iva]
+            : undefined;
+
+        const ivaId = listado ? listado[0] : "0";
         const ivaFloat = parseFloat(comprobante?.iva ?? "0") / 100;
         let data = {};
+
         if (comprobante?.origin == "Nota de credito") {
           data = {
             CantReg: 1, // Cantidad de comprobantes a registrar
@@ -273,7 +316,7 @@ async function approbatecomprobante(liquidationId: string) {
             MonId: "PES",
             MonCotiz: 1,
             Iva: {
-              Id: iva,
+              Id: ivaId,
               BaseImp: 0,
               Importe: (Number(comprobante?.importe) * ivaFloat).toString(),
             },
@@ -285,6 +328,7 @@ async function approbatecomprobante(liquidationId: string) {
               Importe: comprobante?.nroComprobante,
             },
           };
+
           await db
             .update(schema.payments)
             .set({
@@ -297,7 +341,6 @@ async function approbatecomprobante(liquidationId: string) {
               )
             );
         } else {
-          console.log("Encontro?");
           const payment = await db
             .insert(schema.payments)
             .values({
@@ -316,7 +359,7 @@ async function approbatecomprobante(liquidationId: string) {
               du_number: parseInt(billResponsible?.id_number ?? "0"),
               product: producto?.id,
               affiliate_number:
-                (comprobante.family_group?.plan.plan_code ?? "") +
+                (comprobante.family_group?.plan?.plan_code ?? "") +
                 (billResponsible?.id_number ?? ""),
               period: comprobante.due_date,
               first_due_amount: comprobante?.importe,
@@ -333,7 +376,6 @@ async function approbatecomprobante(liquidationId: string) {
               // address: billResponsible?.address,
             })
             .returning();
-          console.log("5");
           data = {
             CantReg: 1, // Cantidad de comprobantes a registrar
             PtoVta: comprobante?.ptoVenta,
@@ -356,14 +398,13 @@ async function approbatecomprobante(liquidationId: string) {
             MonId: "PES",
             MonCotiz: 1,
             Iva: {
-              Id: iva,
+              Id: ivaId,
               BaseImp: 0,
               Importe: (Number(comprobante?.importe) * ivaFloat).toString(),
             },
           };
         }
 
-        console.log("7");
         const html = htmlBill(
           comprobante,
           comprobante.family_group?.businessUnitData!.company,
@@ -382,23 +423,27 @@ async function approbatecomprobante(liquidationId: string) {
           billResponsible?.afip_status ?? ""
         );
 
-        console.log("8");
         const name = `FAC_${last_voucher + 1}.pdf`; // NOMBRE
         last_voucher += 1;
-        console.log("9");
 
         PDFFromHtml(html, name, afip, comprobante?.id ?? "", last_voucher + 1);
-        console.log("10");
 
         // const uploaded = await utapi.uploadFiles(
         //   new File([text], input.fileName, { type: "text/plain" })
         // );
-        let historicEvents = await db.query.events.findMany({
-          where: eq(schema.events.currentAccount_id, cc?.id ?? ""),
-        });
+
+        // al no haber modificado events es posible conseguirlos de los datos ya cargados
+        const cachedEvents = comprobante.family_group?.cc?.events;
+        let historicEvents =
+          cachedEvents ??
+          (await db.query.events.findMany({
+            where: eq(schema.events.currentAccount_id, cc?.id ?? ""),
+          }));
+
         historicEvents = historicEvents.filter(
           (x) => x.createdAt.getTime() < liquidation.createdAt.getTime()
         );
+
         if (historicEvents && historicEvents.length > 0) {
           const lastEvent = historicEvents.reduce((prev, current) => {
             return new Date(prev.createdAt) > new Date(current.createdAt)
@@ -678,6 +723,7 @@ async function approbatecomprobante(liquidationId: string) {
     //     });
     //   }
     // }
+    console.log(`approbatecomprobante total ${Date.now() - start}ms`);
     return "OK";
   } else {
     return "Error";

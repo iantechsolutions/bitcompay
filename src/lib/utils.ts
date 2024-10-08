@@ -1,10 +1,12 @@
 import Afip from "@afipsdk/afip.js";
 import { type ClassValue, clsx } from "clsx";
 import { fi } from "date-fns/locale";
+import { InferSelectModel } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { twMerge } from "tailwind-merge";
 import { number } from "zod";
 import BarcodeProcedure from "~/components/barcode";
+import { schema } from "~/server/db";
 import { FamilyGroup } from "~/server/db/schema";
 import { api } from "~/trpc/server";
 import { RouterOutputs } from "~/trpc/shared";
@@ -90,12 +92,103 @@ export function dateNormalFormat(date: Date | undefined | null) {
 export const topRightAbsoluteOnDesktopClassName =
   "md:absolute md:top-0 md:right-0 mr-10 mt-10";
 
+function formatNumberAsCurrency(amount: number): string {
+  return new Intl.NumberFormat("es-AR", {
+    style: "currency",
+    currency: "ARS",
+    currencyDisplay: "narrowSymbol",
+    minimumFractionDigits: 2,
+  }).format(amount);
+}
+
+function getImageTagForTipoComprobante(tipoComprobante: string): string {
+  if (tipoComprobante.includes("A")) {
+    return `<img src="/comprobantes/factura-a.png" alt="factura A" />`;
+  }
+  if (tipoComprobante.includes("B")) {
+    return `<img src="/comprobantes/factura-b.png" alt="factura B" />`;
+  }
+  return `<img src="/comprobantes/recibo.png" alt="recibo" />`;
+}
+
+function getIimageForLogo(logo: string | null) {
+  if (logo) {
+    return `<img class="logo" style="width: 30vw;height: auto;margin-bottom: 5px;" src=${logo} alt="logo" />`;
+  } else {
+    return `<img class="logo" style="width: 30vw;height: auto;margin-bottom: 5px;" src="https://utfs.io/f/f426d7f1-f9c7-437c-a722-f978ab23830d-neiy4q.png" alt="logo" />`;
+  }
+}
+
+function getIimageForBarcode() {
+  // const barcode = BarcodeProcedure({
+  //   dateVto: comprobante.first_due_date ?? new Date(),
+  //   amountVto: comprobante.first_due_amount ?? 0,
+  //   client: comprobante.fiscal_id_number ?? 0,
+  //   isPagoFacil: false,
+  //   invoiceNumber: comprobante.invoice_number ?? 0,
+  // });
+  return "barcode";
+
+  // if (barcode != undefined) {
+  //   return `<img
+  //   class="cod-barras"
+  //   src="${barcode}
+  //   alt="barcode"
+  // />`;
+  // } else {
+  //   return `<img
+  //         class="cod-barras"
+  //         src="https://utfs.io/f/73e104e8-fb1f-490f-a30e-7de1608ef3ac-12ad.png"
+  //         alt=""
+  //       />`;
+  // }
+}
+
+function generateConcepts(
+  items: Array<{ concept: string | null; total: number | null }>
+): string {
+  return items.map((item) => `<p>${item.concept}</p>`).join("");
+}
+
+function generateAmounts(
+  items: Array<{ concept: string | null; total: number | null }>
+): string {
+  return items.map((item) => `<p>${item.total}</p>`).join("");
+}
+
+function getTextoForTipoComprobante(tipoComprobante: string) {
+  switch (tipoComprobante) {
+    case "1":
+    case "6":
+    case "11":
+    case "51":
+    case "19":
+      return "FACTURA";
+    case "2":
+    case "7":
+    case "12":
+    case "52":
+    case "20":
+      return "NOTA DE DEBITO";
+    case "3":
+    case "8":
+    case "13":
+    case "53":
+    case "21":
+      return "NOTA DE CREDITO";
+    default:
+      return "";
+  }
+}
+
 export function htmlBill(
   comprobante: any,
   company: any,
   producto: any,
   voucher: number,
-  brand: RouterOutputs["brands"]["list"][number] | undefined,
+  brand: /* outerOutputs["brands"]["list"][number] */
+    | InferSelectModel<typeof schema.brands>
+    | undefined,
   name: string,
   domicilio: string,
   localidad: string,
@@ -112,94 +205,13 @@ export function htmlBill(
   if (comprobante) {
     const payment = comprobante.payments;
   }
-  function formatNumberAsCurrency(amount: number): string {
-    return new Intl.NumberFormat("es-AR", {
-      style: "currency",
-      currency: "ARS",
-      currencyDisplay: "narrowSymbol",
-      minimumFractionDigits: 2,
-    }).format(amount);
-  }
-  function getImageTagForTipoComprobante(tipoComprobante: string): string {
-    if (tipoComprobante.includes("A")) {
-      return `<img src="/comprobantes/factura-a.png" alt="factura A" />`;
-    }
-    if (tipoComprobante.includes("B")) {
-      return `<img src="/comprobantes/factura-b.png" alt="factura B" />`;
-    }
-    return `<img src="/comprobantes/recibo.png" alt="recibo" />`;
-  }
+
   console.log("comprobante info");
   console.log(comprobante);
   // console.log(voucher);
 
-  function getIimageForLogo(logo: string | null) {
-    if (logo) {
-      return `<img class="logo" style="width: 30vw;height: auto;margin-bottom: 5px;" src=${logo} alt="logo" />`;
-    } else {
-      return `<img class="logo" style="width: 30vw;height: auto;margin-bottom: 5px;" src="https://utfs.io/f/f426d7f1-f9c7-437c-a722-f978ab23830d-neiy4q.png" alt="logo" />`;
-    }
-  }
+  // moví funciones porque es lento redefinirlas constantemente
 
-  function getIimageForBarcode() {
-    // const barcode = BarcodeProcedure({
-    //   dateVto: comprobante.first_due_date ?? new Date(),
-    //   amountVto: comprobante.first_due_amount ?? 0,
-    //   client: comprobante.fiscal_id_number ?? 0,
-    //   isPagoFacil: false,
-    //   invoiceNumber: comprobante.invoice_number ?? 0,
-    // });
-    return "barcode";
-
-    // if (barcode != undefined) {
-    //   return `<img
-    //   class="cod-barras"
-    //   src="${barcode}
-    //   alt="barcode"
-    // />`;
-    // } else {
-    //   return `<img
-    //         class="cod-barras"
-    //         src="https://utfs.io/f/73e104e8-fb1f-490f-a30e-7de1608ef3ac-12ad.png"
-    //         alt=""
-    //       />`;
-    // }
-  }
-
-  function generateConcepts(
-    items: Array<{ concept: string | null; total: number | null }>
-  ): string {
-    return items.map((item) => `<p>${item.concept}</p>`).join("");
-  }
-  function generateAmounts(
-    items: Array<{ concept: string | null; total: number | null }>
-  ): string {
-    return items.map((item) => `<p>${item.total}</p>`).join("");
-  }
-  function getTextoForTipoComprobante(tipoComprobante: string) {
-    switch (tipoComprobante) {
-      case "1":
-      case "6":
-      case "11":
-      case "51":
-      case "19":
-        return "FACTURA";
-      case "2":
-      case "7":
-      case "12":
-      case "52":
-      case "20":
-        return "NOTA DE DEBITO";
-      case "3":
-      case "8":
-      case "13":
-      case "53":
-      case "21":
-        return "NOTA DE CREDITO";
-      default:
-        return "";
-    }
-  }
   const conceptosList = generateConcepts(comprobante?.items ?? []);
   const amountsList = generateAmounts(comprobante?.items ?? []);
   const htmlContent = `<!DOCTYPE html>
@@ -1030,7 +1042,7 @@ export function visualizationSwitcher(
   return visualization ? viewFormComponent : editFormComponent;
 }
 
-export function Capitalize (value:string){
+export function Capitalize(value: string) {
   const firstChar = value.charAt(0).toUpperCase();
   const rest = value.slice(1).toLowerCase();
 
