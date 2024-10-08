@@ -21,11 +21,16 @@ import { Card } from "~/components/ui/card";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
-import "dayjs/locale/es"
+import "dayjs/locale/es";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.locale("es");
-import { getDifferentialAmount, getGroupContribution } from "~/lib/utils";
+import {
+  Capitalize,
+  cn,
+  getDifferentialAmount,
+  getGroupContribution,
+} from "~/lib/utils";
 import { RouterOutputs } from "~/trpc/shared";
 import { useRouter } from "next/navigation";
 import { SaldoPopoverAffiliates } from "./saldoPopoverAffiliates";
@@ -103,15 +108,24 @@ export default function AffiliatePage(props: {
       ? dayjs.utc(grupo?.charged_date).startOf("day").format("DD-MM-YYYY")
       : "-",
     "Usuario alta": "",
-    Vendedor: "",
-    Supervisor: "",
-    Gerencia: "",
+    Vendedor: grupo?.seller ?? "-",
+    Supervisor: grupo?.supervisor ?? "-",
+    Gerencia: grupo?.gerency ?? "-",
   };
 
   const integrantsPersonalData = new Map<string, Record<string, string>>();
   const integrantsFiscalData = new Map<string, Record<string, string>>();
   const integrantsContactData = new Map<string, Record<string, string>>();
   const integrantsPlanData = new Map<string, Record<string, string>>();
+
+  const formattedAportes = grupo
+    ? new Intl.NumberFormat("es-AR", {
+        style: "currency",
+        currency: "ARS",
+        currencyDisplay: "narrowSymbol",
+      }).format(getGroupContribution(grupo))
+    : "-";
+
   const additionalData = {
     PROMOCIÓN: bonusValido ? bonusValido?.amount + " %" : "-",
     DESDE: bonusValido?.from
@@ -120,20 +134,26 @@ export default function AffiliatePage(props: {
     HASTA: bonusValido?.to
       ? dayjs(bonusValido?.to).utc().format("DD-MM-YYYY")
       : "-",
-    APORTES: grupo ? getGroupContribution(grupo) : "-",
+    APORTES: grupo ? formattedAportes : "-",
     ORIGEN: "",
     "FECHA APORTES": "-",
     "PERIODO APORTADO": "-",
     "CUIT EMPLEADOR": "",
-    DIFERENCIAL: grupo ? getDifferentialAmount(grupo, new Date()) : "-",
+    DIFERENCIAL: grupo
+      ? getDifferentialAmount(grupo, new Date())?.toString()
+      : "-",
   };
+
   for (const integrant of grupo?.integrants ?? []) {
     const intPersonalData = {
-      "TIPO DE DOCUMENTO": integrant.id_type ?? "-",
-      "NUMERO DE DOCUMENTO": integrant.id_number ?? "-",
-      "NRO. AFILIADO": integrant.affiliate_number ?? "-",
+      "TIPO DOCUMENTO": integrant.id_type ?? "-",
+      "Nº DOCUMENTO": integrant.id_number ?? "-",
+      "Nº AFILIADO": integrant.affiliate_number ?? "-",
       EXTENSION: integrant.extention ? integrant?.extention : "-",
-      "NRO. CREDENCIAL": `${integrant.affiliate_number}-${integrant.extention}`,
+      "Nº. CREDENCIAL":
+        (integrant.affiliate_number && integrant.extention)
+          ? `${integrant.affiliate_number}-${integrant.extention}`
+          : "-",
       "FECHA DE NAC": dayjs(integrant.birth_date).format("DD-MM-YYYY") ?? "-",
       EDAD: integrant?.age?.toString() ?? "-",
       "GÉNERO:": integrant?.gender ?? "-",
@@ -143,7 +163,7 @@ export default function AffiliatePage(props: {
     const intFiscalData = {
       "CONDICION DE AFIP": integrant.afip_status ?? "-",
       "TIPO DE ID FISCAL": integrant.fiscal_id_type ?? "-",
-      "NRO. FISCAL": integrant.fiscal_id_number ?? "-",
+      "Nº. FISCAL": integrant.fiscal_id_number ?? "-",
     };
     const intContactData = {
       DOMICILIO:
@@ -351,46 +371,63 @@ export default function AffiliatePage(props: {
           <Accordion
             className="w-full"
             defaultValue={["item-1", "item-2", "item-3"]}
-            type="multiple">
+            type="multiple"
+          >
             <AccordionItem value="item-1">
               <AccordionTrigger className="font-semibold" name="editIcon">
                 Datos del grupo familiar
               </AccordionTrigger>
               <AccordionContent className="pt-6 pl-5">
-                <div className="grid grid-cols-5 gap-6 p-3 rounded-md">
-                  {Object.entries(familyGroupData).map(([key, value]) => (
-                    <ElementCard key={key} element={{ key, value }} />
-                  ))}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 p-3 rounded-md">
+                  {Object.entries(familyGroupData).map(([key, value]) => {
+                    value =
+                      typeof value === "string" ? Capitalize(value) : value;
+                    return <ElementCard key={key} element={{ key, value }} />;
+                  })}
                 </div>
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2">
               <AccordionTrigger
                 className="font-semibold rounded-md overflow-hidden"
-                name="editIcon">
+                name="editIcon"
+              >
                 Integrantes
               </AccordionTrigger>
               <AccordionContent className="pt-6 pl-5">
                 <AccordionIntegrant
                   type="multiple"
-                  className="rounded-md overflow-hidden">
+                  className="rounded-md overflow-hidden"
+                >
                   {integrant?.map((int) => (
                     <AccordionItemIntegrant value={int.id}>
                       <AccordionTriggerIntegrant
                         relationship={int?.relationship}
-                        affiliate={int}>
+                        affiliate={int}
+                      >
                         {int.name}
                       </AccordionTriggerIntegrant>
                       <AccordionContentIntegrant>
                         <p className="text-xs font-semibold">
                           Informacion Personal
                         </p>
-                        <div className="flex flex-1 flex-wrap justify-start gap-8 pt-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-stretch pt-4">
                           {Object.entries(
                             integrantsPersonalData.get(int.id) ?? {}
-                          ).map(([key, value]) => (
-                            <ElementCard key={key} element={{ key, value }} />
-                          ))}
+                          ).map(([key, value]) => {
+                            const isCredentialRelated =
+                              key === "Nº. CREDENCIAL" ||
+                              key == "EXTENSION" ||
+                              key == "Nº AFILIADO" ||
+                              key == "TIPO DOCUMENTO";
+                            value =
+                              typeof value === "string" && !isCredentialRelated
+                                ? Capitalize(value)
+                                : value;
+                            return (
+                              <ElementCard key={key} element={{ key, value }} />
+                            );
+                          })}
                         </div>
                         <p className="text-xs font-semibold my-3 mt-8">
                           Información Fiscal
@@ -398,9 +435,16 @@ export default function AffiliatePage(props: {
                         <div className="flex flex-1 flex-wrap justify-start gap-8 pt-2">
                           {Object.entries(
                             integrantsFiscalData.get(int?.id ?? "") ?? {}
-                          ).map(([key, value]) => (
-                            <ElementCard key={key} element={{ key, value }} />
-                          ))}
+                          ).map(([key, value]) => {
+                            value =
+                              typeof value === "string" &&
+                              key != "TIPO DE ID FISCAL"
+                                ? Capitalize(value)
+                                : value;
+                            return (
+                              <ElementCard key={key} element={{ key, value }} />
+                            );
+                          })}
                         </div>
                         <p className="text-xs font-semibold my-3 mt-8">
                           Información de contacto
@@ -408,9 +452,15 @@ export default function AffiliatePage(props: {
                         <div className="flex flex-1 flex-wrap justify-start gap-8 pt-2">
                           {Object.entries(
                             integrantsContactData.get(int?.id ?? "") ?? {}
-                          ).map(([key, value]) => (
-                            <ElementCard key={key} element={{ key, value }} />
-                          ))}
+                          ).map(([key, value]) => {
+                            value =
+                              typeof value === "string" && key != "EMAIL"
+                                ? Capitalize(value)
+                                : value;
+                            return (
+                              <ElementCard key={key} element={{ key, value }} />
+                            );
+                          })}
                         </div>
                         <p className="text-xs font-semibold my-3 mt-8">
                           Información sobre el plan
@@ -419,14 +469,10 @@ export default function AffiliatePage(props: {
                           {Object.entries(
                             integrantsPlanData.get(int?.id ?? "") ?? {}
                           ).map(([key, value]) => {
-                            if (key === "Estado" && value === "Activo") {
-                              return (
-                                <ElementCard
-                                  key={key}
-                                  element={{ key, value }}
-                                />
-                              );
-                            }
+                            value =
+                              typeof value === "string"
+                                ? Capitalize(value)
+                                : value;
                             return (
                               <ElementCard key={key} element={{ key, value }} />
                             );
@@ -465,7 +511,7 @@ export default function AffiliatePage(props: {
                       />
                       Condicion de Venta:
                     </div>
-                    <p className="font-semibold pl-7 opacity-80">-</p>
+                    <p className="font-semibold pl-7 opacity-80">{grupo?.sale_condition ?? "-"}</p>
                     <div className="flex items-center gap-2">
                       <img
                         src="/public/affiliates/modalityIcon.png"
@@ -494,10 +540,16 @@ export default function AffiliatePage(props: {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-5 gap-4 p-3  pt-6">
-                  {Object.entries(additionalData).map(([key, value]) => (
-                    <ElementCard key={key} element={{ key, value }} />
-                  ))}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-stretch p-3 pt-6">
+                  {Object.entries(additionalData).map(([key, value]) => {
+                    const isEmpty = value === "-" || !value;
+                    const isPeriod =
+                      key === "PERIODO APORTADO" || key === "FECHA APORTES";
+                    if (isEmpty && isPeriod) return null;
+                    value =
+                      typeof value === "string" ? Capitalize(value) : value;
+                    return <ElementCard key={key} element={{ key, value }} />;
+                  })}
                 </div>
               </AccordionContent>
             </AccordionItem>

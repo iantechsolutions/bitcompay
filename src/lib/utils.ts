@@ -5,6 +5,7 @@ import { nanoid } from "nanoid";
 import { twMerge } from "tailwind-merge";
 import { number } from "zod";
 import BarcodeProcedure from "~/components/barcode";
+import { FamilyGroup } from "~/server/db/schema";
 import { api } from "~/trpc/server";
 import { RouterOutputs } from "~/trpc/shared";
 
@@ -1002,6 +1003,7 @@ export function getDifferentialAmount(grupo: any, fechaPreliq: Date) {
   });
   return importe;
 }
+
 export function getGroupContribution(grupo: any) {
   let importe = 0;
   grupo.integrants?.forEach((integrant: any) => {
@@ -1026,4 +1028,11 @@ export function visualizationSwitcher(
   viewFormComponent: React.ReactNode
 ) {
   return visualization ? viewFormComponent : editFormComponent;
+}
+
+export function Capitalize (value:string){
+  const firstChar = value.charAt(0).toUpperCase();
+  const rest = value.slice(1).toLowerCase();
+
+  return firstChar + rest;
 }
