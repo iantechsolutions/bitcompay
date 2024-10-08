@@ -1365,15 +1365,19 @@ export async function preparateComprobante(
       // events = events?.filter(
       //   (x) => x.createdAt.getTime() < new Date().getTime()
       // );
+      if(events.filter(x=>x.currentAccount_id == grupo.cc?.id).length > 0){
 
-      const lastEvent = events
-        .filter((x) => x.currentAccount_id == grupo.cc?.id)
-        .reduce((prev, current) => {
-          return new Date(prev.createdAt) > new Date(current.createdAt)
-            ? prev
-            : current;
-        });
-      saldo = lastEvent.current_amount * -1;
+      
+        const lastEvent = events
+          .filter((x) => x.currentAccount_id == grupo.cc?.id)
+          .reduce((prev, current) => {
+            return new Date(prev.createdAt) > new Date(current.createdAt)
+              ? prev
+              : current;
+          });
+          saldo = lastEvent.current_amount * -1;
+      }
+      
 
       //calculate interest
       let interest = 0;
