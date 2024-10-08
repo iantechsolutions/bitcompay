@@ -32,7 +32,7 @@ export default function DownloadExcelButton({
       bookType: "xlsx",
     });
     const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-    saveAs(blob, `pre-liquidación - ${formatDate(period!)}.xlsx`);
+    saveAs(blob, `preliquidación - ${formatDate(period!)}.xlsx`);
   }
 
   const rows: (string | number)[][] = [[...excelHeaders]];

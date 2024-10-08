@@ -138,7 +138,7 @@ export default async function Home(props: {
             <p className="font-medium  text-sm">{periodo}</p>
           </li>
           <li>
-            <span className="">N° PRE-LIQUIDACIÓN</span>
+            <span className="">N° PRELIQUIDACIÓN</span>
             <br />
             <p className="font-medium  text-sm">
               {preliquidation?.number ?? "-"}

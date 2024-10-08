@@ -108,7 +108,7 @@ export default async function Home(props: {
     <LayoutContainer>
       <div className="flex flex-row justify-between w-full">
         {/* <GoBackButton url="/billing/pre-liquidation" /> */}
-        <Title>Pre-Liquidación</Title>
+        <Title>Preliquidación</Title>
         {preliquidation?.estado === "pendiente" && (
           <>
             <div className="flex flex-row gap-4 mr-8">
@@ -150,7 +150,7 @@ export default async function Home(props: {
             <p className="font-medium text-sm">{periodo}</p>
           </li>
           <li>
-            <span className="">N° PRE-LIQUIDACIÓN</span>
+            <span className="">N° PRELIQUIDACIÓN</span>
             <br />
             <p className="font-medium text-sm">
               {preliquidation?.number ?? "-"}

@@ -103,11 +103,11 @@ export default function AddPreLiquidation() {
         if ("error" in liquidation!) {
           toast.error(liquidation.error);
         } else if (liquidation) {
-          toast.success("Pre-Liquidación creada correctamente");
+          toast.success("Preliquidación creada correctamente");
           queryClient.invalidateQueries();
           setOpen(false);
         } else {
-          toast.error("Error al crear la Pre-Liquidación");
+          toast.error("Error al crear la Preliquidación");
         }
       }
     } catch (e) {
@@ -141,13 +141,13 @@ export default function AddPreLiquidation() {
         onClick={() => setOpen(true)}
         className="rounded-full gap-1 p-4 text-base text-[#3E3E3E] bg-[#BEF0BB] ">
         <PlusCircleIcon className="h-4" />
-        Agregar Pre-Liquidación
+        Agregar Preliquidación
       </AddElementButton>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Crear Pre-Liquidación</DialogTitle>
+            <DialogTitle>Crear Preliquidación</DialogTitle>
           </DialogHeader>
           <div className="w-flex flex-auto text-gray-500 m-3 pr-2 ">
             <Label className="text-xs">MARCA</Label>
@@ -444,7 +444,7 @@ export default function AddPreLiquidation() {
               <CirclePlus className="mr-2" />
 
             )} 
-            Crear Pre-Liquidación
+            Crear Preliquidación
           </Button>
 
         </DialogContent>
