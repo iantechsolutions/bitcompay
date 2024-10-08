@@ -9,11 +9,13 @@ import { RouterOutputs } from "~/trpc/shared";
 import { api } from "~/trpc/react";
 import Download02Icon from "~/components/icons/download-02-stroke-rounded";
 type DownloadExcelButtonProps = {
-  rows: (string | number | null | undefined)[][];
+  liquidationId: string;
+  excelHeaders: string[];
   period: Date | null | undefined;
 };
 export default function DownloadExcelButton({
-  rows,
+  liquidationId,
+  excelHeaders,
   period,
 }: DownloadExcelButtonProps) {
   async function handleGenerate(
@@ -30,6 +32,10 @@ export default function DownloadExcelButton({
     const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
     saveAs(blob, `pre-liquidación - ${formatDate(period!)}.xlsx`);
   }
+
+  const rows: (string | number)[][] = [[...excelHeaders]];
+  const mutation = api.family_groups.getByLiquidationFiltered.useMutation();
+
   return (
     <div className="flex flex-auto justify-end">
     <Button
