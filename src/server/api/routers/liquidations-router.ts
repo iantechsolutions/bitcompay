@@ -48,6 +48,32 @@ export const liquidationsRouter = createTRPCRouter({
         return liquidation_found;
       } else null;
     }),
+  getLite: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const liquidation_found = await db.query.liquidations.findFirst({
+        where: eq(schema.liquidations.id, input.id),
+        with: {
+          bussinessUnits: true,
+          brand: { with: { company: true } },
+          comprobantes: {
+            limit: 1,
+            with: {
+              payments: {
+                limit: 1,
+              },
+            },
+          },
+        },
+      });
+      if (
+        liquidation_found?.brand?.company.some(
+          (x) => x.companyId === ctx.session.orgId
+        )
+      ) {
+        return liquidation_found;
+      } else null;
+    }),
   getFamilyGroups: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {

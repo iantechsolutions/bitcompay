@@ -17,7 +17,6 @@ export function CompanyProvider(props: {
   useEffect(() => {
     if (ref.current != props.company?.id) {
       utils.invalidate();
-      console.log(props.company);
       ref.current = props.company?.id;
     }
   }, [props.company?.id]);

@@ -16,6 +16,7 @@ import {
 import { Router } from "next/router";
 import { RouterOutputs } from "~/trpc/shared";
 import { computeIva, computeBase, computeTotal } from "~/lib/utils";
+import { formatCurrency } from "./detail-sheet";
 type propsContentTable = {
   comprobante: RouterOutputs["comprobantes"]["getByLiquidation"][number];
 };
@@ -40,16 +41,13 @@ function ContentTable(props: propsContentTable) {
             <TableRow key={item.id} className="border-b last:border-none">
               <TableCell className="pl-4 ">{item.concept}</TableCell>
               <TableCell className=" ">
-                {amount > 0 ? "$" : "-$"}
-                {Math.abs(amount)}
+              {formatCurrency(amount)}
               </TableCell>
               <TableCell className=" ">
-                {iva > 0 ? "$" : "-$"}
-                {Math.abs(iva)}
+              {formatCurrency(iva)}
               </TableCell>
               <TableCell className=" ">
-                {total > 0 ? "$" : "-$"}
-                {Math.abs(total)}
+              {formatCurrency(total)}
               </TableCell>
             </TableRow>
           );

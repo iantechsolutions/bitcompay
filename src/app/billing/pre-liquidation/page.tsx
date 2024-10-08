@@ -42,7 +42,7 @@ export default function Page() {
     <LayoutContainer>
       <section className="space-y-2">
         <div className="flex justify-between">
-          <Title>Pre-Liquidation</Title>
+          <Title>Preliquidación</Title>
           <AddPreLiquidation />
         </div>
         <DataTable columns={columns} data={tableData} />

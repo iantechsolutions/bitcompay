@@ -28,7 +28,7 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
   const [confirmed, setConfirmed] = useState(upload!.confirmed);
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-
+  const [supportDate, setSupportDate] = useState<Date | null>(null);
   const [data, setData] = useState<
     RouterOutputs["excelDeserialization"]["deserialization"] | null
   >(null);
@@ -72,8 +72,9 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
     } catch (_error) {}
   }
 
-  function handleDateSelected(date: Date) {
+  function handleDateSelected(date: Date, support_date: Date) {
     setSelectedDate(date);
+    setSupportDate(support_date);
   }
 
   return (
@@ -98,7 +99,7 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
         <Button onClick={handleConfirm} disabled={isDataLoading}>
           Escribir a la base de datos
         </Button>
-        <AddDate onDateSelected={handleDateSelected} />
+        <AddDate onDateSelected={() => handleDateSelected} />
         <Button variant="destructive" onClick={handleDelete}>
           Cancelar y eliminar
         </Button>

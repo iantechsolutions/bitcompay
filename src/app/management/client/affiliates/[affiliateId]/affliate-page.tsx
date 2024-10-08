@@ -1,5 +1,4 @@
 "use client";
-import { useState, useEffect } from "react";
 import { api } from "~/trpc/react";
 import { Landmark } from "lucide-react";
 import LayoutContainer from "~/components/layout-container";
@@ -16,7 +15,6 @@ import {
   AccordionTrigger as AccordionTriggerIntegrant,
 } from "~/components/affiliate-page/integrante-accordion";
 
-import ActiveBadge from "~/components/active-badge";
 import { Card } from "~/components/ui/card";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -35,6 +33,8 @@ import { RouterOutputs } from "~/trpc/shared";
 import { useRouter } from "next/navigation";
 import { SaldoPopoverAffiliates } from "./saldoPopoverAffiliates";
 import ElementCard from "~/components/affiliate-page/element-card";
+import { checkRole } from "~/lib/utils/server/roles";
+import { useUser } from "@clerk/nextjs";
 
 export default function AffiliatePage(props: {
   params: { affiliateId: string; companyId: string };
@@ -42,6 +42,7 @@ export default function AffiliatePage(props: {
   const router = useRouter();
   // const company = props.params.companyId;
   const grupos = props.params.affiliateId;
+
 
   const { data: grupo } = api.family_groups.get.useQuery({
     family_groupsId: grupos!,
@@ -139,11 +140,9 @@ export default function AffiliatePage(props: {
     "FECHA APORTES": "-",
     "PERIODO APORTADO": "-",
     "CUIT EMPLEADOR": "",
-    DIFERENCIAL: grupo
-      ? getDifferentialAmount(grupo, new Date())?.toString()
+    DIFERENCIAL: grupo? getDifferentialAmount(grupo,new Date())?.toString()
       : "-",
   };
-
   for (const integrant of grupo?.integrants ?? []) {
     const intPersonalData = {
       "TIPO DOCUMENTO": integrant.id_type ?? "-",
@@ -409,7 +408,7 @@ export default function AffiliatePage(props: {
                       </AccordionTriggerIntegrant>
                       <AccordionContentIntegrant>
                         <p className="text-xs font-semibold">
-                          Informacion Personal
+                          Información Personal
                         </p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-stretch pt-4">
                           {Object.entries(
@@ -509,7 +508,7 @@ export default function AffiliatePage(props: {
                         src="/public/affiliates/shopIcon.png"
                         className="bg-[#DEF5DD] h-4"
                       />
-                      Condicion de Venta:
+                      Condición de Venta:
                     </div>
                     <p className="font-semibold pl-7 opacity-80">{grupo?.sale_condition ?? "-"}</p>
                     <div className="flex items-center gap-2">
@@ -551,6 +550,7 @@ export default function AffiliatePage(props: {
                     return <ElementCard key={key} element={{ key, value }} />;
                   })}
                 </div>
+                
               </AccordionContent>
             </AccordionItem>
           </Accordion>

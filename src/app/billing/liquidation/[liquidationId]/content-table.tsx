@@ -17,6 +17,7 @@ import { Router } from "next/router";
 import { RouterOutputs } from "~/trpc/shared";
 import { computeIva, computeBase, computeTotal } from "~/lib/utils";
 import { Separator } from "~/components/ui/separator";
+import { formatCurrency } from "../../pre-liquidation/[liquidationId]/detail-sheet";
 type propsContentTable = {
   comprobante: RouterOutputs["comprobantes"]["getByLiquidation"][number];
 };
@@ -39,20 +40,17 @@ function ContentTable(props: propsContentTable) {
           const total = item.total ?? 0;
           return (
             <TableRow key={item.id} className="border-b last:border-none">
-              <TableCell className="pl-4 ">{item.concept}</TableCell>
-              <TableCell className=" ">
-                {amount > 0 ? "$" : "-$"}
-                {Math.abs(amount)}
-              </TableCell>
-              <TableCell className=" ">
-                {iva > 0 ? "$" : "-$"}
-                {Math.abs(iva)}
-              </TableCell>
-              <TableCell className=" ">
-                {total > 0 ? "$" : "-$"}
-                {Math.abs(total)}
-              </TableCell>
-            </TableRow>
+           <TableCell className="pl-4">{item.concept}</TableCell>
+                <TableCell className=" ">
+                {formatCurrency(amount)}
+            </TableCell>
+          <TableCell className=" ">
+               {formatCurrency(iva)} 
+          </TableCell>
+        <TableCell className=" ">
+                {formatCurrency(total)} 
+        </TableCell>
+         </TableRow>
           );
         })}
     </Table>

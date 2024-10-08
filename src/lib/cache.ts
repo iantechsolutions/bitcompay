@@ -10,28 +10,28 @@ export async function cachedAsyncFetch<T>(
   fetchCallback: () => Promise<T>,
   ignoreCache?: boolean
 ): Promise<T> {
-  if (typeof ignoreCache === "boolean" && ignoreCache) {
+  if (ignoreCache) {
     return await fetchCallback();
   }
 
-  if (
-    typeof Cache[key]?.expiresAt === "number" &&
-    Cache[key].expiresAt > Date.now()
-  ) {
-    return Cache[key].value as T;
-  } else if (typeof Cache[key]?.expiresAt === "number") {
-    await Cache[key].fetchMutex.runExclusive(async () => {
-      if (Cache[key] !== undefined) {
-        Cache[key].value = await fetchCallback();
+  const cacheEntry = Cache[key];
+
+  if (cacheEntry?.expiresAt && cacheEntry.expiresAt > Date.now()) {
+    return cacheEntry.value as T;
+  } else if (cacheEntry?.expiresAt) {
+    await cacheEntry.fetchMutex.runExclusive(async () => {
+      if (Cache[key]) {
+        Cache[key]!.value = await fetchCallback();
       }
     });
   } else {
+    const fetchMutex = new Mutex();
     Cache[key] = {
       expiresAt: Date.now() + ttlMs,
       value: await fetchCallback(),
-      fetchMutex: new Mutex(),
+      fetchMutex,
     };
   }
 
-  return Cache[key].value as T;
+  return Cache[key]?.value as T;
 }

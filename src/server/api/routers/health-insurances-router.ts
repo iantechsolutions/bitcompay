@@ -16,7 +16,7 @@ export const healthInsurancesRouter = createTRPCRouter({
         ),
         with: {
           cpData: true,
-          affiliate_os: true,
+          aportes_os: true,
         },
       });
       return healthInsurance_found;
@@ -33,7 +33,7 @@ export const healthInsurancesRouter = createTRPCRouter({
           comprobantes: true,
           cc: true,
           cpData: true,
-          affiliate_os: true,
+          aportes_os: true,
 
           // {
           // with:{
@@ -93,7 +93,7 @@ export const healthInsurancesRouter = createTRPCRouter({
     const companyId = ctx.session.orgId;
     const healthInsurances = await db.query.healthInsurances.findMany({
       where: eq(schema.healthInsurances.companyId, companyId!),
-      with: { cpData: true, affiliate_os: true },
+      with: { cpData: true, aportes_os: true },
     });
     return healthInsurances;
   }),
@@ -104,7 +104,7 @@ export const healthInsurancesRouter = createTRPCRouter({
         eq(schema.healthInsurances.isClient, false),
         eq(schema.healthInsurances.companyId, companyId!)
       ),
-      with: { cpData: true, affiliate_os: true },
+      with: { cpData: true, aportes_os: true },
     });
     return healthInsurances;
   }),
@@ -145,6 +145,11 @@ export const healthInsurancesRouter = createTRPCRouter({
         floor: z.string().optional(),
         office: z.string().optional(),
         dateState: z.date().optional(),
+        excelDocument: z.string().optional(),
+        excelAmount: z.string().optional(),
+        excelEmployerDocument: z.string().optional(),
+        excelSupportPeriod: z.date().optional(),
+        excelContributionperiod: z.date().optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -186,6 +191,11 @@ export const healthInsurancesRouter = createTRPCRouter({
           floor: input.floor,
           office: input.office,
           dateState: input.dateState,
+          excelDocument: input.excelDocument,
+          excelAmount: input.excelAmount,
+          excelEmployerDocument: input.excelEmployerDocument,
+          excelSupportPeriod: input.excelSupportPeriod,
+          excelContributionperiod: input.excelContributionperiod,
         })
         .returning();
 
@@ -246,6 +256,11 @@ export const healthInsurancesRouter = createTRPCRouter({
         floor: z.string().optional(),
         office: z.string().optional(),
         dateState: z.date().optional(),
+        excelDocument: z.string().optional(),
+        excelAmount: z.string().optional(),
+        excelEmployerDocument: z.string().optional(),
+        excelSupportPeriod: z.date().optional(),
+        excelContributionperiod: z.date().optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -284,6 +299,11 @@ export const healthInsurancesRouter = createTRPCRouter({
           floor: input.floor,
           office: input.office,
           dateState: input.dateState,
+          excelDocument: input.excelDocument,
+          excelAmount: input.excelAmount,
+          excelEmployerDocument: input.excelEmployerDocument,
+          excelSupportPeriod: input.excelSupportPeriod,
+          excelContributionperiod: input.excelContributionperiod,
         })
         .where(eq(schema.healthInsurances.id, input.id));
       return healthInsurance_changed;

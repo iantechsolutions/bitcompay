@@ -21,9 +21,9 @@ const LandingPage = () => {
         <main>
         <section className="home" id="home">
             <div className="header-home">
-            <h1>Simplifique la gestión de <br/> tesorería <span>de su empresa</span></h1>
+            <h1>Simplificá la gestión de <br/> tesorería <span>de tu empresa</span></h1>
                 <p>Accedé a un <span>servicio integral</span> de Gestión de Canales de Recaudación y<br/>
-                Cash Managment de forma online con nuestra plataforma.</p>
+                Cash Managment de manera online con nuestra plataforma.</p>
 
                 <a href="#">
                     <button>
