@@ -19,22 +19,28 @@ import { CalendarIcon } from "lucide-react";
 import { Calendar } from "~/components/ui/calendar";
 import { cn } from "~/lib/utils";
 import dayjs from "dayjs";
-import { setDate } from "date-fns";
 
 export default function AddDate({
   onDateSelected,
 }: {
-  onDateSelected: (fecha: Date) => void;
+  onDateSelected: (date: Date, support_date: Date) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [openDate, setOpenDate] = useState(false);
+  const [openSupportDate, setOpenSupportDate] = useState(false);
 
   const [fecha, setFecha] = useState<Date>(new Date());
+  const [fechaSoporte, setFechaSoporte] = useState<Date>(new Date());
 
   async function Save() {
-    console.log(fecha);
+    console.log("Fecha de presentación:", fecha);
+    console.log("Fecha de soporte:", fechaSoporte);
+
+    onDateSelected(fecha, fechaSoporte);
+
     setOpen(false);
   }
+
   return (
     <div>
       <Button onClick={() => setOpen(true)}>Agregar periodo</Button>
@@ -47,6 +53,7 @@ export default function AddDate({
           <div className="grid gap-4 py-4">
             <div className="items-center gap-4">
               <div className="flex flex-col gap-3">
+                {/* Fecha de presentación */}
                 <Label htmlFor="presentation_date">Fecha de presentación</Label>
                 <Popover open={openDate} onOpenChange={setOpenDate}>
                   <PopoverTrigger asChild>
@@ -70,7 +77,45 @@ export default function AddDate({
                       selected={fecha ? new Date(fecha) : undefined}
                       onSelect={(date) => {
                         setFecha(date ?? new Date());
-                        setOpenDate(false); // Cierra el popover después de seleccionar la fecha
+                        setOpenDate(false);
+                      }}
+                      disabled={(date: Date) => date < new Date("1900-01-01")}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+
+                {/* Nueva Fecha de Soporte */}
+                <Label htmlFor="support_date">Fecha de soporte</Label>
+                <Popover
+                  open={openSupportDate}
+                  onOpenChange={setOpenSupportDate}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-[240px] pl-3 text-left font-normal",
+                        fechaSoporte && "text-muted-foreground"
+                      )}>
+                      <p>
+                        {fechaSoporte
+                          ? dayjs
+                              .utc(fechaSoporte)
+                              .format("D [de] MMMM [de] YYYY")
+                          : "Escoga una fecha"}
+                      </p>
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={
+                        fechaSoporte ? new Date(fechaSoporte) : undefined
+                      }
+                      onSelect={(date) => {
+                        setFechaSoporte(date ?? new Date());
+                        setOpenSupportDate(false);
                       }}
                       disabled={(date: Date) => date < new Date("1900-01-01")}
                       initialFocus
@@ -82,7 +127,7 @@ export default function AddDate({
           </div>
           <DialogFooter>
             <Button type="button" onClick={() => Save()}>
-              Guardar fecha
+              Guardar fechas
             </Button>
           </DialogFooter>
         </DialogContent>
