@@ -146,7 +146,8 @@ export default function AddPlanPricesComponent({
         setAnio(initialPrices[0]?.validy_date.getFullYear() ?? null);
       }
     }
-  }, [edit, initialPrices, form, working]);
+  }, [edit, initialPrices, 
+  ]);
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     try {
@@ -252,11 +253,16 @@ export default function AddPlanPricesComponent({
     }
     setIsButtonDisabled(true);
     try {
-      const price = initialPrices?.[index];
-      if (price?.id) {
-        await deletePricePerCondition({ id: price?.id ?? "" });
-        remove(index);
-      } else {
+      if(initialPrices){
+        const price = initialPrices?.[index];
+        initialPrices.splice(index,1);
+
+        if (price?.id) {
+          await deletePricePerCondition({ id: price?.id ?? "" });
+          remove(index);
+        }
+      }
+       else {
         remove(index);
       }
     } catch {
@@ -286,8 +292,8 @@ export default function AddPlanPricesComponent({
                     id: "",
                     createdAt: new Date(),
                     validy_date: new Date(),
-                    from_age: null,
-                    to_age: null,
+                    from_age: 0,
+                    to_age: 0,
                     condition: "",
                     isAmountByAge: true,
                     plan_id: "",

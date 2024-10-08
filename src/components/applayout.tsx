@@ -44,7 +44,7 @@ export default async function AppLayout(props: AppLayoutProps) {
 
       <aside
         // biome-ignore lint/nursery/useSortedClasses: <explanation>
-        className={`fixed bottom-0 left-0 z-20 hidden max-h-full md:w-[20%] min-w-60  bg-white overflow-y-hidden md:block ${props.sidenavClass}`}
+        className={`fixed bottom-0 left-0 z-20 hidden max-h-full w-[21%] max-w-[20rem] bg-white overflow-y-hidden md:block ${props.sidenavClass}`}
       >
         {props.sidenav}
       </aside>
