@@ -9,6 +9,7 @@ import {
 } from "~/server/db/schema";
 import { RouterOutputs } from "~/trpc/shared";
 import { computeBase, computeIva, toNumberOrZero } from "~/lib/utils";
+import { TRPCError } from "@trpc/server";
 export type FamilyListLiquidationId =
   RouterOutputs["family_groups"]["getByLiquidationFiltered"]["results"][number];
 
@@ -460,6 +461,13 @@ export const family_groupsRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
+      if (!ctx.session.orgId) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "!ctx.session.orgId",
+        });
+      }
+
       const integrantsConditions = [
         eq(schema.integrants.isBillResponsible, true),
       ];
@@ -476,7 +484,55 @@ export const family_groupsRouter = createTRPCRouter({
         );
       }
 
+      let whereCompatBusinessUnits = [
+        eq(schema.bussinessUnits.companyId, ctx.session.orgId),
+      ];
+
+      if (input.UN !== undefined) {
+        whereCompatBusinessUnits.push(
+          eq(schema.bussinessUnits.description, input.UN)
+        );
+      }
+
+      let compatibleBusinessUnits = await db.query.bussinessUnits.findMany({
+        where: and(...whereCompatBusinessUnits),
+      });
+
+      let whereFgList = [
+        inArray(
+          schema.family_groups.businessUnit,
+          compatibleBusinessUnits.map((v) => v.id)
+        ),
+      ];
+
+      if (input.modoDesc !== undefined) {
+        let compatibleModos = await db.query.modos.findMany({
+          where: eq(schema.modos.description, input.modoDesc),
+        });
+
+        whereFgList.push(
+          inArray(
+            schema.family_groups.modo,
+            compatibleModos.map((v) => v.id)
+          )
+        );
+      }
+
+      if (input.plan !== undefined) {
+        let compatiblePlans = await db.query.plans.findMany({
+          where: eq(schema.plans.plan_code, input.plan),
+        });
+
+        whereFgList.push(
+          inArray(
+            schema.family_groups.plan,
+            compatiblePlans.map((v) => v.id)
+          )
+        );
+      }
+
       const fg = await db.query.family_groups.findMany({
+        where: and(...whereFgList),
         with: {
           plan: true,
           modo: true,
@@ -500,23 +556,8 @@ export const family_groupsRouter = createTRPCRouter({
         offset: input.cursor,
       });
 
-      // Filtra los comprobantes por `liquidationId` dentro de cada grupo familiar
-      // Si hay comprobantes filtrados, devuelve el grupo con los comprobantes filtrados
-      // se filtran los comprobantes en la query
       const fgCompanyFiltered = fg.filter(
-        (x) =>
-          x.businessUnitData?.companyId === ctx.session.orgId &&
-          x.comprobantes.length > 0 &&
-          x.integrants.length > 0 &&
-          (input.modoDesc !== undefined
-            ? x.modo?.description === input.modoDesc
-            : true) &&
-          (input.plan !== undefined
-            ? x.plan?.plan_code === input.plan
-            : true) &&
-          (input.UN !== undefined
-            ? x.businessUnitData?.description === input.UN
-            : true)
+        (x) => x.comprobantes.length > 0 && x.integrants.length > 0
       );
 
       return {

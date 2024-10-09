@@ -46,7 +46,7 @@ export default function Page() {
       <section className="space-y-2">
         <div className="flex justify-between">
           <div className="flex flex-row">
-            <Title>Liquidaciones Aprobadas</Title>
+            <Title>Liquidación</Title>
             {showLoader ? (
               <Loader2Icon className="animate-spin m-1.5 ml-2" size={20} />
             ) : (

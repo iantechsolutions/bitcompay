@@ -115,7 +115,7 @@ export function DataTable({ columns, summary, liquidationId }: DataTableProps) {
     }
 
     cachedAsyncFetch(
-      `preliq-pq-${cursor}-${pagination.pageSize}`,
+      `preliq-${liquidationId}-${cursor}-${pagination.pageSize}`,
       60000,
       async () => {
         return await paginatedQuery.mutateAsync({

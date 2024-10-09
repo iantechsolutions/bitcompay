@@ -129,7 +129,7 @@ export function DataTable<TData, TValue>({
     }
 
     cachedAsyncFetch(
-      `liq-pq-${cursor}-${pagination.pageSize}`,
+      `liq-${liquidationId}-${cursor}-${pagination.pageSize}`,
       60000,
       async () => {
         return await paginatedQuery.mutateAsync({
