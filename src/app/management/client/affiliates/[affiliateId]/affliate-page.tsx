@@ -37,6 +37,7 @@ import { checkRole } from "~/lib/utils/server/roles";
 import { useUser } from "@clerk/nextjs";
 
 export default function AffiliatePage(props: {
+  isAdmin: boolean;
   params: { affiliateId: string; companyId: string };
 }) {
   const router = useRouter();
@@ -553,13 +554,15 @@ export default function AffiliatePage(props: {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-stretch p-3 pt-6">
                   {Object.entries(additionalData).map(([key, value]) => {
+                    console.log("iteracion: ",key==="DIFERENCIAL", !props.isAdmin);
+                    const notRender= key==="DIFERENCIAL" && !props.isAdmin;
                     const isEmpty = value === "-" || !value;
                     const isPeriod =
                       key === "PERIODO APORTADO" || key === "FECHA APORTES";
                     if (isEmpty && isPeriod) return null;
                     value =
                       typeof value === "string" ? Capitalize(value) : value;
-                    return <ElementCard key={key} element={{ key, value }} />;
+                    return !notRender ? <ElementCard key={key} element={{ key, value }} /> : <></>;
                   })}
                 </div>
               </AccordionContent>

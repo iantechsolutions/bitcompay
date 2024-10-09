@@ -25,7 +25,9 @@ export default function CCDetail(props: {
   params: { ccId: string; affiliateId: string };
 }) {
   const router = useRouter();
-  const {data: events} = api.events.getByCC.useQuery({ ccId: props.params.ccId });
+  const { data: events } = api.events.getByCC.useQuery({
+    ccId: props.params.ccId,
+  });
   const grupo = api.family_groups.get.useQuery({
     family_groupsId: props.params.affiliateId,
   });
@@ -39,13 +41,29 @@ export default function CCDetail(props: {
       : current;
   });
   const comprobantes = grupo.data?.comprobantes;
+  let lastComprobante;
+  if (comprobantes && comprobantes?.length! > 0) {
+    lastComprobante = comprobantes?.reduce((prev, current) => {
+      return new Date(prev.due_date ?? 0) > new Date(current.due_date ?? 0)
+        ? prev
+        : current;
+    });
+  }
+  const nextExpirationDate = lastComprobante?.due_date
+    ? dayjs(lastComprobante?.due_date).format("DD-MM-YYYY")
+    : "-";
 
-const formatCurrency = (amount: { toLocaleString: (arg0: string, arg1: { minimumFractionDigits: number; maximumFractionDigits: number; }) => any; }) => {
-  return amount.toLocaleString('es-AR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-};
+  const formatCurrency = (amount: {
+    toLocaleString: (
+      arg0: string,
+      arg1: { minimumFractionDigits: number; maximumFractionDigits: number }
+    ) => any;
+  }) => {
+    return amount.toLocaleString("es-AR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  };
   let comprobanteNCReciente = comprobantes?.find(
     (comprobante) => comprobante.origin === "Nota de credito"
   );
@@ -74,12 +92,13 @@ const formatCurrency = (amount: { toLocaleString: (arg0: string, arg1: { minimum
     saldo_a_pagar = FCTotal - total_a_pagar;
   }
 
-  const afiliado = grupo.data?.integrants.find((x)=>x.isHolder);
-  const comprobantesTable :RouterOutputs["comprobantes"]["getByLiquidation"] = [];
-  if(comprobanteFCReciente){
+  const afiliado = grupo.data?.integrants.find((x) => x.isHolder);
+  const comprobantesTable: RouterOutputs["comprobantes"]["getByLiquidation"] =
+    [];
+  if (comprobanteFCReciente) {
     comprobantesTable.push(comprobanteFCReciente);
   }
-  if(comprobanteNCReciente){
+  if (comprobanteNCReciente) {
     comprobantesTable.push(comprobanteNCReciente);
   }
   const tableRows: TableRecord[] = [];
@@ -88,15 +107,18 @@ const formatCurrency = (amount: { toLocaleString: (arg0: string, arg1: { minimum
       tableRows.push({
         date: event.createdAt,
         description: event.description,
-        amount:formatCurrency(event.event_amount),
+        amount: formatCurrency(event.event_amount),
         // comprobanteType: "Nota de credito A",
         comprobanteType: event.comprobantes?.tipoComprobante ?? "FACTURA A",
-        comprobanteNumber: event.comprobantes?.ptoVenta.toString().padStart(5) + "-" + event.comprobantes?.nroComprobante.toString().padStart(8),
+        comprobanteNumber:
+          event.comprobantes?.ptoVenta.toString().padStart(5) +
+          "-" +
+          event.comprobantes?.nroComprobante.toString().padStart(8),
         status: "Pendiente",
-        iva: (Number(event.comprobantes?.iva ?? 1.21) -1 ),
+        iva: Number(event.comprobantes?.iva ?? 1.21) - 1,
         comprobantes: comprobantesTable,
         currentAccountAmount: formatCurrency(NCTotal ?? 0),
-        saldo_a_pagar:  formatCurrency(saldo_a_pagar ?? 0),
+        saldo_a_pagar: formatCurrency(saldo_a_pagar ?? 0),
         nombre: afiliado?.name ?? "",
         cuit: afiliado?.fiscal_id_number ?? "",
       });
@@ -124,7 +146,7 @@ const formatCurrency = (amount: { toLocaleString: (arg0: string, arg1: { minimum
           <div className="flex flex-col  justify-center">
             <p className="text-sm font-medium block">PRÓXIMO VENCIMIENTO</p>
             <span className="text-[#3E3E3E] font-semibold text-xl">
-              10/09/2024
+                {nextExpirationDate}
             </span>
           </div>
         </Card>
@@ -133,7 +155,8 @@ const formatCurrency = (amount: { toLocaleString: (arg0: string, arg1: { minimum
       <div className="flex flex-auto justify-end">
         <Button
           variant="bitcompay"
-          className=" text-base px-16 py-6 mt-5 gap-3 text-[#3e3e3e] rounded-full font-medium">
+          className=" text-base px-16 py-6 mt-5 gap-3 text-[#3e3e3e] rounded-full font-medium"
+        >
           <Download02Icon />
           Exportar
         </Button>
