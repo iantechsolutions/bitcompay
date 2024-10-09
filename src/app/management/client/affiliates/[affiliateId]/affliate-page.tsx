@@ -40,14 +40,13 @@ import BonusDialog from "./cc/[ccId]/components_acciones/bonusDialog";
 
 
 
-export default async function AffiliatePage(props: {
+export default function AffiliatePage(props: {
+  isAdmin: boolean;
   params: { affiliateId: string; companyId: string };
 }) {
   const router = useRouter();
   // const company = props.params.companyId;
   const grupos = props.params.affiliateId;
-
-
 
 
   const { data: grupo } = api.family_groups.get.useQuery({
@@ -66,6 +65,16 @@ export default async function AffiliatePage(props: {
       ? prev
       : current;
   });
+
+  let lastComprobante;
+  if (grupo?.comprobantes && grupo?.comprobantes?.length! > 0) {
+    lastComprobante = grupo?.comprobantes?.reduce((prev, current) => {
+      return new Date(prev.due_date ?? 0) > new Date(current.due_date ?? 0)
+        ? prev
+        : current;
+    });
+  }
+  const nextExpirationDate = lastComprobante?.due_date ? dayjs(lastComprobante?.due_date).format("DD-MM-YYYY") : "-";
   const { data: integrant } = api.integrants.getByGroup.useQuery({
     family_group_id: grupos!,
   });
@@ -175,7 +184,7 @@ export default async function AffiliatePage(props: {
       "Nº AFILIADO": integrant.affiliate_number ?? "-",
       EXTENSION: integrant.extention ? integrant?.extention : "-",
       "Nº. CREDENCIAL":
-        (integrant.affiliate_number && integrant.extention)
+        integrant.affiliate_number && integrant.extention
           ? `${integrant.affiliate_number}-${integrant.extention}`
           : "-",
       "FECHA DE NAC": dayjs(integrant.birth_date).format("DD-MM-YYYY") ?? "-",
@@ -404,7 +413,7 @@ export default async function AffiliatePage(props: {
             <div className="flex flex-col  justify-center">
               <p className="text-sm font-medium block">PRÓXIMO VENCIMIENTO</p>
               <span className="text-[#3E3E3E] font-semibold text-xl">
-                10/09/2024
+                {nextExpirationDate}
               </span>
             </div>
           </Card>
@@ -554,7 +563,9 @@ export default async function AffiliatePage(props: {
                       />
                       Condición de Venta:
                     </div>
-                    <p className="font-semibold pl-7 opacity-80">{grupo?.sale_condition ?? "-"}</p>
+                    <p className="font-semibold pl-7 opacity-80">
+                      {grupo?.sale_condition ?? "-"}
+                    </p>
                     <div className="flex items-center gap-2">
                       <img
                         src="/public/affiliates/modalityIcon.png"
@@ -586,16 +597,18 @@ export default async function AffiliatePage(props: {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-stretch p-3 pt-6">
                   {Object.entries(additionalData).map(([key, value]) => {
+                    console.log("iteracion: ",key==="DIFERENCIAL", !props.isAdmin);
+                    const notRender= key==="DIFERENCIAL" && !props.isAdmin;
                     const isEmpty = value === "-" || !value;
                     const isPeriod =
                       key === "PERIODO APORTADO" || key === "FECHA APORTES";
                     if (isEmpty && isPeriod) return null;
                     value =
                       typeof value === "string" ? Capitalize(value) : value;
-                    return <ElementCard key={key} element={{ key, value }} />;
+                    return !notRender ? <ElementCard key={key} element={{ key, value }} /> : <></>;
                   })}
                 </div>
-               
+                
               </AccordionContent>
             </AccordionItem>
           </Accordion>

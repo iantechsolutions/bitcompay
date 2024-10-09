@@ -279,7 +279,7 @@ export function AddNonClientOs(props: {
         ) : (
           <>
             <PlusCircleIcon className="h-4" />
-            Agregar obra social como cliente
+            Agregar obra social no cliente
           </>
         )}
       </AddElementButton>
