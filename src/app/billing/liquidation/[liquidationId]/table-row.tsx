@@ -55,6 +55,12 @@ export default function TableRowContainer({
   const contribution = original_comprobante.items?.find(
     (item) => item.concept === "Aporte"
   );
+
+  // const contribution = family_group.integrants
+  //   .flatMap((part) => part.aportes_os)
+  //   .filter((a) => a.contribution_date === preliquidation?.period)
+  //   .reduce((sum, aporte) => sum + parseInt(aporte.amount), 0);
+
   const interest = original_comprobante.items?.find(
     (item) => item.concept === "Interes"
   );
@@ -87,8 +93,7 @@ export default function TableRowContainer({
       <TableRow
         onClick={() => setOpen(!open)}
         className="rounded-lg bg-[#f0f0f0] hover:bg-[#d7d3d395] hover:cursor-pointer transition-all duration-200 ease-in-out
-    "
-      >
+    ">
         <TableCell className=" relative rounded-l-md border bg-inherit border-[#6cebd1]">
           {family_group?.numericalId ?? "N/A"}
         </TableCell>

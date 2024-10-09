@@ -781,7 +781,7 @@ async function createcomprobanteItem(
       comprobante_id: comprobanteId,
     })
     .returning();
-  console.log("Llegaron", concept, amount, ivaFloat, abonoItem);
+  // console.log("Llegaron", concept, amount, ivaFloat, abonoItem);
 }
 async function getGroupAmount(grupo: grupoCompleto, date: Date) {
   let importe = 0;
@@ -880,6 +880,7 @@ export async function getGruposForLiquidation(brandId: string, date: Date) {
           contribution: true,
           differentialsValues: true,
           pa: true,
+          aportes_os: true,
         },
       },
       cc: {
@@ -1414,9 +1415,9 @@ export async function preparateComprobante(
       // events = events?.filter(
       //   (x) => x.createdAt.getTime() < new Date().getTime()
       // );
-      if(events.filter(x=>x.currentAccount_id == grupo.cc?.id).length > 0){
-
-      
+      if (
+        events.filter((x) => x.currentAccount_id == grupo.cc?.id).length > 0
+      ) {
         const lastEvent = events
           .filter((x) => x.currentAccount_id == grupo.cc?.id)
           .reduce((prev, current) => {
@@ -1424,9 +1425,8 @@ export async function preparateComprobante(
               ? prev
               : current;
           });
-          saldo = lastEvent.current_amount * -1;
+        saldo = lastEvent.current_amount * -1;
       }
-      
 
       //calculate interest
       let interest = 0;
@@ -1466,7 +1466,14 @@ export async function preparateComprobante(
 
       const tipoDocumento = idDictionary[billResponsible?.fiscal_id_type ?? ""];
 
+      const totalAportes = grupo.integrants
+        .flatMap((part) => part.aportes_os)
+        .filter((a) => a.contribution_date === dateDesde)
+        .reduce((sum, aporte) => sum + parseInt(aporte.amount), 0);
+
       //calculate importe
+
+      console.log("karabakskelia", totalAportes);
       const { amount: importe, ivaCodigo: ivaPostFiltro } =
         await calculateAmount(
           grupo,
@@ -1476,10 +1483,10 @@ export async function preparateComprobante(
           contribution,
           abono,
           differential_amount,
+          totalAportes,
           previous_bill,
           saldo
         );
-      console.log("lelelel", importe, ivaPostFiltro);
       if (ivaPostFiltro && ivaPostFiltro == "3") {
         ivaFloat = 1;
       }
@@ -1524,7 +1531,6 @@ export async function preparateComprobante(
       }
 
       //creamos FC nueva
-      console.log("fiorela importe", importe);
 
       const comprobante = await db
         .insert(schema.comprobantes)
@@ -1598,7 +1604,7 @@ export async function preparateComprobante(
       //   "Diferencial",
       //   differential_amount
       // );
-      console.log(ivaFloat, comprobante[0]?.importe ?? "", "Total factura");
+      // console.log(ivaFloat, comprobante[0]?.importe ?? "", "Total factura");
       createcomprobanteItem(
         ivaFloat,
         comprobante[0]?.id ?? "",
@@ -1633,7 +1639,8 @@ async function calculateAmount(
   abono: number,
   diferencial: number,
   previous_bill: number,
-  saldo: number
+  saldo: number,
+  totalAportes: number
 ) {
   let amount = 0;
   let ivaCodigo = null;
@@ -1653,6 +1660,10 @@ async function calculateAmount(
   if (modo?.description == "PRIVADO") {
     contribution = 0;
   }
+
+  if (totalAportes) {
+    console.log("joder, si llego", totalAportes);
+  }
   console.log(
     "calculo de abono",
     abono,
@@ -1662,9 +1673,10 @@ async function calculateAmount(
     saldo,
     iva,
     ivaCodigo,
-    contribution
+    contribution,
+    totalAportes
   );
-  const precioNuevo = abono - bonificacion + diferencial;
+  const precioNuevo = abono - bonificacion + diferencial + totalAportes;
   if (saldo > 0) {
     amount = (previous_bill + interest + precioNuevo) * iva - contribution;
   } else {

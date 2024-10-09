@@ -44,17 +44,17 @@ export const aportes_osRouter = createTRPCRouter({
         id_affiliate: z.string(),
         cuil: z.string(),
         process_date: z.date().optional(),
-        contribution_date: z.date().optional(),
-        support_date: z.date().optional(),
+        contribution_date: z.date().optional().nullable(),
+        support_date: z.date().optional().nullable(),
         amount: z.string(),
-        emploter_document_number: z.string().optional(),
+        employer_document_number: z.string().optional(),
         healthInsurances_id: z.string(),
       })
     )
     .mutation(async ({ input }) => {
-      const affiliate = await db.insert(aportes_os).values(input).returning();
+      const aportes = await db.insert(aportes_os).values(input).returning();
 
-      return affiliate;
+      return aportes;
     }),
   change: protectedProcedure
     .input(
@@ -66,17 +66,17 @@ export const aportes_osRouter = createTRPCRouter({
         contribution_date: z.date().optional(),
         support_date: z.date().optional(),
         amount: z.string().optional(),
-        emploter_document_number: z.string().optional(),
+        employer_document_number: z.string().optional(),
         healthInsurances_id: z.string().optional(),
       })
     )
-    .mutation(async ({ input: { id, ...input } }) => {
+    .mutation(async ({ input, ctx }) => {
       console.log("Function called");
 
       const updatedaportes_os = await db
         .update(schema.aportes_os)
         .set(input)
-        .where(eq(schema.aportes_os.id, id));
+        .where(eq(schema.aportes_os.id, input.id));
       console.log(updatedaportes_os);
       return updatedaportes_os;
     }),

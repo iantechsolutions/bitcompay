@@ -158,43 +158,54 @@ const bonusAsString = z
 
 export const recRowsTransformerOS = (
   rows: Record<string, unknown>[],
-  date: Date
+  columns: { [key: string]: string }
 ) => {
   let finishedArrayOS: {
-    cuil: string | null;
-    // process_date: Date | null;
+    cuil: string;
     contribution_date: Date | null;
-    support_date: Date | null;
-    amount: string | null;
-    emploter_document_number: string | null;
+    support_date: Date | null | undefined;
+    excelAmount: string | null | undefined;
+    employer_document_number: string | null;
   }[] = [];
+
   let errorsOS: z.ZodError<
     {
-      cuil: string | null | undefined | number;
-      // process_date: Date | null;
-      contribution_date: Date | null;
-      support_date: Date | null;
-      amount: string | null | undefined;
-      emploter_document_number: string | null | undefined | number;
+      cuil: string;
+      contribution_date: string | null | undefined;
+      support_date: Date | null | undefined;
+      excelAmount: Date | null | undefined;
+      employer_document_number: string | null | undefined;
     }[]
   >[] = [];
 
   rows.map((row) => {
-    const resultOS = z.array(recDocumentValidatorOS).safeParse([row]);
+    const validator = recDocumentValidatorOS(columns);
+    const resultOS = z.array(validator).safeParse([row]);
+
+    console.log("Cande me ve y se desconecta", resultOS.success);
     if (resultOS.success) {
       let item = resultOS.data[0];
       if (item) {
-        if (!item.support_date) {
-          item.support_date = date;
-        }
-        finishedArrayOS.push(item);
+        console.log("Cande me ve y se desconecta", item.excelAmount);
+
+        finishedArrayOS.push(
+          item as {
+            cuil: string;
+            contribution_date: Date | null;
+            support_date: Date | null | undefined;
+            excelAmount: string | null | undefined;
+            employer_document_number: string | null;
+          }
+        );
       }
     } else {
       errorsOS.push(resultOS.error);
     }
   });
+
   return { finishedArrayOS, errorsOS };
 };
+
 export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
   let finishedArray: {
     business_unit: string | null;
@@ -347,33 +358,30 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
 
 const customEmailRegex = /^[\wñÑ._%+-]+@[a-zñÑ0-9.-]+\.[a-z]{2,}$/i;
 
-export const recDocumentValidatorOS = z
-  .object({
-    CUIL: allToString.nullable(),
-    "PERIODO DE CONTRIBUCION": allToString.nullable(),
-    "PERIODO DE SOPORTE": stringAsDate.nullable().optional(),
-    MONTO: allToString.nullable().optional(),
-    "CUIT EMPLEADOR": allToString.nullable().optional(),
-
-    // cuil: string | null | undefined | number;
-    //   process_date: Date | null;
-    //   contribution_date: Date | null;
-    //   support_date: Date | null;
-    //   amount: string | null | undefined | number;
-    //   emploter_document_number: string | null | undefined | number;
-    // CUIL: value["CUIL"] ?? null,
-    // P
-  })
-  .transform((value) => {
-    return {
-      // name: value["NOMBRE"] ?? null,
-      cuil: value["CUIL"] ?? null,
-      contribution_date: value["PERIODO DE SOPORTE"] ?? null,
-      support_date: value["PERIODO DE SOPORTE"] ?? null,
-      amount: value["MONTO"] ?? null,
-      emploter_document_number: value["CUIT EMPLEADOR"] ?? null,
-    };
-  });
+export const recDocumentValidatorOS = (
+  columns: { [key: string]: string } // columns será el verificador
+) =>
+  z
+    .object({
+      [columns.cuil as string]: numberAsString.nullable(),
+      [columns.contribution_date as string]: stringAsDate.nullable(),
+      [columns.support_date as string]: stringAsDate.nullable().optional(),
+      [columns.excelAmount as string]: allToString.nullable().optional(),
+      [columns.employer_document_number as string]: allToString
+        .nullable()
+        .optional(),
+    })
+    .transform((value) => {
+      return {
+        cuil: value[columns.cuil ?? "CUIL"] ?? null,
+        contribution_date:
+          value[columns.contribution_date ?? "PERIODO"] ?? null,
+        support_date: value[columns.support_date ?? "PERIODO SOPORTE"] ?? null,
+        excelAmount: value[columns.excelAmount ?? "MONTO"] ?? null,
+        employer_document_number:
+          value[columns.employer_document_number ?? "CUIT"] ?? null,
+      };
+    });
 
 export const recDocumentValidator = z
   .object({
@@ -631,26 +639,6 @@ export const recHeaders: TableHeaders = [
   { key: "sale_condition", label: "CONDICION DE VENTA", width: 140 },
 ];
 
-export const recHeadersOS: TableHeaders = [
-  { key: "name", label: "NOMBRE", width: 140 },
-  { key: "cuil", label: "CUIT", width: 140 },
-  { key: "periodo", label: "PERIODO", width: 140 },
-  { key: "modalidad", label: "MODALIDAD", width: 140 },
-  { key: "aporte", label: "APORTE", width: 140 },
-  { key: "contribucion", label: "CONTRIBUCION", width: 140 },
-  { key: "monotributo", label: "MONOTRIBUTO", width: 140 },
-  { key: "subsidio", label: "SUBSIDIO", width: 140 },
-  { key: "total", label: "TOTAL", width: 140 },
-];
-
-export const requiredColumnsOS = [
-  { key: "name", label: "NOMBRE", width: 140 },
-  { key: "cuil", label: "CUIL/CUIT", width: 140 },
-  { key: "periodo", label: "PERIODO", width: 140 },
-  { key: "modalidad", label: "MODALIDAD", width: 140 },
-  { key: "total", label: "TOTAL", width: 140 },
-];
-
 export const requiredColumns = [
   { key: "business_unit", label: "UNIDAD DE NEGOCIO" },
   // { key: "os", label: "OS" },
@@ -678,6 +666,20 @@ export const requiredColumns = [
   { key: "plan", label: "PLAN" },
   { key: "product", label: "PRODUCTO" },
   // { key: "sale_condition", label: "CONDICION DE VENTA" },
+];
+
+export const recHeadersOS: TableHeaders = [
+  { key: "cuil", label: "CUIT", width: 140 },
+  { key: "contribution_date", label: "PERIODO", width: 140 },
+  { key: "support_date", label: "PERIODO SOPORTE", width: 140 },
+  { key: "excelAmount", label: "MONTO", width: 140 },
+  { key: "employer_document_number", label: "CUIT", width: 140 },
+];
+
+export const requiredColumnsOS = [
+  { key: "cuil", label: "CUIT", width: 140 },
+  // { key: "contribution_date", label: "PERIODO", width: 140 },
+  { key: "excelAmount", label: "MONTO", width: 140 },
 ];
 
 export const columnLabelByKey = Object.fromEntries(

@@ -109,21 +109,46 @@ export function AddHealthInsurances(props: {
   const [floor, setFloor] = useState(OS?.floor ?? "");
   const [office, setOffice] = useState(OS?.office ?? "");
   const [isClient, setIsClient] = useState<boolean>(OS?.isClient ?? false);
+  const [initialValue, setInitialValue] = useState("0");
 
   const [dateState, setDateState] = useState<Date | undefined>(
     OS?.dateState ?? undefined
   );
+  const [excelDocument, setExcelDocument] = useState(OS?.excelDocument ?? "");
+  const [excelAmount, setExcelAmount] = useState(OS?.excelAmount ?? "");
+  const [excelEmployerDocument, setExcelEmployerDocument] = useState(
+    OS?.excelDocument ?? ""
+  );
+  const [excelSupportPeriod, setExcelSupportPeriod] = useState(
+    OS?.excelSupportPeriod ?? ""
+  );
+
+  const [excelContributionperiod, setExcelContributionperiod] = useState(
+    OS?.excelContributionperiod ?? undefined
+  );
+
+  // excelDocument: varchar("excelDocument", { length: 255 }),
+  // excelAmount: varchar("excelAmount"),
+  // excelEmployerDocument: varchar("excelEmployerDocument", { length: 255 }),
+  // excelSupportPeriod: timestamp("excelSupportPeriod", {
+  //   mode: "date",
+  // }),
+  // excelContributionperiod: timestamp("excelContributionperiod", {
+  //   mode: "date",
+  // }),
+
   const [popoverEmisionOpen, setPopoverEmisionOpen] = useState(false);
 
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+
+  const [openCalendar, setOpenCalendar] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   const [responsibleName, setResponsibleName] = useState(
     OS?.responsibleName ?? ""
   );
-  const [initialValue, setInitialValue] = useState("0");
 
   function validateFields() {
     const errors: string[] = [];
@@ -183,6 +208,12 @@ export function AddHealthInsurances(props: {
         isClient: true,
         dateState: dateState,
         responsibleName: responsibleName,
+
+        excelDocument: excelDocument,
+        excelAmount: excelAmount,
+        excelEmployerDocument: excelEmployerDocument,
+        excelSupportPeriod: excelSupportPeriod,
+        excelContributionperiod: excelContributionperiod,
         // initialValue: initialValue,
         // responsibleName: responsibleName,
         // sellCondition: sellCondition,
@@ -248,6 +279,12 @@ export function AddHealthInsurances(props: {
         dateState: dateState,
         responsibleName: user,
         cancelMotive: cancelMotive,
+
+        excelDocument: excelDocument,
+        excelAmount: excelAmount,
+        excelEmployerDocument: excelEmployerDocument,
+        excelSupportPeriod: excelSupportPeriod,
+        excelContributionperiod: excelContributionperiod,
         // initialValue: initialValue,
       });
 
@@ -688,7 +725,7 @@ export function AddHealthInsurances(props: {
               Información de la cuenta
             </p>
             <div>
-              <Label htmlFor="postal_code" className="text-xs text-gray-500">
+              <Label htmlFor="state" className="text-xs text-gray-500">
                 ESTADO
               </Label>
               <Select onValueChange={setState} value={state}>
@@ -706,14 +743,16 @@ export function AddHealthInsurances(props: {
               <Label htmlFor="postal_code" className="text-xs text-gray-500">
                 FECHA DE ESTADO
               </Label>
-              <Popover>
+              <Popover open={openCalendar} onOpenChange={setOpenCalendar}>
                 <PopoverTrigger asChild={true}>
                   <Button
                     variant={"outline"}
                     className={cn(
                       "text-left flex justify-between font-medium w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none pr-0 pl-0",
                       !dateState && "text-muted-foreground"
-                    )}>
+                    )}
+                    onClick={() => setOpenCalendar(!openCalendar)} // Controla la apertura
+                  >
                     {dateState ? (
                       format(dateState, "PPP")
                     ) : (
@@ -722,11 +761,14 @@ export function AddHealthInsurances(props: {
                     <Calendar01Icon className="h-4 w-4" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className=" p-0 overflow-y-scroll">
+                <PopoverContent className="p-0 overflow-y-scroll">
                   <Calendar
                     mode="single"
                     selected={dateState}
-                    onSelect={(e) => setDateState(e)}
+                    onSelect={(date) => {
+                      setDateState(date); // Asigna la fecha seleccionada
+                      setOpenCalendar(false); // Cierra el Popover automáticamente
+                    }}
                     initialFocus={true}
                   />
                 </PopoverContent>
@@ -766,6 +808,93 @@ export function AddHealthInsurances(props: {
                 placeholder="..."
                 value={responsibleName}
                 onChange={(e) => setResponsibleName(e.target.value)}
+              />
+            </div>
+            {/* {OS ? null : (
+              <div>
+                <Label htmlFor="initialValue">Saldo inicial</Label>
+                <Input
+                  id="initialValue"
+                  placeholder="..."
+                  value={initialValue}
+                  onChange={(e) => setInitialValue(e.target.value)}
+                />
+              </div>
+            )} */}
+            <div className="flex items-center justify-center">
+              {error && (
+                <span className="text-red-600 text-xs text-center">
+                  {error}
+                </span>
+              )}
+            </div>
+            <p className="col-span-4 mt-3 px-1 py-2 justify-start text-black font-xs text-sm font-semibold">
+              Asignar columnas de excel
+            </p>
+            <div>
+              <Label htmlFor="excelDocument" className="text-xs text-gray-500">
+                CUIL
+              </Label>
+              <Input
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                id="excelDocument"
+                placeholder="..."
+                value={excelDocument}
+                onChange={(e) => setExcelDocument(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="postal_code" className="text-xs text-gray-500">
+                Monto
+              </Label>
+              <Input
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                id="excelAmount"
+                placeholder="..."
+                value={excelAmount}
+                onChange={(e) => setExcelAmount(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label
+                htmlFor="excelEmployerDocument"
+                className="text-xs text-gray-500">
+                CUIT EMPRESA
+              </Label>
+              <Input
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                id="excelEmployerDocument"
+                placeholder="..."
+                value={excelEmployerDocument}
+                onChange={(e) => setExcelEmployerDocument(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label
+                htmlFor="excelContributionperiod"
+                className="text-xs text-gray-500">
+                Periodo de pago
+              </Label>
+              <Input
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                id="excelContributionperiod"
+                placeholder="..."
+                value={excelContributionperiod}
+                onChange={(e) => setExcelContributionperiod(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label
+                htmlFor="excelSupportPeriod"
+                className="text-xs text-gray-500">
+                Periodo de soporte
+              </Label>
+              <Input
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                id="excelSupportPeriod"
+                placeholder="..."
+                value={excelSupportPeriod}
+                onChange={(e) => setExcelSupportPeriod(e.target.value)}
               />
             </div>
             {/* {OS ? null : (

@@ -467,6 +467,7 @@ export const family_groupsRouter = createTRPCRouter({
           integrants: {
             with: {
               differentialsValues: true,
+              aportes_os: true,
             },
             where: and(...integrantsConditions),
           },

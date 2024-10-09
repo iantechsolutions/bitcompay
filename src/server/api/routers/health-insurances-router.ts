@@ -148,8 +148,8 @@ export const healthInsurancesRouter = createTRPCRouter({
         excelDocument: z.string().optional(),
         excelAmount: z.string().optional(),
         excelEmployerDocument: z.string().optional(),
-        excelSupportPeriod: z.date().optional(),
-        excelContributionperiod: z.date().optional(),
+        excelSupportPeriod: z.string().optional(),
+        excelContributionperiod: z.string().optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -259,8 +259,8 @@ export const healthInsurancesRouter = createTRPCRouter({
         excelDocument: z.string().optional(),
         excelAmount: z.string().optional(),
         excelEmployerDocument: z.string().optional(),
-        excelSupportPeriod: z.date().optional(),
-        excelContributionperiod: z.date().optional(),
+        excelSupportPeriod: z.string().optional(),
+        excelContributionperiod: z.string().optional(),
       })
     )
     .mutation(async ({ input }) => {

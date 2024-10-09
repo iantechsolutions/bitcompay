@@ -565,12 +565,8 @@ export const healthInsurances = pgTable("health_insurances", {
   excelDocument: varchar("excelDocument", { length: 255 }),
   excelAmount: varchar("excelAmount"),
   excelEmployerDocument: varchar("excelEmployerDocument", { length: 255 }),
-  excelSupportPeriod: timestamp("excelSupportPeriod", {
-    mode: "date",
-  }),
-  excelContributionperiod: timestamp("excelContributionperiod", {
-    mode: "date",
-  }),
+  excelSupportPeriod: varchar("excelSupportPeriod", { length: 255 }),
+  excelContributionperiod: varchar("excelContributionperiod", { length: 255 }),
 });
 
 export const healthInsurancesRelations = relations(
@@ -1386,11 +1382,11 @@ export const aportes_os = pgTable("aportes_os", {
     .references(() => integrants.id)
     .notNull(),
   cuil: varchar("cuil", { length: 255 }).notNull(),
-  process_date: timestamp("support_date", { mode: "date" }),
-  contribution_date: timestamp("support_date", { mode: "date" }),
+  process_date: timestamp("process_date", { mode: "date" }),
+  contribution_date: timestamp("contribution_date", { mode: "date" }),
   support_date: timestamp("support_date", { mode: "date" }),
   amount: varchar("amount").notNull(),
-  emploter_document_number: varchar("emploter_document_number", {
+  employer_document_number: varchar("employer_document_number", {
     length: 255,
   }),
 

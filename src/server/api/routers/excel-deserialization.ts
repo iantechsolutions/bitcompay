@@ -13,6 +13,7 @@ import {
 } from "~/server/excel/validator";
 import { error } from "console";
 import { calcularEdad } from "~/lib/utils";
+import { columns } from "~/app/billing/liquidation/columns";
 
 export const maxDuration = 300;
 export const dynamic = "force-dynamic";
@@ -29,491 +30,157 @@ export const excelDeserializationRouter = createTRPCRouter({
       });
       return upload;
     }),
+  deserializationOS: protectedProcedure
+    .input(
+      z.object({
+        type: z.string(),
+        id: z.string(),
+        columns: z.object({
+          id: z.string(),
+          cuil: z.string(),
+          contribution_date: z.string(),
+          excelAmount: z.string(),
+          employer_document_number: z.string(),
+          support_date: z.string(),
+        }),
+        // fecha_soporte: z.date().optional(),
+        // contribution_date: z.date().optional(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      let contents;
+
+      console.log("cande no esta", input.columns);
+      contents = await readExcelFileOS(
+        db,
+        input.id,
+        input.type,
+        // input.support_date ?? null,
+        // input.contribution_date ?? null,
+        input.columns,
+        ctx
+      );
+
+      return contents;
+    }),
 
   deserialization: protectedProcedure
     .input(
       z.object({
         type: z.string(),
         id: z.string(),
-        OSid: z.string().optional(),
-        date: z.date().optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
-      let contents;
-      if (input.type === "OS") {
-        contents = await readExcelFileOS(
-          db,
-          input.id,
-          input.type,
-          input.date ?? null,
-          input.OSid ?? null,
-          ctx
-        );
-      } else if (input.type === "rec") {
-        contents = await readExcelFile(db, input.id, input.type, ctx);
-      }
-      //agregar a readExcel verificacion de columnas obligatorias.
+      const contents = await readExcelFile(db, input.id, input.type, ctx);
 
       return contents;
     }),
 
-  confirmData: protectedProcedure
+  confirmDataOS: protectedProcedure
     .input(
       z.object({
         type: z.string(),
         uploadId: z.string(),
-        OSid: z.string().optional(),
-        date: z.date().optional(),
+        columns: z.object({
+          id: z.string(),
+          cuil: z.string(),
+          contribution_date: z.string(),
+          excelAmount: z.string(),
+          employer_document_number: z.string(),
+          support_date: z.string(),
+        }),
+        fecha_soporte: z.date().optional(),
+        contribution_date: z.date().optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
-      if (input.type === "OS") {
-        const contents = await readExcelFileOS(
-          db,
-          input.uploadId,
-          input.type,
-          input.date ?? null,
-          input.OSid ?? null,
-          ctx
-        );
+      const contents = await readExcelFileOS(
+        db,
+        input.uploadId,
+        input.type,
+        input.columns,
+        ctx
+      );
 
-        let monto_total = 0;
+      let monto_total = 0;
 
-        await db.transaction(async (db) => {
-          // Usamos for...of para manejar promesas de forma adecuada
-          for (const row of contents) {
-            const existingAffiliate = await db.query.aportes_os.findFirst({
-              where: eq(schema.aportes_os.cuil, row.cuil ?? ""),
+      await db.transaction(async (db) => {
+        for (const row of contents) {
+          console.log("Row alejandro", row.support_date, input.fecha_soporte);
+
+          if (!row.contribution_date && !input.contribution_date) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "La fecha de contribución es requerida",
             });
-
-            if (!existingAffiliate) {
-              console.log("No se encontró afiliado, creando nuevo...");
-            } else {
-              // const aportes_os = await db
-              //       .insert(schema.aportes_os)
-              //       .values({
-              //         cuil: row.cuil ?? "",
-              //         process_date: new Date(),
-              //         contribution_date: row.contribution_date ?? null,
-              //         support_date: row.support_date ?? null,
-              //         amount: row.amount ?? "0",
-              //         emploter_document_number: row.emploter_document_number ?? "",
-              //         healthInsurances_id: input.OSid ?? "",
-              //         id_affiliate: existingAffiliate?.id ?? "",
-              //       })
-              //       .returning();
-              //     console.log("Nuevo afiliado creado: ", aportes_os);
-              //     monto_total += parseFloat(row.amount ?? "0");
-              //   }
-            }
-
-            console.log("Afiliado existente encontrado:", existingAffiliate);
-
-            await db
-              .update(schema.aportes_os)
-              .set({
-                cuil: row.cuil ?? "",
-                process_date: new Date(),
-                contribution_date: row.contribution_date ?? null,
-                support_date: row.support_date ?? null,
-                amount: row.amount ?? "0",
-                emploter_document_number: row.emploter_document_number ?? "",
-                healthInsurances_id: input.OSid ?? "",
-                id_affiliate: existingAffiliate?.id ?? "",
-              })
-              .where(eq(schema.aportes_os.cuil, row.cuil ?? ""));
-
-            monto_total += parseFloat(row.amount ?? "0");
-            console.log("Actualizado afiliado: ", monto_total);
           }
 
-          console.log("Monto total procesado: ", monto_total);
-
-          const cc = await db.query.currentAccount.findFirst({
-            where: eq(schema.currentAccount.health_insurance, input.OSid ?? ""),
-          });
-
-          let historicEvents = await db.query.events.findMany({
-            where: eq(schema.events.currentAccount_id, cc?.id ?? ""),
-          });
-
-          if (historicEvents && historicEvents.length > 0) {
-            const lastEvent = historicEvents.reduce((prev, current) => {
-              return new Date(prev.createdAt) > new Date(current.createdAt)
-                ? prev
-                : current;
+          if (!row.support_date && !input.fecha_soporte) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "La fecha de soporte es requerida",
             });
-
-            const event = await db
-              .insert(schema.events)
-              .values({
-                currentAccount_id: cc?.id,
-                event_amount: monto_total,
-                current_amount: lastEvent.current_amount + monto_total,
-                description: "Pago afiliados",
-                type: "FC",
-                createdAt: new Date(),
-              })
-              .returning();
-
-            await db
-              .update(schema.excelBilling)
-              .set({
-                confirmed: true,
-                confirmedAt: new Date(),
-              })
-              .where(eq(schema.excelBilling.id, input.uploadId));
           }
+
+          const existingAffiliate = await db.query.integrants.findFirst({
+            where: eq(schema.integrants.fiscal_id_number, row.cuil),
+          });
+
+          if (!existingAffiliate) {
+            console.log("No se encontró afiliado, creando nuevo...");
+          }
+          await db
+            .insert(schema.aportes_os)
+            .values({
+              cuil: row.cuil ?? "",
+              process_date: new Date(),
+              contribution_date:
+                row.contribution_date ?? input.contribution_date,
+              support_date: row.support_date ?? input.fecha_soporte,
+              amount: row.excelAmount ?? "0",
+              employer_document_number:
+                row.employer_document_number?.toString() ?? "0",
+              healthInsurances_id: input.columns.id ?? "",
+              id_affiliate: existingAffiliate?.id ?? "",
+            })
+            .returning();
+
+          monto_total += parseFloat(row.excelAmount ?? "0");
+        }
+
+        // Resto del código de transacción
+        console.log("Monto total procesado: ", monto_total);
+
+        const cc = await db.query.currentAccount.findFirst({
+          where: eq(
+            schema.currentAccount.health_insurance,
+            input.columns.id ?? ""
+          ),
         });
-      } else if (input.type === "rec") {
-        const contents = await readExcelFile(
-          db,
-          input.uploadId,
-          input.type,
-          ctx
-        );
-        const familyGroupMap = new Map<string | null, string>();
 
-        const idDictionary: { [key: string]: number } = {
-          CUIT: 80,
-          CUIL: 86,
-          DNI: 96,
-          "Consumidor Final": 99,
-        };
-        await db.transaction(async (db) => {
-          for (const row of contents) {
-            const business_unit = await db.query.bussinessUnits.findFirst({
-              where: and(
-                eq(schema.bussinessUnits.description, row.business_unit ?? ""),
-                eq(schema.bussinessUnits.companyId, ctx.session.orgId ?? "")
-              ),
-            });
+        let historicEvents = await db.query.events.findMany({
+          where: eq(schema.events.currentAccount_id, cc?.id ?? ""),
+        });
 
-            const mode = await db.query.modos.findFirst({
-              where: eq(schema.modos.description, row.mode ?? ""),
-            });
+        if (historicEvents && historicEvents.length > 0) {
+          const lastEvent = historicEvents.reduce((prev, current) => {
+            return new Date(prev.createdAt) > new Date(current.createdAt)
+              ? prev
+              : current;
+          });
 
-            const plan = await db.query.plans.findFirst({
-              where: and(
-                eq(schema.plans.plan_code, row.plan ?? ""),
-                eq(schema.plans.brand_id, business_unit?.brandId ?? "")
-              ),
-              with: {
-                pricesPerCondition: true,
-              },
-            });
-
-            const health_insurance = await db.query.healthInsurances.findFirst({
-              where: eq(
-                schema.healthInsurances.identificationNumber,
-                row.os ?? ""
-              ),
-            });
-
-            const health_insurance_origin =
-              await db.query.healthInsurances.findMany({
-                where: eq(
-                  schema.healthInsurances.identificationNumber,
-                  row["originating os"] ?? ""
-                ),
-              });
-
-            let familyGroupId = "";
-            const existGroup = isKeyPresent(
-              row.holder_id_number,
-              familyGroupMap
-            );
-            if (!existGroup) {
-              console.log("creando bono");
-              console.log("creando tramite");
-              const procedure = await db
-                .insert(schema.procedure)
-                .values({
-                  type: "alta",
-                  estado: "finalizado",
-                  companyId: ctx.session.orgId ?? "",
-                })
-                .returning();
-              console.log("creando grupo familiar");
-              const familygroup = await db
-                .insert(schema.family_groups)
-                .values({
-                  businessUnit: business_unit?.id,
-                  validity: row.validity,
-                  plan: plan?.id,
-                  modo: mode?.id,
-                  receipt: " ",
-                  state: "ACTIVO",
-                  procedureId: procedure[0]?.id ?? "",
-                  sale_condition: row.sale_condition ?? "",
-                  charged_date: new Date(),
-                  user_charged: ctx.session.user.id ?? "",
-                  seller: row.seller ?? null,
-                  supervisor: row.supervisor ?? null,
-                  gerency: row.gerency ?? null,
-                })
-                .returning();
-              familyGroupMap.set(row.holder_id_number, familygroup[0]!.id);
-              familyGroupId = familygroup[0]?.id ?? "";
-
-              const bonus = await db
-                .insert(schema.bonuses)
-                .values({
-                  amount: row.bonus ?? "0",
-                  appliedUser: " ", //a rellenar
-                  approverUser: " ", //a rellenar
-                  duration: "",
-                  from: row["from bonus"],
-                  to: row["to bonus"],
-                  reason: "", //a rellenar
-                  family_group_id: familyGroupId,
-                })
-                .returning();
-            } else {
-              familyGroupId = familyGroupMap.get(row.holder_id_number) ?? "";
-            }
-
-            const postal_code = row["postal code"];
-            let postal_code_schema = await db.query.postal_code.findFirst({
-              where: eq(schema.postal_code.cp, postal_code ?? " "),
-            });
-
-            if (!postal_code_schema) {
-              const response = await db
-                .insert(schema.postal_code)
-                .values({
-                  cp: postal_code ?? "",
-                  name: postal_code ?? "",
-                  zone: "",
-                })
-                .returning();
-              postal_code_schema = response[0];
-            }
-
-            let differentialId;
-            if (row.differential_code) {
-              const check_differential = await db.query.differentials.findMany({
-                where: eq(schema.differentials.codigo, row.differential_code),
-              });
-              if (check_differential.length == 0) {
-                console.log("creando diferencial codigo");
-                const new_differential = await db
-                  .insert(schema.differentials)
-                  .values({
-                    codigo: row.differential_code ?? "",
-                  })
-                  .returning();
-                differentialId = new_differential[0]?.id ?? "";
-              } else {
-                differentialId = check_differential[0]?.id ?? "";
-              }
-            }
-
-            const birthDate = new Date(row.birth_date ?? "");
-            const today = new Date();
-            let age = today.getFullYear() - birthDate.getFullYear();
-            if (
-              today.getMonth() < birthDate.getMonth() ||
-              (today.getMonth() === birthDate.getMonth() &&
-                today.getDate() < birthDate.getDate())
-            ) {
-              age--;
-            }
-            const relativeExist = await db.query.relative.findMany({
-              where: eq(schema.relative.relation, row.relationship ?? ""),
-            });
-            if (!relativeExist || relativeExist.length == 0) {
-              await db.insert(schema.relative).values({
-                relation: row.relationship,
-              });
-            }
-            let affiliate_number;
-
-            if (row.own_id_type === "DNI" && row.plan && row.fiscal_id_number) {
-              affiliate_number = row.plan + row.fiscal_id_number;
-            }
-            if (
-              row.own_id_type === "PASAPORTE" &&
-              row.plan &&
-              row.fiscal_id_number
-            ) {
-              affiliate_number = "00" + row.plan + row.fiscal_id_number;
-            }
-            console.log("testigo", row.own_id_type);
-            const new_integrant = await db
-              .insert(schema.integrants)
-              .values({
-                affiliate_type: row.relationship,
-                relationship: row.relationship,
-                name: row.name ?? "",
-                id_type: row.own_id_type,
-                id_number: row.own_id_number,
-                birth_date: row.birth_date,
-                gender: row.gender,
-                civil_status: row["marital status"],
-                nationality: row.nationality,
-                afip_status: row["afip status"],
-                fiscal_id_type: row.fiscal_id_type,
-                fiscal_id_number: row.fiscal_id_number,
-                address: row.address,
-                phone_number: row.phone,
-                cellphone_number: row.cellphone,
-                email: row.email,
-                floor: row.floor,
-                department: row.apartment,
-                locality: row.city,
-                partido: row.district,
-                state: row.state,
-                cp: row["postal code"],
-                zone: " ", //a rellenar
-                isHolder: row.isHolder == true,
-                isPaymentHolder: row.isPaymentHolder == true,
-                isAffiliate: row.isAffiliated == true,
-                isBillResponsible: row.isPaymentResponsible == true,
-                age: age,
-                family_group_id: familyGroupId,
-                affiliate_number: affiliate_number,
-                extention: row.extention,
-                postal_codeId: postal_code_schema?.id,
-                health_insuranceId: health_insurance?.id ?? null,
-                originating_health_insuranceId:
-                  health_insurance_origin.length > 0
-                    ? health_insurance_origin[0]?.id ?? ""
-                    : null,
-              })
-              .returning();
-            console.log("creando valores diferencial valor");
-            console.log("Llego Llego");
-
-            if (new_integrant[0]?.isBillResponsible) {
-              const cc = await db
-                .insert(schema.currentAccount)
-                .values({
-                  family_group: new_integrant[0]?.family_group_id ?? "",
-                })
-                .returning();
-              const event = await db.insert(schema.events).values({
-                current_amount: parseFloat(row.balance ?? "0"),
-                description: "Apertura",
-                event_amount: parseFloat(row.balance ?? "0"),
-                currentAccount_id: cc[0]?.id ?? "",
-                type: "REC",
-              });
-              console.log("Llego Llego");
-
-              const tipoDocumento =
-                idDictionary[new_integrant[0]?.id_type ?? ""];
-              const factura = await db.insert(schema.comprobantes).values({
-                origin: "Factura",
-                importe: parseFloat(row.balance ?? "0") * -1,
-                iva: "0",
-                family_group_id: new_integrant[0]?.family_group_id ?? "",
-                billLink: "",
-                concepto: 0,
-                nroComprobante: 0,
-                nroDocumento: parseInt(new_integrant[0].id_number ?? "0"),
-                prodName: "",
-                ptoVenta: 0,
-                generated: new Date(),
-                tipoDocumento: tipoDocumento ?? 0,
-                tipoComprobante: "Apertura de CC",
-                estado: "apertura",
-              });
-            }
-            console.log("Llego Llego");
-            if (row.differential_value) {
-              const ageN = calcularEdad(row.birth_date ?? new Date());
-              const preciosPasados = plan?.pricesPerCondition.filter(
-                (price) => price.validy_date.getTime() <= new Date().getTime()
-              );
-              preciosPasados?.sort(
-                (a, b) => b.validy_date.getTime() - a.validy_date.getTime()
-              );
-              let precioIntegrante = 0;
-              console.log("precios pasados");
-              if (preciosPasados) {
-                const vigente = preciosPasados[0]?.validy_date;
-                console.log("vigente", vigente);
-                precioIntegrante =
-                  plan?.pricesPerCondition
-                    ?.filter(
-                      (x) => x.validy_date.getTime() === vigente?.getTime()
-                    )
-                    .find(
-                      (x) => row.relationship && x.condition == row.relationship
-                    )?.amount ?? 0;
-                console.log("precioIntegrante", precioIntegrante);
-                if (precioIntegrante === 0) {
-                  precioIntegrante =
-                    plan?.pricesPerCondition
-                      ?.filter(
-                        (x) => x.validy_date.getTime() === vigente?.getTime()
-                      )
-                      .find(
-                        (x) =>
-                          (x.from_age ?? 1000) <= ageN &&
-                          (x.to_age ?? 0) >= ageN
-                      )?.amount ?? 0;
-                }
-                console.log("precioIntegrante", precioIntegrante);
-              }
-              console.log("row");
-              console.log(row.differential_value);
-              console.log(precioIntegrante);
-              const precioDiferencial =
-                precioIntegrante && precioIntegrante != 0
-                  ? parseFloat(row.differential_value ?? "0") / precioIntegrante
-                  : 0;
-              // precioIntegrante;
-              console.log("precioDiferencial", precioDiferencial);
-              const differentialValue = await db
-                .insert(schema.differentialsValues)
-                .values({
-                  amount: precioDiferencial,
-                  differentialId: differentialId,
-                  integrant_id: new_integrant[0]?.id ?? "",
-                });
-            }
-            if (row.isPaymentResponsible) {
-              const companyProducts = await db.query.companyProducts.findMany({
-                where: eq(
-                  schema.companyProducts.companyId,
-                  ctx.session.orgId ?? ""
-                ),
-                with: {
-                  product: true,
-                },
-              });
-              console.log("lectura prod");
-              const product = companyProducts.find(
-                (x) => (x.product && x.product.name) ?? "" === row.product
-              )?.product;
-              console.log("post lectura prod");
-              await db.insert(schema.pa).values({
-                card_number: row.card_number?.toString() ?? null,
-                CBU: row.cbu,
-                new_registration: row.is_new ?? false,
-                integrant_id: new_integrant[0]?.id ?? "",
-                product_id: product?.id,
-                // CBU: row.cbu_number!,
-                card_brand: row.card_brand ?? null,
-                card_type: row.card_type ?? null,
-                // new_registration: row.is_new!,
-                // integrant_id: new_integrant[0]!.id,
-                // product: product?.id,
-              });
-            }
-            const contribution = parseFloat(row.contribution ?? "");
-            console.log("creando aportes");
-            await db.insert(schema.contributions).values({
-              employeeContribution: 0,
-              employerContribution: contribution,
-              amount: contribution,
-              integrant_id: new_integrant[0]?.id ?? "",
-              cuitEmployer: " ", //a rellenar
-            });
-          }
+          const event = await db
+            .insert(schema.events)
+            .values({
+              currentAccount_id: cc?.id,
+              event_amount: monto_total,
+              current_amount: lastEvent.current_amount + monto_total,
+              description: "Pago afiliados",
+              type: "FC",
+              createdAt: new Date(),
+            })
+            .returning();
 
           await db
             .update(schema.excelBilling)
@@ -522,8 +189,364 @@ export const excelDeserializationRouter = createTRPCRouter({
               confirmedAt: new Date(),
             })
             .where(eq(schema.excelBilling.id, input.uploadId));
-        });
-      }
+        }
+      });
+    }),
+
+  confirmData: protectedProcedure
+    .input(
+      z.object({
+        type: z.string(),
+        uploadId: z.string(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const contents = await readExcelFile(db, input.uploadId, input.type, ctx);
+      const familyGroupMap = new Map<string | null, string>();
+
+      const idDictionary: { [key: string]: number } = {
+        CUIT: 80,
+        CUIL: 86,
+        DNI: 96,
+        "Consumidor Final": 99,
+      };
+      await db.transaction(async (db) => {
+        for (const row of contents) {
+          const business_unit = await db.query.bussinessUnits.findFirst({
+            where: and(
+              eq(schema.bussinessUnits.description, row.business_unit ?? ""),
+              eq(schema.bussinessUnits.companyId, ctx.session.orgId ?? "")
+            ),
+          });
+
+          const mode = await db.query.modos.findFirst({
+            where: eq(schema.modos.description, row.mode ?? ""),
+          });
+
+          const plan = await db.query.plans.findFirst({
+            where: and(
+              eq(schema.plans.plan_code, row.plan ?? ""),
+              eq(schema.plans.brand_id, business_unit?.brandId ?? "")
+            ),
+            with: {
+              pricesPerCondition: true,
+            },
+          });
+
+          const health_insurance = await db.query.healthInsurances.findFirst({
+            where: eq(
+              schema.healthInsurances.identificationNumber,
+              row.os ?? ""
+            ),
+          });
+
+          const health_insurance_origin =
+            await db.query.healthInsurances.findMany({
+              where: eq(
+                schema.healthInsurances.identificationNumber,
+                row["originating os"] ?? ""
+              ),
+            });
+
+          let familyGroupId = "";
+          const existGroup = isKeyPresent(row.holder_id_number, familyGroupMap);
+          if (!existGroup) {
+            console.log("creando bono");
+            console.log("creando tramite");
+            const procedure = await db
+              .insert(schema.procedure)
+              .values({
+                type: "alta",
+                estado: "finalizado",
+                companyId: ctx.session.orgId ?? "",
+              })
+              .returning();
+            console.log("creando grupo familiar");
+            const familygroup = await db
+              .insert(schema.family_groups)
+              .values({
+                businessUnit: business_unit?.id,
+                validity: row.validity,
+                plan: plan?.id,
+                modo: mode?.id,
+                receipt: " ",
+                state: "ACTIVO",
+                procedureId: procedure[0]?.id ?? "",
+                sale_condition: row.sale_condition ?? "",
+                charged_date: new Date(),
+                user_charged: ctx.session.user.id ?? "",
+                seller: row.seller ?? null,
+                supervisor: row.supervisor ?? null,
+                gerency: row.gerency ?? null,
+              })
+              .returning();
+            familyGroupMap.set(row.holder_id_number, familygroup[0]!.id);
+            familyGroupId = familygroup[0]?.id ?? "";
+
+            const bonus = await db
+              .insert(schema.bonuses)
+              .values({
+                amount: row.bonus ?? "0",
+                appliedUser: " ", //a rellenar
+                approverUser: " ", //a rellenar
+                duration: "",
+                from: row["from bonus"],
+                to: row["to bonus"],
+                reason: "", //a rellenar
+                family_group_id: familyGroupId,
+              })
+              .returning();
+          } else {
+            familyGroupId = familyGroupMap.get(row.holder_id_number) ?? "";
+          }
+
+          const postal_code = row["postal code"];
+          let postal_code_schema = await db.query.postal_code.findFirst({
+            where: eq(schema.postal_code.cp, postal_code ?? " "),
+          });
+
+          if (!postal_code_schema) {
+            const response = await db
+              .insert(schema.postal_code)
+              .values({
+                cp: postal_code ?? "",
+                name: postal_code ?? "",
+                zone: "",
+              })
+              .returning();
+            postal_code_schema = response[0];
+          }
+
+          let differentialId;
+          if (row.differential_code) {
+            const check_differential = await db.query.differentials.findMany({
+              where: eq(schema.differentials.codigo, row.differential_code),
+            });
+            if (check_differential.length == 0) {
+              console.log("creando diferencial codigo");
+              const new_differential = await db
+                .insert(schema.differentials)
+                .values({
+                  codigo: row.differential_code ?? "",
+                })
+                .returning();
+              differentialId = new_differential[0]?.id ?? "";
+            } else {
+              differentialId = check_differential[0]?.id ?? "";
+            }
+          }
+
+          const birthDate = new Date(row.birth_date ?? "");
+          const today = new Date();
+          let age = today.getFullYear() - birthDate.getFullYear();
+          if (
+            today.getMonth() < birthDate.getMonth() ||
+            (today.getMonth() === birthDate.getMonth() &&
+              today.getDate() < birthDate.getDate())
+          ) {
+            age--;
+          }
+          const relativeExist = await db.query.relative.findMany({
+            where: eq(schema.relative.relation, row.relationship ?? ""),
+          });
+          if (!relativeExist || relativeExist.length == 0) {
+            await db.insert(schema.relative).values({
+              relation: row.relationship,
+            });
+          }
+          let affiliate_number;
+
+          if (row.own_id_type === "DNI" && row.plan && row.fiscal_id_number) {
+            affiliate_number = row.plan + row.fiscal_id_number;
+          }
+          if (
+            row.own_id_type === "PASAPORTE" &&
+            row.plan &&
+            row.fiscal_id_number
+          ) {
+            affiliate_number = "00" + row.plan + row.fiscal_id_number;
+          }
+          console.log("testigo", row.own_id_type);
+          const new_integrant = await db
+            .insert(schema.integrants)
+            .values({
+              affiliate_type: row.relationship,
+              relationship: row.relationship,
+              name: row.name ?? "",
+              id_type: row.own_id_type,
+              id_number: row.own_id_number,
+              birth_date: row.birth_date,
+              gender: row.gender,
+              civil_status: row["marital status"],
+              nationality: row.nationality,
+              afip_status: row["afip status"],
+              fiscal_id_type: row.fiscal_id_type,
+              fiscal_id_number: row.fiscal_id_number,
+              address: row.address,
+              phone_number: row.phone,
+              cellphone_number: row.cellphone,
+              email: row.email,
+              floor: row.floor,
+              department: row.apartment,
+              locality: row.city,
+              partido: row.district,
+              state: row.state,
+              cp: row["postal code"],
+              zone: " ", //a rellenar
+              isHolder: row.isHolder == true,
+              isPaymentHolder: row.isPaymentHolder == true,
+              isAffiliate: row.isAffiliated == true,
+              isBillResponsible: row.isPaymentResponsible == true,
+              age: age,
+              family_group_id: familyGroupId,
+              affiliate_number: affiliate_number,
+              extention: row.extention,
+              postal_codeId: postal_code_schema?.id,
+              health_insuranceId: health_insurance?.id ?? null,
+              originating_health_insuranceId:
+                health_insurance_origin.length > 0
+                  ? health_insurance_origin[0]?.id ?? ""
+                  : null,
+            })
+            .returning();
+          console.log("creando valores diferencial valor");
+          console.log("Llego Llego");
+
+          if (new_integrant[0]?.isBillResponsible) {
+            const cc = await db
+              .insert(schema.currentAccount)
+              .values({
+                family_group: new_integrant[0]?.family_group_id ?? "",
+              })
+              .returning();
+            const event = await db.insert(schema.events).values({
+              current_amount: parseFloat(row.balance ?? "0"),
+              description: "Apertura",
+              event_amount: parseFloat(row.balance ?? "0"),
+              currentAccount_id: cc[0]?.id ?? "",
+              type: "REC",
+            });
+            console.log("Llego Llego");
+
+            const tipoDocumento = idDictionary[new_integrant[0]?.id_type ?? ""];
+            const factura = await db.insert(schema.comprobantes).values({
+              origin: "Factura",
+              importe: parseFloat(row.balance ?? "0") * -1,
+              iva: "0",
+              family_group_id: new_integrant[0]?.family_group_id ?? "",
+              billLink: "",
+              concepto: 0,
+              nroComprobante: 0,
+              nroDocumento: parseInt(new_integrant[0].id_number ?? "0"),
+              prodName: "",
+              ptoVenta: 0,
+              generated: new Date(),
+              tipoDocumento: tipoDocumento ?? 0,
+              tipoComprobante: "Apertura de CC",
+              estado: "apertura",
+            });
+          }
+          console.log("Llego Llego");
+          if (row.differential_value) {
+            const ageN = calcularEdad(row.birth_date ?? new Date());
+            const preciosPasados = plan?.pricesPerCondition.filter(
+              (price) => price.validy_date.getTime() <= new Date().getTime()
+            );
+            preciosPasados?.sort(
+              (a, b) => b.validy_date.getTime() - a.validy_date.getTime()
+            );
+            let precioIntegrante = 0;
+            console.log("precios pasados");
+            if (preciosPasados) {
+              const vigente = preciosPasados[0]?.validy_date;
+              console.log("vigente", vigente);
+              precioIntegrante =
+                plan?.pricesPerCondition
+                  ?.filter(
+                    (x) => x.validy_date.getTime() === vigente?.getTime()
+                  )
+                  .find(
+                    (x) => row.relationship && x.condition == row.relationship
+                  )?.amount ?? 0;
+              console.log("precioIntegrante", precioIntegrante);
+              if (precioIntegrante === 0) {
+                precioIntegrante =
+                  plan?.pricesPerCondition
+                    ?.filter(
+                      (x) => x.validy_date.getTime() === vigente?.getTime()
+                    )
+                    .find(
+                      (x) =>
+                        (x.from_age ?? 1000) <= ageN && (x.to_age ?? 0) >= ageN
+                    )?.amount ?? 0;
+              }
+              console.log("precioIntegrante", precioIntegrante);
+            }
+            console.log("row");
+            console.log(row.differential_value);
+            console.log(precioIntegrante);
+            const precioDiferencial =
+              precioIntegrante && precioIntegrante != 0
+                ? parseFloat(row.differential_value ?? "0") / precioIntegrante
+                : 0;
+            // precioIntegrante;
+            console.log("precioDiferencial", precioDiferencial);
+            const differentialValue = await db
+              .insert(schema.differentialsValues)
+              .values({
+                amount: precioDiferencial,
+                differentialId: differentialId,
+                integrant_id: new_integrant[0]?.id ?? "",
+              });
+          }
+          if (row.isPaymentResponsible) {
+            const companyProducts = await db.query.companyProducts.findMany({
+              where: eq(
+                schema.companyProducts.companyId,
+                ctx.session.orgId ?? ""
+              ),
+              with: {
+                product: true,
+              },
+            });
+            console.log("lectura prod");
+            const product = companyProducts.find(
+              (x) => (x.product && x.product.name) ?? "" === row.product
+            )?.product;
+            console.log("post lectura prod");
+            await db.insert(schema.pa).values({
+              card_number: row.card_number?.toString() ?? null,
+              CBU: row.cbu,
+              new_registration: row.is_new ?? false,
+              integrant_id: new_integrant[0]?.id ?? "",
+              product_id: product?.id,
+              // CBU: row.cbu_number!,
+              card_brand: row.card_brand ?? null,
+              card_type: row.card_type ?? null,
+              // new_registration: row.is_new!,
+              // integrant_id: new_integrant[0]!.id,
+              // product: product?.id,
+            });
+          }
+          const contribution = parseFloat(row.contribution ?? "");
+          console.log("creando aportes");
+          await db.insert(schema.contributions).values({
+            employeeContribution: 0,
+            employerContribution: contribution,
+            amount: contribution,
+            integrant_id: new_integrant[0]?.id ?? "",
+            cuitEmployer: " ", //a rellenar
+          });
+        }
+
+        await db
+          .update(schema.excelBilling)
+          .set({
+            confirmed: true,
+            confirmedAt: new Date(),
+          })
+          .where(eq(schema.excelBilling.id, input.uploadId));
+      });
     }),
 });
 
@@ -538,18 +561,18 @@ async function readExcelFileOS(
   db: DBTX,
   id: string,
   type: string | undefined,
-  date: Date | null,
-  OSid: string | null,
+  columns: { [key: string]: string }, // columns es el verificador
   ctx: any,
   batchSize = 100
 ) {
   const upload = await db.query.excelBilling.findFirst({
     where: eq(schema.excelBilling.id, id),
-  }); // aca se cambia por la tabla correcta despues
+  });
 
   if (!upload) {
     throw new TRPCError({ code: "NOT_FOUND" });
   }
+
   if (!type) {
     type = upload.documentType ?? undefined;
   }
@@ -560,49 +583,50 @@ async function readExcelFileOS(
 
   const response = await fetch(upload.url);
   const content = await response.arrayBuffer();
-
   const workbook = xlsx.read(content, { type: "buffer" });
-
-  const firstSheet = workbook.Sheets[workbook.SheetNames[0]!]!;
-
-  const rows = xlsx.utils.sheet_to_json(firstSheet) as unknown as Record<
+  const firstSheet = workbook.Sheets[workbook.SheetNames[0]!];
+  if (!firstSheet) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "No sheet found in the workbook",
+    });
+  }
+  const rows = xlsx.utils.sheet_to_json(firstSheet) as Record<
     string,
     unknown
   >[];
-  console.log("we did it");
+
+  console.log("Excel file read successfully");
+
   const trimmedRows = rows.map(trimObject);
+
+  // Pasamos las columnas al transformador
   const { finishedArrayOS: transformedRows, errorsOS: errorsTransform } =
-    recRowsTransformerOS(trimmedRows, date ?? new Date());
-  console.log("rows", transformedRows);
-  if (trimmedRows.length === 0) {
+    recRowsTransformerOS(trimmedRows, columns);
+
+  if (transformedRows.length === 0) {
     throw new TRPCError({
       code: "BAD_REQUEST",
       message: "No se encontraron datos en el archivo",
     });
   }
+
   const errors: string[] = [];
   errorsTransform.forEach((error) => {
     errors.push(
-      (error.errors.at(0)?.message ?? "") +
-        " " +
-        (error.errors.at(0)?.path.at(1) ?? "ILEGIBLE") +
-        " (fila:" +
-        (
-          parseInt(error.errors.at(0)?.path.at(0)?.toString() ?? "0") + 1
-        ).toString() +
-        ")"
+      `${error.errors.at(0)?.message ?? ""} ${
+        error.errors.at(0)?.path.at(1) ?? "ILEGIBLE"
+      } (fila: ${(
+        parseInt(error.errors.at(0)?.path.at(0)?.toString() ?? "0") + 1
+      ).toString()})`
     );
   });
-
-  for (let i = 0; i < transformedRows.length; i++) {
-    const row = transformedRows[i]!;
-    const rowNum = i + 2;
-  }
 
   if (errors.length > 0) {
     throw new TRPCError({ code: "BAD_REQUEST", message: errors.join("\n") });
   }
-  console.log("Testimonio", transformedRows[0]?.cuil);
+
+  console.log("First transformed row CUIL:", transformedRows[0]?.cuil);
   return transformedRows;
 }
 

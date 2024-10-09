@@ -10,7 +10,7 @@ import { FileSpreadsheetIcon } from "lucide-react";
 import { RouterOutputs } from "~/trpc/shared";
 import { useState } from "react";
 import { recHeaders, recHeadersOS } from "~/server/excel/validator";
-import { LargeTable } from "~/components/table";
+import { LargeTable, TableHeaders } from "~/components/table";
 import { useRouter } from "next/navigation";
 import AddDate from "./addDate";
 
@@ -21,45 +21,96 @@ interface unconfirmedPageProps {
   healthInsuranceId: string;
 }
 
+// interface OS_rows_names {
+//   cuil: string;
+//   contribution_date: string | null;
+//   support_date: string | null;
+//   amount: string;
+//   employer_document_number: string | null;
+// }
+
+function validateDataForHeaders(data: any[], headers: TableHeaders): any[] {
+  return data.map((row) => {
+    const validatedRow: any = {};
+    headers.forEach((header) => {
+      validatedRow[header.key] = row[header.key] || ""; // Si falta alguna clave, pone un valor vacío
+    });
+    return validatedRow;
+  });
+}
+
 export default function UnconfirmedPage(props: unconfirmedPageProps) {
   const upload = props.upload;
   const healthInsuranceId = props.healthInsuranceId;
-  const { mutateAsync: deleteUpload } = api.uploads.delete.useMutation();
-  const [confirmed, setConfirmed] = useState(upload!.confirmed);
+  const { data: OS } = api.healthInsurances.get.useQuery({
+    healthInsuranceId,
+  });
 
+  const { mutateAsync: deleteUpload } = api.uploads.delete.useMutation();
+
+  const [confirmed, setConfirmed] = useState(upload!.confirmed);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [supportDate, setSupportDate] = useState<Date | null>(null);
   const [data, setData] = useState<
-    RouterOutputs["excelDeserialization"]["deserialization"] | null
+    RouterOutputs["excelDeserialization"]["deserializationOS"] | null
   >(null);
+
+  // const excelColumns = {
+  //   cuil: "CUIL",
+  //   contribution_date: "PERIODO",
+  //   amount: "TOTAL",
+  //   employer_document_number: "CUIT",
+  //   support_date: "PERIODO DE SOPORTE",
+  // };
+
   const router = useRouter();
   const {
     mutateAsync: confirmData,
     error: dataError,
     isLoading: isDataLoading,
-  } = api.excelDeserialization.confirmData.useMutation();
+  } = api.excelDeserialization.confirmDataOS.useMutation();
 
   const {
     mutateAsync: readData,
     error: errorRead,
     isLoading: isReadingLoading,
-  } = api.excelDeserialization.deserialization.useMutation();
+  } = api.excelDeserialization.deserializationOS.useMutation();
 
   async function handleRead() {
-    const data = await readData({
+    const columnNames = {
+      id: healthInsuranceId,
+      cuil: OS?.excelDocument ?? "CUIL",
+      contribution_date: OS?.excelContributionperiod ?? "PERIODO",
+      excelAmount: OS?.excelAmount ?? "TOTAL",
+      employer_document_number: OS?.excelEmployerDocument ?? "CUIT",
+      support_date: OS?.excelSupportPeriod ?? "PERIODO DE SOPORTE",
+    };
+
+    const result = await readData({
       type: "OS",
       id: upload!.id,
-      OSid: healthInsuranceId,
-      date: selectedDate ?? undefined,
+      columns: columnNames,
     });
-    setData(data);
+
+    setData(validateDataForHeaders(result, recHeadersOS));
   }
   async function handleConfirm() {
+    const columnNames = {
+      id: healthInsuranceId,
+      cuil: OS?.excelDocument ?? "CUIL",
+      contribution_date: OS?.excelContributionperiod ?? "PERIODO",
+      excelAmount: OS?.excelAmount ?? "TOTAL",
+      employer_document_number: OS?.excelEmployerDocument ?? "CUIT",
+      support_date: OS?.excelSupportPeriod ?? "PERIODO DE SOPORTE",
+    };
+
+    console.log("Calambrees", supportDate);
     await confirmData({
       type: "OS",
       uploadId: upload!.id,
-      OSid: healthInsuranceId,
-      date: selectedDate ?? undefined,
+      columns: columnNames,
+      fecha_soporte: supportDate ?? undefined,
+      contribution_date: selectedDate ?? undefined,
     });
     toast.success("Datos subidos correctamente");
     router.push(`./`);
@@ -99,7 +150,7 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
         <Button onClick={handleConfirm} disabled={isDataLoading}>
           Escribir a la base de datos
         </Button>
-        <AddDate onDateSelected={() => handleDateSelected} />
+        <AddDate onDateSelected={handleDateSelected} />
         <Button variant="destructive" onClick={handleDelete}>
           Cancelar y eliminar
         </Button>
