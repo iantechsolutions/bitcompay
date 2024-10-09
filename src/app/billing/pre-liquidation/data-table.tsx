@@ -27,7 +27,7 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { DataTablePagination } from "~/components/tanstack/pagination";
 import TableToolbar from "~/components/tanstack/table-toolbar";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { RouterOutputs } from "~/trpc/shared";
 import { TableRecord } from "./columns";
 import DataTableSummary from "~/components/tanstack/summary";
@@ -36,11 +36,13 @@ import { useRouter } from "next/navigation";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  setLoading: Dispatch<SetStateAction<boolean>>;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  setLoading,
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const table = useReactTable({
@@ -59,8 +61,12 @@ export function DataTable<TData, TValue>({
   const router = useRouter();
 
   const handleRowClick = (row: Row<TData>) => {
-    const originalData = row.original as { id: string };
-    router.push(`/billing/pre-liquidation/${originalData.id}`);
+    setLoading(true);
+    // este timeout es para que el loader sea visible antes de que se cuelgue
+    setTimeout(() => {
+      const originalData = row.original as { id: string };
+      router.push(`/billing/pre-liquidation/${originalData.id}`);
+    }, 100);
   };
 
   const desiredColumns = ["Marca", "UN"];
