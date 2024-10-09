@@ -36,6 +36,7 @@ export default function Page() {
           "DD/MM/YYYY hh:mm:ss"
         ), //revisar
         UN: liquidation?.bussinessUnits?.description ?? "NO BU",
+        //user: liquidation?.userCreated ?? "NO USER",
       });
     }
   }
