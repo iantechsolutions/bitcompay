@@ -55,6 +55,7 @@ export default async function Home(props: {
   if (!preliquidation) return <Title>Preliquidacion no encotrada</Title>;
   const summary = await api.family_groups.getSummaryByLiqId.query({
     liquidationId: props.params.liquidationId,
+    period: preliquidation?.period ?? undefined,
   });
 
   // const fg = await api.family_groups.getWithFilteredComprobantes.query({

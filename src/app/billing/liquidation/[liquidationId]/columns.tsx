@@ -139,8 +139,7 @@ export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "Aporte",
     header: () => (
-      <div className="text-center whitespace-nowrap text-medium">
-        Aportes</div>
+      <div className="text-center whitespace-nowrap text-medium">Aportes</div>
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("Aporte"));
@@ -158,8 +157,7 @@ export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "interes",
     header: () => (
-      <div className="text-center whitespace-nowrap text-medium">
-        Interés</div>
+      <div className="text-center whitespace-nowrap text-medium">Interés</div>
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("interes"));
@@ -177,8 +175,7 @@ export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "subtotal",
     header: () => (
-      <div className="text-center whitespace-nowrap text-medium">
-        Sub Total</div>
+      <div className="text-center whitespace-nowrap text-medium">Sub Total</div>
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("subtotal"));
@@ -196,8 +193,7 @@ export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "iva",
     header: () => (
-      <div className="text-center whitespace-nowrap text-medium">
-        IVA</div>
+      <div className="text-center whitespace-nowrap text-medium">IVA</div>
     ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("iva"));
@@ -247,11 +243,11 @@ export const columns: ColumnDef<TableRecord>[] = [
     },
   },
   {
-    accessorKey: "UN", 
-    header: () => null, 
+    accessorKey: "UN",
+    header: () => null,
     cell: () => null,
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));
-    }
-  }
+    },
+  },
 ];

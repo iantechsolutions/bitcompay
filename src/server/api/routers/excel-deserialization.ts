@@ -129,66 +129,66 @@ export const excelDeserializationRouter = createTRPCRouter({
 
           if (!existingAffiliate) {
             console.log("No se encontró afiliado, creando nuevo...");
+          } else {
+            await db
+              .insert(schema.aportes_os)
+              .values({
+                cuil: row.cuil,
+                amount: row.excelAmount ?? "0",
+                healthInsurances_id: input.columns.id ?? "",
+                id_affiliate: existingAffiliate?.id ?? "",
+                employer_document_number: row.employer_document_number ?? "",
+                process_date: new Date(),
+                support_date: row.support_date ?? input.fecha_soporte ?? null,
+                contribution_date:
+                  row.contribution_date ?? input.contribution_date ?? null,
+              })
+              .returning();
+
+            monto_total += parseFloat(row.excelAmount ?? "0");
           }
-          await db
-            .insert(schema.aportes_os)
-            .values({
-              cuil: row.cuil ?? "",
-              process_date: new Date(),
-              contribution_date:
-                row.contribution_date ?? input.contribution_date,
-              support_date: row.support_date ?? input.fecha_soporte,
-              amount: row.excelAmount ?? "0",
-              employer_document_number:
-                row.employer_document_number?.toString() ?? "0",
-              healthInsurances_id: input.columns.id ?? "",
-              id_affiliate: existingAffiliate?.id ?? "",
-            })
-            .returning();
 
-          monto_total += parseFloat(row.excelAmount ?? "0");
-        }
+          // Resto del código de transacción
+          console.log("Monto total procesado: ", monto_total);
 
-        // Resto del código de transacción
-        console.log("Monto total procesado: ", monto_total);
-
-        const cc = await db.query.currentAccount.findFirst({
-          where: eq(
-            schema.currentAccount.health_insurance,
-            input.columns.id ?? ""
-          ),
-        });
-
-        let historicEvents = await db.query.events.findMany({
-          where: eq(schema.events.currentAccount_id, cc?.id ?? ""),
-        });
-
-        if (historicEvents && historicEvents.length > 0) {
-          const lastEvent = historicEvents.reduce((prev, current) => {
-            return new Date(prev.createdAt) > new Date(current.createdAt)
-              ? prev
-              : current;
+          const cc = await db.query.currentAccount.findFirst({
+            where: eq(
+              schema.currentAccount.health_insurance,
+              input.columns.id ?? ""
+            ),
           });
 
-          const event = await db
-            .insert(schema.events)
-            .values({
-              currentAccount_id: cc?.id,
-              event_amount: monto_total,
-              current_amount: lastEvent.current_amount + monto_total,
-              description: "Pago afiliados",
-              type: "FC",
-              createdAt: new Date(),
-            })
-            .returning();
+          let historicEvents = await db.query.events.findMany({
+            where: eq(schema.events.currentAccount_id, cc?.id ?? ""),
+          });
 
-          await db
-            .update(schema.excelBilling)
-            .set({
-              confirmed: true,
-              confirmedAt: new Date(),
-            })
-            .where(eq(schema.excelBilling.id, input.uploadId));
+          if (historicEvents && historicEvents.length > 0) {
+            const lastEvent = historicEvents.reduce((prev, current) => {
+              return new Date(prev.createdAt) > new Date(current.createdAt)
+                ? prev
+                : current;
+            });
+
+            const event = await db
+              .insert(schema.events)
+              .values({
+                currentAccount_id: cc?.id,
+                event_amount: monto_total,
+                current_amount: lastEvent.current_amount + monto_total,
+                description: "Pago afiliados",
+                type: "FC",
+                createdAt: new Date(),
+              })
+              .returning();
+
+            await db
+              .update(schema.excelBilling)
+              .set({
+                confirmed: true,
+                confirmedAt: new Date(),
+              })
+              .where(eq(schema.excelBilling.id, input.uploadId));
+          }
         }
       });
     }),

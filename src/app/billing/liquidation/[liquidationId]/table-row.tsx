@@ -52,14 +52,19 @@ export default function TableRowContainer({
   const bonification = original_comprobante.items?.find(
     (item) => item.concept === "Bonificación"
   );
-  const contribution = original_comprobante.items?.find(
-    (item) => item.concept === "Aporte"
-  );
+  // const contribution = original_comprobante.items?.find(
+  //   (item) => item.concept === "Aporte"
+  // );
 
-  // const contribution = family_group.integrants
-  //   .flatMap((part) => part.aportes_os)
-  //   .filter((a) => a.contribution_date === preliquidation?.period)
-  //   .reduce((sum, aporte) => sum + parseInt(aporte.amount), 0);
+  const contribution = family_group.integrants
+    .flatMap((part) => part.aportes_os)
+    .filter((a) => a.contribution_date === preliquidation?.period)
+    .reduce((sum, aporte) => sum + parseInt(aporte.amount), 0);
+
+  console.log(
+    "contribucion----------------------------------------",
+    contribution
+  );
 
   const interest = original_comprobante.items?.find(
     (item) => item.concept === "Interes"
@@ -82,7 +87,7 @@ export default function TableRowContainer({
     abono?.amount,
     bonification?.amount,
     0,
-    contribution?.amount,
+    contribution,
     interest?.amount,
     subTotal,
     iva,
@@ -123,7 +128,7 @@ export default function TableRowContainer({
         </TableCell>
         <TableCell className="border border-[#6cebd1] p-2 py-4">
           {" "}
-          {contribution?.amount}
+          {contribution}
         </TableCell>
         <TableCell className="border border-[#6cebd1] p-2 py-4">
           {" "}
