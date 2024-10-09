@@ -148,15 +148,15 @@ export default function AddPreLiquidation() {
         onClick={() => setOpen(true)}
         className="rounded-full gap-1 p-4 text-base text-[#3E3E3E] bg-[#BEF0BB] ">
         <PlusCircleIcon className="h-4" />
-        Agregar Preliquidación
+        Agregar preliquidación
       </AddElementButton>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Crear Preliquidación</DialogTitle>
-          </DialogHeader>
-          <div className="w-flex flex-auto text-gray-500 m-3 pr-2 ">
+          <DialogHeader className="flex mx-5 ">
+            <DialogTitle className="flex text-2xl">Crear preliquidación</DialogTitle>
+          
+          <div className="w-full text-gray-500 py-4 ">
             <Label className="text-xs">MARCA</Label>
             <Select onValueChange={handleBrandChange}>
               <SelectTrigger
@@ -177,8 +177,8 @@ export default function AddPreLiquidation() {
               </SelectContent>
             </Select>
           </div>
-          <div className="max-w-md w-full flex flex-row gap-2 text-gray-500 p-3 mr-1 pl-2">
-            <div className="w-1/2 m-3 mr-2 ml-2 pr-2">
+          <div className="w-full flex flex-row gap-2 py-4 text-gray-500 justify-start">
+            <div className="w-1/2 pr-2">
               <Label className="text-xs">1° FECHA DE VENCIMIENTO</Label>
               <br />
               <Popover open={popover1Open} onOpenChange={setPopover1Open}>
@@ -186,7 +186,7 @@ export default function AddPreLiquidation() {
                   <Button
                     variant={"form"}
                     className={cn(
-                      "w-full border-b-2 border-green-200 pl-3 text-left font-normal hover:bg-none hover:bg-transparent shadow-none overflow-hidden text-ellipsis whitespace-nowrap",
+                      "w-full border-b border-[#BEF0BB] pl-3 text-left font-normal hover:bg-none hover:bg-transparent shadow-none overflow-hidden text-ellipsis whitespace-nowrap",
                       !fechaVencimiento1 && "text-muted-foreground"
                     )}>
                     <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[#3E3E3E]">
@@ -214,7 +214,7 @@ export default function AddPreLiquidation() {
                 </PopoverContent>
               </Popover>
             </div>
-            <div className="w-1/2 m-3 mr-2 ml-2 pr-2">
+            <div className="w-1/2 pl-2">
               <Label className="text-xs">2° FECHA DE VENCIMIENTO</Label>
               <br />
               <Popover open={popover2Open} onOpenChange={setPopover2Open}>
@@ -222,7 +222,7 @@ export default function AddPreLiquidation() {
                   <Button
                     variant={"form"}
                     className={cn(
-                      "w-full border-b-2 border-green-200 pl-3 text-left font-normal hover:bg-none hover:bg-transparent",
+                      "w-full border-b border-[#BEF0BB] pl-3 text-left font-normal hover:bg-none hover:bg-transparent",
                       !fechaVencimiento2 && "text-muted-foreground"
                     )}>
                     <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[#3E3E3E]">
@@ -311,8 +311,8 @@ export default function AddPreLiquidation() {
               </PopoverContent>
             </Popover>
           </div> */}
-          <div className="w-full flex flex-row gap-2 text-gray-500">
-            <div className="w-1/2 m-3 mr-3">
+          <div className="w-full flex flex-row gap-2 py-4 text-gray-500">
+            <div className="w-1/2 pr-2">
               <Label htmlFor="validy_date" className="text-xs">
                 MES DE VIGENCIA
               </Label>
@@ -386,7 +386,7 @@ export default function AddPreLiquidation() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="w-1/2 m-3 ml-3">
+            <div className="w-1/2 pl-2">
               <Label className="text-xs">AÑO DE VIGENCIA</Label>
               <Input
                 className="w-full  border-[#BEF0BB] border-0 border-b text-[#3E3E3E] bg-background rounded-none"
@@ -397,8 +397,8 @@ export default function AddPreLiquidation() {
               />
             </div>
           </div>
-          <div className="w-full flex flex-row  gap-2 text-gray-500">
-            <div className="m-3 ml-2 mr-3 mb-3 text-nowrap">
+          <div className="flex flex-row py-4 gap-2  text-gray-500">
+            <div className="w-1/2 text-nowrap pr-2">
               <Label htmlFor="name" className="text-xs">
                 PUNTO DE VENTA A UTILIZAR
               </Label>
@@ -416,7 +416,7 @@ export default function AddPreLiquidation() {
                 }}
               />
             </div>
-            <div className="w-2/4 text-gray-500 m-3 ml-3 pr-">
+            <div className="w-1/2 pl-2">
               <Label htmlFor="interest" className="text-xs">
                 {" "}
                 INTERÉS (%)*{" "}
@@ -434,24 +434,27 @@ export default function AddPreLiquidation() {
               />
             </div>
           </div>
-          <div>
+          <div className="py-4">
             <h3 className="text-[#3E3E3E] font-thin text-opacity-80 text-[10px] italic justify-center">
               *Aplica sobre saldos adeudados de períodos anteriores. Completar
               con alícuota como porcentaje directo sobre la base del cálculo.
             </h3>
           </div>
-          <Button
-            type="submit"
-            className="m-5 mb-2 rounded-full w-fit justify-self-center bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#DEF5DD]"
-            disabled={isLoading}
-            onClick={handleCreate}>
-            {isLoading ? (
-              <Loader2Icon className="mr-2 animate-spin" size={20} />
-            ) : (
-              <CirclePlus className="mr-2" />
-            )}
-            Crear Preliquidación
-          </Button>
+          <div className="flex pt-4 pb-2 justify-center">
+            <Button
+              type="submit"
+              className="flex rounded-full w-fit justify-self-center bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#DEF5DD]"
+              disabled={isLoading}
+              onClick={handleCreate}>
+              {isLoading ? (
+                <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
+              ) : (
+                <CirclePlus className="h-4 mr-1 stroke-1" />
+              )}
+              Crear Preliquidación
+            </Button>
+          </div>
+          </DialogHeader>
         </DialogContent>
       </Dialog>
     </>
