@@ -95,9 +95,9 @@ const Filters = forwardRef<FiltersRef, FiltersProps<any, any>>(
           Filtros
         </Button>
         <div
-          className={`transition-all pr-2 duration-700 ease-in-out overflow-hidden ${
+          className={`transition-all duration-700 ease-in-out overflow-hidden ${
             showFilters
-              ? "opacity-100 max-h-[500px] "
+              ? "opacity-100 max-h-[500px] pr-2"
               : "opacity-0 max-h-0 max-w-[0px]"
           }`}
         >

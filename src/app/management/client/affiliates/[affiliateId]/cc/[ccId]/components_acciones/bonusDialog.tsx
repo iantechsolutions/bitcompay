@@ -1,4 +1,5 @@
 import { Dialog, DialogContent, DialogTrigger } from "@radix-ui/react-dialog";
+import { CirclePlus } from "lucide-react";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 
@@ -14,11 +15,14 @@ export default function BonusDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="text-current text-sm shadow-md " variant={"bitcompay"}>Bonus</Button>
+      
+        <Button className="text-current text-sm shadow-md place-items-center" variant={"bitcompay"}>
+        <CirclePlus className="p-0 h-4 stroke-1" />
+        Bonus</Button>
       </DialogTrigger>
       <DialogContent className="absolute bg-white px-4 py-2 z-10 shadow-md rounded-md top-10 right-[-1px]">
         <DialogHeader className="flex bg-white py-2 z-10">
-          <h2 className="text-lg font-semibold whitespace-nowrap p-2">Seleccionar bonus</h2>
+          <h2 className="text-lg font-semibold whitespace-nowrap p-2">Agregar bonus</h2>
 
         <div className="flex flex-col gap-4 bg-white z-10 p-2">
           <div>
