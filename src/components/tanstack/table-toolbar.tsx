@@ -75,7 +75,7 @@ export default function TableToolbar<TData, TValue>({
           </>
         )}
       </div>
-      <div className="flex gap-1 items-center">
+      <div className="flex gap-1 pl-1 items-center">
         {/* Pasamos la prop onClearFilters al componente Filters */}
         <Filters
           ref={filtersRef} // Pasamos la referencia al componente Filters
