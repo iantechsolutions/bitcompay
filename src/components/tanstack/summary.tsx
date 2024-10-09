@@ -33,7 +33,12 @@ export default function DataTableSummary<TData>({
               {key}
             </p>
             <p className="text-[#85CE81] whitespace-nowrap font-bold text-xs">
-              $ {value}
+              {new Intl.NumberFormat("es-AR", {
+                style: "currency",
+                maximumFractionDigits: 2,
+                minimumFractionDigits: 2,
+                currency: "ARS",
+              }).format(value)}
             </p>
           </div>
         ))}

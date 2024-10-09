@@ -15,6 +15,7 @@ import {
   AccordionTrigger as AccordionTriggerIntegrant,
 } from "~/components/affiliate-page/integrante-accordion";
 
+
 import { Card } from "~/components/ui/card";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -33,10 +34,14 @@ import { RouterOutputs } from "~/trpc/shared";
 import { useRouter } from "next/navigation";
 import { SaldoPopoverAffiliates } from "./saldoPopoverAffiliates";
 import ElementCard from "~/components/affiliate-page/element-card";
-import { checkRole } from "~/lib/utils/server/roles";
-import { useUser } from "@clerk/nextjs";
+import { getServerAuthSession } from "~/server/auth";
+import BonusDialog from "./cc/[ccId]/components_acciones/bonusDialog";
 
-export default function AffiliatePage(props: {
+
+
+
+export default async function AffiliatePage(props: {
+  isAdmin: boolean;
   params: { affiliateId: string; companyId: string };
 }) {
   const router = useRouter();
@@ -49,6 +54,7 @@ export default function AffiliatePage(props: {
   });
   const { data: productos } = api.products.list.useQuery();
 
+
   const { data: cc } = api.currentAccount.getByFamilyGroup.useQuery({
     familyGroupId: grupos ?? "",
   });
@@ -59,6 +65,16 @@ export default function AffiliatePage(props: {
       ? prev
       : current;
   });
+
+  let lastComprobante;
+  if (grupo?.comprobantes && grupo?.comprobantes?.length! > 0) {
+    lastComprobante = grupo?.comprobantes?.reduce((prev, current) => {
+      return new Date(prev.due_date ?? 0) > new Date(current.due_date ?? 0)
+        ? prev
+        : current;
+    });
+  }
+  const nextExpirationDate = lastComprobante?.due_date ? dayjs(lastComprobante?.due_date).format("DD-MM-YYYY") : "-";
   const { data: integrant } = api.integrants.getByGroup.useQuery({
     family_group_id: grupos!,
   });
@@ -70,6 +86,7 @@ export default function AffiliatePage(props: {
         new Date().getTime() >= bonus.from.getTime() &&
         new Date().getTime() <= bonus.to.getTime())
   );
+
 
   const billResponsible = grupo?.integrants.find((x) => x.isBillResponsible);
   const grupoPaymentMethod = billResponsible?.pa[0]?.product?.name;
@@ -84,11 +101,13 @@ export default function AffiliatePage(props: {
   }
   const { data: comprobantesList } = api.comprobantes.list.useQuery();
 
+
   const comprobantes = comprobantesList
     ? comprobantesList.filter(
         (comprobante) => comprobante.family_group_id === grupos
       )
     : [];
+
 
   const familyGroupData = {
     "Unidad de negocio": grupo?.businessUnitData?.description,
@@ -114,10 +133,12 @@ export default function AffiliatePage(props: {
     Gerencia: grupo?.gerency ?? "-",
   };
 
+
   const integrantsPersonalData = new Map<string, Record<string, string>>();
   const integrantsFiscalData = new Map<string, Record<string, string>>();
   const integrantsContactData = new Map<string, Record<string, string>>();
   const integrantsPlanData = new Map<string, Record<string, string>>();
+
 
   const formattedAportes = grupo
     ? new Intl.NumberFormat("es-AR", {
@@ -126,6 +147,18 @@ export default function AffiliatePage(props: {
         currencyDisplay: "narrowSymbol",
       }).format(getGroupContribution(grupo))
     : "-";
+
+
+    const session = await getServerAuthSession();
+    const userRole = (session?.user as { id: string; role: string })?.role;
+
+
+
+
+  const diferencialAmount = grupo
+    ? getDifferentialAmount(grupo, new Date())?.toString()
+    : "-";
+
 
   const additionalData = {
     PROMOCIÓN: bonusValido ? bonusValido?.amount + " %" : "-",
@@ -140,9 +173,10 @@ export default function AffiliatePage(props: {
     "FECHA APORTES": "-",
     "PERIODO APORTADO": "-",
     "CUIT EMPLEADOR": "",
-    DIFERENCIAL: grupo? getDifferentialAmount(grupo,new Date())?.toString()
-      : "-",
+    DIFERENCIAL: userRole === "admin" ? diferencialAmount : "No autorizado",
   };
+
+
   for (const integrant of grupo?.integrants ?? []) {
     const intPersonalData = {
       "TIPO DOCUMENTO": integrant.id_type ?? "-",
@@ -150,7 +184,7 @@ export default function AffiliatePage(props: {
       "Nº AFILIADO": integrant.affiliate_number ?? "-",
       EXTENSION: integrant.extention ? integrant?.extention : "-",
       "Nº. CREDENCIAL":
-        (integrant.affiliate_number && integrant.extention)
+        integrant.affiliate_number && integrant.extention
           ? `${integrant.affiliate_number}-${integrant.extention}`
           : "-",
       "FECHA DE NAC": dayjs(integrant.birth_date).format("DD-MM-YYYY") ?? "-",
@@ -190,12 +224,14 @@ export default function AffiliatePage(props: {
     integrantsPersonalData.set(integrant.id, intPersonalData);
   }
 
+
   const bankLogoMap = {
     default: <Landmark />,
     "Banco Industrial y Comercial de China": (
       <img src="/public/affiliates/icbcLogo.png" className="h-4 w-auto mr-2" />
     ),
   };
+
 
   const cardLogoMap = {
     Visa: <img src="/landing_images/VISA.png" className="h-9 w-auto ml-2" />,
@@ -204,8 +240,10 @@ export default function AffiliatePage(props: {
     ),
   };
 
+
   const prodId = billResponsible?.pa[0]?.product_id;
   const prod = productos?.find((x) => x.id === prodId);
+
 
   const paymentMethod = new Map<string, React.ReactNode>([
     [
@@ -220,6 +258,7 @@ export default function AffiliatePage(props: {
           />
           <ElementCard element={{ key: "ALIAS", value: "AAAA.AAA.AAA" }} />
         </div>
+
 
         <div className="mt-3">
           <ElementCard
@@ -257,6 +296,7 @@ export default function AffiliatePage(props: {
         </div>
       </div>,
     ],
+
 
     [
       "EFECTIVO",
@@ -325,6 +365,7 @@ export default function AffiliatePage(props: {
     ],
   ]);
 
+
   const goToCCDetail = (id: string | undefined) => {
     if (!id) return;
     router.push(
@@ -332,12 +373,23 @@ export default function AffiliatePage(props: {
     );
   };
 
+
   return (
     <LayoutContainer>
       <section>
         <h2 className="text-2xl mt-4 font-semibold">
           Grupo familiar Nº {grupo?.numericalId}
         </h2>
+
+
+
+
+        <div className="relative">
+          <div className="absolute top-0 right-0">
+            <BonusDialog />
+          </div>
+        </div>
+
 
         <div className="flex gap-3 mt-5 mb-10">
           <Card className="flex-auto py-4 px-6 w-1/2  items-center">
@@ -361,7 +413,7 @@ export default function AffiliatePage(props: {
             <div className="flex flex-col  justify-center">
               <p className="text-sm font-medium block">PRÓXIMO VENCIMIENTO</p>
               <span className="text-[#3E3E3E] font-semibold text-xl">
-                10/09/2024
+                {nextExpirationDate}
               </span>
             </div>
           </Card>
@@ -498,6 +550,7 @@ export default function AffiliatePage(props: {
                       Tipo de comprobante:
                     </div>
 
+
                     <p className="font-semibold pl-7 opacity-80">
                       {billResponsible?.afip_status == "CONSUMIDOR FINAL"
                         ? "B"
@@ -510,7 +563,9 @@ export default function AffiliatePage(props: {
                       />
                       Condición de Venta:
                     </div>
-                    <p className="font-semibold pl-7 opacity-80">{grupo?.sale_condition ?? "-"}</p>
+                    <p className="font-semibold pl-7 opacity-80">
+                      {grupo?.sale_condition ?? "-"}
+                    </p>
                     <div className="flex items-center gap-2">
                       <img
                         src="/public/affiliates/modalityIcon.png"
@@ -539,15 +594,18 @@ export default function AffiliatePage(props: {
                   </div>
                 </div>
 
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-stretch p-3 pt-6">
                   {Object.entries(additionalData).map(([key, value]) => {
+                    console.log("iteracion: ",key==="DIFERENCIAL", !props.isAdmin);
+                    const notRender= key==="DIFERENCIAL" && !props.isAdmin;
                     const isEmpty = value === "-" || !value;
                     const isPeriod =
                       key === "PERIODO APORTADO" || key === "FECHA APORTES";
                     if (isEmpty && isPeriod) return null;
                     value =
                       typeof value === "string" ? Capitalize(value) : value;
-                    return <ElementCard key={key} element={{ key, value }} />;
+                    return !notRender ? <ElementCard key={key} element={{ key, value }} /> : <></>;
                   })}
                 </div>
                 
@@ -559,3 +617,4 @@ export default function AffiliatePage(props: {
     </LayoutContainer>
   );
 }
+
