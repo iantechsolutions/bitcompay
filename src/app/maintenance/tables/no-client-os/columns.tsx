@@ -5,9 +5,8 @@ export type TableRecord = {
   id: string;
   name: string;
   identificationNumber: string;
-  responsibleName: string;
-  fiscal_id_number: string;
-  afip_status: string;
+  siglas: string;
+  description:string;
 };
 
 export const columns: ColumnDef<TableRecord>[] = [
@@ -27,16 +26,49 @@ export const columns: ColumnDef<TableRecord>[] = [
     },
   },
   {
-    accessorKey: "responsibleName",
+    accessorKey: "siglas",
     header: () => (
       <div className="text-center text-medium">
-        Nombre responsable
+        Siglas
+      </div>
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="text-center">
+          {row.getValue("siglas")}
+        </div>
+      );
+    },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id));
+    },
+  },
+  {
+    accessorKey: "name",
+    header: () => (
+      <div className="text-center text-medium  ">
+        Nombre/ razón social
       </div>
     ),
     cell: ({ row }) => {
       return (
         <div className="text-center  ">
-          {row.getValue("responsibleName")}
+          {row.getValue("name")}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "description",
+    header: () => (
+      <div className="text-center text-medium">
+        Descripción
+      </div>
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="text-center">
+          {row.getValue("siglas")}
         </div>
       );
     },
@@ -45,33 +77,4 @@ export const columns: ColumnDef<TableRecord>[] = [
     },
   },
 
-  {
-    accessorKey: "fiscal_id_number",
-    header: () => (
-      <div className="text-center  text-medium">CUIL/CUIT</div>
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className="text-center  ">
-          {row.getValue("fiscal_id_number")}
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "afip_status",
-    header: () => (
-      <div className="text-center  text-medium">Estado AFIP</div>
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className="text-center  ">
-          {row.getValue("afip_status")}
-        </div>
-      );
-    },
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
-    },
-  },
 ];

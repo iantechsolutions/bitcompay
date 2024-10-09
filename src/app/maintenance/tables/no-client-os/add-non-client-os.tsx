@@ -127,11 +127,9 @@ export function AddNonClientOs(props: {
 
   function validateFields() {
     const errors: string[] = [];
-    if (!razonsocial) errors.push("RAZON SOCIAL");
-    if (!identificationNumber) errors.push("CODIGO");
-    if (!fiscalIdType) errors.push("TIPO DOC FISCAL");
-    if (!afipStatus) errors.push("ESTADO AFIP");
-    if (!description) errors.push("DESCRIPCION");
+    if(!identificationNumber) errors.push("Codigo");
+    if(!initials) errors.push("Sigla");
+    if(!description) errors.push("Descripcion");
 
     return errors;
   }
@@ -151,44 +149,7 @@ export function AddNonClientOs(props: {
         initials: initials,
         name: razonsocial,
         description: description,
-        businessUnit: businessUnit,
-        businessName: razonsocial,
-        fiscal_id_number: fiscalIdNumber.toString(),
-        afip_status: afipStatus,
-        IIBBStatus: IIBBStatus,
-        IIBBNumber: IIBBNumber,
-        sellCondition: sellCondition,
-        fiscalAddress: fiscalAddress,
-        fiscalFloor: fiscalFloor,
-        fiscalOffice: fiscalOffice,
-        fiscalLocality: fiscalLocality,
-        fiscalProvince: fiscalProvince,
-        fiscalPostalCode: fiscalPostalCode,
-        fiscalCountry: fiscalCountry,
-
-        adress: address,
-        floor: floor,
-        office: office,
-        locality: locality,
-        province: province,
-        postal_code: postalCode,
-        initialValue: initialValue,
-
-        phoneNumber: phoneNumber,
-        email: email,
-        state: state,
-        user: user,
-        cancelMotive: cancelMotive,
-
         isClient: false,
-        dateState: dateState,
-        responsibleName: responsibleName,
-        // initialValue: initialValue,
-        // responsibleName: responsibleName,
-        // sellCondition: sellCondition,
-        // user: user,
-        // cancelMotive: cancelMotive,
-        // fiscal_id_type: fiscalIdType,
       });
 
       toast.success("Obra social creada correctamente");
@@ -218,37 +179,6 @@ export function AddNonClientOs(props: {
         initials: initials,
         name: razonsocial,
         description: description,
-
-        businessUnit: businessUnit,
-        businessName: razonsocial,
-        fiscal_id_number: fiscalIdNumber.toString(),
-        afip_status: afipStatus,
-        IIBBStatus: IIBBStatus,
-        IIBBNumber: IIBBNumber,
-        sellCondition: sellCondition,
-        fiscalAddress: fiscalAddress,
-        fiscalFloor: fiscalFloor,
-        fiscalOffice: fiscalOffice,
-        fiscalLocality: fiscalLocality,
-        fiscalProvince: fiscalProvince,
-        fiscalPostalCode: fiscalPostalCode,
-        fiscalCountry: fiscalCountry,
-
-        adress: address,
-        floor: floor,
-        office: office,
-        locality: locality,
-        province: province,
-        postal_code: postalCode,
-        phoneNumber: phoneNumber,
-        email: email,
-
-        isClient: false,
-        state: state,
-        dateState: dateState,
-        responsibleName: user,
-        cancelMotive: cancelMotive,
-        // initialValue: initialValue,
       });
 
       toast.success("Datos actualizados");
@@ -288,12 +218,24 @@ export function AddNonClientOs(props: {
         <DialogContent className="max-w-[1000px] max-h-[95vh] gap-4 rounded-2xl py-8 px-14 overflow-y-scroll">
           <DialogHeader>
             {OS ? (
-              <DialogTitle>Editar obra social</DialogTitle>
+              <DialogTitle>Editar obra social no cliente</DialogTitle>
             ) : (
-              <DialogTitle>Agregar obra social</DialogTitle>
+              <DialogTitle>Agregar obra social no cliente</DialogTitle>
             )}
           </DialogHeader>
           <div className="grid grid-cols-4 gap-y-4 gap-x-8 justify-between">
+          <div>
+              <Label htmlFor="name" className="text-xs text-gray-500">
+                Nombre / Razón social
+              </Label>
+              <Input
+                id="name"
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                placeholder="ingrese nombre obra social"
+                value={razonsocial}
+                onChange={(e) => setRazonsocial(e.target.value)}
+              />
+            </div>
             <div>
               <Label htmlFor="IdNumber" className="text-xs text-gray-500">
                 CODIGO
@@ -305,33 +247,8 @@ export function AddNonClientOs(props: {
                 value={identificationNumber}
                 onChange={(e) => setIdentificationNumber(e.target.value)}
               />
-
-              {/* <Select onValueChange={setIdentificationNumber}>
-                <SelectTrigger className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
-                  <SelectValue placeholder="..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">1-3432-8</SelectItem>
-                  <SelectItem value="2">1-3456-2</SelectItem>
-                  <SelectItem value="3">1-3567-1</SelectItem>
-                </SelectContent>
-              </Select> */}
             </div>
 
-            <div>
-              <Label className="text-xs text-gray-500">
-                Tipo de obra social
-              </Label>
-              <Select onValueChange={(value) => setIsClient(value === "true")}>
-                <SelectTrigger className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none">
-                  <SelectValue placeholder="..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="true">Cliente</SelectItem>
-                  <SelectItem value="false">No cliente</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
             <div>
               <Label className="text-xs text-gray-500">SIGLA</Label>
               <Input
@@ -341,16 +258,6 @@ export function AddNonClientOs(props: {
                 value={initials}
                 onChange={(e) => setInitials(e.target.value)}
               />
-              {/* <Select>
-                <SelectTrigger className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
-                  <SelectValue placeholder="..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">OSBARA</SelectItem>
-                  <SelectItem value="2">OSECAC</SelectItem>
-                  <SelectItem value="3">UTHGRA</SelectItem>
-                </SelectContent>
-              </Select> */}
             </div>
             <div>
               <Label className="text-xs text-gray-500">Descripcion</Label>
@@ -364,421 +271,6 @@ export function AddNonClientOs(props: {
             </div>
             <div />
             <div />
-
-            <p className="col-span-4 mt-3 px-1 py-2 justify-start text-black font-xs text-sm font-semibold">
-              Datos fiscales
-            </p>
-            <div>
-              <Label className="text-xs text-gray-500">UNIDAD DE NEGOCIO</Label>
-              {/* <Input
-                type="number"
-                id="importe"
-                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
-                placeholder="Ej: 121234"
-              /> */}
-              <Select onValueChange={setBusinessUnit} value={businessUnit}>
-                <SelectTrigger
-                  className="w-fit mb-2 border-[#bef0bb] border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right">
-                  <SelectValue placeholder="Seleccione una UN" />
-                </SelectTrigger>
-                <SelectContent>
-                  {businessUnits?.map((bu) => (
-                    <SelectItem key={bu.id} value={bu.id}>
-                      {bu?.description ?? ""}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="name" className="text-xs text-gray-500">
-                RAZON SOCIAL
-              </Label>
-              <Input
-                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
-                id="name"
-                placeholder="..."
-                value={razonsocial}
-                onChange={(e) => setRazonsocial(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <Label className="text-xs text-gray-500">CUIT</Label>
-              <Input
-                type="number"
-                id="importe"
-                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
-                placeholder="XX-XXXXXXXX-X"
-                value={fiscalIdNumber}
-                onChange={(e) => setFiscalIdNumber(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label className="text-xs text-gray-500">CONDICIÓN AFIP</Label>
-              <Select onValueChange={setAfipStatus} value={afipStatus}>
-                <SelectTrigger className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none">
-                  <SelectValue placeholder="Seleccione uno" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="monotributista">Monotributista</SelectItem>
-                  <SelectItem value="responsable_inscripto">
-                    Responsable Inscripto
-                  </SelectItem>
-                  <SelectItem value="exento">Exento</SelectItem>
-                  <SelectItem value="consumidor_final">
-                    Consumidor Final
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label className="text-xs text-gray-500">CONDICIÓN IIBB</Label>
-              <Select onValueChange={setIIBBStatus} value={IIBBStatus}>
-                <SelectTrigger className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none">
-                  <SelectValue placeholder="Seleccione uno" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="monotributista">Monotributista</SelectItem>
-                  <SelectItem value="responsable_inscripto">
-                    Responsable Inscripto
-                  </SelectItem>
-                  <SelectItem value="exento">Exento</SelectItem>
-                  <SelectItem value="consumidor_final">
-                    Consumidor Final
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label htmlFor="IdNumber" className="text-xs text-gray-500">
-                N° IIBB
-              </Label>
-              <Input
-                id="IdNumber"
-                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none"
-                placeholder="0"
-                value={IIBBNumber}
-                onChange={(e) => setIIBBNumber(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="IdNumber" className="text-xs text-gray-500">
-                CONDICION DE VENTA
-              </Label>
-              <Input
-                id="IdNumber"
-                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none"
-                placeholder="0"
-                value={sellCondition}
-                onChange={(e) => setSellCondition(e.target.value)}
-              />
-            </div>
-            <div></div>
-            <div className="w-">
-              <Label htmlFor="address" className="text-xs text-gray-500">
-                DOMICILIO FISCAL
-              </Label>
-              <Input
-                className=" mb-2 border-[#bef0bb] border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right w-full"
-                id="address"
-                placeholder="..."
-                value={fiscalAddress}
-                onChange={(e) => setFiscalAddress(e.target.value)}
-              />
-            </div>
-            <div className="flex-auto w-24">
-              <Label htmlFor="address" className="text-xs text-gray-500">
-                PISO
-              </Label>
-              <Input
-                className=" mb-2 border-[#bef0bb] border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right w-full"
-                id="address"
-                placeholder="0"
-                value={fiscalFloor}
-                onChange={(e) => setFiscalFloor(e.target.value)}
-              />
-            </div>
-            <div className="flex-auto w-24">
-              <Label htmlFor="address" className="text-xs text-gray-500">
-                OFICINA
-              </Label>
-              <Input
-                className=" mb-2 border-[#bef0bb] border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right w-full"
-                id="address"
-                placeholder="0"
-                value={fiscalOffice}
-                onChange={(e) => setFiscalOffice(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="address" className="text-xs text-gray-500">
-                LOCALIDAD
-              </Label>
-              <Input
-                className=" mb-2 border-[#bef0bb] border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right w-full"
-                id="address"
-                placeholder="..."
-                value={fiscalLocality}
-                onChange={(e) => setFiscalLocality(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="address" className="text-xs text-gray-500">
-                PROVINCIA
-              </Label>
-              <Input
-                className=" mb-2 border-[#bef0bb] border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right w-full"
-                id="address"
-                placeholder="..."
-                value={fiscalProvince}
-                onChange={(e) => setFiscalProvince(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="postal_code" className="text-xs text-gray-500">
-                CÓDIGO POSTAL
-              </Label>
-              <Select
-                onValueChange={setFiscalPostalCode}
-                value={fiscalPostalCode}>
-                <SelectTrigger
-                  className=" mb-2 border-[#bef0bb] border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right w-full">
-                  <SelectValue placeholder="0" />
-                </SelectTrigger>
-                <SelectContent>
-                  {cps?.map((cp) => (
-                    <SelectItem key={cp.id} value={cp.id}>
-                      {cp.cp}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="address" className="text-xs text-gray-500">
-                PAÍS
-              </Label>
-              <Input
-                className=" mb-2 border-[#bef0bb] border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right w-full"
-                id="address"
-                placeholder="..."
-                value={fiscalCountry}
-                onChange={(e) => setFiscalCountry(e.target.value)}
-              />
-            </div>
-
-            <p className="col-span-4 mt-3 px-1 py-2 justify-start text-black font-xs text-sm font-semibold">
-              Datos de Contacto
-            </p>
-            <div>
-              <Label htmlFor="address" className="text-xs text-gray-500">
-                DOMICILIO COMERCIAL
-              </Label>
-              <Input
-                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
-                id="address"
-                placeholder="..."
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="address" className="text-xs text-gray-500">
-                PISO
-              </Label>
-              <Input
-                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
-                id="address"
-                placeholder="0"
-                value={floor}
-                onChange={(e) => setFloor(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="address" className="text-xs text-gray-500">
-                OFICINA
-              </Label>
-              <Input
-                className=" mb-2 border-[#bef0bb] border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right w-full"
-                id="address"
-                placeholder="0"
-                value={office}
-                onChange={(e) => setOffice(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="locality" className="text-xs text-gray-500">
-                LOCALIDAD
-              </Label>
-              <Input
-                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
-                id="locality"
-                placeholder="..."
-                value={locality}
-                onChange={(e) => setLocality(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="province" className="text-xs text-gray-500">
-                PROVINCIA
-              </Label>
-              <Input
-                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
-                id="province"
-                placeholder="..."
-                value={province}
-                onChange={(e) => setProvince(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="postal_code" className="text-xs text-gray-500">
-                CÓDIGO POSTAL
-              </Label>
-              <Select onValueChange={setPostalCode} value={postalCode}>
-                <SelectTrigger className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
-                  <SelectValue placeholder="0" />
-                </SelectTrigger>
-                <SelectContent>
-                  {cps?.map((cp) => (
-                    <SelectItem key={cp.id} value={cp.id}>
-                      {cp.cp}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="address" className="text-xs text-gray-500">
-                TELÉFONO
-              </Label>
-              <Input
-                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
-                id="address"
-                placeholder="0"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="address" className="text-xs text-gray-500">
-                E-MAIL
-              </Label>
-              <Input
-                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
-                id="address"
-                placeholder="..."
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <p className="col-span-4 mt-3 px-1 py-2 justify-start text-black font-xs text-sm font-semibold">
-              Información de la cuenta
-            </p>
-            <div>
-              <Label htmlFor="postal_code" className="text-xs text-gray-500">
-                ESTADO
-              </Label>
-              <Select onValueChange={setState} value={state}>
-                <SelectTrigger className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
-                  <SelectValue placeholder="Seleccionar estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ACTIVO">ACTIVO</SelectItem>
-                  <SelectItem value="INACTIVO">INACTIVO</SelectItem>
-                  <SelectItem value="BAJA">BAJA</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="postal_code" className="text-xs text-gray-500">
-                FECHA DE ESTADO
-              </Label>
-              <Popover>
-                <PopoverTrigger asChild={true}>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "text-left flex justify-between font-medium w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none pr-0 pl-0",
-                      !dateState && "text-muted-foreground"
-                    )}>
-                    {dateState ? (
-                      format(dateState, "PPP")
-                    ) : (
-                      <span>Seleccionar fecha</span>
-                    )}
-                    <Calendar01Icon className="h-4 w-4" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className=" p-0 overflow-y-scroll">
-                  <Calendar
-                    mode="single"
-                    selected={dateState}
-                    onSelect={(e) => setDateState(e)}
-                    initialFocus={true}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div>
-              <Label htmlFor="user" className="text-xs text-gray-500">
-                USUARIO
-              </Label>
-              <Input
-                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
-                id="user"
-                placeholder="..."
-                value={user}
-                onChange={(e) => setUser(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="cancelMotive" className="text-xs text-gray-500">
-                MOTIVO DE BAJA
-              </Label>
-              <Input
-                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
-                id="cancelMotive"
-                placeholder="..."
-                value={cancelMotive}
-                onChange={(e) => setCancelMotive(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="user" className="text-xs text-gray-500">
-                NOMBRE DEL RESPONSABLE
-              </Label>
-              <Input
-                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
-                id="user"
-                placeholder="..."
-                value={responsibleName}
-                onChange={(e) => setResponsibleName(e.target.value)}
-              />
-            </div>
-            {/* {OS ? null : (
-              <div>
-                <Label htmlFor="initialValue">Saldo inicial</Label>
-                <Input
-                  id="initialValue"
-                  placeholder="..."
-                  value={initialValue}
-                  onChange={(e) => setInitialValue(e.target.value)}
-                />
-              </div>
-            )} */}
             <div className="flex items-center justify-center">
               {error && (
                 <span className="text-red-600 text-xs text-center">
@@ -812,7 +304,7 @@ export function AddNonClientOs(props: {
                 ) : (
                   <>
                     <CirclePlus className="mr-2" size={20} />
-                    Alta de obra social
+                    Agregar obra social
                   </>
                 )}
               </Button>

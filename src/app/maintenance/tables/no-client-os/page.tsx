@@ -13,12 +13,11 @@ export default async function Home(props: Props) {
     for (const os of no_client_os) {
       tableRecords.push({
         id: os.id!,
-        name: os.name,
+        name: os.name ?? "SIN NOMBRE",
         identificationNumber:
           os?.identificationNumber ?? "SIN NRO DE IDENTIFICACION",
-        responsibleName: os?.responsibleName ?? "SIN NOMBRE DE RESPONSABLE",
-        fiscal_id_number: os?.fiscal_id_number ?? "SIN CUIL/CUIT",
-        afip_status: os?.afip_status ?? "SIN ESTADO AFIP",
+        siglas: os?.initials ?? "SIN SIGLAS",
+        description: os?.description ?? "SIN DESCRIPCION",
       });
     }
   }
