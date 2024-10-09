@@ -9,10 +9,15 @@ import {
 } from "~/server/db/schema";
 import { RouterOutputs } from "~/trpc/shared";
 import { computeBase, computeIva, toNumberOrZero } from "~/lib/utils";
+import { TRPCError } from "@trpc/server";
 export type FamilyListLiquidationId =
   RouterOutputs["family_groups"]["getByLiquidationFiltered"]["results"][number];
 
 function makeSummary(
+  aportesPorGrupo: {
+    groupId: string;
+    aportes: { amount: number }[];
+  }[],
   fgFiltered: {
     comprobantes: {
       items: {
@@ -36,8 +41,7 @@ function makeSummary(
     "TOTAL A FACTURAR": 0,
   };
 
-  fgFiltered.forEach((fg) => {
-    // ya los obtengo filtrados
+  fgFiltered.forEach((fg, index) => {
     const original_comprobante = fg.comprobantes.at(0);
 
     const saldo_anterior = toNumberOrZero(
@@ -45,7 +49,6 @@ function makeSummary(
         (item) => item.concept === "Factura Anterior"
       )?.amount
     );
-
     summary["SALDO ANTERIOR"] += saldo_anterior;
 
     const cuota_planes = toNumberOrZero(
@@ -65,14 +68,15 @@ function makeSummary(
       original_comprobante?.items.find((item) => item.concept === "Diferencial")
         ?.amount
     );
-
     summary["DIFERENCIAL"] += diferencial;
 
-    const aporte = toNumberOrZero(
-      original_comprobante?.items.find((item) => item.concept === "Aporte")
-        ?.amount
+    // Sumamos los aportes correspondientes al grupo actual
+    const aportesGrupo = aportesPorGrupo[index]?.aportes || [];
+    const totalAportesGrupo = aportesGrupo.reduce(
+      (sum, aporte) => sum + toNumberOrZero(aporte.amount),
+      0
     );
-    summary["APORTES"] += aporte;
+    summary["APORTES"] += totalAportesGrupo;
 
     const interes = toNumberOrZero(
       original_comprobante?.items.find((item) => item.concept === "Interes")
@@ -362,7 +366,7 @@ export const family_groupsRouter = createTRPCRouter({
       return input.summary
         ? {
             familyGroups: fgFiltered,
-            summary: makeSummary(fgFiltered as any), // Puedes ajustar el tipo según el uso
+            summary: makeSummary([], fgFiltered as any), // Puedes ajustar el tipo según el uso
           }
         : fgFiltered;
     }),
@@ -375,6 +379,7 @@ export const family_groupsRouter = createTRPCRouter({
         cursor: z.number().int().nonnegative().optional(),
         id_number_startsWith: z.string().min(1).max(255).optional(),
         name_contains: z.string().min(1).max(255).optional(),
+        period: z.date().optional(),
       })
     )
     .query(async ({ input, ctx }) => {
@@ -399,6 +404,9 @@ export const family_groupsRouter = createTRPCRouter({
           businessUnitData: true,
           integrants: {
             where: and(...integrantsConditions),
+            with: {
+              aportes_os: true,
+            },
           },
           comprobantes: {
             with: {
@@ -414,9 +422,6 @@ export const family_groupsRouter = createTRPCRouter({
         offset: input.cursor,
       });
 
-      // Filtra los comprobantes por `liquidationId` dentro de cada grupo familiar
-      // Si hay comprobantes filtrados, devuelve el grupo con los comprobantes filtrados
-      // se filtran los comprobantes en la query
       const fgFiltered = fg.filter(
         (x) =>
           x.businessUnitData?.companyId === ctx.session.orgId &&
@@ -424,8 +429,20 @@ export const family_groupsRouter = createTRPCRouter({
           x.integrants.length > 0
       );
 
+      // Construimos la lista de aportes por grupo
+      const aportesPorGrupo = fgFiltered.map((group) => ({
+        groupId: group.id,
+        aportes: group.integrants
+          .flatMap((part) => part.aportes_os)
+          .filter((a) => a.contribution_date === input.period)
+          .map((aporte) => ({
+            amount: parseInt(aporte.amount),
+            contribution_date: aporte.contribution_date,
+          })),
+      }));
+
       return {
-        summary: makeSummary(fgFiltered),
+        summary: makeSummary(aportesPorGrupo, fgFiltered),
         totalRows: fgFiltered.length,
       };
     }),
@@ -444,6 +461,13 @@ export const family_groupsRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
+      if (!ctx.session.orgId) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "!ctx.session.orgId",
+        });
+      }
+
       const integrantsConditions = [
         eq(schema.integrants.isBillResponsible, true),
       ];
@@ -460,7 +484,55 @@ export const family_groupsRouter = createTRPCRouter({
         );
       }
 
+      let whereCompatBusinessUnits = [
+        eq(schema.bussinessUnits.companyId, ctx.session.orgId),
+      ];
+
+      if (input.UN !== undefined) {
+        whereCompatBusinessUnits.push(
+          eq(schema.bussinessUnits.description, input.UN)
+        );
+      }
+
+      let compatibleBusinessUnits = await db.query.bussinessUnits.findMany({
+        where: and(...whereCompatBusinessUnits),
+      });
+
+      let whereFgList = [
+        inArray(
+          schema.family_groups.businessUnit,
+          compatibleBusinessUnits.map((v) => v.id)
+        ),
+      ];
+
+      if (input.modoDesc !== undefined) {
+        let compatibleModos = await db.query.modos.findMany({
+          where: eq(schema.modos.description, input.modoDesc),
+        });
+
+        whereFgList.push(
+          inArray(
+            schema.family_groups.modo,
+            compatibleModos.map((v) => v.id)
+          )
+        );
+      }
+
+      if (input.plan !== undefined) {
+        let compatiblePlans = await db.query.plans.findMany({
+          where: eq(schema.plans.plan_code, input.plan),
+        });
+
+        whereFgList.push(
+          inArray(
+            schema.family_groups.plan,
+            compatiblePlans.map((v) => v.id)
+          )
+        );
+      }
+
       const fg = await db.query.family_groups.findMany({
+        where: and(...whereFgList),
         with: {
           plan: true,
           modo: true,
@@ -484,23 +556,8 @@ export const family_groupsRouter = createTRPCRouter({
         offset: input.cursor,
       });
 
-      // Filtra los comprobantes por `liquidationId` dentro de cada grupo familiar
-      // Si hay comprobantes filtrados, devuelve el grupo con los comprobantes filtrados
-      // se filtran los comprobantes en la query
       const fgCompanyFiltered = fg.filter(
-        (x) =>
-          x.businessUnitData?.companyId === ctx.session.orgId &&
-          x.comprobantes.length > 0 &&
-          x.integrants.length > 0 &&
-          (input.modoDesc !== undefined
-            ? x.modo?.description === input.modoDesc
-            : true) &&
-          (input.plan !== undefined
-            ? x.plan?.plan_code === input.plan
-            : true) &&
-          (input.UN !== undefined
-            ? x.businessUnitData?.description === input.UN
-            : true)
+        (x) => x.comprobantes.length > 0 && x.integrants.length > 0
       );
 
       return {

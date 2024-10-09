@@ -37,7 +37,7 @@ const UserButtonAndMenu = ({
             className="h-[4.5vh]  mr-[1vw]"
           />
            <div className="flex-1 flex flex-col justify-center">
-            <div className="text-startP text-left color-[#b5b5b5] opacity-50">
+            <div className="text-startP text-left color-[#b5b5b5] text-current opacity-90 font-semibold">
               {user?.firstName && user?.lastName
                 ? `${user.lastName} ${user.firstName}`
                 : "Sin nombre"}

@@ -3,6 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { RouterOutputs } from "~/trpc/shared";
 import dayjs from "dayjs";
+import ActiveBadge from "src/components/active-badge";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -75,25 +76,9 @@ export const columns: ColumnDef<AffiliatesTableRecord>[] = [
     },
   },
   {
-    accessorKey: "Estados GF",
-    header: () => (
-      <div className="text-center whitespace-nowrap text-medium">Estado</div>
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className="text-center  ">
-          {row.getValue("Estados GF")}
-        </div>
-      );
-    },
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
-    },
-  },
-  {
     accessorKey: "fechaEstado",
     header: () => (
-      <div className="text-center whitespace-nowrap text-medium">Fecha Estado</div>
+      <div className="text-center whitespace-nowrap text-medium">Fecha de alta</div>
     ),
     cell: ({ row }) => {
       return (
@@ -101,6 +86,24 @@ export const columns: ColumnDef<AffiliatesTableRecord>[] = [
           {dayjs(row.getValue("fechaEstado")).format("DD/MM/YYYY")}
         </div>
       );
+    },
+  },
+  {
+    accessorKey: "Estados GF",
+    header: () => (
+      <div className="text-center whitespace-nowrap text-medium">Estado</div>
+    ),
+    cell: ({ row }) => {
+      return ( 
+        <div className="flex text-center mx-auto justify-center ">
+          {(row.getValue("Estados GF") === "ACTIVO") && (
+          <ActiveBadge className="w-14 mx-auto"> Activo </ActiveBadge>
+        ) || (row.getValue("Estados GF"))}
+        </div>
+      );
+    },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id));
     },
   },
   {

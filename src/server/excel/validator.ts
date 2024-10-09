@@ -4,6 +4,97 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 dayjs.extend(customParseFormat);
 import type { TableHeaders } from "~/components/table";
 import { Value } from "@radix-ui/react-select";
+type MonthString =
+  | "ENE"
+  | "FEB"
+  | "MAR"
+  | "ABR"
+  | "MAY"
+  | "JUN"
+  | "JUL"
+  | "AGO"
+  | "SEP"
+  | "OCT"
+  | "NOV"
+  | "DIC";
+
+const AllToDate = z
+  .union([z.string(), z.number()])
+  .transform((value) => {
+    // Convertir números a string
+    const stringValue = typeof value === "number" ? value.toString() : value;
+    let date: Date | undefined;
+
+    // Caso 1: Si empieza con "x" (formato mes letra año)
+    if (typeof stringValue === "string" && stringValue.startsWith("x")) {
+      const cleanedValue = stringValue.replace(/^x\s*/, ""); // Eliminar el "x" inicial
+      const [monthStr, year] = cleanedValue.split(".");
+
+      const monthMap: Record<MonthString, number> = {
+        ENE: 0,
+        FEB: 1,
+        MAR: 2,
+        ABR: 3,
+        MAY: 4,
+        JUN: 5,
+        JUL: 6,
+        AGO: 7,
+        SEP: 8,
+        OCT: 9,
+        NOV: 10,
+        DIC: 11,
+      };
+      let month;
+      if (monthStr) {
+        month = monthMap[monthStr.trim().toUpperCase() as MonthString];
+      }
+      if (month !== undefined && year) {
+        date = new Date(Number(year), month, 1);
+      }
+    }
+
+    // Caso 2: Si tiene 10 dígitos (formato mes-dia-año)
+    else if (typeof stringValue === "string" && stringValue.length === 10) {
+      const [day, month, year] = stringValue.split(".");
+      date = new Date(Number(year), Number(month) - 1, Number(day));
+    }
+
+    // Caso 3: Si tiene 7 dígitos (formato año-mes)
+    else if (
+      typeof stringValue === "string" &&
+      stringValue.length === 7 &&
+      stringValue.includes("-")
+    ) {
+      const [year, month] = stringValue.split("-");
+      if (year && month) {
+        date = new Date(parseInt(year, 10), parseInt(month, 10) - 1, 1);
+      }
+    }
+
+    // Caso 4: Si tiene 4 dígitos (formato año mes)
+    else if (typeof stringValue === "string" && stringValue.length === 4) {
+      const year = parseInt(stringValue.slice(0, 2), 10) + 2000;
+      const month = parseInt(stringValue.slice(2, 4), 10) - 1;
+      date = new Date(year, month, 1);
+    }
+
+    // Caso 5: Si tiene 6 dígitos (formato año mes sin guion)
+    else if (typeof stringValue === "string" && stringValue.length === 6) {
+      const year = parseInt(stringValue.slice(0, 4), 10);
+      const month = parseInt(stringValue.slice(4, 6), 10) - 1; // Los meses van de 0 a 11 en JavaScript
+      date = new Date(year, month, 1);
+    }
+
+    // Validar la fecha
+    if (!date || isNaN(date.getTime())) {
+      throw new Error("Formato de fecha no reconocido");
+    }
+
+    return date;
+  })
+  .refine((value) => dayjs(value).isValid(), {
+    message: "Caracteres incorrectos en fecha:",
+  });
 
 const stringAsDate = z
   .union([z.string(), z.number()])
@@ -164,16 +255,16 @@ export const recRowsTransformerOS = (
     cuil: string;
     contribution_date: Date | null;
     support_date: Date | null | undefined;
-    excelAmount: string | null | undefined;
+    excelAmount: string;
     employer_document_number: string | null;
   }[] = [];
 
   let errorsOS: z.ZodError<
     {
-      cuil: string;
-      contribution_date: string | null | undefined;
+      cuil: string | null;
+      contribution_date: Date | null;
       support_date: Date | null | undefined;
-      excelAmount: Date | null | undefined;
+      excelAmount: string;
       employer_document_number: string | null | undefined;
     }[]
   >[] = [];
@@ -192,8 +283,8 @@ export const recRowsTransformerOS = (
           item as {
             cuil: string;
             contribution_date: Date | null;
-            support_date: Date | null | undefined;
-            excelAmount: string | null | undefined;
+            support_date: Date | null;
+            excelAmount: string;
             employer_document_number: string | null;
           }
         );
@@ -358,14 +449,12 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
 
 const customEmailRegex = /^[\wñÑ._%+-]+@[a-zñÑ0-9.-]+\.[a-z]{2,}$/i;
 
-export const recDocumentValidatorOS = (
-  columns: { [key: string]: string } // columns será el verificador
-) =>
+export const recDocumentValidatorOS = (columns: { [key: string]: string }) =>
   z
     .object({
-      [columns.cuil as string]: numberAsString.nullable(),
-      [columns.contribution_date as string]: stringAsDate.nullable(),
-      [columns.support_date as string]: stringAsDate.nullable().optional(),
+      [columns.cuil as string]: allToString.nullable(),
+      [columns.contribution_date as string]: AllToDate.nullable(),
+      [columns.support_date as string]: AllToDate.nullable().optional(),
       [columns.excelAmount as string]: allToString.nullable().optional(),
       [columns.employer_document_number as string]: allToString
         .nullable()

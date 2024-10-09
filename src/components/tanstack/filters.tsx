@@ -81,23 +81,23 @@ const Filters = forwardRef<FiltersRef, FiltersProps<any, any>>(
     };
 
     return (
-      <div className="flex items-center p-0 bg-[#DEF5DD] rounded-full">
+      <div className="flex items-center bg-[#DEF5DD] rounded-full">
         <Button
           variant={"outline"}
-          className="rounded-full px-5 py-5 bg-[#c0f4bc] hover:bg-[#c0f4bc] h-7 text-black shadow-none hover:text-black "
+          className="rounded-full px-5 py-5 gap-2 font-medium bg-[#c0f4bc] hover:bg-[#c0f4bc] h-7 text-black shadow-none hover:text-black "
           color="#0DA485"
           onClick={() => setShowFilters(!showFilters)}
         >
           <img
             src="/public/tables/Frame-22.png"
-            className={`h-5 w-auto ${showFilters ? "mr-2" : ""}`}
+            className={`h-5 w-auto`}
           />
-          {showFilters && "Filtros"}
+          Filtros
         </Button>
         <div
           className={`transition-all duration-700 ease-in-out overflow-hidden ${
             showFilters
-              ? "opacity-100 max-h-[500px] "
+              ? "opacity-100 max-h-[500px] pr-2"
               : "opacity-0 max-h-0 max-w-[0px]"
           }`}
         >

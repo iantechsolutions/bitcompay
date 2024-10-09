@@ -32,7 +32,7 @@ const AccordionTrigger = React.forwardRef<
   if (props.name === "editIcon") {
     editIcon = (
       <Button variant="bitcompay"
-      className="absolute right-10 text-sm px-4 h-5 justify-center text-[#3e3e3e] rounded-full font-medium">
+      className="absolute right-10 text-sm px-4 h-5 justify-center text-[#3e3e3e] rounded-full font-medium z-0">
         <Edit02Icon className="h-3" /> Editar
       </Button>
      )
@@ -50,7 +50,7 @@ const AccordionTrigger = React.forwardRef<
         {children}
         {editIcon}
         <CircleChevronDown
-          className="h-5 w-7 shrink-0 transition-transform duration-200"
+          className="h-5 w-7 shrink-0 transition-transform duration-200 z-0"
           strokeWidth={1.3}
         />
       </AccordionPrimitive.Trigger>

@@ -15,7 +15,6 @@ import {
   AccordionTrigger as AccordionTriggerIntegrant,
 } from "~/components/affiliate-page/integrante-accordion";
 
-
 import { Card } from "~/components/ui/card";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -34,26 +33,21 @@ import { RouterOutputs } from "~/trpc/shared";
 import { useRouter } from "next/navigation";
 import { SaldoPopoverAffiliates } from "./saldoPopoverAffiliates";
 import ElementCard from "~/components/affiliate-page/element-card";
-import { getServerAuthSession } from "~/server/auth";
 import BonusDialog from "./cc/[ccId]/components_acciones/bonusDialog";
+import { checkRole } from "~/lib/utils/react/roles";
 
-
-
-
-export default async function AffiliatePage(props: {
+export default function AffiliatePage(props: {
   isAdmin: boolean;
   params: { affiliateId: string; companyId: string };
 }) {
   const router = useRouter();
   // const company = props.params.companyId;
   const grupos = props.params.affiliateId;
-
-
+  const isAdmin = props.isAdmin;
   const { data: grupo } = api.family_groups.get.useQuery({
     family_groupsId: grupos!,
   });
   const { data: productos } = api.products.list.useQuery();
-
 
   const { data: cc } = api.currentAccount.getByFamilyGroup.useQuery({
     familyGroupId: grupos ?? "",
@@ -74,7 +68,15 @@ export default async function AffiliatePage(props: {
         : current;
     });
   }
-  const nextExpirationDate = lastComprobante?.due_date ? dayjs(lastComprobante?.due_date).format("DD-MM-YYYY") : "-";
+  let nextExpirationDate;
+  if (lastComprobante) {
+    nextExpirationDate = lastComprobante?.due_date
+      ? dayjs(lastComprobante?.due_date).format("DD-MM-YYYY")
+      : "-";
+  }
+
+  // const nextExpirationDate = new Date().getTime();
+
   const { data: integrant } = api.integrants.getByGroup.useQuery({
     family_group_id: grupos!,
   });
@@ -86,7 +88,6 @@ export default async function AffiliatePage(props: {
         new Date().getTime() >= bonus.from.getTime() &&
         new Date().getTime() <= bonus.to.getTime())
   );
-
 
   const billResponsible = grupo?.integrants.find((x) => x.isBillResponsible);
   const grupoPaymentMethod = billResponsible?.pa[0]?.product?.name;
@@ -101,13 +102,11 @@ export default async function AffiliatePage(props: {
   }
   const { data: comprobantesList } = api.comprobantes.list.useQuery();
 
-
   const comprobantes = comprobantesList
     ? comprobantesList.filter(
         (comprobante) => comprobante.family_group_id === grupos
       )
     : [];
-
 
   const familyGroupData = {
     "Unidad de negocio": grupo?.businessUnitData?.description,
@@ -133,12 +132,10 @@ export default async function AffiliatePage(props: {
     Gerencia: grupo?.gerency ?? "-",
   };
 
-
   const integrantsPersonalData = new Map<string, Record<string, string>>();
   const integrantsFiscalData = new Map<string, Record<string, string>>();
   const integrantsContactData = new Map<string, Record<string, string>>();
   const integrantsPlanData = new Map<string, Record<string, string>>();
-
 
   const formattedAportes = grupo
     ? new Intl.NumberFormat("es-AR", {
@@ -148,17 +145,12 @@ export default async function AffiliatePage(props: {
       }).format(getGroupContribution(grupo))
     : "-";
 
-
-    const session = await getServerAuthSession();
-    const userRole = (session?.user as { id: string; role: string })?.role;
-
-
-
+  // const session = getServerAuthSession();
+  // const userRole = (session?.user as { id: string; role: string })?.role;
 
   const diferencialAmount = grupo
     ? getDifferentialAmount(grupo, new Date())?.toString()
     : "-";
-
 
   const additionalData = {
     PROMOCIÓN: bonusValido ? bonusValido?.amount + " %" : "-",
@@ -173,9 +165,8 @@ export default async function AffiliatePage(props: {
     "FECHA APORTES": "-",
     "PERIODO APORTADO": "-",
     "CUIT EMPLEADOR": "",
-    DIFERENCIAL: userRole === "admin" ? diferencialAmount : "No autorizado",
+    DIFERENCIAL: isAdmin ? diferencialAmount : "No autorizado",
   };
-
 
   for (const integrant of grupo?.integrants ?? []) {
     const intPersonalData = {
@@ -224,14 +215,12 @@ export default async function AffiliatePage(props: {
     integrantsPersonalData.set(integrant.id, intPersonalData);
   }
 
-
   const bankLogoMap = {
     default: <Landmark />,
     "Banco Industrial y Comercial de China": (
       <img src="/public/affiliates/icbcLogo.png" className="h-4 w-auto mr-2" />
     ),
   };
-
 
   const cardLogoMap = {
     Visa: <img src="/landing_images/VISA.png" className="h-9 w-auto ml-2" />,
@@ -240,10 +229,8 @@ export default async function AffiliatePage(props: {
     ),
   };
 
-
   const prodId = billResponsible?.pa[0]?.product_id;
   const prod = productos?.find((x) => x.id === prodId);
-
 
   const paymentMethod = new Map<string, React.ReactNode>([
     [
@@ -258,7 +245,6 @@ export default async function AffiliatePage(props: {
           />
           <ElementCard element={{ key: "ALIAS", value: "AAAA.AAA.AAA" }} />
         </div>
-
 
         <div className="mt-3">
           <ElementCard
@@ -296,7 +282,6 @@ export default async function AffiliatePage(props: {
         </div>
       </div>,
     ],
-
 
     [
       "EFECTIVO",
@@ -365,7 +350,6 @@ export default async function AffiliatePage(props: {
     ],
   ]);
 
-
   const goToCCDetail = (id: string | undefined) => {
     if (!id) return;
     router.push(
@@ -373,23 +357,18 @@ export default async function AffiliatePage(props: {
     );
   };
 
-
   return (
     <LayoutContainer>
-      <section>
+      <section className="relative">
         <h2 className="text-2xl mt-4 font-semibold">
           Grupo familiar Nº {grupo?.numericalId}
         </h2>
 
-
-
-
-        <div className="relative">
+        
           <div className="absolute top-0 right-0">
             <BonusDialog />
           </div>
-        </div>
-
+        
 
         <div className="flex gap-3 mt-5 mb-10">
           <Card className="flex-auto py-4 px-6 w-1/2  items-center">
@@ -422,8 +401,7 @@ export default async function AffiliatePage(props: {
           <Accordion
             className="w-full"
             defaultValue={["item-1", "item-2", "item-3"]}
-            type="multiple"
-          >
+            type="multiple">
             <AccordionItem value="item-1">
               <AccordionTrigger className="font-semibold" name="editIcon">
                 Datos del grupo familiar
@@ -441,21 +419,18 @@ export default async function AffiliatePage(props: {
             <AccordionItem value="item-2">
               <AccordionTrigger
                 className="font-semibold rounded-md overflow-hidden"
-                name="editIcon"
-              >
+                name="editIcon">
                 Integrantes
               </AccordionTrigger>
               <AccordionContent className="pt-6 pl-5">
                 <AccordionIntegrant
                   type="multiple"
-                  className="rounded-md overflow-hidden"
-                >
+                  className="rounded-md overflow-hidden">
                   {integrant?.map((int) => (
                     <AccordionItemIntegrant value={int.id}>
                       <AccordionTriggerIntegrant
                         relationship={int?.relationship}
-                        affiliate={int}
-                      >
+                        affiliate={int}>
                         {int.name}
                       </AccordionTriggerIntegrant>
                       <AccordionContentIntegrant>
@@ -550,7 +525,6 @@ export default async function AffiliatePage(props: {
                       Tipo de comprobante:
                     </div>
 
-
                     <p className="font-semibold pl-7 opacity-80">
                       {billResponsible?.afip_status == "CONSUMIDOR FINAL"
                         ? "B"
@@ -594,21 +568,23 @@ export default async function AffiliatePage(props: {
                   </div>
                 </div>
 
-
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-stretch p-3 pt-6">
                   {Object.entries(additionalData).map(([key, value]) => {
-                    console.log("iteracion: ",key==="DIFERENCIAL", !props.isAdmin);
-                    const notRender= key==="DIFERENCIAL" && !props.isAdmin;
+                    console.log("iteracion: ", key === "DIFERENCIAL", !isAdmin);
+                    const notRender = key === "DIFERENCIAL" && !isAdmin;
                     const isEmpty = value === "-" || !value;
                     const isPeriod =
                       key === "PERIODO APORTADO" || key === "FECHA APORTES";
                     if (isEmpty && isPeriod) return null;
                     value =
                       typeof value === "string" ? Capitalize(value) : value;
-                    return !notRender ? <ElementCard key={key} element={{ key, value }} /> : <></>;
+                    return !notRender ? (
+                      <ElementCard key={key} element={{ key, value }} />
+                    ) : (
+                      <></>
+                    );
                   })}
                 </div>
-                
               </AccordionContent>
             </AccordionItem>
           </Accordion>
@@ -617,4 +593,3 @@ export default async function AffiliatePage(props: {
     </LayoutContainer>
   );
 }
-

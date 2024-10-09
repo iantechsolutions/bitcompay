@@ -129,7 +129,7 @@ export function DataTable<TData, TValue>({
     }
 
     cachedAsyncFetch(
-      `liq-pq-${cursor}-${pagination.pageSize}`,
+      `liq-${liquidationId}-${cursor}-${pagination.pageSize}`,
       60000,
       async () => {
         return await paginatedQuery.mutateAsync({
@@ -170,6 +170,14 @@ export function DataTable<TData, TValue>({
     desiredColumns.includes(column.id!)
   );
 
+  // const totalAportes =
+  // .flatMap((group) => group.integrants)
+  // .flatMap((part) => part.aportes_os)
+  // .filter((a) => a.contribution_date === input.period)
+  // .reduce((sum, aporte) => sum + parseInt(aporte.amount), 0);
+  // const aporteTotal = summary.summary.APORTES;
+  // const total = summary.summary["APORTES"];
+
   return (
     <>
       <DataTableSummary summary={summary.summary} />
@@ -185,8 +193,7 @@ export function DataTable<TData, TValue>({
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow
                 className="bg-[#f7f7f7] first:rounded-s-lg last:rounded-e-lg"
-                key={headerGroup.id}
-              >
+                key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead key={header.id}>
@@ -209,8 +216,7 @@ export function DataTable<TData, TValue>({
                   <TableRow
                     key={row.id}
                     onClick={() => handleRowClick(row)}
-                    className="border-b-2 border-gray-200 border-x-0 hover:bg-[#d7d3d395] hover:cursor-pointer"
-                  >
+                    className="border-b-2 border-gray-200 border-x-0 hover:bg-[#d7d3d395] hover:cursor-pointer">
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
                         {flexRender(
@@ -233,8 +239,7 @@ export function DataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center"
-                >
+                  className="h-24 text-center">
                   No results.
                 </TableCell>
               </TableRow>

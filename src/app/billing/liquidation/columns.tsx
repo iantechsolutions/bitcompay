@@ -11,6 +11,7 @@ export type TableRecord = {
   period: string;
   processDate: string;
   UN: string;
+  //user: string;
 };
 
 export const columns: ColumnDef<TableRecord>[] = [
@@ -83,4 +84,15 @@ export const columns: ColumnDef<TableRecord>[] = [
       );
     },
   },
+  // {
+  //   accessorKey: "user",
+  //   header: () => (
+  //     <div className="text-center whitespace-nowrap text-medium">Usuario</div>
+  //   ),
+  //   cell: ({ row }) => {
+  //     return (
+  //       <div className="text-center  ">{row.getValue("user")}</div>
+  //     );
+  //   },
+  // },
 ];
