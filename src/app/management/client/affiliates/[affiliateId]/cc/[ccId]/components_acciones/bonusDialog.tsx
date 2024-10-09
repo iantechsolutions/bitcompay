@@ -1,6 +1,7 @@
 import { Dialog, DialogContent, DialogTrigger } from "@radix-ui/react-dialog";
 import { useState } from "react";
-import { Button } from "react-day-picker";
+import { Button } from "~/components/ui/button";
+
 import { DialogHeader, DialogFooter } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 
@@ -23,7 +24,7 @@ export default function BonusDialog() {
         <div className="flex flex-col gap-4">
           <div>
             <label htmlFor="group">Grupo Familiar</label>
-            <Input 
+            <Input
               id="group"
               value={group}
               onChange={(e) => setGroup(e.target.value)}
@@ -31,22 +32,22 @@ export default function BonusDialog() {
             />
           </div>
           <div>
-         <label htmlFor="percentage">Porcentaje</label>
-          <div className="input-with-suffix">
-          <Input 
-      id="percentage"
-      value={percentage}
-      onChange={(e) => setPercentage(e.target.value)}
-      placeholder="Introduce un porcentaje"
-      type="number"
-    />
-    <span className="suffix">%</span>
-  </div>
-</div>
+            <label htmlFor="percentage">Porcentaje</label>
+            <div className="input-with-suffix">
+              <Input
+                id="percentage"
+                value={percentage}
+                onChange={(e) => setPercentage(e.target.value)}
+                placeholder="Introduce un porcentaje"
+                type="number"
+              />
+              <span className="suffix">%</span>
+            </div>
+          </div>
 
           <div>
             <label htmlFor="fromDate">Fecha Desde</label>
-            <Input 
+            <Input
               id="fromDate"
               value={fromDate}
               onChange={(e) => setFromDate(e.target.value)}
@@ -55,7 +56,7 @@ export default function BonusDialog() {
           </div>
           <div>
             <label htmlFor="toDate">Fecha Hasta</label>
-            <Input 
+            <Input
               id="toDate"
               value={toDate}
               onChange={(e) => setToDate(e.target.value)}
