@@ -60,22 +60,22 @@ export default function AffiliatePage(props: {
       : current;
   });
 
-  // let lastComprobante;
-  // if (grupo?.comprobantes && grupo?.comprobantes?.length! > 0) {
-  //   lastComprobante = grupo?.comprobantes?.reduce((prev, current) => {
-  //     return new Date(prev.due_date ?? 0) > new Date(current.due_date ?? 0)
-  //       ? prev
-  //       : current;
-  //   });
-  // }
-  // let nextExpirationDate;
-  // if (lastComprobante) {
-  //   nextExpirationDate = lastComprobante?.due_date
-  //     ? dayjs(lastComprobante?.due_date).format("DD-MM-YYYY")
-  //     : "-";
-  // }
+  let lastComprobante;
+  if (grupo?.comprobantes && grupo?.comprobantes?.length! > 0) {
+    lastComprobante = grupo?.comprobantes?.reduce((prev, current) => {
+      return new Date(prev.due_date ?? 0) > new Date(current.due_date ?? 0)
+        ? prev
+        : current;
+    });
+  }
+  let nextExpirationDate;
+  if (lastComprobante) {
+    nextExpirationDate = lastComprobante?.due_date
+      ? dayjs(lastComprobante?.due_date).format("DD-MM-YYYY")
+      : "-";
+  }
 
-  const nextExpirationDate = new Date().getTime();
+  // const nextExpirationDate = new Date().getTime();
 
   const { data: integrant } = api.integrants.getByGroup.useQuery({
     family_group_id: grupos!,
@@ -359,16 +359,16 @@ export default function AffiliatePage(props: {
 
   return (
     <LayoutContainer>
-      <section>
+      <section className="relative">
         <h2 className="text-2xl mt-4 font-semibold">
           Grupo familiar Nº {grupo?.numericalId}
         </h2>
 
-        <div className="relative">
+        
           <div className="absolute top-0 right-0">
             <BonusDialog />
           </div>
-        </div>
+        
 
         <div className="flex gap-3 mt-5 mb-10">
           <Card className="flex-auto py-4 px-6 w-1/2  items-center">
