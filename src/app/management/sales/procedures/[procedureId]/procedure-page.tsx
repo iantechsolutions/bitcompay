@@ -125,6 +125,7 @@ export default function ProcedurePage(props: ProcedurePageProps) {
             birth_date: member.birth_date.toString(),
             gender: gender ?? null,
             civil_status: status,
+            extention: member.extention,
             nationality: member.nationality,
             afip_status: member.afip_status,
             fiscal_id_type: member.fiscal_id_type,
@@ -148,6 +149,7 @@ export default function ProcedurePage(props: ProcedurePageProps) {
             isPaymentHolder: member.isPaymentResponsible,
             isBillResponsible: member.isBillResponsible,
             family_group_id: props.family_group.id,
+            validity: member.validity ?? undefined,
           });
         } else {
           await createIntegrant({
@@ -182,6 +184,7 @@ export default function ProcedurePage(props: ProcedurePageProps) {
             isHolder: member.isHolder,
             isPaymentHolder: member.isPaymentResponsible,
             isBillResponsiblee: member.isBillResponsible,
+            validity: member.validity ?? new Date(),
           });
         }
       }
@@ -250,6 +253,7 @@ export default function ProcedurePage(props: ProcedurePageProps) {
           cellphone_number: integrant.cellphone_number ?? "",
           email: integrant.email ?? "",
           floor: integrant.floor ?? "",
+          extention: integrant.extention ?? "",
           department: integrant.department ?? "",
           locality: integrant.locality ?? "",
           partido: integrant.partido ?? "",
@@ -264,6 +268,7 @@ export default function ProcedurePage(props: ProcedurePageProps) {
           isBillResponsible: integrant.isBillResponsible ?? "",
           mail: integrant.email ?? "",
           isPaymentResponsible: integrant.isPaymentHolder ?? "",
+          validity: integrant.validity,
         };
       })
     );

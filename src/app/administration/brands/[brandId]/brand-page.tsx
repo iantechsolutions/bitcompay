@@ -152,6 +152,9 @@ export default function BrandPage({
       setBillType(brand.bill_type ?? "");
     }
   }, [brand]);
+  
+  const [logoUrl, setLogoUrl] = useState(brand.logo_url ?? "");
+
   return (
     <LayoutContainer>
       <section className="space-y-2">
@@ -187,7 +190,7 @@ export default function BrandPage({
                     <Label htmlFor="code">Código de marca(max. 4 carac)</Label>
                     <Input
                       id="code"
-                      placeholder="..."
+                      placeholder="0"
                       value={code}
                       onChange={(e) => setCode(e.target.value)}
                       required
@@ -236,11 +239,22 @@ export default function BrandPage({
                       </SelectContent>
                     </Select>
                   </div>
+                  <div className="col-span-3">
+                    <Label htmlFor="code">Código Prisma (máx. 4 caracteres)</Label>
+               <Input
+                  id="prisma-code"
+                  placeholder="0"
+                  value={code}
+                   onChange={(e) => setCode(e.target.value)}
+                   required
+                   maxLength={4}
+                    />
+              </div>
                   <div className="col-span-2">
                     <Label htmlFor="iva">IVA</Label>
                     <Select value={iva} onValueChange={(e) => setIva(e)}>
                       <SelectTrigger className="w-[180px] font-bold">
-                        <SelectValue placeholder="Seleccionar IVA" />
+                        <SelectValue placeholder="0,00" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="3">0%</SelectItem>
@@ -266,7 +280,7 @@ export default function BrandPage({
                           { value: "FACTURA D", label: "FACTURA M" },
                           { value: "FACTURA E", label: "FACTURA E" },
                         ]}
-                        onSelectionChange={(e) => setBillType(e)}
+                        onionChange={(e) => setBillType(e)}
                       />
                     </div>
                   </div> */}
@@ -300,8 +314,14 @@ export default function BrandPage({
 
                         if (!file) return;
                         toast.success("¡Logo actualizado!");
+                        setLogoUrl(file.url);
                       }}
                     />
+                    {logoUrl && (
+                <div className="mt-2">
+               <Image src={logoUrl} alt="logo marca" width={100} height={100} />
+                  </div>
+                   )}
                   </div>
                 </div>
               </Card>

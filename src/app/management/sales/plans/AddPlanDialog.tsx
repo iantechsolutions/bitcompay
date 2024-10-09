@@ -31,16 +31,20 @@ export default function AddPlanDialog(props: { planId?: string }) {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           {planId ? (
-            <Button className="bg-transparent hover:bg-transparent px-1 text-[#3e3e3e] shadow-none h-5">
-              <Edit02Icon className="mr-1 h-4" /> Actualizar Info
-            </Button>
+            <div>
+              <Button className="bg-transparent hover:bg-transparent px-1 text-[#3e3e3e] shadow-none h-5">
+                <Edit02Icon className="mr-1 h-4" /> Actualizar Info
+              </Button>
+            </div>
           ) : (
-            <Button
-              onClick={() => setOpen(true)}
-              className="bg-[#BEF0BB] hover:bg-[#BEF0BB] rounded-full text-[#3E3E3E] hover:text-[#3E3E3E]">
-              <PlusCircleIcon className="mr-2" size={20} strokeWidth={1} />
-              Agregar plan
-            </Button>
+            <div>
+              <Button
+                onClick={() => setOpen(true)}
+                className="bg-[#BEF0BB] hover:bg-[#BEF0BB] rounded-full text-[#3E3E3E] hover:text-[#3E3E3E]">
+                <PlusCircleIcon className="mr-2" size={20} strokeWidth={1} />
+                Agregar plan
+              </Button>
+            </div>
           )}
         </DialogTrigger>
         <DialogContent>

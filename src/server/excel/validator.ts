@@ -156,12 +156,63 @@ const bonusAsString = z
     message: "Caracteres incorrectos en columna:",
   });
 
+export const recRowsTransformerOS = (
+  rows: Record<string, unknown>[],
+  columns: { [key: string]: string }
+) => {
+  let finishedArrayOS: {
+    cuil: string;
+    contribution_date: Date | null;
+    support_date: Date | null | undefined;
+    excelAmount: string | null | undefined;
+    employer_document_number: string | null;
+  }[] = [];
+
+  let errorsOS: z.ZodError<
+    {
+      cuil: string;
+      contribution_date: string | null | undefined;
+      support_date: Date | null | undefined;
+      excelAmount: Date | null | undefined;
+      employer_document_number: string | null | undefined;
+    }[]
+  >[] = [];
+
+  rows.map((row) => {
+    const validator = recDocumentValidatorOS(columns);
+    const resultOS = z.array(validator).safeParse([row]);
+
+    console.log("Cande me ve y se desconecta", resultOS.success);
+    if (resultOS.success) {
+      let item = resultOS.data[0];
+      if (item) {
+        console.log("Cande me ve y se desconecta", item.excelAmount);
+
+        finishedArrayOS.push(
+          item as {
+            cuil: string;
+            contribution_date: Date | null;
+            support_date: Date | null | undefined;
+            excelAmount: string | null | undefined;
+            employer_document_number: string | null;
+          }
+        );
+      }
+    } else {
+      errorsOS.push(resultOS.error);
+    }
+  });
+
+  return { finishedArrayOS, errorsOS };
+};
+
 export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
   let finishedArray: {
     business_unit: string | null;
     os: string | null;
     "originating os": string | null;
     validity: Date | null;
+    state_date: Date | null;
     mode: string | null;
     bonus: string | null;
     balance: string | null;
@@ -173,7 +224,7 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     own_id_type: "DNI" | "PASAPORTE" | null;
     own_id_number: string | null;
     affiliate_number: string | number | null;
-    extension: string | null;
+    extention: string | null;
     relationship: string | null;
     birth_date: Date | null;
     gender: "MASCULINO" | "FEMENINO" | "OTRO" | null;
@@ -211,9 +262,9 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
     is_new: boolean | null;
     card_number: string | null;
     card_type: string | null;
-    import: string | null;
-    remuneration: string | null;
-    monotributo: string | null;
+    seller: string | null;
+    supervisor: string | null;
+    gerency: string | null;
   }[] = [];
   let errors: z.ZodError<
     {
@@ -221,7 +272,8 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
       "SALDO CUENTA CORRIENTE"?: string | number | null | undefined;
       OS?: string | null | undefined;
       "OS ORIGEN"?: string | null | undefined;
-      VIGENCIA?: string | number | null | undefined;
+      "FECHA DE VIGENCIA"?: string | number | null | undefined;
+      "FECHA DE ESTADO"?: string | number | null | undefined;
       MODO?: string | null | undefined;
       BONIFICACION?: string | null | undefined;
       "DESDE BONIF."?: string | number | null | undefined;
@@ -285,9 +337,9 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
       "ALTA NUEVA"?: string | boolean | null | undefined;
       "NRO. TARJETA"?: number | null | undefined;
       "TIPO DE TARJETA"?: string | null | undefined;
-      IMPORTE?: string | number | null | undefined;
-      REMUNERACION?: string | number | null | undefined;
-      MONOTRIBUTO?: string | number | null | undefined;
+      VENDEDOR?: string | null | undefined;
+      SUPERVISOR?: string | null | undefined;
+      GERENCIA?: string | null | undefined;
     }[]
   >[] = [];
   rows.map((row) => {
@@ -306,6 +358,31 @@ export const recRowsTransformer = (rows: Record<string, unknown>[]) => {
 
 const customEmailRegex = /^[\wñÑ._%+-]+@[a-zñÑ0-9.-]+\.[a-z]{2,}$/i;
 
+export const recDocumentValidatorOS = (
+  columns: { [key: string]: string } // columns será el verificador
+) =>
+  z
+    .object({
+      [columns.cuil as string]: numberAsString.nullable(),
+      [columns.contribution_date as string]: stringAsDate.nullable(),
+      [columns.support_date as string]: stringAsDate.nullable().optional(),
+      [columns.excelAmount as string]: allToString.nullable().optional(),
+      [columns.employer_document_number as string]: allToString
+        .nullable()
+        .optional(),
+    })
+    .transform((value) => {
+      return {
+        cuil: value[columns.cuil ?? "CUIL"] ?? null,
+        contribution_date:
+          value[columns.contribution_date ?? "PERIODO"] ?? null,
+        support_date: value[columns.support_date ?? "PERIODO SOPORTE"] ?? null,
+        excelAmount: value[columns.excelAmount ?? "MONTO"] ?? null,
+        employer_document_number:
+          value[columns.employer_document_number ?? "CUIT"] ?? null,
+      };
+    });
+
 export const recDocumentValidator = z
   .object({
     "UNIDAD DE NEGOCIO": z
@@ -316,7 +393,11 @@ export const recDocumentValidator = z
       .optional(),
     OS: allToString.nullable().optional(),
     "OS ORIGEN": allToString.nullable().optional(),
-    VIGENCIA: stringAsDate.nullable().optional(),
+    VENDEDOR: allToString.nullable().optional(),
+    SUPERVISOR: allToString.nullable().optional(),
+    GERENCIA: allToString.nullable().optional(),
+    "FECHA DE VIGENCIA": stringAsDate.nullable().optional(),
+    "FECHA DE ESTADO": stringAsDate.nullable().optional(),
     MODO: z
       .string()
       .min(0)
@@ -340,8 +421,8 @@ export const recDocumentValidator = z
       .max(140, { message: "Ingrese un valor menor a 140 caracteres" })
       .nullable()
       .optional(),
-    "NRO AFILIADO": allToString.nullable().optional(),
-    EXTENSION: allToString.nullable().optional(),
+    "NRO AFILIADO": numberAsString.nullable().optional(),
+    EXTENSION: z.string().optional(),
     "TIPO DOC PROPIO": z
       .enum(["DNI", "PASAPORTE"])
       .refine((value) => ["DNI", "PASAPORTE"].includes(value), {
@@ -451,7 +532,11 @@ export const recDocumentValidator = z
       business_unit: value["UNIDAD DE NEGOCIO"] ?? null,
       os: value.OS ?? null,
       "originating os": value["OS ORIGEN"] ?? null,
-      validity: value.VIGENCIA ?? null,
+      seller: value.VENDEDOR ?? null,
+      supervisor: value.SUPERVISOR ?? null,
+      gerency: value.GERENCIA ?? null,
+      validity: value["FECHA DE VIGENCIA"] ?? null,
+      state_date: value["FECHA DE ESTADO"] ?? null,
       mode: value.MODO ?? null,
       bonus: value.BONIFICACION ?? "0",
       "from bonus": value["DESDE BONIF."] ?? null,
@@ -462,7 +547,7 @@ export const recDocumentValidator = z
       own_id_number: value["NRO DOC PROPIO"] ?? null,
       own_id_type: value["TIPO DOC PROPIO"] ?? null,
       affiliate_number: value["NRO AFILIADO"] ?? null,
-      extension: value.EXTENSION ?? null,
+      extention: value["EXTENSION"] ?? null,
       // du_number: value["NRO DOC PROPIO"] ?? null,
       relationship: value.PAR ?? null,
       birth_date: value["FECHA NACIMIENTO"] ?? null,
@@ -497,10 +582,6 @@ export const recDocumentValidator = z
       is_new: value["ALTA NUEVA"] ?? null,
       card_number: value["NRO. TARJETA"] ?? null,
       card_type: value["TIPO DE TARJETA"] ?? null,
-      remuneration: value["REMUNERACION"] ?? null,
-      monotributo: value["MONOTRIBUTO"] ?? null,
-      otros: value["OTROS"] ?? null,
-      import: value["IMPORTE"] ?? null,
     };
   });
 
@@ -508,7 +589,11 @@ export const recHeaders: TableHeaders = [
   { key: "business_unit", label: "UNIDAD DE NEGOCIO", width: 140 },
   { key: "os", label: "OS", width: 140 },
   { key: "originating os", label: "OS ORIGEN", width: 140 },
-  { key: "validity", label: "VIGENCIA", width: 140 },
+  { key: "seller", label: "VENDEDOR", width: 140 },
+  { key: "supervisor", label: "SUPERVISOR", width: 140 },
+  { key: "gerency", label: "GERENCIA", width: 140 },
+  { key: "validity", label: "FECHA DE VIGENCIA", width: 140 },
+  { key: "state_date", label: "FECHA ESTADO", width: 140 },
   { key: "mode", label: "MODO", width: 140 },
   { key: "bonus", label: "BONIFICACION" },
   { key: "from bonus", label: "DESDE BONIF." },
@@ -517,7 +602,7 @@ export const recHeaders: TableHeaders = [
   { key: "holder_id_number", label: "NRO DOC TITULAR", width: 140 },
   { key: "name", label: "NOMBRE", width: 140 },
   { key: "affiliate_number", label: "NRO AFILIADO", width: 140 },
-  { key: "extension", label: "EXTENSION", width: 140 },
+  { key: "extention", label: "EXTENSION", width: 140 },
   { key: "own_id_type", label: "TIPO DOC PROPIO", width: 140 },
   { key: "own_id_number", label: "NRO DOC PROPIO", width: 140 },
   { key: "relationship", label: "PAR", width: 140 },
@@ -552,16 +637,12 @@ export const recHeaders: TableHeaders = [
   { key: "card_type", label: "TIPO DE TARJETA", width: 140 },
   { key: "card_number", label: "Nro. TARJETA", width: 140 },
   { key: "sale_condition", label: "CONDICION DE VENTA", width: 140 },
-  { key: "remuneration", label: "REMUNERACION", width: 140 },
-  { key: "monotributo", label: "MONOTRIBUTO", width: 140 },
-  { key: "otros", label: "OTROS", width: 140 },
-  { key: "import", label: "IMPORTE", width: 140 },
 ];
 
 export const requiredColumns = [
   { key: "business_unit", label: "UNIDAD DE NEGOCIO" },
   // { key: "os", label: "OS" },
-  { key: "validity", label: "VIGENCIA" },
+  { key: "validity", label: "FECHA DE VIGENCIA" },
   { key: "mode", label: "MODO" },
   { key: "state", label: "ESTADO" },
   { key: "holder_id_number", label: "NRO DOC TITULAR" },
@@ -569,7 +650,7 @@ export const requiredColumns = [
   { key: "own_id_type", label: "TIPO DOC PROPIO" },
   { key: "own_id_number", label: "NRO DOC PROPIO" },
   // { key: "affiliate_number", label: "NRO AFILIADO" },
-  { key: "extension", label: "EXTENSION" },
+  { key: "extention", label: "EXTENSION" },
   { key: "relationship", label: "PAR" },
   { key: "birth_date", label: "FECHA NACIMIENTO" },
   { key: "gender", label: "GENERO" },
@@ -585,6 +666,20 @@ export const requiredColumns = [
   { key: "plan", label: "PLAN" },
   { key: "product", label: "PRODUCTO" },
   // { key: "sale_condition", label: "CONDICION DE VENTA" },
+];
+
+export const recHeadersOS: TableHeaders = [
+  { key: "cuil", label: "CUIT", width: 140 },
+  { key: "contribution_date", label: "PERIODO", width: 140 },
+  { key: "support_date", label: "PERIODO SOPORTE", width: 140 },
+  { key: "excelAmount", label: "MONTO", width: 140 },
+  { key: "employer_document_number", label: "CUIT", width: 140 },
+];
+
+export const requiredColumnsOS = [
+  { key: "cuil", label: "CUIT", width: 140 },
+  // { key: "contribution_date", label: "PERIODO", width: 140 },
+  { key: "excelAmount", label: "MONTO", width: 140 },
 ];
 
 export const columnLabelByKey = Object.fromEntries(

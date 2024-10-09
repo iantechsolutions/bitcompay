@@ -35,7 +35,6 @@ export function AddBrandDialog() {
   const [utility, setUtility] = useState("");
 
   const [code, setCode] = useState("");
-  const [razonSocial, setRazonSocial] = useState("");
   const [concept, setConcepto] = useState("");
 
   // const [billType, setBillType] = useState<string>("");
@@ -52,7 +51,7 @@ export function AddBrandDialog() {
 
   async function handleCreate() {
     try {
-      if (!name || !code || !description || !iva || !reducedDescription) {
+      if (!name || !code || !iva || !reducedDescription) {
         setError("Todos los campos son obligatorios.");
         return;
       }
@@ -73,7 +72,7 @@ export function AddBrandDialog() {
       setOpen(false);
     } catch (e) {
       setError(
-        "No se puede asignar una descripcion reducidad de mas de 10 caracteres"
+        "No se puede asignar una descripcion reducida de mas de 10 caracteres"
       );
       const error = asTRPCError(e)!;
       toast.error(error.message);
@@ -105,7 +104,7 @@ export function AddBrandDialog() {
               />
             </div>
 
-            <div>
+            {/* <div>
               <Label htmlFor="razonSocial">Razon social la marca</Label>
               <Input
                 id="razonSocial"
@@ -114,12 +113,13 @@ export function AddBrandDialog() {
                 onChange={(e) => setRazonSocial(e.target.value)}
                 required
               />
-            </div>
+            </div> */}
             <div>
               <Label htmlFor="concept">Concepto</Label>
               <Select
                 onValueChange={(e) => setConcepto(e)}
-                value={concept ?? ""}>
+                value={concept ?? ""}
+              >
                 <SelectTrigger className="w-[180px] font-bold">
                   <SelectValue placeholder="Seleccionar concepto..." />
                 </SelectTrigger>
@@ -133,10 +133,10 @@ export function AddBrandDialog() {
             {/* Código de marca */}
             <div className="flex">
               <div className="w-[250px] font-bold">
-                <Label htmlFor="code">Código de marca(max. 4 carac)</Label>
+                <Label htmlFor="code">Código PRISMA(max. 4 carac)</Label>
                 <Input
                   id="code"
-                  placeholder="..."
+                  placeholder="0"
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
                   required
@@ -147,7 +147,7 @@ export function AddBrandDialog() {
                 <Label htmlFor="utility">Código de utilidad(senapsa)</Label>
                 <Input
                   id="utility"
-                  placeholder="..."
+                  placeholder="0"
                   value={utility}
                   onChange={(e) => setUtility(e.target.value)}
                   maxLength={8}
@@ -172,7 +172,7 @@ export function AddBrandDialog() {
                 <Label htmlFor="iva">IVA</Label>
                 <Select onValueChange={(e) => setIva(e)}>
                   <SelectTrigger className="w-[180px] font-bold">
-                    <SelectValue placeholder="Seleccionar IVA" />
+                    <SelectValue placeholder="0,00" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="3">0%</SelectItem>

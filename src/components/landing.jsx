@@ -1,37 +1,6 @@
 // LandingPage.jsx
-import Link from 'next/link';
 import React from 'react';
 import './landing.css'; // Archivo CSS para estilos
-import Image from 'next/image';
-import logo from "../../public/landing_images/logo bitcom.png";
-import cotizar from "../../public/landing_images/COTIZAR SERVICIO (3).png";
-import compu1 from "../../public/landing_images/compu (1).png";
-import tarjeta1 from "../../public/landing_images/tarjeta 1.png";
-import tarjeta2 from "../../public/landing_images/tarjeta 2.png";
-import tarjeta3 from "../../public/landing_images/tarjeta 3.png";
-import tarjeta4 from "../../public/landing_images/tarjeta 4.png";
-import tarjeta5 from "../../public/landing_images/tarjeta 5.png";
-import tarjeta6 from "../../public/landing_images/tarjeta 6.png";
-import sinTitulo3 from "../../public/landing_images/Sin título-3.png";
-import alimentar from "../../public/landing_images/ALIMENTAR.png";
-import americanExpress from "../../public/landing_images/AMERICAN EXPRESS.png";
-import cabal from "../../public/landing_images/CABAL.png";
-import maestro from "../../public/landing_images/MAESTRO.png";
-import mastercard from "../../public/landing_images/MASTERCARD.png";
-import naranjax from "../../public/landing_images/NARANJA X.png";
-import naranja from "../../public/landing_images/NARANJA.png";
-import ctadni from "../../public/landing_images/CUENTA DNI.png";
-import dinersclub from "../../public/landing_images/DINERSCLUB.png";
-import modo from "../../public/landing_images/MODO.png";
-import pagocuentas from "../../public/landing_images/PAGO MIS CUENTAS.png";
-import rapipago from "../../public/landing_images/RAPIPAGO.png";
-import uala from "../../public/landing_images/UALA.png";
-import pagar from "../../public/landing_images/PAGAR.png";
-import mp from "../../public/landing_images/MERCADO PAGO.png";
-import pay from "../../public/landing_images/PAY.png";
-import payway from "../../public/landing_images/PAYWAY.png";
-import wp from "../../public/landing_images/wp (1).png";
-import botonlenguaje from "../../public/landing_images/botonLenguaje.png";
 
 const LandingPage = () => {
   return (
@@ -52,9 +21,9 @@ const LandingPage = () => {
         <main>
         <section className="home" id="home">
             <div className="header-home">
-            <h1>Simplifique la gestión de <br/> tesorería <span>de su Empresa</span></h1>
-                <p>Accede a un <span>servicio integral</span> de Gestion de Canales de Recaudación y<br/>
-                Cash Managment de forma online con nuestra Plataforma.</p>
+            <h1>Simplificá la gestión de <br/> tesorería <span>de tu empresa</span></h1>
+                <p>Accedé a un <span>servicio integral</span> de Gestión de Canales de Recaudación y<br/>
+                Cash Managment de manera online con nuestra plataforma.</p>
 
                 <a href="#">
                     <button>
@@ -89,20 +58,20 @@ const LandingPage = () => {
             <div className="home-3-items">
                 <div className="items-1">
                     <p>Evite costos tercerizando los pagos a sus <br/>proveedores, servicios e impuestos.</p> <br/>
-                    <p>Atesoramos los fondos recaudados en nuesta <br/>Cuenta Corriente Recaudadora Mayorista, a la <br/>espera de instrucciones de pagos por su Empresa.</p>
+                    <p>Atesoramos los fondos recaudados en nuesta <br/>Cuenta Corriente Recaudadora Mayorista<br/>, a la  espera de instrucciones de pagos por su Empresa.</p>
                 </div>
                 <div className="items-2">
-                    <p>Sin limite en cuanto a volumen y cantidad de pagos.</p>
+                    <p>Sin límite en cuanto a volumen y cantidad de pagos.</p>
                     <ul>
                         <li>Pago a provedores</li>
                         <li>Pago de Honorarios y/o comisiones.</li>
                         <li>Pago de Servicios y/o Impuestos AFIP mediante VEP</li>
                     </ul>
-                    <br/><p>Metodos de pago</p>
+                    <br/><p>Métodos de pago</p>
                     <ul>
                         <li>Transferencias Programadas</li>
                         <li>Transferencias Inmediatas.</li>
-                        <li>Emisiones de CPD electronico</li>
+                        <li>Emisiones de CPD electrónico</li>
                     </ul>
                 </div>
             </div>    
@@ -111,7 +80,7 @@ const LandingPage = () => {
             <div className='h-1'/>
             <div className="prehome-4-tittle">
                 <h2>Nuestros servicios <span>destacados:</span></h2>
-                <p>Gestione sus recaudaciones y pagos de forma online:</p>
+                <p>Gestione sus recaudaciones y pagos de manera online:</p>
                 <br/>
             </div>
         </section>
@@ -197,7 +166,7 @@ const LandingPage = () => {
                     <li className='roboto-light'>© 2024 Bitcompay. Todos los derechos reservados</li>
                     <li><a href="https://api.whatsapp.com/send?phone=+54 9 11 5506-8673"><img src="https://utfs.io/f/8fb9d30c-2089-4ff7-b033-62ff0cc1d72f-cyks5j.png" alt=""/></a></li>
                     <li><img className="logo-derechos" src="https://utfs.io/f/5e8f0ac9-219d-4b75-bf71-1768551d369c-ju8o7r.png" alt=""/></li>
-                    <li>Politicas de privacidad</li>
+                    <li>Políticas de privacidad</li>
                     <li>Defensa del consumidor</li>
                 </ul>
             </div>

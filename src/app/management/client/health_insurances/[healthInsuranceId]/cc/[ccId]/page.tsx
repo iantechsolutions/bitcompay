@@ -14,6 +14,7 @@ import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 import LayoutContainer from "~/components/layout-container";
 import { Button } from "~/components/ui/button";
+import { formatCurrency } from "~/app/billing/pre-liquidation/[liquidationId]/detail-sheet";
 export default function CCDetail(props: {
   params: { ccId: string; healthInsuranceId: string };
 }) {
@@ -48,8 +49,8 @@ export default function CCDetail(props: {
               </TableCell>
               <TableCell>{event?.description}</TableCell>
               <TableCell>{event?.type}</TableCell>
-              <TableCell>${event?.event_amount * -1}</TableCell>
-            </TableRow>
+              <TableCell>${formatCurrency(event?.event_amount * -1)}</TableCell>
+                </TableRow>
           ))}
         </TableBody>
       </Table>
@@ -74,7 +75,7 @@ export default function CCDetail(props: {
                 {dayjs(comprobante?.createdAt).format("YYYY-MM-DD hh:mm")}
               </TableCell>
               <TableCell>{comprobante?.tipoComprobante}</TableCell>
-              <TableCell>${comprobante?.importe}</TableCell>
+              <TableCell>${formatCurrency(comprobante?.importe)}</TableCell>
               <TableCell>{comprobante?.estado}</TableCell>
               <TableCell className="flex justify-center">
                 <Button

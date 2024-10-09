@@ -1,5 +1,4 @@
 "use client";
-import { useState, useEffect } from "react";
 import { api } from "~/trpc/react";
 import { Landmark } from "lucide-react";
 import LayoutContainer from "~/components/layout-container";
@@ -16,31 +15,39 @@ import {
   AccordionTrigger as AccordionTriggerIntegrant,
 } from "~/components/affiliate-page/integrante-accordion";
 
-import ActiveBadge from "~/components/active-badge";
 import { Card } from "~/components/ui/card";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
-
+import "dayjs/locale/es";
 dayjs.extend(utc);
 dayjs.extend(timezone);
-
-import { getDifferentialAmount, getGroupContribution } from "~/lib/utils";
+dayjs.locale("es");
+import {
+  Capitalize,
+  cn,
+  getDifferentialAmount,
+  getGroupContribution,
+} from "~/lib/utils";
 import { RouterOutputs } from "~/trpc/shared";
 import { useRouter } from "next/navigation";
 import { SaldoPopoverAffiliates } from "./saldoPopoverAffiliates";
 import ElementCard from "~/components/affiliate-page/element-card";
+import BonusDialog from "./cc/[ccId]/components_acciones/bonusDialog";
+import { checkRole } from "~/lib/utils/react/roles";
 
 export default function AffiliatePage(props: {
+  isAdmin: boolean;
   params: { affiliateId: string; companyId: string };
 }) {
   const router = useRouter();
   // const company = props.params.companyId;
   const grupos = props.params.affiliateId;
-
+  const isAdmin = props.isAdmin;
   const { data: grupo } = api.family_groups.get.useQuery({
     family_groupsId: grupos!,
   });
+  const { data: productos } = api.products.list.useQuery();
 
   const { data: cc } = api.currentAccount.getByFamilyGroup.useQuery({
     familyGroupId: grupos ?? "",
@@ -52,6 +59,24 @@ export default function AffiliatePage(props: {
       ? prev
       : current;
   });
+
+  let lastComprobante;
+  if (grupo?.comprobantes && grupo?.comprobantes?.length! > 0) {
+    lastComprobante = grupo?.comprobantes?.reduce((prev, current) => {
+      return new Date(prev.due_date ?? 0) > new Date(current.due_date ?? 0)
+        ? prev
+        : current;
+    });
+  }
+  let nextExpirationDate;
+  if (lastComprobante) {
+    nextExpirationDate = lastComprobante?.due_date
+      ? dayjs(lastComprobante?.due_date).format("DD-MM-YYYY")
+      : "-";
+  }
+
+  // const nextExpirationDate = new Date().getTime();
+
   const { data: integrant } = api.integrants.getByGroup.useQuery({
     family_group_id: grupos!,
   });
@@ -65,6 +90,7 @@ export default function AffiliatePage(props: {
   );
 
   const billResponsible = grupo?.integrants.find((x) => x.isBillResponsible);
+  const grupoPaymentMethod = billResponsible?.pa[0]?.product?.name;
   const paymentResponsible = grupo?.integrants.find((x) => x.isPaymentHolder);
   let pa: RouterOutputs["pa"]["get"];
   if (paymentResponsible?.pa && paymentResponsible.pa.length > 0) {
@@ -89,25 +115,43 @@ export default function AffiliatePage(props: {
     Vigencia: grupo?.validity
       ? dayjs(grupo?.validity).format("DD-MM-YYYY")
       : "-",
-    "O.S Asignada": "",
-    "O.S Origen": "",
-    Zona: "",
+    "O.S Asignada":
+      billResponsible?.healthInsurances?.identificationNumber ?? "-",
+    "O.S Origen":
+      billResponsible?.originatingHealthInsurances?.identificationNumber ?? "-",
+    Zona: "-",
     Estado: grupo?.state,
     "Fecha estado": "",
     "Motivo baja": "",
-    "Fecha alta": grupo?.entry_date
-      ? dayjs.utc(grupo?.entry_date).startOf("day").format("DD-MM-YYYY")
+    "Fecha alta": grupo?.charged_date
+      ? dayjs.utc(grupo?.charged_date).startOf("day").format("DD-MM-YYYY")
       : "-",
     "Usuario alta": "",
-    Vendedor: "",
-    Supervisor: "",
-    Gerencia: "",
+    Vendedor: grupo?.seller ?? "-",
+    Supervisor: grupo?.supervisor ?? "-",
+    Gerencia: grupo?.gerency ?? "-",
   };
 
   const integrantsPersonalData = new Map<string, Record<string, string>>();
   const integrantsFiscalData = new Map<string, Record<string, string>>();
   const integrantsContactData = new Map<string, Record<string, string>>();
   const integrantsPlanData = new Map<string, Record<string, string>>();
+
+  const formattedAportes = grupo
+    ? new Intl.NumberFormat("es-AR", {
+        style: "currency",
+        currency: "ARS",
+        currencyDisplay: "narrowSymbol",
+      }).format(getGroupContribution(grupo))
+    : "-";
+
+  // const session = getServerAuthSession();
+  // const userRole = (session?.user as { id: string; role: string })?.role;
+
+  const diferencialAmount = grupo
+    ? getDifferentialAmount(grupo, new Date())?.toString()
+    : "-";
+
   const additionalData = {
     PROMOCIÓN: bonusValido ? bonusValido?.amount + " %" : "-",
     DESDE: bonusValido?.from
@@ -116,20 +160,24 @@ export default function AffiliatePage(props: {
     HASTA: bonusValido?.to
       ? dayjs(bonusValido?.to).utc().format("DD-MM-YYYY")
       : "-",
-    APORTES: grupo ? getGroupContribution(grupo) : "-",
+    APORTES: grupo ? formattedAportes : "-",
     ORIGEN: "",
     "FECHA APORTES": "-",
     "PERIODO APORTADO": "-",
     "CUIT EMPLEADOR": "",
-    DIFERENCIAL: grupo ? getDifferentialAmount(grupo, new Date()) : "-",
+    DIFERENCIAL: isAdmin ? diferencialAmount : "No autorizado",
   };
+
   for (const integrant of grupo?.integrants ?? []) {
     const intPersonalData = {
-      "TIPO DE DOCUMENTO": integrant.id_type ?? "-",
-      "NUMERO DE DOCUMENTO": integrant.id_number ?? "-",
-      "NRO. AFILIADO": integrant.affiliate_number ?? "-",
+      "TIPO DOCUMENTO": integrant.id_type ?? "-",
+      "Nº DOCUMENTO": integrant.id_number ?? "-",
+      "Nº AFILIADO": integrant.affiliate_number ?? "-",
       EXTENSION: integrant.extention ? integrant?.extention : "-",
-      "NRO. CREDENCIAL": `${integrant.affiliate_number}-${integrant.extention}`,
+      "Nº. CREDENCIAL":
+        integrant.affiliate_number && integrant.extention
+          ? `${integrant.affiliate_number}-${integrant.extention}`
+          : "-",
       "FECHA DE NAC": dayjs(integrant.birth_date).format("DD-MM-YYYY") ?? "-",
       EDAD: integrant?.age?.toString() ?? "-",
       "GÉNERO:": integrant?.gender ?? "-",
@@ -139,7 +187,7 @@ export default function AffiliatePage(props: {
     const intFiscalData = {
       "CONDICION DE AFIP": integrant.afip_status ?? "-",
       "TIPO DE ID FISCAL": integrant.fiscal_id_type ?? "-",
-      "NRO. FISCAL": integrant.fiscal_id_number ?? "-",
+      "Nº. FISCAL": integrant.fiscal_id_number ?? "-",
     };
     const intContactData = {
       DOMICILIO:
@@ -180,12 +228,20 @@ export default function AffiliatePage(props: {
       <img src="/landing_images/MASTERCARD.png" className="h-4 w-auto ml-2" />
     ),
   };
-  const paymentMethod: Record<string, React.ReactNode> = {
-    "Débito Directo": (
+
+  const prodId = billResponsible?.pa[0]?.product_id;
+  const prod = productos?.find((x) => x.id === prodId);
+
+  const paymentMethod = new Map<string, React.ReactNode>([
+    [
+      "DEBITO DIRECTO",
       <>
         <div className="flex items-start gap-1">
           <ElementCard
-            element={{ key: "CBU", value: "0000000000000000000000" }}
+            element={{
+              key: "CBU",
+              value: billResponsible?.pa[0]?.CBU ?? "0000000000000000000000",
+            }}
           />
           <ElementCard element={{ key: "ALIAS", value: "AAAA.AAA.AAA" }} />
         </div>
@@ -204,9 +260,10 @@ export default function AffiliatePage(props: {
             }}
           />
         </div>
-      </>
-    ),
-    Voluntario: (
+      </>,
+    ],
+    [
+      "PAGO VOLUNTARIO",
       <div className="p-0">
         <h2 className="font-bold text-base mb-2">Redes Habilitadas: </h2>
         <div className="flex gap-4 items-center justify-start">
@@ -223,15 +280,37 @@ export default function AffiliatePage(props: {
             Pagomiscuentas
           </div>
         </div>
-      </div>
-    ),
-    "Débito Automático": (
+      </div>,
+    ],
+
+    [
+      "EFECTIVO",
+      <div className="p-0">
+        <h2 className="font-bold text-base mb-2">Redes Habilitadas: </h2>
+        <div className="flex gap-4 items-center justify-start">
+          <div className="flex gap-2 items-center">
+            <img src="/public/affiliates/rapipago.png" className="h-5" />{" "}
+            Rapipago
+          </div>
+          <div className="flex gap-2">
+            <img src="/public/affiliates/pagofacil.png" className="h-5" />
+            Pago Fácil
+          </div>
+          {/* <div className="flex gap-2">
+            <img src="/public/affiliates/pagomiscuentas.png" className="h-5" />{" "}
+            Pagomiscuentas
+          </div> */}
+        </div>
+      </div>,
+    ],
+    [
+      "DEBITO AUTOMATICO",
       <div className="pl-4">
         <div className="flex justify-between">
           <ElementCard
             element={{
               key: "NOMBRE DE LA TARJETA",
-              value: "Claudia Alejandra Perea",
+              value: billResponsible?.name ?? "Claudia Alejandra Perea",
             }}
           />
           <ElementCard
@@ -239,21 +318,37 @@ export default function AffiliatePage(props: {
               key: "NÚMERO DE TARJETA",
               value: (
                 <div className="flex justify-between items-center">
-                  **** **** **** 1234 {cardLogoMap["Visa"]}
+                  **** **** ****
+                  {billResponsible?.pa[0]
+                    ? billResponsible?.pa[0].card_number?.slice(12, 16) ??
+                      "1234"
+                    : "1234"}
+                  {cardLogoMap["Visa"]}
                 </div>
               ),
             }}
           />
         </div>
         <div className="flex justify-start gap-3 mt-3">
-          <ElementCard element={{ key: "TIPO DE TARJETA", value: "Débito" }} />
           <ElementCard
-            element={{ key: "FECHA DE VENC.", value: "01/12/2024" }}
+            element={{
+              key: "TIPO DE TARJETA",
+              value: billResponsible?.pa[0]?.card_type ?? "Débito",
+            }}
+          />
+          <ElementCard
+            element={{
+              key: "FECHA DE VENC.",
+              value:
+                dayjs(billResponsible?.pa[0]?.expire_date).format(
+                  "DD/MM/YYYY"
+                ) ?? "01/12/2024",
+            }}
           />
         </div>
-      </div>
-    ),
-  };
+      </div>,
+    ],
+  ]);
 
   const goToCCDetail = (id: string | undefined) => {
     if (!id) return;
@@ -264,34 +359,40 @@ export default function AffiliatePage(props: {
 
   return (
     <LayoutContainer>
-      <section>
+      <section className="relative">
         <h2 className="text-2xl mt-4 font-semibold">
           Grupo familiar Nº {grupo?.numericalId}
         </h2>
 
+        
+          <div className="absolute top-0 right-0">
+            <BonusDialog />
+          </div>
+        
+
         <div className="flex gap-3 mt-5 mb-10">
           <Card className="flex-auto py-4 px-6 w-1/2  items-center">
-          <div className=" grid grid-cols-2 items-center">
+            <div className=" grid grid-cols-2 items-center">
               <div>
-              <p className="text-sm">SALDO ACTUAL</p>
-              <span className="text-[#EB2727] text-xl font-bold">
-                $
-                {lastEvent?.current_amount !== undefined
-                  ? lastEvent.current_amount.toFixed(2)
-                  : "0.00"}
-              </span>
+                <p className="text-sm">SALDO ACTUAL</p>
+                <span className="text-[#EB2727] text-xl font-bold">
+                  $
+                  {lastEvent?.current_amount !== undefined
+                    ? lastEvent.current_amount.toFixed(2)
+                    : "0.00"}
+                </span>
               </div>
-            <SaldoPopoverAffiliates
-              ccId={cc?.id}
-              healthInsuranceId={props.params.affiliateId}
+              <SaldoPopoverAffiliates
+                ccId={cc?.id}
+                healthInsuranceId={props.params.affiliateId}
               />
-              </div>
+            </div>
           </Card>
           <Card className="py-4 px-9 bg-[#DEF5DD] w-1/2 flex flex-col justify-center">
             <div className="flex flex-col  justify-center">
               <p className="text-sm font-medium block">PRÓXIMO VENCIMIENTO</p>
               <span className="text-[#3E3E3E] font-semibold text-xl">
-                10/09/2024
+                {nextExpirationDate}
               </span>
             </div>
           </Card>
@@ -300,46 +401,59 @@ export default function AffiliatePage(props: {
           <Accordion
             className="w-full"
             defaultValue={["item-1", "item-2", "item-3"]}
-            type="multiple"
-          >
+            type="multiple">
             <AccordionItem value="item-1">
               <AccordionTrigger className="font-semibold" name="editIcon">
-                Datos del grupo familiar</AccordionTrigger>
+                Datos del grupo familiar
+              </AccordionTrigger>
               <AccordionContent className="pt-6 pl-5">
-                <div className="grid grid-cols-5 gap-6 p-3 rounded-md">
-                  {Object.entries(familyGroupData).map(([key, value]) => (
-                    <ElementCard key={key} element={{ key, value }} />
-                  ))}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 p-3 rounded-md">
+                  {Object.entries(familyGroupData).map(([key, value]) => {
+                    value =
+                      typeof value === "string" ? Capitalize(value) : value;
+                    return <ElementCard key={key} element={{ key, value }} />;
+                  })}
                 </div>
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2">
-              <AccordionTrigger className="font-semibold rounded-md overflow-hidden" name="editIcon">
+              <AccordionTrigger
+                className="font-semibold rounded-md overflow-hidden"
+                name="editIcon">
                 Integrantes
               </AccordionTrigger>
               <AccordionContent className="pt-6 pl-5">
                 <AccordionIntegrant
                   type="multiple"
-                  className="rounded-md overflow-hidden"
-                >
+                  className="rounded-md overflow-hidden">
                   {integrant?.map((int) => (
                     <AccordionItemIntegrant value={int.id}>
                       <AccordionTriggerIntegrant
                         relationship={int?.relationship}
-                        affiliate={int}
-                      >
+                        affiliate={int}>
                         {int.name}
                       </AccordionTriggerIntegrant>
                       <AccordionContentIntegrant>
                         <p className="text-xs font-semibold">
-                          Informacion Personal
+                          Información Personal
                         </p>
-                        <div className="flex flex-1 flex-wrap justify-start gap-8 pt-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-stretch pt-4">
                           {Object.entries(
                             integrantsPersonalData.get(int.id) ?? {}
-                          ).map(([key, value]) => (
-                            <ElementCard key={key} element={{ key, value }} />
-                          ))}
+                          ).map(([key, value]) => {
+                            const isCredentialRelated =
+                              key === "Nº. CREDENCIAL" ||
+                              key == "EXTENSION" ||
+                              key == "Nº AFILIADO" ||
+                              key == "TIPO DOCUMENTO";
+                            value =
+                              typeof value === "string" && !isCredentialRelated
+                                ? Capitalize(value)
+                                : value;
+                            return (
+                              <ElementCard key={key} element={{ key, value }} />
+                            );
+                          })}
                         </div>
                         <p className="text-xs font-semibold my-3 mt-8">
                           Información Fiscal
@@ -347,9 +461,16 @@ export default function AffiliatePage(props: {
                         <div className="flex flex-1 flex-wrap justify-start gap-8 pt-2">
                           {Object.entries(
                             integrantsFiscalData.get(int?.id ?? "") ?? {}
-                          ).map(([key, value]) => (
-                            <ElementCard key={key} element={{ key, value }} />
-                          ))}
+                          ).map(([key, value]) => {
+                            value =
+                              typeof value === "string" &&
+                              key != "TIPO DE ID FISCAL"
+                                ? Capitalize(value)
+                                : value;
+                            return (
+                              <ElementCard key={key} element={{ key, value }} />
+                            );
+                          })}
                         </div>
                         <p className="text-xs font-semibold my-3 mt-8">
                           Información de contacto
@@ -357,9 +478,15 @@ export default function AffiliatePage(props: {
                         <div className="flex flex-1 flex-wrap justify-start gap-8 pt-2">
                           {Object.entries(
                             integrantsContactData.get(int?.id ?? "") ?? {}
-                          ).map(([key, value]) => (
-                            <ElementCard key={key} element={{ key, value }} />
-                          ))}
+                          ).map(([key, value]) => {
+                            value =
+                              typeof value === "string" && key != "EMAIL"
+                                ? Capitalize(value)
+                                : value;
+                            return (
+                              <ElementCard key={key} element={{ key, value }} />
+                            );
+                          })}
                         </div>
                         <p className="text-xs font-semibold my-3 mt-8">
                           Información sobre el plan
@@ -368,11 +495,10 @@ export default function AffiliatePage(props: {
                           {Object.entries(
                             integrantsPlanData.get(int?.id ?? "") ?? {}
                           ).map(([key, value]) => {
-                            if (key === "Estado" && value === "Activo") {
-                              return (
-                                <ElementCard key={key} element={{ key, value }} />
-                              );
-                            }
+                            value =
+                              typeof value === "string"
+                                ? Capitalize(value)
+                                : value;
                             return (
                               <ElementCard key={key} element={{ key, value }} />
                             );
@@ -385,7 +511,9 @@ export default function AffiliatePage(props: {
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-3">
-              <AccordionTrigger className="font-semibold">Datos de facturación</AccordionTrigger>
+              <AccordionTrigger className="font-semibold">
+                Datos de facturación
+              </AccordionTrigger>
               <AccordionContent className="pt-8 pl-8">
                 <div className="flex gap-2">
                   <div className="flex flex-col gap-1 bg-[#DEF5DD] pl-5 pr-6 pt-5 pb-14 w-1/3 rounded-lg">
@@ -407,9 +535,11 @@ export default function AffiliatePage(props: {
                         src="/public/affiliates/shopIcon.png"
                         className="bg-[#DEF5DD] h-4"
                       />
-                      Condicion de Venta:
+                      Condición de Venta:
                     </div>
-                    <p className="font-semibold pl-7 opacity-80">-</p>
+                    <p className="font-semibold pl-7 opacity-80">
+                      {grupo?.sale_condition ?? "-"}
+                    </p>
                     <div className="flex items-center gap-2">
                       <img
                         src="/public/affiliates/modalityIcon.png"
@@ -419,21 +549,41 @@ export default function AffiliatePage(props: {
                     </div>
                     <p className="font-semibold pl-7 opacity-80">
                       {" "}
-                      Debito Directo
+                      {prod?.name ?? "no se pudo encontrar el producto"}
                     </p>
                   </div>
                   <div className="w-2/3 bg-[#DEF5DD] px-6 pt-5 pb-10 rounded-lg">
                     <h2 className="mb-3 text-lg font-normal">
                       Detalles del pago
                     </h2>
-                    {paymentMethod["Voluntario"]}
+                    {paymentMethod && paymentMethod?.has(prod?.name ?? "") ? (
+                      <div className="flex gap-4 items-start">
+                        {paymentMethod.get(prod?.name ?? "")}
+                      </div>
+                    ) : (
+                      <div className="flex gap-4 items-start">
+                        {paymentMethod.get("Pago Voluntario")}
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-5 gap-4 p-3  pt-6">
-                  {Object.entries(additionalData).map(([key, value]) => (
-                    <ElementCard key={key} element={{ key, value }} />
-                  ))}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-stretch p-3 pt-6">
+                  {Object.entries(additionalData).map(([key, value]) => {
+                    console.log("iteracion: ", key === "DIFERENCIAL", !isAdmin);
+                    const notRender = key === "DIFERENCIAL" && !isAdmin;
+                    const isEmpty = value === "-" || !value;
+                    const isPeriod =
+                      key === "PERIODO APORTADO" || key === "FECHA APORTES";
+                    if (isEmpty && isPeriod) return null;
+                    value =
+                      typeof value === "string" ? Capitalize(value) : value;
+                    return !notRender ? (
+                      <ElementCard key={key} element={{ key, value }} />
+                    ) : (
+                      <></>
+                    );
+                  })}
                 </div>
               </AccordionContent>
             </AccordionItem>

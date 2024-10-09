@@ -1,15 +1,16 @@
+"use client";
 import LayoutContainer from "~/components/layout-container";
 import { List, ListTile } from "~/components/list";
 import { Title } from "~/components/title";
-import { api } from "~/trpc/server";
+import { api } from "~/trpc/react";
 import AddPlanDialog from "./AddPlanDialog";
 import { Button } from "~/components/ui/button";
 import DeleteButton from "~/components/plan/delete-plan";
 import SeeButton from "~/components/plan/see-plan";
+import { auth } from "@clerk/nextjs/server";
 
-export default async function Page() {
-  // cambiar luego por tramite router
-  const planes = await api.plans.list.query();
+export default function Page() {
+  const { data: planes, isLoading } = api.plans.list.useQuery();
   return (
     <LayoutContainer>
       <section className="space-y-2">
@@ -17,21 +18,26 @@ export default async function Page() {
           <Title>Planes</Title>
           <AddPlanDialog />
         </div>
-        <List>
-          {planes.map((planes) => (
-            <ListTile
-              className="pl-10 pr-5 "
-              key={planes.id}
-              title={planes.plan_code}
-              trailing={<div className="flex gap-2">
-                <SeeButton id={planes.id} />
-                <DeleteButton id={planes.id} />
-              </div>}
-            />
-          ))}
-        </List>
+        {isLoading && <p>Cargando...</p>}
+        {!planes && !isLoading && <p>No hay planes</p>}
+        {planes && (
+          <List>
+            {planes?.map((planes) => (
+              <ListTile
+                className="pl-10 pr-5 "
+                key={planes.id}
+                title={planes.plan_code}
+                trailing={
+                  <div className="flex gap-2">
+                    <SeeButton id={planes.id} />
+                    <DeleteButton id={planes.id} />
+                  </div>
+                }
+              />
+            ))}
+          </List>
+        )}
       </section>
     </LayoutContainer>
   );
 }
-

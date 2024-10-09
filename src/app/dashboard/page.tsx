@@ -43,7 +43,7 @@ export default async function page() {
                   </div>
 
                   <p className="w-[120px] overflow-hidden whitespace-normal text-wrap text-left text-[16px] text-basis">
-                    Generacion de Recaudacion
+                    Generación de Recaudación
                   </p>
                 </Button>
               </Link>
@@ -65,7 +65,7 @@ export default async function page() {
                   </div>
 
                   <p className="w-[120px] overflow-hidden whitespace-normal text-wrap text-left text-[16px] text-basis">
-                    Informacion de facturacion
+                    Información de facturación
                   </p>
                 </Button>
               </Link>
@@ -154,7 +154,7 @@ export default async function page() {
           </Card>
           <Card className="cardDashboard col-span-3">
             <CardHeader>
-              <CardTitle className="text-xl">Transacciones del dia</CardTitle>
+              <CardTitle className="text-xl">Transacciones del día</CardTitle>
             </CardHeader>
             <CardContent>
               <RecentSales />

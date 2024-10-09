@@ -45,12 +45,12 @@ export default async function AdminDashboard(params: {
           usersList.map((user) => (
             <List key={user.id}>
               <ListTile
-                href={`./user/${user.id}`}
-                title={
-                  <>
-                    {user.firstName} {user.lastName}
-                  </>
-                }
+                // href={`./user/${user.id}`}
+                // title={
+                //   <>
+                //     {user.firstName} {user.lastName}
+                //   </>
+                // }
                 subtitle={
                   user.emailAddresses.find(
                     (email) => email.id === user.primaryEmailAddressId

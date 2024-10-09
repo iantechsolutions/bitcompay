@@ -28,6 +28,7 @@ export function AddCompanyDialog() {
     api.events.createFirstEvent.useMutation();
   const [description, setDescription] = useState("");
   const [name, setName] = useState("");
+  const [razon_social, setRazon] = useState("");
   const [organizationName, setOrganizationName] = useState("");
   const [concept, setConcept] = useState("");
   const [cuit, setCuit] = useState("");
@@ -76,6 +77,7 @@ export function AddCompanyDialog() {
             concept,
             cuit,
             afipKey,
+            razon_social,
           });
           const cc = await createCC({
             company_id: organization.id,
@@ -88,6 +90,7 @@ export function AddCompanyDialog() {
           });
         }
         setName("");
+        setRazon("");
         setDescription("");
         setConcept("");
         toast.success("Entidad creada correctamente");
@@ -107,7 +110,7 @@ export function AddCompanyDialog() {
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>
+      <Button onClick={() => setOpen(true)} variant="bitcompay" className="text-current text-sm">
         <PlusCircleIcon className="mr-2" size={20} />
         Crear entidad
       </Button>
@@ -120,8 +123,8 @@ export function AddCompanyDialog() {
                 </DialogDescription> */}
           </DialogHeader>
           <form onSubmit={handleCreate}>
-            <div>
-              <Label htmlFor="name">Nombre de la entidad</Label>
+            <div className="m-2">
+              <Label htmlFor="name" className="m-2">Nombre de la entidad</Label>
               <Input
                 id="name"
                 placeholder="ej: bitcompay"
@@ -132,8 +135,19 @@ export function AddCompanyDialog() {
                 }}
               />
             </div>
-            <div>
-              <Label htmlFor="description">Descripción</Label>
+            <div className="m-2">
+                <Label htmlFor="razon_social" className="m-2">Razón social</Label>
+              <Input
+                id="razon_social"
+                placeholder="..."
+                value={razon_social}
+                onChange={(e) => {
+                  setRazon(e.target.value);
+                }}
+              />
+            </div>
+            <div className="m-2">
+              <Label htmlFor="description" className="m-2">Descripción</Label>
               <Input
                 id="description"
                 placeholder="..."
@@ -141,8 +155,8 @@ export function AddCompanyDialog() {
                 onChange={(e) => setDescription(e.target.value)}
               />
             </div>
-            <div>
-              <Label htmlFor="concept">Concepto</Label>
+            <div className="m-2">
+              <Label htmlFor="concept" className="m-2">Concepto</Label>
               <Input
                 id="concept"
                 placeholder="..."
@@ -160,21 +174,21 @@ export function AddCompanyDialog() {
               />
               <span className="text-red-600 text-xs">{error}</span>
             </div>
-            <div>
-              <Label htmlFor="cuit">CUIL/CUIT</Label>
+            <div className="m-2">
+              <Label htmlFor="cuit" className="m-2">CUIL/CUIT</Label>
               <Input
                 id="cuit"
-                placeholder="..."
+                placeholder="0"
                 value={cuit}
                 onChange={(e) => setCuit(e.target.value)}
               />
               <span className="text-red-600 text-xs">{error}</span>
             </div>
-            <div>
-              <Label htmlFor="afipKey">Clave fiscal</Label>
+            <div className="m-2" >
+              <Label htmlFor="afipKey" className="m-2">Clave fiscal</Label>
               <Input
                 id="afipKey"
-                placeholder="..."
+                placeholder="0"
                 value={afipKey}
                 onChange={(e) => setAfipKey(e.target.value)}
               />
@@ -182,7 +196,7 @@ export function AddCompanyDialog() {
             </div>
             <br />
             <DialogFooter>
-              <Button disabled={isLoadingCC || isLoading} type="submit">
+              <Button disabled={isLoadingCC || isLoading} variant="bitcompay" className="text-current">
                 {isLoading ? (
                   <Loader2Icon className="mr-2 animate-spin" size={20} />
                 ) : (

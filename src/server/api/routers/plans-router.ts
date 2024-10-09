@@ -8,18 +8,28 @@ import { RouterOutputs } from "~/trpc/shared";
 export const plansRouter = createTRPCRouter({
   get: protectedProcedure
     .input(z.object({ planId: z.string() }))
-    .query(async ({ input }) => {
-      console.log("input", input);
-      const planes = await db.query.plans.findMany();
-      console.log("planes", planes);
+    .query(async ({ input, ctx }) => {
       const plan_found = await db.query.plans.findFirst({
         where: eq(schema.plans.id, input.planId),
         with: {
           pricesPerCondition: true,
+          brands: {
+            with: {
+              company: true,
+            },
+          },
         },
       });
-      console.log("plan_found", plan_found);
-      return plan_found;
+
+      if (
+        plan_found?.brands?.company.some(
+          (company) => company.companyId === ctx.session.orgId
+        )
+      ) {
+        return plan_found;
+      } else {
+        return null;
+      }
     }),
   list: protectedProcedure.query(async ({ ctx }) => {
     const plans = await db.query.plans.findMany({
@@ -31,13 +41,10 @@ export const plansRouter = createTRPCRouter({
           },
         },
       },
+      where: eq(schema.plans.companies_id, ctx.session.orgId ?? ""),
     });
-    const plan_reduced = plans.filter((plan) => {
-      return plan.brands?.company.some(
-        (company) => company.companyId == ctx.session.orgId!
-      );
-    });
-    return plan_reduced;
+
+    return plans.length > 0 ? plans : [];
   }),
   getByBrand: protectedProcedure
     .input(z.object({ brandId: z.string() }))
@@ -47,7 +54,7 @@ export const plansRouter = createTRPCRouter({
         with: { pricesPerCondition: true },
       });
 
-      return planes;
+      return planes.length > 0 ? planes : [];
     }),
   create: protectedProcedure
     .input(
@@ -57,7 +64,7 @@ export const plansRouter = createTRPCRouter({
         brand_id: z.string().max(255),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const user = await currentUser();
       const new_plan = await db
         .insert(schema.plans)
@@ -66,6 +73,7 @@ export const plansRouter = createTRPCRouter({
           plan_code: input.plan_code,
           description: input.description,
           brand_id: input.brand_id,
+          companies_id: ctx.session.orgId,
         })
         .returning();
       return new_plan;

@@ -1,15 +1,103 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db, schema } from "~/server/db";
-import { desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, ilike, inArray, like } from "drizzle-orm";
 import {
   administrative_audit,
   medical_audit,
   family_groups,
 } from "~/server/db/schema";
 import { RouterOutputs } from "~/trpc/shared";
+import { computeBase, computeIva, toNumberOrZero } from "~/lib/utils";
+import { TRPCError } from "@trpc/server";
 export type FamilyListLiquidationId =
-  RouterOutputs["family_groups"]["getByLiquidation"][number];
+  RouterOutputs["family_groups"]["getByLiquidationFiltered"]["results"][number];
+
+function makeSummary(
+  fgFiltered: {
+    comprobantes: {
+      items: {
+        amount: number | null;
+        concept: string | null;
+      }[];
+      importe: number;
+      iva: string;
+    }[];
+  }[]
+) {
+  const summary = {
+    "SALDO ANTERIOR": 0,
+    "CUOTA PLANES": 0,
+    BONIFICACIÓN: 0,
+    DIFERENCIAL: 0,
+    APORTES: 0,
+    INTERÉS: 0,
+    SUBTOTAL: 0,
+    IVA: 0,
+    "TOTAL A FACTURAR": 0,
+  };
+
+  fgFiltered.forEach((fg) => {
+    // ya los obtengo filtrados
+    const original_comprobante = fg.comprobantes.at(0);
+
+    const saldo_anterior = toNumberOrZero(
+      original_comprobante?.items.find(
+        (item) => item.concept === "Factura Anterior"
+      )?.amount
+    );
+
+    summary["SALDO ANTERIOR"] += saldo_anterior;
+
+    const cuota_planes = toNumberOrZero(
+      original_comprobante?.items.find((item) => item.concept === "Abono")
+        ?.amount
+    );
+    summary["CUOTA PLANES"] += cuota_planes;
+
+    const bonificacion = toNumberOrZero(
+      original_comprobante?.items.find(
+        (item) => item.concept === "BONIFICACIÓN"
+      )?.amount
+    );
+    summary["BONIFICACIÓN"] += bonificacion;
+
+    const diferencial = toNumberOrZero(
+      original_comprobante?.items.find((item) => item.concept === "Diferencial")
+        ?.amount
+    );
+
+    summary["DIFERENCIAL"] += diferencial;
+
+    const aporte = toNumberOrZero(
+      original_comprobante?.items.find((item) => item.concept === "Aporte")
+        ?.amount
+    );
+    summary["APORTES"] += aporte;
+
+    const interes = toNumberOrZero(
+      original_comprobante?.items.find((item) => item.concept === "Interes")
+        ?.amount
+    );
+    summary["INTERÉS"] += interes;
+
+    const total = toNumberOrZero(
+      parseFloat(original_comprobante?.importe?.toFixed(2)!)
+    );
+
+    const subTotal = computeBase(
+      total,
+      Number(original_comprobante?.iva ?? "0")
+    );
+    summary.SUBTOTAL += subTotal;
+
+    const iva = computeIva(total, Number(original_comprobante?.iva ?? "0"));
+    summary.IVA += iva;
+    summary["TOTAL A FACTURAR"] += total;
+  });
+
+  return summary;
+}
 
 export const family_groupsRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({ ctx }) => {
@@ -202,7 +290,13 @@ export const family_groupsRouter = createTRPCRouter({
             with: {
               contribution: true,
               differentialsValues: true,
-              pa: true,
+              pa: {
+                with: {
+                  product: true,
+                },
+              },
+              healthInsurances: true,
+              originatingHealthInsurances: true,
             },
           },
         },
@@ -214,7 +308,12 @@ export const family_groupsRouter = createTRPCRouter({
     }),
 
   getByLiquidation: protectedProcedure
-    .input(z.object({ liquidationId: z.string() }))
+    .input(
+      z.object({
+        liquidationId: z.string(),
+        summary: z.boolean().default(false),
+      })
+    )
     .query(async ({ input, ctx }) => {
       const fg = await db.query.family_groups.findMany({
         with: {
@@ -231,27 +330,225 @@ export const family_groupsRouter = createTRPCRouter({
         },
       });
       const fgCompany = fg.filter(
-        (x) => x.businessUnitData?.companyId === ctx.session.orgId ?? ""
+        (x) => x.businessUnitData?.companyId === ctx.session.orgId
       );
 
       // Filtra los comprobantes por `liquidationId` dentro de cada grupo familiar
       const fgFiltered = fgCompany
         .map((group) => {
+          // Filtra los comprobantes según el liquidation_id
           const filteredComprobantes = group.comprobantes.filter(
             (comprobante) => comprobante.liquidation_id === input.liquidationId
           );
+
           // Si hay comprobantes filtrados, devuelve el grupo con los comprobantes filtrados
           if (filteredComprobantes.length > 0) {
             return {
               ...group,
-              comprobantes: filteredComprobantes,
+              comprobantes: filteredComprobantes.map((comprobante) => ({
+                items: comprobante.items.map((item) => ({
+                  amount: item.amount ?? 0,
+                  concept: item.concept ?? "",
+                })),
+                importe: comprobante.importe ?? 0,
+                iva: comprobante.iva ?? "0%",
+              })),
             };
           }
           return null;
         })
         .filter((group) => group !== null); // Filtra los grupos nulos
 
-      return fgFiltered;
+      // Retorna un objeto con el formato esperado
+      return input.summary
+        ? {
+            familyGroups: fgFiltered,
+            summary: makeSummary(fgFiltered as any), // Puedes ajustar el tipo según el uso
+          }
+        : fgFiltered;
+    }),
+
+  getSummaryByLiqId: protectedProcedure
+    .input(
+      z.object({
+        liquidationId: z.string(),
+        limit: z.number().int().nonnegative().optional(),
+        cursor: z.number().int().nonnegative().optional(),
+        id_number_startsWith: z.string().min(1).max(255).optional(),
+        name_contains: z.string().min(1).max(255).optional(),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const integrantsConditions = [
+        eq(schema.integrants.isBillResponsible, true),
+      ];
+
+      if (typeof input.id_number_startsWith === "string") {
+        integrantsConditions.push(
+          like(schema.integrants.id_number, `%${input.id_number_startsWith}`)
+        );
+      }
+
+      if (typeof input.name_contains === "string") {
+        integrantsConditions.push(
+          ilike(schema.integrants.name, `%${input.name_contains}%`)
+        );
+      }
+
+      const fg = await db.query.family_groups.findMany({
+        with: {
+          businessUnitData: true,
+          integrants: {
+            where: and(...integrantsConditions),
+          },
+          comprobantes: {
+            with: {
+              items: true,
+            },
+            where: and(
+              eq(schema.comprobantes.liquidation_id, input.liquidationId),
+              eq(schema.comprobantes.origin, "Factura")
+            ),
+          },
+        },
+        limit: input.limit,
+        offset: input.cursor,
+      });
+
+      // Filtra los comprobantes por `liquidationId` dentro de cada grupo familiar
+      // Si hay comprobantes filtrados, devuelve el grupo con los comprobantes filtrados
+      // se filtran los comprobantes en la query
+      const fgFiltered = fg.filter(
+        (x) =>
+          x.businessUnitData?.companyId === ctx.session.orgId &&
+          x.comprobantes.length > 0 &&
+          x.integrants.length > 0
+      );
+
+      return {
+        summary: makeSummary(fgFiltered),
+        totalRows: fgFiltered.length,
+      };
+    }),
+
+  getByLiquidationFiltered: protectedProcedure
+    .input(
+      z.object({
+        liquidationId: z.string(),
+        limit: z.number().int().nonnegative().optional(),
+        cursor: z.number().int().nonnegative().optional(),
+        id_number_startsWith: z.string().min(1).max(255).optional(),
+        name_contains: z.string().min(1).max(255).optional(),
+        modoDesc: z.string().min(1).max(255).optional(),
+        plan: z.string().min(1).max(255).optional(),
+        UN: z.string().min(1).max(255).optional(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      if (!ctx.session.orgId) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "!ctx.session.orgId",
+        });
+      }
+
+      const integrantsConditions = [
+        eq(schema.integrants.isBillResponsible, true),
+      ];
+
+      if (typeof input.id_number_startsWith === "string") {
+        integrantsConditions.push(
+          like(schema.integrants.id_number, `${input.id_number_startsWith}%`)
+        );
+      }
+
+      if (typeof input.name_contains === "string") {
+        integrantsConditions.push(
+          ilike(schema.integrants.name, `%${input.name_contains}%`)
+        );
+      }
+
+      let whereCompatBusinessUnits = [
+        eq(schema.bussinessUnits.companyId, ctx.session.orgId),
+      ];
+
+      if (input.UN !== undefined) {
+        whereCompatBusinessUnits.push(
+          eq(schema.bussinessUnits.description, input.UN)
+        );
+      }
+
+      let compatibleBusinessUnits = await db.query.bussinessUnits.findMany({
+        where: and(...whereCompatBusinessUnits),
+      });
+
+      let whereFgList = [
+        inArray(
+          schema.family_groups.businessUnit,
+          compatibleBusinessUnits.map((v) => v.id)
+        ),
+      ];
+
+      if (input.modoDesc !== undefined) {
+        let compatibleModos = await db.query.modos.findMany({
+          where: eq(schema.modos.description, input.modoDesc),
+        });
+
+        whereFgList.push(
+          inArray(
+            schema.family_groups.modo,
+            compatibleModos.map((v) => v.id)
+          )
+        );
+      }
+
+      if (input.plan !== undefined) {
+        let compatiblePlans = await db.query.plans.findMany({
+          where: eq(schema.plans.plan_code, input.plan),
+        });
+
+        whereFgList.push(
+          inArray(
+            schema.family_groups.plan,
+            compatiblePlans.map((v) => v.id)
+          )
+        );
+      }
+
+      const fg = await db.query.family_groups.findMany({
+        where: and(...whereFgList),
+        with: {
+          plan: true,
+          modo: true,
+          integrants: {
+            with: {
+              differentialsValues: true,
+              aportes_os: true,
+            },
+            where: and(...integrantsConditions),
+          },
+          cc: true,
+          businessUnitData: true,
+          comprobantes: {
+            with: {
+              items: true,
+            },
+            where: eq(schema.comprobantes.liquidation_id, input.liquidationId),
+          },
+        },
+        limit: input.limit,
+        offset: input.cursor,
+      });
+
+      const fgCompanyFiltered = fg.filter(
+        (x) => x.comprobantes.length > 0 && x.integrants.length > 0
+      );
+
+      return {
+        results: fgCompanyFiltered,
+        usedCursor: input.cursor,
+        usedLimit: input.limit,
+      };
     }),
 
   getbyProcedure: protectedProcedure
@@ -276,7 +573,8 @@ export const family_groupsRouter = createTRPCRouter({
       const family_group = await db.query.family_groups.findFirst({
         where: eq(schema.family_groups.plan, input.planId),
       });
-      return family_group;
+
+      return family_group ? { data: family_group } : { data: null };
     }),
   getByBrand: protectedProcedure
     .input(
@@ -340,8 +638,9 @@ export const family_groupsRouter = createTRPCRouter({
         procedureId: z.string().optional(),
         state: z.string().optional(),
         payment_status: z.string().optional(),
-        entry_date: z.date(),
+        charged_date: z.date(),
         sale_condition: z.string().optional(),
+        user_charged: z.string().optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -368,6 +667,7 @@ export const family_groupsRouter = createTRPCRouter({
         state: z.string().nullable().optional(),
         payment_status: z.string().nullable().optional(),
         sale_condition: z.string().optional(),
+        user_charged: z.string().optional(),
       })
     )
     .mutation(async ({ input: { id, ...input } }) => {

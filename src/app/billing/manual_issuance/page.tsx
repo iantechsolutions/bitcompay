@@ -1,31 +1,14 @@
 "use client";
-import Afip from "@afipsdk/afip.js";
-import { format } from "date-fns";
 import {
   Loader2Icon,
-  PlusCircleIcon,
   CircleX,
   CircleCheck,
-  Search,
-  Scroll,
-  ChevronRightCircleIcon,
   CircleChevronRight,
 } from "lucide-react";
-import { Calendar as CalendarIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import * as React from "react";
 import { Button } from "~/components/ui/button";
-import { Calendar } from "~/components/ui/calendar";
-import { ComboboxDemo } from "~/components/ui/combobox";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
-import {
-  cn,
   htmlBill,
   ingresarAfip,
   comprobanteDictionary,
@@ -33,57 +16,35 @@ import {
   reversedIvaDictionary,
   ivaDictionary,
   idDictionary,
-  dateNormalFormat,
-  reverseConceptDictionary,
   valueToNameComprobanteMap,
 } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
-import { Comprobante } from "./facturaGenerada";
 import LayoutContainer from "~/components/layout-container";
 import { Title } from "~/components/title";
 import { useRouter } from "next/navigation";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
-  SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { create } from "domain";
-import BarcodeProcedure from "~/components/barcode";
 import { SelectTrigger as SelectTriggerMagnify } from "~/components/selectwithsearchIcon";
-import { channel } from "diagnostics_channel";
-import ElementCard from "~/components/affiliate-page/element-card";
-import Calendar01Icon from "~/components/icons/calendar-01-stroke-rounded";
-import { Command, CommandInput } from "~/components/ui/command";
-import { CommandGroup, CommandItem } from "cmdk";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import ComprobanteCard from "~/components/manual_issuance/comprobante-card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "~/components/ui/form";
 import AdditionalInfoCard from "~/components/manual_issuance/additional-info";
-import { RouterOutputs } from "~/trpc/shared";
-import AddCircleIcon from "~/components/icons/add-circle-stroke-rounded";
-import CancelCircleIcon from "~/components/icons/cancel-circle-stroke-rounded";
 import OtherTributes from "~/components/manual_issuance/other-tributes";
 import ConfirmationPage from "~/components/manual_issuance/confirmation-page";
 import ReceptorCard from "~/components/manual_issuance/receptor-card";
 import Totals from "~/components/manual_issuance/totals";
-
-type Totals = {
-  subTotal: number;
-  iva: number;
-  otherAttributes: number;
-};
-
+import {
+  type ConceptsForm,
+  type ManualGenInputs,
+  type OtherTributesForm,
+  type AsociatedFCForm,
+  type otherConceptsForm,
+} from "~/lib/types/app";
+import { type Comprobante } from "~/server/db/schema";
 function formatDate(date: Date | undefined) {
   if (date) {
     const year = date.getFullYear();
@@ -108,11 +69,12 @@ export default function Page() {
   const { data: marcas } = api.brands.list.useQuery();
   const { data: gruposFamiliar } = api.family_groups.list.useQuery();
   const { data: obrasSociales } = api.healthInsurances.list.useQuery();
-  const [subTotal, setSubTotal]= useState<number>(0);
-  const [ivaTotal, setIvaTotal]= useState<number>(0);
-  const [otherAttributes, setOtherAttributes]= useState<number>(0);
+  const [subTotal, setSubTotal] = useState<number>(0);
+  const [ivaTotal, setIvaTotal] = useState<number>(0);
+  const [otherAttributes, setOtherAttributes] = useState<number>(0);
   const [logo, setLogo] = useState("");
   const [fcSelec, setFCSelec] = useState("");
+  const [fcSeleccionada, setFcSeleccionada] = useState<Comprobante[]>([]);
   const [comprobantes, setComprobantes] = useState<any[]>();
   const [selectedComprobante, setSelectedComprobante] = useState<any>(null);
   const [comprobanteCreado, setComprobanteCreado] = useState<any>(null);
@@ -130,16 +92,16 @@ export default function Page() {
     loginAfip();
   }, []);
 
+  
   function computeTotals() {
-    let subTotal=0;
-    let ivaTotal=0;
-    let otherAttributes=0;
-    const res = otherTributesForm.getValues()
-    console.log("res", res)
+    let subTotal = 0;
+    let ivaTotal = 0;
+    let otherAttributes = 0;
+    const res = otherTributesForm.getValues();
     for (const attribute of res.tributes) {
       otherAttributes += Number(attribute.amount);
     }
-
+    
     switch (valueToNameComprobanteMap[tipoComprobante]) {
       case "Factura":
         for (const concept of conceptsForm.getValues().concepts) {
@@ -150,9 +112,14 @@ export default function Page() {
         for (const concepts of otherConceptsForm.getValues().otherConcepts) {
           subTotal += Number(concepts.importe);
         }
-      case "Nota de Crédito":
-      // implementar logica de factura asociada
+      case "Nota de crédito":
+        for (const comprobante of asociatedFCForm.getValues().comprobantes) {
+          console.log("comprobante del forms",comprobante)
+          subTotal += Number(comprobante.importe);
+          ivaTotal += Number(comprobante.iva) * Number(comprobante.iva);
+        }
     }
+    console.log("subtotal", subTotal)
     setSubTotal(subTotal);
     setIvaTotal(ivaTotal);
     setOtherAttributes(otherAttributes);
@@ -320,7 +287,7 @@ export default function Page() {
           comprobante = await createComprobante({
             billLink: "",
             concepto: Number(concepto) ?? 0,
-            importe: Number(importe) * ivaFloat + Number(tributos) ?? 0,
+            importe: Number(importe) * ivaFloat + Number(tributos),
             iva: iva ?? "0",
             nroDocumento: Number(nroDocumento) ?? 0,
             ptoVenta: Number(form.getValues().puntoVenta) ?? 0,
@@ -400,7 +367,7 @@ export default function Page() {
           comprobante = await createComprobante({
             billLink: "", //deberiamos poner un link ?
             concepto: Number(concepto) ?? 0,
-            importe: Number(importe) * ivaFloat + Number(tributos) ?? 0,
+            importe: Number(importe) * ivaFloat + Number(tributos),
             iva: "0",
             nroDocumento: Number(nroDocumento) ?? 0,
             ptoVenta: Number(form.getValues().puntoVenta) ?? 0,
@@ -437,9 +404,9 @@ export default function Page() {
           }
         }
         const billResponsible = gruposFamiliar
-          ?.find((x) => x.id == grupoFamiliarId)
-          ?.integrants.find((x) => x.isBillResponsible);
-        const obraSocial = obrasSociales?.find((x) => x.id == obraSocialId);
+          ?.find((x: { id: string; }) => x.id == grupoFamiliarId)
+          ?.integrants.find((x: { isBillResponsible: any; }) => x.isBillResponsible);
+        const obraSocial = obrasSociales?.find((x: { id: string; }) => x.id == obraSocialId);
 
         if (comprobante && comprobante[0]) {
           const html = htmlBill(
@@ -448,7 +415,7 @@ export default function Page() {
             undefined,
 
             2,
-            marcas?.find((x) => x.id === brandId),
+            marcas?.find((x: { id: string; }) => x.id === brandId),
             nombre,
             billResponsible
               ? billResponsible?.address ??
@@ -506,25 +473,6 @@ export default function Page() {
     }
   }
 
-  type ManualGenInputs = {
-    puntoVenta: string;
-    tipoDeConcepto: string;
-    alicuota: string;
-    dateEmision: Date;
-    dateVencimiento: Date;
-    dateDesde: Date;
-    dateHasta: Date;
-    facturasEmitidas: Number;
-  };
-  type ConceptsForm = {
-    concepts: {
-      concepto: string;
-      importe: number;
-      iva: number;
-      total: number;
-    }[];
-  };
-
   const [tipoComprobante, setTipoComprobante] = useState("");
   const [concepto, setConcepto] = useState("");
   const [tipoDocumento, setTipoDocumento] = useState("");
@@ -556,15 +504,7 @@ export default function Page() {
       concepts: [{ concepto: "", importe: 0, iva: 0, total: 0 }],
     },
   });
-  type OtherTributesForm = {
-    tributes: {
-      tribute: string;
-      jurisdiccion: string;
-      base: number;
-      aliquot: number;
-      amount: number;
-    }[];
-  };
+
   const otherTributesForm = useForm<OtherTributesForm>({
     defaultValues: {
       tributes: [
@@ -572,14 +512,7 @@ export default function Page() {
       ],
     },
   });
-  type AsociatedFCForm = {
-    comprobantes: {
-      tipoComprobante: string;
-      puntoVenta: string;
-      nroComprobante: string;
-      dateEmision: Date;
-    }[];
-  };
+  console.log("comprobante tipo",valueToNameComprobanteMap[tipoComprobante])
   const asociatedFCForm = useForm<AsociatedFCForm>({
     defaultValues: {
       comprobantes: [
@@ -588,42 +521,28 @@ export default function Page() {
           puntoVenta: "",
           nroComprobante: "",
           dateEmision: new Date(),
+          importe: 0,
+          iva: 0,
         },
       ],
     },
   });
 
-  type otherConceptsForm = {
-    otherConcepts: {
-      description: string;
-      importe: number;
-    }[];
-  };
   const otherConceptsForm = useForm<otherConceptsForm>({
     defaultValues: { otherConcepts: [{ description: "", importe: 0 }] },
   });
-    // useEffect(() => {
-    //   console.log("preComputeTotals");
-    //   computeTotals();
-    //   console.log("computeTotals");
-    //   console.log("total otros tributos", otherAttributes);
-    // }, [
-    //   otherTributesForm.watch("tributes"),
-    //   conceptsForm.watch("concepts"),
-    //   otherConceptsForm.watch("otherConcepts"),
-    // ]);
+
   const [page, setPage] = useState<"formPage" | "confirmationPage">("formPage");
   function handlePageChange(page: "formPage" | "confirmationPage") {
     setPage(page);
   }
 
-  const products = api.products.list.useQuery().data;
   const [brandId, setBrandId] = useState("");
   function handleGrupoFamilarChange(value: string) {
     setGrupoFamiliarId(value);
     setObraSocialId("");
-    let grupo = gruposFamiliar?.find((x) => x.id == value);
-    let billResponsible = grupo?.integrants.find((x) => x.isBillResponsible);
+    let grupo = gruposFamiliar?.find((x: { id: string; }) => x.id == value);
+    let billResponsible = grupo?.integrants.find((x: { isBillResponsible: any; }) => x.isBillResponsible);
     setComprobantes(grupo?.comprobantes ?? []);
     setNroDocumento(billResponsible?.fiscal_id_number ?? "0");
     setNroDocumentoDNI(billResponsible?.id_number ?? "0");
@@ -634,9 +553,9 @@ export default function Page() {
   function handleObraSocialChange(value: string) {
     setGrupoFamiliarId("");
     setObraSocialId(value);
-    let obra = obrasSociales?.find((x) => x.id == value);
+    let obra = obrasSociales?.find((x: { id: string; }) => x.id == value);
     setNroDocumento(obra?.fiscal_id_number?.toString() ?? "0");
-    setNroDocumentoDNI("0" ?? "");
+    setNroDocumentoDNI("0");
     setNombre(obra?.responsibleName ?? "");
     setTipoDocumento(obra?.fiscal_id_type ?? "");
   }
@@ -647,7 +566,7 @@ export default function Page() {
   let selectedBrand;
 
   const handleBrandChange = (value: string) => {
-    selectedBrand = marcas?.find((marca) => marca.id === value);
+    selectedBrand = marcas?.find((marca: { id: string; }) => marca.id === value);
     setBrandId(value);
   };
 
@@ -668,13 +587,13 @@ export default function Page() {
               </SelectTriggerMagnify>
               <SelectContent>
                 {gruposFamiliar &&
-                  gruposFamiliar.map((gruposFamiliar) => (
+                  gruposFamiliar.map((gruposFamiliar: any) => (
                     <SelectItem
                       key={gruposFamiliar?.id}
                       value={gruposFamiliar?.id}
                       className="rounded-none"
                     >
-                      {gruposFamiliar?.integrants.find((x) => x.isHolder)?.name}
+                      {gruposFamiliar?.integrants.find((x: { isHolder: any; }) => x.isHolder)?.name}
                     </SelectItem>
                   ))}
               </SelectContent>
@@ -688,7 +607,7 @@ export default function Page() {
               </SelectTriggerMagnify>
               <SelectContent>
                 {obrasSociales &&
-                  obrasSociales.map((obrasSocial) => (
+                  obrasSociales.map((obrasSocial: any) => (
                     <SelectItem
                       key={obrasSocial?.id}
                       value={obrasSocial?.id}
@@ -748,14 +667,14 @@ export default function Page() {
                 </SelectTriggerMagnify>
                 <SelectContent>
                   {gruposFamiliar &&
-                    gruposFamiliar.map((gruposFamiliar) => (
+                    gruposFamiliar.map((gruposFamiliar: any) => (
                       <SelectItem
                         key={gruposFamiliar?.id}
                         value={gruposFamiliar?.id}
                         className="rounded-none"
                       >
                         {
-                          gruposFamiliar?.integrants.find((x) => x.isHolder)
+                          gruposFamiliar?.integrants.find((x: { isHolder: any; }) => x.isHolder)
                             ?.name
                         }
                       </SelectItem>
@@ -771,7 +690,7 @@ export default function Page() {
                 </SelectTriggerMagnify>
                 <SelectContent>
                   {obrasSociales &&
-                    obrasSociales.map((obrasSocial) => (
+                    obrasSociales.map((obrasSocial: any) => (
                       <SelectItem
                         key={obrasSocial?.id}
                         value={obrasSocial?.id}
@@ -798,6 +717,9 @@ export default function Page() {
             />
 
             <AdditionalInfoCard
+              fcSeleccionada={fcSeleccionada}
+              setFcSeleccionada={setFcSeleccionada}
+              grupoFamiliarId={grupoFamiliarId}
               onValueChange={computeTotals}
               visualization={false}
               tipoComprobante={tipoComprobante}
@@ -813,7 +735,11 @@ export default function Page() {
               onAdd={computeTotals}
             />
 
-            <Totals subTotal={subTotal} iva={ivaTotal} otherAttributes={otherAttributes}/>
+            <Totals
+              subTotal={subTotal}
+              iva={ivaTotal}
+              otherAttributes={otherAttributes}
+            />
             <Button
               variant="outline"
               className="flex justify-between px-4 py-4 rounded-full self-end bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e]"
@@ -826,6 +752,8 @@ export default function Page() {
         {page === "confirmationPage" && (
           <ConfirmationPage
             form={form}
+            fcSeleccionada={fcSeleccionada}
+            setFcSeleccionada={setFcSeleccionada}
             conceptsForm={conceptsForm}
             otherConcepts={otherConceptsForm}
             setTipoComprobante={setTipoComprobante}

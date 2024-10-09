@@ -42,47 +42,80 @@ import { useRouter } from "next/navigation";
 
 export default function UserPage(props: { params: { userId: string } }) {
   const router = useRouter();
+  const id = props.params.userId;
   const { data: user } = api.clerk.getUserbyId.useQuery({
-    id: props.params.userId,
+    id: id ?? "",
   });
   const { mutateAsync: editUser, isLoading } = api.clerk.editUser.useMutation();
-  const {data:orgs } = api.companies.list.useQuery();
-  const {data:relOrgs} = api.clerk.relatedOrgs.useQuery({userId: props.params.userId});
-  console.log(relOrgs);
+  const { data: companies } = api.companies.list.useQuery();
+  const { data: relOrgs } = api.clerk.relatedOrgs.useQuery({
+    userId: id,
+  });
+
   // const relCompanies = orgs?.map(x=> x.)
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [username, setUsername] = useState("");
-  const [role, setRole] = useState("");
-  const relatedOrgs: Map<string,boolean> = new Map<string,boolean>();
+  const [firstName, setFirstName] = useState(user?.firstName ?? "");
+  const [lastName, setLastName] = useState(user?.lastName ?? "");
+  const [role, setRole] = useState(
+    (user?.publicMetadata?.role as string) ?? ""
+  );
+
+  const [relatedOrgs, setRelatedOrgs] = useState<Set<string>>(
+    new Set(companies?.map((c) => c.id))
+  );
+
+  // const handleOrgSwitchChange = (companyId: string, isChecked: boolean) => {
+  //   const updatedOrgs = new Map(relatedOrgs);
+  //   updatedOrgs.set(companyId, isChecked);
+  //   setRelatedOrgs(updatedOrgs);
+  // };
+
+  let orgsIds = relOrgs?.orgIds;
+
+  function handleOrgSwitchChange(companyId: string, enabled: boolean) {
+    if (enabled) {
+      relatedOrgs.add(companyId);
+      console.log("lolo", enabled, companyId);
+    } else {
+      relatedOrgs.delete(companyId);
+      console.log("lolo", enabled, companyId);
+    }
+    setRelatedOrgs(new Set(relatedOrgs));
+  }
+  useEffect(() => {
+    if (orgsIds) {
+      setRelatedOrgs(new Set(orgsIds.map((org) => org)));
+    }
+  }, [orgsIds]);
+
   useEffect(() => {
     if (user) {
       setFirstName(user?.firstName ?? "");
       setLastName(user?.lastName ?? "");
-      setUsername(user?.username ?? "");
       setRole((user?.publicMetadata.role as string) ?? "");
     }
   }, [user]);
+
   async function handleChange() {
     try {
-      const entities = Array.from(relatedOrgs.entries()).map(([k,v]) => 
-      {
-        if(v && k) return k;
-      }) ?? [];
+      const entities =
+        Array.from(relatedOrgs.entries()).map(([k, v]) => {
+          if (v && k) return k;
+        }) ?? [];
+
+      console.log("test", user?.publicMetadata.role);
       const res = await editUser({
         userId: props.params.userId,
         role,
         firstName,
         lastName,
-        username,
-        entities
+        entities,
       });
       if (res.message) {
         toast.error(res.message);
         return;
       }
-      toast.success("Se han guardado los cambios");
       router.refresh();
+      toast.success("Se han guardado los cambios");
     } catch (e) {
       const error = asTRPCError(e)!;
       toast.error(error.message);
@@ -130,14 +163,14 @@ export default function UserPage(props: { params: { userId: string } }) {
                         onChange={(e) => setLastName(e.target.value)}
                       />
                     </div>
-                    <div className="col-span-2">
+                    {/* <div className="col-span-2">
                       <Label htmlFor="description">Nombre de usuario</Label>
                       <Input
                         id="username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                       />
-                    </div>
+                    </div> */}
                   </div>
                 </Card>
               </AccordionContent>
@@ -152,8 +185,7 @@ export default function UserPage(props: { params: { userId: string } }) {
                     <Label htmlFor="role">Rol</Label>
                     <Select
                       defaultValue={role}
-                      onValueChange={(value) => setRole(value)}
-                    >
+                      onValueChange={(value) => setRole(value)}>
                       <SelectTrigger>
                         <SelectValue>{role}</SelectValue>
                       </SelectTrigger>
@@ -170,33 +202,31 @@ export default function UserPage(props: { params: { userId: string } }) {
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-3">
-            <AccordionTrigger>
-              <h2 className="text-md">Agregar a entidad</h2>
-            </AccordionTrigger>
-            <AccordionContent>
-              <List>
-                {orgs?.map((company) => {
-                  const isChecked = (relOrgs?.orgIds ?? []).some(
-                    (c) => c === company?.id
-                  );
-                  return (
-                    <ListTile 
-                      key={company?.id}
-                      title={company?.name}
-                      trailing={
-                        <Switch
-                          checked={isChecked}
-                          onCheckedChange={(required) =>
-                            relatedOrgs.set(company?.id, required)
-                          }
-                        />
-                      }
-                    />
-                  );
-                })}
-              </List>
-            </AccordionContent>
-          </AccordionItem>
+              <AccordionTrigger>
+                <h2 className="text-md">Agregar a entidad</h2>
+              </AccordionTrigger>
+              <AccordionContent>
+                <List>
+                  {companies?.map((company) => {
+                    const isChecked = relatedOrgs.has(company.id);
+                    return (
+                      <ListTile
+                        key={company?.id}
+                        title={company?.name}
+                        trailing={
+                          <Switch
+                            checked={isChecked}
+                            onCheckedChange={(required) =>
+                              handleOrgSwitchChange(company.id, required)
+                            }
+                          />
+                        }
+                      />
+                    );
+                  })}
+                </List>
+              </AccordionContent>
+            </AccordionItem>
           </Accordion>
         </section>
       )}

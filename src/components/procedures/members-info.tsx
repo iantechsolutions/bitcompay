@@ -71,6 +71,7 @@ export type InputsMembers = {
   depto: string;
   localidad: string;
   county: string;
+  extention: string;
   // state: string;
   province: string;
   cp: string;
@@ -83,6 +84,7 @@ export type InputsMembers = {
   isBillResponsible: boolean;
   isPaymentResponsible: boolean;
   isAffiliate: boolean;
+  validity: Date | null;
 };
 
 interface AddMembersProps {
@@ -392,7 +394,7 @@ export default function AddMembers(props: AddMembersProps) {
                     <FormLabel>Nro. de Id fiscal</FormLabel>
                     <Input
                       {...field}
-                      placeholder="Ingrese el número de id fiscal"
+                      placeholder="0"
                     />
                   </FormItem>
                 )}
@@ -415,7 +417,7 @@ export default function AddMembers(props: AddMembersProps) {
                     <FormLabel>Nro. de Domicilio</FormLabel>
                     <Input
                       {...field}
-                      placeholder="Ingrese el número de domicilio"
+                      placeholder="0000"
                     />
                   </FormItem>
                 )}
@@ -426,7 +428,7 @@ export default function AddMembers(props: AddMembersProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Piso</FormLabel>
-                    <Input {...field} placeholder="Ingrese el piso" />
+                    <Input {...field} placeholder="0" />
                   </FormItem>
                 )}
               />
@@ -436,7 +438,7 @@ export default function AddMembers(props: AddMembersProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Depto.</FormLabel>
-                    <Input {...field} placeholder="Ingrese el departamento" />
+                    <Input {...field} placeholder="0" />
                   </FormItem>
                 )}
               />
@@ -535,7 +537,7 @@ export default function AddMembers(props: AddMembersProps) {
                     <FormLabel>Teléfono Particular</FormLabel>
                     <Input
                       {...field}
-                      placeholder="Ingrese el teléfono particular"
+                      placeholder="0000000000"
                     />
                   </FormItem>
                 )}
@@ -546,7 +548,7 @@ export default function AddMembers(props: AddMembersProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Teléfono Móvil</FormLabel>
-                    <Input {...field} placeholder="Ingrese el teléfono móvil" />
+                    <Input {...field} placeholder="0000000000" />
                   </FormItem>
                 )}
               />

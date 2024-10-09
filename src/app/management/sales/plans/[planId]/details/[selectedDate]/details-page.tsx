@@ -49,6 +49,8 @@ import { toast } from "sonner";
 import { GoBackButton } from "~/components/goback-button";
 import DeletePrice from "~/components/plan/delete-price";
 import { asTRPCError } from "~/lib/errors";
+import Edit02Icon from "~/components/icons/edit-02-stroke-rounded";
+import { formatCurrency } from "~/app/billing/pre-liquidation/[liquidationId]/detail-sheet";
 // import AddPlanDialogPerPrice from "./AddPlanDialog";
 
 dayjs.extend(utc);
@@ -260,7 +262,7 @@ export default function DetailsPage(props: {
                     <Label htmlFor="number">Porcentaje de aumento</Label>
                     <Input
                       id="number"
-                      placeholder="Ej: 30%"
+                      placeholder="0,00%"
                       value={percent}
                       onChange={(e) => setPercent(e.target.value)}
                     />
@@ -276,8 +278,9 @@ export default function DetailsPage(props: {
             {editable && (
               <Button
                 onClick={() => handleUpdatePrice("edit")}
-                className="ml-10">
+                className="ml-10 rounded-2xl bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e]">
                 {" "}
+                <Edit02Icon className="mr-2 h-5" />
                 Editar precio
               </Button>
             )}
@@ -340,7 +343,7 @@ export default function DetailsPage(props: {
                             {price.condition}
                           </TableCell>
                           <TableCell className="text-center font-medium opacity-60">
-                            ${price.amount}
+                          ${formatCurrency(price.amount)}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -381,7 +384,7 @@ export default function DetailsPage(props: {
                             {price.to_age} {price.to_age == 1 ? "año" : "años"}
                           </TableCell>
                           <TableCell className="px-[7vw] text-center font-medium opacity-60">
-                            ${price.amount}
+                          ${formatCurrency(price.amount)}
                           </TableCell>
                         </TableRow>
                       ))}

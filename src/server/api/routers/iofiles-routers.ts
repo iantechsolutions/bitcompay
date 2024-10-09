@@ -76,12 +76,14 @@ export const iofilesRouter = createTRPCRouter({
         if (
           channel.name.includes("DEBITO AUTOMATICO") &&
           card_brand &&
-          card_type
+          card_brand != undefined &&
+          card_type &&
+          card_type != undefined
         ) {
           payments = payments.filter(
             (p) =>
-              p.card_brand?.toUpperCase().includes(card_brand) &&
-              p.card_type?.toUpperCase().includes(card_type)
+              p.card_brand?.toUpperCase().includes(card_brand!) &&
+              p.card_type?.toUpperCase().includes(card_type!)
           );
         }
 

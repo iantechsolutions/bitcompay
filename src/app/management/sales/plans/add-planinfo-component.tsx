@@ -111,8 +111,7 @@ export default function AddPlanInfoComponent({
           <Label className="text-xs">MARCA</Label>
           <Select
             onValueChange={(value: string) => setBrand(value)}
-            value={brand}
-          >
+            value={brand}>
             <SelectTrigger className="w-full mb-3 gap-3 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none hover:none justify-self-right">
               <SelectValue placeholder="Seleccione una marca" />
             </SelectTrigger>
@@ -131,6 +130,7 @@ export default function AddPlanInfoComponent({
         <Input
           className="w-fit mb-5 border-green-300 border-b text-[#3E3E3E] bg-background rounded-none shadow-none hover:none justify-self-right"
           type="text"
+          placeholder="0"
           value={codigo}
           onChange={(e) => setCodigo(e.target.value)}
         />
@@ -148,8 +148,7 @@ export default function AddPlanInfoComponent({
       <Button
         onClick={handleSubmit}
         disabled={isCreating || isUpdating}
-        className="mt-7 font-medium mb-2 rounded-full w-fit justify-self-right bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3E3E3E]"
-      >
+        className="mt-7 font-medium mb-2 rounded-full w-fit justify-self-right bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3E3E3E]">
         {isCreating || isUpdating ? (
           <Loader2Icon className="mr-2 animate-spin" size={20} />
         ) : (

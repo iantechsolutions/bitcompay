@@ -769,9 +769,10 @@ async function readResponseUploadContents(
         console.log("Descripcion novedad: ", news_type);
         console.log("Descripcion novedad: ", news_description);
       } else if (
-        fileContent.startsWith(
-          "0RDEBLIQD" || "0RDEBLIMD" || "0LDEBLIQD" || "0LDEBLIMD"
-        )
+        fileContent.startsWith("0RDEBLIQD") ||
+        fileContent.startsWith("0RDEBLIMD") ||
+        fileContent.startsWith("0LDEBLIQD") ||
+        fileContent.startsWith("0LDEBLIMD")
       ) {
         //Cómo leés los archivos de tarjetas de crédito
         //TARJETAS DE CREDITO
@@ -787,7 +788,9 @@ async function readResponseUploadContents(
         payment_date = recordValues[1]?.slice(8, 16);
 
         //Cómo leés los archivos de tarjetas de débito Visa:
-      } else if (fileContent.startsWith("0RDEBLIQC" || "0RDEBLIMC")) {
+      } else if ( fileContent.startsWith("0RDEBLIQC") ||
+      fileContent.startsWith("0RDEBLIMC")
+    ) {
         console.log("Eureka");
 
         const recordValues = line.trim().split(/\s{2,}/);

@@ -20,6 +20,7 @@ import {
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { literal, number, type z } from "zod";
 import { he } from "date-fns/locale";
+import { date } from "drizzle-orm/mysql-core";
 
 export const documentUploads = pgTable(
   "document_upload",
@@ -247,6 +248,7 @@ export const companiesRelations = relations(companies, ({ many }) => ({
   brands: many(companiesToBrands),
   products: many(companyProducts),
   bussinessUnits: many(bussinessUnits),
+  plans: many(plans),
 }));
 export const selectCompanySchema = createSelectSchema(companies);
 export type Company = z.infer<typeof selectCompanySchema>;
@@ -260,7 +262,6 @@ export const brands = pgTable(
     redescription: varchar("redescription", { length: 10 })
       .notNull()
       .default(""),
-    razon_social: varchar("razon_social"),
     iva: varchar("iva"),
     bill_type: varchar("bill_type"),
     concept: varchar("concept"),
@@ -476,6 +477,9 @@ export const plans = pgTable("plans", {
   plan_code: varchar("plan_code", { length: 255 }).notNull(),
   description: varchar("description", { length: 255 }).notNull(),
   brand_id: varchar("brand_id", { length: 255 }).references(() => brands.id),
+  companies_id: varchar("companies_id", { length: 255 }).references(
+    () => companies.id
+  ),
 });
 
 export const plansRelations = relations(plans, ({ many, one }) => ({
@@ -483,6 +487,10 @@ export const plansRelations = relations(plans, ({ many, one }) => ({
   brands: one(brands, {
     fields: [plans.brand_id],
     references: [brands.id],
+  }),
+  companies: one(companies, {
+    fields: [plans.companies_id],
+    references: [companies.id],
   }),
 }));
 
@@ -521,6 +529,7 @@ export const healthInsurances = pgTable("health_insurances", {
   ),
   name: varchar("name", { length: 255 }).notNull(),
   identificationNumber: varchar("identificationNumber", { length: 255 }),
+  description: varchar("description", { length: 255 }),
   isClient: boolean("isClient").notNull().default(false),
   fiscal_id_type: varchar("fiscal_id_type", { length: 255 }),
   fiscal_id_number: varchar("fiscal_id_number"),
@@ -553,7 +562,11 @@ export const healthInsurances = pgTable("health_insurances", {
   floor: varchar("floor", { length: 255 }),
   office: varchar("office", { length: 255 }),
   dateState: timestamp("dateState", { mode: "date" }),
-
+  excelDocument: varchar("excelDocument", { length: 255 }),
+  excelAmount: varchar("excelAmount"),
+  excelEmployerDocument: varchar("excelEmployerDocument", { length: 255 }),
+  excelSupportPeriod: varchar("excelSupportPeriod", { length: 255 }),
+  excelContributionperiod: varchar("excelContributionperiod", { length: 255 }),
 });
 
 export const healthInsurancesRelations = relations(
@@ -565,6 +578,7 @@ export const healthInsurancesRelations = relations(
     }),
     comprobantes: many(comprobantes),
     cc: one(currentAccount),
+    aportes_os: many(aportes_os),
   })
 );
 
@@ -642,6 +656,7 @@ export const integrants = pgTable("integrant", {
   originating_health_insuranceId: varchar("originating_health_insuranceId", {
     length: 255,
   }).references(() => healthInsurances.id),
+  validity: timestamp("validity", { mode: "date" }),
 });
 
 export const integrantsRelations = relations(integrants, ({ one, many }) => ({
@@ -662,6 +677,7 @@ export const integrantsRelations = relations(integrants, ({ one, many }) => ({
     references: [healthInsurances.id],
   }),
   pa: many(pa),
+  aportes_os: many(aportes_os),
   contribution: one(contributions),
   differentialsValues: many(differentialsValues),
 }));
@@ -857,7 +873,7 @@ export const ComprobantesSchemaDB = insertComprobantesSchema.pick({
   origin: true,
   previous_facturaId: true,
 });
-export type Comprobantes = z.infer<typeof selectComprobantesSchema>;
+export type Comprobante = z.infer<typeof selectComprobantesSchema>;
 
 export const items = pgTable("items", {
   id: columnId,
@@ -898,9 +914,13 @@ export const family_groups = pgTable("family_groups", {
   ),
   state: varchar("state", { length: 255 }),
   sale_condition: varchar("sale_condition", { length: 255 }),
-  entry_date: timestamp("entry_date", { mode: "date" }),
   payment_status: varchar("payment_status", { length: 255 }).default("pending"),
   numericalId: serial("autoincrementNumber"),
+  charged_date: timestamp("charged_date", { mode: "date" }),
+  user_charged: varchar("user_charged", { length: 255 }),
+  seller: varchar("seller", { length: 255 }),
+  supervisor: varchar("supervisor", { length: 255 }),
+  gerency: varchar("gerency", { length: 255 }),
 });
 
 export const family_groupsRelations = relations(
@@ -939,6 +959,12 @@ export const family_groupsSchemaDB = insertfamily_groupsSchema.pick({
   state: true,
   payment_status: true,
   receipt: true,
+  seller: true,
+  supervisor: true,
+  gerency: true,
+  sale_condition: true,
+  user_charged: true,
+  charged_date: true,
 });
 export type FamilyGroup = z.infer<typeof selectfamily_groupsSchema>;
 
@@ -1099,7 +1125,7 @@ export const liquidations = pgTable("liquidations", {
   cuit: varchar("cuit", { length: 255 }),
   pdv: integer("pdv").notNull(),
   period: timestamp("period", { mode: "date" }),
-  number: serial("autoincrementNumber"),
+  number: integer("autoincrementNumber"),
   interest: real("interest"),
   bussinessUnits_id: varchar("bussinessUnits_id", { length: 255 }).references(
     () => bussinessUnits.id
@@ -1118,6 +1144,24 @@ export const liquidationsRelations = relations(
       references: [brands.id],
     }),
     comprobantes: many(comprobantes),
+  })
+);
+
+export const liquidations_counter = pgTable("liquidations_counter", {
+  id: columnId,
+  companies_id: varchar("companies_id", { length: 255 })
+    .references(() => companies.id)
+    .notNull(),
+  number: integer("number").notNull(),
+});
+
+export const liquidations_counterRelations = relations(
+  liquidations_counter,
+  ({ one }) => ({
+    companies: one(companies, {
+      fields: [liquidations_counter.companies_id],
+      references: [companies.id],
+    }),
   })
 );
 
@@ -1331,3 +1375,34 @@ export const selectrelativeSchema = createSelectSchema(relative);
 //   relation:true,
 // })
 export type Relative = z.infer<typeof selectrelativeSchema>;
+
+export const aportes_os = pgTable("aportes_os", {
+  id: columnId,
+  id_affiliate: varchar("id_affiliate", { length: 255 })
+    .references(() => integrants.id)
+    .notNull(),
+  cuil: varchar("cuil", { length: 255 }).notNull(),
+  process_date: timestamp("process_date", { mode: "date" }),
+  contribution_date: timestamp("contribution_date", { mode: "date" }),
+  support_date: timestamp("support_date", { mode: "date" }),
+  amount: varchar("amount").notNull(),
+  employer_document_number: varchar("employer_document_number", {
+    length: 255,
+  }),
+
+  healthInsurances_id: varchar("healthInsurances_id", {
+    length: 255,
+  }).notNull(),
+  createdAt,
+});
+
+export const aportes_os_Relations = relations(aportes_os, ({ one }) => ({
+  healthInsurances: one(healthInsurances, {
+    fields: [aportes_os.healthInsurances_id],
+    references: [healthInsurances.id],
+  }),
+  affiliate: one(integrants, {
+    fields: [aportes_os.id_affiliate],
+    references: [integrants.id],
+  }),
+}));

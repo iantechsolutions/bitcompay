@@ -62,7 +62,6 @@ export default function EditCompany() {
       });
       await editBrand({
         brandId: brandId!,
-        razon_social,
         billType: tipoComprobante ?? "11",
         concept: concepto ?? "1",
         iva: iva ?? "5",
@@ -82,7 +81,6 @@ export default function EditCompany() {
 
       console.log(brand);
       console.log(marcas);
-      setRazonSocial(brand.razon_social || "");
       setTipoComprobante(brand.bill_type || "");
       setConcepto(brand.concept || "");
       setIva(brand.iva || "");
@@ -122,7 +120,7 @@ export default function EditCompany() {
             <Label htmlFor="afipKey">Clave fiscal</Label>
             <Input
               id="afipKey"
-              placeholder="Enter AFIP Key"
+              placeholder="0"
               value={afipKey}
               onChange={(e) => setAfipKey(e.target.value)}
             />
@@ -140,8 +138,7 @@ export default function EditCompany() {
                     <SelectItem
                       key={marca?.id}
                       value={marca?.id}
-                      className="rounded-none border-b border-gray-600"
-                    >
+                      className="rounded-none border-b border-gray-600">
                       {marca?.name}
                     </SelectItem>
                   ))}
@@ -167,8 +164,7 @@ export default function EditCompany() {
                 <br />
                 <Select
                   onValueChange={(e) => setTipoComprobante(e)}
-                  value={tipoComprobante ?? ""}
-                >
+                  value={tipoComprobante ?? ""}>
                   <SelectTrigger className="w-[180px] font-bold">
                     <SelectValue placeholder="Seleccionar factura..." />
                   </SelectTrigger>
@@ -193,8 +189,7 @@ export default function EditCompany() {
                 <br />
                 <Select
                   onValueChange={(e) => setConcepto(e)}
-                  value={concepto ?? ""}
-                >
+                  value={concepto ?? ""}>
                   <SelectTrigger className="w-[180px] font-bold">
                     <SelectValue placeholder="Seleccionar concepto..." />
                   </SelectTrigger>
@@ -210,7 +205,7 @@ export default function EditCompany() {
                 <br />
                 <Select onValueChange={(e) => setIva(e)} value={iva ?? ""}>
                   <SelectTrigger className="w-[180px] font-bold">
-                    <SelectValue placeholder="Seleccionar IVA" />
+                    <SelectValue placeholder="0,00" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="3">0%</SelectItem>

@@ -21,6 +21,7 @@ import { AddHealthInsurances } from "../AddHealthInsurances";
 import { Card } from "~/components/ui/card";
 import Upload02Icon from "~/components/icons/upload-02-stroke-rounded";
 import ElementCard from "~/components/affiliate-page/element-card";
+import Link from "next/link";
 dayjs.extend(utc);
 dayjs.locale("es");
 
@@ -34,6 +35,12 @@ export default function HealthInsurancePage(props: {
   const [idNumber, setIdNumber] = useState(
     props.healthInsurance!.identificationNumber!
   );
+
+  const { data: bussinesUnit } = api.bussinessUnits.get.useQuery({
+    bussinessUnitId: props.healthInsurance?.businessUnit ?? "",
+  });
+
+  const { data: postalCodes } = api.postal_code.list.useQuery();
   const [isPending, setIsLoading] = useState<boolean>(false);
   const { data: cc } = api.currentAccount.getByHealthInsurance.useQuery({
     healthInsuranceId: props.healthInsurance?.id ?? "",
@@ -70,9 +77,8 @@ export default function HealthInsurancePage(props: {
       toast.error(error.message);
     }
   }
-
   const fiscalData = {
-    "Unidad de negocio": props.healthInsurance?.businessUnit,
+    "Unidad de negocio": bussinesUnit?.description,
     "Razón Social": props.healthInsurance?.responsibleName,
     CUIT: props.healthInsurance?.fiscal_id_number,
     "Condición AFIP": props.healthInsurance?.afip_status,
@@ -80,14 +86,16 @@ export default function HealthInsurancePage(props: {
     "Numero IIBB": props.healthInsurance?.IIBBNumber,
     "Condición de venta": props.healthInsurance?.sellCondition,
   };
-
+  const fiscalPostalCode = postalCodes?.find(
+    (postalCode) => postalCode.id === props.healthInsurance?.fiscalPostalCode
+  );
   const facturacion = {
     "Domicilio fiscal": props.healthInsurance?.fiscalAddress,
     Piso: props.healthInsurance?.fiscalFloor,
     Oficina: props.healthInsurance?.fiscalOffice,
     Localidad: props.healthInsurance?.fiscalLocality,
     Provincia: props.healthInsurance?.fiscalProvince,
-    "Codigo postal": props.healthInsurance?.fiscalPostalCode,
+    "Codigo postal": fiscalPostalCode?.cp ?? "No se encontro C.P.",
     País: props.healthInsurance?.fiscalCountry,
   };
 
@@ -104,10 +112,13 @@ export default function HealthInsurancePage(props: {
 
   const accountInfo = {
     Estado: props.healthInsurance?.state,
-    "Fecha de estado": JSON.stringify(props.healthInsurance?.dateState),
+    "Fecha de estado": dayjs(props.healthInsurance?.dateState).format(
+      "DD/MM/YYYY"
+    ),
     Usuario: props.healthInsurance?.user,
     "Motivo de baja": props.healthInsurance?.cancelMotive,
   };
+  1;
 
   return (
     <LayoutContainer>
@@ -157,13 +168,17 @@ export default function HealthInsurancePage(props: {
               <p className="text-base font-[550] block place-content-center text-[#3e3e3e]">
                 Soportes
               </p>
-              <Button
-                variant="bitcompay"
-                className="bg-[#85CE81] text-sm px-4 h-7 gap-2 text-[#ffffff] rounded-full font-normal"
+              <Link
+                href={`/management/client/health_insurances/${props.healthInsuranceId}/massive-upload`}
               >
-                <Upload02Icon className="h-4" />
-                Subir archivo
-              </Button>
+                <Button
+                  variant="bitcompay"
+                  className="bg-[#85CE81] text-sm px-4 h-7 gap-2 text-[#ffffff] rounded-full font-normal"
+                >
+                  <Upload02Icon className="h-4" />
+                  Subir archivo
+                </Button>
+              </Link>
             </div>
           </Card>
         </div>

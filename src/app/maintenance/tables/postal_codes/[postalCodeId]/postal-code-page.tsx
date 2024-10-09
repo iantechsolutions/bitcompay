@@ -117,7 +117,7 @@ export default function PostalCodePage(props: {
           <Label htmlFor="description">Codigo postal</Label>
           <Input
             id="cp"
-            placeholder="Escriba el codigo postal"
+            placeholder="0"
             value={cp}
             onChange={(e) => setCP(e.target.value)}
           />

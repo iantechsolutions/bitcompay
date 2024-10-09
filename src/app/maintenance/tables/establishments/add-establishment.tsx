@@ -144,7 +144,7 @@ export default function AddEstablishment(props: AddEstablishmentProps) {
             <Input
               value={establishmentNumber}
               onChange={(e) => setEstablishmentNumber(e.target.value)}
-              placeholder="Número de Establecimiento"
+              placeholder="0"
             />
             {errors.establishmentNumber && (
               <p className="text-red-500">{errors.establishmentNumber}</p>

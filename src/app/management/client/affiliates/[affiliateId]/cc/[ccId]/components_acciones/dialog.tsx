@@ -39,6 +39,21 @@ export default function DialogCC ({ open, setOpen }: DialogCCProps){
     const [fechaValidacion, setFechaValidacion] = useState<Date | null>(null);
     dayjs.extend(utc);
     dayjs.locale("es");
+    const ImporteInput = () => {
+      const [importe, setImporte] = useState("");
+      const formatNumber = (number: { toLocaleString: (arg0: string, arg1: { minimumFractionDigits: number; maximumFractionDigits: number; }) => any; }) => {
+        return number.toLocaleString('es-ES', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });}};
+        const handleChange = (e: { target: { value: any; }; }) => {
+          const value = e.target.value;
+          const regex = /^\d*[,]?\d{0,2}$/; 
+          if (regex.test(value) || value === "") {
+            setImporte(value);
+          }
+        };
+  
     const handleDateChange = (newDate: Date | null) => {
         setFechaValidacion(newDate);
       };
@@ -59,7 +74,7 @@ export default function DialogCC ({ open, setOpen }: DialogCCProps){
         <DialogTitle className="whitespace-nowrap">Ajustes</DialogTitle>
       </div>
     </DialogHeader>
-    <h1 className="text-xs block ml-2 pl-2">CUENTA CORRIENTE N° XXXX</h1>
+    <h1 className="text-xs block ml-2 pl-2">CUENTA CORRIENTE N°</h1>
 
     <div className="flex justify-between p-2">
       <div className="w-1/2 mr-2 ml-2 ">
@@ -147,7 +162,7 @@ export default function DialogCC ({ open, setOpen }: DialogCCProps){
           type="number"
           id="importe"
           className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none "
-          placeholder="Ingrese importe"
+          placeholder="0,00"
         />
       </div>
 
@@ -183,4 +198,8 @@ export default function DialogCC ({ open, setOpen }: DialogCCProps){
   </DialogContent>
 </Dialog>
     )
+}
+
+function setImporte(value: any) {
+  throw new Error("Function not implemented.");
 }

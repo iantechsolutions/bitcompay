@@ -340,7 +340,7 @@ export default function BillingInfo({ data, form }: propsBillingInfo) {
                       >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="ingrese su iva"/>
+                          <SelectValue placeholder="0,00 %"/>
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -362,7 +362,7 @@ export default function BillingInfo({ data, form }: propsBillingInfo) {
                     <FormLabel>Numero de tarjeta</FormLabel>
                     <Input
                       {...field}
-                      placeholder="ingrese su numero de tarjeta"
+                      placeholder="0000 0000 0000 0000"
                     />
                     <FormMessage />
                   </FormItem>
@@ -477,7 +477,7 @@ export default function BillingInfo({ data, form }: propsBillingInfo) {
                     <FormLabel>Codigo de seguridad</FormLabel>
                     <Input
                       {...field}
-                      placeholder="ingrese su codigo de seguridad"
+                      placeholder="000"
                     />
                   </FormItem>
                 )}
@@ -489,7 +489,7 @@ export default function BillingInfo({ data, form }: propsBillingInfo) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>CBU</FormLabel>
-                    <Input {...field} placeholder="ingrese su cbu" />
+                    <Input {...field} placeholder="000000000000" />
                   </FormItem>
                 )}
               />

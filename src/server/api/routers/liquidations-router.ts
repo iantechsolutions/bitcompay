@@ -48,6 +48,32 @@ export const liquidationsRouter = createTRPCRouter({
         return liquidation_found;
       } else null;
     }),
+  getLite: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const liquidation_found = await db.query.liquidations.findFirst({
+        where: eq(schema.liquidations.id, input.id),
+        with: {
+          bussinessUnits: true,
+          brand: { with: { company: true } },
+          comprobantes: {
+            limit: 1,
+            with: {
+              payments: {
+                limit: 1,
+              },
+            },
+          },
+        },
+      });
+      if (
+        liquidation_found?.brand?.company.some(
+          (x) => x.companyId === ctx.session.orgId
+        )
+      ) {
+        return liquidation_found;
+      } else null;
+    }),
   getFamilyGroups: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
@@ -88,6 +114,7 @@ export const liquidationsRouter = createTRPCRouter({
         periodo: z.date(),
         cuit: z.string(),
         pdv: z.number(),
+        number: z.number(),
         interest: z.number().optional(),
         logo_url: z.string().optional(),
       })
@@ -101,6 +128,7 @@ export const liquidationsRouter = createTRPCRouter({
         period: input.periodo,
         cuit: input.cuit,
         pdv: input.pdv,
+        number: input.number,
         interest: input.interest ?? 0,
         logo_url: input.logo_url,
       });
@@ -116,6 +144,7 @@ export const liquidationsRouter = createTRPCRouter({
         razonSocial: z.string(),
         periodo: z.date(),
         cuit: z.string(),
+        number: z.number(),
         pdv: z.number(),
         logo_url: z.string().optional(),
       })
@@ -130,8 +159,8 @@ export const liquidationsRouter = createTRPCRouter({
           razon_social: input.razonSocial,
           period: input.periodo,
           cuit: input.cuit,
+          number: input.number,
           pdv: input.pdv,
-          number: 1,
           logo_url: input.logo_url,
         })
         .where(eq(schema.liquidations.id, input.id));

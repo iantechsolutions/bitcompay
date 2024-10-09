@@ -84,6 +84,7 @@ const FormControl = React.forwardRef<React.ElementRef<typeof Slot>, React.Compon
         <Slot
             ref={ref}
             id={formItemId}
+            className='shadow-none rounded-none'
             aria-describedby={error ? `${formDescriptionId} ${formMessageId}` : `${formDescriptionId}`}
             aria-invalid={!!error}
             {...props}

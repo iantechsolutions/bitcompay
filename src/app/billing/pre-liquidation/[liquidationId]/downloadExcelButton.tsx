@@ -8,12 +8,16 @@ import { formatDate } from "~/lib/utils";
 import { RouterOutputs } from "~/trpc/shared";
 import { api } from "~/trpc/react";
 import Download02Icon from "~/components/icons/download-02-stroke-rounded";
+import { makeExcelRows } from "./utils";
 type DownloadExcelButtonProps = {
-  rows: (string | number | null | undefined)[][];
+  liquidationId: string;
+  excelHeaders: string[];
   period: Date | null | undefined;
 };
+
 export default function DownloadExcelButton({
-  rows,
+  liquidationId,
+  excelHeaders,
   period,
 }: DownloadExcelButtonProps) {
   async function handleGenerate(
@@ -28,18 +32,28 @@ export default function DownloadExcelButton({
       bookType: "xlsx",
     });
     const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-    saveAs(blob, `pre-liquidación - ${formatDate(period!)}.xlsx`);
+    saveAs(blob, `preliquidación - ${formatDate(period!)}.xlsx`);
   }
+
+  const rows: (string | number)[][] = [[...excelHeaders]];
+  const mutation = api.family_groups.getByLiquidationFiltered.useMutation();
+
   return (
     <div className="flex flex-auto justify-end">
       <Button
         variant="bitcompay"
-        className=" text-base px-14 py-4 mt-5 gap-2 text-[#3e3e3e] rounded-full font-medium"
+        className="bg-[#BEF0BB] text-base px-14 py-4 mt-5 gap-2 text-[#3e3e3e] rounded-full font-medium"
         onClick={async () => {
           alert("Descargando Excel Pre liquidación");
+          const data = await mutation.mutateAsync({
+            liquidationId,
+          });
+
+          makeExcelRows(data, rows, null);
           await handleGenerate(rows);
-        }}>
-        <Download02Icon className="h-4"/>
+        }}
+      >
+        <Download02Icon className="h-4" />
         Exportar
       </Button>
     </div>

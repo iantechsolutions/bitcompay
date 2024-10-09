@@ -14,51 +14,19 @@ import ComprobanteCard from "./comprobante-card";
 import AdditionalInfoCard from "./additional-info";
 import OtherTributes from "./other-tributes";
 import Totals from "./totals";
-type ManualGenInputs = {
-  puntoVenta: string;
-  tipoDeConcepto: string;
-  alicuota: string;
-  dateEmision: Date;
-  dateVencimiento: Date;
-  dateDesde: Date;
-  dateHasta: Date;
-  facturasEmitidas: Number;
-};
-type OtherTributesForm = {
-  tributes: {
-    tribute: string;
-    jurisdiccion: string; 
-    base: number;
-    aliquot: number;
-    amount: number;
-  }[];
-};
-type AsociatedFCForm = {
-  comprobantes: {
-    tipoComprobante: string;
-    puntoVenta: string;
-    nroComprobante: string;
-    dateEmision: Date;
-  }[];
-};
-type ConceptsForm = {
-  concepts: {
-    concepto: string;
-    importe: number;
-    iva: number;
-    total: number;
-  }[];
-};
-
-type otherConceptsForm = {
-  otherConcepts: {
-    description: string;
-    importe: number;
-  }[];
-};
+import {
+  type ConceptsForm,
+  type ManualGenInputs,
+  type OtherTributesForm,
+  type AsociatedFCForm,
+  type otherConceptsForm,
+} from "~/lib/types/app";
+import { Comprobante } from "~/server/db/schema";
 
 interface Props {
   changePage: (page: "formPage" | "confirmationPage") => void;
+  fcSeleccionada: Comprobante[];
+  setFcSeleccionada: (fc: Comprobante[]) => void;
   form: UseFormReturn<ManualGenInputs>;
   otherTributes: UseFormReturn<OtherTributesForm>;
   tipoComprobante: string;
@@ -72,6 +40,8 @@ interface Props {
 }
 const confirmationPage = ({
   changePage,
+  fcSeleccionada,
+  setFcSeleccionada,
   form,
   otherTributes,
   tipoComprobante,
@@ -81,8 +51,14 @@ const confirmationPage = ({
   otherConcepts,
   subTotal,
   ivaTotal,
-  otherAttributes
+  otherAttributes,
 }: Props) => {
+  function handleApprove() {
+    alert("Aprobado");
+  }
+  function handleCreate() {
+    alert("Creado");
+  }
   return (
     <section className="space-y-2 flex flex-col">
       <Title>Resumen de datos</Title>
@@ -101,6 +77,8 @@ const confirmationPage = ({
       />
 
       <AdditionalInfoCard
+        fcSeleccionada={fcSeleccionada}
+        setFcSeleccionada={setFcSeleccionada}
         visualization={true}
         asociatedFCForm={asociatedFCForm}
         conceptsForm={conceptsForm}
@@ -108,8 +86,12 @@ const confirmationPage = ({
         otherConceptsForm={otherConcepts}
         tipoComprobante={tipoComprobante}
       />
-      <OtherTributes Visualization={true} otherTributes={otherTributes}/>
-      <Totals subTotal={subTotal} iva={ivaTotal} otherAttributes={otherAttributes}/>
+      <OtherTributes Visualization={true} otherTributes={otherTributes} />
+      <Totals
+        subTotal={subTotal}
+        iva={ivaTotal}
+        otherAttributes={otherAttributes}
+      />
       <div className="self-end flex gap-1">
         <Button
           onClick={() => changePage("formPage")}
@@ -117,7 +99,13 @@ const confirmationPage = ({
         >
           <ChevronLeftCircleIcon className="mr-2 h-4 w-auto" /> Volver
         </Button>
-        <Button className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none">
+        <Button
+          className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
+          onClick={() => {
+            handleApprove();
+            handleCreate();
+          }}
+        >
           <CircleCheck className="h-4 w-auto mr-2" />
           Aprobar
         </Button>

@@ -82,7 +82,7 @@ export default function SelectPercentDialog() {
             <Label htmlFor="number">Porcentaje de aumento</Label>
             <Input
               id="number"
-              placeholder="Ej: 30%"
+              placeholder="0,00 %"
               value={percent}
               onChange={(e) => setPercent(e.target.value)}
             />

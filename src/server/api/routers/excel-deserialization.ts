@@ -9,9 +9,11 @@ import {
   recRowsTransformer,
   columnLabelByKey,
   keysArray,
+  recRowsTransformerOS,
 } from "~/server/excel/validator";
 import { error } from "console";
 import { calcularEdad } from "~/lib/utils";
+import { columns } from "~/app/billing/liquidation/columns";
 
 export const maxDuration = 300;
 export const dynamic = "force-dynamic";
@@ -28,31 +30,180 @@ export const excelDeserializationRouter = createTRPCRouter({
       });
       return upload;
     }),
+  deserializationOS: protectedProcedure
+    .input(
+      z.object({
+        type: z.string(),
+        id: z.string(),
+        columns: z.object({
+          id: z.string(),
+          cuil: z.string(),
+          contribution_date: z.string(),
+          excelAmount: z.string(),
+          employer_document_number: z.string(),
+          support_date: z.string(),
+        }),
+        // fecha_soporte: z.date().optional(),
+        // contribution_date: z.date().optional(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      let contents;
+
+      console.log("cande no esta", input.columns);
+      contents = await readExcelFileOS(
+        db,
+        input.id,
+        input.type,
+        // input.support_date ?? null,
+        // input.contribution_date ?? null,
+        input.columns,
+        ctx
+      );
+
+      return contents;
+    }),
 
   deserialization: protectedProcedure
     .input(
       z.object({
-        type: z.literal("rec"),
+        type: z.string(),
         id: z.string(),
       })
     )
     .mutation(async ({ input, ctx }) => {
       const contents = await readExcelFile(db, input.id, input.type, ctx);
-      //agregar a readExcel verificacion de columnas obligatorias.
 
       return contents;
+    }),
+
+  confirmDataOS: protectedProcedure
+    .input(
+      z.object({
+        type: z.string(),
+        uploadId: z.string(),
+        columns: z.object({
+          id: z.string(),
+          cuil: z.string(),
+          contribution_date: z.string(),
+          excelAmount: z.string(),
+          employer_document_number: z.string(),
+          support_date: z.string(),
+        }),
+        fecha_soporte: z.date().optional(),
+        contribution_date: z.date().optional(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const contents = await readExcelFileOS(
+        db,
+        input.uploadId,
+        input.type,
+        input.columns,
+        ctx
+      );
+
+      let monto_total = 0;
+
+      await db.transaction(async (db) => {
+        for (const row of contents) {
+          console.log("Row alejandro", row.support_date, input.fecha_soporte);
+
+          if (!row.contribution_date && !input.contribution_date) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "La fecha de contribución es requerida",
+            });
+          }
+
+          if (!row.support_date && !input.fecha_soporte) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "La fecha de soporte es requerida",
+            });
+          }
+
+          const existingAffiliate = await db.query.integrants.findFirst({
+            where: eq(schema.integrants.fiscal_id_number, row.cuil),
+          });
+
+          if (!existingAffiliate) {
+            console.log("No se encontró afiliado, creando nuevo...");
+          }
+          await db
+            .insert(schema.aportes_os)
+            .values({
+              cuil: row.cuil ?? "",
+              process_date: new Date(),
+              contribution_date:
+                row.contribution_date ?? input.contribution_date,
+              support_date: row.support_date ?? input.fecha_soporte,
+              amount: row.excelAmount ?? "0",
+              employer_document_number:
+                row.employer_document_number?.toString() ?? "0",
+              healthInsurances_id: input.columns.id ?? "",
+              id_affiliate: existingAffiliate?.id ?? "",
+            })
+            .returning();
+
+          monto_total += parseFloat(row.excelAmount ?? "0");
+        }
+
+        // Resto del código de transacción
+        console.log("Monto total procesado: ", monto_total);
+
+        const cc = await db.query.currentAccount.findFirst({
+          where: eq(
+            schema.currentAccount.health_insurance,
+            input.columns.id ?? ""
+          ),
+        });
+
+        let historicEvents = await db.query.events.findMany({
+          where: eq(schema.events.currentAccount_id, cc?.id ?? ""),
+        });
+
+        if (historicEvents && historicEvents.length > 0) {
+          const lastEvent = historicEvents.reduce((prev, current) => {
+            return new Date(prev.createdAt) > new Date(current.createdAt)
+              ? prev
+              : current;
+          });
+
+          const event = await db
+            .insert(schema.events)
+            .values({
+              currentAccount_id: cc?.id,
+              event_amount: monto_total,
+              current_amount: lastEvent.current_amount + monto_total,
+              description: "Pago afiliados",
+              type: "FC",
+              createdAt: new Date(),
+            })
+            .returning();
+
+          await db
+            .update(schema.excelBilling)
+            .set({
+              confirmed: true,
+              confirmedAt: new Date(),
+            })
+            .where(eq(schema.excelBilling.id, input.uploadId));
+        }
+      });
     }),
 
   confirmData: protectedProcedure
     .input(
       z.object({
-        type: z.literal("rec"),
+        type: z.string(),
         uploadId: z.string(),
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const familyGroupMap = new Map<string | null, string>();
       const contents = await readExcelFile(db, input.uploadId, input.type, ctx);
+      const familyGroupMap = new Map<string | null, string>();
+
       const idDictionary: { [key: string]: number } = {
         CUIT: 80,
         CUIL: 86,
@@ -121,8 +272,12 @@ export const excelDeserializationRouter = createTRPCRouter({
                 receipt: " ",
                 state: "ACTIVO",
                 procedureId: procedure[0]?.id ?? "",
-                entry_date: new Date(),
                 sale_condition: row.sale_condition ?? "",
+                charged_date: new Date(),
+                user_charged: ctx.session.user.id ?? "",
+                seller: row.seller ?? null,
+                supervisor: row.supervisor ?? null,
+                gerency: row.gerency ?? null,
               })
               .returning();
             familyGroupMap.set(row.holder_id_number, familygroup[0]!.id);
@@ -199,16 +354,23 @@ export const excelDeserializationRouter = createTRPCRouter({
               relation: row.relationship,
             });
           }
-          console.log("creando integrante");
-          let affiliateNumber = row?.plan ?? "" + row?.own_id_number ?? "";
-          if (row.own_id_type === "PASAPORTE") {
-            affiliateNumber = "00" + affiliateNumber;
+          let affiliate_number;
+
+          if (row.own_id_type === "DNI" && row.plan && row.fiscal_id_number) {
+            affiliate_number = row.plan + row.fiscal_id_number;
+          }
+          if (
+            row.own_id_type === "PASAPORTE" &&
+            row.plan &&
+            row.fiscal_id_number
+          ) {
+            affiliate_number = "00" + row.plan + row.fiscal_id_number;
           }
           console.log("testigo", row.own_id_type);
           const new_integrant = await db
             .insert(schema.integrants)
             .values({
-              affiliate_type: "type",
+              affiliate_type: row.relationship,
               relationship: row.relationship,
               name: row.name ?? "",
               id_type: row.own_id_type,
@@ -237,8 +399,8 @@ export const excelDeserializationRouter = createTRPCRouter({
               isBillResponsible: row.isPaymentResponsible == true,
               age: age,
               family_group_id: familyGroupId,
-              affiliate_number: affiliateNumber,
-              extention: " ",
+              affiliate_number: affiliate_number,
+              extention: row.extention,
               postal_codeId: postal_code_schema?.id,
               health_insuranceId: health_insurance?.id ?? null,
               originating_health_insuranceId:
@@ -324,7 +486,9 @@ export const excelDeserializationRouter = createTRPCRouter({
             console.log(row.differential_value);
             console.log(precioIntegrante);
             const precioDiferencial =
-              parseFloat(row.differential_value ?? "0") / precioIntegrante;
+              precioIntegrante && precioIntegrante != 0
+                ? parseFloat(row.differential_value ?? "0") / precioIntegrante
+                : 0;
             // precioIntegrante;
             console.log("precioDiferencial", precioDiferencial);
             const differentialValue = await db
@@ -393,6 +557,79 @@ function isKeyPresent(
   return dictionary.has(key ?? "");
 }
 
+async function readExcelFileOS(
+  db: DBTX,
+  id: string,
+  type: string | undefined,
+  columns: { [key: string]: string }, // columns es el verificador
+  ctx: any,
+  batchSize = 100
+) {
+  const upload = await db.query.excelBilling.findFirst({
+    where: eq(schema.excelBilling.id, id),
+  });
+
+  if (!upload) {
+    throw new TRPCError({ code: "NOT_FOUND" });
+  }
+
+  if (!type) {
+    type = upload.documentType ?? undefined;
+  }
+
+  if (!type) {
+    throw new TRPCError({ code: "BAD_REQUEST" });
+  }
+
+  const response = await fetch(upload.url);
+  const content = await response.arrayBuffer();
+  const workbook = xlsx.read(content, { type: "buffer" });
+  const firstSheet = workbook.Sheets[workbook.SheetNames[0]!];
+  if (!firstSheet) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "No sheet found in the workbook",
+    });
+  }
+  const rows = xlsx.utils.sheet_to_json(firstSheet) as Record<
+    string,
+    unknown
+  >[];
+
+  console.log("Excel file read successfully");
+
+  const trimmedRows = rows.map(trimObject);
+
+  // Pasamos las columnas al transformador
+  const { finishedArrayOS: transformedRows, errorsOS: errorsTransform } =
+    recRowsTransformerOS(trimmedRows, columns);
+
+  if (transformedRows.length === 0) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "No se encontraron datos en el archivo",
+    });
+  }
+
+  const errors: string[] = [];
+  errorsTransform.forEach((error) => {
+    errors.push(
+      `${error.errors.at(0)?.message ?? ""} ${
+        error.errors.at(0)?.path.at(1) ?? "ILEGIBLE"
+      } (fila: ${(
+        parseInt(error.errors.at(0)?.path.at(0)?.toString() ?? "0") + 1
+      ).toString()})`
+    );
+  });
+
+  if (errors.length > 0) {
+    throw new TRPCError({ code: "BAD_REQUEST", message: errors.join("\n") });
+  }
+
+  console.log("First transformed row CUIL:", transformedRows[0]?.cuil);
+  return transformedRows;
+}
+
 async function readExcelFile(
   db: DBTX,
   id: string,
@@ -414,6 +651,7 @@ async function readExcelFile(
   if (!type) {
     throw new TRPCError({ code: "BAD_REQUEST" });
   }
+
   const response = await fetch(upload.url);
   const content = await response.arrayBuffer();
 
@@ -449,6 +687,7 @@ async function readExcelFile(
         ")"
     );
   });
+
   let brands = await db.query.brands.findMany({
     with: { company: true },
   });

@@ -61,7 +61,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
             className={`text-[#3E3E3E] font-family ${montserrat.className}`}>
             <TRPCReactProvider cookies={cookies().toString()}>
               <AppLayout
-                headerClass="bg-white"
+                headerClass="bg-white z-20"
                 sidenavClass="top-0"
                 sidenav={<CompanySidenav />}>
                 {company && (
