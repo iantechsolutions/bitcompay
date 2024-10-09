@@ -40,7 +40,7 @@ import BonusDialog from "./cc/[ccId]/components_acciones/bonusDialog";
 
 
 
-export default function AffiliatePage(props: {
+export default async function AffiliatePage(props: {
   isAdmin: boolean;
   params: { affiliateId: string; companyId: string };
 }) {
