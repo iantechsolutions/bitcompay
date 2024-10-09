@@ -226,12 +226,12 @@ export function AddNonClientOs(props: {
           <div className="grid grid-cols-4 gap-y-4 gap-x-8 justify-between">
           <div>
               <Label htmlFor="name" className="text-xs text-gray-500">
-                Nombre / Razón social
+                NOMBRE
               </Label>
               <Input
                 id="name"
                 className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
-                placeholder="ingrese nombre obra social"
+                placeholder=""
                 value={razonsocial}
                 onChange={(e) => setRazonsocial(e.target.value)}
               />
@@ -260,7 +260,7 @@ export function AddNonClientOs(props: {
               />
             </div>
             <div>
-              <Label className="text-xs text-gray-500">Descripcion</Label>
+              <Label className="text-xs text-gray-500">DESCRIPCION</Label>
               <Input
                 id="description"
                 className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
