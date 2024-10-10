@@ -4,6 +4,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { RouterOutputs } from "~/trpc/shared";
 import dayjs from "dayjs";
 import ActiveBadge from "src/components/active-badge";
+import { stringify } from "querystring";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -41,12 +42,13 @@ export const columns: ColumnDef<AffiliatesTableRecord>[] = [
   {
     accessorKey: "nombre",
     header: () => (
-      <div className="text-center whitespace-nowrap text-medium">Apellido, Nombre</div>
+      <div className="text-center whitespace-nowrap text-medium">Nombre y apellido</div>
     ),
     cell: ({ row }) => {
       return (
-        <div className="text-center   overflow-hidden whitespace-nowrap text-overflow-ellipsis">
-          {row.getValue("nombre")}
+        <div className="text-center capitalize overflow-hidden whitespace-nowrap text-overflow-ellipsis">
+          {String(row.getValue("nombre")) &&
+          (String(row.getValue("nombre")).toLowerCase())}
         </div>
       );
     },
@@ -65,7 +67,7 @@ export const columns: ColumnDef<AffiliatesTableRecord>[] = [
   {
     accessorKey: "integrantes",
     header: () => (
-      <div className="text-center whitespace-nowrap text-medium">Integrantes</div>
+      <div className="text-center whitespace-nowrap text-medium px-4">Integrantes</div>
     ),
     cell: ({ row }) => {
       return (
@@ -82,7 +84,7 @@ export const columns: ColumnDef<AffiliatesTableRecord>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <div className="text-center  ">
+        <div className="text-center px-4 ">
           {dayjs(row.getValue("fechaEstado")).format("DD/MM/YYYY")}
         </div>
       );
@@ -95,9 +97,9 @@ export const columns: ColumnDef<AffiliatesTableRecord>[] = [
     ),
     cell: ({ row }) => {
       return ( 
-        <div className="flex text-center mx-auto justify-center ">
+        <div className="flex text-center mx-auto justify-center px-4">
           {(row.getValue("Estados GF") === "ACTIVO") && (
-          <ActiveBadge className="w-14 mx-auto"> Activo </ActiveBadge>
+          <ActiveBadge className=""> Activo </ActiveBadge>
         ) || (row.getValue("Estados GF"))}
         </div>
       );

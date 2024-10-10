@@ -160,7 +160,7 @@ export default function AddPlanInfoComponent({
             )}
           </>
         )}
-        {planId ? "Actualizar plan" : "Agregar Plan"}
+        {planId ? "Actualizar plan" : "Agregar plan"}
       </Button>
     </div>
   );

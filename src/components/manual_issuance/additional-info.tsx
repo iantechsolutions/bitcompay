@@ -307,11 +307,11 @@ export default function AdditionalInfoCard({
                                   <SelectItem value="0">RECIBO</SelectItem>
                                   <SelectItem value="1">FACTURA A</SelectItem>
                                   <SelectItem value="3">
-                                    NOTA DE CREDITO A
+                                    NOTA DE CRÉDITO A
                                   </SelectItem>
                                   <SelectItem value="6">FACTURA B</SelectItem>
                                   <SelectItem value="8">
-                                    NOTA DE CREDITO B
+                                    NOTA DE CRÉDITO B
                                   </SelectItem>
                                 </SelectContent>
                               </SelectContent>

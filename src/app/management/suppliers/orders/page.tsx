@@ -58,7 +58,7 @@ export default function HomePage() {
                   leading={item.liquidations?.estado}
                   key={item.id}
                   title={
-                    item.liquidations?.razon_social! || "Sin grupo familiar"
+                    item.liquidations?.razón_social! || "Sin grupo familiar"
                   }
                 />
                 <h1>{item.due_date?.getDate()}</h1>

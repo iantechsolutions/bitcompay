@@ -76,7 +76,7 @@ export default function PostalCodePage(props: {
         postalCodeId: cpId,
       });
 
-      toast.success("El codigo postal se ha eliminado correctamente");
+      toast.success("El código postal se ha eliminado correctamente");
       router.refresh();
       router.push("/maintenance/tables/postal_codes");
     } catch (e) {
@@ -88,7 +88,7 @@ export default function PostalCodePage(props: {
   return (
     <LayoutContainer>
       <div className="container mx-auto p-4">
-        <h1 className="text-xl font-semibold mb-4">Editar Codigo postal</h1>
+        <h1 className="text-xl font-semibold mb-4">Editar código postal</h1>
         <div className="mb-4">
           <Label htmlFor="description">Nombre</Label>
           <Input
@@ -114,7 +114,7 @@ export default function PostalCodePage(props: {
           </Select>
         </div>
         <div className="mb-4">
-          <Label htmlFor="description">Codigo postal</Label>
+          <Label htmlFor="description">Código postal</Label>
           <Input
             id="cp"
             placeholder="0"
@@ -137,7 +137,7 @@ export default function PostalCodePage(props: {
         <Dialog open={openDelete} onOpenChange={setOpenDelete}>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>Seguro que desea codigo postal?</DialogTitle>
+              <DialogTitle>¿Desea eliminar el código postal de forma permanente?</DialogTitle>
             </DialogHeader>
 
             <DialogFooter>
@@ -146,7 +146,7 @@ export default function PostalCodePage(props: {
                 {isPending && (
                   <Loader2Icon className="mr-2 animate-spin" size={20} />
                 )}
-                Eliminar codigo postal
+                Eliminar código postal
               </Button>
             </DialogFooter>
           </DialogContent>

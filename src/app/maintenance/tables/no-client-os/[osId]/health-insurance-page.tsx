@@ -57,7 +57,7 @@ export default function NonOsPage(props: {
     "Razón Social": props.healthInsurance?.responsibleName,
     CUIT: props.healthInsurance?.fiscal_id_number,
     "Condición AFIP": props.healthInsurance?.afip_status,
-    "Condicion de IIBB": props.healthInsurance?.IIBBStatus,
+    "Condición de IIBB": props.healthInsurance?.IIBBStatus,
     "Numero IIBB": props.healthInsurance?.IIBBNumber,
     "Condición de venta": props.healthInsurance?.sellCondition,
   };
@@ -68,7 +68,7 @@ export default function NonOsPage(props: {
     Oficina: props.healthInsurance?.fiscalOffice,
     Localidad: props.healthInsurance?.fiscalLocality,
     Provincia: props.healthInsurance?.fiscalProvince,
-    "Codigo postal": fiscalPostalCode?.cp ?? "No se encontro C.P.",
+    "Código  postal": fiscalPostalCode?.cp ?? "No se encontro C.P.",
     País: props.healthInsurance?.fiscalCountry,
   };
 
@@ -78,7 +78,7 @@ export default function NonOsPage(props: {
     Oficina: props.healthInsurance?.office,
     Localidad: props.healthInsurance?.locality,
     Provincia: props.healthInsurance?.province,
-    "Codigo postal": props.healthInsurance?.postal_code,
+    "Código postal": props.healthInsurance?.postal_code,
     Telefono: props.healthInsurance?.phoneNumber,
     "E-mail": props.healthInsurance?.email,
   };

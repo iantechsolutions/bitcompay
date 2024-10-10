@@ -5,8 +5,6 @@ import { db, schema } from "~/server/db";
 import { api } from "~/trpc/server";
 import GenerateChannelOutputPage from "./generate-channel-output";
 import LayoutContainer from "~/components/layout-container";
-import { SelectDebitoAutomatico } from "./debitoautomaticoselect";
-// import { useState } from "react";
 
 type SelectData = {
   cardType: string | null;

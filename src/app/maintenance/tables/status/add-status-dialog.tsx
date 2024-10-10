@@ -47,19 +47,19 @@ export function AddStatusDialog() {
     <>
       <Button onClick={() => setOpen(true)}>
         <PlusCircleIcon className="mr-2" size={20} />
-        Agregar Estado de transaccion
+        Agregar estado de transacción
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Crear nuevo Estado</DialogTitle>
+            <DialogTitle>Crear nuevo estado</DialogTitle>
             {/* <DialogDescription>
                     
                 </DialogDescription> */}
           </DialogHeader>
 
           <div>
-            <Label htmlFor="code">Codigo de Estado</Label>
+            <Label htmlFor="code">Código de estado</Label>
             <Input
               id="code"
               placeholder="0"
@@ -68,7 +68,7 @@ export function AddStatusDialog() {
             />
           </div>
           <div>
-            <Label htmlFor="name">Descripcion del Estado</Label>
+            <Label htmlFor="name">Descripción del estado</Label>
             <Input
               id="status_description"
               placeholder="ej: RECHAZADO POR BANCO"

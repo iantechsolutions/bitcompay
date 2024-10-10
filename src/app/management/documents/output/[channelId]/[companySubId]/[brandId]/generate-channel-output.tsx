@@ -160,8 +160,8 @@ export default function GenerateChannelOutputPage(props: {
             <Table className="mb-5 w-full">
               <TableHeader>
                 <TableRow>
-                  <TableHead>Estado transaccion</TableHead>
-                  <TableHead>Cant. Transacciones</TableHead>
+                  <TableHead>Estado de transacción</TableHead>
+                  <TableHead>Cant. transacciones</TableHead>
                   <TableHead>Recaudacion </TableHead>
                 </TableRow>
               </TableHeader>
@@ -194,7 +194,7 @@ export default function GenerateChannelOutputPage(props: {
                 size="lg"
                 className="w-full">
                 {isLoading && <Loader2Icon className="mr-2 animate-spin" />}
-                Generar Archivo
+                Generar archivo
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
@@ -216,7 +216,7 @@ export default function GenerateChannelOutputPage(props: {
                     </>
                   ) : (
                     <div className="flex flex-col gap-3">
-                      <Label htmlFor="card_brand">Marca de Tarjeta</Label>
+                      <Label htmlFor="card_brand">Marca de tarjeta</Label>
                       <Select onValueChange={(value) => setCardBrand(value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Marca Tarjeta" />
@@ -226,16 +226,16 @@ export default function GenerateChannelOutputPage(props: {
                           <SelectItem value="mastercard">MasterCard</SelectItem>
                         </SelectContent>
                       </Select>
-                      <Label htmlFor="card_type"> Tipo de Tarjeta</Label>
+                      <Label htmlFor="card_type"> Tipo de tarjeta</Label>
                       <Select onValueChange={(value) => setCardType(value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Tipo tarjeta" />
                         </SelectTrigger>
                         <SelectContent>
                           {cardBrand === "visa" ? (
-                            <SelectItem value="debito">Debito</SelectItem>
+                            <SelectItem value="debito">Débito</SelectItem>
                           ) : null}
-                          <SelectItem value="credito">Credito</SelectItem>
+                          <SelectItem value="credito">Crédito</SelectItem>
                         </SelectContent>
                       </Select>
 
@@ -316,7 +316,7 @@ export default function GenerateChannelOutputPage(props: {
               <DialogFooter>
                 <DialogClose>
                   <Button type="button" onClick={handleGenerate}>
-                    generar archivo
+                    Generar archivo
                   </Button>
                 </DialogClose>
               </DialogFooter>

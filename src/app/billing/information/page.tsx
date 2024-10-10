@@ -11,7 +11,7 @@ export default async function Page() {
     <LayoutContainer>
       <section className="space-y-2">
         <div className="flex justify-between">
-          <Title>Informacion de la compañia</Title>
+          <Title>Información de la compañia</Title>
           {/* <EditCompany /> */}
         </div>
         {company && (

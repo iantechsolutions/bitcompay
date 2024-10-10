@@ -127,11 +127,11 @@ export function AddNonClientOs(props: {
 
   function validateFields() {
     const errors: string[] = [];
-    if (!razonsocial) errors.push("RAZON SOCIAL");
+    if (!razonsocial) errors.push("RAZÓN SOCIAL");
     if (!identificationNumber) errors.push("CODIGO");
     if (!fiscalIdType) errors.push("TIPO DOC FISCAL");
     if (!afipStatus) errors.push("ESTADO AFIP");
-    if (!description) errors.push("DESCRIPCION");
+    if (!description) errors.push("DESCRIPCIÓN");
 
     return errors;
   }
@@ -296,7 +296,7 @@ export function AddNonClientOs(props: {
           <div className="grid grid-cols-4 gap-y-4 gap-x-8 justify-between">
             <div>
               <Label htmlFor="IdNumber" className="text-xs text-gray-500">
-                CODIGO
+                CÓDIGO
               </Label>
               <Input
                 id="code"
@@ -353,7 +353,7 @@ export function AddNonClientOs(props: {
               </Select> */}
             </div>
             <div>
-              <Label className="text-xs text-gray-500">Descripcion</Label>
+              <Label className="text-xs text-gray-500">Descripción</Label>
               <Input
                 id="description"
                 className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
@@ -393,7 +393,7 @@ export function AddNonClientOs(props: {
             </div>
             <div>
               <Label htmlFor="name" className="text-xs text-gray-500">
-                RAZON SOCIAL
+                RAZÓN SOCIAL
               </Label>
               <Input
                 className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
@@ -422,13 +422,15 @@ export function AddNonClientOs(props: {
                   <SelectValue placeholder="Seleccione uno" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="monotributista">Monotributista</SelectItem>
+                  <SelectItem value="monotributista">
+                    Monotributista</SelectItem>
                   <SelectItem value="responsable_inscripto">
                     Responsable Inscripto
                   </SelectItem>
-                  <SelectItem value="exento">Exento</SelectItem>
+                  <SelectItem value="exento">
+                    Exento</SelectItem>
                   <SelectItem value="consumidor_final">
-                    Consumidor Final
+                    Consumidor final
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -441,13 +443,15 @@ export function AddNonClientOs(props: {
                   <SelectValue placeholder="Seleccione uno" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="monotributista">Monotributista</SelectItem>
+                  <SelectItem value="monotributista">
+                    Monotributista</SelectItem>
                   <SelectItem value="responsable_inscripto">
                     Responsable Inscripto
                   </SelectItem>
-                  <SelectItem value="exento">Exento</SelectItem>
+                  <SelectItem value="exento">
+                    Exento</SelectItem>
                   <SelectItem value="consumidor_final">
-                    Consumidor Final
+                    Consumidor final
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -468,7 +472,7 @@ export function AddNonClientOs(props: {
 
             <div>
               <Label htmlFor="IdNumber" className="text-xs text-gray-500">
-                CONDICION DE VENTA
+                CONDICIÓN DE VENTA
               </Label>
               <Input
                 id="IdNumber"

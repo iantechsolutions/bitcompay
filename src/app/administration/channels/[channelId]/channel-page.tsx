@@ -211,7 +211,7 @@ function DeleteChannel(props: { channelId: string }) {
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            ¿Estás seguro que querés eliminar el canal?
+            ¿Está seguro que quiere eliminar el canal?
           </AlertDialogTitle>
           <AlertDialogDescription>
             Eliminar canal permanentemente.
