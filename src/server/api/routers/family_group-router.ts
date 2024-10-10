@@ -309,6 +309,30 @@ export const family_groupsRouter = createTRPCRouter({
         return family_groups;
       } else null;
     }),
+    
+  getWithAportes: protectedProcedure
+    .input(
+      z.object({
+        family_groupsId: z.string(),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const family_groups = await db.query.family_groups.findFirst({
+        where: eq(schema.family_groups.id, input.family_groupsId),
+        with: {
+          businessUnitData: true,
+          integrants: {
+            with: {
+              aportes_os: true,
+            },
+          },
+        },
+      });
+
+      if (family_groups?.businessUnitData?.companyId === ctx.session.orgId) {
+        return family_groups;
+      } else null;
+    }),
 
   getByLiquidation: protectedProcedure
     .input(
