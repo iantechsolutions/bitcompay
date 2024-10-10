@@ -108,7 +108,6 @@ export function AddHealthInsurances(props: {
   const [cancelMotive, setCancelMotive] = useState(OS?.cancelMotive ?? "");
   const [floor, setFloor] = useState(OS?.floor ?? "");
   const [office, setOffice] = useState(OS?.office ?? "");
-  const [isClient, setIsClient] = useState<boolean>(OS?.isClient ?? false);
   const [initialValue, setInitialValue] = useState("0");
 
   const [dateState, setDateState] = useState<Date | undefined>(
@@ -356,20 +355,6 @@ export function AddHealthInsurances(props: {
             </div>
 
             <div>
-              <Label className="text-xs text-gray-500">
-                Tipo de obra social
-              </Label>
-              <Select onValueChange={(value) => setIsClient(value === "true")}>
-                <SelectTrigger className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none">
-                  <SelectValue placeholder="..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="true">Cliente</SelectItem>
-                  <SelectItem value="false">No cliente</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
               <Label className="text-xs text-gray-500">SIGLA</Label>
               <Input
                 id="initials"
@@ -378,16 +363,6 @@ export function AddHealthInsurances(props: {
                 value={initials}
                 onChange={(e) => setInitials(e.target.value)}
               />
-              {/* <Select>
-                <SelectTrigger className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
-                  <SelectValue placeholder="..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">OSBARA</SelectItem>
-                  <SelectItem value="2">OSECAC</SelectItem>
-                  <SelectItem value="3">UTHGRA</SelectItem>
-                </SelectContent>
-              </Select> */}
             </div>
             <div>
               <Label className="text-xs text-gray-500">Descripción</Label>
@@ -407,12 +382,6 @@ export function AddHealthInsurances(props: {
             </p>
             <div>
               <Label className="text-xs text-gray-500">UNIDAD DE NEGOCIO</Label>
-              {/* <Input
-                type="number"
-                id="importe"
-                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
-                placeholder="Ej: 121234"
-              /> */}
               <Select onValueChange={setBusinessUnit} value={businessUnit}>
                 <SelectTrigger
                   className="w-fit mb-2 border-[#bef0bb] border-b text-[#3E3E3E] bg-background rounded-none shadow-none
