@@ -111,7 +111,7 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
         <div className="mt-4">
           {comprobanteNCReciente && (
             <>
-              <h1 className="text-base capitalize font-bold mb-3">
+              <h1 className="text-base uppercase font-bold mb-3">
               {String(comprobanteNCReciente.tipoComprobante).toLowerCase()}
               </h1>
               <ContentTable comprobante={comprobanteNCReciente} />
@@ -131,7 +131,7 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
         <div className="mt-4">
           {comprobanteFCReciente && (
             <>
-              <h1 className="text-base capitalize font-bold mb-3">
+              <h1 className="text-base uppercase font-bold mb-3">
                 {String(comprobanteFCReciente.tipoComprobante).toLowerCase()}
               </h1>
               <ContentTable comprobante={comprobanteFCReciente} />
@@ -151,7 +151,7 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
         <div className="mt-4">
           {aportesOS && (
             <>
-              <h1 className="text-base font-bold mb-3">
+              <h1 className="text-base uppercase font-bold mb-3">
                 Detalle de aportes
               </h1>
               <AportesTable aportesOS={aportesOS??[]} />
