@@ -56,8 +56,7 @@ export default function HealthInsurancePage(props: {
     });
   }
   currentAmount = lastEvent?.current_amount ?? 0;
-  const [openBasicData, setOpenBasicData] = useState<boolean>(false);
-  const [openFacturacion, setOpenFacturacion] = useState<boolean>(false);
+ 
 
   const { mutateAsync: updateHealthInsurance, isLoading } =
     api.healthInsurances.change.useMutation();
@@ -82,7 +81,7 @@ export default function HealthInsurancePage(props: {
     "Razón Social": props.healthInsurance?.responsibleName,
     CUIT: props.healthInsurance?.fiscal_id_number,
     "Condición AFIP": props.healthInsurance?.afip_status,
-    "Condicion de IIBB": props.healthInsurance?.IIBBStatus,
+    "Condición de IIBB": props.healthInsurance?.IIBBStatus,
     "Numero IIBB": props.healthInsurance?.IIBBNumber,
     "Condición de venta": props.healthInsurance?.sellCondition,
   };
@@ -93,18 +92,18 @@ export default function HealthInsurancePage(props: {
     Oficina: props.healthInsurance?.fiscalOffice,
     Localidad: props.healthInsurance?.fiscalLocality,
     Provincia: props.healthInsurance?.fiscalProvince,
-    "Codigo postal": fiscalPostalCode?.cp ?? "No se encontro C.P.",
+    "Código postal": fiscalPostalCode?.cp ?? "No se encontro C.P.",
     País: props.healthInsurance?.fiscalCountry,
   };
 
   const contactData = {
-    "Domicilio Comercial": props.healthInsurance?.adress,
+    "Domicilio comercial": props.healthInsurance?.adress,
     Piso: props.healthInsurance?.floor,
     Oficina: props.healthInsurance?.office,
     Localidad: props.healthInsurance?.locality,
     Provincia: props.healthInsurance?.province,
-    "Codigo postal": props.healthInsurance?.postal_code,
-    Telefono: props.healthInsurance?.phoneNumber,
+    "Código postal": props.healthInsurance?.postal_code,
+    Teléfono: props.healthInsurance?.phoneNumber,
     "E-mail": props.healthInsurance?.email,
   };
 
@@ -179,7 +178,7 @@ export default function HealthInsurancePage(props: {
           <Accordion className="w-full" type="multiple">
             <AccordionItem value="item-1">
               <AccordionTrigger className="font-semibold" name="editIcon">
-                Datos Básicos
+                Datos básicos
               </AccordionTrigger>
               <AccordionContent className="pt-6 pl-5">
                 <h3 className="font-bold text-md mb-4">Datos Fiscales</h3>

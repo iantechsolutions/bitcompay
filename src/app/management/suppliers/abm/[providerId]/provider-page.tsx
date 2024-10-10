@@ -40,7 +40,7 @@ export default function ProviderPage(props: {
           <Title>{props.provider?.name}</Title>
           <Accordion type="single" collapsible={true}>
             <AccordionItem value="item-1">
-              <AccordionTrigger>Informacion de proveedor</AccordionTrigger>
+              <AccordionTrigger>Información de proveedor</AccordionTrigger>
               <AccordionContent>
                 <Card className="p-5">
                   <ProviderForm provider={props.provider} />
@@ -94,7 +94,7 @@ function DeleteProvider(props: { providerId: string }) {
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            ¿Estás seguro que querés eliminar este proveedor?
+            ¿Está seguro que quiere eliminar este proveedor?
           </AlertDialogTitle>
           <AlertDialogDescription>
             Eliminar Proveedor permanentemente.

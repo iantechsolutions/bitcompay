@@ -42,7 +42,7 @@ export const stringAsDate = z
       new Date(dob).toString() !== "Invalid Date";
     },
     {
-      message: "Ingrese una fecha valida",
+      message: "Ingrese una fecha válida",
     }
   )
   .transform((value) => {
@@ -69,64 +69,64 @@ export const ProviderSchema = z.object({
   // aca iba createdAt
   provider_type: z.nativeEnum(ProviderType, {
     errorMap: () => {
-      return { message: "Seleccione un tipo de proveedor valido" };
+      return { message: "Seleccione un tipo de proveedor válido" };
     },
   }),
   supervisor: z
     .string()
-    .max(255, { message: "ingrese un supervisor valido" })
+    .max(255, { message: "ingrese un supervisor válido" })
     .optional()
     .nullable(),
   manager: z
     .string()
-    .max(255, { message: "ingrese un gerente valido" })
+    .max(255, { message: "ingrese un gerente válido" })
     .optional()
     .nullable(),
   provider_code: z
     .string()
-    .max(22, { message: "ingrese un codigo de proveedor valido" })
+    .max(22, { message: "ingrese un codigo de proveedor válido" })
     .refine((value) => !Number.isNaN(Number(value)), {
-      message: "ingrese un número valido",
+      message: "ingrese un número válido",
     })
     .optional()
     .nullable(),
   id_type: z.nativeEnum(IdType, {
     errorMap: () => {
-      return { message: "Seleccione un tipo de documento valido" };
+      return { message: "Seleccione un tipo de documento válido" };
     },
   }),
   id_number: z
     .string()
     .max(11, {
-      message: "ingrese un numero de documento de max 11 caracteres",
+      message: "ingrese un número de documento de max 11 caracteres",
     })
     .refine((value) => /^\d+$/.test(value), {
-      message: "ingrese un número valido",
+      message: "ingrese un número válido",
     }),
-  name: z.string().max(255, { message: "ingrese de name valido" }),
+  name: z.string().max(255, { message: "ingrese de name válido" }),
   afip_status: z
     .string()
-    .max(255, { message: "ingrese de afip_status valido" }),
+    .max(255, { message: "ingrese de afip_status válido" }),
   fiscal_id_type: z.nativeEnum(fiscalIdType, {
     errorMap: () => {
-      return { message: "Seleccione un tipo de id fiscal valido" };
+      return { message: "Seleccione un tipo de id fiscal válido" };
     },
   }),
   fiscal_id_number: z
     .string()
     .max(11, { message: "ingrese un numero de id fiscal de max 11 caracteres" })
     .refine((value) => !Number.isNaN(Number(value)), {
-      message: "ingrese un número de id fiscal valido",
+      message: "ingrese un número de id fiscal válido",
     }),
   gender: z.nativeEnum(Gender, {
     errorMap: () => {
-      return { message: "Seleccione un valor valido" };
+      return { message: "Seleccione un valor válido" };
     },
   }),
   birth_date: stringAsDate,
   civil_status: z.nativeEnum(CivilStatus, {
     errorMap: () => {
-      return { message: "Seleccione un estado civil valido" };
+      return { message: "Seleccione un estado civil válido" };
     },
   }),
   nationality: z.string().max(255),
@@ -135,10 +135,10 @@ export const ProviderSchema = z.object({
     .string()
     .max(255)
     .refine((value) => /^\d+$/.test(value), {
-      message: "ingrese un número valido",
+      message: "ingrese un número válido",
     }),
   cellphone_number: z.string().refine((value) => /^\d+$/.test(value), {
-    message: "ingrese un número de celular valido",
+    message: "ingrese un número de celular válido",
   }),
   email: z
     .string()
@@ -151,16 +151,16 @@ export const ProviderSchema = z.object({
     .string()
     .length(22, { message: "ingrese un CBU de 22 caracteres" })
     .refine((value) => !Number.isNaN(Number(value)), {
-      message: "ingrese un número valido",
+      message: "ingrese un número válido",
     }),
   status: z
     .string()
-    .max(255, { message: "ingresar un estado valido" })
+    .max(255, { message: "ingresar un estado válido" })
     .optional()
     .nullable(),
   unsubscription_motive: z
     .string()
-    .max(255, { message: "ingrese un motivo valido" })
+    .max(255, { message: "ingrese un motivo válido" })
     .optional()
     .nullable(),
 });

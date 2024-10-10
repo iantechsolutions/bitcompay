@@ -84,12 +84,12 @@ export default function AddBonusDialog() {
     <>
       <Button onClick={() => setOpen(true)}>
         <PlusCircleIcon className="mr-2" size={20} />
-        Crear bonificacion
+        Crear bonificación
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Crear bonificacion</DialogTitle>
+            <DialogTitle>Crear bonificación</DialogTitle>
           </DialogHeader>
           <div>
             <Form {...form}>
@@ -200,7 +200,7 @@ export default function AddBonusDialog() {
                   )}
                 />
                 <Button className="mt-2" type="submit" disabled={isLoading}>
-                  Crear bonificacion
+                  Crear bonificación
                 </Button>
               </form>
             </Form>

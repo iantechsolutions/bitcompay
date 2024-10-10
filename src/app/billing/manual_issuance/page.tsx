@@ -575,7 +575,7 @@ export default function Page() {
       <LayoutContainer>
         <section>
           <div>
-            <Title>Generacion de comprobantes</Title>
+            <Title>Generación de comprobantes</Title>
           </div>
           <div className="flex flex-row justify-between gap-8 ">
             <Select

@@ -30,7 +30,7 @@ export default async function Home(props: { params: { procedureId: string } }) {
     integrantId: paymentHolder!.id,
   });
   if (!pa) {
-    throw new Error("No se encontro la informacion de pago");
+    throw new Error("No se encontro la información de pago");
   }
   return (
     <ProcedurePage

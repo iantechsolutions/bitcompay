@@ -246,7 +246,7 @@ export default function ProductPage({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              ¿Estás seguro que querés eliminar el producto?
+              ¿Está seguro que quiere eliminar el producto?
             </AlertDialogTitle>
             <AlertDialogDescription>
               Eliminar producto permanentemente.

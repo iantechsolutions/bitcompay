@@ -208,7 +208,7 @@ export default function BrandPage({
                   </div>
                   <div>
                     <Label htmlFor="utility">
-                      Codigo de utilidad(8 otorgada por senapsa)
+                    Código de utilidad (8 otorgada por senapsa)
                     </Label>
                     <Input
                       id="utility"
@@ -285,7 +285,7 @@ export default function BrandPage({
                     </div>
                   </div> */}
                   <div>
-                    <Label> Actualizar Logo Marca</Label>
+                    <Label> Actualizar logo de marca</Label>
                     {brand.logo_url && (
                       <div className="mt-2">
                         <Image
@@ -358,7 +358,7 @@ export default function BrandPage({
           </AccordionItem>
           <AccordionItem value="item-5" className="border-none">
             <AccordionTrigger>
-              <h2 className="text-md">Eliminar Marca</h2>
+              <h2 className="text-md">Eliminar marca</h2>
             </AccordionTrigger>
             <AccordionContent>
               <div className="flex justify-end">
@@ -394,13 +394,13 @@ function Deletebrand(props: { brandId: string }) {
     <AlertDialog>
       <AlertDialogTrigger asChild={true}>
         <Button variant="destructive" className="w-[160px]">
-          Eliminar Marca
+          Eliminar marca
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            ¿Estás seguro que querés eliminar la marca?
+            ¿Está seguro que quiere eliminar la marca?
           </AlertDialogTitle>
           <AlertDialogDescription>
             Eliminar marca permanentemente.

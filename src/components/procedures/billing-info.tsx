@@ -154,7 +154,7 @@ export default function BillingInfo({ data, form }: propsBillingInfo) {
           parsedData.Type.toLowerCase() === "debit"
         ) {
           form.setError("card_number", {
-            message: "No aceptamos tarjetas MasterCard debito.",
+            message: "No aceptamos tarjetas MasterCard débito.",
           });
           return;
         }
@@ -180,7 +180,7 @@ export default function BillingInfo({ data, form }: propsBillingInfo) {
   return (
     <>
       <ScrollArea className="h-72">
-        <h2 className="text-lg font-semibold">Responsable de facturacion</h2>
+        <h2 className="text-lg font-semibold">Responsable de facturación</h2>
         <Form {...form}>
           <form>
             <div className="grid grid-cols-3 gap-x-16 gap-y-6">
@@ -474,7 +474,7 @@ export default function BillingInfo({ data, form }: propsBillingInfo) {
                 name="card_security_code"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Codigo de seguridad</FormLabel>
+                    <FormLabel>Código de seguridad</FormLabel>
                     <Input
                       {...field}
                       placeholder="000"

@@ -79,7 +79,7 @@ export default function StatusPage({
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div className="col-span-2">
                     <div className="col-span-2">
-                      <Label htmlFor="code">Codigo</Label>
+                      <Label htmlFor="code">Código</Label>
                       <Input
                         disabled={true}
                         id="code"
@@ -100,7 +100,7 @@ export default function StatusPage({
           </AccordionItem>
           <AccordionItem value="item-2" className="border-none">
             <AccordionTrigger>
-              <h2 className="text-md">Eliminar Estado de transaccion</h2>
+              <h2 className="text-md">Eliminar estado de transacción</h2>
             </AccordionTrigger>
             <AccordionContent>
               <div className="flex justify-end">
@@ -143,7 +143,7 @@ function DeleteStatus(props: { statusId: string }) {
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            ¿Estás seguro que querés eliminar el estado?
+            ¿Está seguro que quiere eliminar el estado?
           </AlertDialogTitle>
           <AlertDialogDescription>
             Eliminar estado permanentemente.

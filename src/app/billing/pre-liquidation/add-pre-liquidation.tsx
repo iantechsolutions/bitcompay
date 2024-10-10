@@ -142,7 +142,7 @@ export default function AddPreLiquidation() {
   return (
     <>
       {/* <Button onClick={() => setOpen(true)}>
-        <PlusCircleIcon className="mr-2" /> Crear Pre liquidacion
+        <PlusCircleIcon className="mr-2" /> Crear Pre liquidación
       </Button> */}
       <AddElementButton
         onClick={() => setOpen(true)}

@@ -156,7 +156,6 @@ export default function CompanySidenav() {
   const canSeeAudit = false;
 
   let disabled = false;
-  //Facturacion
 
   const canSeeManualIssuance = has!({
     permission: "org:billing:manual_issuance",
@@ -679,7 +678,7 @@ export default function CompanySidenav() {
                       href={`/management/suppliers/comprobants-upload`}
                       IsChild={true}
                       className="text-sideNav">
-                      Alta Comprobantes
+                      Alta comprobantes
                     </SidenavItem>
                     <SidenavItem
                       icon={<Folder strokeWidth={1} />}
@@ -687,7 +686,7 @@ export default function CompanySidenav() {
                       href={`/management/suppliers/currentAcounts`}
                       IsChild={true}
                       className="text-sideNav">
-                      Cuentas Corrientes de Proveedores
+                      Cuentas corrientes de proveedores
                     </SidenavItem>
                     <SidenavItem
                       icon={<Globe strokeWidth={1} />}
@@ -752,7 +751,7 @@ export default function CompanySidenav() {
                         href={`/management/documents/massive-upload`}
                         IsChild={true}
                         className="text-sideNav">
-                        Carga Masiva
+                        Carga masiva
                       </SidenavItem>
                     )}
                     {canSeeRecUpload && (
@@ -923,7 +922,7 @@ export default function CompanySidenav() {
                 }
                 href={`/billing/manual_issuance`}
                 className="text-sideNav">
-                Generacion manual
+              Generación manual
               </SidenavItem>
             )}
             {canSeePreLiquidation && (
@@ -961,7 +960,7 @@ export default function CompanySidenav() {
                 }
                 href={`/billing/liquidation`}
                 className="text-sideNav">
-                Liquidacion
+                Liquidación
               </SidenavItem>
             )}
             {canSeeInformation && disabled && (
@@ -978,7 +977,7 @@ export default function CompanySidenav() {
                 }
                 href={`/billing/information`}
                 className="text-sideNav">
-                Informacion
+                Información
               </SidenavItem>
             )}
             {canSeeConsults && disabled && (
@@ -1017,7 +1016,7 @@ export default function CompanySidenav() {
                   />
                 }
                 href={`/treasury/current_count`}>
-                Cuenta Corriente
+                Cuenta corriente
               </SidenavItem>
             )}
             {canSeeCollections && (

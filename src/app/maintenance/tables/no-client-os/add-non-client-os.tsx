@@ -238,7 +238,7 @@ export function AddNonClientOs(props: {
             </div>
             <div>
               <Label htmlFor="IdNumber" className="text-xs text-gray-500">
-                CODIGO
+                CÓDIGO
               </Label>
               <Input
                 id="code"
@@ -260,7 +260,7 @@ export function AddNonClientOs(props: {
               />
             </div>
             <div>
-              <Label className="text-xs text-gray-500">DESCRIPCION</Label>
+              <Label className="text-xs text-gray-500">DESCRIPCIÓN</Label>
               <Input
                 id="description"
                 className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "

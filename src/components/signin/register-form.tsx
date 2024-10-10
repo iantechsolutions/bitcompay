@@ -97,7 +97,7 @@ export default function RegisterForm({ setShowRegister }: RegisterFormProps) {
   if (verifying) {
     return (
       <div className="flex flex-col items-center px-10 pt-3 pb-7 bg-white rounded-2xl">
-        <Title>Ingresar codigo de verificacion</Title>
+        <Title>Ingresar código de verificacion</Title>
         <InputOTP
           value={code}
           onChange={(value: string) => setCode(value)}
@@ -163,10 +163,10 @@ export default function RegisterForm({ setShowRegister }: RegisterFormProps) {
         height={80}
       />
       <p className="text-lg mt-7">
-        Acceso a <span className="font-bold"> Entidades</span>
+        Acceso a <span className="font-bold">entidades</span>
       </p>
       <p className="text-muted-foreground text-xs font-medium mb-3">
-        Ingrese sus datos para <span className="font-bold"> crear cuenta</span>
+        Ingrese sus datos para <span className="font-bold">crear cuenta</span>
       </p>
 
       <Form {...form}>
@@ -284,7 +284,7 @@ export default function RegisterForm({ setShowRegister }: RegisterFormProps) {
                         (e) => e.code === "form_password_size_in_bytes_exceeded"
                       ) && (
                         <p className="text-red-500 text-sm">
-                          La contraseña debe tener un maximo de 20 caracteres
+                          La contraseña debe tener un máximo de 20 caracteres
                         </p>
                       )}
                     </>
@@ -319,7 +319,7 @@ export default function RegisterForm({ setShowRegister }: RegisterFormProps) {
             </Button>
 
             <p className="text-muted-foreground opacity-60 text-xs">
-              ¿Ya tiene una cuenta ?{" "}
+              ¿Ya tiene una cuenta?{" "}
               <span
                 className="text-[#1BDFB7] font-bold opacity-100 hover:cursor-pointer"
                 onClick={() => setShowRegister(false)}

@@ -148,9 +148,9 @@ export default function EditCompany() {
 
           {brandId && (
             <>
-              <h2>Informacion de marca</h2>
+              <h2>Información de marca</h2>
               <div>
-                <Label>Razon social en factura de la marca</Label>
+                <Label>Razón social en factura de la marca</Label>
                 <Input
                   id="razon_social"
                   placeholder="Enter Razon Social"
@@ -173,14 +173,14 @@ export default function EditCompany() {
                     <SelectItem value="6">FACTURA B</SelectItem>
                     <SelectItem value="11">FACTURA C</SelectItem>
                     <SelectItem value="51">FACTURA M</SelectItem>
-                    <SelectItem value="2">NOTA DE DEBITO A</SelectItem>
-                    <SelectItem value="7">NOTA DE DEBITO B</SelectItem>
-                    <SelectItem value="12">NOTA DE DEBITO C</SelectItem>
-                    <SelectItem value="52">NOTA DE DEBITO M</SelectItem>
-                    <SelectItem value="3">NOTA DE CREDITO A</SelectItem>
-                    <SelectItem value="8">NOTA DE CREDITO B</SelectItem>
-                    <SelectItem value="13">NOTA DE CREDITO C</SelectItem>
-                    <SelectItem value="53">NOTA DE CREDITO M</SelectItem>
+                    <SelectItem value="2">NOTA DE DÉBITO A</SelectItem>
+                    <SelectItem value="7">NOTA DE DÉBITO B</SelectItem>
+                    <SelectItem value="12">NOTA DE DÉBITO C</SelectItem>
+                    <SelectItem value="52">NOTA DE DÉBITO M</SelectItem>
+                    <SelectItem value="3">NOTA DE CRÉDITO A</SelectItem>
+                    <SelectItem value="8">NOTA DE CRÉDITO B</SelectItem>
+                    <SelectItem value="13">NOTA DE CRÉDITO C</SelectItem>
+                    <SelectItem value="53">NOTA DE CRÉDITO M</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
