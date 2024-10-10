@@ -111,8 +111,8 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
         <div className="mt-4">
           {comprobanteNCReciente && (
             <>
-              <h1 className="text-base font-bold mb-3">
-                {comprobanteNCReciente.tipoComprobante}
+              <h1 className="text-base capitalize font-bold mb-3">
+              {String(comprobanteNCReciente.tipoComprobante).toLowerCase()}
               </h1>
               <ContentTable comprobante={comprobanteNCReciente} />
               <div className="mt-3">
