@@ -747,6 +747,7 @@ export default function Page() {
             >
               Siguiente <CircleChevronRight className="h-4 ml-2" />
             </Button>
+            
           </section>
         )}
         {page === "confirmationPage" && (
