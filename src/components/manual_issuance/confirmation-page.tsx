@@ -53,8 +53,12 @@ const confirmationPage = ({
   ivaTotal,
   otherAttributes,
 }: Props) => {
+  // function generateComprobante(){
+
+  // }
+
   function handleApprove() {
-    alert("Aprobado");
+    console.log();
   }
   function handleCreate() {
     alert("Creado");
