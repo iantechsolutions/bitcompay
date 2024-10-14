@@ -607,13 +607,13 @@ export default function Page() {
               </SelectTriggerMagnify>
               <SelectContent>
                 {obrasSociales &&
-                  obrasSociales.map((obrasSocial: any) => (
+                  obrasSociales.map((obrasSocial) => (
                     <SelectItem
                       key={obrasSocial?.id}
                       value={obrasSocial?.id}
                       className="rounded-none"
                     >
-                      {obrasSocial?.name}
+                      {obrasSocial?.initials}
                     </SelectItem>
                   ))}
               </SelectContent>
