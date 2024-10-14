@@ -559,7 +559,7 @@ async function approbatecomprobante(liquidationId: string) {
 
         const name = `FAC_${lastVoucher + 1}.pdf`; // NOMBRE        lastVoucher += 1;
 
-        PDFFromHtml(html, name, afip, comprobante?.id ?? "", lastVoucher + 1);
+        await PDFFromHtml(html, name, afip, comprobante?.id ?? "", lastVoucher + 1);
         console.log(
           `[TIMING] PDF generation (comprobante ${index}): ${
             Date.now() - pdfGenerateStart
