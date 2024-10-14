@@ -205,7 +205,7 @@ export default function PlanPage(props: {
                       href={`/management/sales/plans/${
                         plan?.id ?? ""
                       }/editPrice`}
-                      className="p-0 text-[#3e3e3e] font-medium shadow-none h-5 flex">
+                      className="p-0 text-[#3e3e3e] w-full font-medium shadow-none h-5 flex">
                       <PlusCircleIcon
                         className="mr-2"
                         size={20}
@@ -247,9 +247,9 @@ export default function PlanPage(props: {
                           <ChevronDown className="h-5" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent className="bg-[#f7f7f7]">
-                        <DropdownMenuItem>
-                          <Button
+                      <DropdownMenuContent className="bg-[#f7f7f7] w-full">
+                        <DropdownMenuItem className="w-full p-0 flex">
+                          <button
                             onClick={() =>
                               router.push(
                                 `/management/sales/plans/${
@@ -257,26 +257,39 @@ export default function PlanPage(props: {
                                 }/details/${fecha.getTime()}`
                               )
                             }
-                            className="bg-transparent hover:bg-transparent p-0 text-[#3e3e3e] shadow-none h-5">
+                            className="bg-transparent hover:bg-[#f0f0f0] p-2 text-[#3e3e3e] shadow-none w-full flex items-center justify-start">
                             <ViewIcon className="mr-1 h-4" /> Ver
-                          </Button>
+                          </button>
                         </DropdownMenuItem>
+
                         <DropdownMenuSeparator />
+
                         {vigente ? (
                           <div>
                             <DropdownMenuItem
                               disabled={vigente > fecha}
+                              className="w-full p-0 flex"
                               onSelect={(e) => e.preventDefault()}>
-                              <EditPrice plan={plan} fecha={fecha.getTime()} />
+                              <div className="w-full">
+                                <EditPrice
+                                  plan={plan}
+                                  fecha={fecha.getTime()}
+                                />
+                              </div>
                             </DropdownMenuItem>
+
                             <DropdownMenuSeparator />
+
                             <DropdownMenuItem
+                              className="w-full p-0 flex"
                               onSelect={(e) => e.preventDefault()}
                               disabled={vigente === fecha || vigente > fecha}>
-                              <DeletePrice
-                                planId={plan?.id ?? ""}
-                                currentVigency={fecha}
-                              />
+                              <div className="w-full">
+                                <DeletePrice
+                                  planId={plan?.id ?? ""}
+                                  currentVigency={fecha}
+                                />
+                              </div>
                             </DropdownMenuItem>
                           </div>
                         ) : null}
@@ -468,7 +481,7 @@ export default function PlanPage(props: {
             <Button
               disabled={loading}
               onClick={handleUpdatePrice}
-              className="bg-[#BEF0BB] hover:bg-[#BEF0BB] ml-3 rounded-full mr-4 px-6 text-black font-normal hover:text-[#3E3E3E]">
+              className="bg-[#BEF0BB] hover:bg-[#BEF0BB] ml-3 rounded-full mr-4 px-6 text-black font-normal hover:text-[#3E3E3E] w-full">
               {loading && (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}
