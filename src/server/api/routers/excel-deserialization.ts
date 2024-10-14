@@ -2,7 +2,7 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { z } from "zod";
 import * as schema from "~/server/db/schema";
 import { type DBTX, db } from "~/server/db";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import * as xlsx from "xlsx";
 import {
@@ -14,6 +14,13 @@ import {
 import { error } from "console";
 import { calcularEdad } from "~/lib/utils";
 import { columns } from "~/app/billing/liquidation/columns";
+import PromisePool from "@supercharge/promise-pool";
+
+const preparedModo = db.query.modos
+  .findFirst({
+    where: eq(schema.modos.description, sql.placeholder("modoDesc")),
+  })
+  .prepare("preparedModo");
 
 export const maxDuration = 300;
 export const dynamic = "force-dynamic";
@@ -219,9 +226,7 @@ export const excelDeserializationRouter = createTRPCRouter({
             ),
           });
 
-          const mode = await db.query.modos.findFirst({
-            where: eq(schema.modos.description, row.mode ?? ""),
-          });
+          const mode = await preparedModo.execute({ modoDesc: row.mode ?? "" });
 
           const plan = await db.query.plans.findFirst({
             where: and(
@@ -691,199 +696,218 @@ async function readExcelFile(
   let brands = await db.query.brands.findMany({
     with: { company: true },
   });
+
   brands = brands.filter((x) =>
     x.company.some((x) => x.companyId === ctx.session.orgId)
   );
-  for (let i = 0; i < transformedRows.length; i++) {
-    const row = transformedRows[i]!;
-    const rowNum = i + 2;
-    const companyProducts = await db.query.companyProducts.findMany({
-      where: eq(schema.companyProducts.companyId, ctx.session.orgId!),
-      with: {
-        product: true,
-      },
-    });
-    console.log("companyProducts", companyProducts);
-    console.log("product", row.product);
-    const product = companyProducts.find(
-      (x) => x.product && x.product.name === row.product
-    )?.product;
 
-    // await db.query.products.findFirst({
-    //   where: eq(schema.products.name, row.product!),
-    // });
-    if (product) {
-      const requiredColumns = await getRequiredColums(product.description);
-      if (requiredColumns.has("card_number")) {
-        if ((row.card_number?.length ?? 0) < 16) {
-          errors.push(
-            `El numero de tarjeta debe tener 16 digitos (fila:${rowNum})`
-          );
-        } else {
-          console.log(row.card_number?.slice(0, 8));
-          const response = await fetch(
-            `https://data.handyapi.com/bin/${row.card_number?.slice(0, 8)}`
-          );
-          const json = await response?.json();
-          console.log(json);
-          let row_card_type = row.card_type ?? json?.Type;
-          let row_card_brand = row.card_brand ?? json?.Scheme;
+  const companyProducts = await db.query.companyProducts.findMany({
+    where: eq(schema.companyProducts.companyId, ctx.session.orgId!),
+    with: {
+      product: true,
+    },
+  });
 
-          if (!row_card_brand || !row_card_type) {
+  const res = await PromisePool.withConcurrency(128)
+    .for(transformedRows)
+    .process(async (row, i) => {
+      const rowNum = i + 2;
+
+      console.log("companyProducts", companyProducts);
+      console.log("product", row.product);
+      const product = companyProducts.find(
+        (x) => x.product && x.product.name === row.product
+      )?.product;
+      // await db.query.products.findFirst({
+      //   where: eq(schema.products.name, row.product!),
+      // });
+
+      if (product) {
+        const requiredColumns = await getRequiredColums(product.description);
+        if (requiredColumns.has("card_number")) {
+          if ((row.card_number?.length ?? 0) < 16) {
             errors.push(
-              `No se pudo obtener (${!row_card_brand ? "Marca" : ""}, ${
-                !row_card_type ? "Tipo" : ""
-              }) de la tarjeta en fila: ${rowNum} \n`
+              `El numero de tarjeta debe tener 16 digitos (fila:${rowNum})`
+            );
+          } else {
+            console.log(row.card_number?.slice(0, 8));
+            const response = await fetch(
+              `https://data.handyapi.com/bin/${row.card_number?.slice(0, 8)}`
+            );
+            const json = await response?.json();
+            console.log(json);
+            let row_card_type = row.card_type ?? json?.Type;
+            let row_card_brand = row.card_brand ?? json?.Scheme;
+
+            if (!row_card_brand || !row_card_type) {
+              errors.push(
+                `No se pudo obtener (${!row_card_brand ? "Marca" : ""}, ${
+                  !row_card_type ? "Tipo" : ""
+                }) de la tarjeta en fila: ${rowNum} \n`
+              );
+            }
+
+            if (!row_card_brand) {
+              row_card_brand = json?.Scheme;
+            }
+            if (!row_card_type) {
+              row_card_type = json?.Type;
+            }
+            if (json?.CardTier && json.CardTier == "PREPAID MASTERCARD CARD") {
+              row_card_type = "DEBIT";
+            }
+            if (row_card_brand && row_card_type) {
+              row.card_brand = row_card_brand;
+              row.card_type = row_card_type;
+            }
+          }
+        }
+      }
+
+      for (const column of keysArray) {
+        const value = (row as Record<string, unknown>)[column];
+
+        if (!value) {
+          const columnName = columnLabelByKey[column] ?? column;
+
+          errors.push(
+            `La columna ${columnName} es obligatoria y no esta en el archivo (fila:${rowNum})`
+          );
+        }
+      }
+
+      const health_insurance = await db.query.healthInsurances.findFirst({
+        where: and(
+          eq(schema.healthInsurances.identificationNumber, row.os!),
+          eq(schema.healthInsurances.companyId, ctx.session.orgId!)
+        ),
+      });
+
+      if (!health_insurance && row.mode === "MIXTO") {
+        errors.push(
+          `El modo es incorrecto, la OBRA SOCIAL no es valida o no perteneciente a la organizacion en (fila:${rowNum})`
+        );
+      }
+
+      const business_unit = await db.query.bussinessUnits.findFirst({
+        where: and(
+          eq(schema.bussinessUnits.description, row.business_unit!),
+          eq(schema.bussinessUnits.companyId, ctx.session.orgId!)
+        ),
+      });
+
+      if (!business_unit) {
+        errors.push(
+          `UNIDAD DE NEGOCIO no valida o no perteneciente a la organizacion en (fila:${rowNum})`
+        );
+      } else {
+        const plan = await db.query.plans.findFirst({
+          where: and(
+            eq(schema.plans.plan_code, row.plan!),
+            eq(schema.plans.brand_id, business_unit.brandId)
+          ),
+        });
+        if (!plan) {
+          errors.push(
+            `PLAN no valido o no perteneciente a la marca en (fila:${rowNum})`
+          );
+        }
+      }
+      // if (business_unit?.companyId !== ctx.session.orgId) {
+      //   errors.push(
+      //     `UNIDAD DE NEGOCIO no pertenece a la organizacion (fila:${rowNum}) `
+      //   );
+      // }
+
+      if (
+        row.differential_value &&
+        row.differential_value !== "0" &&
+        !row.differential_code
+      ) {
+        errors.push(`CODIGO DIFERENCIAL requerido en (fila:${rowNum})`);
+      }
+      if (row.mode?.toUpperCase() === "MIXTO") {
+        const health_insurance = await db.query.healthInsurances.findFirst({
+          where: eq(schema.healthInsurances.identificationNumber, row.os!),
+        });
+
+        if (!health_insurance) {
+          errors.push(
+            `OBRA SOCIAL no valida en (fila:${rowNum}) para integrante MIXTO`
+          );
+        }
+      }
+
+      const mode = await preparedModo.execute({ modoDesc: row.mode! });
+
+      if (row["originating os"]) {
+        const originating_os = await db.query.healthInsurances.findFirst({
+          where: eq(
+            schema.healthInsurances.identificationNumber,
+            row["originating os"]!
+          ),
+        });
+        if (!originating_os) {
+          errors.push(`OBRA SOCIAL DE ORIGEN no valida en (fila:${rowNum})`);
+        }
+      }
+      if (!mode) {
+        errors.push(`MODO no valido en (fila:${rowNum})`);
+      }
+      const planes = await db.query.plans.findMany({
+        where: eq(schema.plans.plan_code, row.plan!),
+      });
+      const plan = planes.filter((x) =>
+        brands.some((y) => y.id === x.brand_id)
+      );
+
+      if (!plan) {
+        errors.push(`PLAN no valido en (fila:${rowNum})`);
+      }
+
+      const postal_code = row["postal code"];
+      // const check_postal_code = await db.query.postal_code.findMany({
+      //   where: eq(schema.postal_code.cp, postal_code ?? " "),
+      // });
+
+      // if (check_postal_code.length == 0) {
+      //   errors.push(`CODIGO POSTAL no valido en (fila:${rowNum})`);
+      // }
+      if (!product) {
+        errors.push(`PRODUCTO no valido en (fila:${rowNum})`);
+      }
+
+      if (product) {
+        const requiredColumns = await getRequiredColums(product.description);
+        console.log("row", row);
+        for (const column of requiredColumns) {
+          const columnName = columnLabelByKey[column];
+          const value = row[column as keyof typeof row];
+          if (
+            (column in row && !value) ||
+            (column in row && value?.toString() === "")
+          ) {
+            errors.push(
+              `La columna ${columnName} no puede ser nula ni estar vacia, es obligatoria para el producto (fila:${rowNum})`
             );
           }
-
-          if (!row_card_brand) {
-            row_card_brand = json?.Scheme;
-          }
-          if (!row_card_type) {
-            row_card_type = json?.Type;
-          }
-          if (json?.CardTier && json.CardTier == "PREPAID MASTERCARD CARD") {
-            row_card_type = "DEBIT";
-          }
-          if (row_card_brand && row_card_type) {
-            row.card_brand = row_card_brand;
-            row.card_type = row_card_type;
-          }
         }
       }
-    }
-    for (const column of keysArray) {
-      const value = (row as Record<string, unknown>)[column];
 
-      if (!value) {
-        const columnName = columnLabelByKey[column] ?? column;
-
-        errors.push(
-          `La columna ${columnName} es obligatoria y no esta en el archivo (fila:${rowNum})`
-        );
-      }
-    }
-    const health_insurance = await db.query.healthInsurances.findFirst({
-      where: and(
-        eq(schema.healthInsurances.identificationNumber, row.os!),
-        eq(schema.healthInsurances.companyId, ctx.session.orgId!)
-      ),
+      return row;
     });
-    if (!health_insurance && row.mode === "MIXTO") {
-      errors.push(
-        `El modo es incorrecto, la OBRA SOCIAL no es valida o no perteneciente a la organizacion en (fila:${rowNum})`
-      );
-    }
-
-    const business_unit = await db.query.bussinessUnits.findFirst({
-      where: and(
-        eq(schema.bussinessUnits.description, row.business_unit!),
-        eq(schema.bussinessUnits.companyId, ctx.session.orgId!)
-      ),
-    });
-    if (!business_unit) {
-      errors.push(
-        `UNIDAD DE NEGOCIO no valida o no perteneciente a la organizacion en (fila:${rowNum})`
-      );
-    } else {
-      const plan = await db.query.plans.findFirst({
-        where: and(
-          eq(schema.plans.plan_code, row.plan!),
-          eq(schema.plans.brand_id, business_unit.brandId)
-        ),
-      });
-      if (!plan) {
-        errors.push(
-          `PLAN no valido o no perteneciente a la marca en (fila:${rowNum})`
-        );
-      }
-    }
-    // if (business_unit?.companyId !== ctx.session.orgId) {
-    //   errors.push(
-    //     `UNIDAD DE NEGOCIO no pertenece a la organizacion (fila:${rowNum}) `
-    //   );
-    // }
-
-    if (
-      row.differential_value &&
-      row.differential_value !== "0" &&
-      !row.differential_code
-    ) {
-      errors.push(`CODIGO DIFERENCIAL requerido en (fila:${rowNum})`);
-    }
-    if (row.mode?.toUpperCase() === "MIXTO") {
-      const health_insurance = await db.query.healthInsurances.findFirst({
-        where: eq(schema.healthInsurances.identificationNumber, row.os!),
-      });
-
-      if (!health_insurance) {
-        errors.push(
-          `OBRA SOCIAL no valida en (fila:${rowNum}) para integrante MIXTO`
-        );
-      }
-    }
-    const mode = await db.query.modos.findFirst({
-      where: eq(schema.modos.description, row.mode!),
-    });
-
-    if (row["originating os"]) {
-      const originating_os = await db.query.healthInsurances.findFirst({
-        where: eq(
-          schema.healthInsurances.identificationNumber,
-          row["originating os"]!
-        ),
-      });
-      if (!originating_os) {
-        errors.push(`OBRA SOCIAL DE ORIGEN no valida en (fila:${rowNum})`);
-      }
-    }
-    if (!mode) {
-      errors.push(`MODO no valido en (fila:${rowNum})`);
-    }
-    const planes = await db.query.plans.findMany({
-      where: eq(schema.plans.plan_code, row.plan!),
-    });
-    const plan = planes.filter((x) => brands.some((y) => y.id === x.brand_id));
-
-    if (!plan) {
-      errors.push(`PLAN no valido en (fila:${rowNum})`);
-    }
-
-    const postal_code = row["postal code"];
-    // const check_postal_code = await db.query.postal_code.findMany({
-    //   where: eq(schema.postal_code.cp, postal_code ?? " "),
-    // });
-
-    // if (check_postal_code.length == 0) {
-    //   errors.push(`CODIGO POSTAL no valido en (fila:${rowNum})`);
-    // }
-    if (!product) {
-      errors.push(`PRODUCTO no valido en (fila:${rowNum})`);
-    }
-    if (product) {
-      const requiredColumns = await getRequiredColums(product.description);
-      console.log("row", row);
-      for (const column of requiredColumns) {
-        const columnName = columnLabelByKey[column];
-        const value = row[column as keyof typeof row];
-        if (
-          (column in row && !value) ||
-          (column in row && value?.toString() === "")
-        ) {
-          errors.push(
-            `La columna ${columnName} no puede ser nula ni estar vacia, es obligatoria para el producto (fila:${rowNum})`
-          );
-        }
-      }
-    }
-  }
 
   if (errors.length > 0) {
     throw new TRPCError({ code: "BAD_REQUEST", message: errors.join("\n") });
   }
+
+  if (res.errors.length > 0) {
+    console.error(res.errors);
+    throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+  }
+
   console.log("Testimonio", transformedRows[0]?.own_id_type);
-  return transformedRows;
+  return res.results;
 }
 
 function trimObject(obj: Record<string, unknown>) {
@@ -902,9 +926,9 @@ function trimObject(obj: Record<string, unknown>) {
   );
 }
 
-async function getRequiredColums(productName: string) {
-  const product = await db.query.products.findFirst({
-    where: eq(schema.products.description, productName),
+const preparedProdFind = db.query.products
+  .findFirst({
+    where: eq(schema.products.description, sql.placeholder("productName")),
     with: {
       channels: {
         with: {
@@ -917,6 +941,12 @@ async function getRequiredColums(productName: string) {
         },
       },
     },
+  })
+  .prepare("preparedProdFind");
+
+async function getRequiredColums(productName: string) {
+  const product = await preparedProdFind.execute({
+    productName,
   });
 
   const requiredColumns = new Set(
@@ -924,5 +954,6 @@ async function getRequiredColums(productName: string) {
       .map((c) => c.channel.requiredColumns)
       .reduce((acc, val) => acc.concat(val), [])
   );
+
   return requiredColumns;
 }
