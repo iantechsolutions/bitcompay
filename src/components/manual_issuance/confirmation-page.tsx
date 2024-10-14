@@ -22,6 +22,7 @@ import {
   type otherConceptsForm,
 } from "~/lib/types/app";
 import { Comprobante } from "~/server/db/schema";
+import { idDictionary, ivaDictionary } from "~/lib/utils";
 
 interface Props {
   changePage: (page: "formPage" | "confirmationPage") => void;
@@ -44,6 +45,18 @@ interface Props {
   sell_condition:string
   otherAttributes: number;
 }
+
+function formatDate(date: Date | undefined) {
+  if (date) {
+    const year = date.getFullYear();
+    const month = (1 + date.getMonth()).toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
+
+    return year + month + day;
+  }
+  return null;
+}
+
 const confirmationPage = ({
   changePage,
   fcSeleccionada,
@@ -89,23 +102,83 @@ const confirmationPage = ({
     console.log("otherAttributes");
     console.log(otherAttributes);
   }
-  async function handleAFIP() {
-    let last_voucher = 0;
-    if (tipoComprobante == "1" || tipoComprobante == "6") {
-        try {
-          last_voucher = await afip.ElectronicBilling.getLastVoucher(
-            form.getValues().puntoVenta,
-            tipoComprobante
-          );
-        } catch {
-          last_voucher = 0;
-        }
+  // async function handleAFIP() {
+  //   const formValues = form.getValues()
+  //   const concepto = formValues.tipoDeConcepto;
+  //   let last_voucher = 0;
+  //   let data = null;
+  //   let ivaFloat =
+  //         (100 + parseFloat(ivaDictionary[Number(iva)] ?? "0")) / 100;
+  //   const fecha = new Date(
+  //     Date.now() - new Date().getTimezoneOffset() * 60000
+  //   ).toISOString()
+    
+  //   .split("T")[0];
+  //   if (tipoComprobante == "1" || tipoComprobante == "6") {
+  //       try {
+  //         last_voucher = await afip.ElectronicBilling.getLastVoucher(
+  //           form.getValues().puntoVenta,
+  //           tipoComprobante
+  //         );
+  //       } catch {
+  //         last_voucher = 0;
+  //       }
 
-    }
+
+
+  //       data = {
+  //         CantReg: 1, // Cantidad de comprobantes a registrar
+  //         PtoVta: Number(form.getValues().puntoVenta),
+  //         CbteTipo: Number(tipoComprobante),
+  //         Concepto: Number(concepto),
+  //         DocTipo: idDictionary[tipoDocumento ?? ""],
+  //         DocNro: fiscal_document ?? 0,
+  //         CbteDesde: last_voucher + 1,
+  //         CbteHasta: last_voucher + 1,
+  //         CbteFch: parseInt(fecha?.replace(/-/g, "") ?? ""),
+  //         FchServDesde:
+  //           concepto != "1"
+  //             ? formatDate(form.getValues().dateDesde ?? new Date())
+  //             : null,
+  //         FchServHasta:
+  //           concepto != "1"
+  //             ? formatDate(form.getValues().dateHasta ?? new Date())
+  //             : null,
+  //         FchVtoPago:
+  //           concepto != "1"
+  //             ? formatDate(form.getValues().dateVencimiento ?? new Date())
+  //             : null,
+  //         ImpTotal:
+  //           Math.round(
+  //             100 * (Number(importe) * ivaFloat + Number(tributos))
+  //           ) / 100,
+  //         ImpTotConc: 0,
+  //         ImpNeto: Number(importe),
+  //         ImpOpEx: 0,
+  //         ImpIVA:
+  //           Math.round(
+  //             100 * (Number(importe ?? 0) * ivaFloat - Number(importe))
+  //           ) / 100,
+  //         ImpTrib: 0,
+  //         MonId: "PES",
+  //         MonCotiz: 1,
+  //         Iva: {
+  //           Id: iva,
+  //           BaseImp: Number(importe),
+  //           Importe:
+  //             Math.round(
+  //               100 * (Number(importe ?? 0) * ivaFloat - Number(importe))
+  //             ) / 100,
+  //         },
+  //       };
 
 
 
-  }
+  //   }
+
+
+
+  // }
   return (
     <section className="space-y-2 flex flex-col">
       <Title>Resumen de datos</Title>

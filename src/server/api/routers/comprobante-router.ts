@@ -213,6 +213,8 @@ const preparedBillResponsible = db.query.integrants
   })
   .prepare("preparedBillResponsible");
 
+
+
 async function approbatecomprobante(liquidationId: string) {
   const start = Date.now();
   console.log(`[START] Function start: ${start}`);
@@ -258,7 +260,11 @@ async function approbatecomprobante(liquidationId: string) {
     const userStart = Date.now();
     const user = await currentUser();
 
-    const ccs = await db.query.currentAccount.findMany();
+    const ccs = await db.query.currentAccount.findMany({
+      with: {
+        events:true,
+      }
+    });
 
     console.log(`[TIMING] Current user fetch: ${Date.now() - userStart}ms`);
 
@@ -369,11 +375,19 @@ async function approbatecomprobante(liquidationId: string) {
         );
 
         const ccFetchStart = Date.now();
-        const cachedCc = comprobante.family_group?.cc;
+        // const cachedCc = comprobante.family_group?.cc;
         const cc =
-          cachedCc ?? ccs.find((x) => x.id == comprobante.family_group?.cc?.id);
+           ccs.find((x) => x.id == comprobante.family_group?.cc?.id);
+        let lastEventAmount = 0;
+        if (cc?.events && cc?.events.length > 0) {
+          lastEventAmount = cc?.events.reduce((prev, current) => {
+            return new Date(prev.createdAt) > new Date(current.createdAt)
+              ? prev
+              : current;
+          }).current_amount;
+        }
         console.log(
-          `[TIMING] Current account fetch (comprobante ${index}): ${
+          `[TIMING] Current account transaction (comprobante ${index}): ${
             Date.now() - ccFetchStart
           }ms`
         );
@@ -430,18 +444,35 @@ async function approbatecomprobante(liquidationId: string) {
               Importe: comprobante?.nroComprobante,
             },
           };
+          await db
+        .insert(schema.events)
+        .values({
+          current_amount: lastEventAmount,
+          description: "NC",
+          event_amount: lastEventAmount + comprobante.importe,
+          currentAccount_id: cc?.id,
+          type: "NC",
+          comprobante_id: comprobante.id,
+        })
           // AAACAAAA
           await preparedUpdatePayment.execute({
             comprobanteId: comprobante?.previous_facturaId,
             statusId: statusCancelado?.id,
           });
         } else {
-          await preparedAddPayment.execute({
+
+
+
+
+          await db
+          .insert(schema.payments)
+          .values({
             companyId:
               comprobante.family_group?.businessUnitData?.company?.id ?? "",
             invoice_number: comprobante?.nroComprobante,
             userId: user?.id ?? "",
-            g_c: comprobante.family_group?.businessUnitData?.brand?.number ?? 0,
+            g_c:
+              comprobante.family_group?.businessUnitData?.brand?.number ?? 0,
             name: billResponsible?.name ?? "",
             fiscal_id_type: billResponsible?.fiscal_id_type,
             fiscal_id_number: parseInt(
@@ -453,13 +484,9 @@ async function approbatecomprobante(liquidationId: string) {
             affiliate_number:
               (comprobante.family_group?.plan?.plan_code ?? "") +
               (billResponsible?.id_number ?? ""),
-            period: schema.payments.period.mapToDriverValue(
-              comprobante.due_date
-            ),
+            period: comprobante?.due_date,
             first_due_amount: comprobante?.importe,
-            first_due_date: schema.payments.first_due_date.mapToDriverValue(
-              comprobante.due_date
-            ),
+            first_due_date: comprobante?.due_date,
             cbu: billResponsible?.pa[0]?.CBU,
             comprobante_id: comprobante?.id,
             documentUploadId: "0AspRyw8g4jgDAuNGAeBX",
@@ -468,41 +495,8 @@ async function approbatecomprobante(liquidationId: string) {
             card_number: billResponsible?.pa[0]?.card_number,
             card_brand: billResponsible?.pa[0]?.card_brand,
             card_type: billResponsible?.pa[0]?.card_type,
-          });
 
-          /* const payment = await db
-            .insert(schema.payments)
-            .values({
-              companyId:
-                comprobante.family_group?.businessUnitData?.company?.id ?? "",
-              invoice_number: comprobante?.nroComprobante,
-              userId: user?.id ?? "",
-              g_c:
-                comprobante.family_group?.businessUnitData?.brand?.number ?? 0,
-              name: billResponsible?.name ?? "",
-              fiscal_id_type: billResponsible?.fiscal_id_type,
-              fiscal_id_number: parseInt(
-                billResponsible?.fiscal_id_number ?? "0"
-              ),
-              du_type: billResponsible?.id_type,
-              du_number: parseInt(billResponsible?.id_number ?? "0"),
-              product: producto?.id,
-              affiliate_number:
-                (comprobante.family_group?.plan?.plan_code ?? "") +
-                (billResponsible?.id_number ?? ""),
-              period: comprobante.due_date,
-              first_due_amount: comprobante?.importe,
-              first_due_date: comprobante.due_date,
-              cbu: billResponsible?.pa[0]?.CBU,
-              comprobante_id: comprobante?.id,
-              documentUploadId: "0AspRyw8g4jgDAuNGAeBX",
-              product_number: producto?.number ?? 0,
-              statusId: status?.id,
-              card_number: billResponsible?.pa[0]?.card_number,
-              card_brand: billResponsible?.pa[0]?.card_brand,
-              card_type: billResponsible?.pa[0]?.card_type,
-            })
-            .returning(); */
+          });
 
           data = {
             CantReg: 1, // Cantidad de comprobantes a registrar
@@ -531,6 +525,17 @@ async function approbatecomprobante(liquidationId: string) {
               Importe: (Number(comprobante?.importe) * ivaFloat).toString(),
             },
           };
+
+          await db
+          .insert(schema.events)
+          .values({
+            current_amount: lastEventAmount,
+            description: "FC",
+            event_amount: lastEventAmount - comprobante.importe,
+            currentAccount_id: cc?.id,
+            type: "FC",
+            comprobante_id: comprobante.id,
+          })
         }
         console.log(
           `[TIMING] Comprobante process (comprobante ${index}): ${
@@ -1205,7 +1210,6 @@ export async function preparateComprobante(
       lt(schema.events.createdAt, new Date())
     ),
   });
-  console.log("lele", events.length);
   await Promise.all(
     grupos.map(async (grupo) => {
       // const grupo = grupos[i];
@@ -1219,7 +1223,6 @@ export async function preparateComprobante(
 
       //calculate ppb
       const abono = await getGroupAmount(grupo, dateDesde!);
-      console.log("lele", abono);
       //calculate bonification
       const today = new Date();
       const bonificacion =
@@ -1245,14 +1248,6 @@ export async function preparateComprobante(
         dateDesde!
       );
       let saldo = 0;
-
-      console.log(
-        "lele",
-        differential_amount,
-        contribution,
-        abono,
-        bonificacion
-      );
       //calculate saldo
       // let events = await db.query.events.findMany({
       //   where: eq(schema.events.currentAccount_id, grupo.cc?.id ?? ""),

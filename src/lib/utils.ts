@@ -59,7 +59,6 @@ export function calcularEdad(fechaNacimiento: Date): number {
 
 export function formatDate(date: Date | undefined) {
   if (date) {
-    console.log("formatDate", date);
     const year = date.getFullYear();
     const month = (1 + date.getMonth()).toString().padStart(2, "0");
     const day = date.getDate().toString().padStart(2, "0");
@@ -206,8 +205,6 @@ export function htmlBill(
     const payment = comprobante.payments;
   }
 
-  console.log("comprobante info");
-  console.log(comprobante);
   // console.log(voucher);
 
   // moví funciones porque es lento redefinirlas constantemente
