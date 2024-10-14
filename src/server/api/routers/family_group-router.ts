@@ -530,7 +530,8 @@ export const family_groupsRouter = createTRPCRouter({
           )
         );
       }
-
+      console.log("whereFgList", whereFgList);
+      console.log("compatibleBusinessUnits",compatibleBusinessUnits);
       const fg = await db.query.family_groups.findMany({
         where: and(...whereFgList),
         with: {
@@ -555,11 +556,18 @@ export const family_groupsRouter = createTRPCRouter({
         limit: input.limit,
         offset: input.cursor,
       });
-
+      console.log("fg", fg.length);
+      fg.map(x=>{
+        x.comprobantes = x.comprobantes.filter((comprobante) => comprobante.liquidation_id === input.liquidationId)
+      });
       const fgCompanyFiltered = fg.filter(
-        (x) => x.comprobantes.length > 0 && x.integrants.length > 0
+        (x) => 
+          x.comprobantes.length > 0 &&
+         x.integrants.length > 0
       );
+      
 
+      console.log("fgCompanyFiltered", fgCompanyFiltered);
       return {
         results: fgCompanyFiltered,
         usedCursor: input.cursor,
