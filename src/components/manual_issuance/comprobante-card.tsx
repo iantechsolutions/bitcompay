@@ -54,8 +54,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                 render={({ field }) => (
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                    defaultValue={field.value}>
                     <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8">
                       <SelectValue placeholder="Seleccionar PV..." />
                     </SelectTrigger>
@@ -67,8 +66,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                         <SelectItem
                           key={option.value}
                           value={option.value}
-                          className="rounded-none "
-                        >
+                          className="rounded-none ">
                           {option.label}
                         </SelectItem>
                       ))}
@@ -97,8 +95,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                         className={cn(
                           "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                           !field.value && "text-muted-foreground"
-                        )}
-                      >
+                        )}>
                         {field.value ? (
                           format(field.value, "dd/MM/yyyy")
                         ) : (
@@ -136,8 +133,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                 render={({ field }) => (
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                    defaultValue={field.value}>
                     <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8 ">
                       <SelectValue placeholder="Seleccionar alicuota" />
                     </SelectTrigger>
@@ -153,8 +149,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                         <SelectItem
                           key={option.value}
                           value={option.value}
-                          className="rounded-none "
-                        >
+                          className="rounded-none ">
                           {option.label}
                         </SelectItem>
                       ))}
@@ -178,8 +173,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                 render={({ field }) => (
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                    defaultValue={field.value}>
                     <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8">
                       <SelectValue placeholder="Seleccionar concepto" />
                     </SelectTrigger>
@@ -192,8 +186,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                         <SelectItem
                           key={option.value}
                           value={option.value}
-                          className="rounded-none "
-                        >
+                          className="rounded-none ">
                           {option.label}
                         </SelectItem>
                       ))}
@@ -222,8 +215,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                         className={cn(
                           "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                           !field.value && "text-muted-foreground"
-                        )}
-                      >
+                        )}>
                         {field.value ? (
                           format(field.value, "dd/MM/yyyy")
                         ) : (
@@ -266,8 +258,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                         className={cn(
                           "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                           !field.value && "text-muted-foreground"
-                        )}
-                      >
+                        )}>
                         {field.value ? (
                           format(field.value, "dd/MM/yyyy")
                         ) : (
@@ -309,8 +300,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                         className={cn(
                           "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                           !field.value && "text-muted-foreground"
-                        )}
-                      >
+                        )}>
                         {field.value ? (
                           format(field.value, "dd/MM/yyyy")
                         ) : (
@@ -350,8 +340,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                 render={({ field }) => (
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                    defaultValue={field.value}>
                     <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8">
                       <SelectValue placeholder="Seleccionar PV..." />
                     </SelectTrigger>
@@ -363,8 +352,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                         <SelectItem
                           key={option.value}
                           value={option.value}
-                          className="rounded-none "
-                        >
+                          className="rounded-none ">
                           {option.label}
                         </SelectItem>
                       ))}
@@ -393,8 +381,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                         className={cn(
                           "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                           !field.value && "text-muted-foreground"
-                        )}
-                      >
+                        )}>
                         {field.value ? (
                           format(field.value, "dd/MM/yyyy")
                         ) : (
@@ -431,8 +418,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                         className={cn(
                           "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                           !field.value && "text-muted-foreground"
-                        )}
-                      >
+                        )}>
                         {field.value ? (
                           format(field.value, "dd/MM/yyyy")
                         ) : (
@@ -471,8 +457,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                         className={cn(
                           "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                           !field.value && "text-muted-foreground"
-                        )}
-                      >
+                        )}>
                         {field.value ? (
                           format(field.value, "dd/MM/yyyy")
                         ) : (
@@ -510,8 +495,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                         className={cn(
                           "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                           !field.value && "text-muted-foreground"
-                        )}
-                      >
+                        )}>
                         {field.value ? (
                           format(field.value, "dd/MM/yyyy")
                         ) : (
@@ -552,8 +536,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                         className={cn(
                           "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                           !field.value && "text-muted-foreground"
-                        )}
-                      >
+                        )}>
                         {field.value ? (
                           format(field.value, "dd/MM/yyyy")
                         ) : (
@@ -613,8 +596,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                   "w-full grid grid-flow-col justify-stretch gap-5",
                 comprobanteValueTipo != "Recibo" &&
                   "grid grid-cols-2 gap-4 gap-x-6"
-              )}
-            >
+              )}>
               <ElementCard
                 className="pr-1 pb-0 border-[#bef0bb]"
                 element={{
@@ -623,8 +605,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                     props.visualization,
                     <Select
                       onValueChange={(e) => props.setTipoComprobante(e)}
-                      defaultValue={props.tipoComprobante}
-                    >
+                      defaultValue={props.tipoComprobante}>
                       <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8">
                         <SelectValue placeholder="Seleccionar comprobante..." />
                       </SelectTrigger>

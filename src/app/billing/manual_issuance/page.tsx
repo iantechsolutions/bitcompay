@@ -92,7 +92,6 @@ export default function Page() {
     loginAfip();
   }, []);
 
-  
   function computeTotals() {
     let subTotal = 0;
     let ivaTotal = 0;
@@ -101,7 +100,7 @@ export default function Page() {
     for (const attribute of res.tributes) {
       otherAttributes += Number(attribute.amount);
     }
-    
+
     switch (valueToNameComprobanteMap[tipoComprobante]) {
       case "Factura":
         for (const concept of conceptsForm.getValues().concepts) {
@@ -114,12 +113,12 @@ export default function Page() {
         }
       case "Nota de crédito":
         for (const comprobante of asociatedFCForm.getValues().comprobantes) {
-          console.log("comprobante del forms",comprobante)
+          console.log("comprobante del forms", comprobante);
           subTotal += Number(comprobante.importe);
           ivaTotal += Number(comprobante.iva) * Number(comprobante.iva);
         }
     }
-    console.log("subtotal", subTotal)
+    console.log("subtotal", subTotal);
     setSubTotal(subTotal);
     setIvaTotal(ivaTotal);
     setOtherAttributes(otherAttributes);
@@ -172,17 +171,17 @@ export default function Page() {
           .toISOString()
           .split("T")[0];
 
-         if (tipoComprobante == "1" || tipoComprobante == "6") {
+        if (tipoComprobante == "1" || tipoComprobante == "6") {
           let ivaFloat =
             (100 + parseFloat(ivaDictionary[Number(iva)] ?? "0")) / 100;
-            try {
-              last_voucher = await afip.ElectronicBilling.getLastVoucher(
-                form.getValues().puntoVenta,
-                tipoComprobante
-              );
-            } catch {
-              last_voucher = 0;
-            }
+          try {
+            last_voucher = await afip.ElectronicBilling.getLastVoucher(
+              form.getValues().puntoVenta,
+              tipoComprobante
+            );
+          } catch {
+            last_voucher = 0;
+          }
           // const billResponsible = gruposFamiliar
           //   ?.find((x) => x.id == grupoFamiliarId)
           //   ?.integrants.find((x) => x.isBillResponsible);
@@ -203,7 +202,7 @@ export default function Page() {
             nroComprobante: 0,
             family_group_id: grupoFamiliarId,
           });
-          
+
           data = {
             CantReg: 1, // Cantidad de comprobantes a registrar
             PtoVta: Number(form.getValues().puntoVenta),
@@ -288,7 +287,10 @@ export default function Page() {
             amount: comprobante[0]?.importe ?? 0,
             comprobante_id: comprobante[0]?.id ?? "",
           });
-        } else if (fcSelec && (tipoComprobante == "3" || tipoComprobante == "8")) {
+        } else if (
+          fcSelec &&
+          (tipoComprobante == "3" || tipoComprobante == "8")
+        ) {
           const facSeleccionada = comprobantes?.find((x) => x.id == fcSelec);
 
           let ivaFloat = (100 + parseFloat(facSeleccionada?.iva ?? "0")) / 100;
@@ -394,8 +396,7 @@ export default function Page() {
             amount: comprobante[0]?.importe ?? 0,
             comprobante_id: comprobante[0]?.id ?? "",
           });
-        }
-        else{
+        } else {
           toast.error("Error, revise que todos los campos esten completos");
           return null;
         }
@@ -410,9 +411,13 @@ export default function Page() {
           }
         }
         const billResponsible = gruposFamiliar
-          ?.find((x: { id: string; }) => x.id == grupoFamiliarId)
-          ?.integrants.find((x: { isBillResponsible: any; }) => x.isBillResponsible);
-        const obraSocial = obrasSociales?.find((x: { id: string; }) => x.id == obraSocialId);
+          ?.find((x: { id: string }) => x.id == grupoFamiliarId)
+          ?.integrants.find(
+            (x: { isBillResponsible: any }) => x.isBillResponsible
+          );
+        const obraSocial = obrasSociales?.find(
+          (x: { id: string }) => x.id == obraSocialId
+        );
 
         if (comprobante && comprobante[0]) {
           const html = htmlBill(
@@ -421,7 +426,7 @@ export default function Page() {
             undefined,
 
             2,
-            marcas?.find((x: { id: string; }) => x.id === brandId),
+            marcas?.find((x: { id: string }) => x.id === brandId),
             nombre,
             billResponsible
               ? billResponsible?.address ??
@@ -520,7 +525,7 @@ export default function Page() {
       ],
     },
   });
-  console.log("comprobante tipo",valueToNameComprobanteMap[tipoComprobante])
+  console.log("comprobante tipo", valueToNameComprobanteMap[tipoComprobante]);
   const asociatedFCForm = useForm<AsociatedFCForm>({
     defaultValues: {
       comprobantes: [
@@ -549,8 +554,10 @@ export default function Page() {
   function handleGrupoFamilarChange(value: string) {
     setGrupoFamiliarId(value);
     setObraSocialId("");
-    let grupo = gruposFamiliar?.find((x: { id: string; }) => x.id == value);
-    let billResponsible = grupo?.integrants.find((x: { isBillResponsible: any; }) => x.isBillResponsible);
+    let grupo = gruposFamiliar?.find((x: { id: string }) => x.id == value);
+    let billResponsible = grupo?.integrants.find(
+      (x: { isBillResponsible: any }) => x.isBillResponsible
+    );
     setComprobantes(grupo?.comprobantes ?? []);
     setNroDocumento(billResponsible?.fiscal_id_number ?? "0");
     setNroDocumentoDNI(billResponsible?.id_number ?? "0");
@@ -564,12 +571,12 @@ export default function Page() {
   function handleObraSocialChange(value: string) {
     setGrupoFamiliarId("");
     setObraSocialId(value);
-    let obra = obrasSociales?.find((x: { id: string; }) => x.id == value);
+    let obra = obrasSociales?.find((x: { id: string }) => x.id == value);
     setNroDocumento(obra?.fiscal_id_number?.toString() ?? "0");
     setNroDocumentoDNI("0");
     setNombre(obra?.responsibleName ?? "");
     setTipoDocumento(obra?.fiscal_id_type ?? "");
-    setIvaCondition(  obra?.afip_status ?? "");
+    setIvaCondition(obra?.afip_status ?? "");
     setSellCondition("No Aplica");
   }
   function handleComprobanteChange(value: string) {
@@ -579,7 +586,7 @@ export default function Page() {
   let selectedBrand;
 
   const handleBrandChange = (value: string) => {
-    selectedBrand = marcas?.find((marca: { id: string; }) => marca.id === value);
+    selectedBrand = marcas?.find((marca: { id: string }) => marca.id === value);
     setBrandId(value);
   };
 
@@ -593,8 +600,7 @@ export default function Page() {
           <div className="flex flex-row justify-between gap-8 ">
             <Select
               onValueChange={(e) => handleGrupoFamilarChange(e)}
-              value={grupoFamiliarId}
-            >
+              value={grupoFamiliarId}>
               <SelectTriggerMagnify className=" w-full bg-[#FAFAFA] font-normal text-[#747474]">
                 <SelectValue placeholder="Buscar afiliado.." />
               </SelectTriggerMagnify>
@@ -604,17 +610,19 @@ export default function Page() {
                     <SelectItem
                       key={gruposFamiliar?.id}
                       value={gruposFamiliar?.id}
-                      className="rounded-none"
-                    >
-                      {gruposFamiliar?.integrants.find((x: { isHolder: any; }) => x.isHolder)?.name}
+                      className="rounded-none">
+                      {
+                        gruposFamiliar?.integrants.find(
+                          (x: { isHolder: any }) => x.isHolder
+                        )?.name
+                      }
                     </SelectItem>
                   ))}
               </SelectContent>
             </Select>
             <Select
               onValueChange={(e) => handleObraSocialChange(e)}
-              value={obraSocialId}
-            >
+              value={obraSocialId}>
               <SelectTriggerMagnify className="w-full bg-[#FAFAFA] font-normal text-[#747474]">
                 <SelectValue placeholder="Buscar por obra social.." />
               </SelectTriggerMagnify>
@@ -624,8 +632,7 @@ export default function Page() {
                     <SelectItem
                       key={obrasSocial?.id}
                       value={obrasSocial?.id}
-                      className="rounded-none"
-                    >
+                      className="rounded-none">
                       {obrasSocial?.initials}
                     </SelectItem>
                   ))}
@@ -651,8 +658,7 @@ export default function Page() {
                   className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 mr-3 shadow-none"
                   // onClick={() => setOpen(true)}
                   disabled={loading}
-                  onClick={generateComprobante}
-                >
+                  onClick={generateComprobante}>
                   {loading ? (
                     <Loader2Icon className="mr-2 animate-spin" size={20} />
                   ) : (
@@ -673,8 +679,7 @@ export default function Page() {
             <div className="flex flex-row justify-between gap-8 ">
               <Select
                 onValueChange={(e) => handleGrupoFamilarChange(e)}
-                value={grupoFamiliarId}
-              >
+                value={grupoFamiliarId}>
                 <SelectTriggerMagnify className=" w-full bg-[#FAFAFA] font-normal text-[#747474]">
                   <SelectValue placeholder="Buscar afiliado.." />
                 </SelectTriggerMagnify>
@@ -684,11 +689,11 @@ export default function Page() {
                       <SelectItem
                         key={gruposFamiliar?.id}
                         value={gruposFamiliar?.id}
-                        className="rounded-none"
-                      >
+                        className="rounded-none">
                         {
-                          gruposFamiliar?.integrants.find((x: { isHolder: any; }) => x.isHolder)
-                            ?.name
+                          gruposFamiliar?.integrants.find(
+                            (x: { isHolder: any }) => x.isHolder
+                          )?.name
                         }
                       </SelectItem>
                     ))}
@@ -696,8 +701,7 @@ export default function Page() {
               </Select>
               <Select
                 onValueChange={(e) => handleObraSocialChange(e)}
-                value={obraSocialId}
-              >
+                value={obraSocialId}>
                 <SelectTriggerMagnify className="w-full bg-[#FAFAFA] font-normal text-[#747474]">
                   <SelectValue placeholder="Buscar por obra social.." />
                 </SelectTriggerMagnify>
@@ -707,8 +711,7 @@ export default function Page() {
                       <SelectItem
                         key={obrasSocial?.id}
                         value={obrasSocial?.id}
-                        className="rounded-none"
-                      >
+                        className="rounded-none">
                         {obrasSocial?.name}
                       </SelectItem>
                     ))}
@@ -758,11 +761,9 @@ export default function Page() {
             <Button
               variant="outline"
               className="flex justify-between px-4 py-4 rounded-full self-end bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e]"
-              onClick={() => setPage("confirmationPage")}
-            >
+              onClick={() => setPage("confirmationPage")}>
               Siguiente <CircleChevronRight className="h-4 ml-2" />
             </Button>
-            
           </section>
         )}
         {page === "confirmationPage" && (
@@ -782,12 +783,8 @@ export default function Page() {
             document={nroDocumentoDNI}
             fiscal_document={nroDocumento}
             name={nombre}
-            iva={
-              ivaCondition
-            }
-            sell_condition={
-              sellCondition
-            }
+            iva={ivaCondition}
+            sell_condition={sellCondition}
             afip={afip}
             // nombre={nombre}
             //   nroDocumento={nroDocumento}

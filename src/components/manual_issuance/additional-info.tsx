@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { cn, valueToNameComprobanteMap } from "~/lib/utils";
+import { cn, ivaDictionary, valueToNameComprobanteMap } from "~/lib/utils";
 import GeneralCard from "./general-card";
 import { useFormContext, UseFormReturn } from "react-hook-form";
 import { useFieldArray } from "react-hook-form";
@@ -33,6 +33,7 @@ import {
   ManualGenInputs,
   otherConceptsForm,
 } from "~/lib/types/app";
+import { Label } from "../ui/label";
 
 type AdditionalInfoProps = {
   onValueChange?: () => void;
@@ -73,6 +74,11 @@ export default function AdditionalInfoCard({
         </SelectItem>
       ));
   }
+
+  const IVA_TASA = parseFloat(
+    ivaDictionary[Number(form.watch("alicuota"))] ?? "0"
+  );
+
   const { fields, remove, append } = useFieldArray({
     control: conceptsForm.control,
     name: "concepts",
@@ -113,12 +119,16 @@ export default function AdditionalInfoCard({
       <GeneralCard title="Conceptos" containerClassName="flex flex-col gap-5">
         {fields.length === 0 && !visualization && (
           <div className="flex justify-between px-2">
-            <p> No se agregarán conceptos</p>
+            <p>No se agregarán conceptos</p>
             <Button
               onClick={() =>
-                append({ concepto: "", importe: 0, iva: 0, total: 0 })
-              }
-            >
+                append({
+                  concepto: "",
+                  importe: 0,
+                  iva: IVA_TASA, // Para mostrar como porcentaje
+                  total: 0,
+                })
+              }>
               Agregar concepto
             </Button>
           </div>
@@ -126,8 +136,7 @@ export default function AdditionalInfoCard({
         {fields.map((fieldElement, index) => (
           <div
             key={fieldElement.id}
-            className="w-full grid grid-flow-col gap-5 justify-stretch items-center"
-          >
+            className="w-full grid grid-flow-col gap-5 justify-stretch items-center">
             <ElementCard
               className="pr-1 pb-0 border-[#bef0bb]"
               element={{
@@ -162,6 +171,19 @@ export default function AdditionalInfoCard({
                       <Input
                         {...field}
                         type="number"
+                        onChange={(e) => {
+                          const importe = parseFloat(e.target.value) || 0; // Manejo de valores no numéricos
+                          field.onChange(importe);
+                          if (onValueChange) onValueChange();
+
+                          const iva = (importe * IVA_TASA) / 100;
+                          const total = importe + iva;
+                          conceptsForm.setValue(
+                            `concepts.${index}.total`,
+                            total
+                          );
+                          conceptsForm.setValue(`concepts.${index}.iva`, iva);
+                        }}
                         value={field.value ?? 0}
                       />
                     )}
@@ -174,49 +196,20 @@ export default function AdditionalInfoCard({
               className="pr-1 pb-0 border-[#bef0bb]"
               element={{
                 key: "IVA",
-                value: visualizationSwitcher(
-                  visualization,
-                  <FormField
-                    control={conceptsForm.control}
-                    name={`concepts.${index}.iva`}
-                    render={({ field }) => (
-                      <Input
-                        {...field}
-                        type="number"
-                        onChange={(e) => {
-                          field.onChange(e);
-                          if (onValueChange) onValueChange();
-                        }}
-                        value={field.value ?? 0}
-                      />
-                    )}
-                  />,
-                  fieldElement.iva
-                ),
+                // Mostrar el IVA como porcentaje
+                value: <p>{IVA_TASA.toFixed(2)}%</p>,
               }}
             />
             <ElementCard
               className="pr-1 pb-0 border-[#bef0bb]"
               element={{
                 key: "TOTAL",
-                value: visualizationSwitcher(
-                  visualization,
-                  <FormField
-                    control={conceptsForm.control}
-                    name={`concepts.${index}.total`}
-                    render={({ field }) => (
-                      <Input
-                        {...field}
-                        type="number"
-                        onChange={(e) => {
-                          field.onChange(e);
-                          if (onValueChange) onValueChange();
-                        }}
-                        value={field.value ?? 0}
-                      />
-                    )}
-                  />,
-                  fieldElement.total
+                value: (
+                  <p>
+                    {(
+                      conceptsForm.getValues(`concepts.${index}.total`) ?? 0
+                    ).toFixed(2)}
+                  </p>
                 ),
               }}
             />
@@ -228,9 +221,13 @@ export default function AdditionalInfoCard({
                   variant="outline"
                   className="bg-transparent hover:bg-transparent border-none shadow-none"
                   onClick={() =>
-                    append({ concepto: "", importe: 0, iva: 0, total: 0 })
-                  }
-                >
+                    append({
+                      concepto: "",
+                      importe: 0,
+                      iva: parseInt(form.watch("alicuota")),
+                      total: 0,
+                    })
+                  }>
                   <AddCircleIcon className="text-[#8bd087]" />
                 </Button>
                 <Button
@@ -241,8 +238,7 @@ export default function AdditionalInfoCard({
                   onClick={() => {
                     remove(index);
                     if (onValueChange) onValueChange();
-                  }}
-                >
+                  }}>
                   <CancelCircleIcon className="text-[#ed4444]" />
                 </Button>
               </div>
@@ -264,8 +260,7 @@ export default function AdditionalInfoCard({
                   nroComprobante: "",
                   dateEmision: new Date(),
                 })
-              }
-            >
+              }>
               Agregar comprobante
             </Button>
           </div>
@@ -275,8 +270,7 @@ export default function AdditionalInfoCard({
             {asocFields.map((fieldElement, index) => (
               <div
                 className="w-full grid grid-flow-col gap-5 justify-stretch items-center"
-                key={index}
-              >
+                key={index}>
                 <ElementCard
                   className="pr-1 pb-0 border-[#bef0bb]"
                   element={{
@@ -295,8 +289,7 @@ export default function AdditionalInfoCard({
                                   reverseComprobanteDictionary[Number(e)]!
                                 );
                               }}
-                              defaultValue={field.value}
-                            >
+                              defaultValue={field.value}>
                               <FormControl>
                                 <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8">
                                   <SelectValue placeholder="Seleccionar tipo comprobante..." />
@@ -391,8 +384,7 @@ export default function AdditionalInfoCard({
                                   }
                                 }
                               }}
-                              defaultValue={field.value}
-                            >
+                              defaultValue={field.value}>
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Seleccionar comprobante..." />
@@ -434,8 +426,7 @@ export default function AdditionalInfoCard({
                                       "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                                       !field.value && "text-muted-foreground"
                                     )}
-                                    disabled
-                                  >
+                                    disabled>
                                     {field.value ? (
                                       format(field.value, "dd/MM/yyyy")
                                     ) : (
@@ -467,8 +458,7 @@ export default function AdditionalInfoCard({
                       onClick={() => {
                         asocRemove(index);
                         if (onValueChange) onValueChange();
-                      }}
-                    >
+                      }}>
                       <CancelCircleIcon className="text-[#ed4444]" />
                     </Button>
                     <Button
@@ -483,8 +473,7 @@ export default function AdditionalInfoCard({
                           nroComprobante: "",
                           dateEmision: new Date(),
                         })
-                      }
-                    >
+                      }>
                       <AddCircleIcon className="text-[#8bd087]" />
                     </Button>
                   </div>
@@ -511,8 +500,7 @@ export default function AdditionalInfoCard({
               <Button
                 onClick={() =>
                   otherConceptsAppend({ description: "", importe: 0 })
-                }
-              >
+                }>
                 Agregar concepto
               </Button>
             </div>
@@ -520,8 +508,7 @@ export default function AdditionalInfoCard({
           {otherConceptsFields.map((fieldElement, index) => (
             <div
               key={fieldElement.id}
-              className="w-full grid grid-flow-col gap-5 justify-stretch items-center"
-            >
+              className="w-full grid grid-flow-col gap-5 justify-stretch items-center">
               <ElementCard
                 element={{
                   key: "DESCRIPCIÓN",
@@ -574,8 +561,7 @@ export default function AdditionalInfoCard({
                     className="bg-transparent hover:bg-transparent border-none shadow-none"
                     onClick={() =>
                       otherConceptsAppend({ description: "", importe: 0 })
-                    }
-                  >
+                    }>
                     <AddCircleIcon className="text-[#8bd087]" />
                   </Button>
                   <Button
@@ -585,8 +571,7 @@ export default function AdditionalInfoCard({
                     onClick={(e) => {
                       otherConceptsRemove(index);
                       if (onValueChange) onValueChange();
-                    }}
-                  >
+                    }}>
                     <CancelCircleIcon className="text-[#ed4444]" />
                   </Button>
                 </div>
