@@ -16,14 +16,15 @@ import { useRouter } from "next/navigation";
 import { asTRPCError } from "~/lib/errors";
 
 export default function DeleteButton(props: { id: string }) {
+  const [openDelete, setOpenDelete] = useState<boolean>(false);
   const router = useRouter();
   const planId = props?.id;
   const [error, setError] = useState<boolean>(false);
-  const { data: familiGroups } = api.family_groups.getbyPlans.useQuery({
+  const { data: family_groups } = api.family_groups.getbyPlans.useQuery({
     planId: planId,
   });
   async function handleDelete() {
-    if (familiGroups) {
+    if (family_groups?.data) {
       setError(true);
       return toast.error("No se pudo eliminar el plan");
     } else {
@@ -31,10 +32,9 @@ export default function DeleteButton(props: { id: string }) {
         await deletePlan({
           planId: props.id ?? "",
         });
-
-        toast.success("El plan se eliminado correctamente");
-        router.push("/management/sales/plans");
+        setOpenDelete(false);
         router.refresh();
+        toast.success("El plan se eliminado correctamente");
       } catch (e) {
         const error = asTRPCError(e)!;
         toast.error(error.message);
@@ -42,13 +42,14 @@ export default function DeleteButton(props: { id: string }) {
     }
   }
   const { mutateAsync: deletePlan, isLoading } = api.plans.delete.useMutation();
-  const [openDelete, setOpenDelete] = useState<boolean>(false);
+
   return (
     <>
       <Button
         variant="bitcompay"
         className="text-[#3e3e3e] bg-stone-100 hover:bg-stone-200"
-        onClick={() => setOpenDelete(true)}>
+        onClick={() => setOpenDelete(true)}
+      >
         <Delete02Icon className="mr-2" /> Eliminar
       </Button>
       <Dialog open={openDelete} onOpenChange={setOpenDelete}>
@@ -63,7 +64,8 @@ export default function DeleteButton(props: { id: string }) {
               type="submit"
               className="rounded-full bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#BEF0BB]"
               disabled={isLoading || error}
-              onClick={handleDelete}>
+              onClick={handleDelete}
+            >
               {isLoading && (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}
