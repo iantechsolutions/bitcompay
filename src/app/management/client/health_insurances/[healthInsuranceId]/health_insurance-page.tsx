@@ -86,6 +86,7 @@ export default function HealthInsurancePage(props: {
     "Condición de venta": props.healthInsurance?.sellCondition,
   };
   const fiscalPostalCode= postalCodes?.find((postalCode) => postalCode.id === props.healthInsurance?.fiscalPostalCode);
+  const postalCode = postalCodes?.find((postalCode) => postalCode.id === props.healthInsurance?.postal_code);
   const facturacion = {
     "Domicilio fiscal": props.healthInsurance?.fiscalAddress,
     Piso: props.healthInsurance?.fiscalFloor,
@@ -102,7 +103,7 @@ export default function HealthInsurancePage(props: {
     Oficina: props.healthInsurance?.office,
     Localidad: props.healthInsurance?.locality,
     Provincia: props.healthInsurance?.province,
-    "Código postal": props.healthInsurance?.postal_code,
+    "Código postal": postalCode?.cp ?? "No se encontro C.P.",
     Teléfono: props.healthInsurance?.phoneNumber,
     "E-mail": props.healthInsurance?.email,
   };

@@ -38,6 +38,7 @@ interface Props {
   ivaTotal: number;
   name: string;
   document: string;
+  afip: any;
   fiscal_document:string;
   iva: string;
   sell_condition:string
@@ -61,6 +62,7 @@ const confirmationPage = ({
   document,
   fiscal_document,
   iva,
+  afip,
   sell_condition
 }: Props) => {
   // function generateComprobante(){
@@ -68,11 +70,41 @@ const confirmationPage = ({
   // }
 
   function handleApprove() {
-    const forma = form.getValues();
-    console.log(forma);
+    console.log("fcSeleccionada");
+    console.log(fcSeleccionada);
+    console.log("otherTributes");
+    console.log(otherTributes.getValues());
+    console.log("form");
+    console.log(form.getValues());
+    console.log("asociatedFCForm");
+    console.log(asociatedFCForm.getValues());
+    console.log("conceptsForm");
+    console.log(conceptsForm.getValues());
+    console.log("otherConcepts");
+    console.log(otherConcepts.getValues());
+    console.log("subTotal");
+    console.log(subTotal);
+    console.log("ivaTotal");
+    console.log(ivaTotal);
+    console.log("otherAttributes");
+    console.log(otherAttributes);
   }
-  function handleCreate() {
-    alert("Creado");
+  async function handleAFIP() {
+    let last_voucher = 0;
+    if (tipoComprobante == "1" || tipoComprobante == "6") {
+        try {
+          last_voucher = await afip.ElectronicBilling.getLastVoucher(
+            form.getValues().puntoVenta,
+            tipoComprobante
+          );
+        } catch {
+          last_voucher = 0;
+        }
+
+    }
+
+
+
   }
   return (
     <section className="space-y-2 flex flex-col">
@@ -120,7 +152,7 @@ const confirmationPage = ({
           className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
           onClick={() => {
             handleApprove();
-            handleCreate();
+            // handleCreate();
           }}
         >
           <CircleCheck className="h-4 w-auto mr-2" />
