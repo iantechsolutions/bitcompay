@@ -113,7 +113,7 @@ export default function AdditionalInfoCard({
       <GeneralCard title="Conceptos" containerClassName="flex flex-col gap-5">
         {fields.length === 0 && !visualization && (
           <div className="flex justify-between px-2">
-            <p> no se agregaran conceptos</p>
+            <p> No se agregarán conceptos</p>
             <Button
               onClick={() =>
                 append({ concepto: "", importe: 0, iva: 0, total: 0 })

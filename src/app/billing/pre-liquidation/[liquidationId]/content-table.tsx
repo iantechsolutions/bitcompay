@@ -7,12 +7,6 @@ import {
   TableRow,
 } from "~/components/ui/tablePreliq";
 
-import {
-  Table as OriginalTable,
-  TableCell as OriginalTableCell,
-  TableRow as OriginalTableRow,
-  TableHead as OriginalTableHead,
-} from "~/components/ui/table";
 import { Router } from "next/router";
 import { RouterOutputs } from "~/trpc/shared";
 import { computeIva, computeBase, computeTotal } from "~/lib/utils";
@@ -21,7 +15,7 @@ type propsContentTable = {
   comprobante: RouterOutputs["comprobantes"]["getByLiquidation"][number];
 };
 
-function ContentTable(props: propsContentTable) {
+export default function ContentTable(props: propsContentTable) {
   const { comprobante } = props;
   return (
     <Table>
@@ -29,7 +23,7 @@ function ContentTable(props: propsContentTable) {
         <TableHead className="pl-4 "> Concepto </TableHead>
         <TableHead className=" "> Importe </TableHead>
         <TableHead className=" "> IVA</TableHead>
-        <TableHead className="">TOTAL</TableHead>
+        <TableHead className="pr-1">TOTAL</TableHead>
       </TableHeader>{" "}
       {comprobante?.items
         .filter((item) => item.concept != "Total factura")
@@ -46,7 +40,7 @@ function ContentTable(props: propsContentTable) {
               <TableCell className=" ">
               {formatCurrency(iva)}
               </TableCell>
-              <TableCell className=" ">
+              <TableCell className="pr-1 ">
               {formatCurrency(total)}
               </TableCell>
             </TableRow>
@@ -56,4 +50,3 @@ function ContentTable(props: propsContentTable) {
   );
 }
 
-export default ContentTable;

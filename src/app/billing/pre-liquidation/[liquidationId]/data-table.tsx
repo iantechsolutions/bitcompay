@@ -48,6 +48,7 @@ interface DataTableProps {
 interface DetailData {
   comprobantes: RouterOutputs["comprobantes"]["getByLiquidation"];
   currentAccountAmount: number;
+  id: string;
   nombre: string;
   cuit: string;
   [index: string]: any;
@@ -140,12 +141,14 @@ export function DataTable({ columns, summary, liquidationId }: DataTableProps) {
   const hiddenDataKeys = [
     "comprobantes",
     "currentAccountAmount",
+    "id",
     "nombre",
     "cuit",
   ];
 
   const handleRowClick = (row: Row<TableRecord>) => {
     let detailData = {} as DetailData;
+    console.log("row", row.original)
     for (const key in row.original) {
       if (hiddenDataKeys.includes(key)) {
         detailData[key] = (
@@ -155,6 +158,7 @@ export function DataTable({ columns, summary, liquidationId }: DataTableProps) {
     }
 
     setDetailData(detailData);
+    console.log("detailData", detailData);
     setOpen(!open);
   };
 

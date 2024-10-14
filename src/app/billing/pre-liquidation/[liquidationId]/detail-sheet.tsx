@@ -16,18 +16,19 @@ import { useState } from "react";
 import { api } from "~/trpc/react";
 import Download02Icon from "~/components/icons/download-02-stroke-rounded";
 import { format } from "path";
+import { aportes_os } from "~/server/db/schema";
+import AportesTable from "./aportes-table";
 type DetailSheetProps = {
   data: {
     comprobantes: RouterOutputs["comprobantes"]["getByLiquidation"];
     currentAccountAmount: number;
+    id: string;
     nombre: string;
     cuit: string;
   };
   open: boolean;
   setOpen: (open: boolean) => void;
 };
-
-type Comprobante = RouterOutputs["comprobantes"]["getByLiquidation"][number];
 
 export function formatCurrency(amount: number) {
   return (Intl.NumberFormat("es-AR", {
@@ -39,8 +40,12 @@ export function formatCurrency(amount: number) {
   }).format(amount));
 }; 
 export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
-  const [openFCAccordion, setOpenFCAccordion] = useState(true); // Qué es esto??
-  const [openNCAccordion, setOpenNCAccordion] = useState(false);
+  const {data: familyGroup} = api.family_groups.getWithAportes.useQuery({family_groupsId: data.id})
+  let aportesOS: RouterOutputs["aportes_os"]["list"] = []
+  familyGroup?.integrants?.map((integrant) => {
+  aportesOS = [...aportesOS, ...integrant.aportes_os]  
+  })
+    
   let comprobanteNCReciente =   data.comprobantes.find(
     (comprobante) => comprobante.origin === "Nota de credito"
   );
@@ -69,6 +74,10 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
     saldo_a_pagar = FCTotal - total_a_pagar;
   }
   
+  let total_aportes = 0
+  aportesOS?.forEach((aporte) => {
+    total_aportes += parseInt(aporte.amount)
+  })
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -99,11 +108,11 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
           </p>
         </div>
 
-        <div className="mt-5">
+        <div className="mt-4">
           {comprobanteNCReciente && (
             <>
-              <h1 className="text-base font-bold mb-3">
-                {comprobanteNCReciente.tipoComprobante}
+              <h1 className="text-base uppercase font-bold mb-3">
+              {String(comprobanteNCReciente.tipoComprobante).toLowerCase()}
               </h1>
               <ContentTable comprobante={comprobanteNCReciente} />
               <div className="mt-3">
@@ -122,17 +131,37 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
         <div className="mt-4">
           {comprobanteFCReciente && (
             <>
-              <h1 className="text-base font-bold mb-3">
-                {comprobanteFCReciente.tipoComprobante}
+              <h1 className="text-base uppercase font-bold mb-3">
+                {String(comprobanteFCReciente.tipoComprobante).toLowerCase()}
               </h1>
               <ContentTable comprobante={comprobanteFCReciente} />
               <div className="mt-3">
                 <div className="bg-[#DEF5DD] flex flex-row justify-between items-center p-3 rounded-md mt-2">
                   <p className=" text-[#6952EB] font-[550] ">
-                    Saldo a pagar:{" "}
+                    Saldo a pagar:
                   </p>
                   <p className="text-[#6952EB] font-[550] ">
                     {saldo_a_pagar ? `${formatCurrency(saldo_a_pagar)}` : "N/A"}
+                  </p>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+        <div className="mt-4">
+          {aportesOS && (
+            <>
+              <h1 className="text-base uppercase font-bold mb-3">
+                Detalle de aportes
+              </h1>
+              <AportesTable aportesOS={aportesOS??[]} />
+              <div className="mt-3">
+                <div className="bg-[#DEF5DD] flex flex-row justify-between items-center p-3 rounded-md mt-2">
+                  <p className=" text-[#6952EB] font-[550] ">
+                    Total:
+                  </p>
+                  <p className="text-[#6952EB] font-[550] ">
+                    {total_aportes ? `${formatCurrency(total_aportes)}` : "$0,00"}
                   </p>
                 </div>
               </div>
