@@ -28,6 +28,7 @@ import { utapi } from "~/server/uploadthing";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+import { PgUpdateBase, PgUpdatePrepare } from "drizzle-orm/pg-core";
 
 // Extiende dayjs con los plugins necesarios
 dayjs.extend(utc);
@@ -144,10 +145,78 @@ const idDictionary: { [key: string]: number } = {
 //   const res = await afip.ElectronicBilling.createVoucher(data);
 // }
 
+const preparedUpdatePayment = db
+  .update(schema.payments)
+  .set({
+    statusId: sql.placeholder("statusId").getSQL(),
+  })
+  .where(eq(schema.payments.comprobante_id, sql.placeholder("comprobanteId")))
+  .prepare("preparedUpdatePayment");
+
+const preparedAddPayment = db
+  .insert(schema.payments)
+  .values({
+    companyId: sql.placeholder("companyId"),
+    invoice_number: sql.placeholder("invoice_number"),
+    userId: sql.placeholder("userId"),
+    g_c: sql.placeholder("g_c"),
+    name: sql.placeholder("name"),
+    fiscal_id_type: sql.placeholder("fiscal_id_type"),
+    fiscal_id_number: sql.placeholder("fiscal_id_number"),
+    du_type: sql.placeholder("du_type"),
+    du_number: sql.placeholder("du_number"),
+    product: sql.placeholder("product"),
+    affiliate_number: sql.placeholder("affiliate_number"),
+    period: sql.placeholder("period").getSQL(),
+    first_due_amount: sql.placeholder("first_due_amount"),
+    first_due_date: sql.placeholder("first_due_date").getSQL(),
+    cbu: sql.placeholder("cbu"),
+    comprobante_id: sql.placeholder("comprobante_id"),
+    documentUploadId: sql.placeholder("documentUploadId"),
+    product_number: sql.placeholder("product_number"),
+    statusId: sql.placeholder("statusId"),
+    card_number: sql.placeholder("card_number"),
+    card_brand: sql.placeholder("card_brand"),
+    card_type: sql.placeholder("card_type"),
+  })
+  .prepare("preparedAddPayment");
+
+const preparedApproveLiquidation = db
+  .update(schema.liquidations)
+  .set({
+    estado: "aprobada",
+    userApproved: sql.placeholder("userApproved").getSQL(),
+  })
+  .where(eq(schema.liquidations.id, sql.placeholder("liquidationId")))
+  .prepare("preparedApproveLiquidation");
+
+const preparedCompBillLink = db
+  .update(schema.comprobantes)
+  .set({
+    billLink: sql.placeholder("billLink").getSQL(),
+    estado: sql.placeholder("estado").getSQL(),
+    nroComprobante: sql.placeholder("voucher").getSQL(),
+  })
+  .where(eq(schema.comprobantes.id, sql.placeholder("comprobanteId")))
+  .prepare("preparedCompBillLink");
+
+const preparedBillResponsible = db.query.integrants
+  .findFirst({
+    where: and(
+      eq(schema.integrants.family_group_id, sql.placeholder("family_groupId")),
+      eq(schema.integrants.isBillResponsible, true)
+    ),
+    with: {
+      postal_code: true,
+      pa: true,
+    },
+  })
+  .prepare("preparedBillResponsible");
+
 async function approbatecomprobante(liquidationId: string) {
   const start = Date.now();
   console.log(`[START] Function start: ${start}`);
-  
+
   const liquidationStart = Date.now();
   const liquidation = await db.query.liquidations.findFirst({
     where: eq(schema.liquidations.id, liquidationId),
@@ -189,20 +258,22 @@ async function approbatecomprobante(liquidationId: string) {
     const userStart = Date.now();
     const user = await currentUser();
 
-    const ccs = await db.query.currentAccount.findMany()
+    const ccs = await db.query.currentAccount.findMany();
 
     console.log(`[TIMING] Current user fetch: ${Date.now() - userStart}ms`);
-    
+
     const updateStart = Date.now();
-    const updatedLiquidation = await db
-      .update(schema.liquidations)
-      .set({ estado: "aprobada", userApproved: user?.id })
-      .where(eq(schema.liquidations.id, liquidationId));
+    await preparedApproveLiquidation.execute({
+      userApproved: user?.id,
+      liquidationId,
+    });
+
     console.log(`[TIMING] Liquidation update: ${Date.now() - updateStart}ms`);
 
     console.log("Ingresando afip");
     const afipStart = Date.now();
     const afip = await ingresarAfip();
+
     console.log(`[TIMING] Afip login: ${Date.now() - afipStart}ms`);
     const [status, statusCancelado, productos] = await Promise.all([
       db.query.paymentStatus.findFirst({
@@ -215,46 +286,18 @@ async function approbatecomprobante(liquidationId: string) {
     ]);
 
     console.log("aca");
-    const updatePayment = db
-      .update(schema.payments)
-      .set({
-        statusId: statusCancelado?.id,
-      })
-      .where(eq(schema.payments.comprobante_id, sql.placeholder('comprobanteId')))
-      .prepare("p1")
+
     console.log("aca2");
-    // const addPayment = db
-    // .insert(schema.payments)
-    // .values({
-    //   companyId:sql.placeholder('companyId'),
-    //   invoice_number: sql.placeholder('invoice_number'),
-    //   userId: sql.placeholder('userId'),
-    //   g_c: sql.placeholder('g_c'),
-    //   name: sql.placeholder('name'),
-    //   fiscal_id_type: sql.placeholder('fiscal_id_type'),
-    //   fiscal_id_number: sql.placeholder('fiscal_id_number'),
-    //   du_type: sql.placeholder('du_type'),
-    //   du_number: sql.placeholder('du_number'),
-    //   product: sql.placeholder('product'),
-    //   affiliate_number: sql.placeholder('affiliate_number'),
-    //   period: sql.placeholder('period'),
-    //   first_due_amount: sql.placeholder('first_due_amount'),
-    //   first_due_date: sql.placeholder('first_due_date'),
-    //   cbu: sql.placeholder('cbu'),
-    //   comprobante_id: sql.placeholder('comprobante_id'),
-    //   documentUploadId: sql.placeholder('documentUploadId'),
-    //   product_number: sql.placeholder('product_number'),
-    //   statusId: sql.placeholder('statusId'),
-    //   card_number: sql.placeholder('card_number'),
-    //   card_brand: sql.placeholder('card_brand'),
-    //   card_type: sql.placeholder('card_type'),
-    // }).prepare("addPayment");
 
     console.log("aca3");
 
     const paymentFetchStart = Date.now();
-    
-    console.log(`[TIMING] Payment status and products fetch: ${Date.now() - paymentFetchStart}ms`);
+
+    console.log(
+      `[TIMING] Payment status and products fetch: ${
+        Date.now() - paymentFetchStart
+      }ms`
+    );
 
     const productMapStart = Date.now();
     const productosMap = new Map<
@@ -266,14 +309,13 @@ async function approbatecomprobante(liquidationId: string) {
     }
     console.log(`[TIMING] Products mapping: ${Date.now() - productMapStart}ms`);
 
-
     const promisePoolStart = Date.now();
     const { results, errors } = await PromisePool.withConcurrency(1000)
       .for(liquidation?.comprobantes)
       .process(async (comprobante, index) => {
         const comprobanteCod =
           comprobanteDictionary[comprobante.tipoComprobante ?? ""];
-        
+
         let lastVoucher = 0;
         const lastVoucherStart = Date.now();
         try {
@@ -285,7 +327,11 @@ async function approbatecomprobante(liquidationId: string) {
         } catch {
           lastVoucher = 0;
         }
-        console.log(`[TIMING] Last voucher fetch (comprobante ${index}): ${Date.now() - lastVoucherStart}ms`);
+        console.log(
+          `[TIMING] Last voucher fetch (comprobante ${index}): ${
+            Date.now() - lastVoucherStart
+          }ms`
+        );
 
         // const randomNumber =
         //   Math.floor(Math.random() * (100000 - 1000 + 1)) + 1000;
@@ -300,34 +346,37 @@ async function approbatecomprobante(liquidationId: string) {
 
         const billResponsible =
           cachedBillResponsible ??
-          (await db.query.integrants.findFirst({
-            where: and(
-              eq(
-                schema.integrants.family_group_id,
-                comprobante.family_group?.id ?? ""
-              ),
-              eq(schema.integrants.isBillResponsible, true)
-            ),
-            with: {
-              postal_code: true,
-              pa: true,
-            },
+          (await preparedBillResponsible.execute({
+            family_groupId: comprobante.family_group?.id ?? "",
           }));
-        console.log(`[TIMING] Bill responsible fetch (comprobante ${index}): ${Date.now() - billResponsibleStart}ms`);
+
+        console.log(
+          `[TIMING] Bill responsible fetch (comprobante ${index}): ${
+            Date.now() - billResponsibleStart
+          }ms`
+        );
 
         const productFetchStart = Date.now();
         let producto = undefined;
         if (typeof billResponsible?.pa[0]?.product_id === "string") {
           producto = productosMap.get(billResponsible?.pa[0]?.product_id);
         }
-        console.log(`[TIMING] Product fetch (comprobante ${index}): ${Date.now() - productFetchStart}ms`);
+
+        console.log(
+          `[TIMING] Product fetch (comprobante ${index}): ${
+            Date.now() - productFetchStart
+          }ms`
+        );
 
         const ccFetchStart = Date.now();
         const cachedCc = comprobante.family_group?.cc;
         const cc =
-          cachedCc ??
-          (ccs.find(x=>x.id == comprobante.family_group?.cc?.id));
-        console.log(`[TIMING] Current account fetch (comprobante ${index}): ${Date.now() - ccFetchStart}ms`);
+          cachedCc ?? ccs.find((x) => x.id == comprobante.family_group?.cc?.id);
+        console.log(
+          `[TIMING] Current account fetch (comprobante ${index}): ${
+            Date.now() - ccFetchStart
+          }ms`
+        );
 
         const fecha = new Date(
           Date.now() - new Date().getTimezoneOffset() * 60000
@@ -381,38 +430,47 @@ async function approbatecomprobante(liquidationId: string) {
               Importe: comprobante?.nroComprobante,
             },
           };
-// AAACAAAA
-          await updatePayment.execute({comprobanteId: comprobante?.previous_facturaId});
+          // AAACAAAA
+          await preparedUpdatePayment.execute({
+            comprobanteId: comprobante?.previous_facturaId,
+            statusId: statusCancelado?.id,
+          });
         } else {
+          await preparedAddPayment.execute({
+            companyId:
+              comprobante.family_group?.businessUnitData?.company?.id ?? "",
+            invoice_number: comprobante?.nroComprobante,
+            userId: user?.id ?? "",
+            g_c: comprobante.family_group?.businessUnitData?.brand?.number ?? 0,
+            name: billResponsible?.name ?? "",
+            fiscal_id_type: billResponsible?.fiscal_id_type,
+            fiscal_id_number: parseInt(
+              billResponsible?.fiscal_id_number ?? "0"
+            ),
+            du_type: billResponsible?.id_type,
+            du_number: parseInt(billResponsible?.id_number ?? "0"),
+            product: producto?.id,
+            affiliate_number:
+              (comprobante.family_group?.plan?.plan_code ?? "") +
+              (billResponsible?.id_number ?? ""),
+            period: schema.payments.period.mapToDriverValue(
+              comprobante.due_date
+            ),
+            first_due_amount: comprobante?.importe,
+            first_due_date: schema.payments.first_due_date.mapToDriverValue(
+              comprobante.due_date
+            ),
+            cbu: billResponsible?.pa[0]?.CBU,
+            comprobante_id: comprobante?.id,
+            documentUploadId: "0AspRyw8g4jgDAuNGAeBX",
+            product_number: producto?.number ?? 0,
+            statusId: status?.id,
+            card_number: billResponsible?.pa[0]?.card_number,
+            card_brand: billResponsible?.pa[0]?.card_brand,
+            card_type: billResponsible?.pa[0]?.card_type,
+          });
 
-          // await addPayment.execute({
-          //   companyId: comprobante.family_group?.businessUnitData?.company?.id ?? "",
-          //   invoice_number: comprobante?.nroComprobante,
-          //   userId: user?.id ?? "",
-          //   g_c: comprobante.family_group?.businessUnitData?.brand?.number ?? 0,
-          //   name: billResponsible?.name ?? "",
-          //   fiscal_id_type: billResponsible?.fiscal_id_type,
-          //   fiscal_id_number: parseInt(billResponsible?.fiscal_id_number ?? "0"),
-          //   du_type: billResponsible?.id_type,
-          //   du_number: parseInt(billResponsible?.id_number ?? "0"),
-          //   product: producto?.id,
-          //   affiliate_number:
-          //     (comprobante.family_group?.plan?.plan_code ?? "") +
-          //     (billResponsible?.id_number ?? ""),
-          //   period: comprobante.due_date,
-          //   first_due_amount: comprobante?.importe,
-          //   first_due_date: comprobante.due_date,
-          //   cbu: billResponsible?.pa[0]?.CBU,
-          //   comprobante_id: comprobante?.id,
-          //   documentUploadId: "0AspRyw8g4jgDAuNGAeBX",
-          //   product_number: producto?.number ?? 0,
-          //   statusId: status?.id,
-          //   card_number: billResponsible?.pa[0]?.card_number,
-          //   card_brand: billResponsible?.pa[0]?.card_brand,
-          //   card_type: billResponsible?.pa[0]?.card_type,
-          // })
-
-          const payment = await db
+          /* const payment = await db
             .insert(schema.payments)
             .values({
               companyId:
@@ -444,7 +502,8 @@ async function approbatecomprobante(liquidationId: string) {
               card_brand: billResponsible?.pa[0]?.card_brand,
               card_type: billResponsible?.pa[0]?.card_type,
             })
-            .returning();
+            .returning(); */
+
           data = {
             CantReg: 1, // Cantidad de comprobantes a registrar
             PtoVta: comprobante?.ptoVenta,
@@ -473,7 +532,11 @@ async function approbatecomprobante(liquidationId: string) {
             },
           };
         }
-        console.log(`[TIMING] Comprobante process (comprobante ${index}): ${Date.now() - processStart}ms`);
+        console.log(
+          `[TIMING] Comprobante process (comprobante ${index}): ${
+            Date.now() - processStart
+          }ms`
+        );
 
         const pdfGenerateStart = Date.now();
         const html = htmlBill(
@@ -497,18 +560,22 @@ async function approbatecomprobante(liquidationId: string) {
         const name = `FAC_${lastVoucher + 1}.pdf`; // NOMBRE        lastVoucher += 1;
 
         PDFFromHtml(html, name, afip, comprobante?.id ?? "", lastVoucher + 1);
-        console.log(`[TIMING] PDF generation (comprobante ${index}): ${Date.now() - pdfGenerateStart}ms`);
+        console.log(
+          `[TIMING] PDF generation (comprobante ${index}): ${
+            Date.now() - pdfGenerateStart
+          }ms`
+        );
       });
 
-    console.log(`[TIMING] Promise pool processing: ${Date.now() - promisePoolStart}ms`);
+    console.log(
+      `[TIMING] Promise pool processing: ${Date.now() - promisePoolStart}ms`
+    );
     console.log(`approbatecomprobante total ${Date.now() - start}ms`);
     return "OK";
   } else {
     return "Error";
   }
 }
-
-
 
 async function PDFFromHtml(
   html: string,
@@ -534,14 +601,12 @@ async function PDFFromHtml(
   // Verifica si 'upload' es un array o un objeto
   const uploadData = Array.isArray(upload) ? upload[0]?.data : upload?.data;
 
-  await db
-    .update(schema.comprobantes)
-    .set({
-      billLink: uploadData?.url ?? res.file ?? "",
-      estado: "pendiente",
-      nroComprobante: voucher,
-    })
-    .where(eq(schema.comprobantes.id, comprobanteId));
+  await preparedCompBillLink.execute({
+    billLink: uploadData?.url ?? res.file ?? "",
+    estado: "pendiente",
+    voucher,
+    comprobanteId,
+  });
 
   console.log("termino la funcion");
 }
