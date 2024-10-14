@@ -214,142 +214,709 @@ export function htmlBill(
 
   const conceptosList = generateConcepts(comprobante?.items ?? []);
   const amountsList = generateAmounts(comprobante?.items ?? []);
-  const htmlContent = `<!DOCTYPE html>
+  const htmlContent =
+  //  `<!DOCTYPE html>
+  // <html lang="en">
+  //   <head>
+  //     <meta charset="UTF-8" />
+  //     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  //     <link rel="stylesheet" href="style.css" />
+  //     <link rel="preconnect" href="https://fonts.googleapis.com" />
+  //     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  //     <link
+  //       href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap"
+  //       rel="stylesheet"
+  //     />
+  //     <title>Document</title>
+  //   <style>
+  //     * {
+  //       box-sizing: border-box;
+  //       margin: 0;
+  //       padding: 0;
+  //       font-family: "Roboto", sans-serif;
+  //     }
+
+  //     body {
+  //       padding: 0 5rem;
+  //     }
+  //     header {
+  //       display: flex;
+  //       flex-direction: row;
+  //       justify-content: space-between;
+  //       border-bottom: 1.6px solid #8fefdc;
+  //       /* padding-bottom: 1.2rem; */
+  //       width: 100%;
+  //     }
+
+  //     .items-1 {
+  //       margin: 8px;
+  //       padding-bottom: 1.2rem;
+  //     }
+
+  //     .items-1 p {
+  //       font-size: 16px;
+  //       font-weight: 400;
+  //       color: #787878;
+  //     }
+
+  //     .logo {
+  //       width: 25vw;
+  //       height: auto;
+  //       margin-bottom: 5px;
+  //     }
+
+  //     .items-2 {
+  //       position: relative;
+  //     }
+
+  //     .items-2 img {
+  //       width: 60px;
+  //       top: 0;
+  //       left: 0;
+  //     }
+
+  //     .items-3 {
+  //       padding-bottom: 1.2rem;
+  //       display: flex;
+  //       flex-direction: column;
+  //       justify-content: space-between;
+  //     }
+
+  //     .items-3 h2 {
+  //       font-size: 1.7rem;
+  //       font-weight: 500;
+  //       line-height: 25px;
+  //     }
+
+  //     .items-3 p {
+  //       font-size: 16px;
+  //       font-weight: 400;
+  //       color: #787878;
+  //       line-height: 20px;
+  //     }
+
+  //     .items-3 div .fecha {
+  //       font-weight: 200;
+  //       size: 20px;
+  //       color: #787878;
+  //       letter-spacing: 2px;
+  //     }
+
+  //     .parte-2 {
+  //       display: flex;
+  //       justify-content: space-between;
+  //       border-top: none;
+  //       border-bottom: 1.6px solid #8fefdc;
+  //     }
+
+  //     .datos-1 {
+  //       font-size: 16px;
+  //       margin: 10px 10px 10px 0;
+  //       list-style-type: none;
+  //       line-height: 30px;
+  //       color: #303030;
+  //     }
+  //     .datos-1 li p span {
+  //       font-weight: 600;
+  //       opacity: 70;
+  //     }
+  //     .datos-2 {
+  //       font-size: 16px;
+  //       list-style-type: none;
+  //       line-height: 30px;
+  //       margin: 10px 10px 10px 0;
+  //       color: #303030;
+  //     }
+
+  //     .datos-2 li p span {
+  //       font-weight: 600;
+  //       opacity: 70;
+  //     }
+
+  //     .parte-3 {
+  //       display: flex;
+  //       justify-content: space-between;
+  //       border-top: none;
+  //       border-bottom: 1.6px solid #8fefdc;
+  //     }
+
+  //     .parte-3 p {
+  //       font-size: 18px;
+  //       font-weight: 500;
+  //       margin: 7px;
+  //     }
+
+  //     .parte-5 {
+  //       display: flex;
+  //       justify-content: space-between;
+  //       border-bottom: 1.6px solid #8fefdc;
+  //       padding-bottom: 20px;
+  //     }
+
+  //     .parte-5 p {
+  //       font-size: 16px;
+  //       color: #303030;
+  //       font-weight: 600;
+  //       line-height: 20px;
+  //       margin: 10px 0 0 0;
+  //     }
+
+  //     .parte-4 {
+  //       display: flex;
+  //       justify-content: space-between;
+  //       border-bottom: 1.6px solid #8fefdc;
+  //     }
+
+  //     .parte-4 p {
+  //       font-size: 13px;
+
+  //       font-weight: 500;
+  //       color: #323232;
+  //       margin: 5px 0 5px 0;
+  //     }
+
+  //     .parte-4 p span {
+  //       text-decoration: none;
+  //       font-weight: 600;
+  //     }
+
+  //     .parte-6 h2 {
+  //       margin-top: 10px;
+  //       font-size: 18px;
+
+  //       font-weight: 500;
+  //     }
+
+  //     .parte-6 p {
+  //       font-style: oblique;
+  //       margin-top: 10px;
+  //       font-style: bold;
+  //     }
+
+  //     .logos {
+  //       display: flex;
+  //       justify-content: space-between;
+  //       align-items: center;
+  //       margin-top: 10px;
+  //       padding: 6px 12px;
+  //       border: 2px dashed #8fefdc;
+  //     }
+
+  //     .pago-facil {
+  //       height: 63px;
+  //       width: 65px;
+  //     }
+
+  //     .rapi-pago {
+  //       width: 110px;
+  //     }
+
+  //     .mercado-pago {
+  //       height: 60px;
+  //       width: 65px;
+  //     }
+
+  //     .cod-barras {
+  //       width: 270px;
+  //     }
+
+  //     .cbu-section h2 {
+  //       margin-top: 10px;
+  //       margin-bottom: 5px;
+  //       font-weight: 400;
+  //       font-size: 12px;
+
+  //       font-style: oblique;
+  //     }
+
+  //     .cbu-section-2 {
+  //       display: flex;
+  //       align-items: center;
+  //       justify-content: space-between;
+  //       border: 2px dashed #8fefdc;
+  //       padding: 10px;
+  //     }
+
+  //     .cbu-section-2 p {
+  //       font-size: 18px;
+  //       font-weight: 700;
+  //       margin-right: 50px;
+  //       text-align: right;
+  //     }
+
+  //     .pago-mis {
+  //       height: 30px;
+  //       width: 200px;
+  //     }
+
+  //     .cards h2 {
+  //       margin-top: 10px;
+  //       margin-bottom: 5px;
+  //       font-weight: 400;
+  //       font-size: 12px;
+
+  //       font-style: oblique;
+  //     }
+
+  //     .cards-section {
+  //       display: flex;
+  //       justify-content: space-between;
+  //       align-items: center;
+  //       border: 2px dashed #8fefdc;
+  //       padding: 8px 16px;
+  //     }
+
+  //     .visa {
+  //       height: 45px;
+  //       width: 95px;
+  //     }
+
+  //     .visa-debit {
+  //       height: 45px;
+  //       width: 93px;
+  //     }
+
+  //     .mastercard {
+  //       height: 45px;
+  //       width: 70px;
+  //     }
+
+  //     .master-debit {
+  //       height: 45px;
+  //       width: 70px;
+  //     }
+
+  //     .cbu {
+  //     }
+
+  //     .factura-vencimiento {
+  //       margin-top: 10px;
+  //       border: 2px dashed #8fefdc;
+  //       padding: 2px 12px;
+  //     }
+
+  //     .factura-vencimiento p {
+  //       font-style: oblique;
+  //       font-size: 13px;
+  //       font-weight: 700;
+  //       color: #303030;
+  //     }
+
+  //     .qr-section {
+  //       font-size: 12px;
+
+  //       line-height: 20px;
+  //       gap: 10px;
+  //       display: flex;
+  //       margin-top: 20px;
+  //     }
+
+  //     .qr {
+  //       width: 150px;
+  //     }
+
+  //     .cae-section {
+  //       flex-direction: column;
+  //       gap: 10px;
+  //     }
+  //     .cae-section p {
+  //       font-size: 15px;
+  //       font-weight: 600;
+  //       color: #303030;
+  //     }
+
+  //     .cae-section span{
+  //       font-size: 13px;
+  //       font-style: oblique;
+  //       color: #303030;
+  //     }
+
+  //     .bold {
+  //       font-weight: 500;
+  //     }
+
+  //     .afip {
+  //       width: 150px;
+  //     }
+
+  //     .bp-logo {
+  //       width: 80px;
+  //       vertical-align: middle;
+  //     }
+  //   </style>
+  //   </head>
+  //   <body>
+  //     <header>
+  //       <div class="items-1">
+  //       ${getIimageForLogo(brand?.logo_url ?? null)}
+  //         <p>
+  //           ${company.razon_social}<br />
+  //           ${company.address} <br />
+  //           ${company.afip_condition}
+  //         </p>
+  //       </div>
+  
+  //       <div class="items-2">
+  //             ${getImageTagForTipoComprobante(
+  //               comprobanteDictionary[
+  //                 comprobante?.tipoComprobante
+  //               ]?.toString() ?? ""
+  //             )}
+         
+  //       </div>
+  
+  //       <div class="items-3">
+  //         <div>
+  //         <h2>
+  //           ${comprobante?.tipoComprobante ?? ""} <br />
+  //           N° ${comprobante?.ptoVenta.toString().padStart(4, "0")}-${voucher
+  //   .toString()
+  //   .padStart(8, "0")}
+  //         </h2>
+  //         <span class="fecha"> Fecha: ${dateNormalFormat(new Date())}</span>
+  //         </div>
+  //         <p>
+  //           C.U.I.T: ${company.cuit} <br />
+  //           Ing. Brutos Conv.Multil: ${company.cuit} <br />
+  //           Fecha de Inicio de Actividad: ${dateNormalFormat(
+  //             company.activity_start_date
+  //           )}
+  //         </p>
+  //       </div>
+  //     </header>
+  
+  //     <section class="parte-2">
+  //       <ul class="datos-1">
+  //         <li>
+  //           <p><span>Cliente: </span>${name}</p>
+  //         </li>
+  //         <li>
+  //           <p><span>Domicilio: </span>${domicilio}</p>
+  //         </li>
+  //         <li>
+  //           <p><span>Localidad: </span>${localidad}</p>
+  //         </li>
+  //         <li>
+  //           <p><span>Provincia: </span>${provincia}</p>
+  //         </li>
+  //         <li>
+  //           <p><span>CP: </span>${cp}</p>
+  //         </li>
+  //       </ul>
+  
+  //       <ul class="datos-2">
+  //         <li>
+  //           <p><span>${id_type}: </span>${id_number}</p>
+  //         </li>
+  //         <li>
+  //           <p><span>Categoria I.V.A: </span>${afip_status}</p>
+  //         </li>
+  //         <li>
+  //           <p><span>Condicion de Venta: </span>---</p>
+  //         </li>
+  //         <li>
+  //           <p><span>Periodo facturado: </span>${dateNormalFormat(
+  //             comprobante?.fromPeriod
+  //           )}</p>
+  //         </li>
+  //         <li>
+  //           <p><span>Fecha de vencimiento: </span>${dateNormalFormat(
+  //             comprobante?.due_date
+  //           )}</p>
+  //         </li>
+  //       </ul>
+  //     </section>
+  
+  //     <section class="parte-3">
+  //       <p>CONCEPTOS</p>
+  //       <p>IMPORTE</p>
+  //     </section>
+  
+  //     <section class="parte-5">
+  //       <div>
+  //         ${conceptosList}
+  //       </div>
+  
+  //       <div>
+  //         ${amountsList}
+  //       </div>
+  //     </section>
+  
+  //     <section class="parte-4">
+  //       <p>Pesos ${numeroALetras(Math.floor(comprobante?.importe ?? 0))} ${
+  //   obtenerDecimales(comprobante?.importe) == "00" || "0"
+  //     ? ""
+  //     : `con ${obtenerDecimales(comprobante?.importe)}/100`
+  // }</p>
+  //       <p><span>TOTAL: </span>${formatNumberAsCurrency(
+  //         comprobante?.importe ?? 0
+  //       )}</p>
+  //     </section>
+      
+  //     <section class="factura-vencimiento">
+  //       <p>Esta factura se debitara en fecha de vencimiento en CBU ###########</p>
+  //     </section>
+
+  //     <section class="parte-6">
+  //       <h2>Canales de Pago Habilitados</h2>
+  //       <p>Mediante lectura del codigo de barras:</p>
+        
+  //       <div class="logos">
+  //         <img
+  //           class="pago-facil"
+  //           src="https://utfs.io/f/79d56fb6-2cb7-4760-bbc6-add1a1e434f6-tkdz7.png"
+  //           alt=""
+  //         />
+  //         <img
+  //           class="rapi-pago"
+  //           src="https://utfs.io/f/501ea573-2d69-4f4b-9ae3-95531c540d9c-h1yi1.jpg"
+  //           alt=""
+  //         />
+  //         <img
+  //           class="mercado-pago"
+  //           src="https://utfs.io/f/781ea16d-cac2-46de-9b9a-e59db510e17b-8b1bm4.png"
+  //           alt=""
+  //         />
+  //         ${true ? getIimageForBarcode() : null}
+          
+  //       </div>
+  //     </section>
+  
+  //     <section class="cbu-section">
+  //       <h2>Ingresando el codigo electronico de pagos:</h2>
+  //       <div class="cbu-section-2">
+  //         <img
+  //           class="pago-mis"
+  //           src="https://utfs.io/f/a215f09e-25e8-4eb3-9d1c-6adf1d17baa5-pvvezi.png"
+  //           alt=""
+  //         />
+  //         <p>20214823838</p>
+  //       </div>
+  //     </section>
+  
+  //     <section class="cards">
+  //       <h2>Debito Automatico en Tarjetas y/o Cuentas Bancarias</h2>
+  //       <div class="cards-section">
+  //         <img
+  //           class="visa"
+  //           src="https://utfs.io/f/6f4442e1-57c1-4df8-a810-29258735b429-reuj6w.png"
+  //           alt=""
+  //         />
+  //         <img
+  //           class="visa-debit"
+  //           src="https://utfs.io/f/8d48ec18-1d0b-4e61-9db3-e304cb732abf-q42cl4.png"
+  //           alt=""
+  //         />
+  //         <img
+  //           class="mastercard"
+  //           src="https://utfs.io/f/23711681-416d-4155-9894-4e6c8584219f-mgfpcc.png"
+  //           alt=""
+  //         />
+  //         <img
+  //           class="master-debit"
+  //           src="https://utfs.io/f/23711681-416d-4155-9894-4e6c8584219f-mgfpcc.png"
+  //           alt=""
+  //         />
+  //         <img
+  //           class="cbu"
+  //           src="https://utfs.io/f/0405e613-cee2-41c4-830d-8403002b6c98-4o63ls.png"
+  //           alt=""
+  //         />
+  //       </div>
+  //     </section>
+  
+  //     <section class="qr-section">
+  //       <div>
+  //         <img
+  //           class="qr"
+  //           src="https://utfs.io/f/2dd25618-943b-41f4-8c0e-363fc8ba3228-n3iun9.png"
+  //           alt=""
+  //         />
+  //       </div>
+  //       <div class="cae-section">
+  //         <img
+  //           class="afip"
+  //           src="/comprobantes/logo-afip.png"
+  //           alt=""
+  //         />
+  //         <p>CAE N° ####</p>
+  //         <p>Fecha de Vto. de CAE:</p>
+  //         <p>
+  //           Powered by
+  //           <img
+  //             class="bp-logo"
+  //             src="https://utfs.io/f/fa110834-238b-4880-a8c2-eedebe9e6b6e-mnl13r.png"
+  //             alt=""
+  //           />
+  //         </p>
+  //       </div>
+  //     </section>
+  //   </body>
+  // </html>
+  
+  `<!DOCTYPE html>
   <html lang="en">
     <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <link rel="stylesheet" href="style.css" />
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-      <link
-        href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap"
-        rel="stylesheet"
-      />
-      <title>Document</title>
-    <style>
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-        font-family: "Roboto", sans-serif;
-      }
+       <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+  <title>Documento</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Roboto", sans-serif;
+    }
 
-      body {
-        padding: 0 5rem;
-      }
-      header {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        border-bottom: 1.6px solid #8fefdc;
-        /* padding-bottom: 1.2rem; */
-        width: 100%;
-      }
+    body {
+      padding: 1rem;
+    }
 
-      .items-1 {
-        margin: 8px;
-        padding-bottom: 1.2rem;
-      }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #dcdcdc; /* Borde gris claro */
+      padding-bottom: 1.2rem;
+      width: 100%;
+      margin-bottom: 20px; /* Espacio entre la sección de la tabla y el header */
+    }
 
-      .items-1 p {
-        font-size: 16px;
-        font-weight: 400;
-        color: #787878;
-      }
+    .items-1 {
+      margin: 8px;
+    }
 
-      .logo {
-        width: 25vw;
-        height: auto;
-        margin-bottom: 5px;
-      }
+    .items-1 p {
+      font-size: 16px;
+      font-weight: 400;
+      color: #787878;
+    }
 
-      .items-2 {
-        position: relative;
-      }
+    .logo {
+      width: 150px; /* Ajusta el tamaño del logo */
+      height: auto;
+      margin-bottom: 5px;
+    }
 
-      .items-2 img {
-        width: 60px;
-        top: 0;
-        left: 0;
-      }
+    .items-2 {
+      text-align: center;
+    }
 
-      .items-3 {
-        padding-bottom: 1.2rem;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-      }
+    .items-2 img {
+      width: 60px;
+    }
 
-      .items-3 h2 {
-        font-size: 1.7rem;
-        font-weight: 500;
-        line-height: 25px;
-      }
+    .items-2 h3 {
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: #787878;
+    }
 
-      .items-3 p {
-        font-size: 16px;
-        font-weight: 400;
-        color: #787878;
-        line-height: 20px;
-      }
+    .items-3 {
+      text-align: right; /* Alinea el contenido a la derecha */
+    }
 
-      .items-3 div .fecha {
-        font-weight: 200;
-        size: 20px;
-        color: #787878;
-        letter-spacing: 2px;
-      }
+    .items-3 h2 {
+      font-size: 1.7rem;
+      font-weight: 500;
+      line-height: 25px;
+      margin-bottom: 8px;
+    }
+
+    .items-3 p {
+      font-size: 16px;
+      font-weight: 400;
+      color: #787878;
+      line-height: 20px;
+    }
+
+    .items-3 div .fecha {
+      font-weight: 200;
+      font-size: 14px;
+      color: #787878;
+      letter-spacing: 1px;
+    }
 
       .parte-2 {
-        display: flex;
+         display: flex;
         justify-content: space-between;
+         margin-bottom: 1rem; 
+        
+        margin-top: 20px;
         border-top: none;
         border-bottom: 1.6px solid #8fefdc;
+        flex-direction: column;
+
       }
 
       .datos-1 {
+        text-align: left;
         font-size: 16px;
-        margin: 10px 10px 10px 0;
-        list-style-type: none;
+          list-style-type: none;
+          padding: 0;
+          margin: 0;
         line-height: 30px;
         color: #303030;
+        flex: 1;
       }
       .datos-1 li p span {
         font-weight: 600;
         opacity: 70;
+        flex: 1;
+    margin-right: 1rem;
       }
       .datos-2 {
-        font-size: 16px;
-        list-style-type: none;
+        text-align: right;
+         font-size: 16px;
+          list-style-type: none;
+          padding: 0;
+          margin: 0;
         line-height: 30px;
-        margin: 10px 10px 10px 0;
         color: #303030;
+        flex: 1;
       }
 
       .datos-2 li p span {
         font-weight: 600;
         opacity: 70;
+        flex: 1;
+    margin-right: 1rem;
       }
 
       .parte-3 {
         display: flex;
-        justify-content: space-between;
+        justify-content: end;
+        align: right;
+        margin-bottom: 20px; 
+        margin-top: 20px;
         border-top: none;
         border-bottom: 1.6px solid #8fefdc;
+         background: #dcdcdc;
       }
 
       .parte-3 p {
         font-size: 18px;
         font-weight: 500;
         margin: 7px;
+        background: #dcdcdc;
       }
 
       .parte-5 {
         display: flex;
         justify-content: space-between;
+        margin-bottom: 1rem; 
+        margin-top: 20px;
         border-bottom: 1.6px solid #8fefdc;
         padding-bottom: 20px;
+        flex-direction: column;
+
       }
 
       .parte-5 p {
@@ -393,12 +960,14 @@ export function htmlBill(
       }
 
       .logos {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+          display: flex;
+    justify-content: space-around;
+    align-items: center;
         margin-top: 10px;
         padding: 6px 12px;
         border: 2px dashed #8fefdc;
+        flex-direction: column;
+
       }
 
       .pago-facil {
@@ -432,8 +1001,8 @@ export function htmlBill(
         display: flex;
         align-items: center;
         justify-content: space-between;
-        border: 2px dashed #8fefdc;
         padding: 10px;
+    border: 2px dashed #8fefdc;
       }
 
       .cbu-section-2 p {
@@ -458,11 +1027,13 @@ export function htmlBill(
       }
 
       .cards-section {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border: 2px dashed #8fefdc;
-        padding: 8px 16px;
+          display: flex;
+    justify-content: space-around;
+    align-items: center;
+       padding: 10px;
+    border: 2px dashed #8fefdc;
+    flex-direction: column;
+
       }
 
       .visa {
@@ -503,7 +1074,8 @@ export function htmlBill(
 
       .qr-section {
         font-size: 12px;
-
+        display: flex;
+        justify-content: space-between;
         line-height: 20px;
         gap: 10px;
         display: flex;
@@ -542,119 +1114,202 @@ export function htmlBill(
         width: 80px;
         vertical-align: middle;
       }
+      
+      .info-tributo-contenedor {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  margin-bottom: 20px;
+}
+      
+      .tabla-totales {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.tabla-totales th, .tabla-totales td {
+  border:;
+  padding: 8px;
+  text-align: left;
+}
+
+.tabla-totales th {
+  background-color: inherit;
+}
+
+.resumen-totales {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+}
+
+.resumen-totales .totales-info {
+  font-size: 10x;
+ text-align: right;
+  width: 30%;
+}
+
+.resumen-totales .total-a-pagar {
+  background-color: #d9f7be;
+  padding: 10px;
+  text-align: right;
+}
+
+.total-a-pagar {
+  background-color: #d9f7be;
+  padding: 10px;
+  text-align: right;
+  justify: end;
+}      
+      
+.total-a-pagar p {
+  margin: 0;
+}
+
+.total-a-pagar .total {
+  font-size: 24px;
+  color: #6c63ff;
+}
+
+.factura-vencimiento {
+  font-style: italic;
+  margin-top: 10px;
+}
+
+.factura-vencimiento p {
+  font-size: 12px;
+}
+    
+.conceptos-container {
+  display: flex;
+  justify-content: space-between; 
+  width: 100%;
+}
+ .conceptos-container div {
+  width: 48%; 
+}   
+    .align-left {
+  text-align: left; 
+}
+
+.align-right {
+  text-align: right; 
+  width: 100%; 
+}
+
     </style>
     </head>
     <body>
       <header>
         <div class="items-1">
-        ${getIimageForLogo(brand?.logo_url ?? null)}
-          <p>
-            ${company.razon_social}<br />
-            ${company.address} <br />
-            ${company.afip_condition}
-          </p>
-        </div>
+          <img       
+                class="logo" alt="Logo"
+src="https://cristalsalud.ar/wp-content/uploads/elementor/thumbs/cropped-CRISTALlogo-1-qd3yuac8msju1wzhbm0ax14dfhqcgg4fcm3dzm6s7m.png"/>
+        <p>CONSULT-RENT S.R.L.</p>
+      <p>BOLIVAR 547 Piso 1º Dpto. A - C.A.B.A</p>
+      <p>IVA Responsable Inscripto</p>
+    </div>
   
         <div class="items-2">
-              ${getImageTagForTipoComprobante(
-                comprobanteDictionary[
-                  comprobante?.tipoComprobante
-                ]?.toString() ?? ""
-              )}
-         
+         <h3>ORIGINAL</h3>     
+      <img src="logo_B.png" alt="Letra B" />
         </div>
   
         <div class="items-3">
-          <div>
-          <h2>
-            ${comprobante?.tipoComprobante ?? ""} <br />
-            N° ${comprobante?.ptoVenta.toString().padStart(4, "0")}-${voucher
-    .toString()
-    .padStart(8, "0")}
-          </h2>
-          <span class="fecha"> Fecha: ${dateNormalFormat(new Date())}</span>
-          </div>
-          <p>
-            C.U.I.T: ${company.cuit} <br />
-            Ing. Brutos Conv.Multil: ${company.cuit} <br />
-            Fecha de Inicio de Actividad: ${dateNormalFormat(
-              company.activity_start_date
-            )}
-          </p>
-        </div>
-      </header>
+         <div>
+      <h2>FACTURA <br /> Comp. N°: xxxx-xxxxxxxx</h2>
+      <span class="fecha">Fecha de Emisión: 01/01/2024</span>
+    </div>
+    <p>
+      C.U.I.T: 30-71054237-2 <br />
+      Ingresos Brutos: Exento <br />
+      Fecha de Inicio de Actividad: 13/05/2008
+    </p>
+  </div>
+</header>
   
-      <section class="parte-2">
-        <ul class="datos-1">
-          <li>
-            <p><span>Cliente: </span>${name}</p>
-          </li>
-          <li>
-            <p><span>Domicilio: </span>${domicilio}</p>
-          </li>
-          <li>
-            <p><span>Localidad: </span>${localidad}</p>
-          </li>
-          <li>
-            <p><span>Provincia: </span>${provincia}</p>
-          </li>
-          <li>
-            <p><span>CP: </span>${cp}</p>
-          </li>
-        </ul>
-  
-        <ul class="datos-2">
-          <li>
-            <p><span>${id_type}: </span>${id_number}</p>
-          </li>
-          <li>
-            <p><span>Categoria I.V.A: </span>${afip_status}</p>
-          </li>
-          <li>
-            <p><span>Condicion de Venta: </span>---</p>
-          </li>
-          <li>
-            <p><span>Periodo facturado: </span>${dateNormalFormat(
-              comprobante?.fromPeriod
-            )}</p>
-          </li>
-          <li>
-            <p><span>Fecha de vencimiento: </span>${dateNormalFormat(
-              comprobante?.due_date
-            )}</p>
-          </li>
-        </ul>
+     <section class="parte-2">
+  <ul class="datos-1">
+    <li><p><span>Razón Social:</span> Fulano Mengano</p></li>
+    <li><p><span>Domicilio: </span> Alicia Moreau de Justo 1150 4to Piso Of. 410 - Ciudad Autónoma de Buenos Aires.</p></li>
+    <li><p><span>Condición AFIP: </span> Responsable Inscripto</p></li>
+    <li><p><span>Período: </span>01/2024</p></li>
+  </ul>
+       
+    <ul class="datos-2">
+    <li><p><span>CUIT: </span>00-00000000-0</p></li>
+    <li><p><span>Condición de Venta: </span>Cuenta Corriente</p></li>
+    <li><p><span>Vencimiento de pago: </span>10/01/2024</p></li>
+  </ul>
       </section>
   
-      <section class="parte-3">
-        <p>CONCEPTOS</p>
-        <p>IMPORTE</p>
-      </section>
+     <section class="parte-3">
+  <div class="conceptos-container">
+    <div class="align-left"><strong>CONCEPTOS</strong></div>
+    <div class="align-right"><strong>IMPORTE</strong></div>
+  </div>
+</section>
   
       <section class="parte-5">
-        <div>
-          ${conceptosList}
-        </div>
-  
-        <div>
-          ${amountsList}
-        </div>
-      </section>
-  
-      <section class="parte-4">
-        <p>Pesos ${numeroALetras(Math.floor(comprobante?.importe ?? 0))} ${
-    obtenerDecimales(comprobante?.importe) == "00" || "0"
-      ? ""
-      : `con ${obtenerDecimales(comprobante?.importe)}/100`
-  }</p>
-        <p><span>TOTAL: </span>${formatNumberAsCurrency(
-          comprobante?.importe ?? 0
-        )}</p>
-      </section>
+  <div class="conceptos-container">
+    <div>Concepto 1</div>
+    <div>$10.000,00</div>
+  </div>
+  <div class="conceptos-container">
+    <div>Concepto 2</div>
+    <div>$10.000,00</div>
+  </div>
+</section>
       
-      <section class="factura-vencimiento">
-        <p>Esta factura se debitara en fecha de vencimiento en CBU ###########</p>
-      </section>
+<section class="parte-4">
+  <div class="info-tributo-contenedor">
+    <div class="info-tributo">
+      <table class="tabla-totales">
+        <thead>
+          <tr>
+            <th>TRIBUTO</th>
+            <th>JURISDICCIÓN</th>
+            <th>ALÍCUOTA</th>
+            <th>BASE IMPONIBLE</th>
+            <th>IMPORTE</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Ret. Imp. Gan.</td>
+            <td>Buenos Aires</td>
+            <td>0%</td>
+            <td>$0,00</td>
+            <td>$0,00</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="totales-info">
+      <div>Sub-total: $20.000,00</div>
+      <div>Otros Tributos: $0,00</div>
+      <div>Pagos a cuenta: $20.000,00</div>
+    </div>
+  </div>
+</section>
+
+<section class="resumen-totales">
+ 
+  <div class="total-a-pagar"
+    <p>
+Ciento noventa y siete millones cuatrocientos cuarenta y
+cinco mil setecientos setenta y nueve con 59/100</p>
+    <p> <span class="total">TOTAL A PAGAR: $197.445.779,59 
+  </div>
+</section>
+
+<section class="factura-vencimiento">
+  <p>Esta factura se debitara en fecha de vencimiento en CBU ###########</p>
+</section>
+
 
       <section class="parte-6">
         <h2>Canales de Pago Habilitados</h2>
@@ -751,8 +1406,8 @@ export function htmlBill(
         </div>
       </section>
     </body>
-  </html>
-  `;
+  </html>`;
+
   return htmlContent;
 }
 
