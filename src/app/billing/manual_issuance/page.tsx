@@ -68,7 +68,7 @@ export default function Page() {
   const { data: company } = api.companies.get.useQuery();
   const { data: marcas } = api.brands.list.useQuery();
   const { data: gruposFamiliar } = api.family_groups.list.useQuery();
-  const { data: obrasSociales } = api.healthInsurances.list.useQuery();
+  const { data: obrasSociales } = api.healthInsurances.listClient.useQuery();
   const [subTotal, setSubTotal] = useState<number>(0);
   const [ivaTotal, setIvaTotal] = useState<number>(0);
   const [otherAttributes, setOtherAttributes] = useState<number>(0);
@@ -172,7 +172,123 @@ export default function Page() {
           .toISOString()
           .split("T")[0];
 
-        if (fcSelec && (tipoComprobante == "3" || tipoComprobante == "8")) {
+         if (tipoComprobante == "1" || tipoComprobante == "6") {
+          let ivaFloat =
+            (100 + parseFloat(ivaDictionary[Number(iva)] ?? "0")) / 100;
+            try {
+              last_voucher = await afip.ElectronicBilling.getLastVoucher(
+                form.getValues().puntoVenta,
+                tipoComprobante
+              );
+            } catch {
+              last_voucher = 0;
+            }
+          // const billResponsible = gruposFamiliar
+          //   ?.find((x) => x.id == grupoFamiliarId)
+          //   ?.integrants.find((x) => x.isBillResponsible);
+          comprobante = await createComprobante({
+            billLink: "",
+            concepto: Number(concepto) ?? 0,
+            importe: Number(importe) * ivaFloat + Number(tributos),
+            iva: iva ?? "0",
+            nroDocumento: Number(nroDocumento) ?? 0,
+            ptoVenta: Number(form.getValues().puntoVenta) ?? 0,
+            tipoDocumento: idDictionary[tipoDocumento ?? ""] ?? 0,
+            tipoComprobante: reverseComprobanteDictionary[tipoComprobante],
+            fromPeriod: form.getValues().dateDesde,
+            toPeriod: form.getValues().dateHasta,
+            due_date: form.getValues().dateVencimiento,
+            generated: new Date(),
+            prodName: servicioprod ?? "",
+            nroComprobante: 0,
+            family_group_id: grupoFamiliarId,
+          });
+          
+          data = {
+            CantReg: 1, // Cantidad de comprobantes a registrar
+            PtoVta: Number(form.getValues().puntoVenta),
+            CbteTipo: Number(tipoComprobante),
+            Concepto: Number(concepto),
+            DocTipo: idDictionary[tipoDocumento ?? ""],
+            DocNro: nroDocumento ?? 0,
+            CbteDesde: last_voucher + 1,
+            CbteHasta: last_voucher + 1,
+            CbteFch: parseInt(fecha?.replace(/-/g, "") ?? ""),
+            FchServDesde:
+              concepto != "1"
+                ? formatDate(form.getValues().dateDesde ?? new Date())
+                : null,
+            FchServHasta:
+              concepto != "1"
+                ? formatDate(form.getValues().dateHasta ?? new Date())
+                : null,
+            FchVtoPago:
+              concepto != "1"
+                ? formatDate(form.getValues().dateVencimiento ?? new Date())
+                : null,
+            ImpTotal:
+              Math.round(
+                100 * (Number(importe) * ivaFloat + Number(tributos))
+              ) / 100,
+            ImpTotConc: 0,
+            ImpNeto: Number(importe),
+            ImpOpEx: 0,
+            ImpIVA:
+              Math.round(
+                100 * (Number(importe ?? 0) * ivaFloat - Number(importe))
+              ) / 100,
+            ImpTrib: 0,
+            MonId: "PES",
+            MonCotiz: 1,
+            Iva: {
+              Id: iva,
+              BaseImp: Number(importe),
+              Importe:
+                Math.round(
+                  100 * (Number(importe ?? 0) * ivaFloat - Number(importe))
+                ) / 100,
+            },
+          };
+          const event = createEventFamily({
+            family_group_id: grupoFamiliarId,
+            type: "FC",
+            amount: comprobante[0]?.importe ?? 0,
+            comprobante_id: comprobante[0]?.id ?? "",
+          });
+        } else if (tipoComprobante == "0") {
+          // iva = 0;
+
+          //
+          comprobante = await createComprobante({
+            billLink: "", //deberiamos poner un link ?
+            concepto: Number(concepto) ?? 0,
+            importe: Number(importe) * ivaFloat + Number(tributos),
+            iva: "0",
+            nroDocumento: Number(nroDocumento) ?? 0,
+            ptoVenta: Number(form.getValues().puntoVenta) ?? 0,
+            tipoDocumento: idDictionary[tipoDocumento ?? ""] ?? 0,
+            tipoComprobante: reverseComprobanteDictionary[tipoComprobante],
+            fromPeriod: form.getValues().dateDesde,
+            toPeriod: form.getValues().dateHasta,
+            due_date: form.getValues().dateVencimiento,
+            generated: new Date(),
+            prodName: servicioprod ?? "",
+            nroComprobante: 0,
+            family_group_id: grupoFamiliarId,
+          });
+
+          const event = createEventFamily({
+            family_group_id: grupoFamiliarId,
+            type: "REC",
+            amount: comprobante[0]?.importe ?? 0,
+            comprobante_id: comprobante[0]?.id ?? "",
+          });
+          const eventOrg = createEventOrg({
+            type: "REC",
+            amount: comprobante[0]?.importe ?? 0,
+            comprobante_id: comprobante[0]?.id ?? "",
+          });
+        } else if (fcSelec && (tipoComprobante == "3" || tipoComprobante == "8")) {
           const facSeleccionada = comprobantes?.find((x) => x.id == fcSelec);
 
           let ivaFloat = (100 + parseFloat(facSeleccionada?.iva ?? "0")) / 100;
@@ -278,122 +394,12 @@ export default function Page() {
             amount: comprobante[0]?.importe ?? 0,
             comprobante_id: comprobante[0]?.id ?? "",
           });
-        } else if (tipoComprobante == "1" || tipoComprobante == "6") {
-          let ivaFloat =
-            (100 + parseFloat(ivaDictionary[Number(iva)] ?? "0")) / 100;
-          // const billResponsible = gruposFamiliar
-          //   ?.find((x) => x.id == grupoFamiliarId)
-          //   ?.integrants.find((x) => x.isBillResponsible);
-          comprobante = await createComprobante({
-            billLink: "",
-            concepto: Number(concepto) ?? 0,
-            importe: Number(importe) * ivaFloat + Number(tributos),
-            iva: iva ?? "0",
-            nroDocumento: Number(nroDocumento) ?? 0,
-            ptoVenta: Number(form.getValues().puntoVenta) ?? 0,
-            tipoDocumento: idDictionary[tipoDocumento ?? ""] ?? 0,
-            tipoComprobante: reverseComprobanteDictionary[tipoComprobante],
-            fromPeriod: form.getValues().dateDesde,
-            toPeriod: form.getValues().dateHasta,
-            due_date: form.getValues().dateVencimiento,
-            generated: new Date(),
-            prodName: servicioprod ?? "",
-            nroComprobante: 0,
-            family_group_id: grupoFamiliarId,
-          });
-          try {
-            last_voucher = await afip.ElectronicBilling.getLastVoucher(
-              form.getValues().puntoVenta,
-              tipoComprobante
-            );
-          } catch {
-            last_voucher = 0;
-          }
-          data = {
-            CantReg: 1, // Cantidad de comprobantes a registrar
-            PtoVta: Number(form.getValues().puntoVenta),
-            CbteTipo: Number(tipoComprobante),
-            Concepto: Number(concepto),
-            DocTipo: idDictionary[tipoDocumento ?? ""],
-            DocNro: nroDocumento ?? 0,
-            CbteDesde: last_voucher + 1,
-            CbteHasta: last_voucher + 1,
-            CbteFch: parseInt(fecha?.replace(/-/g, "") ?? ""),
-            FchServDesde:
-              concepto != "1"
-                ? formatDate(form.getValues().dateDesde ?? new Date())
-                : null,
-            FchServHasta:
-              concepto != "1"
-                ? formatDate(form.getValues().dateHasta ?? new Date())
-                : null,
-            FchVtoPago:
-              concepto != "1"
-                ? formatDate(form.getValues().dateVencimiento ?? new Date())
-                : null,
-            ImpTotal:
-              Math.round(
-                100 * (Number(importe) * ivaFloat + Number(tributos))
-              ) / 100,
-            ImpTotConc: 0,
-            ImpNeto: Number(importe),
-            ImpOpEx: 0,
-            ImpIVA:
-              Math.round(
-                100 * (Number(importe ?? 0) * ivaFloat - Number(importe))
-              ) / 100,
-            ImpTrib: 0,
-            MonId: "PES",
-            MonCotiz: 1,
-            Iva: {
-              Id: iva,
-              BaseImp: Number(importe),
-              Importe:
-                Math.round(
-                  100 * (Number(importe ?? 0) * ivaFloat - Number(importe))
-                ) / 100,
-            },
-          };
-          const event = createEventFamily({
-            family_group_id: grupoFamiliarId,
-            type: "FC",
-            amount: comprobante[0]?.importe ?? 0,
-            comprobante_id: comprobante[0]?.id ?? "",
-          });
-        } else if (tipoComprobante == "0") {
-          // iva = 0;
-
-          //
-          comprobante = await createComprobante({
-            billLink: "", //deberiamos poner un link ?
-            concepto: Number(concepto) ?? 0,
-            importe: Number(importe) * ivaFloat + Number(tributos),
-            iva: "0",
-            nroDocumento: Number(nroDocumento) ?? 0,
-            ptoVenta: Number(form.getValues().puntoVenta) ?? 0,
-            tipoDocumento: idDictionary[tipoDocumento ?? ""] ?? 0,
-            tipoComprobante: reverseComprobanteDictionary[tipoComprobante],
-            fromPeriod: form.getValues().dateDesde,
-            toPeriod: form.getValues().dateHasta,
-            due_date: form.getValues().dateVencimiento,
-            generated: new Date(),
-            prodName: servicioprod ?? "",
-            nroComprobante: 0,
-            family_group_id: grupoFamiliarId,
-          });
-
-          const event = createEventFamily({
-            family_group_id: grupoFamiliarId,
-            type: "REC",
-            amount: comprobante[0]?.importe ?? 0,
-            comprobante_id: comprobante[0]?.id ?? "",
-          });
-          const eventOrg = createEventOrg({
-            type: "REC",
-            amount: comprobante[0]?.importe ?? 0,
-            comprobante_id: comprobante[0]?.id ?? "",
-          });
         }
+        else{
+          toast.error("Error, revise que todos los campos esten completos");
+          return null;
+        }
+
         console.log("testtt2");
 
         if (data) {
@@ -476,6 +482,8 @@ export default function Page() {
   const [tipoComprobante, setTipoComprobante] = useState("");
   const [concepto, setConcepto] = useState("");
   const [tipoDocumento, setTipoDocumento] = useState("");
+  const [ivaCondition, setIvaCondition] = useState("");
+  const [sellCondition, setSellCondition] = useState("");
   const [nroDocumento, setNroDocumento] = useState("");
   const [nroDocumentoDNI, setNroDocumentoDNI] = useState("");
   const [nombre, setNombre] = useState("");
@@ -549,6 +557,9 @@ export default function Page() {
     setNombre(billResponsible?.name ?? "");
     setTipoDocumento(billResponsible?.fiscal_id_type ?? "");
     setBrandId(grupo?.businessUnitData?.brandId ?? "");
+    setIvaCondition(billResponsible?.afip_status ?? "");
+    // setSellCondition(billResponsible?.sale_condition ?? "");
+    setSellCondition(grupo?.sale_condition ?? "");
   }
   function handleObraSocialChange(value: string) {
     setGrupoFamiliarId("");
@@ -558,6 +569,8 @@ export default function Page() {
     setNroDocumentoDNI("0");
     setNombre(obra?.responsibleName ?? "");
     setTipoDocumento(obra?.fiscal_id_type ?? "");
+    setIvaCondition(  obra?.afip_status ?? "");
+    setSellCondition("No Aplica");
   }
   function handleComprobanteChange(value: string) {
     setFCSelec(value);
@@ -607,13 +620,13 @@ export default function Page() {
               </SelectTriggerMagnify>
               <SelectContent>
                 {obrasSociales &&
-                  obrasSociales.map((obrasSocial: any) => (
+                  obrasSociales.map((obrasSocial) => (
                     <SelectItem
                       key={obrasSocial?.id}
                       value={obrasSocial?.id}
                       className="rounded-none"
                     >
-                      {obrasSocial?.name}
+                      {obrasSocial?.initials}
                     </SelectItem>
                   ))}
               </SelectContent>
@@ -707,6 +720,8 @@ export default function Page() {
               nombre={nombre}
               nroDocumento={nroDocumento}
               nroDocumentoDNI={nroDocumentoDNI}
+              conditionIVA={ivaCondition}
+              conditionVenta={sellCondition}
             />
 
             <ComprobanteCard
@@ -764,6 +779,19 @@ export default function Page() {
             changePage={handlePageChange}
             subTotal={subTotal}
             ivaTotal={ivaTotal}
+            document={nroDocumentoDNI}
+            fiscal_document={nroDocumento}
+            name={nombre}
+            iva={
+              ivaCondition
+            }
+            sell_condition={
+              sellCondition
+            }
+            afip={afip}
+            // nombre={nombre}
+            //   nroDocumento={nroDocumento}
+            //   nroDocumentoDNI={nroDocumentoDNI}
             otherAttributes={otherAttributes}
           />
         )}

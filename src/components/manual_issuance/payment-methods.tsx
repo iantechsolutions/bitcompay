@@ -33,8 +33,11 @@ interface pageProps {
   paymentMethod: string;
   setPaymentMethod: (paymentMethod: string) => void;
 }
-export default function PaymentMethods({ visualization, paymentMethod,setPaymentMethod }: pageProps) {
-  
+export default function PaymentMethods({
+  visualization,
+  paymentMethod,
+  setPaymentMethod,
+}: pageProps) {
   const paymentMethodsForm = useForm<PaymentMethodsProps>({});
   const paymentMethodsMap: Record<string, React.ReactNode> = {
     default: <></>,
@@ -99,14 +102,18 @@ export default function PaymentMethods({ visualization, paymentMethod,setPayment
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" initialFocus={true} />
+                      <Calendar
+                        mode="single"
+                        initialFocus={true}
+                        onSelect={(date) => field.onChange(date)}
+                      />
                     </PopoverContent>
                   </Popover>
                 )}
               />,
               dayjs(paymentMethodsForm.getValues("paymentDate")).format(
                 "DD/MM/YYYY"
-              ) ?? "no hay fecha seleccionada"
+              ) ?? "No hay fecha seleccionada"
             ),
           }}
         />
@@ -173,14 +180,18 @@ export default function PaymentMethods({ visualization, paymentMethod,setPayment
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" initialFocus={true} />
+                      <Calendar
+                        mode="single"
+                        initialFocus={true}
+                        onSelect={(date) => field.onChange(date)}
+                      />
                     </PopoverContent>
                   </Popover>
                 )}
               />,
               dayjs(paymentMethodsForm.getValues("emisionDate")).format(
                 "DD/MM/YYYY"
-              ) ?? "no hay fecha seleccionada"
+              ) ?? "No hay fecha seleccionada"
             ),
           }}
         />
@@ -212,14 +223,18 @@ export default function PaymentMethods({ visualization, paymentMethod,setPayment
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" initialFocus={true} />
+                      <Calendar
+                        mode="single"
+                        initialFocus={true}
+                        onSelect={(date) => field.onChange(date)}
+                      />
                     </PopoverContent>
                   </Popover>
                 )}
               />,
               dayjs(paymentMethodsForm.getValues("paymentDate")).format(
                 "DD/MM/YYYY"
-              ) ?? "no hay fecha seleccionada"
+              ) ?? "No hay fecha seleccionada"
             ),
           }}
         />
@@ -270,14 +285,18 @@ export default function PaymentMethods({ visualization, paymentMethod,setPayment
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" initialFocus={true} />
+                      <Calendar
+                        mode="single"
+                        initialFocus={true}
+                        onSelect={(date) => field.onChange(date)}
+                      />
                     </PopoverContent>
                   </Popover>
                 )}
               />,
               dayjs(paymentMethodsForm.getValues("paymentDate")).format(
                 "DD/MM/YYYY"
-              ) ?? "no hay fecha seleccionada"
+              ) ?? "No hay fecha seleccionada"
             ),
           }}
         />
@@ -328,14 +347,18 @@ export default function PaymentMethods({ visualization, paymentMethod,setPayment
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" initialFocus={true} />
+                      <Calendar
+                        mode="single"
+                        initialFocus={true}
+                        onSelect={(date) => field.onChange(date)}
+                      />
                     </PopoverContent>
                   </Popover>
                 )}
               />,
               dayjs(paymentMethodsForm.getValues("emisionDate")).format(
                 "DD/MM/YYYY"
-              ) ?? "no hay fecha seleccionada"
+              ) ?? "No hay fecha seleccionada"
             ),
           }}
         />
@@ -367,14 +390,18 @@ export default function PaymentMethods({ visualization, paymentMethod,setPayment
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" initialFocus={true} />
+                      <Calendar
+                        mode="single"
+                        initialFocus={true}
+                        onSelect={(date) => field.onChange(date)}
+                      />
                     </PopoverContent>
                   </Popover>
                 )}
               />,
               dayjs(paymentMethodsForm.getValues("paymentDate")).format(
                 "DD/MM/YYYY"
-              ) ?? "no hay fecha seleccionada"
+              ) ?? "No hay fecha seleccionada"
             ),
           }}
         />
@@ -459,7 +486,11 @@ export default function PaymentMethods({ visualization, paymentMethod,setPayment
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" initialFocus={true} />
+                      <Calendar
+                        mode="single"
+                        initialFocus={true}
+                        onSelect={(date) => field.onChange(date)}
+                      />
                     </PopoverContent>
                   </Popover>
                 )}
@@ -489,7 +520,8 @@ export default function PaymentMethods({ visualization, paymentMethod,setPayment
             className={cn("pr-1 pb-0 border-[#bef0bb]")}
             element={{
               key: "Medio de Pago",
-              value: visualizationSwitcher(visualization,
+              value: visualizationSwitcher(
+                visualization,
                 <Select onValueChange={(e) => setPaymentMethod(e)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar medio de pago" />
@@ -505,8 +537,9 @@ export default function PaymentMethods({ visualization, paymentMethod,setPayment
                     <SelectItem value="Tarjeta">Tarjeta</SelectItem>
                     <SelectItem value="Transferencia">Transferencia</SelectItem>
                   </SelectContent>
-                </Select>
-              , paymentMethod),
+                </Select>,
+                paymentMethod
+              ),
             }}
           />
           {paymentMethodsMap[paymentMethod]}
