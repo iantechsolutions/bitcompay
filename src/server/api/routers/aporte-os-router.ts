@@ -49,6 +49,8 @@ export const aportes_osRouter = createTRPCRouter({
         amount: z.string(),
         employer_document_number: z.string().optional(),
         healthInsurances_id: z.string(),
+        type: z.string(),
+        origen: z.string(),
       })
     )
     .mutation(async ({ input }) => {
@@ -68,6 +70,8 @@ export const aportes_osRouter = createTRPCRouter({
         amount: z.string().optional(),
         employer_document_number: z.string().optional(),
         healthInsurances_id: z.string().optional(),
+        type: z.string(),
+        origen: z.string(),
       })
     )
     .mutation(async ({ input, ctx }) => {
