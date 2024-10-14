@@ -764,7 +764,7 @@ export async function ingresarAfip() {
   const _username = "23439214619";
 
   //CONTRASEÑA PARA ENTRAR A AFIPs
-  const _password = "TBzQ.,i5JhZbAg2";
+  const _password = "";
 
   // //ALIAS PARA EL CERTIFICADO
   const alias = "afipsdk2";
