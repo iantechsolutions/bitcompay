@@ -97,6 +97,18 @@ export const healthInsurancesRouter = createTRPCRouter({
     });
     return healthInsurances;
   }),
+  listClient: protectedProcedure.query(async ({ input, ctx }) => {
+    const companyId = ctx.session.orgId;
+    const healthInsurances = await db.query.healthInsurances.findMany({
+      where:
+       and(
+        eq(schema.healthInsurances.companyId, companyId!),
+        eq(schema.healthInsurances.isClient, false)
+       ),
+      with: { cpData: true, aportes_os: true },
+    });
+    return healthInsurances;
+  }),
   listNonClient: protectedProcedure.query(async ({ input, ctx }) => {
     const companyId = ctx.session.orgId;
     const healthInsurances = await db.query.healthInsurances.findMany({

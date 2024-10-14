@@ -68,7 +68,7 @@ export default function Page() {
   const { data: company } = api.companies.get.useQuery();
   const { data: marcas } = api.brands.list.useQuery();
   const { data: gruposFamiliar } = api.family_groups.list.useQuery();
-  const { data: obrasSociales } = api.healthInsurances.list.useQuery();
+  const { data: obrasSociales } = api.healthInsurances.listClient.useQuery();
   const [subTotal, setSubTotal] = useState<number>(0);
   const [ivaTotal, setIvaTotal] = useState<number>(0);
   const [otherAttributes, setOtherAttributes] = useState<number>(0);
