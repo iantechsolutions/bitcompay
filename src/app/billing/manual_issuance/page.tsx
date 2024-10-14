@@ -476,6 +476,8 @@ export default function Page() {
   const [tipoComprobante, setTipoComprobante] = useState("");
   const [concepto, setConcepto] = useState("");
   const [tipoDocumento, setTipoDocumento] = useState("");
+  const [ivaCondition, setIvaCondition] = useState("");
+  const [sellCondition, setSellCondition] = useState("");
   const [nroDocumento, setNroDocumento] = useState("");
   const [nroDocumentoDNI, setNroDocumentoDNI] = useState("");
   const [nombre, setNombre] = useState("");
@@ -549,6 +551,9 @@ export default function Page() {
     setNombre(billResponsible?.name ?? "");
     setTipoDocumento(billResponsible?.fiscal_id_type ?? "");
     setBrandId(grupo?.businessUnitData?.brandId ?? "");
+    setIvaCondition(billResponsible?.afip_status ?? "");
+    // setSellCondition(billResponsible?.sale_condition ?? "");
+    setSellCondition(grupo?.sale_condition ?? "");
   }
   function handleObraSocialChange(value: string) {
     setGrupoFamiliarId("");
@@ -558,6 +563,8 @@ export default function Page() {
     setNroDocumentoDNI("0");
     setNombre(obra?.responsibleName ?? "");
     setTipoDocumento(obra?.fiscal_id_type ?? "");
+    setIvaCondition(  obra?.afip_status ?? "");
+    setSellCondition("No Aplica");
   }
   function handleComprobanteChange(value: string) {
     setFCSelec(value);
@@ -707,6 +714,8 @@ export default function Page() {
               nombre={nombre}
               nroDocumento={nroDocumento}
               nroDocumentoDNI={nroDocumentoDNI}
+              conditionIVA={ivaCondition}
+              conditionVenta={sellCondition}
             />
 
             <ComprobanteCard
@@ -764,6 +773,18 @@ export default function Page() {
             changePage={handlePageChange}
             subTotal={subTotal}
             ivaTotal={ivaTotal}
+            document={nroDocumentoDNI}
+            fiscal_document={nroDocumento}
+            name={nombre}
+            iva={
+              ivaCondition
+            }
+            sell_condition={
+              sellCondition
+            }
+            // nombre={nombre}
+            //   nroDocumento={nroDocumento}
+            //   nroDocumentoDNI={nroDocumentoDNI}
             otherAttributes={otherAttributes}
           />
         )}

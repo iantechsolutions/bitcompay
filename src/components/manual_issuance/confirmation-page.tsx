@@ -36,6 +36,11 @@ interface Props {
   setTipoComprobante: (tipoComprobante: string) => void;
   subTotal: number;
   ivaTotal: number;
+  name: string;
+  document: string;
+  fiscal_document:string;
+  iva: string;
+  sell_condition:string
   otherAttributes: number;
 }
 const confirmationPage = ({
@@ -52,9 +57,19 @@ const confirmationPage = ({
   subTotal,
   ivaTotal,
   otherAttributes,
+  name,
+  document,
+  fiscal_document,
+  iva,
+  sell_condition
 }: Props) => {
+  // function generateComprobante(){
+
+  // }
+
   function handleApprove() {
-    alert("Aprobado");
+    const forma = form.getValues();
+    console.log(forma);
   }
   function handleCreate() {
     alert("Creado");
@@ -64,9 +79,11 @@ const confirmationPage = ({
       <Title>Resumen de datos</Title>
 
       <ReceptorCard
-        nombre="Perea alejandro"
-        nroDocumentoDNI="12345678"
-        nroDocumento="12345678"
+        nombre={name}
+        nroDocumentoDNI={document}
+        nroDocumento={fiscal_document}
+        conditionIVA={iva}
+        conditionVenta={sell_condition}
       />
 
       <ComprobanteCard
