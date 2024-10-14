@@ -41,7 +41,7 @@ export function AddPostalCode() {
 
   function validateFields() {
     const errors: string[] = [];
-    if (!cp) errors.push("Codigo postal");
+    if (!cp) errors.push("Código postal");
     if (!name) errors.push("Nombre");
     if (!zone) errors.push("Zona");
 
@@ -52,7 +52,7 @@ export function AddPostalCode() {
     const validationErrors = validateFields();
     if (validationErrors.length > 0) {
       return toast.error(
-        `Los siguientes campos están vacíos y sin obligatorios: ${validationErrors.join(
+        `Los siguientes campos vacíos son obligatorios: ${validationErrors.join(
           ", "
         )}`
       );
@@ -101,12 +101,12 @@ export function AddPostalCode() {
     <>
       <Button onClick={() => setOpen(true)}>
         <PlusCircleIcon className="mr-2" size={20} />
-        Agregar Código Postal
+        Agregar código postal
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Crear Código Postal</DialogTitle>
+            <DialogTitle>Crear código postal</DialogTitle>
           </DialogHeader>
           <div>
             <Label htmlFor="name">Nombre</Label>
@@ -118,7 +118,7 @@ export function AddPostalCode() {
             />
           </div>
           <div>
-            <Label htmlFor="cp">Codigo postal</Label>
+            <Label htmlFor="cp">Código postal</Label>
             <Input
               id="cp"
               type="number"
@@ -167,7 +167,7 @@ export function AddPostalCode() {
               {isLoading && (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}
-              Crear Código Postal
+              Crear código postal
             </Button>
           </DialogFooter>
         </DialogContent>

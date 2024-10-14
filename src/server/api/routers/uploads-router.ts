@@ -883,7 +883,7 @@ async function readResponseUploadContents(
     for (const line of lines) {
       if (recordIndex === 1) {
         const recordValues = line.trim().split(/\s{2,}/);
-        console.log("recordValues", recordValues);
+       
         //trato el ultimo elemento que esta junto nro de factura y estado de pago
         const largeNumber = recordValues[2];
 
@@ -893,7 +893,6 @@ async function readResponseUploadContents(
 
         const payment_date = recordValues[4];
 
-        console.log("codigo gogo", status_code, observacion);
 
         const day = payment_date?.slice(6, 8);
         const month = payment_date?.slice(4, 6);

@@ -9,11 +9,11 @@ interface Props {
   };
 }
 export default async function Page(props: Props) {
-  const nonClientOs = await api.healthInsurances.get.query({
-    healthInsuranceId: props.params.osId,
-  });
+  const nonClientoss = await api.healthInsurances.listNonClient.query()
+  console.log(nonClientoss);
+  const nonClientOs = nonClientoss.find((os) => os.id === props.params.osId);
   console.log("no cliente os ",nonClientOs);
-  if (nonClientOs) {
+  if (!nonClientOs) {
     return <Title>no se encontro obra social </Title>;
   }
   return (

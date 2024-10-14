@@ -309,6 +309,30 @@ export const family_groupsRouter = createTRPCRouter({
         return family_groups;
       } else null;
     }),
+    
+  getWithAportes: protectedProcedure
+    .input(
+      z.object({
+        family_groupsId: z.string(),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const family_groups = await db.query.family_groups.findFirst({
+        where: eq(schema.family_groups.id, input.family_groupsId),
+        with: {
+          businessUnitData: true,
+          integrants: {
+            with: {
+              aportes_os: true,
+            },
+          },
+        },
+      });
+
+      if (family_groups?.businessUnitData?.companyId === ctx.session.orgId) {
+        return family_groups;
+      } else null;
+    }),
 
   getByLiquidation: protectedProcedure
     .input(
@@ -530,7 +554,8 @@ export const family_groupsRouter = createTRPCRouter({
           )
         );
       }
-
+      console.log("whereFgList", whereFgList);
+      console.log("compatibleBusinessUnits",compatibleBusinessUnits);
       const fg = await db.query.family_groups.findMany({
         where: and(...whereFgList),
         with: {
@@ -555,11 +580,18 @@ export const family_groupsRouter = createTRPCRouter({
         limit: input.limit,
         offset: input.cursor,
       });
-
+      console.log("fg", fg.length);
+      fg.map(x=>{
+        x.comprobantes = x.comprobantes.filter((comprobante) => comprobante.liquidation_id === input.liquidationId)
+      });
       const fgCompanyFiltered = fg.filter(
-        (x) => x.comprobantes.length > 0 && x.integrants.length > 0
+        (x) => 
+          x.comprobantes.length > 0 &&
+         x.integrants.length > 0
       );
+      
 
+      console.log("fgCompanyFiltered", fgCompanyFiltered);
       return {
         results: fgCompanyFiltered,
         usedCursor: input.cursor,

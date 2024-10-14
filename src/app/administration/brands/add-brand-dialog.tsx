@@ -72,7 +72,7 @@ export function AddBrandDialog() {
       setOpen(false);
     } catch (e) {
       setError(
-        "No se puede asignar una descripcion reducida de mas de 10 caracteres"
+        "No se puede asignar una descripción reducida de mas de 10 caracteres"
       );
       const error = asTRPCError(e)!;
       toast.error(error.message);

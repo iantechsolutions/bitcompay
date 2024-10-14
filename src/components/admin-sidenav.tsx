@@ -38,7 +38,7 @@ export default function AdminSidenav() {
         Estados
       </SidenavItem>
       <SidenavItem icon={<Banknote />} href="/admin/factura">
-        Facturacion
+        Facturación
       </SidenavItem>
       <SidenavItem icon={<UsersIcon />} href="/admin/users">
         Usuarios

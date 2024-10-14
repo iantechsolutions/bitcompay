@@ -111,7 +111,7 @@ export default function ZonePage(props: {
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="item-1">
             <AccordionTrigger>
-              <h2 className="text-md">Informacion de zona</h2>
+              <h2 className="text-md">Información de zona</h2>
             </AccordionTrigger>
             <AccordionContent>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 border-t border-b pt-3 pl-1">
@@ -126,7 +126,7 @@ export default function ZonePage(props: {
                 </div>
                 <div></div>
                 <div className="mb-4 col-span-1">
-                  <Label htmlFor="description">Codigo postal</Label>
+                  <Label htmlFor="description">Código postal</Label>
                   <Input
                     id="cp"
                     placeholder="0"
@@ -140,7 +140,7 @@ export default function ZonePage(props: {
 
           <AccordionItem value="item-2">
             <AccordionTrigger>
-              <h2 className="text-md">Codigo postales</h2>
+              <h2 className="text-md">Códigos postales</h2>
             </AccordionTrigger>
             <AccordionContent>
               <List>
@@ -175,7 +175,7 @@ export default function ZonePage(props: {
                   <AlertDialogContent>
                     <AlertDialogHeader>
                       <AlertDialogTitle>
-                        ¿Estás seguro que querés eliminar la entidad?
+                        ¿Está seguro que quiere eliminar la entidad?
                       </AlertDialogTitle>
                       <AlertDialogDescription>
                         Eliminar entidad permanentemente.

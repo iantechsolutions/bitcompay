@@ -300,11 +300,11 @@ export default function ProcedurePage(props: ProcedurePageProps) {
                   <Tabs>
                     <TabsList>
                       <TabsTrigger value="general_info">
-                        Informacion General
+                      Información general
                       </TabsTrigger>
                       <TabsTrigger value="members">Integrantes</TabsTrigger>
                       <TabsTrigger value="billing">
-                        Informacion de Facturacion
+                        Información de facturación
                       </TabsTrigger>
                     </TabsList>
                     <TabsContent value="general_info">

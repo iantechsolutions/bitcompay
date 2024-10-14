@@ -73,7 +73,7 @@ export function SelectDebitoAutomatico({ onSelectData }: Props) {
           <div className="grid gap-4 py-4">
             <div className="items-center gap-4">
               <div className="flex flex-col gap-3">
-                <Label htmlFor="card_brand">Marca de Tarjeta</Label>
+                <Label htmlFor="card_brand">Marca de tarjeta</Label>
                 <Select onValueChange={(value) => setCardBrand(value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Marca Tarjeta" />
@@ -83,16 +83,16 @@ export function SelectDebitoAutomatico({ onSelectData }: Props) {
                     <SelectItem value="mastercard">MasterCard</SelectItem>
                   </SelectContent>
                 </Select>
-                <Label htmlFor="card_type">Tipo de Tarjeta</Label>
+                <Label htmlFor="card_type">Tipo de tarjeta</Label>
                 <Select onValueChange={(value) => setCardType(value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Tipo tarjeta" />
                   </SelectTrigger>
                   <SelectContent>
                     {cardBrand === "visa" && (
-                      <SelectItem value="debito">Debito</SelectItem>
+                      <SelectItem value="debito">Débito</SelectItem>
                     )}
-                    <SelectItem value="credito">Credito</SelectItem>
+                    <SelectItem value="credito">Crédito</SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -136,7 +136,7 @@ export function SelectDebitoAutomatico({ onSelectData }: Props) {
           <DialogFooter>
             <DialogClose>
               <Button type="button" onClick={handleGenerate}>
-                buscar archivos
+                Buscar archivos
               </Button>
             </DialogClose>
           </DialogFooter>

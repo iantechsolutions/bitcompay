@@ -173,7 +173,7 @@ export default function CompanyPage({
                     />
                   </div>
                   <div>
-                    <Label htmlFor="razonSocial">Razon social</Label>
+                    <Label htmlFor="razonSocial">Razón social</Label>
                     <Input
                       id="razonSocial"
                       value={razonSocial}
@@ -181,7 +181,7 @@ export default function CompanyPage({
                     />
                   </div>
                   <div>
-                    <Label htmlFor="address">Direccion</Label>
+                    <Label htmlFor="address">Dirección</Label>
                     <Input
                       id="address"
                       value={address}
@@ -194,13 +194,13 @@ export default function CompanyPage({
           </AccordionItem>
           <AccordionItem value="item-3">
             <AccordionTrigger>
-              <Label htmlFor="Info de facturacion">Info. de facturacion</Label>
+              <Label htmlFor="Info de facturacion">Info. de facturación</Label>
             </AccordionTrigger>
             <AccordionContent>
               <Card className="p-5">
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div className="col-span-2">
-                    <Label htmlFor="afipCondition">Condicion ante afip</Label>
+                    <Label htmlFor="afipCondition">Condición ante AFIP</Label>
                     <Input
                       id="afipCondition"
                       value={afipCondition}
@@ -309,7 +309,7 @@ function DeleteChannel(props: { companySubId: string }) {
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            ¿Estás seguro que querés eliminar la entidad?
+            ¿Está seguro que quiere eliminar la entidad?
           </AlertDialogTitle>
           <AlertDialogDescription>
             Eliminar entidad permanentemente.

@@ -185,7 +185,7 @@ export default function AffiliatePage(props: {
       NACIONALIDAD: integrant?.nationality ?? "-",
     };
     const intFiscalData = {
-      "CONDICION DE AFIP": integrant.afip_status ?? "-",
+      "CONDICIÓN DE AFIP": integrant.afip_status ?? "-",
       "TIPO DE ID FISCAL": integrant.fiscal_id_type ?? "-",
       "Nº. FISCAL": integrant.fiscal_id_number ?? "-",
     };
@@ -196,7 +196,7 @@ export default function AffiliatePage(props: {
       DEPARTAMENTO: integrant?.department ?? "-",
       LOCALIDAD: integrant?.locality ?? "-",
       PROVINCIA: integrant?.province ?? "-",
-      "CODIGO POSTAL": integrant?.cp ?? "-",
+      "CÓDIGO POSTAL": integrant?.cp ?? "-",
       EMAIL: integrant?.email ?? "-",
       "TEL. PARTICULAR": integrant?.phone_number ?? "-",
       "TEL. MOVIL": integrant?.cellphone_number ?? "-",
@@ -234,7 +234,7 @@ export default function AffiliatePage(props: {
 
   const paymentMethod = new Map<string, React.ReactNode>([
     [
-      "DEBITO DIRECTO",
+      "DÉBITO DIRECTO",
       <>
         <div className="flex items-start gap-1">
           <ElementCard
@@ -253,8 +253,8 @@ export default function AffiliatePage(props: {
               value: (
                 <div className="flex items-center">
                   {" "}
-                  {bankLogoMap["Banco Industrial y Comercial de China"]} Banco
-                  Industrial y Comercial de China
+                  {bankLogoMap["Banco Industrial y Comercial de China"]} 
+                  Banco Industrial y Comercial de China
                 </div>
               ),
             }}
@@ -265,7 +265,7 @@ export default function AffiliatePage(props: {
     [
       "PAGO VOLUNTARIO",
       <div className="p-0">
-        <h2 className="font-bold text-base mb-2">Redes Habilitadas: </h2>
+        <h2 className="font-bold text-base mb-2">Redes habilitadas: </h2>
         <div className="flex gap-4 items-center justify-start">
           <div className="flex gap-2 items-center">
             <img src="/public/affiliates/rapipago.png" className="h-5" />{" "}
@@ -286,7 +286,7 @@ export default function AffiliatePage(props: {
     [
       "EFECTIVO",
       <div className="p-0">
-        <h2 className="font-bold text-base mb-2">Redes Habilitadas: </h2>
+        <h2 className="font-bold text-base mb-2">Redes habilitadas: </h2>
         <div className="flex gap-4 items-center justify-start">
           <div className="flex gap-2 items-center">
             <img src="/public/affiliates/rapipago.png" className="h-5" />{" "}
@@ -535,7 +535,7 @@ export default function AffiliatePage(props: {
                         src="/public/affiliates/shopIcon.png"
                         className="bg-[#DEF5DD] h-4"
                       />
-                      Condición de Venta:
+                      Condición de venta:
                     </div>
                     <p className="font-semibold pl-7 opacity-80">
                       {grupo?.sale_condition ?? "-"}
@@ -545,7 +545,7 @@ export default function AffiliatePage(props: {
                         src="/public/affiliates/modalityIcon.png"
                         className="bg-[#DEF5DD] h-4"
                       />
-                      Modalidad de Pago:
+                      Modalidad de pago:
                     </div>
                     <p className="font-semibold pl-7 opacity-80">
                       {" "}

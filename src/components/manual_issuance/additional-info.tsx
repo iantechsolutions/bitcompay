@@ -113,7 +113,7 @@ export default function AdditionalInfoCard({
       <GeneralCard title="Conceptos" containerClassName="flex flex-col gap-5">
         {fields.length === 0 && !visualization && (
           <div className="flex justify-between px-2">
-            <p> no se agregaran conceptos</p>
+            <p> No se agregarán conceptos</p>
             <Button
               onClick={() =>
                 append({ concepto: "", importe: 0, iva: 0, total: 0 })
@@ -307,11 +307,11 @@ export default function AdditionalInfoCard({
                                   <SelectItem value="0">RECIBO</SelectItem>
                                   <SelectItem value="1">FACTURA A</SelectItem>
                                   <SelectItem value="3">
-                                    NOTA DE CREDITO A
+                                    NOTA DE CRÉDITO A
                                   </SelectItem>
                                   <SelectItem value="6">FACTURA B</SelectItem>
                                   <SelectItem value="8">
-                                    NOTA DE CREDITO B
+                                    NOTA DE CRÉDITO B
                                   </SelectItem>
                                 </SelectContent>
                               </SelectContent>

@@ -173,7 +173,7 @@ function DeleteEstablishment(props: { establishmentId: string }) {
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            ¿Estás seguro que querés eliminar el establecimiento?
+            ¿Está seguro que quiere eliminar el establecimiento?
           </AlertDialogTitle>
           <AlertDialogDescription>
             Eliminar establecimiento permanentemente.

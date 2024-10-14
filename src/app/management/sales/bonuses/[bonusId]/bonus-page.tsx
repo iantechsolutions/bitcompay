@@ -98,7 +98,7 @@ export default function BonusPage(props: BonusPageProps) {
         amount: roundedAmount ?? "",
         reason: bonusData?.reason ?? " ",
       });
-      toast.success("Se ha actualizado la informacion del bono");
+      toast.success("Se ha actualizado la información del bono");
       router.refresh();
     } catch (e) {
       const error = asTRPCError(e)!;
@@ -123,7 +123,7 @@ export default function BonusPage(props: BonusPageProps) {
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="item-1">
             <AccordionTrigger>
-              <h2 className="text-md">Info. de la bonificacion</h2>
+              <h2 className="text-md">Info. de la bonificación</h2>
             </AccordionTrigger>
             <AccordionContent>
               <Card className="p-5">
@@ -135,10 +135,10 @@ export default function BonusPage(props: BonusPageProps) {
                         control={form.control}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Usuario de aplicacion</FormLabel>
+                            <FormLabel>Usuario de aplicación </FormLabel>
                             <Input
                               {...field}
-                              placeholder="ingrese usuario de aplicacion"
+                              placeholder="Ingrese usuario de aplicación "
                             />
                           </FormItem>
                         )}
@@ -151,7 +151,7 @@ export default function BonusPage(props: BonusPageProps) {
                             <FormLabel>Usuario aprobado</FormLabel>
                             <Input
                               {...field}
-                              placeholder="ingrese usuario aprobado"
+                              placeholder="Ingrese usuario aprobado"
                             />
                           </FormItem>
                         )}
@@ -161,7 +161,7 @@ export default function BonusPage(props: BonusPageProps) {
                         control={form.control}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Fecha de validacion</FormLabel>
+                            <FormLabel>Fecha de validación</FormLabel>
                             <br />
                             <Popover
                               open={popoverOpen}
@@ -214,8 +214,8 @@ export default function BonusPage(props: BonusPageProps) {
                         control={form.control}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Duracion</FormLabel>
-                            <Input {...field} placeholder="ingrese duracion" />
+                            <FormLabel>Duración</FormLabel>
+                            <Input {...field} placeholder="Ingrese duración" />
                           </FormItem>
                         )}
                       />
@@ -234,8 +234,8 @@ export default function BonusPage(props: BonusPageProps) {
                         control={form.control}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Razon</FormLabel>
-                            <Input {...field} placeholder="ingrese razon" />
+                            <FormLabel>Razón</FormLabel>
+                            <Input {...field} placeholder="Ingrese razón" />
                           </FormItem>
                         )}
                       />
@@ -248,7 +248,7 @@ export default function BonusPage(props: BonusPageProps) {
 
           <AccordionItem value="item-2" className="border-none">
             <AccordionTrigger>
-              <h2 className="text-md">Eliminar bonificacion</h2>
+              <h2 className="text-md">Eliminar bonificación</h2>
             </AccordionTrigger>
             <AccordionContent>
               <div className="flex justify-end">
@@ -291,7 +291,7 @@ function DeleteBonus(props: { bonusesId: string }) {
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            ¿Estás seguro que querés eliminar el bono?
+            ¿Está seguro que quiere eliminar el bono?
           </AlertDialogTitle>
           <AlertDialogDescription>
             Eliminar bono permanentemente.

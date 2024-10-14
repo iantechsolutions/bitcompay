@@ -173,11 +173,11 @@ export default function AddProcedure() {
             onValueChange={(value) => setActiveTab(value)}>
             <TabsList>
               <TabsTrigger value="general_info">
-                Informacion General
+              Información general
               </TabsTrigger>
               <TabsTrigger value="members">Integrantes</TabsTrigger>
               <TabsTrigger value="billing">
-                Informacion de Facturacion
+                Información de facturación
               </TabsTrigger>
             </TabsList>
             <TabsContent value="general_info">

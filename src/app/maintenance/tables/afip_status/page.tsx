@@ -8,7 +8,7 @@ export default async function Home() {
     <LayoutContainer>
       <section className="space-y-2">
         <div className="flex justify-between">
-          <Title>Condicion fiscal</Title>
+          <Title>Condición fiscal</Title>
         </div>
       </section>
     </LayoutContainer>
