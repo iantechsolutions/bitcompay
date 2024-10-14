@@ -92,31 +92,33 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                 render={({ field }) => (
                   <Popover>
                     <PopoverTrigger asChild={true}>
-                  
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "dd/MM/yyyy")
-                          ) : (
-                            <span>Seleccionar fecha</span>
-                          )}
-                          <Calendar01Icon className="h-4 w-4" />
-                        </Button>
-                     
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "dd/MM/yyyy")
+                        ) : (
+                          <span>Seleccionar fecha</span>
+                        )}
+                        <Calendar01Icon className="h-4 w-4" />
+                      </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" initialFocus={true} />
+                      <Calendar
+                        mode="single"
+                        initialFocus={true}
+                        // Ensure the onChange event updates the form state
+                        onSelect={(date) => field.onChange(date)}
+                      />
                     </PopoverContent>
                   </Popover>
                 )}
               />,
-              dayjs(props.form.getValues("dateEmision")).format("DD/MM/YYYY") ??
-                "no hay fecha seleccionada"
+              dayjs(props.form.getValues("dateEmision")).format("DD/MM/YYYY") ?? "no hay fecha seleccionada"
             ),
           }}
         />
