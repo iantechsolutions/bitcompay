@@ -40,7 +40,7 @@ export default function HealthInsurancePage(props: {
     bussinessUnitId: props.healthInsurance?.businessUnit ?? "",
   });
 
-  const {data: postalCodes} = api.postal_code.list.useQuery();
+  const { data: postalCodes } = api.postal_code.list.useQuery();
   const [isPending, setIsLoading] = useState<boolean>(false);
   const { data: cc } = api.currentAccount.getByHealthInsurance.useQuery({
     healthInsuranceId: props.healthInsurance?.id ?? "",
@@ -56,7 +56,6 @@ export default function HealthInsurancePage(props: {
     });
   }
   currentAmount = lastEvent?.current_amount ?? 0;
- 
 
   const { mutateAsync: updateHealthInsurance, isLoading } =
     api.healthInsurances.change.useMutation();
@@ -110,10 +109,13 @@ export default function HealthInsurancePage(props: {
 
   const accountInfo = {
     Estado: props.healthInsurance?.state,
-    "Fecha de estado": dayjs(props.healthInsurance?.dateState).format("DD/MM/YYYY"),
+    "Fecha de estado": dayjs(props.healthInsurance?.dateState).format(
+      "DD/MM/YYYY"
+    ),
     Usuario: props.healthInsurance?.user,
     "Motivo de baja": props.healthInsurance?.cancelMotive,
-  };1
+  };
+  1;
 
   return (
     <LayoutContainer>
@@ -150,7 +152,8 @@ export default function HealthInsurancePage(props: {
                     router.push(
                       `/management/client/health_insurances/${props.healthInsuranceId}/cc/${props.ccId}`
                     );
-                  }}>
+                  }}
+                >
                   <Eye className="mr-2 w-4 h-4" />
                   Ver movimientos
                 </Button>
@@ -163,10 +166,12 @@ export default function HealthInsurancePage(props: {
                 Soportes
               </p>
               <Link
-                href={`/management/client/health_insurances/${props.healthInsuranceId}/massive-upload`}>
+                href={`/management/client/health_insurances/${props.healthInsuranceId}/massive-upload`}
+              >
                 <Button
                   variant="bitcompay"
-                  className="bg-[#85CE81] text-sm px-4 h-7 gap-2 text-[#ffffff] rounded-full font-normal">
+                  className="bg-[#85CE81] text-sm px-4 h-7 gap-2 text-[#ffffff] rounded-full font-normal"
+                >
                   <Upload02Icon className="h-4" />
                   Subir archivo
                 </Button>
@@ -177,7 +182,7 @@ export default function HealthInsurancePage(props: {
         <div>
           <Accordion className="w-full" type="multiple">
             <AccordionItem value="item-1">
-              <AccordionTrigger className="font-semibold" name="editIcon">
+              <AccordionTrigger className="font-semibold" name="">
                 Datos básicos
               </AccordionTrigger>
               <AccordionContent className="pt-6 pl-5">
