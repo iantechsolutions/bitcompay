@@ -133,6 +133,8 @@ export default function Page() {
     }
 
     if (
+      tipoComprobante != "0" &&
+      (
       !form.getValues().puntoVenta ||
       !form.getValues().dateEmision ||
       !tipoComprobante ||
@@ -141,7 +143,18 @@ export default function Page() {
       !form.getValues().dateVencimiento ||
       !subTotal ||
       !tributos
-      // (Number(subTotal) * ivaFloat + Number(tributos)) <= 0
+    )
+
+    ||
+
+    tipoComprobante == "0" &&
+    (
+      !form.getValues().dateEmision ||
+      !tipoComprobante ||
+      !form.getValues().dateVencimiento ||
+      !subTotal ||
+      !tributos
+    )
     ) {
       console.log(!form.getValues().puntoVenta);
       console.log(!form.getValues().dateEmision);
