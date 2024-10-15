@@ -26,7 +26,6 @@ import Calendar01Icon from "../icons/calendar-01-stroke-rounded";
 import { format } from "date-fns";
 import { useEffect, useState } from "react";
 import { api } from "~/trpc/react";
-import { reverseComprobanteDictionary } from "~/lib/utils";
 import { Comprobante } from "~/server/db/schema";
 import {
   AsociatedFCForm,
@@ -48,6 +47,7 @@ type AdditionalInfoProps = {
   otherConceptsForm: UseFormReturn<otherConceptsForm>;
   grupoFamiliarId?: string;
   comprobantes?: RouterOutputs["comprobantes"]["getByEntity"];
+  possibleComprobanteTipo: string,
 };
 export default function AdditionalInfoCard({
   onValueChange,
@@ -60,6 +60,7 @@ export default function AdditionalInfoCard({
   otherConceptsForm,
   visualization,
   grupoFamiliarId,
+  possibleComprobanteTipo,
   comprobantes,
 }: AdditionalInfoProps) {
   // const { data: comprobantes } = api.comprobantes.getByEntity.useQuery({
@@ -284,38 +285,45 @@ export default function AdditionalInfoCard({
                   className="pr-1 pb-0 border-[#bef0bb]"
                   element={{
                     key: "COMPROBANTE ASOCIADO",
-                    value: visualizationSwitcher(
-                      visualization,
-                      <FormField
-                        control={asociatedFCForm.control}
-                        name={`comprobantes.${index}.tipoComprobante`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <Select
-                              onValueChange={(e) => {
-                                asociatedFCForm.setValue(
-                                  `comprobantes.${index}.tipoComprobante`,
-                                  reverseComprobanteDictionary[Number(e)]!
-                                );
-                                setCurrentCompType(e);
-                              }}
-                              defaultValue={field.value}
-                            >
-                              <FormControl>
-                                <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8">
-                                  <SelectValue placeholder="Seleccionar tipo comprobante..." />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="1">FACTURA A</SelectItem>
-                                <SelectItem value="6">FACTURA B</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </FormItem>
-                        )}
-                      />,
-                      fieldElement.tipoComprobante
-                    ),
+                    // value: visualizationSwitcher(
+                    //   visualization,
+                    //   <FormField
+                    //     control={asociatedFCForm.control}
+                    //     name={`comprobantes.${index}.tipoComprobante`}
+                    //     render={({ field }) => (
+                    //       <FormItem>
+                    //         <Select
+                    //           onValueChange={(e) => {
+                    //             asociatedFCForm.setValue(
+                    //               `comprobantes.${index}.tipoComprobante`,
+                    //               reverseComprobanteDictionary[Number(e)]!
+                    //             );
+                    //             setCurrentCompType(e);
+                    //           }}
+                    //           defaultValue={field.value}
+                    //         >
+                    //           <FormControl>
+                    //             <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8">
+                    //               <SelectValue placeholder="Seleccionar tipo comprobante..." />
+                    //             </SelectTrigger>
+                    //           </FormControl>
+                    //           <SelectContent>
+                    //             <SelectItem value="1">FACTURA A</SelectItem>
+                    //             <SelectItem value="6">FACTURA B</SelectItem>
+                    //           </SelectContent>
+                    //         </Select>
+                    //       </FormItem>
+                    //     )}
+                    //   />,
+                    //   fieldElement.tipoComprobante
+                    // ),
+                    value: 
+                    <p className="px-[12px] py-[8px]">
+                      {(
+                        possibleComprobanteTipo
+                      )}
+                    </p>
+                    
                   }}
                 />
                 <ElementCard
@@ -418,10 +426,7 @@ export default function AdditionalInfoCard({
                                 {comprobantes
                                   ?.filter(
                                     (comprobante) =>
-                                      comprobante.tipoComprobante ===
-                                      reverseComprobanteDictionary[
-                                        Number(currentCompType)
-                                      ]
+                                      comprobante.tipoComprobante === possibleComprobanteTipo
                                   )
                                   .slice(0, 10)
                                   .map((comprobante) => (

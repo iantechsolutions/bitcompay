@@ -12,11 +12,12 @@ import {
   htmlBill,
   ingresarAfip,
   comprobanteDictionary,
-  reverseComprobanteDictionary,
   reversedIvaDictionary,
   ivaDictionary,
   idDictionary,
   valueToNameComprobanteMap,
+  reverseComprobanteDictionary,
+  fcAnc,
 } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
@@ -133,28 +134,21 @@ export default function Page() {
     }
 
     if (
-      tipoComprobante != "0" &&
-      (
-      !form.getValues().puntoVenta ||
-      !form.getValues().dateEmision ||
-      !tipoComprobante ||
-      !concepto ||
-      !iva ||
-      !form.getValues().dateVencimiento ||
-      !subTotal ||
-      !tributos
-    )
-
-    ||
-
-    tipoComprobante == "0" &&
-    (
-      !form.getValues().dateEmision ||
-      !tipoComprobante ||
-      !form.getValues().dateVencimiento ||
-      !subTotal ||
-      !tributos
-    )
+      (tipoComprobante != "0" &&
+        (!form.getValues().puntoVenta ||
+          !form.getValues().dateEmision ||
+          !tipoComprobante ||
+          !concepto ||
+          !iva ||
+          !form.getValues().dateVencimiento ||
+          !subTotal ||
+          !tributos)) ||
+      (tipoComprobante == "0" &&
+        (!form.getValues().dateEmision ||
+          !tipoComprobante ||
+          !form.getValues().dateVencimiento ||
+          !subTotal ||
+          !tributos))
     ) {
       console.log(!form.getValues().puntoVenta);
       console.log(!form.getValues().dateEmision);
@@ -747,6 +741,13 @@ export default function Page() {
             />
 
             <AdditionalInfoCard
+              possibleComprobanteTipo={
+                fcAnc[
+                  reverseComprobanteDictionary[
+                    Number(tipoComprobante ?? "0")
+                  ] ?? ""
+                ] ?? ""
+              }
               comprobantes={comprobantes}
               fcSeleccionada={fcSeleccionada}
               setFcSeleccionada={setFcSeleccionada}
