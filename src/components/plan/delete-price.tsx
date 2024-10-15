@@ -58,6 +58,12 @@ export default function DeletePrice(props: {
           <DialogTitle>¿Está seguro de borrar esta vigencia?</DialogTitle>
         </DialogHeader>
         <DialogFooter>
+          <Button disabled={isDeleting} onClick={() => setIsOpen(false)}>
+            {isDeleting && (
+              <Loader2Icon className="mr-2 animate-spin" size={20} />
+            )}
+            Cancelar
+          </Button>
           <Button disabled={isDeleting} onClick={handleDelete}>
             {isDeleting && (
               <Loader2Icon className="mr-2 animate-spin" size={20} />
