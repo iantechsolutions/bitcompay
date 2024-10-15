@@ -20,6 +20,7 @@ type DetailSheetProps = {
     currentAccountAmount: number;
     nombre: string;
     cuit: string;
+    id: string;
   };
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -67,17 +68,19 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
             Detalle del movimiento
           </SheetTitle>
           <SheetDescription>
-            <ul className="mt-2">
-              <li className="text-xs"> RECEPTOR </li>
-              <li className="font-medium text-[#3e3e3e]">
-                {" "}
-                {data.nombre ?? "-"}
-              </li>
-              <br />
-              <li className="text-xs"> CUIL/CUIT </li>
-              <li className="font-medium text-[#3e3e3e]">{data.cuit ?? "-"}</li>
-              <br />
-            </ul>
+            <Link href={`/management/client/affiliates/${data.id}`}>
+              <ul className="mt-2">
+                <li className="text-xs"> RECEPTOR </li>
+                <li className="font-medium text-[#3e3e3e]">
+                  {" "}
+                  {data.nombre ?? "-"}
+                </li>
+                <br />
+                <li className="text-xs"> CUIL/CUIT </li>
+                <li className="font-medium text-[#3e3e3e]">{data.cuit ?? "-"}</li>
+                <br />
+              </ul>
+            </Link>
           </SheetDescription>
         </SheetHeader>
 
