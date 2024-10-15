@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db, schema } from "~/server/db";
-import { and, desc, eq, ilike, inArray, like } from "drizzle-orm";
+import { and, desc, eq, ilike, inArray, like, lt, SQL } from "drizzle-orm";
 import {
   administrative_audit,
   medical_audit,
@@ -475,6 +475,7 @@ export const family_groupsRouter = createTRPCRouter({
     .input(
       z.object({
         liquidationId: z.string(),
+        maxEventDate: z.date().optional(),
         limit: z.number().int().nonnegative().optional(),
         cursor: z.number().int().nonnegative().optional(),
         id_number_startsWith: z.string().min(1).max(255).optional(),
@@ -577,6 +578,30 @@ export const family_groupsRouter = createTRPCRouter({
         );
       }
 
+      let cc:
+        | true
+        | {
+            with: {
+              events: {
+                limit: number;
+                orderBy: SQL<unknown>[];
+                where: SQL<unknown>;
+              };
+            };
+          } = true;
+
+      if (input.maxEventDate) {
+        cc = {
+          with: {
+            events: {
+              limit: 1,
+              orderBy: [desc(schema.events.createdAt)],
+              where: lt(schema.events.createdAt, input.maxEventDate),
+            },
+          },
+        };
+      }
+
       const fg = await db.query.family_groups.findMany({
         where: and(...whereFgList),
         with: {
@@ -589,7 +614,7 @@ export const family_groupsRouter = createTRPCRouter({
             },
             where: eq(schema.integrants.isBillResponsible, true),
           },
-          cc: true,
+          cc,
           businessUnitData: true,
           comprobantes: {
             with: {
