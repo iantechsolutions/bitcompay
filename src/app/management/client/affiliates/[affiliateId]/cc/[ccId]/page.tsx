@@ -93,13 +93,13 @@ export default function CCDetail(props: {
   }
   const tableRows: TableRecord[] = [];
   if (events) {
-    console.log("events",events);
+    console.log("events", events);
 
     for (const event of events) {
       // console.log("saldo_a_pagar");
       // console.log(saldo_a_pagar);
-      console.log("event",formatCurrency(event.event_amount));
-      
+      console.log("event", formatCurrency(event.event_amount));
+
       tableRows.push({
         date: event.createdAt,
         description: event.description,
@@ -107,9 +107,10 @@ export default function CCDetail(props: {
         // comprobanteType: "Nota de credito A",
         comprobanteType: event.comprobantes?.tipoComprobante ?? "FACTURA A",
         comprobanteNumber:
-          (event.comprobantes?.ptoVenta.toString().padStart(5) ?? "00000" ) +
+          (event.comprobantes?.ptoVenta.toString().padStart(5) ?? "00000") +
           "-" +
-          (event.comprobantes?.nroComprobante.toString().padStart(8) ?? "00000000"),
+          (event.comprobantes?.nroComprobante.toString().padStart(8) ??
+            "00000000"),
         status: "Pendiente",
         iva: Number(event.comprobantes?.iva ?? 21),
         comprobantes: comprobantesTable,
