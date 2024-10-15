@@ -12,11 +12,12 @@ import {
   htmlBill,
   ingresarAfip,
   comprobanteDictionary,
-  reverseComprobanteDictionary,
   reversedIvaDictionary,
   ivaDictionary,
   idDictionary,
   valueToNameComprobanteMap,
+  reverseComprobanteDictionary,
+  fcAnc,
 } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
@@ -779,6 +780,13 @@ export default function Page() {
             />
 
             <AdditionalInfoCard
+              possibleComprobanteTipo={
+                fcAnc[
+                  reverseComprobanteDictionary[
+                    Number(tipoComprobante ?? "0")
+                  ] ?? ""
+                ] ?? ""
+              }
               comprobantes={comprobantes}
               fcSeleccionada={fcSeleccionada}
               setFcSeleccionada={setFcSeleccionada}
