@@ -155,14 +155,16 @@ export default function CCDetail(props: {
             {lastEvent?.current_amount !== undefined ? (
               <span
                 className={`text-2xl font-bold ${
-                  lastEvent?.current_amount > 0
+                  lastEvent.current_amount > 0
                     ? "text-[#6952EB]"
-                    : "text-[#EB2727]"
+                    : lastEvent.current_amount < 0
+                    ? "text-[#EB2727]"
+                    : "text-black"
                 }`}>
                 {lastEvent.current_amount.toFixed(2)}
               </span>
             ) : (
-              <span className={`text-2xl font-bold`}>0.00</span>
+              <span className={`text-2xl font-bold text-black`}>0.00</span>
             )}
           </div>
         </Card>

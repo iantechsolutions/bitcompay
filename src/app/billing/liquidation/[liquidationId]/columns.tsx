@@ -11,7 +11,7 @@ export type TableRecord = {
   UN: string;
   nombre: string;
   cuit: string;
-  "saldo anterior": number;
+  "Saldo anterior": number;
   "cuota plan": number;
   bonificacion: number;
   diferencial: number;
@@ -59,14 +59,14 @@ export const columns: ColumnDef<TableRecord>[] = [
     },
   },
   {
-    accessorKey: "saldo anterior",
+    accessorKey: "Saldo anterior",
     header: () => (
       <div className="text-center whitespace-nowrap text-medium">
         Saldo anterior
       </div>
     ),
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("saldo anterior"));
+      const amount = parseFloat(row.getValue("Saldo anterior"));
       const formatted = new Intl.NumberFormat("es-AR", {
         style: "currency",
         currency: "ARS",
