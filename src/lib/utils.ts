@@ -1569,7 +1569,7 @@ export const valueToNameComprobanteMap: Record<string, string> = {
   "1": "Factura",
   "3": "Nota de crédito",
   "6": "Factura",
-  "8": "Recibo",
+  "8": "Nota de crédito",
 };
 export const comprobanteDictionary: { [key: string]: number } = {
   "FACTURA A": 1,
