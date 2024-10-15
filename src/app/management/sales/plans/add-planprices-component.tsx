@@ -153,14 +153,14 @@ export default function AddPlanPricesComponent({
     try {
       setWorking(true);
       if (!mes && !edit) {
-        toast.error("ingrese el mes correspondiente");
+        toast.error("Ingrese el mes correspondiente");
         setWorking(false);
       } else if (data.prices.length < 1) {
-        toast.error("ingrese al menos un precio");
+        toast.error("Ingrese al menos un precio");
         setWorking(false);
       } else {
         let allowed = true;
-        data.prices.sort((a, b) => (a.from_age ?? 0) - (b.from_age ?? 0));
+        data.prices.filter(x=>x.isAmountByAge).sort((a, b) => (a.from_age ?? 0) - (b.from_age ?? 0));
 
         const validity_date = new Date(anio ?? 0, (mes ?? 1) - 1, 1);
         for (let i = 0; i < data.prices.length; i++) {
@@ -177,7 +177,7 @@ export default function AddPlanPricesComponent({
 
               if (fromAge2 !== null && toAge2 !== null) {
                 if (fromAge1 <= toAge2 && fromAge2 <= toAge1) {
-                  toast.error("Las edades se superposicionan");
+                  toast.error("Las edades se superponen");
                   allowed = false;
                 }
               }

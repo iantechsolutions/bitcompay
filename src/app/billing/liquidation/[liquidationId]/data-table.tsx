@@ -45,6 +45,7 @@ interface DataTableProps {
   columns: ColumnDef<TableRecord>[];
   summary: RouterOutputs["family_groups"]["getSummaryByLiqId"];
   liquidationId: string;
+  maxEventDate: Date;
 }
 
 interface DetailData {
@@ -52,6 +53,7 @@ interface DetailData {
   currentAccountAmount: number;
   nombre: string;
   cuit: string;
+  id: string;
   [index: string]: any;
 }
 
@@ -59,16 +61,27 @@ export function DataTable<TData, TValue>({
   columns,
   summary,
   liquidationId,
+  maxEventDate,
 }: DataTableProps) {
   const [open, setOpen] = useState(false);
   const [detailData, setDetailData] = useState<DetailData | null>(null);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [delayedColumnFilters, setDelayedColumnFilters] =
+    useState<ColumnFiltersState>([]);
 
   const [data, setData] = useState<TableRecord[]>([]);
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
   });
+
+  useEffect(() => {
+    const timeOutId = setTimeout(
+      () => setDelayedColumnFilters(columnFilters),
+      750
+    );
+    return () => clearTimeout(timeOutId);
+  }, [columnFilters]);
 
   const paginatedQuery =
     api.family_groups.getByLiquidationFiltered.useMutation();
@@ -105,7 +118,7 @@ export function DataTable<TData, TValue>({
     let filterPlan: string | undefined = undefined;
     let filterUN: string | undefined = undefined;
 
-    for (const f of columnFilters) {
+    for (const f of delayedColumnFilters) {
       const id = f.id.toLowerCase();
       if (id === "nombre") {
         filter = f.value as string;
@@ -141,15 +154,16 @@ export function DataTable<TData, TValue>({
           modoDesc: filterModo,
           plan: filterPlan,
           UN: filterUN,
+          maxEventDate,
         });
       },
-      columnFilters.length > 0
+      delayedColumnFilters.length > 0
     ).then((data) => {
       const dataArray: TableRecord[] = [];
       makeExcelRows(data, null, dataArray);
       setData(dataArray);
     });
-  }, [pagination, columnFilters]);
+  }, [pagination, delayedColumnFilters]);
 
   const handleRowClick = (row: Row<TableRecord>) => {
     let detailData = {} as DetailData;
@@ -161,6 +175,7 @@ export function DataTable<TData, TValue>({
       }
     }
 
+    detailData.id = row.original.id;
     setDetailData(detailData);
     setOpen(!open);
   };
@@ -177,7 +192,7 @@ export function DataTable<TData, TValue>({
   // .reduce((sum, aporte) => sum + parseInt(aporte.amount), 0);
   // const aporteTotal = summary.summary.APORTES;
   // const total = summary.summary["APORTES"];
-
+  
   return (
     <>
       <DataTableSummary summary={summary.summary} />
@@ -193,7 +208,8 @@ export function DataTable<TData, TValue>({
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow
                 className="bg-[#f7f7f7] first:rounded-s-lg last:rounded-e-lg"
-                key={headerGroup.id}>
+                key={headerGroup.id}
+              >
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead key={header.id}>
@@ -216,7 +232,8 @@ export function DataTable<TData, TValue>({
                   <TableRow
                     key={row.id}
                     onClick={() => handleRowClick(row)}
-                    className="border-b-2 border-gray-200 border-x-0 hover:bg-[#d7d3d395] hover:cursor-pointer">
+                    className="border-b-2 border-gray-200 border-x-0 hover:bg-[#d7d3d395] hover:cursor-pointer"
+                  >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
                         {flexRender(
@@ -229,6 +246,7 @@ export function DataTable<TData, TValue>({
                 ))}
                 {detailData && (
                   <DetailSheet
+                    liquidationId={liquidationId}
                     open={open}
                     setOpen={setOpen}
                     data={detailData}
@@ -239,7 +257,8 @@ export function DataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center">
+                  className="h-24 text-center"
+                >
                   No results.
                 </TableCell>
               </TableRow>

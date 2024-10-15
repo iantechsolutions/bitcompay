@@ -20,6 +20,7 @@ import { Card } from "~/components/ui/card";
 import Download02Icon from "~/components/icons/download-02-stroke-rounded";
 import { RouterOutputs } from "~/trpc/shared";
 import BonusDialog from "./components_acciones/bonusDialog";
+import { formatCurrency } from "~/app/billing/pre-liquidation/[liquidationId]/detail-sheet";
 
 export default function CCDetail(props: {
   params: { ccId: string; affiliateId: string };
@@ -28,7 +29,7 @@ export default function CCDetail(props: {
   const { data: events } = api.events.getByCC.useQuery({
     ccId: props.params.ccId,
   });
-  const grupo = api.family_groups.get.useQuery({
+  const { data: grupo } = api.family_groups.get.useQuery({
     family_groupsId: props.params.affiliateId,
   });
   const grupos = props.params.affiliateId;
@@ -40,7 +41,7 @@ export default function CCDetail(props: {
       ? prev
       : current;
   });
-  const comprobantes = grupo.data?.comprobantes;
+  const comprobantes = grupo?.comprobantes;
   let lastComprobante;
   if (comprobantes && comprobantes?.length! > 0) {
     lastComprobante = comprobantes?.reduce((prev, current) => {
@@ -52,18 +53,7 @@ export default function CCDetail(props: {
   const nextExpirationDate = lastComprobante?.due_date
     ? dayjs(lastComprobante?.due_date).format("DD-MM-YYYY")
     : "-";
-
-  const formatCurrency = (amount: {
-    toLocaleString: (
-      arg0: string,
-      arg1: { minimumFractionDigits: number; maximumFractionDigits: number }
-    ) => any;
-  }) => {
-    return amount.toLocaleString("es-AR", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-  };
+  console.log("aca");
   let comprobanteNCReciente = comprobantes?.find(
     (comprobante) => comprobante.origin === "Nota de credito"
   );
@@ -92,7 +82,7 @@ export default function CCDetail(props: {
     saldo_a_pagar = FCTotal - total_a_pagar;
   }
 
-  const afiliado = grupo.data?.integrants.find((x) => x.isHolder);
+  const afiliado = grupo?.integrants.find((x) => x.isHolder);
   const comprobantesTable: RouterOutputs["comprobantes"]["getByLiquidation"] =
     [];
   if (comprobanteFCReciente) {
@@ -103,44 +93,77 @@ export default function CCDetail(props: {
   }
   const tableRows: TableRecord[] = [];
   if (events) {
+    console.log("events", events);
+
     for (const event of events) {
-      tableRows.push({
-        date: event.createdAt,
-        description: event.description,
-        amount: formatCurrency(event.event_amount),
-        // comprobanteType: "Nota de credito A",
-        comprobanteType: event.comprobantes?.tipoComprobante ?? "FACTURA A",
-        comprobanteNumber:
-          event.comprobantes?.ptoVenta.toString().padStart(5) +
-          "-" +
-          event.comprobantes?.nroComprobante.toString().padStart(8),
-        status: "Pendiente",
-        iva: Number(event.comprobantes?.iva ?? 1.21) - 1,
-        comprobantes: comprobantesTable,
-        currentAccountAmount: formatCurrency(NCTotal ?? 0),
-        saldo_a_pagar: formatCurrency(saldo_a_pagar ?? 0),
-        nombre: afiliado?.name ?? "",
-        cuit: afiliado?.fiscal_id_number ?? "",
-        event: event,
-      });
+      // console.log("saldo_a_pagar");
+      // console.log(saldo_a_pagar);
+      console.log("event", formatCurrency(event.event_amount));
+      if (event.comprobantes) {
+        tableRows.push({
+          date: event.createdAt,
+          description: event.description,
+          amount: formatCurrency(event.event_amount),
+          // comprobanteType: "Nota de credito A",
+          comprobanteType: event.comprobantes?.tipoComprobante ?? "FACTURA A",
+          comprobanteNumber:
+            (event.comprobantes?.ptoVenta.toString().padStart(5) ?? "00000") +
+            "-" +
+            (event.comprobantes?.nroComprobante.toString().padStart(8) ??
+              "00000000"),
+          status: "Pendiente",
+          iva: Number(event.comprobantes?.iva ?? 0),
+          comprobantes: comprobantesTable,
+          currentAccountAmount: formatCurrency(NCTotal ?? 0),
+          saldo_a_pagar: formatCurrency(saldo_a_pagar ?? 0),
+          nombre: afiliado?.name ?? "",
+          cuit: afiliado?.fiscal_id_number ?? "",
+          event: event,
+        });
+      } else {
+        tableRows.push({
+          date: event.createdAt,
+          description: event.description,
+          amount: formatCurrency(event.event_amount),
+          // comprobanteType: "Nota de credito A",
+          comprobanteType: "Apertura de CC",
+          comprobanteNumber: "00000" + "-" + "00000000",
+          status: "Pendiente",
+          iva: 0,
+          comprobantes: comprobantesTable,
+          currentAccountAmount: formatCurrency(NCTotal ?? 0),
+          saldo_a_pagar: formatCurrency(saldo_a_pagar ?? 0),
+          nombre: afiliado?.name ?? "",
+          cuit: afiliado?.fiscal_id_number ?? "",
+          event: event,
+        });
+      }
     }
   }
+  //dasdas
   return (
     <LayoutContainer>
       <Title>Movimientos cuenta corriente</Title>
       <h2 className=" font-semibold mb-2">
-        Grupo familiar N° {grupo.data?.numericalId}
+        Grupo familiar N° {grupo?.numericalId}
       </h2>
       <div className="flex gap-3 mt-5 mb-10">
         <Card className="py-4 px-6 w-1/4 grid grid-cols-2 items-center">
           <div className="flex flex-col">
             <p className="text-base font-medium block">SALDO ACTUAL</p>
-            <span className="text-[#EB2727] text-2xl font-bold">
-              $
-              {lastEvent?.current_amount !== undefined
-                ? lastEvent.current_amount.toFixed(2)
-                : "0.00"}
-            </span>
+
+            {lastEvent?.current_amount !== undefined ? (
+              <span
+                className={`text-2xl font-bold ${
+                  lastEvent?.current_amount > 0
+                    ? "text-[#6952EB]"
+                    : "text-[#EB2727]"
+                }`}>
+                {lastEvent.current_amount.toFixed(2)}
+              </span>
+            ) : (
+              <span className={`text-2xl font-bold`}>0.00</span>
+            )}
           </div>
         </Card>
         <Card className="py-4 px-9 bg-[#DEF5DD] w-1/4 flex flex-col justify-center">

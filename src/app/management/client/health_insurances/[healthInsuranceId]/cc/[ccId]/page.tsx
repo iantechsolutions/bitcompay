@@ -49,7 +49,7 @@ export default function CCDetail(props: {
               </TableCell>
               <TableCell>{event?.description}</TableCell>
               <TableCell>{event?.type}</TableCell>
-              <TableCell>{formatCurrency(event?.event_amount * -1)}</TableCell>
+              <TableCell>{formatCurrency(event?.event_amount)}</TableCell>
                 </TableRow>
           ))}
         </TableBody>

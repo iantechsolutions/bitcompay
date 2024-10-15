@@ -33,7 +33,7 @@ export default function DeleteButton(props: { id: string }) {
           planId: props.id ?? "",
         });
         setOpenDelete(false);
-        router.refresh();
+        window.location.reload();
         toast.success("El plan se eliminado correctamente");
       } catch (e) {
         const error = asTRPCError(e)!;
@@ -48,8 +48,7 @@ export default function DeleteButton(props: { id: string }) {
       <Button
         variant="bitcompay"
         className="text-[#3e3e3e] bg-stone-100 hover:bg-stone-200"
-        onClick={() => setOpenDelete(true)}
-      >
+        onClick={() => setOpenDelete(true)}>
         <Delete02Icon className="mr-2" /> Eliminar
       </Button>
       <Dialog open={openDelete} onOpenChange={setOpenDelete}>
@@ -64,8 +63,7 @@ export default function DeleteButton(props: { id: string }) {
               type="submit"
               className="rounded-full bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#BEF0BB]"
               disabled={isLoading || error}
-              onClick={handleDelete}
-            >
+              onClick={handleDelete}>
               {isLoading && (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}

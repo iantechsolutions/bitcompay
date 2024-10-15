@@ -43,6 +43,7 @@ interface DataTableProps {
   columns: ColumnDef<TableRecord>[];
   summary: RouterOutputs["family_groups"]["getSummaryByLiqId"];
   liquidationId: string;
+  maxEventDate: Date;
 }
 
 interface DetailData {
@@ -53,16 +54,31 @@ interface DetailData {
   cuit: string;
   [index: string]: any;
 }
-export function DataTable({ columns, summary, liquidationId }: DataTableProps) {
+export function DataTable({
+  columns,
+  summary,
+  liquidationId,
+  maxEventDate,
+}: DataTableProps) {
   const [open, setOpen] = useState(false);
   const [detailData, setDetailData] = useState<DetailData | null>(null);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [delayedColumnFilters, setDelayedColumnFilters] =
+    useState<ColumnFiltersState>([]);
 
   const [data, setData] = useState<TableRecord[]>([]);
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
   });
+
+  useEffect(() => {
+    const timeOutId = setTimeout(
+      () => setDelayedColumnFilters(columnFilters),
+      750
+    );
+    return () => clearTimeout(timeOutId);
+  }, [columnFilters]);
 
   const paginatedQuery =
     api.family_groups.getByLiquidationFiltered.useMutation();
@@ -92,7 +108,7 @@ export function DataTable({ columns, summary, liquidationId }: DataTableProps) {
     let filterPlan: string | undefined = undefined;
     let filterUN: string | undefined = undefined;
 
-    for (const f of columnFilters) {
+    for (const f of delayedColumnFilters) {
       const id = f.id.toLowerCase();
       if (id === "nombre") {
         filter = f.value as string;
@@ -128,15 +144,16 @@ export function DataTable({ columns, summary, liquidationId }: DataTableProps) {
           modoDesc: filterModo,
           plan: filterPlan,
           UN: filterUN,
+          maxEventDate,
         });
       },
-      columnFilters.length > 0
+      delayedColumnFilters.length > 0
     ).then((data) => {
       const dataArray: TableRecord[] = [];
       makeExcelRows(data, null, dataArray);
       setData(dataArray);
     });
-  }, [pagination, columnFilters]);
+  }, [pagination, delayedColumnFilters]);
 
   const hiddenDataKeys = [
     "comprobantes",
@@ -148,7 +165,6 @@ export function DataTable({ columns, summary, liquidationId }: DataTableProps) {
 
   const handleRowClick = (row: Row<TableRecord>) => {
     let detailData = {} as DetailData;
-    console.log("row", row.original)
     for (const key in row.original) {
       if (hiddenDataKeys.includes(key)) {
         detailData[key] = (
@@ -158,7 +174,6 @@ export function DataTable({ columns, summary, liquidationId }: DataTableProps) {
     }
 
     setDetailData(detailData);
-    console.log("detailData", detailData);
     setOpen(!open);
   };
 
@@ -220,6 +235,7 @@ export function DataTable({ columns, summary, liquidationId }: DataTableProps) {
                 ))}
                 {detailData && (
                   <DetailSheet
+                    liquidationId={liquidationId}
                     open={open}
                     setOpen={setOpen}
                     data={detailData}
