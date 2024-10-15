@@ -132,6 +132,7 @@ const confirmationPage = ({
     console.log(otherAttributes);
   }
   async function handleAFIP() {
+    handleApprove();
     const formValues = form.getValues()
     const concepto = formValues.tipoDeConcepto;
     const iva = formValues.alicuota ? formValues.alicuota : reversedIvaDictionary[fcSeleccionada[0]?.iva ?? ""];
@@ -226,12 +227,16 @@ const confirmationPage = ({
 
     }
     else if (tipoComprobante == "0"){
+      const otrosConceptos = otherConcepts.getValues()
+      const importe = otrosConceptos.otherConcepts.reduce((acc, concept) => acc + Number(concept.importe), 0);
+      console.log("importe");
+      console.log(importe)
       if(fgId){
 
         const event = createEventFamily({
           family_group_id: fgId,
           type: "REC",
-          amount: (ivaFloat*importe) + tributos,
+          amount: importe,
           comprobante_id: createdComprobante.id ?? "",
         });
       }
@@ -239,14 +244,14 @@ const confirmationPage = ({
         const event = createEventOS({
           health_insurance_id: osId,
           type: "REC",
-          amount: (ivaFloat*importe) + tributos,
+          amount: importe,
           comprobante_id: createdComprobante.id ?? "",
         });
       }
 
       const eventOrg = createEventOrg({
         type: "REC",
-        amount: (ivaFloat*importe) + tributos,
+        amount: importe,
         comprobante_id: createdComprobante.id ?? "",
       });
 
@@ -363,9 +368,9 @@ const confirmationPage = ({
 
 
   //reemplazar por comprobante creado
-  if (fcSeleccionada && fcSeleccionada[0]) {
+  if (createdComprobante) {
     const html = htmlBill(
-      fcSeleccionada[0],
+      createdComprobante,
       company,
       undefined,
       2,
@@ -419,7 +424,7 @@ const confirmationPage = ({
       window.open(resHtml.file, "_blank");
     }
     toast.success("La factura se creo correctamente");
-    router.push("/dashboard");
+    router.push("/");
   }
 
   
