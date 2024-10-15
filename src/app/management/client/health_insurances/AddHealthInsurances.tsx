@@ -604,112 +604,6 @@ export function AddHealthInsurances(props: {
                 onChange={(e) => setFiscalCountry(e.target.value)}
               />
             </div>
-
-            <p className="col-span-4 mt-3 px-1 py-2 justify-start text-black font-xs text-sm font-semibold">
-              Datos de Contacto
-            </p>
-            <div>
-              <Label htmlFor="address" className="text-xs text-gray-500">
-                DOMICILIO COMERCIAL
-              </Label>
-              <Input
-                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
-                id="address"
-                placeholder="..."
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="address" className="text-xs text-gray-500">
-                PISO
-              </Label>
-              <Input
-                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
-                id="address"
-                placeholder="0"
-                value={floor}
-                onChange={(e) => setFloor(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="address" className="text-xs text-gray-500">
-                OFICINA
-              </Label>
-              <Input
-                className=" mb-2 border-[#bef0bb] border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right w-full"
-                id="address"
-                placeholder="0"
-                value={office}
-                onChange={(e) => setOffice(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="locality" className="text-xs text-gray-500">
-                LOCALIDAD
-              </Label>
-              <Input
-                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
-                id="locality"
-                placeholder="..."
-                value={locality}
-                onChange={(e) => setLocality(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="province" className="text-xs text-gray-500">
-                PROVINCIA
-              </Label>
-              <Input
-                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
-                id="province"
-                placeholder="..."
-                value={province}
-                onChange={(e) => setProvince(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="postal_code" className="text-xs text-gray-500">
-                CÓDIGO POSTAL
-              </Label>
-              <Select onValueChange={setPostalCode} value={postalCode}>
-                <SelectTrigger className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
-                  <SelectValue placeholder="0" />
-                </SelectTrigger>
-                <SelectContent>
-                  {cps?.map((cp) => (
-                    <SelectItem key={cp.id} value={cp.id}>
-                      {cp.cp}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="address" className="text-xs text-gray-500">
-                TELÉFONO
-              </Label>
-              <Input
-                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
-                id="address"
-                placeholder="0"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="address" className="text-xs text-gray-500">
-                E-MAIL
-              </Label>
-              <Input
-                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
-                id="address"
-                placeholder="..."
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
             <p className="col-span-4 mt-3 px-1 py-2 justify-start text-black font-xs text-sm font-semibold">
               Información de la cuenta
             </p>
@@ -817,6 +711,112 @@ export function AddHealthInsurances(props: {
                 </span>
               )}
             </div>
+            <p className="col-span-4 mt-3 px-1 py-2 justify-start text-black font-xs text-sm font-semibold">
+              Datos de Contacto
+            </p>
+            <div>
+              <Label htmlFor="address" className="text-xs text-gray-500">
+                DOMICILIO COMERCIAL
+              </Label>
+              <Input
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                id="address"
+                placeholder="..."
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="address" className="text-xs text-gray-500">
+                PISO
+              </Label>
+              <Input
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                id="address"
+                placeholder="0"
+                value={floor}
+                onChange={(e) => setFloor(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="address" className="text-xs text-gray-500">
+                OFICINA
+              </Label>
+              <Input
+                className=" mb-2 border-[#bef0bb] border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right w-full"
+                id="address"
+                placeholder="0"
+                value={office}
+                onChange={(e) => setOffice(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="locality" className="text-xs text-gray-500">
+                LOCALIDAD
+              </Label>
+              <Input
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                id="locality"
+                placeholder="..."
+                value={locality}
+                onChange={(e) => setLocality(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="province" className="text-xs text-gray-500">
+                PROVINCIA
+              </Label>
+              <Input
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                id="province"
+                placeholder="..."
+                value={province}
+                onChange={(e) => setProvince(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="postal_code" className="text-xs text-gray-500">
+                CÓDIGO POSTAL
+              </Label>
+              <Select onValueChange={setPostalCode} value={postalCode}>
+                <SelectTrigger className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
+                  <SelectValue placeholder="0" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cps?.map((cp) => (
+                    <SelectItem key={cp.id} value={cp.id}>
+                      {cp.cp}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="address" className="text-xs text-gray-500">
+                TELÉFONO
+              </Label>
+              <Input
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                id="address"
+                placeholder="0"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="address" className="text-xs text-gray-500">
+                E-MAIL
+              </Label>
+              <Input
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                id="address"
+                placeholder="..."
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+
             <p className="col-span-4 mt-3 px-1 py-2 justify-start text-black font-xs text-sm font-semibold">
               Asignar columnas de excel
             </p>
