@@ -9,7 +9,7 @@ import { TableRecord } from "./columns";
 import { AddHealthInsurances } from "./AddHealthInsurances";
 
 export default function Home() {
-  const obraSocial = api.healthInsurances.list.useQuery().data;
+  const obraSocial = api.healthInsurances.listClient.useQuery().data;
   const tableRecords: TableRecord[] = [];
   if (obraSocial) {
     for (const os of obraSocial) {

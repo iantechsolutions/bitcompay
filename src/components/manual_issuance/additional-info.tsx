@@ -1,3 +1,4 @@
+"use client";
 import ElementCard from "../affiliate-page/element-card";
 import {
   Select,
@@ -6,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { cn, valueToNameComprobanteMap } from "~/lib/utils";
+import { cn, ivaDictionary, valueToNameComprobanteMap } from "~/lib/utils";
 import GeneralCard from "./general-card";
 import { useFormContext, UseFormReturn } from "react-hook-form";
 import { useFieldArray } from "react-hook-form";
@@ -33,6 +34,7 @@ import {
   ManualGenInputs,
   otherConceptsForm,
 } from "~/lib/types/app";
+import { Label } from "../ui/label";
 
 type AdditionalInfoProps = {
   onValueChange?: () => void;
@@ -45,6 +47,7 @@ type AdditionalInfoProps = {
   asociatedFCForm: UseFormReturn<AsociatedFCForm>;
   otherConceptsForm: UseFormReturn<otherConceptsForm>;
   grupoFamiliarId?: string;
+  comprobantes?: RouterOutputs["comprobantes"]["getByEntity"];
 };
 export default function AdditionalInfoCard({
   onValueChange,
@@ -57,22 +60,16 @@ export default function AdditionalInfoCard({
   otherConceptsForm,
   visualization,
   grupoFamiliarId,
+  comprobantes,
 }: AdditionalInfoProps) {
-  const { data: comprobantes } = api.comprobantes.getByEntity.useQuery({
-    familyGroup: grupoFamiliarId,
-    healthInsurance: null,
-    tipoComprobante: null,
-  });
-  function getComprobantesOptions(tipoComprobante: string) {
-    return comprobantes
-      ?.slice(0, 10)
-      .filter((comprobante) => comprobante.tipoComprobante === tipoComprobante)
-      .map((comprobante) => (
-        <SelectItem key={comprobante.id} value={comprobante.id}>
-          {comprobante.nroComprobante}
-        </SelectItem>
-      ));
-  }
+  // const { data: comprobantes } = api.comprobantes.getByEntity.useQuery({
+  //   familyGroup: grupoFamiliarId,
+  //   healthInsurance: null,
+  //   tipoComprobante: null,
+  // });
+  const IVA_TASA = parseFloat(
+    ivaDictionary[Number(form.watch("alicuota"))] ?? "0"
+  );
   const { fields, remove, append } = useFieldArray({
     control: conceptsForm.control,
     name: "concepts",
@@ -86,6 +83,7 @@ export default function AdditionalInfoCard({
     name: "comprobantes",
   });
 
+  const [currentCompType, setCurrentCompType] = useState("");
   const {
     fields: otherConceptsFields,
     remove: otherConceptsRemove,
@@ -113,10 +111,15 @@ export default function AdditionalInfoCard({
       <GeneralCard title="Conceptos" containerClassName="flex flex-col gap-5">
         {fields.length === 0 && !visualization && (
           <div className="flex justify-between px-2">
-            <p> No se agregarán conceptos</p>
+            <p>No se agregarán conceptos</p>
             <Button
               onClick={() =>
-                append({ concepto: "", importe: 0, iva: 0, total: 0 })
+                append({
+                  concepto: "",
+                  importe: 0,
+                  iva: IVA_TASA, // Para mostrar como porcentaje
+                  total: 0,
+                })
               }
             >
               Agregar concepto
@@ -141,7 +144,7 @@ export default function AdditionalInfoCard({
                       <Input
                         {...field}
                         value={field.value ?? ""}
-                        placeholder="ingrese un concepto"
+                        placeholder="Ingrese un concepto"
                       />
                     )}
                   />,
@@ -162,6 +165,25 @@ export default function AdditionalInfoCard({
                       <Input
                         {...field}
                         type="number"
+                        onChange={(e) => {
+                          const importe = parseFloat(e.target.value) || 0; // Manejo de valores no numéricos
+                          field.onChange(importe);
+                          
+                          const ivaCalcular = isNaN(IVA_TASA) ? 0 : IVA_TASA;
+                          // console.log("IVA_TASA",IVA_TASA);
+                          // if(isNaN(IVA_TASA)){
+                          //   IVA_TASA = 1;
+                          // }
+                          const iva = (importe * (ivaCalcular ?? 1)) / 100;
+                          console.log("iva",iva);
+                          const total = importe + iva;
+                          conceptsForm.setValue(
+                            `concepts.${index}.total`,
+                            total
+                          );
+                          conceptsForm.setValue(`concepts.${index}.iva`, iva);
+                          if (onValueChange) onValueChange();
+                        }}
                         value={field.value ?? 0}
                       />
                     )}
@@ -174,49 +196,24 @@ export default function AdditionalInfoCard({
               className="pr-1 pb-0 border-[#bef0bb]"
               element={{
                 key: "IVA",
-                value: visualizationSwitcher(
-                  visualization,
-                  <FormField
-                    control={conceptsForm.control}
-                    name={`concepts.${index}.iva`}
-                    render={({ field }) => (
-                      <Input
-                        {...field}
-                        type="number"
-                        onChange={(e) => {
-                          field.onChange(e);
-                          if (onValueChange) onValueChange();
-                        }}
-                        value={field.value ?? 0}
-                      />
-                    )}
-                  />,
-                  fieldElement.iva
-                ),
+                // Mostrar el IVA como porcentaje
+                value: <p className="px-[12px] py-[8px]">
+                {(
+                  conceptsForm.getValues(`concepts.${index}.iva`) ?? 0
+                ).toFixed(2)}
+              </p>,
               }}
             />
             <ElementCard
               className="pr-1 pb-0 border-[#bef0bb]"
               element={{
                 key: "TOTAL",
-                value: visualizationSwitcher(
-                  visualization,
-                  <FormField
-                    control={conceptsForm.control}
-                    name={`concepts.${index}.total`}
-                    render={({ field }) => (
-                      <Input
-                        {...field}
-                        type="number"
-                        onChange={(e) => {
-                          field.onChange(e);
-                          if (onValueChange) onValueChange();
-                        }}
-                        value={field.value ?? 0}
-                      />
-                    )}
-                  />,
-                  fieldElement.total
+                value: (
+                  <p className="px-[12px] py-[8px]">
+                    {(
+                      conceptsForm.getValues(`concepts.${index}.total`) ?? 0
+                    ).toFixed(2)}
+                  </p>
                 ),
               }}
             />
@@ -228,7 +225,12 @@ export default function AdditionalInfoCard({
                   variant="outline"
                   className="bg-transparent hover:bg-transparent border-none shadow-none"
                   onClick={() =>
-                    append({ concepto: "", importe: 0, iva: 0, total: 0 })
+                    append({
+                      concepto: "",
+                      importe: 0,
+                      iva: parseInt(form.watch("alicuota")),
+                      total: 0,
+                    })
                   }
                 >
                   <AddCircleIcon className="text-[#8bd087]" />
@@ -263,6 +265,7 @@ export default function AdditionalInfoCard({
                   puntoVenta: "",
                   nroComprobante: "",
                   dateEmision: new Date(),
+                  id: "",
                 })
               }
             >
@@ -294,6 +297,7 @@ export default function AdditionalInfoCard({
                                   `comprobantes.${index}.tipoComprobante`,
                                   reverseComprobanteDictionary[Number(e)]!
                                 );
+                                setCurrentCompType(e);
                               }}
                               defaultValue={field.value}
                             >
@@ -303,17 +307,8 @@ export default function AdditionalInfoCard({
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                <SelectContent>
-                                  <SelectItem value="0">RECIBO</SelectItem>
-                                  <SelectItem value="1">FACTURA A</SelectItem>
-                                  <SelectItem value="3">
-                                    NOTA DE CRÉDITO A
-                                  </SelectItem>
-                                  <SelectItem value="6">FACTURA B</SelectItem>
-                                  <SelectItem value="8">
-                                    NOTA DE CRÉDITO B
-                                  </SelectItem>
-                                </SelectContent>
+                                <SelectItem value="1">FACTURA A</SelectItem>
+                                <SelectItem value="6">FACTURA B</SelectItem>
                               </SelectContent>
                             </Select>
                           </FormItem>
@@ -333,11 +328,28 @@ export default function AdditionalInfoCard({
                         control={asociatedFCForm.control}
                         name={`comprobantes.${index}.puntoVenta`}
                         render={({ field }) => (
-                          <Input
-                            {...field}
-                            placeholder="Punto de venta"
-                            disabled
-                          />
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8">
+                              <SelectValue placeholder="Seleccionar PV..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {[
+                                { value: "1", label: "1" },
+                                { value: "2", label: "2" },
+                              ].map((option) => (
+                                <SelectItem
+                                  key={option.value}
+                                  value={option.value}
+                                  className="rounded-none "
+                                >
+                                  {option.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         )}
                       />,
                       fieldElement.puntoVenta
@@ -357,8 +369,7 @@ export default function AdditionalInfoCard({
                           <FormItem>
                             <Select
                               onValueChange={(e) => {
-                                for (const comprobante of comprobantes!) {
-                                  console.log(comprobante.id);
+                                for (const comprobante of comprobantes ?? []) {
                                   if (comprobante.id === e) {
                                     setFcSeleccionada([
                                       ...fcSeleccionada,
@@ -369,6 +380,11 @@ export default function AdditionalInfoCard({
                                       `comprobantes.${index}.nroComprobante`,
                                       comprobante.nroComprobante.toString()
                                     );
+                                    asociatedFCForm.setValue(
+                                      `comprobantes.${index}.id`,
+                                      comprobante.id.toString()
+                                    );
+
                                     asociatedFCForm.setValue(
                                       `comprobantes.${index}.puntoVenta`,
                                       comprobante.ptoVenta.toString()
@@ -399,11 +415,23 @@ export default function AdditionalInfoCard({
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                {getComprobantesOptions(
-                                  asociatedFCForm.watch(
-                                    `comprobantes.${index}.tipoComprobante`
+                                {comprobantes
+                                  ?.filter(
+                                    (comprobante) =>
+                                      comprobante.tipoComprobante ===
+                                      reverseComprobanteDictionary[
+                                        Number(currentCompType)
+                                      ]
                                   )
-                                )}
+                                  .slice(0, 10)
+                                  .map((comprobante) => (
+                                    <SelectItem
+                                      key={comprobante.id}
+                                      value={comprobante.id}
+                                    >
+                                      {comprobante.nroComprobante}
+                                    </SelectItem>
+                                  ))}
                               </SelectContent>
                             </Select>
                           </FormItem>
@@ -446,7 +474,12 @@ export default function AdditionalInfoCard({
                                 </FormControl>
                               </PopoverTrigger>
                               <PopoverContent className="w-auto p-0">
-                                <Calendar mode="single" initialFocus={true} />
+                                <Calendar
+                                  mode="single"
+                                  initialFocus={true}
+                                  onSelect={(date) => field.onChange(date)}
+                                  selected={field.value ?? new Date()}
+                                />
                               </PopoverContent>
                             </Popover>
                           </FormItem>
@@ -482,6 +515,7 @@ export default function AdditionalInfoCard({
                           puntoVenta: "",
                           nroComprobante: "",
                           dateEmision: new Date(),
+                          id: "",
                         })
                       }
                     >

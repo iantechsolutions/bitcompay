@@ -1382,6 +1382,8 @@ export const aportes_os = pgTable("aportes_os", {
     .references(() => integrants.id)
     .notNull(),
   cuil: varchar("cuil", { length: 255 }).notNull(),
+  // type: varchar("type", { length: 255 }).notNull(),}
+  // origen: varchar("origen", { length: 255 }).notNull(),
   process_date: timestamp("process_date", { mode: "date" }),
   contribution_date: timestamp("contribution_date", { mode: "date" }),
   support_date: timestamp("support_date", { mode: "date" }),

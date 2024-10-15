@@ -101,8 +101,8 @@ export default function DetailsPage(props: {
         });
 
         toast.success("Precios eliminados correctamente");
-        router.push("./");
-        // router.refresh();
+        window.history.go(-1);
+        router.refresh();
       }
     } catch (e) {
       const error = asTRPCError(e)!;
@@ -343,7 +343,7 @@ export default function DetailsPage(props: {
                             {price.condition}
                           </TableCell>
                           <TableCell className="text-center font-medium opacity-60">
-                          ${formatCurrency(price.amount)}
+                            {formatCurrency(price.amount)}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -384,7 +384,7 @@ export default function DetailsPage(props: {
                             {price.to_age} {price.to_age == 1 ? "año" : "años"}
                           </TableCell>
                           <TableCell className="px-[7vw] text-center font-medium opacity-60">
-                          ${formatCurrency(price.amount)}
+                            {formatCurrency(price.amount)}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -396,7 +396,9 @@ export default function DetailsPage(props: {
           <Dialog open={openDelete} onOpenChange={setOpenDelete}>
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
-                <DialogTitle>Seguro que borrar esta vigencia?</DialogTitle>
+                <DialogTitle>
+                  Seguro que desea borrar esta vigencia?
+                </DialogTitle>
               </DialogHeader>
 
               <DialogFooter>

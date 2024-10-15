@@ -62,6 +62,8 @@ export const pricePerConditionRouter = createTRPCRouter({
           plan_id: input.plan_id,
           validy_date: input.validy_date,
         });
+
+      console.log("Pasta", new_pricePerCondition);
       return new_pricePerCondition;
     }),
   change: protectedProcedure

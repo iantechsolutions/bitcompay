@@ -109,6 +109,7 @@ export function AddHealthInsurances(props: {
   const [floor, setFloor] = useState(OS?.floor ?? "");
   const [office, setOffice] = useState(OS?.office ?? "");
   const [initialValue, setInitialValue] = useState("0");
+  // const [type, setType] = useState(OS?.type ?? "");
 
   const [dateState, setDateState] = useState<Date | undefined>(
     OS?.dateState ?? undefined
@@ -213,6 +214,8 @@ export function AddHealthInsurances(props: {
         excelEmployerDocument: excelEmployerDocument,
         excelSupportPeriod: excelSupportPeriod,
         excelContributionperiod: excelContributionperiod,
+        // origen: origen,
+
         // initialValue: initialValue,
         // responsibleName: responsibleName,
         // sellCondition: sellCondition,
@@ -284,6 +287,7 @@ export function AddHealthInsurances(props: {
         excelEmployerDocument: excelEmployerDocument,
         excelSupportPeriod: excelSupportPeriod,
         excelContributionperiod: excelContributionperiod,
+        // origen: origen,
         // initialValue: initialValue,
       });
 
@@ -428,13 +432,11 @@ export function AddHealthInsurances(props: {
                   <SelectValue placeholder="Seleccione uno" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="monotributista">
-                    Monotributista</SelectItem>
+                  <SelectItem value="monotributista">Monotributista</SelectItem>
                   <SelectItem value="responsable_inscripto">
                     Responsable inscripto
                   </SelectItem>
-                  <SelectItem value="exento">
-                    Exento</SelectItem>
+                  <SelectItem value="exento">Exento</SelectItem>
                   <SelectItem value="consumidor_final">
                     Consumidor final
                   </SelectItem>
@@ -449,8 +451,7 @@ export function AddHealthInsurances(props: {
                   <SelectValue placeholder="Seleccione uno" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="monotributista">
-                    Monotributista</SelectItem>
+                  <SelectItem value="monotributista">Monotributista</SelectItem>
                   <SelectItem value="responsable_inscripto">
                     Responsable inscripto
                   </SelectItem>
@@ -869,6 +870,18 @@ export function AddHealthInsurances(props: {
                 onChange={(e) => setExcelSupportPeriod(e.target.value)}
               />
             </div>
+            {/* <div>
+              <Label htmlFor="type" className="text-xs text-gray-500">
+                Tipo
+              </Label>
+              <Input
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                id="type"
+                placeholder="..."
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+              />
+            </div> */}
             {/* {OS ? null : (
               <div>
                 <Label htmlFor="initialValue">Saldo inicial</Label>
