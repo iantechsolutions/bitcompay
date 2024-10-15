@@ -29,7 +29,7 @@ export default function CCDetail(props: {
   const { data: events } = api.events.getByCC.useQuery({
     ccId: props.params.ccId,
   });
-  const grupo = api.family_groups.get.useQuery({
+  const { data: grupo } = api.family_groups.get.useQuery({
     family_groupsId: props.params.affiliateId,
   });
   const grupos = props.params.affiliateId;
@@ -41,7 +41,7 @@ export default function CCDetail(props: {
       ? prev
       : current;
   });
-  const comprobantes = grupo.data?.comprobantes;
+  const comprobantes = grupo?.comprobantes;
   let lastComprobante;
   if (comprobantes && comprobantes?.length! > 0) {
     lastComprobante = comprobantes?.reduce((prev, current) => {
@@ -82,7 +82,7 @@ export default function CCDetail(props: {
     saldo_a_pagar = FCTotal - total_a_pagar;
   }
 
-  const afiliado = grupo.data?.integrants.find((x) => x.isHolder);
+  const afiliado = grupo?.integrants.find((x) => x.isHolder);
   const comprobantesTable: RouterOutputs["comprobantes"]["getByLiquidation"] =
     [];
   if (comprobanteFCReciente) {
@@ -99,27 +99,45 @@ export default function CCDetail(props: {
       // console.log("saldo_a_pagar");
       // console.log(saldo_a_pagar);
       console.log("event", formatCurrency(event.event_amount));
-
-      tableRows.push({
-        date: event.createdAt,
-        description: event.description,
-        amount: formatCurrency(event.event_amount),
-        // comprobanteType: "Nota de credito A",
-        comprobanteType: event.comprobantes?.tipoComprobante ?? "FACTURA A",
-        comprobanteNumber:
-          (event.comprobantes?.ptoVenta.toString().padStart(5) ?? "00000") +
-          "-" +
-          (event.comprobantes?.nroComprobante.toString().padStart(8) ??
-            "00000000"),
-        status: "Pendiente",
-        iva: Number(event.comprobantes?.iva ?? 0),
-        comprobantes: comprobantesTable,
-        currentAccountAmount: formatCurrency(NCTotal ?? 0),
-        saldo_a_pagar: formatCurrency(saldo_a_pagar ?? 0),
-        nombre: afiliado?.name ?? "",
-        cuit: afiliado?.fiscal_id_number ?? "",
-        event: event,
-      });
+      if (event.comprobantes) {
+        tableRows.push({
+          date: event.createdAt,
+          description: event.description,
+          amount: formatCurrency(event.event_amount),
+          // comprobanteType: "Nota de credito A",
+          comprobanteType: event.comprobantes?.tipoComprobante ?? "FACTURA A",
+          comprobanteNumber:
+            (event.comprobantes?.ptoVenta.toString().padStart(5) ?? "00000") +
+            "-" +
+            (event.comprobantes?.nroComprobante.toString().padStart(8) ??
+              "00000000"),
+          status: "Pendiente",
+          iva: Number(event.comprobantes?.iva ?? 0),
+          comprobantes: comprobantesTable,
+          currentAccountAmount: formatCurrency(NCTotal ?? 0),
+          saldo_a_pagar: formatCurrency(saldo_a_pagar ?? 0),
+          nombre: afiliado?.name ?? "",
+          cuit: afiliado?.fiscal_id_number ?? "",
+          event: event,
+        });
+      } else {
+        tableRows.push({
+          date: event.createdAt,
+          description: event.description,
+          amount: formatCurrency(event.event_amount),
+          // comprobanteType: "Nota de credito A",
+          comprobanteType: "Apertura de CC",
+          comprobanteNumber: "00000" + "-" + "00000000",
+          status: "Pendiente",
+          iva: 0,
+          comprobantes: comprobantesTable,
+          currentAccountAmount: formatCurrency(NCTotal ?? 0),
+          saldo_a_pagar: formatCurrency(saldo_a_pagar ?? 0),
+          nombre: afiliado?.name ?? "",
+          cuit: afiliado?.fiscal_id_number ?? "",
+          event: event,
+        });
+      }
     }
   }
   //dasdas
@@ -127,7 +145,7 @@ export default function CCDetail(props: {
     <LayoutContainer>
       <Title>Movimientos cuenta corriente</Title>
       <h2 className=" font-semibold mb-2">
-        Grupo familiar N° {grupo.data?.numericalId}
+        Grupo familiar N° {grupo?.numericalId}
       </h2>
       <div className="flex gap-3 mt-5 mb-10">
         <Card className="py-4 px-6 w-1/4 grid grid-cols-2 items-center">
@@ -137,7 +155,7 @@ export default function CCDetail(props: {
             {lastEvent?.current_amount !== undefined ? (
               <span
                 className={`text-2xl font-bold ${
-                  lastEvent?.current_amount < 0
+                  lastEvent?.current_amount > 0
                     ? "text-[#6952EB]"
                     : "text-[#EB2727]"
                 }`}>
