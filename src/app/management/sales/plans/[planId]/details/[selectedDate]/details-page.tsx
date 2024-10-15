@@ -85,30 +85,12 @@ export default function DetailsPage(props: {
     month: "long",
     day: "numeric",
   });
-  const [openDelete, setOpenDelete] = useState<boolean>(false);
 
   const { mutateAsync: deletePricePerCondition, isLoading: isDeleting } =
     api.pricePerCondition.deleteByPlanAndDate.useMutation();
 
   const planId = props?.plan?.id ?? "";
 
-  async function handleDelete() {
-    try {
-      if (props.date) {
-        await deletePricePerCondition({
-          id: planId,
-          currentVigency: props.date,
-        });
-
-        toast.success("Precios eliminados correctamente");
-        window.history.go(-1);
-        router.refresh();
-      }
-    } catch (e) {
-      const error = asTRPCError(e)!;
-      toast.error(error.message);
-    }
-  }
   const plaId = props.plan?.id ?? "";
   const { data, error, isLoading } =
     api.pricePerCondition.getByCreatedAt.useQuery({
@@ -201,6 +183,21 @@ export default function DetailsPage(props: {
     setGroupByAge(groupByAge);
   }, []);
 
+  const handleDelete = async (planId: string, currentVigency: Date) => {
+    try {
+      await deletePricePerCondition({
+        id: planId,
+        currentVigency: currentVigency,
+      });
+      toast.success("Precios eliminados correctamente");
+
+      window.location.reload();
+    } catch (e) {
+      const error = asTRPCError(e)!;
+      toast.error(error.message);
+    }
+  };
+
   return (
     <LayoutContainer>
       <GoBackButton url={"../"} />
@@ -287,10 +284,11 @@ export default function DetailsPage(props: {
 
             {deleteable && (
               <div className="flex items-center">
-                <Button onClick={() => setOpenDelete(true)} className="ml-10">
-                  {" "}
-                  Eliminar
-                </Button>
+                <DeletePrice
+                  planId={planId ?? ""}
+                  currentVigency={props.date}
+                  onDelete={() => handleDelete(planId ?? "", props.date)}
+                />
 
                 <Button
                   onClick={() => handleUpdatePrice("edit")}
@@ -393,27 +391,30 @@ export default function DetailsPage(props: {
               </TabsContent>
             </Tabs>
           )}
-          <Dialog open={openDelete} onOpenChange={setOpenDelete}>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>
-                  Seguro que desea borrar esta vigencia?
-                </DialogTitle>
-              </DialogHeader>
-
-              <DialogFooter>
-                <Button onClick={() => setOpenDelete(false)}>Cancelar</Button>
-                <Button disabled={isDeleting} onClick={handleDelete}>
-                  {isDeleting && (
-                    <Loader2Icon className="mr-2 animate-spin" size={20} />
-                  )}
-                  Eliminar vigencia
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
         </section>
       </div>
     </LayoutContainer>
   );
+}
+
+{
+  /* <Dialog open={openDelete} onOpenChange={setOpenDelete}>
+  <DialogContent className="sm:max-w-[425px]">
+    <DialogHeader>
+      <DialogTitle>
+        Seguro que desea borrar esta vigencia?
+      </DialogTitle>
+    </DialogHeader>
+
+    <DialogFooter>
+      <Button onClick={() => setOpenDelete(false)}>Cancelar</Button>
+      <Button disabled={isDeleting} onClick={handleDelete}>
+        {isDeleting && (
+          <Loader2Icon className="mr-2 animate-spin" size={20} />
+        )}
+        Eliminar vigencia
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog> */
 }
