@@ -125,6 +125,8 @@ export default function Page() {
   }
 
   function generateComprobante() {
+    const formValues = form.getValues()
+    const concepto = formValues.tipoDeConcepto;
     if (marcas) {
       setLogo(marcas[0]?.logo_url ?? "");
     }
@@ -485,7 +487,7 @@ export default function Page() {
   }
 
   const [tipoComprobante, setTipoComprobante] = useState("");
-  const [concepto, setConcepto] = useState("");
+  // const [concepto, setConcepto] = useState("");
   const [tipoDocumento, setTipoDocumento] = useState("");
   const [ivaCondition, setIvaCondition] = useState("");
   const [sellCondition, setSellCondition] = useState("");
