@@ -546,8 +546,6 @@ export default function Page() {
     let billResponsible = grupo?.integrants.find(
       (x: { isBillResponsible: any }) => x.isBillResponsible
     );
-    console.log("grupo?.comprobantes");
-    console.log(grupo?.comprobantes ?? []);
     setComprobantes(grupo?.comprobantes ?? []);
     setNroDocumento(billResponsible?.fiscal_id_number ?? "0");
     setNroDocumentoDNI(billResponsible?.id_number ?? "0");

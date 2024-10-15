@@ -72,7 +72,7 @@ export default function PlanPage(props: {
   const [anio, setAnio] = useState(2020);
   const [mes, setMes] = useState(0);
   const [vigente, setVigente] = useState<Date>();
-  const [percent, setPercent] = useState("");
+  const [percent, setPercent] = useState<number>(0);
 
   const { mutateAsync: deletePlan, isLoading } = api.plans.delete.useMutation();
 
@@ -101,6 +101,7 @@ export default function PlanPage(props: {
     setArrayFechas(sortedArrayFechas);
   }, []);
   async function handleUpdatePrice() {
+    console.log("llego");
     setLoading(true);
     if (plan?.pricesPerCondition) {
       if (
@@ -114,7 +115,7 @@ export default function PlanPage(props: {
         for (const price of validPrices) {
           await createPricePerAge({
             plan_id: plan.id ?? "",
-            amount: price.amount * (1 + parseFloat(percent) / 100),
+            amount: price.amount * (price.amount + percent / 100),
             from_age: price.from_age ?? 0,
             to_age: price.to_age ?? 0,
             condition: price.condition ?? "",
@@ -122,6 +123,8 @@ export default function PlanPage(props: {
             validy_date: new Date(anio, mes, 1),
           });
         }
+        toast.success("Se actualizo el listado de precios");
+        router.refresh();
         setOpen(false);
       } else {
         toast.error("Ya existe un listado de precios para el mes seleccionado");
@@ -472,8 +475,9 @@ export default function PlanPage(props: {
             <Input
               className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none"
               id="number"
+              type="number"
               value={percent}
-              onChange={(e) => setPercent(e.target.value)}
+              onChange={(e) => setPercent(parseInt(e.target.value))}
             />
           </div>
 

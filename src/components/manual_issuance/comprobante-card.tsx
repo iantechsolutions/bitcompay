@@ -404,7 +404,11 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" initialFocus={true} onSelect={(date) => field.onChange(date)}/>
+                      <Calendar
+                        mode="single"
+                        initialFocus={true}
+                        onSelect={(date) => field.onChange(date)}
+                      />
                     </PopoverContent>
                   </Popover>
                 )}
@@ -442,7 +446,11 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" initialFocus={true} onSelect={(date) => field.onChange(date)} />
+                      <Calendar
+                        mode="single"
+                        initialFocus={true}
+                        onSelect={(date) => field.onChange(date)}
+                      />
                     </PopoverContent>
                   </Popover>
                 )}
@@ -482,7 +490,11 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" initialFocus={true} onSelect={(date) => field.onChange(date)} />
+                      <Calendar
+                        mode="single"
+                        initialFocus={true}
+                        onSelect={(date) => field.onChange(date)}
+                      />
                     </PopoverContent>
                   </Popover>
                 )}
@@ -521,7 +533,11 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" initialFocus={true} onSelect={(date) => field.onChange(date)} />
+                      <Calendar
+                        mode="single"
+                        initialFocus={true}
+                        onSelect={(date) => field.onChange(date)}
+                      />
                     </PopoverContent>
                   </Popover>
                 )}
@@ -563,7 +579,11 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" initialFocus={true} onSelect={(date) => field.onChange(date)} />
+                      <Calendar
+                        mode="single"
+                        initialFocus={true}
+                        onSelect={(date) => field.onChange(date)}
+                      />
                     </PopoverContent>
                   </Popover>
                 )}
