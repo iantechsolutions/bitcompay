@@ -19,8 +19,11 @@ export function makeExcelRows(
     excelRow.push(name);
     excelRow.push(cuit);
     const original_comprobante = fg?.comprobantes?.find(
-      (comprobante) => comprobante?.origin?.toLowerCase() === "factura"
+      (comprobante) =>
+        comprobante.origin?.toLowerCase() === "factura" &&
+        comprobante.tipoComprobante !== "Apertura de CC"
     );
+
     // const saldo_anterior = toNumberOrZero(
     //   original_comprobante?.items.find(
     //     (item) => item.concept === "Saldo anterior"

@@ -52,6 +52,7 @@ interface DetailData {
   currentAccountAmount: number;
   nombre: string;
   cuit: string;
+  id: string;
   [index: string]: any;
 }
 
@@ -171,6 +172,7 @@ export function DataTable<TData, TValue>({
       }
     }
 
+    detailData.id = row.original.id;
     setDetailData(detailData);
     setOpen(!open);
   };
