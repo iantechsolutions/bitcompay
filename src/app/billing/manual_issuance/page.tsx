@@ -64,8 +64,7 @@ export default function Page() {
   const { data: marcas } = api.brands.list.useQuery();
   const { data: gruposFamiliar } = api.family_groups.list.useQuery();
   const { data: obrasSociales } = api.healthInsurances.listClient.useQuery();
-  // const { data: comprobantes } = api.comprobantes.list.useQuery();
-
+  const {data: comprobantesEntidad} = api.comprobantes.getByEntity.useQuery();
   const [subTotal, setSubTotal] = useState<number>(0);
   const [ivaTotal, setIvaTotal] = useState<number>(0);
   const [otherAttributes, setOtherAttributes] = useState<number>(0);
@@ -107,6 +106,8 @@ export default function Page() {
         for (const concepts of otherConceptsForm.getValues().otherConcepts) {
           subTotal += Number(concepts.importe);
         }
+        const importe = form.getValues().facturasEmitidas.importe;
+        subTotal+= form.getValues().facturasEmitidas.importe; 
       case "Nota de crédito":
         for (const comprobante of asociatedFCForm.getValues().comprobantes) {
           console.log("comprobante del forms", comprobante);
@@ -133,28 +134,21 @@ export default function Page() {
     }
 
     if (
-      tipoComprobante != "0" &&
-      (
-      !form.getValues().puntoVenta ||
-      !form.getValues().dateEmision ||
-      !tipoComprobante ||
-      !concepto ||
-      !iva ||
-      !form.getValues().dateVencimiento ||
-      !subTotal ||
-      !tributos
-    )
-
-    ||
-
-    tipoComprobante == "0" &&
-    (
-      !form.getValues().dateEmision ||
-      !tipoComprobante ||
-      !form.getValues().dateVencimiento ||
-      !subTotal ||
-      !tributos
-    )
+      (tipoComprobante != "0" &&
+        (!form.getValues().puntoVenta ||
+          !form.getValues().dateEmision ||
+          !tipoComprobante ||
+          !concepto ||
+          !iva ||
+          !form.getValues().dateVencimiento ||
+          !subTotal ||
+          !tributos)) ||
+      (tipoComprobante == "0" &&
+        (!form.getValues().dateEmision ||
+          !tipoComprobante ||
+          !form.getValues().dateVencimiento ||
+          !subTotal ||
+          !tributos))
     ) {
       console.log(!form.getValues().puntoVenta);
       console.log(!form.getValues().dateEmision);
@@ -493,11 +487,9 @@ export default function Page() {
   const [nroDocumento, setNroDocumento] = useState("");
   const [nroDocumentoDNI, setNroDocumentoDNI] = useState("");
   const [nombre, setNombre] = useState("");
-  // const [importe, setImporte] = useState("0");
   const [tributos, setTributos] = useState("0");
   const [servicioprod, setservicioprod] = useState("Servicio");
   const [obraSocialId, setObraSocialId] = useState("");
-  // const [iva, setIva] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [grupoFamiliarId, setGrupoFamiliarId] = useState("");
@@ -510,7 +502,13 @@ export default function Page() {
       dateEmision: new Date(),
       tipoDeConcepto: "",
       alicuota: "",
-      facturasEmitidas: 0,
+      facturasEmitidas: {
+        tipoComprobante: "",
+        puntoVenta: "",
+        nroComprobante: "",
+        importe: 0,
+        iva: "",
+      },
     },
   });
   const conceptsForm = useForm<ConceptsForm>({
@@ -526,7 +524,7 @@ export default function Page() {
       ],
     },
   });
-  console.log("comprobante tipo", valueToNameComprobanteMap[tipoComprobante]);
+
   const asociatedFCForm = useForm<AsociatedFCForm>({
     defaultValues: {
       comprobantes: [
@@ -740,6 +738,8 @@ export default function Page() {
             />
 
             <ComprobanteCard
+              onValueChange={computeTotals}
+              comprobantesEntidad={comprobantesEntidad}
               visualization={false}
               form={form}
               tipoComprobante={tipoComprobante}

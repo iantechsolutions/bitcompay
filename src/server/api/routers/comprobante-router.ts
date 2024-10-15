@@ -871,15 +871,7 @@ export const comprobantesRouter = createTRPCRouter({
       }
     }),
   getByEntity: protectedProcedure
-    .input(
-      z.object({
-        healthInsurance: z.string().optional().nullable(),
-        familyGroup: z.string().optional().nullable(),
-        tipoComprobante: z.string().nullable(),
-      })
-    )
-    .query(async ({ ctx, input }) => {
-      console.log("orgId", ctx.session.orgId);
+    .query(async ({ ctx }) => {
       const bussinessUnits = await db.query.bussinessUnits.findMany({
         where: eq(schema.bussinessUnits.companyId, ctx.session.orgId!),
         with: {
@@ -893,15 +885,6 @@ export const comprobantesRouter = createTRPCRouter({
       let comprobantes = bussinessUnits.flatMap((bu) =>
         bu.ls.flatMap((ls) => ls.comprobantes)
       );
-      if (input.familyGroup) {
-        comprobantes = comprobantes.filter(
-          (comprobante) => comprobante.family_group_id === input.familyGroup
-        );
-      } else if (input.tipoComprobante) {
-        comprobantes = comprobantes.filter(
-          (comprobante) => comprobante.tipoComprobante === input.tipoComprobante
-        );
-      }
       return comprobantes;
     }),
   getByLiquidation: protectedProcedure

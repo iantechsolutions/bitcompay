@@ -59,14 +59,10 @@ export default function AdditionalInfoCard({
   tipoComprobante,
   otherConceptsForm,
   visualization,
-  grupoFamiliarId,
   comprobantes,
+
 }: AdditionalInfoProps) {
-  // const { data: comprobantes } = api.comprobantes.getByEntity.useQuery({
-  //   familyGroup: grupoFamiliarId,
-  //   healthInsurance: null,
-  //   tipoComprobante: null,
-  // });
+ 
   const IVA_TASA = parseFloat(
     ivaDictionary[Number(form.watch("alicuota"))] ?? "0"
   );
@@ -404,6 +400,7 @@ export default function AdditionalInfoCard({
                                     );
 
                                     if (onValueChange) onValueChange();
+                                    break;
                                   }
                                 }
                               }}
