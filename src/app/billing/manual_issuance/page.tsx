@@ -77,6 +77,7 @@ export default function Page() {
   const [selectedComprobante, setSelectedComprobante] = useState<any>(null);
   const [afip, setAfip] = useState<any>(null);
   const router = useRouter();
+
   useEffect(() => {
     async function loginAfip() {
       const afip = await ingresarAfip();
@@ -507,6 +508,7 @@ export default function Page() {
       facturasEmitidas: 0,
     },
   });
+
   const conceptsForm = useForm<ConceptsForm>({
     defaultValues: {
       concepts: [{ concepto: "", importe: 0, iva: 0, total: 0 }],
@@ -520,6 +522,7 @@ export default function Page() {
       ],
     },
   });
+
   console.log("comprobante tipo", valueToNameComprobanteMap[tipoComprobante]);
   const asociatedFCForm = useForm<AsociatedFCForm>({
     defaultValues: {
@@ -540,12 +543,13 @@ export default function Page() {
     defaultValues: { otherConcepts: [{ description: "", importe: 0 }] },
   });
 
+  const [brandId, setBrandId] = useState("");
   const [page, setPage] = useState<"formPage" | "confirmationPage">("formPage");
+
   function handlePageChange(page: "formPage" | "confirmationPage") {
     setPage(page);
   }
 
-  const [brandId, setBrandId] = useState("");
   function handleGrupoFamilarChange(value: string) {
     setGrupoFamiliarId(value);
     setObraSocialId("");
@@ -576,15 +580,50 @@ export default function Page() {
     setIvaCondition(obra?.afip_status ?? "");
     setSellCondition("No Aplica");
   }
+
   function handleComprobanteChange(value: string) {
     setFCSelec(value);
     setSelectedComprobante(comprobantes?.find((x) => x.id == value));
   }
+
   let selectedBrand;
 
   const handleBrandChange = (value: string) => {
     selectedBrand = marcas?.find((marca: { id: string }) => marca.id === value);
     setBrandId(value);
+  };
+
+  const reloadPage = () => {
+    setSubTotal(0);
+    setIvaTotal(0);
+    setOtherAttributes(0);
+    setLogo("");
+    setFCSelec("");
+    setFcSeleccionada([]);
+    setComprobantes(undefined);
+    setSelectedComprobante(null);
+    setTipoComprobante("");
+    setCreatedComprobante(undefined);
+    setTipoDocumento("");
+    setIvaCondition("");
+    setSellCondition("");
+    setNroDocumento("");
+    setNroDocumentoDNI("");
+    setNombre("");
+    setTributos("0");
+    setservicioprod("Servicio");
+    setObraSocialId("");
+    setError(null);
+    // setLoading(true);
+    setGrupoFamiliarId("");
+    form.reset();
+    conceptsForm.reset();
+    otherTributesForm.reset();
+    asociatedFCForm.reset();
+    otherConceptsForm.reset();
+    setPage("formPage");
+    setBrandId("");
+    router.refresh();
   };
 
   if (!grupoFamiliarId && !obraSocialId) {
@@ -791,6 +830,7 @@ export default function Page() {
         {page === "confirmationPage" && createdComprobante && (
           <ConfirmationPage
             form={form}
+            reloadPage={reloadPage}
             fcSeleccionada={fcSeleccionada}
             setFcSeleccionada={setFcSeleccionada}
             conceptsForm={conceptsForm}
