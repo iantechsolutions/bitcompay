@@ -318,11 +318,15 @@ export default function AdditionalInfoCard({
                     //   fieldElement.tipoComprobante
                     // ),
                     value: 
-                    <p className="px-[12px] py-[8px]">
-                      {(
-                        possibleComprobanteTipo
-                      )}
-                    </p>
+                    visualizationSwitcher(
+                      visualization,
+                      <p className="px-[12px] py-[8px]">
+                        {(
+                          possibleComprobanteTipo
+                        )}
+                      </p>,
+                      possibleComprobanteTipo
+                    )
                     
                   }}
                 />
