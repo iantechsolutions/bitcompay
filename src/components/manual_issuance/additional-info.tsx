@@ -172,6 +172,7 @@ export default function AdditionalInfoCard({
                           // }
                           const iva = (importe * (ivaCalcular ?? 1)) / 100;
                           console.log("iva", iva);
+                          console.log("iva", iva);
                           const total = importe + iva;
                           conceptsForm.setValue(
                             `concepts.${index}.total`,
@@ -193,6 +194,13 @@ export default function AdditionalInfoCard({
               element={{
                 key: "IVA",
                 // Mostrar el IVA como porcentaje
+                value: (
+                  <p className="px-[12px] py-[8px]">
+                    {(
+                      conceptsForm.getValues(`concepts.${index}.iva`) ?? 0
+                    ).toFixed(2)}
+                  </p>
+                ),
                 value: (
                   <p className="px-[12px] py-[8px]">
                     {(
@@ -425,7 +433,9 @@ export default function AdditionalInfoCard({
                                   ?.filter(
                                     (comprobante) =>
                                       comprobante.tipoComprobante ===
-                                      possibleComprobanteTipo
+                                        possibleComprobanteTipo &&
+                                      (comprobante.estado === "parcial" ||
+                                        comprobante.estado === "pendiente")
                                   )
                                   .slice(0, 10)
                                   .map((comprobante) => (
@@ -433,7 +443,9 @@ export default function AdditionalInfoCard({
                                       key={comprobante.id}
                                       value={comprobante.id}
                                     >
-                                      {comprobante.nroComprobante}
+                                      {comprobante.nroComprobante +
+                                        " - " +
+                                        comprobante.importe}
                                     </SelectItem>
                                   ))}
                               </SelectContent>
@@ -468,7 +480,8 @@ export default function AdditionalInfoCard({
                                     )}
                                     disabled
                                   >
-                                    {field.value ? (
+                                    {field.value &&
+                                    dayjs(field.value).isValid() ? (
                                       format(field.value, "dd/MM/yyyy")
                                     ) : (
                                       <span>Seleccionar fecha</span>
