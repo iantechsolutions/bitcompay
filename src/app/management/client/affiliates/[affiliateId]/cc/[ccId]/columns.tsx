@@ -248,6 +248,7 @@ export const columns: ColumnDef<TableRecord>[] = [
           {detailData && (
             <div>
               <DetailSheet
+                // liquidationId={detailData.id}
                 open={sheetOpen}
                 setOpen={setSheetOpen}
                 data={detailData}

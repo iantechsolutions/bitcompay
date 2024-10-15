@@ -24,20 +24,21 @@ type DetailSheetProps = {
   };
   open: boolean;
   setOpen: (open: boolean) => void;
+  liquidationId: string;
 };
 import Download02Icon from "~/components/icons/download-02-stroke-rounded";
 import { formatCurrency } from "../../pre-liquidation/[liquidationId]/detail-sheet";
 
 type Comprobante = RouterOutputs["comprobantes"]["getByLiquidation"][number];
 
-export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
+export default function DetailSheet({ data, open, setOpen, liquidationId }: DetailSheetProps) {
   const [openFCAccordion, setOpenFCAccordion] = useState(true);
   const [openNCAccordion, setOpenNCAccordion] = useState(true);
   let comprobanteNCReciente = data.comprobantes.find(
-    (comprobante) => comprobante.origin === "Nota de credito"
+    (comprobante) => comprobante.origin === "Nota de credito" && comprobante.liquidation_id === liquidationId
   );
   let comprobanteFCReciente = data.comprobantes.find(
-    (comprobante) => comprobante.origin === "Factura"
+    (comprobante) => comprobante.origin === "Factura" && comprobante.liquidation_id === liquidationId
   );
 
   let FCTotal = null;
