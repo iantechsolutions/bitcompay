@@ -14,25 +14,28 @@ const Totals = ({ subTotal, iva, otherAttributes }: Props) => {
       <div className="flex flex-col gap-2">
           <Label className="text-[#747474]">SUB-TOTAL FACTURA</Label>
           <div className="bg-[#def5dd] text-[#6952EB] font-semibold rounded-lg w-48 border-[#e9fcf8] border py-1 px-2">
-            {`$ ${subTotal}`}
+            {`$ ${(Math.round(subTotal*100)/100).toFixed(2)}`}
           </div>
         </div>
         <div className="flex flex-col gap-2">
           <Label className="text-[#747474]">IMPORTE IVA</Label>
           <div className="bg-[#def5dd] text-[#6952EB] font-semibold rounded-lg w-48 border-[#e9fcf8] border py-1 px-2">
-            {`$ ${iva}`}
+            {`$ ${(Math.round(iva*100)/100).toFixed(2)}`}
           </div>
         </div>
         <div className="flex flex-col gap-2">
           <Label className="text-[#747474]">OTROS ATRIBUTOS</Label>
           <div className="bg-[#def5dd] text-[#6952EB] font-semibold rounded-lg w-48 border-[#e9fcf8] border py-1 px-2">
-            {`$ ${otherAttributes}`}
+            {`$ ${(Math.round(otherAttributes*100)/100).toFixed(2)}`}
           </div>
         </div>
         <div className="flex flex-col gap-2">
           <Label className="text-[#747474]">TOTAL</Label>
           <div className="bg-[#def5dd] text-[#6952EB] font-semibold rounded-lg w-48 border-[#e9fcf8] border py-1 px-2">
-            {`$ ${subTotal - otherAttributes}`}
+            {`$ ${(Math.round(((subTotal + iva )+ otherAttributes)*100)/100).toFixed(2)}`}
+
+
+            
           </div>
         </div>
       </div>

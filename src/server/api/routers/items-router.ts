@@ -25,7 +25,7 @@ export const itemsRouter = createTRPCRouter({
         amount: z.number(),
         iva: z.number(),
         total: z.number(),
-        abono: z.number(),
+        abono: z.number().optional(),
         comprobante_id: z.string(),
       })
     )

@@ -972,23 +972,33 @@ export const comprobantesRouter = createTRPCRouter({
               },
             },
             plan: true,
+            integrants: {
+              with: {
+                postal_code: true,
+                pa: true,
+              }
+            },
           },
         });
         console.log("Encontro family_group");
+        console.log(comprobanteGotten?.family_group?.id);
         if (family_group) {
-          const billResponsible = await db.query.integrants.findFirst({
-            where: and(
-              eq(
-                schema.integrants.family_group_id,
-                comprobanteGotten?.family_group?.id ?? ""
-              ),
-              eq(schema.integrants.isBillResponsible, true)
-            ),
-            with: {
-              postal_code: true,
-              pa: true,
-            },
-          });
+          
+          const billResponsible = family_group.integrants.find(x=>x.isBillResponsible);
+          
+          // const billResponsible = await db.query.integrants.findFirst({
+          //   where: and(
+          //     eq(
+          //       schema.integrants.family_group_id,
+          //       comprobanteGotten?.family_group?.id ?? ""
+          //     ),
+          //     eq(schema.integrants.isBillResponsible, true)
+          //   ),
+            
+          // });
+          console.log(billResponsible);
+          console.log(billResponsible?.pa[0]);
+          console.log(billResponsible?.pa[0]?.product_id);
           const producto = await db.query.products.findFirst({
             where: eq(
               schema.products.id,
@@ -996,6 +1006,7 @@ export const comprobantesRouter = createTRPCRouter({
             ),
           });
           console.log("Encontro producto");
+          console.log(producto);
           console.log("Entro?");
 
           const payment = await db

@@ -60,7 +60,8 @@ function formatDate(date: Date | undefined) {
 export default function Page() {
   const { mutateAsync: createComprobante } =
     api.comprobantes.create.useMutation();
-
+    const { mutateAsync: createItem } =
+    api.items.create.useMutation();
   const { data: company } = api.companies.get.useQuery();
   const { data: marcas } = api.brands.list.useQuery();
   const { data: gruposFamiliar } = api.family_groups.list.useQuery();
@@ -201,7 +202,27 @@ export default function Page() {
             family_group_id: grupoFamiliarId,
             health_insurance_id: obraSocialId,
           });
-
+          const sumaTributos = otherTributesForm.getValues().tributes.reduce(
+            (acc, tribute) => acc + Number(tribute.amount),
+            0
+          );
+          const comprobanteId = comprobante[0]?.id ?? ""
+          const tributo = await createItem({
+            amount: sumaTributos,
+            concept: "Tributos",
+            iva: 0,
+            total: subTotal ,
+            comprobante_id: comprobanteId,
+          })
+          conceptsForm.getValues().concepts.forEach(async (concept) => {
+            await createItem({
+              amount: concept.importe,
+              concept: concept.concepto,
+              iva: concept.iva,
+              total: concept.total,
+              comprobante_id: comprobanteId,
+            })
+          })
           // data = {
           //   CantReg: 1, // Cantidad de comprobantes a registrar
           //   PtoVta: Number(form.getValues().puntoVenta),
