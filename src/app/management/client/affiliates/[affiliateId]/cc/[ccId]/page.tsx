@@ -121,6 +121,7 @@ export default function CCDetail(props: {
         saldo_a_pagar: formatCurrency(saldo_a_pagar ?? 0),
         nombre: afiliado?.name ?? "",
         cuit: afiliado?.fiscal_id_number ?? "",
+        event: event,
       });
     }
   }
@@ -146,7 +147,7 @@ export default function CCDetail(props: {
           <div className="flex flex-col  justify-center">
             <p className="text-sm font-medium block">PRÓXIMO VENCIMIENTO</p>
             <span className="text-[#3E3E3E] font-semibold text-xl">
-                {nextExpirationDate}
+              {nextExpirationDate}
             </span>
           </div>
         </Card>
@@ -155,8 +156,7 @@ export default function CCDetail(props: {
       <div className="flex flex-auto justify-end">
         <Button
           variant="bitcompay"
-          className=" text-base px-16 py-6 mt-5 gap-3 text-[#3e3e3e] rounded-full font-medium"
-        >
+          className=" text-base px-16 py-6 mt-5 gap-3 text-[#3e3e3e] rounded-full font-medium">
           <Download02Icon />
           Exportar
         </Button>

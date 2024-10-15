@@ -21,7 +21,7 @@ export const eventsRouter = createTRPCRouter({
         orderBy: [desc(schema.events.createdAt)],
         with: {
           comprobantes: true,
-        }
+        },
       });
       return events;
     }),
@@ -42,6 +42,24 @@ export const eventsRouter = createTRPCRouter({
       });
 
       return event;
+    }),
+  update: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        event_amount: z.number().optional(),
+        current_amount: z.number().optional(),
+        description: z.string().optional(),
+        type: z.enum(["NC", "FC", "REC"]).optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      await db
+        .update(schema.events)
+        .set(input)
+        .where(eq(schema.events.id, input.id));
+
+      return input;
     }),
   createByType: protectedProcedure
     .input(
