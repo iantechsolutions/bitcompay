@@ -1360,12 +1360,26 @@ export async function preparateComprobante(
           mostRecentFactura?.estado == "parcial" ||
           mostRecentFactura?.estado == "apertura")
       ) {
+
+        let previousTipoComprobante = fcAnc[grupo.modo?.description == "MIXTO" ? "FACTURA B" : "FACTURA A"  ]
+
+        switch (billResponsible?.afip_status?.toUpperCase()) {
+          case "MONOTRIBUTISTA":
+          case "RESPONSABLE INSCRIPTO":
+            previousTipoComprobante = "FACTURA A";
+          case "CONSUMIDOR FINAL":
+            previousTipoComprobante = "FACTURA B";
+        }
+
+        if(mostRecentFactura && mostRecentFactura.tipoComprobante && mostRecentFactura.tipoComprobante !== "Apertura de CC"){
+          previousTipoComprobante = fcAnc[mostRecentFactura.tipoComprobante]
+        }
         const notaCredito = await db
           .insert(schema.comprobantes)
           .values({
             ptoVenta: mostRecentFactura.ptoVenta,
             nroComprobante: mostRecentFactura.nroComprobante,
-            tipoComprobante: fcAnc[mostRecentFactura?.tipoComprobante ?? "0"],
+            tipoComprobante: fcAnc[previousTipoComprobante ?? ""],
             concepto: mostRecentFactura?.concepto ?? 0,
             tipoDocumento: tipoDocumento ?? 0,
             generated: new Date(),
