@@ -109,7 +109,7 @@ export function AddHealthInsurances(props: {
   const [floor, setFloor] = useState(OS?.floor ?? "");
   const [office, setOffice] = useState(OS?.office ?? "");
   const [initialValue, setInitialValue] = useState("0");
-  const [isClient, setIsClient] = useState(OS?.isClient ?? false);
+  // const [isClient, setIsClient] = useState(OS?.isClient ?? false);
 
   const [dateState, setDateState] = useState<Date | undefined>(
     OS?.dateState ?? undefined
@@ -205,7 +205,7 @@ export function AddHealthInsurances(props: {
         user: user,
         cancelMotive: cancelMotive,
 
-        isClient: isClient,
+        isClient: true,
         dateState: dateState,
         responsibleName: responsibleName,
 
@@ -276,7 +276,7 @@ export function AddHealthInsurances(props: {
         phoneNumber: phoneNumber,
         email: email,
 
-        isClient: isClient,
+        isClient: true,
         state: state,
         dateState: dateState,
         responsibleName: user,
@@ -378,7 +378,7 @@ export function AddHealthInsurances(props: {
                 onChange={(e) => setDescripcion(e.target.value)}
               />
             </div>
-            <div>
+            {/* <div>
               <Label className="text-xs text-gray-500">Es cliente?</Label>
               <Select
                 onValueChange={(value) => setIsClient(value === "true")}
@@ -393,7 +393,7 @@ export function AddHealthInsurances(props: {
                   <SelectItem value="false">No es cliente</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
+            </div> */}
             <div />
             <div />
 
@@ -644,7 +644,7 @@ export function AddHealthInsurances(props: {
                     <Calendar01Icon className="h-4 w-4" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="p-0 overflow-y-scroll">
+                <PopoverContent align="end" className="p-0 overflow-y-scroll">
                   <Calendar
                     mode="single"
                     selected={dateState}
