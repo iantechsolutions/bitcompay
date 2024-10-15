@@ -189,7 +189,7 @@ export function DataTable<TData, TValue>({
   // .reduce((sum, aporte) => sum + parseInt(aporte.amount), 0);
   // const aporteTotal = summary.summary.APORTES;
   // const total = summary.summary["APORTES"];
-
+  
   return (
     <>
       <DataTableSummary summary={summary.summary} />
