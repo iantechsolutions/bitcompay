@@ -20,6 +20,7 @@ import { Card } from "~/components/ui/card";
 import Download02Icon from "~/components/icons/download-02-stroke-rounded";
 import { RouterOutputs } from "~/trpc/shared";
 import BonusDialog from "./components_acciones/bonusDialog";
+import { formatCurrency } from "~/app/billing/pre-liquidation/[liquidationId]/detail-sheet";
 
 export default function CCDetail(props: {
   params: { ccId: string; affiliateId: string };
@@ -52,18 +53,7 @@ export default function CCDetail(props: {
   const nextExpirationDate = lastComprobante?.due_date
     ? dayjs(lastComprobante?.due_date).format("DD-MM-YYYY")
     : "-";
-
-  const formatCurrency = (amount: {
-    toLocaleString: (
-      arg0: string,
-      arg1: { minimumFractionDigits: number; maximumFractionDigits: number }
-    ) => any;
-  }) => {
-    return amount.toLocaleString("es-AR", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-  };
+  console.log("aca");
   let comprobanteNCReciente = comprobantes?.find(
     (comprobante) => comprobante.origin === "Nota de credito"
   );
@@ -103,7 +93,13 @@ export default function CCDetail(props: {
   }
   const tableRows: TableRecord[] = [];
   if (events) {
+    console.log("events",events);
+
     for (const event of events) {
+      // console.log("saldo_a_pagar");
+      // console.log(saldo_a_pagar);
+      console.log("event",formatCurrency(event.event_amount));
+      
       tableRows.push({
         date: event.createdAt,
         description: event.description,
@@ -111,11 +107,11 @@ export default function CCDetail(props: {
         // comprobanteType: "Nota de credito A",
         comprobanteType: event.comprobantes?.tipoComprobante ?? "FACTURA A",
         comprobanteNumber:
-          event.comprobantes?.ptoVenta.toString().padStart(5) +
+          (event.comprobantes?.ptoVenta.toString().padStart(5) ?? "00000" ) +
           "-" +
-          event.comprobantes?.nroComprobante.toString().padStart(8),
+          (event.comprobantes?.nroComprobante.toString().padStart(8) ?? "00000000"),
         status: "Pendiente",
-        iva: Number(event.comprobantes?.iva ?? 1.21) - 1,
+        iva: Number(event.comprobantes?.iva ?? 21),
         comprobantes: comprobantesTable,
         currentAccountAmount: formatCurrency(NCTotal ?? 0),
         saldo_a_pagar: formatCurrency(saldo_a_pagar ?? 0),

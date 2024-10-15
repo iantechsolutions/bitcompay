@@ -25,14 +25,14 @@ type DetailSheetProps = {
   data?: {
     date: Date;
     description: string;
-    amount: number;
+    amount: string;
     comprobanteType: string;
     comprobanteNumber: string;
     status: "Pagada" | "Pendiente";
     iva: number;
     comprobantes?: RouterOutputs["comprobantes"]["getByLiquidation"];
-    currentAccountAmount: number;
-    saldo_a_pagar: number;
+    currentAccountAmount: string;
+    saldo_a_pagar: string;
     nombre: string;
     cuit: string;
     [index: string]: any;
