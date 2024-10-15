@@ -35,7 +35,7 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 // Configura la zona horaria de Buenos Aires
-const buenosAiresTime = dayjs().tz("America/Argentina/Buenos_Aires").toDate();
+// const buenosAiresTime = dayjs().tz("America/Argentina/Buenos_Aires").toDate();
 type Bonus = {
   id: string;
   appliedUser: string;
@@ -1137,7 +1137,6 @@ export const comprobantesRouter = createTRPCRouter({
         .insert(schema.liquidations)
         .values({
           brandId: input.brandId,
-          createdAt: buenosAiresTime,
           estado: "pendiente",
           cuit: company?.cuit ?? "",
           period: input.dateDesde,

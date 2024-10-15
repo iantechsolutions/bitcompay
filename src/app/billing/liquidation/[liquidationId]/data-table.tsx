@@ -45,6 +45,7 @@ interface DataTableProps {
   columns: ColumnDef<TableRecord>[];
   summary: RouterOutputs["family_groups"]["getSummaryByLiqId"];
   liquidationId: string;
+  maxEventDate: Date;
 }
 
 interface DetailData {
@@ -60,6 +61,7 @@ export function DataTable<TData, TValue>({
   columns,
   summary,
   liquidationId,
+  maxEventDate,
 }: DataTableProps) {
   const [open, setOpen] = useState(false);
   const [detailData, setDetailData] = useState<DetailData | null>(null);
@@ -152,6 +154,7 @@ export function DataTable<TData, TValue>({
           modoDesc: filterModo,
           plan: filterPlan,
           UN: filterUN,
+          maxEventDate,
         });
       },
       delayedColumnFilters.length > 0
@@ -189,7 +192,7 @@ export function DataTable<TData, TValue>({
   // .reduce((sum, aporte) => sum + parseInt(aporte.amount), 0);
   // const aporteTotal = summary.summary.APORTES;
   // const total = summary.summary["APORTES"];
-
+  
   return (
     <>
       <DataTableSummary summary={summary.summary} />
