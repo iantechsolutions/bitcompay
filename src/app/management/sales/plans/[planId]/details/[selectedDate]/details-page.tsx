@@ -190,9 +190,9 @@ export default function DetailsPage(props: {
         id: planId,
         currentVigency: currentVigency,
       });
-      toast.success("Precios eliminados correctamente");
 
       window.location.reload();
+      toast.success("Precios eliminados correctamente");
     } catch (e) {
       const error = asTRPCError(e)!;
       toast.error(error.message);
