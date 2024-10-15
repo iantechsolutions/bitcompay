@@ -118,7 +118,7 @@ export function makeExcelRows(
         UN: businessUnit,
         nombre: name,
         cuit,
-        "saldo anterior":
+        "Saldo anterior":
           //  eventPreComprobante?.current_amount ??
           saldo_anterior,
         "cuota plan": cuota_planes,

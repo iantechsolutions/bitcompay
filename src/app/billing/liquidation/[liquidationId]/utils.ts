@@ -28,7 +28,7 @@ export function makeExcelRows(
     const last_event = fg.cc?.events.at(0);
     // const saldo_anterior = toNumberOrZero(
     //   original_comprobante?.items.find(
-    //     (item) => item.concept === "Saldo anterior"
+    //     (item) => item.concept === "Factura Anterior"
     //   )?.amount
     // );
 
@@ -118,7 +118,7 @@ export function makeExcelRows(
         UN: businessUnit,
         nombre: name,
         cuit,
-        "saldo anterior":
+        "Saldo anterior":
           //  eventPreComprobante?.current_amount ??
           saldo_anterior,
         "cuota plan": cuota_planes,

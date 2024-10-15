@@ -861,23 +861,22 @@ export const comprobantesRouter = createTRPCRouter({
         return events?.comprobantes;
       }
     }),
-  getByEntity: protectedProcedure
-    .query(async ({ ctx }) => {
-      const bussinessUnits = await db.query.bussinessUnits.findMany({
-        where: eq(schema.bussinessUnits.companyId, ctx.session.orgId!),
-        with: {
-          ls: {
-            with: {
-              comprobantes: true,
-            },
+  getByEntity: protectedProcedure.query(async ({ ctx }) => {
+    const bussinessUnits = await db.query.bussinessUnits.findMany({
+      where: eq(schema.bussinessUnits.companyId, ctx.session.orgId!),
+      with: {
+        ls: {
+          with: {
+            comprobantes: true,
           },
         },
-      });
-      let comprobantes = bussinessUnits.flatMap((bu) =>
-        bu.ls.flatMap((ls) => ls.comprobantes)
-      );
-      return comprobantes;
-    }),
+      },
+    });
+    let comprobantes = bussinessUnits.flatMap((bu) =>
+      bu.ls.flatMap((ls) => ls.comprobantes)
+    );
+    return comprobantes;
+  }),
   getByLiquidation: protectedProcedure
     .input(z.object({ liquidationId: z.string() }))
     .query(async ({ input }) => {
@@ -1221,6 +1220,7 @@ export async function preparateComprobante(
       let iva =
         ivaDictionary[Number(grupo.businessUnitData?.brand?.iva ?? 0) ?? 3];
 
+      console.log("iva", iva, grupo.businessUnitData?.brand?.iva);
       let ivaFloat = (100 + parseFloat(iva ?? "0")) / 100;
 
       //calculate ppb
@@ -1274,6 +1274,7 @@ export async function preparateComprobante(
       let interest = 0;
       if (saldo > 0) interest = (interes / 100) * saldo;
 
+      console.log("interes", interest);
       let mostRecentFactura;
       let ivaFloatAnterior = 1;
       let previous_bill = 0;
@@ -1343,8 +1344,8 @@ export async function preparateComprobante(
           mostRecentFactura?.estado == "parcial" ||
           mostRecentFactura?.estado == "apertura")
       ) {
-
-        let previousTipoComprobante = fcAnc[grupo.modo?.description == "MIXTO" ? "FACTURA B" : "FACTURA A"  ]
+        let previousTipoComprobante =
+          fcAnc[grupo.modo?.description == "MIXTO" ? "FACTURA B" : "FACTURA A"];
 
         switch (billResponsible?.afip_status?.toUpperCase()) {
           case "MONOTRIBUTISTA":
@@ -1354,8 +1355,12 @@ export async function preparateComprobante(
             previousTipoComprobante = "FACTURA B";
         }
 
-        if(mostRecentFactura && mostRecentFactura.tipoComprobante && mostRecentFactura.tipoComprobante !== "Apertura de CC"){
-          previousTipoComprobante = fcAnc[mostRecentFactura.tipoComprobante]
+        if (
+          mostRecentFactura &&
+          mostRecentFactura.tipoComprobante &&
+          mostRecentFactura.tipoComprobante !== "Apertura de CC"
+        ) {
+          previousTipoComprobante = fcAnc[mostRecentFactura.tipoComprobante];
         }
         const notaCredito = await db
           .insert(schema.comprobantes)
@@ -1543,6 +1548,7 @@ async function calculateAmount(
     amount = precioNuevo * iva - contribution;
   }
 
+  console.log("papel", precioNuevo, amount, ivaCodigo);
   // if (modo?.description == "PRIVADO") {
   //   amount = saldo + interest + precioNuevo * iva;
   // }
