@@ -109,7 +109,7 @@ export function AddHealthInsurances(props: {
   const [floor, setFloor] = useState(OS?.floor ?? "");
   const [office, setOffice] = useState(OS?.office ?? "");
   const [initialValue, setInitialValue] = useState("0");
-  const [isClient, setIsClient] = useState(OS?.isClient ?? false);
+  // const [isClient, setIsClient] = useState(OS?.isClient ?? false);
 
   const [dateState, setDateState] = useState<Date | undefined>(
     OS?.dateState ?? undefined
@@ -205,7 +205,7 @@ export function AddHealthInsurances(props: {
         user: user,
         cancelMotive: cancelMotive,
 
-        isClient: isClient,
+        isClient: true,
         dateState: dateState,
         responsibleName: responsibleName,
 
@@ -276,7 +276,7 @@ export function AddHealthInsurances(props: {
         phoneNumber: phoneNumber,
         email: email,
 
-        isClient: isClient,
+        isClient: true,
         state: state,
         dateState: dateState,
         responsibleName: user,
@@ -379,7 +379,7 @@ export function AddHealthInsurances(props: {
               />
             </div>
             <div>
-              <Label className="text-xs text-gray-500">Es cliente?</Label>
+              {/* <Label className="text-xs text-gray-500">Es cliente?</Label>
               <Select
                 onValueChange={(value) => setIsClient(value === "true")}
                 value={isClient !== null ? String(isClient) : undefined}>
@@ -392,7 +392,7 @@ export function AddHealthInsurances(props: {
                   <SelectItem value="true">Es cliente</SelectItem>
                   <SelectItem value="false">No es cliente</SelectItem>
                 </SelectContent>
-              </Select>
+              </Select> */}
             </div>
             <div />
             <div />
