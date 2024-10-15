@@ -43,35 +43,13 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { asTRPCError } from "~/lib/errors";
+import { TableRecord } from "../columns";
 
 type DialogCCProps = {
   open: boolean;
   setOpen: (open: boolean) => void;
-  data?: {
-    date: Date;
-    description: string;
-    amount: number;
-    comprobanteType: string;
-    comprobanteNumber: string;
-    status: "Pagada" | "Pendiente";
-    iva: number;
-    comprobantes?: RouterOutputs["comprobantes"]["getByLiquidation"];
-    currentAccountAmount: number;
-    saldo_a_pagar: number;
-    nombre: string;
-    cuit: string;
-    event: {
-      id: string;
-      description: string;
-      createdAt: Date;
-      comprobante_id: string | null;
-      type: "NC" | "FC" | "REC" | null;
-      currentAccount_id: string | null;
-      event_amount: number;
-      current_amount: number;
-    } | null;
-    [index: string]: any;
-  };
+  data?: TableRecord;
+
 };
 
 export default function DialogCC({ open, setOpen, data }: DialogCCProps) {
