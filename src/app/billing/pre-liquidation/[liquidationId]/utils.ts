@@ -18,11 +18,14 @@ export function makeExcelRows(
     excelRow.push(fg?.numericalId ?? "");
     excelRow.push(name);
     excelRow.push(cuit);
+
     const original_comprobante = fg?.comprobantes?.find(
       (comprobante) =>
         comprobante.origin?.toLowerCase() === "factura" &&
         comprobante.tipoComprobante !== "Apertura de CC"
     );
+
+    const last_event = fg.cc?.events.at(0);
 
     // const saldo_anterior = toNumberOrZero(
     //   original_comprobante?.items.find(
@@ -37,11 +40,12 @@ export function makeExcelRows(
     //     x.createdAt < preliquidation?.createdAt
     // );
 
-    const saldo_anterior = toNumberOrZero(
+    /* const saldo_anterior = toNumberOrZero(
       original_comprobante?.items.find(
         (item) => item.concept === "Factura Anterior"
       )?.amount
-    );
+    ); */
+    const saldo_anterior = toNumberOrZero(last_event?.current_amount);
 
     // excelRow.push(eventPreComprobante?.current_amount ?? 0);
 
@@ -99,9 +103,10 @@ export function makeExcelRows(
     //   ccId: fg?.cc?.id!,
     //   date: preliquidation?.createdAt ?? new Date(),
     // });
-    const currentAccountAmount =
-      // lastEvent?.current_amount ??
-      0;
+    let currentAccountAmount = -1;
+    if (typeof original_comprobante?.importe === "number") {
+      currentAccountAmount = saldo_anterior - original_comprobante.importe;
+    }
 
     const plan = fg?.plan?.description ?? "";
     const modo = fg?.modo?.description ?? "";

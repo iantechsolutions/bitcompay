@@ -43,6 +43,7 @@ interface DataTableProps {
   columns: ColumnDef<TableRecord>[];
   summary: RouterOutputs["family_groups"]["getSummaryByLiqId"];
   liquidationId: string;
+  maxEventDate: Date;
 }
 
 interface DetailData {
@@ -53,7 +54,12 @@ interface DetailData {
   cuit: string;
   [index: string]: any;
 }
-export function DataTable({ columns, summary, liquidationId }: DataTableProps) {
+export function DataTable({
+  columns,
+  summary,
+  liquidationId,
+  maxEventDate,
+}: DataTableProps) {
   const [open, setOpen] = useState(false);
   const [detailData, setDetailData] = useState<DetailData | null>(null);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -138,6 +144,7 @@ export function DataTable({ columns, summary, liquidationId }: DataTableProps) {
           modoDesc: filterModo,
           plan: filterPlan,
           UN: filterUN,
+          maxEventDate,
         });
       },
       delayedColumnFilters.length > 0
@@ -158,7 +165,6 @@ export function DataTable({ columns, summary, liquidationId }: DataTableProps) {
 
   const handleRowClick = (row: Row<TableRecord>) => {
     let detailData = {} as DetailData;
-    console.log("row", row.original)
     for (const key in row.original) {
       if (hiddenDataKeys.includes(key)) {
         detailData[key] = (
@@ -168,7 +174,6 @@ export function DataTable({ columns, summary, liquidationId }: DataTableProps) {
     }
 
     setDetailData(detailData);
-    console.log("detailData", detailData);
     setOpen(!open);
   };
 

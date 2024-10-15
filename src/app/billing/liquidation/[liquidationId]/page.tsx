@@ -213,6 +213,7 @@ export default async function Home(props: {
           columns={columns}
           liquidationId={props.params.liquidationId}
           summary={summary}
+          maxEventDate={preliquidation.createdAt}
         />
         <DownloadExcelButton
           liquidationId={props.params.liquidationId}
