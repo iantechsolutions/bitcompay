@@ -175,11 +175,6 @@ export default function Page() {
         let comprobante = null;
         let ivaFloat =
           (100 + parseFloat(ivaDictionary[Number(iva)] ?? "0")) / 100;
-        const fecha = new Date(
-          Date.now() - new Date().getTimezoneOffset() * 60000
-        )
-          .toISOString()
-          .split("T")[0];
 
         if (tipoComprobante == "1" || tipoComprobante == "6") {
           let ivaFloat =
