@@ -55,11 +55,13 @@ export default function DetailSheet({ data, open, setOpen,liquidationId }: Detai
   console.log(data.comprobantes);
 
   let comprobanteNCReciente = data.comprobantes.find(
-    (comprobante) => comprobante.origin === "Nota de credito" && comprobante.liquidation_id === data.id
+    (comprobante) => comprobante.origin === "Nota de credito" && comprobante.liquidation_id === liquidationId
   );
+  console.log("comprobanteNCReciente", comprobanteNCReciente);
   let comprobanteFCReciente = data.comprobantes.find(
-    (comprobante) => comprobante.origin === "Factura"
+    (comprobante) => comprobante.origin === "Factura" && comprobante.liquidation_id === liquidationId
   );
+  console.log("comprobanteFCReciente", comprobanteFCReciente);
 
   let FCTotal = null;
   let NCTotal = null;
