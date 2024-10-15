@@ -205,12 +205,12 @@ export default function CompanySidenav() {
     <ScrollArea className="h-[99vh] w-full relative overflow-x-auto">
       <div className="sticky top-0 bg-white w-full h-[11vh] px-[1vw] items-center justify-center content-center text-center z-20">
         <img
-          className="max-w-52 w-[18vw] px-auto py-auto"
+          className="max-w-52 w-[18vw] min-w-44 px-auto py-auto"
           src="/public/bitcom-03.png"
           alt="logo"
         />
       </div>
-      <Sidenav className="w-[18vw] bg-white pr-2 pl-4">
+      <Sidenav className="w-[18vw] min-w-44 bg-white pr-5 pl-4">
         <SidenavItem
           className="w-[11vw] bg-white text-sideNav"
           href={`/`}
@@ -936,7 +936,7 @@ export default function CompanySidenav() {
                 activeIcon={
                   <img
                     src="/public/sidebar/Frame-9.png"
-                    className=" w-7 h-auto"
+                    className="w-8 h-auto"
                   />
                 }
                 href={`/billing/pre-liquidation`}
@@ -949,7 +949,7 @@ export default function CompanySidenav() {
                 icon={
                   <img
                     src="/public/sidebar/Frame-10.png"
-                    className=" w-7 h-auto"
+                    className=" min-w-7 h-auto"
                   />
                 }
                 activeIcon={
