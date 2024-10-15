@@ -1300,7 +1300,7 @@ export async function preparateComprobante(
       let previous_bill = 0;
       if (grupo?.comprobantes.length > 0) {
         const listadoFac = grupo.comprobantes?.filter(
-          (x) => (x.origin == "Factura" && x.estado != "generada" || x.origin == "Factura" && x.estado != "apertura")
+          (x) => (x.origin == "Factura" && x.estado != "generada" /* || x.origin == "Factura" && x.estado != "apertura" */)
         );
         if (listadoFac.length > 0) {
           mostRecentFactura = listadoFac.reduce((prev, current) => {
