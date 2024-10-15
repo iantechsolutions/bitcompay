@@ -630,7 +630,7 @@ export function AddHealthInsurances(props: {
                 FECHA DE ESTADO
               </Label>
               <Popover open={openCalendar} onOpenChange={setOpenCalendar}>
-                <PopoverTrigger asChild={true}>
+                <PopoverTrigger asChild={true} autoFocus={false}>
                   <Button
                     variant={"outline"}
                     className={cn(
@@ -647,7 +647,7 @@ export function AddHealthInsurances(props: {
                     <Calendar01Icon className="h-4 w-4" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent align="end" className="p-0 overflow-y-scroll">
+                <PopoverContent align="end" className="p-0" >
                   <Calendar
                     mode="single"
                     selected={dateState}

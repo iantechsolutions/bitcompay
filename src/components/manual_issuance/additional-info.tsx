@@ -473,7 +473,7 @@ export default function AdditionalInfoCard({
                                     )}
                                     disabled
                                   >
-                                    {field.value ? (
+                                    {field.value && dayjs(field.value).isValid() ? (
                                       format(field.value, "dd/MM/yyyy")
                                     ) : (
                                       <span>Seleccionar fecha</span>

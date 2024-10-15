@@ -99,7 +99,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                           "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                           !field.value && "text-muted-foreground"
                         )}>
-                        {field.value ? (
+                        {field.value && dayjs(field.value).isValid() ? (
                           format(field.value, "dd/MM/yyyy")
                         ) : (
                           <span>Seleccionar fecha</span>
@@ -223,7 +223,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                           "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                           !field.value && "text-muted-foreground"
                         )}>
-                        {field.value ? (
+                        {field.value && dayjs(field.value).isValid() ? (
                           format(field.value, "dd/MM/yyyy")
                         ) : (
                           <span>Seleccionar fecha</span>
@@ -269,7 +269,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                               "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                               !field.value && "text-muted-foreground"
                             )}>
-                            {field.value ? (
+                            {field.value && dayjs(field.value).isValid() ? (
                               format(field.value, "dd/MM/yyyy")
                             ) : (
                               <span>Seleccionar fecha</span>
@@ -313,7 +313,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                               "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                               !field.value && "text-muted-foreground"
                             )}>
-                            {field.value ? (
+                            {field.value && dayjs(field.value).isValid() ? (
                               format(field.value, "dd/MM/yyyy")
                             ) : (
                               <span>Seleccionar fecha</span>
@@ -398,7 +398,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                           "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                           !field.value && "text-muted-foreground"
                         )}>
-                        {field.value ? (
+                        {field.value && dayjs(field.value).isValid() ? (
                           format(field.value, "dd/MM/yyyy")
                         ) : (
                           <span>Seleccionar fecha</span>
@@ -440,11 +440,11 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                           "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                           !field.value && "text-muted-foreground"
                         )}>
-                        {field.value && dayjs(field.value) ? (
-                          format(field.value, "dd/MM/yyyy")
-                        ) : (
-                          <span>Seleccionar fecha</span>
-                        )}
+                        {field.value && dayjs(field.value).isValid() ? (
+                            format(field.value, "dd/MM/yyyy")
+                          ) : (
+                            <span>Seleccionar fecha</span>
+                          )}
                         <Calendar01Icon className=" h-4 w-4" />
                       </Button>
                     </PopoverTrigger>
@@ -484,7 +484,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                           "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                           !field.value && "text-muted-foreground"
                         )}>
-                        {field.value ? (
+                        {field.value && dayjs(field.value).isValid() ? (
                           format(field.value, "dd/MM/yyyy")
                         ) : (
                           <span>Seleccionar fecha</span>
@@ -527,7 +527,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                           "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                           !field.value && "text-muted-foreground"
                         )}>
-                        {field.value ? (
+                        {field.value && dayjs(field.value).isValid() ? (
                           format(field.value, "dd/MM/yyyy")
                         ) : (
                           <span>Seleccionar fecha</span>
@@ -573,7 +573,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                           "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                           !field.value && "text-muted-foreground"
                         )}>
-                        {field.value ? (
+                        {field.value && dayjs(field.value).isValid() ? (
                           format(field.value, "dd/MM/yyyy")
                         ) : (
                           <span>Seleccionar fecha</span>
