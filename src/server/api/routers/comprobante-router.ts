@@ -785,6 +785,27 @@ export const comprobantesRouter = createTRPCRouter({
     });
     return comprobantes;
   }),
+  listFacturas: protectedProcedure.query(async ({ ctx }) => {
+    const comprobantes = await db.query.comprobantes.findMany({
+      with: {
+        items: true,
+        family_group: {
+          with: {
+            integrants: {
+              where: eq(schema.integrants.isBillResponsible, true),
+              with: {
+                postal_code: true,
+              },
+            },
+            plan: true,
+            cc: true,
+            bonus: true,
+          },
+        },
+      },
+    });
+    return comprobantes;
+  }),
   get: protectedProcedure
     .input(
       z.object({
@@ -1156,20 +1177,22 @@ export const comprobantesRouter = createTRPCRouter({
         .where(eq(schema.comprobantes.id, id));
       return updatedProvider;
     }),
-  addBillLinkAndNumber: protectedProcedure
+  addBillLinkAndNumberAndEstado: protectedProcedure
     .input(
       z.object({
         id: z.string(),
         billLink: z.string(),
         number: z.number(),
+        state: z.enum(["pendiente", "generada", "parcial", "anulada","apertura"]),
       })
     )
-    .mutation(async ({ input: { id, billLink, number } }) => {
+    .mutation(async ({ input: { id, billLink, number, state } }) => {
       const updatedProvider = await db
         .update(schema.comprobantes)
         .set({
           billLink: billLink,
           nroComprobante: number,
+          estado: state,
         })
         .where(eq(schema.comprobantes.id, id));
       const updatedPayments = await db

@@ -14,25 +14,25 @@ const Totals = ({ subTotal, iva, otherAttributes }: Props) => {
       <div className="flex flex-col gap-2">
           <Label className="text-[#747474]">SUB-TOTAL FACTURA</Label>
           <div className="bg-[#def5dd] text-[#6952EB] font-semibold rounded-lg w-48 border-[#e9fcf8] border py-1 px-2">
-            {`$ ${subTotal}` ?? "$0"}
+            {`$ ${subTotal}`}
           </div>
         </div>
         <div className="flex flex-col gap-2">
           <Label className="text-[#747474]">IMPORTE IVA</Label>
           <div className="bg-[#def5dd] text-[#6952EB] font-semibold rounded-lg w-48 border-[#e9fcf8] border py-1 px-2">
-            {`$ ${iva}` ?? "$0"}
+            {`$ ${iva}`}
           </div>
         </div>
         <div className="flex flex-col gap-2">
           <Label className="text-[#747474]">OTROS ATRIBUTOS</Label>
           <div className="bg-[#def5dd] text-[#6952EB] font-semibold rounded-lg w-48 border-[#e9fcf8] border py-1 px-2">
-            {`$ ${otherAttributes}` ?? "$0"}
+            {`$ ${otherAttributes}`}
           </div>
         </div>
         <div className="flex flex-col gap-2">
           <Label className="text-[#747474]">TOTAL</Label>
           <div className="bg-[#def5dd] text-[#6952EB] font-semibold rounded-lg w-48 border-[#e9fcf8] border py-1 px-2">
-            {`$ ${subTotal - otherAttributes}` ?? "$0"}
+            {`$ ${subTotal - otherAttributes}`}
           </div>
         </div>
       </div>

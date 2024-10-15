@@ -47,5 +47,6 @@ export type TotalsType = {
       dateEmision: Date | null;
       importe?: number; 
       iva?: number;
+      id: string;
     }[];
   };
