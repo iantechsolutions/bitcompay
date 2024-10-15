@@ -201,13 +201,6 @@ export default function AdditionalInfoCard({
                     ).toFixed(2)}
                   </p>
                 ),
-                value: (
-                  <p className="px-[12px] py-[8px]">
-                    {(
-                      conceptsForm.getValues(`concepts.${index}.iva`) ?? 0
-                    ).toFixed(2)}
-                  </p>
-                ),
               }}
             />
             <ElementCard
