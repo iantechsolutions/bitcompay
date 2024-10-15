@@ -139,7 +139,6 @@ export default function Page() {
         (!form.getValues().puntoVenta ||
           !form.getValues().dateEmision ||
           !tipoComprobante ||
-          !concepto ||
           !iva ||
           !form.getValues().dateVencimiento ||
           !subTotal ||
@@ -295,10 +294,10 @@ export default function Page() {
           //   comprobante_id: comprobante[0]?.id ?? "",
           // });
         } else if (
-          fcSelec &&
+          fcSeleccionada &&
           (tipoComprobante == "3" || tipoComprobante == "8")
         ) {
-          const facSeleccionada = comprobantes?.find((x) => x.id == fcSelec);
+          const facSeleccionada = comprobantes?.find((x) => x.id == fcSeleccionada[0]?.id);
 
           let ivaFloat = (100 + parseFloat(facSeleccionada?.iva ?? "0")) / 100;
 

@@ -28,6 +28,7 @@ import {
   htmlBill,
   idDictionary,
   ivaDictionary,
+  reverseComprobanteDictionary,
   reversedIvaDictionary,
 } from "~/lib/utils";
 import { api } from "~/trpc/react";
@@ -119,6 +120,7 @@ const confirmationPage = ({
   const { mutateAsync: updateComprobante } =
     api.comprobantes.addBillLinkAndNumberAndEstado.useMutation();
   const router = useRouter();
+
   function handleApprove() {
     console.log("fcSeleccionada");
     console.log(fcSeleccionada);
@@ -445,6 +447,9 @@ const confirmationPage = ({
 
       <AdditionalInfoCard
         // comprobantes={}
+        possibleComprobanteTipo={
+          fcSeleccionada[0]?.tipoComprobante ?? ""
+        }
         fcSeleccionada={fcSeleccionada}
         setFcSeleccionada={setFcSeleccionada}
         visualization={true}
