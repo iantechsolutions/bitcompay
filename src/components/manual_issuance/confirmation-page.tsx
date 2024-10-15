@@ -215,53 +215,7 @@ const confirmationPage = ({
             ) / 100,
         },
       };
-      console.log("ivaFloat", ivaFloat);
-      console.log("importe", importe);
-      console.log("iva", iva);
-      if (fgId) {
-        const event = createEventFamily({
-          family_group_id: fgId,
-          type: "FC",
-          amount: ivaFloat * importe + tributos,
-          comprobante_id: createdComprobante.id ?? "",
-        });
-      } else if (osId) {
-        const event = createEventOS({
-          health_insurance_id: osId ?? "",
-          type: "FC",
-          amount: ivaFloat * importe + tributos,
-          comprobante_id: createdComprobante.id ?? "",
-        });
-      }
     } else if (tipoComprobante == "0") {
-      const otrosConceptos = otherConcepts.getValues();
-      const importe = otrosConceptos.otherConcepts.reduce(
-        (acc, concept) => acc + Number(concept.importe),
-        0
-      );
-      console.log("importe");
-      console.log(importe);
-      if (fgId) {
-        const event = createEventFamily({
-          family_group_id: fgId,
-          type: "REC",
-          amount: importe,
-          comprobante_id: createdComprobante.id ?? "",
-        });
-      } else if (osId) {
-        const event = createEventOS({
-          health_insurance_id: osId,
-          type: "REC",
-          amount: importe,
-          comprobante_id: createdComprobante.id ?? "",
-        });
-      }
-
-      const eventOrg = createEventOrg({
-        type: "REC",
-        amount: importe,
-        comprobante_id: createdComprobante.id ?? "",
-      });
     } else if (
       fcSeleccionada &&
       (tipoComprobante == "3" || tipoComprobante == "8")
@@ -332,7 +286,69 @@ const confirmationPage = ({
           Nro: fcSeleccionada[0]?.nroComprobante ?? 0,
         },
       };
-      console.log("testtt");
+    
+    } else {
+      toast.error("Error, revise que todos los campos esten completos");
+      return null;
+    }
+
+    if (data) {
+      try {
+        const res = await afip.ElectronicBilling.createVoucher(data);
+      } catch (error) {
+        console.log(error);
+        toast.error("Error enviando a AFIP: " + error);
+        return null;
+      }
+    }
+    if (tipoComprobante == "1" || tipoComprobante == "6"){
+      if (fgId) {
+        const event = createEventFamily({
+          family_group_id: fgId,
+          type: "FC",
+          amount: ivaFloat * importe + tributos,
+          comprobante_id: createdComprobante.id ?? "",
+        });
+      } else if (osId) {
+        const event = createEventOS({
+          health_insurance_id: osId ?? "",
+          type: "FC",
+          amount: ivaFloat * importe + tributos,
+          comprobante_id: createdComprobante.id ?? "",
+        });
+      }
+    }
+    if (tipoComprobante == "0"){
+      const otrosConceptos = otherConcepts.getValues();
+      const importe = otrosConceptos.otherConcepts.reduce(
+        (acc, concept) => acc + Number(concept.importe),
+        0
+      );
+
+      if (fgId) {
+        const event = createEventFamily({
+          family_group_id: fgId,
+          type: "REC",
+          amount: importe,
+          comprobante_id: createdComprobante.id ?? "",
+        });
+      } else if (osId) {
+        const event = createEventOS({
+          health_insurance_id: osId,
+          type: "REC",
+          amount: importe,
+          comprobante_id: createdComprobante.id ?? "",
+        });
+      }
+
+      const eventOrg = createEventOrg({
+        type: "REC",
+        amount: importe,
+        comprobante_id: createdComprobante.id ?? "",
+      });
+    }
+
+    else if(fcSeleccionada &&  (tipoComprobante == "3" || tipoComprobante == "8")){
       if (fgId) {
         const event = createEventFamily({
           family_group_id: fgId,
@@ -348,20 +364,7 @@ const confirmationPage = ({
           comprobante_id: createdComprobante.id ?? "",
         });
       }
-    } else {
-      toast.error("Error, revise que todos los campos esten completos");
-      return null;
     }
-
-    if (data) {
-      try {
-        const res = await afip.ElectronicBilling.createVoucher(data);
-      } catch (error) {
-        console.log(error);
-        toast.error("Error enviando a AFIP: " + error);
-      }
-    }
-
     const billResponsible = gruposFamiliar
       ?.find((x: { id: string }) => x.id == fgId)
       ?.integrants.find((x: { isBillResponsible: any }) => x.isBillResponsible);
@@ -417,7 +420,7 @@ const confirmationPage = ({
         number: last_voucher + 1,
         state: "pendiente",
       });
-      console.log("resultadHTML", resHtml);
+      
       if (resHtml.file) {
         window.open(resHtml.file, "_blank");
       }

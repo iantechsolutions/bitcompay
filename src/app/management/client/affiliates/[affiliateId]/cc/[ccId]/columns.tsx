@@ -24,6 +24,7 @@ import { ChangeEvent, useState } from "react";
 import DetailSheet from "./components_acciones/detail-sheet";
 import DialogCC from "./components_acciones/dialog";
 import { RouterOutputs } from "~/trpc/shared";
+import { toast } from "sonner";
 
 export type TableRecord = {
   date: Date;
@@ -53,12 +54,12 @@ export type TableRecord = {
 };
 
 export const AjustarDialog = () => {
-  const [open, setOpen] = useState(false);
+  // const [open, setOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [adjustType, setAdjustType] = useState<string | null>(null);
-  const [concept, setConcept] = useState<string | null>(null);
-  const [amount, setAmount] = useState<string>("");
-  const [user, setUser] = useState<string>("");
+  // const [adjustType, setAdjustType] = useState<string | null>(null);
+  // const [concept, setConcept] = useState<string | null>(null);
+  // const [amount, setAmount] = useState<string>("");
+  // const [user, setUser] = useState<string>("");
 
   const handleDateChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSelectedDate(e.target.value);
@@ -66,6 +67,7 @@ export const AjustarDialog = () => {
 };
 
 const print = () => {};
+
 export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "description",
@@ -145,13 +147,8 @@ export const columns: ColumnDef<TableRecord>[] = [
             {row.getValue("amount")}
           </div>
           <div className="absolute top-1/2 transform translate-y-4 text-[#c4c4c4] text-xs flex flex-row gap-x-1">
-            <div>
-              
-              IVA:
-            </div>
-            <div>
-            {` ${ivaMostrar}%`}
-            </div>
+            <div>IVA:</div>
+            <div>{` ${ivaMostrar}%`}</div>
           </div>
         </div>
       );
@@ -169,6 +166,7 @@ export const columns: ColumnDef<TableRecord>[] = [
       const handleMenuClick = () => {
         let detailData = row.original as TableRecord;
 
+        console.log("detailData", detailData);
         setDetailData(detailData);
         setSheetOpen(!sheetOpen);
       };
@@ -178,6 +176,50 @@ export const columns: ColumnDef<TableRecord>[] = [
         setDetailData(detailData);
         setDialOpen(!dialogOpen);
       };
+
+      const print = async () => {
+        let detailData = row.original as TableRecord;
+
+        setDetailData(detailData);
+        console.log("Detail Data for Print:", detailData?.comprobantes);
+
+        const comprobante = detailData?.comprobantes?.find(
+          (comprobante) =>
+            comprobante?.nroComprobante ===
+            parseInt(detailData?.comprobanteNumber)
+        );
+
+        if (!detailData) {
+          return toast.error("Error al imprimir");
+        } else if (!comprobante || !comprobante?.billLink) {
+          return toast.error("No hay comprobantes disponibles para imprimir");
+        } else {
+          const url = comprobante.billLink ?? "";
+          const filename = comprobante.billLink ?? "";
+
+          if (confirm("¿Desea descargar el archivo?")) {
+            try {
+              const response = await fetch(url);
+              if (!response.ok) {
+                throw new Error("Error en la descarga");
+              }
+              const blob = await response.blob();
+              const link = document.createElement("a");
+              link.href = URL.createObjectURL(blob);
+              link.download = filename;
+
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              URL.revokeObjectURL(link.href);
+            } catch (error) {
+              console.error("Error al descargar el archivo:", error);
+              toast.error("Error al descargar el archivo");
+            }
+          }
+        }
+      };
+
       return (
         <>
           <DropdownMenu>
