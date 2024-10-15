@@ -14,7 +14,7 @@ export default function LayoutContainer({
   return (
     <div
       className={cn(
-        `space-y-[2vh]  overflow-hidden bg-white rounded-3xl py-[3vh] px-[3vw] mt-[16vh] mx-[3vw] md:ml-[23vw] `,
+        `space-y-[2vh] overflow-hidden bg-white rounded-3xl py-[3vh] px-[3vw] mt-[16vh] mx-[3vw] md:ml-[21vw] `,
         className
       )}>
       <div>

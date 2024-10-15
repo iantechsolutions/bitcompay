@@ -142,9 +142,20 @@ export default function HealthInsurancePage(props: {
             <div className="grid grid-cols-2 items-center">
               <div>
                 <p className="text-sm font-medium">SALDO ACTUAL</p>
-                <span className="text-[#CD3D3B] text-center text-xl font-bold">
-                  $ {currentAmount}
-                </span>
+                {currentAmount !== undefined ? (
+                  <span
+                    className={`text-2xl font-bold ${
+                      currentAmount > 0
+                        ? "text-[#6952EB]"
+                        : currentAmount < 0
+                        ? "text-[#EB2727]"
+                        : "text-black"
+                    }`}>
+                    {currentAmount.toFixed(2)}
+                  </span>
+                ) : (
+                  <span className={`text-2xl font-bold text-black`}>0.00</span>
+                )}
               </div>
               <div>
                 <Button

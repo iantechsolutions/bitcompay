@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db, schema } from "~/server/db";
-import { and, desc, eq, ilike, inArray, like, lt, SQL } from "drizzle-orm";
+import { and, desc, eq, ilike, inArray, like, lt, or, SQL } from "drizzle-orm";
 import {
   administrative_audit,
   medical_audit,
@@ -43,7 +43,7 @@ function makeSummary(
 
   fgFiltered.forEach((fg, index) => {
     const original_comprobante = fg.comprobantes.at(0);
-
+    console.log("costas", original_comprobante);
     const saldo_anterior = toNumberOrZero(
       original_comprobante?.items.find(
         (item) => item.concept === "Factura Anterior"

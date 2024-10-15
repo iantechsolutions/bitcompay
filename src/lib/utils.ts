@@ -100,21 +100,21 @@ function formatNumberAsCurrency(amount: number): string {
   }).format(amount);
 }
 
-function getImageTagForTipoComprobante(tipoComprobante: string): string {
+function getTagForTipoComprobante(tipoComprobante: string): string {
   if (tipoComprobante.includes("A")) {
-    return `<img src="/comprobantes/factura-a.png" alt="factura A" />`;
+    return "A";
   }
   if (tipoComprobante.includes("B")) {
-    return `<img src="/comprobantes/factura-b.png" alt="factura B" />`;
+    return "B";
   }
-  return `<img src="/comprobantes/recibo.png" alt="recibo" />`;
+  return "X";
 }
 
 function getIimageForLogo(logo: string | null) {
   if (logo) {
-    return `<img class="logo" style="width: 30vw;height: auto;margin-bottom: 5px;" src=${logo} alt="logo" />`;
+    return `<img class="logo" style="height:180px width:50" src=${logo} alt="logo" />`;
   } else {
-    return `<img class="logo" style="width: 30vw;height: auto;margin-bottom: 5px;" src="https://utfs.io/f/f426d7f1-f9c7-437c-a722-f978ab23830d-neiy4q.png" alt="logo" />`;
+    return `<img class="logo" style="height:180px width:50" src="https://utfs.io/f/f426d7f1-f9c7-437c-a722-f978ab23830d-neiy4q.png" alt="logo" />`;
   }
 }
 
@@ -192,7 +192,7 @@ export function htmlBill(
   domicilio: string,
   localidad: string,
   provincia: string,
-  cp: string,
+  sellCondition: string | undefined,
   id_type: string,
   id_number: string,
   afip_status: string
@@ -212,656 +212,105 @@ export function htmlBill(
   const conceptosList = generateConcepts(comprobante?.items ?? []);
   const amountsList = generateAmounts(comprobante?.items ?? []);
   const htmlContent =
-  //  `<!DOCTYPE html>
-  // <html lang="en">
-  //   <head>
-  //     <meta charset="UTF-8" />
-  //     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  //     <link rel="stylesheet" href="style.css" />
-  //     <link rel="preconnect" href="https://fonts.googleapis.com" />
-  //     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  //     <link
-  //       href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap"
-  //       rel="stylesheet"
-  //     />
-  //     <title>Document</title>
-  //   <style>
-  //     * {
-  //       box-sizing: border-box;
-  //       margin: 0;
-  //       padding: 0;
-  //       font-family: "Roboto", sans-serif;
-  //     }
-
-  //     body {
-  //       padding: 0 5rem;
-  //     }
-  //     header {
-  //       display: flex;
-  //       flex-direction: row;
-  //       justify-content: space-between;
-  //       border-bottom: 1.6px solid #8fefdc;
-  //       /* padding-bottom: 1.2rem; */
-  //       width: 100%;
-  //     }
-
-  //     .items-1 {
-  //       margin: 8px;
-  //       padding-bottom: 1.2rem;
-  //     }
-
-  //     .items-1 p {
-  //       font-size: 16px;
-  //       font-weight: 400;
-  //       color: #787878;
-  //     }
-
-  //     .logo {
-  //       width: 25vw;
-  //       height: auto;
-  //       margin-bottom: 5px;
-  //     }
-
-  //     .items-2 {
-  //       position: relative;
-  //     }
-
-  //     .items-2 img {
-  //       width: 60px;
-  //       top: 0;
-  //       left: 0;
-  //     }
-
-  //     .items-3 {
-  //       padding-bottom: 1.2rem;
-  //       display: flex;
-  //       flex-direction: column;
-  //       justify-content: space-between;
-  //     }
-
-  //     .items-3 h2 {
-  //       font-size: 1.7rem;
-  //       font-weight: 500;
-  //       line-height: 25px;
-  //     }
-
-  //     .items-3 p {
-  //       font-size: 16px;
-  //       font-weight: 400;
-  //       color: #787878;
-  //       line-height: 20px;
-  //     }
-
-  //     .items-3 div .fecha {
-  //       font-weight: 200;
-  //       size: 20px;
-  //       color: #787878;
-  //       letter-spacing: 2px;
-  //     }
-
-  //     .parte-2 {
-  //       display: flex;
-  //       justify-content: space-between;
-  //       border-top: none;
-  //       border-bottom: 1.6px solid #8fefdc;
-  //     }
-
-  //     .datos-1 {
-  //       font-size: 16px;
-  //       margin: 10px 10px 10px 0;
-  //       list-style-type: none;
-  //       line-height: 30px;
-  //       color: #303030;
-  //     }
-  //     .datos-1 li p span {
-  //       font-weight: 600;
-  //       opacity: 70;
-  //     }
-  //     .datos-2 {
-  //       font-size: 16px;
-  //       list-style-type: none;
-  //       line-height: 30px;
-  //       margin: 10px 10px 10px 0;
-  //       color: #303030;
-  //     }
-
-  //     .datos-2 li p span {
-  //       font-weight: 600;
-  //       opacity: 70;
-  //     }
-
-  //     .parte-3 {
-  //       display: flex;
-  //       justify-content: space-between;
-  //       border-top: none;
-  //       border-bottom: 1.6px solid #8fefdc;
-  //     }
-
-  //     .parte-3 p {
-  //       font-size: 18px;
-  //       font-weight: 500;
-  //       margin: 7px;
-  //     }
-
-  //     .parte-5 {
-  //       display: flex;
-  //       justify-content: space-between;
-  //       border-bottom: 1.6px solid #8fefdc;
-  //       padding-bottom: 20px;
-  //     }
-
-  //     .parte-5 p {
-  //       font-size: 16px;
-  //       color: #303030;
-  //       font-weight: 600;
-  //       line-height: 20px;
-  //       margin: 10px 0 0 0;
-  //     }
-
-  //     .parte-4 {
-  //       display: flex;
-  //       justify-content: space-between;
-  //       border-bottom: 1.6px solid #8fefdc;
-  //     }
-
-  //     .parte-4 p {
-  //       font-size: 13px;
-
-  //       font-weight: 500;
-  //       color: #323232;
-  //       margin: 5px 0 5px 0;
-  //     }
-
-  //     .parte-4 p span {
-  //       text-decoration: none;
-  //       font-weight: 600;
-  //     }
-
-  //     .parte-6 h2 {
-  //       margin-top: 10px;
-  //       font-size: 18px;
-
-  //       font-weight: 500;
-  //     }
-
-  //     .parte-6 p {
-  //       font-style: oblique;
-  //       margin-top: 10px;
-  //       font-style: bold;
-  //     }
-
-  //     .logos {
-  //       display: flex;
-  //       justify-content: space-between;
-  //       align-items: center;
-  //       margin-top: 10px;
-  //       padding: 6px 12px;
-  //       border: 2px dashed #8fefdc;
-  //     }
-
-  //     .pago-facil {
-  //       height: 63px;
-  //       width: 65px;
-  //     }
-
-  //     .rapi-pago {
-  //       width: 110px;
-  //     }
-
-  //     .mercado-pago {
-  //       height: 60px;
-  //       width: 65px;
-  //     }
-
-  //     .cod-barras {
-  //       width: 270px;
-  //     }
-
-  //     .cbu-section h2 {
-  //       margin-top: 10px;
-  //       margin-bottom: 5px;
-  //       font-weight: 400;
-  //       font-size: 12px;
-
-  //       font-style: oblique;
-  //     }
-
-  //     .cbu-section-2 {
-  //       display: flex;
-  //       align-items: center;
-  //       justify-content: space-between;
-  //       border: 2px dashed #8fefdc;
-  //       padding: 10px;
-  //     }
-
-  //     .cbu-section-2 p {
-  //       font-size: 18px;
-  //       font-weight: 700;
-  //       margin-right: 50px;
-  //       text-align: right;
-  //     }
-
-  //     .pago-mis {
-  //       height: 30px;
-  //       width: 200px;
-  //     }
-
-  //     .cards h2 {
-  //       margin-top: 10px;
-  //       margin-bottom: 5px;
-  //       font-weight: 400;
-  //       font-size: 12px;
-
-  //       font-style: oblique;
-  //     }
-
-  //     .cards-section {
-  //       display: flex;
-  //       justify-content: space-between;
-  //       align-items: center;
-  //       border: 2px dashed #8fefdc;
-  //       padding: 8px 16px;
-  //     }
-
-  //     .visa {
-  //       height: 45px;
-  //       width: 95px;
-  //     }
-
-  //     .visa-debit {
-  //       height: 45px;
-  //       width: 93px;
-  //     }
-
-  //     .mastercard {
-  //       height: 45px;
-  //       width: 70px;
-  //     }
-
-  //     .master-debit {
-  //       height: 45px;
-  //       width: 70px;
-  //     }
-
-  //     .cbu {
-  //     }
-
-  //     .factura-vencimiento {
-  //       margin-top: 10px;
-  //       border: 2px dashed #8fefdc;
-  //       padding: 2px 12px;
-  //     }
-
-  //     .factura-vencimiento p {
-  //       font-style: oblique;
-  //       font-size: 13px;
-  //       font-weight: 700;
-  //       color: #303030;
-  //     }
-
-  //     .qr-section {
-  //       font-size: 12px;
-
-  //       line-height: 20px;
-  //       gap: 10px;
-  //       display: flex;
-  //       margin-top: 20px;
-  //     }
-
-  //     .qr {
-  //       width: 150px;
-  //     }
-
-  //     .cae-section {
-  //       flex-direction: column;
-  //       gap: 10px;
-  //     }
-  //     .cae-section p {
-  //       font-size: 15px;
-  //       font-weight: 600;
-  //       color: #303030;
-  //     }
-
-  //     .cae-section span{
-  //       font-size: 13px;
-  //       font-style: oblique;
-  //       color: #303030;
-  //     }
-
-  //     .bold {
-  //       font-weight: 500;
-  //     }
-
-  //     .afip {
-  //       width: 150px;
-  //     }
-
-  //     .bp-logo {
-  //       width: 80px;
-  //       vertical-align: middle;
-  //     }
-  //   </style>
-  //   </head>
-  //   <body>
-  //     <header>
-  //       <div class="items-1">
-  //       ${getIimageForLogo(brand?.logo_url ?? null)}
-  //         <p>
-  //           ${company.razon_social}<br />
-  //           ${company.address} <br />
-  //           ${company.afip_condition}
-  //         </p>
-  //       </div>
-  
-  //       <div class="items-2">
-  //             ${getImageTagForTipoComprobante(
-  //               comprobanteDictionary[
-  //                 comprobante?.tipoComprobante
-  //               ]?.toString() ?? ""
-  //             )}
-         
-  //       </div>
-  
-  //       <div class="items-3">
-  //         <div>
-  //         <h2>
-  //           ${comprobante?.tipoComprobante ?? ""} <br />
-  //           N° ${comprobante?.ptoVenta.toString().padStart(4, "0")}-${voucher
-  //   .toString()
-  //   .padStart(8, "0")}
-  //         </h2>
-  //         <span class="fecha"> Fecha: ${dateNormalFormat(new Date())}</span>
-  //         </div>
-  //         <p>
-  //           C.U.I.T: ${company.cuit} <br />
-  //           Ing. Brutos Conv.Multil: ${company.cuit} <br />
-  //           Fecha de Inicio de Actividad: ${dateNormalFormat(
-  //             company.activity_start_date
-  //           )}
-  //         </p>
-  //       </div>
-  //     </header>
-  
-  //     <section class="parte-2">
-  //       <ul class="datos-1">
-  //         <li>
-  //           <p><span>Cliente: </span>${name}</p>
-  //         </li>
-  //         <li>
-  //           <p><span>Domicilio: </span>${domicilio}</p>
-  //         </li>
-  //         <li>
-  //           <p><span>Localidad: </span>${localidad}</p>
-  //         </li>
-  //         <li>
-  //           <p><span>Provincia: </span>${provincia}</p>
-  //         </li>
-  //         <li>
-  //           <p><span>CP: </span>${cp}</p>
-  //         </li>
-  //       </ul>
-  
-  //       <ul class="datos-2">
-  //         <li>
-  //           <p><span>${id_type}: </span>${id_number}</p>
-  //         </li>
-  //         <li>
-  //           <p><span>Categoria I.V.A: </span>${afip_status}</p>
-  //         </li>
-  //         <li>
-  //           <p><span>Condicion de Venta: </span>---</p>
-  //         </li>
-  //         <li>
-  //           <p><span>Periodo facturado: </span>${dateNormalFormat(
-  //             comprobante?.fromPeriod
-  //           )}</p>
-  //         </li>
-  //         <li>
-  //           <p><span>Fecha de vencimiento: </span>${dateNormalFormat(
-  //             comprobante?.due_date
-  //           )}</p>
-  //         </li>
-  //       </ul>
-  //     </section>
-  
-  //     <section class="parte-3">
-  //       <p>CONCEPTOS</p>
-  //       <p>IMPORTE</p>
-  //     </section>
-  
-  //     <section class="parte-5">
-  //       <div>
-  //         ${conceptosList}
-  //       </div>
-  
-  //       <div>
-  //         ${amountsList}
-  //       </div>
-  //     </section>
-  
-  //     <section class="parte-4">
-  //       <p>Pesos ${numeroALetras(Math.floor(comprobante?.importe ?? 0))} ${
-  //   obtenerDecimales(comprobante?.importe) == "00" || "0"
-  //     ? ""
-  //     : `con ${obtenerDecimales(comprobante?.importe)}/100`
-  // }</p>
-  //       <p><span>TOTAL: </span>${formatNumberAsCurrency(
-  //         comprobante?.importe ?? 0
-  //       )}</p>
-  //     </section>
-      
-  //     <section class="factura-vencimiento">
-  //       <p>Esta factura se debitara en fecha de vencimiento en CBU ###########</p>
-  //     </section>
-
-  //     <section class="parte-6">
-  //       <h2>Canales de Pago Habilitados</h2>
-  //       <p>Mediante lectura del codigo de barras:</p>
-        
-  //       <div class="logos">
-  //         <img
-  //           class="pago-facil"
-  //           src="https://utfs.io/f/79d56fb6-2cb7-4760-bbc6-add1a1e434f6-tkdz7.png"
-  //           alt=""
-  //         />
-  //         <img
-  //           class="rapi-pago"
-  //           src="https://utfs.io/f/501ea573-2d69-4f4b-9ae3-95531c540d9c-h1yi1.jpg"
-  //           alt=""
-  //         />
-  //         <img
-  //           class="mercado-pago"
-  //           src="https://utfs.io/f/781ea16d-cac2-46de-9b9a-e59db510e17b-8b1bm4.png"
-  //           alt=""
-  //         />
-  //         ${true ? getIimageForBarcode() : null}
-          
-  //       </div>
-  //     </section>
-  
-  //     <section class="cbu-section">
-  //       <h2>Ingresando el codigo electronico de pagos:</h2>
-  //       <div class="cbu-section-2">
-  //         <img
-  //           class="pago-mis"
-  //           src="https://utfs.io/f/a215f09e-25e8-4eb3-9d1c-6adf1d17baa5-pvvezi.png"
-  //           alt=""
-  //         />
-  //         <p>20214823838</p>
-  //       </div>
-  //     </section>
-  
-  //     <section class="cards">
-  //       <h2>Debito Automatico en Tarjetas y/o Cuentas Bancarias</h2>
-  //       <div class="cards-section">
-  //         <img
-  //           class="visa"
-  //           src="https://utfs.io/f/6f4442e1-57c1-4df8-a810-29258735b429-reuj6w.png"
-  //           alt=""
-  //         />
-  //         <img
-  //           class="visa-debit"
-  //           src="https://utfs.io/f/8d48ec18-1d0b-4e61-9db3-e304cb732abf-q42cl4.png"
-  //           alt=""
-  //         />
-  //         <img
-  //           class="mastercard"
-  //           src="https://utfs.io/f/23711681-416d-4155-9894-4e6c8584219f-mgfpcc.png"
-  //           alt=""
-  //         />
-  //         <img
-  //           class="master-debit"
-  //           src="https://utfs.io/f/23711681-416d-4155-9894-4e6c8584219f-mgfpcc.png"
-  //           alt=""
-  //         />
-  //         <img
-  //           class="cbu"
-  //           src="https://utfs.io/f/0405e613-cee2-41c4-830d-8403002b6c98-4o63ls.png"
-  //           alt=""
-  //         />
-  //       </div>
-  //     </section>
-  
-  //     <section class="qr-section">
-  //       <div>
-  //         <img
-  //           class="qr"
-  //           src="https://utfs.io/f/2dd25618-943b-41f4-8c0e-363fc8ba3228-n3iun9.png"
-  //           alt=""
-  //         />
-  //       </div>
-  //       <div class="cae-section">
-  //         <img
-  //           class="afip"
-  //           src="/comprobantes/logo-afip.png"
-  //           alt=""
-  //         />
-  //         <p>CAE N° ####</p>
-  //         <p>Fecha de Vto. de CAE:</p>
-  //         <p>
-  //           Powered by
-  //           <img
-  //             class="bp-logo"
-  //             src="https://utfs.io/f/fa110834-238b-4880-a8c2-eedebe9e6b6e-mnl13r.png"
-  //             alt=""
-  //           />
-  //         </p>
-  //       </div>
-  //     </section>
-  //   </body>
-  // </html>
-  
-  `<!DOCTYPE html>
+   `<!DOCTYPE html>
   <html lang="en">
     <head>
-       <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap"
-    rel="stylesheet"
-  />
-  <title>Documento</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: "Roboto", sans-serif;
-    }
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="stylesheet" href="style.css" />
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+      <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap"
+        rel="stylesheet"
+      />
+      <title>Document</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Roboto", sans-serif;
+      }
 
-    body {
-      padding: 1rem;
-    }
+      body {
+        padding: 1 rem;
+        -webkit-print-color-adjust: exact; 
+		print-color-adjust: exact;
+      }
+      header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        border-bottom: 1px solid #ccc;
+        width: 100%;
+      }
 
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 2px solid #dcdcdc; /* Borde gris claro */
-      padding-bottom: 1.2rem;
-      width: 100%;
-      margin-bottom: 20px; /* Espacio entre la sección de la tabla y el header */
-    }
+        .items-1 {
+        margin-left:40px;
+        padding-bottom: 0;
+      }
 
-    .items-1 {
-      margin: 8px;
-    }
+      .items-1 p {
+        font-size: 12px;
+        font-weight: 400;
+        color: #3E3E3E;
+margin-bottom:1px;
+      }
 
-    .items-1 p {
-      font-size: 16px;
-      font-weight: 400;
-      color: #787878;
-    }
+      .logo {
+        width: 25vw;
+        height: auto;
+        margin-bottom: 5px;
+      }
 
-    .logo {
-      width: 150px; /* Ajusta el tamaño del logo */
-      height: auto;
-      margin-bottom: 5px;
-    }
+      .items-2 {
+        position: relative;
+	
+      }
 
-    .items-2 {
-      text-align: center;
-    }
+      .items-2 img {
+        width: 60px;
+        top: 0;
+        left: 0;
+      }
 
-    .items-2 img {
-      width: 60px;
-    }
+      .items-3 {
+        padding-bottom: 0rem;
+        margin-right:40px;
+        display: flex;
+        flex-direction: column;
+      }
 
-    .items-2 h3 {
-      font-size: 1.2rem;
-      font-weight: 500;
-      color: #787878;
-    }
+      .items-3 h2 {
+        font-size: 1.7rem;
+        font-weight: 500;
+        line-height: 25px;
+      }
 
-    .items-3 {
-      text-align: right; /* Alinea el contenido a la derecha */
-    }
-
-    .items-3 h2 {
-      font-size: 1.7rem;
-      font-weight: 500;
-      line-height: 25px;
-      margin-bottom: 8px;
-    }
-
-    .items-3 p {
-      font-size: 16px;
-      font-weight: 400;
-      color: #787878;
-      line-height: 20px;
-    }
-
-    .items-3 div .fecha {
-      font-weight: 200;
-      font-size: 14px;
-      color: #787878;
-      letter-spacing: 1px;
-    }
+      .items-3 p {
+        display: flex;
+        font-size: 12px;
+        color: #3E3E3E;
+margin-bottom:1px;
+      }
 
       .parte-2 {
          display: flex;
         justify-content: space-between;
          margin-bottom: 1rem; 
-        
-        margin-top: 20px;
-        border-top: none;
-        border-bottom: 1.6px solid #8fefdc;
+ 	font-size: 12px;
         flex-direction: column;
-
+	padding-bottom: 3px; 
+        color: #3E3E3E;
       }
 
       .datos-1 {
-        text-align: left;
         font-size: 16px;
-          list-style-type: none;
-          padding: 0;
-          margin: 0;
+        margin: 10px 10px 10px 0;
+        list-style-type: none;
         line-height: 30px;
         color: #303030;
-        flex: 1;
       }
       .datos-1 li p span {
         font-weight: 600;
@@ -870,46 +319,39 @@ export function htmlBill(
     margin-right: 1rem;
       }
       .datos-2 {
-        text-align: right;
-         font-size: 16px;
-          list-style-type: none;
-          padding: 0;
-          margin: 0;
+        font-size: 16px;
+        list-style-type: none;
         line-height: 30px;
-        color: #303030;
         flex: 1;
+        margin-right: 1rem;
+        margin: 10px 10px 10px 0;
+        color: #303030;
       }
 
       .datos-2 li p span {
         font-weight: 600;
         opacity: 70;
-        flex: 1;
-    margin-right: 1rem;
       }
 
       .parte-3 {
         display: flex;
         justify-content: end;
         align: right;
-        margin-bottom: 20px; 
-        margin-top: 20px;
+        margin-bottom: 1rem; 
         border-top: none;
         border-bottom: 1.6px solid #8fefdc;
-         background: #dcdcdc;
       }
 
       .parte-3 p {
         font-size: 18px;
         font-weight: 500;
         margin: 7px;
-        background: #dcdcdc;
       }
 
       .parte-5 {
         display: flex;
         justify-content: space-between;
         margin-bottom: 1rem; 
-        margin-top: 20px;
         border-bottom: 1.6px solid #8fefdc;
         padding-bottom: 20px;
         flex-direction: column;
@@ -967,136 +409,39 @@ export function htmlBill(
 
       }
 
-      .pago-facil {
-        height: 63px;
-        width: 65px;
-      }
-
-      .rapi-pago {
-        width: 110px;
-      }
-
-      .mercado-pago {
-        height: 60px;
-        width: 65px;
-      }
-
       .cod-barras {
         width: 270px;
       }
 
-      .cbu-section h2 {
-        margin-top: 10px;
-        margin-bottom: 5px;
-        font-weight: 400;
-        font-size: 12px;
-
-        font-style: oblique;
-      }
-
-      .cbu-section-2 {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 10px;
-    border: 2px dashed #8fefdc;
-      }
-
-      .cbu-section-2 p {
-        font-size: 18px;
-        font-weight: 700;
-        margin-right: 50px;
-        text-align: right;
-      }
-
-      .pago-mis {
-        height: 30px;
-        width: 200px;
-      }
-
-      .cards h2 {
-        margin-top: 10px;
-        margin-bottom: 5px;
-        font-weight: 400;
-        font-size: 12px;
-
-        font-style: oblique;
-      }
-
-      .cards-section {
-          display: flex;
-    justify-content: space-around;
-    align-items: center;
-       padding: 10px;
-    border: 2px dashed #8fefdc;
-    flex-direction: column;
-
-      }
-
-      .visa {
-        height: 45px;
-        width: 95px;
-      }
-
-      .visa-debit {
-        height: 45px;
-        width: 93px;
-      }
-
-      .mastercard {
-        height: 45px;
-        width: 70px;
-      }
-
-      .master-debit {
-        height: 45px;
-        width: 70px;
-      }
-
-      .cbu {
-      }
-
-      .factura-vencimiento {
-        margin-top: 10px;
-        border: 2px dashed #8fefdc;
-        padding: 2px 12px;
-      }
-
-      .factura-vencimiento p {
-        font-style: oblique;
-        font-size: 13px;
-        font-weight: 700;
-        color: #303030;
-      }
-
       .qr-section {
-        font-size: 12px;
+        font-size: 10px;
         display: flex;
         justify-content: space-between;
-        line-height: 20px;
         gap: 10px;
         display: flex;
         margin-top: 20px;
+        margin-left: 40px;
+    margin-right:40px;
       }
 
+.qr-section p{
+font-size: 10px;
+margin-bottom: 1px;
+}
       .qr {
         width: 150px;
       }
 
       .cae-section {
         flex-direction: column;
-        gap: 10px;
       }
       .cae-section p {
-        font-size: 15px;
-        font-weight: 600;
-        color: #303030;
-      }
-
-      .cae-section span{
-        font-size: 13px;
-        font-style: oblique;
-        color: #303030;
+        font-size: 12px;
+	height:15px;
+        font-weight: 400;
+        color: #333;
+        margin-bottom:0;
+        padding-bottom: 0;
       }
 
       .bold {
@@ -1149,7 +494,7 @@ export function htmlBill(
 }
 
 .resumen-totales .total-a-pagar {
-  background-color: #d9f7be;
+  background-color: #DEF5DD;
   padding: 10px;
   text-align: right;
 }
@@ -1170,228 +515,335 @@ export function htmlBill(
   color: #6c63ff;
 }
 
-.factura-vencimiento {
-  font-style: italic;
-  margin-top: 10px;
+
+
+.icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 0;
 }
 
-.factura-vencimiento p {
-  font-size: 12px;
-}
-    
-.conceptos-container {
-  display: flex;
-  justify-content: space-between; 
-  width: 100%;
-}
- .conceptos-container div {
-  width: 48%; 
-}   
-    .align-left {
-  text-align: left; 
+.icon span {
+    font-size: 30px;
+    color: #3E3E3E;
+    font-weight: bold;
 }
 
-.align-right {
-  text-align: right; 
-  width: 100%; 
+p {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 5px;
 }
 
+.line {
+    width: 1px;
+    height: 30px;
+    background-color: #ccc;
+    margin: 0 auto 0;
+}
+
+.grid {
+	font-size: 15px;
+	padding-right: 40px;
+	padding-left: 40px
+}
+
+.grid div {
+padding-bottom: 10px;
+}
+
+
+
+
+
+
+.conceptotables {
+    width: 100%;
+    border-collapse: collapse;
+	max-height:100%;
+}
+
+.conceptotables-header {
+    padding-top: 10px;
+	padding-bottom: 10px;
+    font-weight: bold;
+    color: #3E3E3E;
+	background-color: #f1f1f1;
+	border-style : hidden;
+}
+
+.conceptotables-cell {
+    padding-top: 10px;
+	padding-bottom: 10px;
+    border-top: 1px solid #ddd;
+    color: #666;
+	border-style : hidden;
+}
+
+.tributos p {
+font-size:10px
+}
+.tributos {
+padding-top: 15px;
+border-top: 1px solid #ccc
+}
+
+	.resumen-total {
+		background-color: #DEF5DD;
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		padding-bottom: 10px;
+		padding-top: 10px;
+		border-radius: 5px
+		
+	}
+.payment {
+  position: relative;
+border-width: 0.25px;
+  border-style: solid;
+border-radius: 0.75rem;
+border-color: #D9D9D9;
+      display: flex;
+  justify-content: space-evenly;
+  gap: 1rem;
+  padding: 0.5rem 1rem;
+  place-items: center;
+
+}
+
+      .payment span{
+            position: absolute;
+font-size:10px;
+        background-color: #FFFFFF;
+        top: -8px;
+        padding: 0 8px;
+        white-space:nowrap;
+        color:#3E3E3E;
+}
     </style>
     </head>
     <body>
-      <header>
+      <header style="margin-bottom:10px">
         <div class="items-1">
-          <img       
-                class="logo" alt="Logo"
-src="https://cristalsalud.ar/wp-content/uploads/elementor/thumbs/cropped-CRISTALlogo-1-qd3yuac8msju1wzhbm0ax14dfhqcgg4fcm3dzm6s7m.png"/>
-        <p>CONSULT-RENT S.R.L.</p>
-      <p>BOLIVAR 547 Piso 1º Dpto. A - C.A.B.A</p>
-      <p>IVA Responsable Inscripto</p>
-    </div>
+        ${getIimageForLogo(brand?.logo_url ?? null)}
+          <p>${company.razon_social}</p>
+            <p>${company.address}</p>
+            <p>${company.afip_condition}</p>
+        </div>
   
-        <div class="items-2">
-         <h3>ORIGINAL</h3>     
-      <img src="logo_B.png" alt="Letra B" />
+          <div class="items-2" style="text-align:center">
+        <div class="icon">
+				<span>${getTagForTipoComprobante(
+          comprobanteDictionary[
+            comprobante?.tipoComprobante
+          ]?.toString() ?? ""
+        )}</span>
+			  </div>
+			<div class="line"></div>
         </div>
   
         <div class="items-3">
-         <div>
-      <h2>FACTURA <br /> Comp. N°: xxxx-xxxxxxxx</h2>
-      <span class="fecha">Fecha de Emisión: 01/01/2024</span>
-    </div>
-    <p>
-      C.U.I.T: 30-71054237-2 <br />
-      Ingresos Brutos: Exento <br />
-      Fecha de Inicio de Actividad: 13/05/2008
-    </p>
-  </div>
-</header>
+          <div>
+           <h3 style=" font-size: 16px; font-weight:500; padding-bottom:3px;">
+            ${comprobante?.tipoComprobante ?? ""} </h3>
+           <h3 style=" font-size: 14px; font-weight:400; padding-bottom:3px;">
+            N° ${comprobante?.ptoVenta.toString().padStart(4, "0")}-${voucher
+    .toString()
+    .padStart(8, "0")}
+          </h3>
+
+          <p> Fecha de Emisión: ${dateNormalFormat(new Date())}</p>
+          	<p> C.U.I.T:${company.cuit}</p>
+            <p> Ingresos Brutos: XXXX</p>
+          <p> Fecha de Inicio de Actividad: ${dateNormalFormat(
+              company.activity_start_date
+            )}</p>
+        </div>
+      </header>
   
-     <section class="parte-2">
-  <ul class="datos-1">
-    <li><p><span>Razón Social:</span> Fulano Mengano</p></li>
-    <li><p><span>Domicilio: </span> Alicia Moreau de Justo 1150 4to Piso Of. 410 - Ciudad Autónoma de Buenos Aires.</p></li>
-    <li><p><span>Condición AFIP: </span> Responsable Inscripto</p></li>
-    <li><p><span>Período: </span>01/2024</p></li>
-  </ul>
-       
-    <ul class="datos-2">
-    <li><p><span>CUIT: </span>00-00000000-0</p></li>
-    <li><p><span>Condición de Venta: </span>Cuenta Corriente</p></li>
-    <li><p><span>Vencimiento de pago: </span>10/01/2024</p></li>
-  </ul>
-      </section>
+    <div class="parte-2">	
+		<div class="grid" style="display:flex; flex-direction:row; justify-content:space-between">
+          <div>
+				<span><span style="font-weight:600; opacity:70;margin-right:4px;">Nombre/Razón Social:</span>${name}</span>
+          </div>
+          <div>
+				<span><span style="font-weight:600; opacity:70;margin-right:4px;">${id_type}</span>${id_number}</span>
+			</div>
+      </div>
+		<div class="grid">
+		<div>
+          <span><span style="font-weight:600; opacity:70;margin-right:4px;">Domicilio:</span>${domicilio} ${localidad} ${provincia}</span>
+			</div>
+      	</div>
+
+        <div class="grid" style="display:flex; flex-direction:row; justify-content:space-between">
+		<div style="display:flex; flex-direction:column; justify-content:start">
+			<div>
+				<span><span style="font-weight:600; opacity:70;margin-right:4px;">Condición AFIP:</span>${afip_status}</span>
+     	</div>
+      	<div>
+				<span><span style="font-weight:600; opacity:70;margin-right:4px;">Período:</span>${dateNormalFormat(comprobante?.fromPeriod)}</span>
+			</div>	
+      	</div>
+		<div style="display:flex; flex-direction:column; justify-content:start">
+			<div>
+				<span><span style="font-weight:600; opacity:70;margin-right:4px;">Condición de venta:</span>${sellCondition}</span>
+			</div>	
+			<div>
+				<span><span style="font-weight:600; opacity:70;margin-right:4px;">Fecha de vencimiento:</span>${dateNormalFormat(
+          comprobante?.due_date
+        )}</span>
+			</div>
+		</div>
+	  </div>
   
-     <section class="parte-3">
-  <div class="conceptos-container">
-    <div class="align-left"><strong>CONCEPTOS</strong></div>
-    <div class="align-right"><strong>IMPORTE</strong></div>
-  </div>
-</section>
-  
-      <section class="parte-5">
-  <div class="conceptos-container">
-    <div>Concepto 1</div>
-    <div>$10.000,00</div>
-  </div>
-  <div class="conceptos-container">
-    <div>Concepto 2</div>
-    <div>$10.000,00</div>
-  </div>
-</section>
-      
-<section class="parte-4">
-  <div class="info-tributo-contenedor">
-    <div class="info-tributo">
-      <table class="tabla-totales">
-        <thead>
-          <tr>
-            <th>TRIBUTO</th>
-            <th>JURISDICCIÓN</th>
-            <th>ALÍCUOTA</th>
-            <th>BASE IMPONIBLE</th>
-            <th>IMPORTE</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Ret. Imp. Gan.</td>
-            <td>Buenos Aires</td>
-            <td>0%</td>
-            <td>$0,00</td>
-            <td>$0,00</td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="conceptotables-container" style="height: 280px;">
+        <table class="conceptotables">
+            <thead>
+                <tr>
+                    <th class="conceptotables-header" style="text-align:left;padding-left:40px;background-color: #f0f0f0;border-top-left-radius:5px;border-bottom-left-radius:5px" >Conceptos</th>
+                    <th class="conceptotables-header" style="text-align:right;padding-right:40px;border-top-right-radius:5px;border-bottom-right-radius:5px">Importe</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="conceptotables-cell" style="text-align:left;padding-left:40px;"> ${conceptosList}</td>
+                    <td class="conceptotables-cell" style="text-align:right;padding-right:40px;">${amountsList}</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
-    <div class="totales-info">
-      <div>Sub-total: $20.000,00</div>
-      <div>Otros Tributos: $0,00</div>
-      <div>Pagos a cuenta: $20.000,00</div>
-    </div>
-  </div>
+
+       <div class="tributos" style="display:flex; flex-direction: row;justify-content:space-between; padding-left:40px; padding-right:40px">
+	<div style="display:flex; flex-direction: row;justify-content:space-between; gap:15px">
+		<div style="display:flex; flex-direction:column">
+			<p style="font-weight:600">TRIBUTO</p>
+			<p>Ret. Imp. Gan. XXXX</p>
+		</div>
+		<div style="display:flex; flex-direction:column">
+			<p style="font-weight:600">JURISDICCIÓN</p>
+			<p>Buenos Aires XXXX</p>
+		</div>
+		<div style="display:flex; flex-direction:column">
+			<p style="font-weight:600">ALICUOTA</p>
+			<p>X%</p>
+		</div>
+		<div style="display:flex; flex-direction:column">
+			<p style="font-weight:600">BASE IMPONIBLE</p>
+			<p>$XX,XX</p>
+		</div>
+		<div style="display:flex; flex-direction:column">
+			<p style="font-weight:600">IMPORTE</p>
+			<p>$XX,XX</p>
+		</div>
+	</div>
+
+  <div style="display:flex; flex-direction:column; margin-bottom: 10px; font-weight:500;">
+		<p style="font-size:12px; text-align:right; ">Sub-total: $XX.XXX,XX</p>
+    <p style="font-size:12px; text-align:right">IVA 10,5%: $XX.XXX,XX</p>
+		<p style="font-size:12px; text-align:right">Otros Tributos: $XX.XXX,XX</p>
+    <p style="font-size:12px; text-align:right">Pagos a cuenta: $XX.XXX,XX</p>
+	</div>
+</div>
+  
+<section style="padding-bottom: 15px; border-bottom:1px solid #ccc ">
+	<div class="resumen-total">
+		<div style="font-size:12px;padding-left:40px; width:350px">
+    ${numeroALetras(Math.floor(comprobante?.importe ?? 0))}
+		</div>
+		<div style="color:#6952EB; font-size:18px;font-weight:600; padding-right: 40px; display:flex; flex-direction:row">
+		<div style="padding-right:15px">TOTAL A PAGAR:</div>${formatNumberAsCurrency(comprobante?.importe ?? 0)}
+		</div>
+	</div>
+
+  <div style="font-size:12px;padding-left:40px; padding-top:10px; width:350px; white-space: nowrap; font-style: italic;">
+			Esta factura se debitará en fecha de vencimiento en CBU: XXXXXXXXXXXXXXXXXXXXXXXXX.
+		</div>
 </section>
 
-<section class="resumen-totales">
- 
-  <div class="total-a-pagar"
-    <p>
-Ciento noventa y siete millones cuatrocientos cuarenta y
-cinco mil setecientos setenta y nueve con 59/100</p>
-    <p> <span class="total">TOTAL A PAGAR: $197.445.779,59 
-  </div>
-</section>
-
-<section class="factura-vencimiento">
-  <p>Esta factura se debitara en fecha de vencimiento en CBU ###########</p>
-</section>
-
-
-      <section class="parte-6">
-        <h2>Canales de Pago Habilitados</h2>
-        <p>Mediante lectura del codigo de barras:</p>
-        
-        <div class="logos">
+     
+       <section style="padding-left:40px; padding-right:40px; padding-top: 15px; padding-bottom: 5px;">
+        <h2 style="color: #3E3E3E; font-weight: 500; font-size:16px;">Canales de pago habilitados </h2>
+        <div style="display:flex; flex: 1 1 auto; justify-content: space-between; margin-top:20px; margin-bottom:5px; place-items: center;">
+          <div class="payment">
+            <span>Lectura de código de barras</span>  
           <img
-            class="pago-facil"
+            style="width:30px; height:30px;"
             src="https://utfs.io/f/79d56fb6-2cb7-4760-bbc6-add1a1e434f6-tkdz7.png"
             alt=""
           />
           <img
-            class="rapi-pago"
+             style="width:63px; height:15px;"
             src="https://utfs.io/f/501ea573-2d69-4f4b-9ae3-95531c540d9c-h1yi1.jpg"
             alt=""
           />
           <img
-            class="mercado-pago"
+            style="width:72px; height:18px;"
             src="https://utfs.io/f/781ea16d-cac2-46de-9b9a-e59db510e17b-8b1bm4.png"
             alt=""
           />
-          ${true ? getIimageForBarcode() : null}
-          
-        </div>
-      </section>
-  
-      <section class="cbu-section">
-        <h2>Ingresando el codigo electronico de pagos:</h2>
-        <div class="cbu-section-2">
+           </div>
+           
+          <div class="payment" style="padding-left: 40px; padding-right: 40px;">
+            <span>Código de pago electrónico</span>
           <img
-            class="pago-mis"
+            style="width:90px; height:30px;"
             src="https://utfs.io/f/a215f09e-25e8-4eb3-9d1c-6adf1d17baa5-pvvezi.png"
             alt=""
           />
-          <p>20214823838</p>
-        </div>
-      </section>
-  
-      <section class="cards">
-        <h2>Debito Automatico en Tarjetas y/o Cuentas Bancarias</h2>
-        <div class="cards-section">
+         </div>
+
+          <div class="payment">
+            <span>Débito automático</span>
+            <img
+               style="width:54px; height:30px;"
+              src="https://utfs.io/f/8d48ec18-1d0b-4e61-9db3-e304cb732abf-q42cl4.png"
+              alt=""
+            />
           <img
-            class="visa"
+             style="width:54px; height:23px;"
             src="https://utfs.io/f/6f4442e1-57c1-4df8-a810-29258735b429-reuj6w.png"
             alt=""
           />
           <img
-            class="visa-debit"
-            src="https://utfs.io/f/8d48ec18-1d0b-4e61-9db3-e304cb732abf-q42cl4.png"
-            alt=""
-          />
-          <img
-            class="mastercard"
+           style="width:45px; height:33px;"
             src="https://utfs.io/f/23711681-416d-4155-9894-4e6c8584219f-mgfpcc.png"
-            alt=""
-          />
-          <img
-            class="master-debit"
-            src="https://utfs.io/f/23711681-416d-4155-9894-4e6c8584219f-mgfpcc.png"
-            alt=""
-          />
-          <img
-            class="cbu"
-            src="https://utfs.io/f/0405e613-cee2-41c4-830d-8403002b6c98-4o63ls.png"
             alt=""
           />
         </div>
+         </div>
       </section>
   
-      <section class="qr-section">
-        <div>
+       <section class="qr-section">
+        <div style="display: flex; flex-direction: column; ">
+        <div style="display: flex; justify-content: flex-start;" >
           <img
             class="qr"
             src="https://utfs.io/f/2dd25618-943b-41f4-8c0e-363fc8ba3228-n3iun9.png"
             alt=""
+	style="height: 100px; width:100px; "
           />
-        </div>
-        <div class="cae-section">
+
+           <div style="display: flex; flex-direction: column; padding-left:10px; ">
           <img
-            class="afip"
+             style="width:100px; height:40px;"
             src="/comprobantes/logo-afip.png"
             alt=""
           />
-          <p>CAE N° ####</p>
-          <p>Fecha de Vto. de CAE:</p>
+
+          <p style="color: #333; font-style: italic; font-weight: 500; margin-bottom: 10px;">Comprobante autorizado</p>
+          <p>CAE N° XXXXXXXXX</p>
+          <p style="white-space: nowrap">Fecha Vto de CAE: XX/XX/XXXX</p>
+        </div>
+          </div>
+         <div style="padding-top:5px;">
           <p>
             Powered by
             <img
@@ -1400,6 +852,14 @@ cinco mil setecientos setenta y nueve con 59/100</p>
               alt=""
             />
           </p>
+          </div>
+          </div>
+
+        <div class="cae-section" style="text-align: left;">
+           <p>CÓDIGO DE PAGO ELECTRÓNICO: XXXX-XXXXXXXX</p>
+          <p>FECHA TOPE PARA EL PAGO EN REDES: XX/XX/XXXX</p>
+          <p>CANALES CON LECTURA DE CÓDIGO DE BARRAS: </p>
+          ${true ? getIimageForBarcode() : null}
         </div>
       </section>
     </body>

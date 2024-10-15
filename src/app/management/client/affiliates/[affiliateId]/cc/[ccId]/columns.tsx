@@ -25,6 +25,7 @@ import DetailSheet from "./components_acciones/detail-sheet";
 import DialogCC from "./components_acciones/dialog";
 import { RouterOutputs } from "~/trpc/shared";
 import { toast } from "sonner";
+import { Span } from "next/dist/trace";
 
 export type TableRecord = {
   date: Date;
@@ -140,12 +141,27 @@ export const columns: ColumnDef<TableRecord>[] = [
       console.log("ivaRecibido");
       console.log(row.getValue("iva"));
       const ivaMostrar = (row.getValue("iva") as number).toString();
+
+      let originalAmount = row.getValue("amount") as string;
+      originalAmount = originalAmount
+        .replace(/[$\s]/g, "")
+        .replace(/\./g, "")
+        .replace(/,/g, ".");
+      const amount = parseFloat(originalAmount);
+      console.log("originalAmount", originalAmount);
+      console.log("das das", originalAmount);
       return (
         <div className="relative h-full flex flex-col justify-center items-center mx-10 mr-14">
-          <div className="absolute top-1/2 transform -translate-y-1/2 font-bold">
-            {" "}
-            {row.getValue("amount")}
-          </div>
+          {amount === 0 ? (
+            <span className="">{originalAmount}</span>
+          ) : (
+            <span
+              className={`"absolute top-1/2 transform -translate-y-1/2 font-bold ${
+                amount > 0 ? "text-[#6952EB]" : "text-[#EB2727]"
+              }`}>
+              {amount}
+            </span>
+          )}
           <div className="absolute top-1/2 transform translate-y-4 text-[#c4c4c4] text-xs flex flex-row gap-x-1">
             <div>IVA:</div>
             <div>{` ${ivaMostrar}%`}</div>

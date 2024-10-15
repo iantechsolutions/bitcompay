@@ -11,7 +11,7 @@ export type TableRecord = {
   UN: string;
   nombre: string;
   cuit: string;
-  "saldo anterior": number;
+  "Saldo anterior": number;
   "cuota plan": number;
   bonificacion: number;
   diferencial: number;
@@ -30,9 +30,7 @@ export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "nroGF",
     header: () => (
-      <div className="text-center whitespace-nowrap text-medium px-7">
-        Nro
-      </div>
+      <div className="text-center whitespace-nowrap text-medium px-7">Nro</div>
     ),
     cell: ({ row }) => {
       return <div className="text-center">{row.getValue("nroGF")}</div>;
@@ -65,14 +63,14 @@ export const columns: ColumnDef<TableRecord>[] = [
     },
   },
   {
-    accessorKey: "saldo anterior",
+    accessorKey: "Saldo anterior",
     header: () => (
       <div className="text-center whitespace-nowrap text-medium px-7">
         Saldo anterior
       </div>
     ),
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("saldo anterior"));
+      const amount = parseFloat(row.getValue("Saldo anterior"));
       const formatted = new Intl.NumberFormat("es-AR", {
         style: "currency",
         currency: "ARS",
@@ -80,7 +78,7 @@ export const columns: ColumnDef<TableRecord>[] = [
         maximumFractionDigits: 2,
         currencyDisplay: "narrowSymbol",
       }).format(amount);
-
+      console.log("Saldo", amount, formatted);
       return <div className="text-center  ">{formatted}</div>;
     },
   },
@@ -257,11 +255,11 @@ export const columns: ColumnDef<TableRecord>[] = [
     },
   },
   {
-    accessorKey: "UN", 
+    accessorKey: "UN",
     header: () => null,
     cell: () => null,
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));
-    }
-  }
+    },
+  },
 ];
