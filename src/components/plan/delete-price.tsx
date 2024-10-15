@@ -19,6 +19,7 @@ import { useState } from "react";
 export default function DeletePrice(props: {
   planId: string;
   currentVigency: Date | undefined;
+  onDelete: () => Promise<void>; // Nueva prop
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const { mutateAsync: deletePricePerCondition, isLoading: isDeleting } =
@@ -28,14 +29,9 @@ export default function DeletePrice(props: {
   async function handleDelete() {
     try {
       if (props.currentVigency) {
-        await deletePricePerCondition({
-          id: props.planId,
-          currentVigency: props.currentVigency,
-        });
-
-        toast.success("Precios eliminados correctamente");
-        router.refresh();
-        setIsOpen(false); // Cierra el diálogo
+        router.push("/management/sales/plans/" + props.planId);
+        await props.onDelete();
+        setIsOpen(false);
       }
     } catch (e) {
       const error = asTRPCError(e)!;
