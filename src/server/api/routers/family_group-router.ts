@@ -309,7 +309,7 @@ export const family_groupsRouter = createTRPCRouter({
         return family_groups;
       } else null;
     }),
-    
+
   getWithAportes: protectedProcedure
     .input(
       z.object({
@@ -492,22 +492,6 @@ export const family_groupsRouter = createTRPCRouter({
         });
       }
 
-      const integrantsConditions = [
-        eq(schema.integrants.isBillResponsible, true),
-      ];
-
-      if (typeof input.id_number_startsWith === "string") {
-        integrantsConditions.push(
-          like(schema.integrants.id_number, `${input.id_number_startsWith}%`)
-        );
-      }
-
-      if (typeof input.name_contains === "string") {
-        integrantsConditions.push(
-          ilike(schema.integrants.name, `%${input.name_contains}%`)
-        );
-      }
-
       let whereCompatBusinessUnits = [
         eq(schema.bussinessUnits.companyId, ctx.session.orgId),
       ];
@@ -554,8 +538,45 @@ export const family_groupsRouter = createTRPCRouter({
           )
         );
       }
-      console.log("whereFgList", whereFgList);
-      console.log("compatibleBusinessUnits",compatibleBusinessUnits);
+
+      whereFgList.push(
+        inArray(
+          schema.family_groups.id,
+          db
+            .select({ id: schema.comprobantes.family_group_id })
+            .from(schema.comprobantes)
+            .where(eq(schema.comprobantes.liquidation_id, input.liquidationId))
+        )
+      );
+
+      const integrantsConditions = [];
+      if (typeof input.id_number_startsWith === "string") {
+        integrantsConditions.push(
+          like(schema.integrants.id_number, `${input.id_number_startsWith}%`)
+        );
+      }
+
+      if (typeof input.name_contains === "string") {
+        integrantsConditions.push(
+          ilike(schema.integrants.name, `%${input.name_contains}%`)
+        );
+      }
+
+      if (integrantsConditions.length > 0) {
+        integrantsConditions.push(
+          eq(schema.integrants.isBillResponsible, true)
+        );
+        whereFgList.push(
+          inArray(
+            schema.family_groups.id,
+            db
+              .select({ id: schema.integrants.family_group_id })
+              .from(schema.integrants)
+              .where(and(...integrantsConditions))
+          )
+        );
+      }
+
       const fg = await db.query.family_groups.findMany({
         where: and(...whereFgList),
         with: {
@@ -566,7 +587,7 @@ export const family_groupsRouter = createTRPCRouter({
               differentialsValues: true,
               aportes_os: true,
             },
-            where: and(...integrantsConditions),
+            where: eq(schema.integrants.isBillResponsible, true),
           },
           cc: true,
           businessUnitData: true,
@@ -574,26 +595,24 @@ export const family_groupsRouter = createTRPCRouter({
             with: {
               items: true,
             },
-            where: eq(schema.comprobantes.liquidation_id, input.liquidationId),
           },
         },
         limit: input.limit,
         offset: input.cursor,
       });
-      console.log("fg", fg.length);
-      fg.map(x=>{
-        x.comprobantes = x.comprobantes.filter((comprobante) => comprobante.liquidation_id === input.liquidationId)
-      });
-      const fgCompanyFiltered = fg.filter(
-        (x) => 
-          x.comprobantes.length > 0 &&
-         x.integrants.length > 0
-      );
-      
 
-      console.log("fgCompanyFiltered", fgCompanyFiltered);
+      /* fg.map((x) => {
+        x.comprobantes = x.comprobantes.filter(
+          (comprobante) => comprobante.liquidation_id === input.liquidationId
+        );
+      });
+
+      const fgCompanyFiltered = fg.filter(
+        (x) => x.comprobantes.length > 0 && x.integrants.length > 0
+      ); */
+
       return {
-        results: fgCompanyFiltered,
+        results: fg,
         usedCursor: input.cursor,
         usedLimit: input.limit,
       };

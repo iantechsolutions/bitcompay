@@ -57,12 +57,22 @@ export function DataTable({ columns, summary, liquidationId }: DataTableProps) {
   const [open, setOpen] = useState(false);
   const [detailData, setDetailData] = useState<DetailData | null>(null);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [delayedColumnFilters, setDelayedColumnFilters] =
+    useState<ColumnFiltersState>([]);
 
   const [data, setData] = useState<TableRecord[]>([]);
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
   });
+
+  useEffect(() => {
+    const timeOutId = setTimeout(
+      () => setDelayedColumnFilters(columnFilters),
+      750
+    );
+    return () => clearTimeout(timeOutId);
+  }, [columnFilters]);
 
   const paginatedQuery =
     api.family_groups.getByLiquidationFiltered.useMutation();
@@ -92,7 +102,7 @@ export function DataTable({ columns, summary, liquidationId }: DataTableProps) {
     let filterPlan: string | undefined = undefined;
     let filterUN: string | undefined = undefined;
 
-    for (const f of columnFilters) {
+    for (const f of delayedColumnFilters) {
       const id = f.id.toLowerCase();
       if (id === "nombre") {
         filter = f.value as string;
@@ -130,13 +140,13 @@ export function DataTable({ columns, summary, liquidationId }: DataTableProps) {
           UN: filterUN,
         });
       },
-      columnFilters.length > 0
+      delayedColumnFilters.length > 0
     ).then((data) => {
       const dataArray: TableRecord[] = [];
       makeExcelRows(data, null, dataArray);
       setData(dataArray);
     });
-  }, [pagination, columnFilters]);
+  }, [pagination, delayedColumnFilters]);
 
   const hiddenDataKeys = [
     "comprobantes",
