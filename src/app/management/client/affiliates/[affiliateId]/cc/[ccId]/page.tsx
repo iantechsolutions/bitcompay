@@ -122,6 +122,7 @@ export default function CCDetail(props: {
       });
     }
   }
+  //dasdas
   return (
     <LayoutContainer>
       <Title>Movimientos cuenta corriente</Title>
@@ -132,12 +133,19 @@ export default function CCDetail(props: {
         <Card className="py-4 px-6 w-1/4 grid grid-cols-2 items-center">
           <div className="flex flex-col">
             <p className="text-base font-medium block">SALDO ACTUAL</p>
-            <span className="text-[#EB2727] text-2xl font-bold">
-              $
-              {lastEvent?.current_amount !== undefined
-                ? lastEvent.current_amount.toFixed(2)
-                : "0.00"}
-            </span>
+
+            {lastEvent?.current_amount !== undefined ? (
+              <span
+                className={`text-2xl font-bold ${
+                  lastEvent?.current_amount < 0
+                    ? "text-[#6952EB]"
+                    : "text-[#EB2727]"
+                }`}>
+                {lastEvent.current_amount.toFixed(2)}
+              </span>
+            ) : (
+              <span className={`text-2xl font-bold`}>0.00</span>
+            )}
           </div>
         </Card>
         <Card className="py-4 px-9 bg-[#DEF5DD] w-1/4 flex flex-col justify-center">
