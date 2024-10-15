@@ -38,7 +38,7 @@ interface ComprobanteCardProps {
   setTipoComprobante: (e: string) => void;
 }
 export default function ComprobanteCard(props: ComprobanteCardProps) {
-  const [concept, setConcept] = useState(false);
+  const [concept, setConcept] = useState(true);
 
   setDefaultOptions({ locale: es });
   const Map: Record<string, React.ReactNode> = {
