@@ -67,7 +67,9 @@ export default function AdditionalInfoCard({
   //   healthInsurance: null,
   //   tipoComprobante: null,
   // });
-
+  const IVA_TASA = parseFloat(
+    ivaDictionary[Number(form.watch("alicuota"))] ?? "0"
+  );
   const { fields, remove, append } = useFieldArray({
     control: conceptsForm.control,
     name: "concepts",
