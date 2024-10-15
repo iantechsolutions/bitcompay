@@ -275,8 +275,8 @@ export default function EditPrice({
           </div>
           <div>
             <Button
-              disabled={isLoading}
               onClick={handleUpdatePrice}
+              disabled={isLoading}
               className="bg-[#BEF0BB] hover:bg-[#BEF0BB] ml-3 rounded-full mr-4 px-6 text-black font-normal hover:text-[#3E3E3E]">
               {isLoading && (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
