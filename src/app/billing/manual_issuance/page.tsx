@@ -12,11 +12,12 @@ import {
   htmlBill,
   ingresarAfip,
   comprobanteDictionary,
-  reverseComprobanteDictionary,
   reversedIvaDictionary,
   ivaDictionary,
   idDictionary,
   valueToNameComprobanteMap,
+  reverseComprobanteDictionary,
+  fcAnc,
 } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
@@ -64,8 +65,7 @@ export default function Page() {
   const { data: marcas } = api.brands.list.useQuery();
   const { data: gruposFamiliar } = api.family_groups.list.useQuery();
   const { data: obrasSociales } = api.healthInsurances.listClient.useQuery();
-  // const { data: comprobantes } = api.comprobantes.list.useQuery();
-
+  const {data: comprobantesEntidad} = api.comprobantes.getByEntity.useQuery();
   const [subTotal, setSubTotal] = useState<number>(0);
   const [ivaTotal, setIvaTotal] = useState<number>(0);
   const [otherAttributes, setOtherAttributes] = useState<number>(0);
@@ -76,6 +76,7 @@ export default function Page() {
   const [selectedComprobante, setSelectedComprobante] = useState<any>(null);
   const [afip, setAfip] = useState<any>(null);
   const router = useRouter();
+
   useEffect(() => {
     async function loginAfip() {
       const afip = await ingresarAfip();
@@ -107,6 +108,8 @@ export default function Page() {
         for (const concepts of otherConceptsForm.getValues().otherConcepts) {
           subTotal += Number(concepts.importe);
         }
+        const importe = form.getValues().facturasEmitidas.importe;
+        subTotal+= form.getValues().facturasEmitidas.importe; 
       case "Nota de crédito":
         for (const comprobante of asociatedFCForm.getValues().comprobantes) {
           console.log("comprobante del forms", comprobante);
@@ -133,28 +136,20 @@ export default function Page() {
     }
 
     if (
-      tipoComprobante != "0" &&
-      (
-      !form.getValues().puntoVenta ||
-      !form.getValues().dateEmision ||
-      !tipoComprobante ||
-      !concepto ||
-      !iva ||
-      !form.getValues().dateVencimiento ||
-      !subTotal ||
-      !tributos
-    )
-
-    ||
-
-    tipoComprobante == "0" &&
-    (
-      !form.getValues().dateEmision ||
-      !tipoComprobante ||
-      !form.getValues().dateVencimiento ||
-      !subTotal ||
-      !tributos
-    )
+      (tipoComprobante != "0" &&
+        (!form.getValues().puntoVenta ||
+          !form.getValues().dateEmision ||
+          !tipoComprobante ||
+          !iva ||
+          !form.getValues().dateVencimiento ||
+          !subTotal ||
+          !tributos)) ||
+      (tipoComprobante == "0" &&
+        (!form.getValues().dateEmision ||
+          !tipoComprobante ||
+          !form.getValues().dateVencimiento ||
+          !subTotal ||
+          !tributos))
     ) {
       console.log(!form.getValues().puntoVenta);
       console.log(!form.getValues().dateEmision);
@@ -181,11 +176,6 @@ export default function Page() {
         let comprobante = null;
         let ivaFloat =
           (100 + parseFloat(ivaDictionary[Number(iva)] ?? "0")) / 100;
-        const fecha = new Date(
-          Date.now() - new Date().getTimezoneOffset() * 60000
-        )
-          .toISOString()
-          .split("T")[0];
 
         if (tipoComprobante == "1" || tipoComprobante == "6") {
           let ivaFloat =
@@ -300,10 +290,10 @@ export default function Page() {
           //   comprobante_id: comprobante[0]?.id ?? "",
           // });
         } else if (
-          fcSelec &&
+          fcSeleccionada &&
           (tipoComprobante == "3" || tipoComprobante == "8")
         ) {
-          const facSeleccionada = comprobantes?.find((x) => x.id == fcSelec);
+          const facSeleccionada = comprobantes?.find((x) => x.id == fcSeleccionada[0]?.id);
 
           let ivaFloat = (100 + parseFloat(facSeleccionada?.iva ?? "0")) / 100;
 
@@ -493,11 +483,9 @@ export default function Page() {
   const [nroDocumento, setNroDocumento] = useState("");
   const [nroDocumentoDNI, setNroDocumentoDNI] = useState("");
   const [nombre, setNombre] = useState("");
-  // const [importe, setImporte] = useState("0");
   const [tributos, setTributos] = useState("0");
   const [servicioprod, setservicioprod] = useState("Servicio");
   const [obraSocialId, setObraSocialId] = useState("");
-  // const [iva, setIva] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [grupoFamiliarId, setGrupoFamiliarId] = useState("");
@@ -510,9 +498,16 @@ export default function Page() {
       dateEmision: new Date(),
       tipoDeConcepto: "",
       alicuota: "",
-      facturasEmitidas: 0,
+      facturasEmitidas: {
+        tipoComprobante: "",
+        puntoVenta: "",
+        nroComprobante: "",
+        importe: 0,
+        iva: "",
+      },
     },
   });
+
   const conceptsForm = useForm<ConceptsForm>({
     defaultValues: {
       concepts: [{ concepto: "", importe: 0, iva: 0, total: 0 }],
@@ -546,12 +541,13 @@ export default function Page() {
     defaultValues: { otherConcepts: [{ description: "", importe: 0 }] },
   });
 
+  const [brandId, setBrandId] = useState("");
   const [page, setPage] = useState<"formPage" | "confirmationPage">("formPage");
+
   function handlePageChange(page: "formPage" | "confirmationPage") {
     setPage(page);
   }
 
-  const [brandId, setBrandId] = useState("");
   function handleGrupoFamilarChange(value: string) {
     setGrupoFamiliarId(value);
     setObraSocialId("");
@@ -582,15 +578,50 @@ export default function Page() {
     setIvaCondition(obra?.afip_status ?? "");
     setSellCondition("No Aplica");
   }
+
   function handleComprobanteChange(value: string) {
     setFCSelec(value);
     setSelectedComprobante(comprobantes?.find((x) => x.id == value));
   }
+
   let selectedBrand;
 
   const handleBrandChange = (value: string) => {
     selectedBrand = marcas?.find((marca: { id: string }) => marca.id === value);
     setBrandId(value);
+  };
+
+  const reloadPage = () => {
+    setSubTotal(0);
+    setIvaTotal(0);
+    setOtherAttributes(0);
+    setLogo("");
+    setFCSelec("");
+    setFcSeleccionada([]);
+    setComprobantes(undefined);
+    setSelectedComprobante(null);
+    setTipoComprobante("");
+    setCreatedComprobante(undefined);
+    setTipoDocumento("");
+    setIvaCondition("");
+    setSellCondition("");
+    setNroDocumento("");
+    setNroDocumentoDNI("");
+    setNombre("");
+    setTributos("0");
+    setservicioprod("Servicio");
+    setObraSocialId("");
+    setError(null);
+    // setLoading(true);
+    setGrupoFamiliarId("");
+    form.reset();
+    conceptsForm.reset();
+    otherTributesForm.reset();
+    asociatedFCForm.reset();
+    otherConceptsForm.reset();
+    setPage("formPage");
+    setBrandId("");
+    router.refresh();
   };
 
   if (!grupoFamiliarId && !obraSocialId) {
@@ -740,6 +771,8 @@ export default function Page() {
             />
 
             <ComprobanteCard
+              onValueChange={computeTotals}
+              comprobantesEntidad={comprobantesEntidad}
               visualization={false}
               form={form}
               tipoComprobante={tipoComprobante}
@@ -747,6 +780,13 @@ export default function Page() {
             />
 
             <AdditionalInfoCard
+              possibleComprobanteTipo={
+                fcAnc[
+                  reverseComprobanteDictionary[
+                    Number(tipoComprobante ?? "0")
+                  ] ?? ""
+                ] ?? ""
+              }
               comprobantes={comprobantes}
               fcSeleccionada={fcSeleccionada}
               setFcSeleccionada={setFcSeleccionada}
@@ -790,6 +830,7 @@ export default function Page() {
         {page === "confirmationPage" && createdComprobante && (
           <ConfirmationPage
             form={form}
+            reloadPage={reloadPage}
             fcSeleccionada={fcSeleccionada}
             setFcSeleccionada={setFcSeleccionada}
             conceptsForm={conceptsForm}

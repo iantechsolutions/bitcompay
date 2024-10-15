@@ -43,35 +43,12 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { asTRPCError } from "~/lib/errors";
+import { TableRecord } from "../columns";
 
 type DialogCCProps = {
   open: boolean;
   setOpen: (open: boolean) => void;
-  data?: {
-    date: Date;
-    description: string;
-    amount: number;
-    comprobanteType: string;
-    comprobanteNumber: string;
-    status: "Pagada" | "Pendiente";
-    iva: number;
-    comprobantes?: RouterOutputs["comprobantes"]["getByLiquidation"];
-    currentAccountAmount: number;
-    saldo_a_pagar: number;
-    nombre: string;
-    cuit: string;
-    event: {
-      id: string;
-      description: string;
-      createdAt: Date;
-      comprobante_id: string | null;
-      type: "NC" | "FC" | "REC" | null;
-      currentAccount_id: string | null;
-      event_amount: number;
-      current_amount: number;
-    } | null;
-    [index: string]: any;
-  };
+  data?: TableRecord;
 };
 
 export default function DialogCC({ open, setOpen, data }: DialogCCProps) {
@@ -98,6 +75,7 @@ export default function DialogCC({ open, setOpen, data }: DialogCCProps) {
   }
 
   const router = useRouter();
+  const events = data?.events ?? [];
 
   function validateFields() {
     const errors: string[] = [];
@@ -109,13 +87,8 @@ export default function DialogCC({ open, setOpen, data }: DialogCCProps) {
     return errors;
   }
 
-  const comprobantes =
-    data?.comprobantes && data.comprobantes.length > 0
-      ? data.comprobantes[0]
-      : null;
-
   async function UpdateComprobante() {
-    console.log(comprobantes?.id);
+    console.log(events?.id);
     const validationErrors = validateFields();
     if (validationErrors.length > 0) {
       return toast.error(
@@ -124,9 +97,9 @@ export default function DialogCC({ open, setOpen, data }: DialogCCProps) {
     }
 
     try {
-      if (comprobantes) {
+      if (events) {
         await updateEvents({
-          id: data?.id ?? "",
+          id: events.id ?? "",
           current_amount: importe,
           description: concept,
           event_amount: importe,
@@ -151,7 +124,9 @@ export default function DialogCC({ open, setOpen, data }: DialogCCProps) {
             <DialogTitle className="whitespace-nowrap">Ajustes</DialogTitle>
           </div>
         </DialogHeader>
-        <h1 className="text-xs block ml-2 pl-2">CUENTA CORRIENTE N°</h1>
+        <h1 className="text-xs block ml-2 pl-2">
+          CUENTA CORRIENTE N° {events.currentAccount_id + "-" + events.id}
+        </h1>
 
         <div className="flex justify-between p-2">
           <div className="w-1/2 mr-2 ml-2">

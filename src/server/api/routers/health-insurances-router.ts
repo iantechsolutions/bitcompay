@@ -100,12 +100,11 @@ export const healthInsurancesRouter = createTRPCRouter({
   listClient: protectedProcedure.query(async ({ input, ctx }) => {
     const companyId = ctx.session.orgId;
     const healthInsurances = await db.query.healthInsurances.findMany({
-      where:
-       and(
+      where: and(
         eq(schema.healthInsurances.companyId, companyId!),
         eq(schema.healthInsurances.isClient, true)
-       ),
-      with: { cpData: true, aportes_os: true, comprobantes:true },
+      ),
+      with: { cpData: true, aportes_os: true, comprobantes: true },
     });
     return healthInsurances;
   }),

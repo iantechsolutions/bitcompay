@@ -224,6 +224,7 @@ export default async function Home(props: {
         <DataTable
           columns={columns}
           summary={summary}
+          maxEventDate={preliquidation.createdAt}
           liquidationId={liquidationId}
         />
         <DownloadExcelButton

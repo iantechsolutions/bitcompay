@@ -84,8 +84,12 @@ export default function HealthInsurancePage(props: {
     "Numero IIBB": props.healthInsurance?.IIBBNumber,
     "Condición de venta": props.healthInsurance?.sellCondition,
   };
-  const fiscalPostalCode= postalCodes?.find((postalCode) => postalCode.id === props.healthInsurance?.fiscalPostalCode);
-  const postalCode = postalCodes?.find((postalCode) => postalCode.id === props.healthInsurance?.postal_code);
+  const fiscalPostalCode = postalCodes?.find(
+    (postalCode) => postalCode.id === props.healthInsurance?.fiscalPostalCode
+  );
+  const postalCode = postalCodes?.find(
+    (postalCode) => postalCode.id === props.healthInsurance?.postal_code
+  );
   const facturacion = {
     "Domicilio fiscal": props.healthInsurance?.fiscalAddress,
     Piso: props.healthInsurance?.fiscalFloor,
@@ -114,6 +118,7 @@ export default function HealthInsurancePage(props: {
     ),
     Usuario: props.healthInsurance?.user,
     "Motivo de baja": props.healthInsurance?.cancelMotive,
+    // "Es cliente?": props.healthInsurance?.isClient ? "Si" : "No",
   };
   1;
 
@@ -152,8 +157,7 @@ export default function HealthInsurancePage(props: {
                     router.push(
                       `/management/client/health_insurances/${props.healthInsuranceId}/cc/${props.ccId}`
                     );
-                  }}
-                >
+                  }}>
                   <Eye className="mr-2 w-4 h-4" />
                   Ver movimientos
                 </Button>
@@ -166,12 +170,10 @@ export default function HealthInsurancePage(props: {
                 Soportes
               </p>
               <Link
-                href={`/management/client/health_insurances/${props.healthInsuranceId}/massive-upload`}
-              >
+                href={`/management/client/health_insurances/${props.healthInsuranceId}/massive-upload`}>
                 <Button
                   variant="bitcompay"
-                  className="bg-[#85CE81] text-sm px-4 h-7 gap-2 text-[#ffffff] rounded-full font-normal"
-                >
+                  className="bg-[#85CE81] text-sm px-4 h-7 gap-2 text-[#ffffff] rounded-full font-normal">
                   <Upload02Icon className="h-4" />
                   Subir archivo
                 </Button>

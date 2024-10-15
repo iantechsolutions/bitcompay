@@ -184,7 +184,7 @@ export const excelDeserializationRouter = createTRPCRouter({
                 current_amount: lastEvent.current_amount + monto_total,
                 description: "Pago afiliados",
                 type: "FC",
-                createdAt: new Date(),
+                // createdAt: new Date(),
               })
               .returning();
 

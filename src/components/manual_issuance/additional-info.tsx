@@ -26,7 +26,6 @@ import Calendar01Icon from "../icons/calendar-01-stroke-rounded";
 import { format } from "date-fns";
 import { useEffect, useState } from "react";
 import { api } from "~/trpc/react";
-import { reverseComprobanteDictionary } from "~/lib/utils";
 import { Comprobante } from "~/server/db/schema";
 import {
   AsociatedFCForm,
@@ -48,6 +47,7 @@ type AdditionalInfoProps = {
   otherConceptsForm: UseFormReturn<otherConceptsForm>;
   grupoFamiliarId?: string;
   comprobantes?: RouterOutputs["comprobantes"]["getByEntity"];
+  possibleComprobanteTipo: string;
 };
 export default function AdditionalInfoCard({
   onValueChange,
@@ -60,13 +60,9 @@ export default function AdditionalInfoCard({
   otherConceptsForm,
   visualization,
   grupoFamiliarId,
+  possibleComprobanteTipo,
   comprobantes,
 }: AdditionalInfoProps) {
-  // const { data: comprobantes } = api.comprobantes.getByEntity.useQuery({
-  //   familyGroup: grupoFamiliarId,
-  //   healthInsurance: null,
-  //   tipoComprobante: null,
-  // });
   const IVA_TASA = parseFloat(
     ivaDictionary[Number(form.watch("alicuota"))] ?? "0"
   );
@@ -168,14 +164,15 @@ export default function AdditionalInfoCard({
                         onChange={(e) => {
                           const importe = parseFloat(e.target.value) || 0; // Manejo de valores no numéricos
                           field.onChange(importe);
-                          
+
                           const ivaCalcular = isNaN(IVA_TASA) ? 0 : IVA_TASA;
                           // console.log("IVA_TASA",IVA_TASA);
                           // if(isNaN(IVA_TASA)){
                           //   IVA_TASA = 1;
                           // }
                           const iva = (importe * (ivaCalcular ?? 1)) / 100;
-                          console.log("iva",iva);
+                          console.log("iva", iva);
+                          console.log("iva", iva);
                           const total = importe + iva;
                           conceptsForm.setValue(
                             `concepts.${index}.total`,
@@ -197,11 +194,13 @@ export default function AdditionalInfoCard({
               element={{
                 key: "IVA",
                 // Mostrar el IVA como porcentaje
-                value: <p className="px-[12px] py-[8px]">
-                {(
-                  conceptsForm.getValues(`concepts.${index}.iva`) ?? 0
-                ).toFixed(2)}
-              </p>,
+                value: (
+                  <p className="px-[12px] py-[8px]">
+                    {(
+                      conceptsForm.getValues(`concepts.${index}.iva`) ?? 0
+                    ).toFixed(2)}
+                  </p>
+                ),
               }}
             />
             <ElementCard
@@ -284,37 +283,44 @@ export default function AdditionalInfoCard({
                   className="pr-1 pb-0 border-[#bef0bb]"
                   element={{
                     key: "COMPROBANTE ASOCIADO",
+                    // value: visualizationSwitcher(
+                    //   visualization,
+                    //   <FormField
+                    //     control={asociatedFCForm.control}
+                    //     name={`comprobantes.${index}.tipoComprobante`}
+                    //     render={({ field }) => (
+                    //       <FormItem>
+                    //         <Select
+                    //           onValueChange={(e) => {
+                    //             asociatedFCForm.setValue(
+                    //               `comprobantes.${index}.tipoComprobante`,
+                    //               reverseComprobanteDictionary[Number(e)]!
+                    //             );
+                    //             setCurrentCompType(e);
+                    //           }}
+                    //           defaultValue={field.value}
+                    //         >
+                    //           <FormControl>
+                    //             <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8">
+                    //               <SelectValue placeholder="Seleccionar tipo comprobante..." />
+                    //             </SelectTrigger>
+                    //           </FormControl>
+                    //           <SelectContent>
+                    //             <SelectItem value="1">FACTURA A</SelectItem>
+                    //             <SelectItem value="6">FACTURA B</SelectItem>
+                    //           </SelectContent>
+                    //         </Select>
+                    //       </FormItem>
+                    //     )}
+                    //   />,
+                    //   fieldElement.tipoComprobante
+                    // ),
                     value: visualizationSwitcher(
                       visualization,
-                      <FormField
-                        control={asociatedFCForm.control}
-                        name={`comprobantes.${index}.tipoComprobante`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <Select
-                              onValueChange={(e) => {
-                                asociatedFCForm.setValue(
-                                  `comprobantes.${index}.tipoComprobante`,
-                                  reverseComprobanteDictionary[Number(e)]!
-                                );
-                                setCurrentCompType(e);
-                              }}
-                              defaultValue={field.value}
-                            >
-                              <FormControl>
-                                <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8">
-                                  <SelectValue placeholder="Seleccionar tipo comprobante..." />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="1">FACTURA A</SelectItem>
-                                <SelectItem value="6">FACTURA B</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </FormItem>
-                        )}
-                      />,
-                      fieldElement.tipoComprobante
+                      <p className="px-[12px] py-[8px]">
+                        {possibleComprobanteTipo}
+                      </p>,
+                      possibleComprobanteTipo
                     ),
                   }}
                 />
@@ -404,6 +410,7 @@ export default function AdditionalInfoCard({
                                     );
 
                                     if (onValueChange) onValueChange();
+                                    break;
                                   }
                                 }
                               }}
@@ -419,9 +426,9 @@ export default function AdditionalInfoCard({
                                   ?.filter(
                                     (comprobante) =>
                                       comprobante.tipoComprobante ===
-                                      reverseComprobanteDictionary[
-                                        Number(currentCompType)
-                                      ]
+                                        possibleComprobanteTipo &&
+                                      (comprobante.estado === "parcial" ||
+                                        comprobante.estado === "pendiente")
                                   )
                                   .slice(0, 10)
                                   .map((comprobante) => (
@@ -429,7 +436,9 @@ export default function AdditionalInfoCard({
                                       key={comprobante.id}
                                       value={comprobante.id}
                                     >
-                                      {comprobante.nroComprobante}
+                                      {comprobante.nroComprobante +
+                                        " - " +
+                                        comprobante.importe}
                                     </SelectItem>
                                   ))}
                               </SelectContent>
@@ -464,7 +473,8 @@ export default function AdditionalInfoCard({
                                     )}
                                     disabled
                                   >
-                                    {field.value ? (
+                                    {field.value &&
+                                    dayjs(field.value).isValid() ? (
                                       format(field.value, "dd/MM/yyyy")
                                     ) : (
                                       <span>Seleccionar fecha</span>

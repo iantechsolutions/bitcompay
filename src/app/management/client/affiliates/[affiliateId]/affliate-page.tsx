@@ -419,7 +419,7 @@ export default function AffiliatePage(props: {
             <AccordionItem value="item-2">
               <AccordionTrigger
                 className="font-semibold rounded-md overflow-hidden"
-                name="editIcon">
+                >
                 Integrantes
               </AccordionTrigger>
               <AccordionContent className="pt-6 pl-5">

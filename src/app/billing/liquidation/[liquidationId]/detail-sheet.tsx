@@ -20,27 +20,38 @@ type DetailSheetProps = {
     currentAccountAmount: number;
     nombre: string;
     cuit: string;
+    id: string;
   };
   open: boolean;
   setOpen: (open: boolean) => void;
+  liquidationId: string;
 };
 import Download02Icon from "~/components/icons/download-02-stroke-rounded";
 import { formatCurrency } from "../../pre-liquidation/[liquidationId]/detail-sheet";
 
 type Comprobante = RouterOutputs["comprobantes"]["getByLiquidation"][number];
 
-export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
+export default function DetailSheet({
+  data,
+  open,
+  setOpen,
+  liquidationId,
+}: DetailSheetProps) {
   const [openFCAccordion, setOpenFCAccordion] = useState(true);
   const [openNCAccordion, setOpenNCAccordion] = useState(true);
   let comprobanteNCReciente = data.comprobantes.find(
-    (comprobante) => comprobante.origin === "Nota de credito"
+    (comprobante) =>
+      comprobante.origin === "Nota de credito" &&
+      comprobante.liquidation_id === liquidationId
   );
   let comprobanteFCReciente = data.comprobantes.find(
-    (comprobante) => comprobante.origin === "Factura"
+    (comprobante) =>
+      comprobante.origin === "Factura" &&
+      comprobante.liquidation_id === liquidationId
   );
 
   let FCTotal = null;
-  let NCTotal = null; 
+  let NCTotal = null;
   if (comprobanteFCReciente) {
     FCTotal = comprobanteFCReciente.items.find(
       (item) => item.concept === "Total factura"
@@ -67,24 +78,32 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
             Detalle del movimiento
           </SheetTitle>
           <SheetDescription>
-            <ul className="mt-2">
-              <li className="text-xs"> RECEPTOR </li>
-              <li className="font-medium text-[#3e3e3e]">
-                {" "}
-                {data.nombre ?? "-"}
-              </li>
-              <br />
-              <li className="text-xs"> CUIL/CUIT </li>
-              <li className="font-medium text-[#3e3e3e]">{data.cuit ?? "-"}</li>
-              <br />
-            </ul>
+            <Link
+              href={`/management/client/affiliates/${data.id}`}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <ul className="mt-2">
+                <li className="text-xs"> RECEPTOR </li>
+                <li className="font-medium text-[#3e3e3e]">
+                  {" "}
+                  {data.nombre ?? "-"}
+                </li>
+                <br />
+                <li className="text-xs"> CUIL/CUIT </li>
+                <li className="font-medium text-[#3e3e3e]">
+                  {data.cuit ?? "-"}
+                </li>
+                <br />
+              </ul>
+            </Link>
           </SheetDescription>
         </SheetHeader>
 
         <div className="flex flex-row border justify-between items-center p-5 rounded-md mt-3 bg-[#f7f7f7]">
           <p className="text-lg font-medium-medium">Saldo actual </p>
           <p className="text-[#6952EB] font-semibold text-xl">
-            {formatCurrency(data.currentAccountAmount)} 
+            {formatCurrency(data.currentAccountAmount)}
           </p>
         </div>
         <div className="mt-5">
@@ -96,9 +115,7 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
               <ContentTable comprobante={comprobanteNCReciente} />
               <div className="mt-3">
                 <div className="bg-[#DEF5DD] flex flex-row justify-between items-center p-3 rounded-md mt-2">
-                  <p className=" text-[#6952EB] font-semibold">
-                    Total:{" "}
-                  </p>
+                  <p className=" text-[#6952EB] font-semibold">Total: </p>
                   <p className="text-[#6952EB] font-semibold">
                     {NCTotal ? `${formatCurrency(NCTotal)}` : "N/A"}
                   </p>
@@ -137,7 +154,7 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
                     Saldo a pagar:{" "}
                   </p>
                   <p className="text-[#6952EB] font-semibold ">
-                  {saldo_a_pagar ? `${formatCurrency(saldo_a_pagar)}` : "N/A"}
+                    {saldo_a_pagar ? `${formatCurrency(saldo_a_pagar)}` : "N/A"}
                   </p>
                 </div>
               </div>

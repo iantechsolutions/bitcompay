@@ -1029,7 +1029,7 @@ export const valueToNameComprobanteMap: Record<string, string> = {
   "1": "Factura",
   "3": "Nota de crédito",
   "6": "Factura",
-  "8": "Recibo",
+  "8": "Nota de crédito",
 };
 export const comprobanteDictionary: { [key: string]: number } = {
   "FACTURA A": 1,
@@ -1045,6 +1045,20 @@ export const comprobanteDictionary: { [key: string]: number } = {
   "NOTA DE CREDITO C": 13,
   "NOTA DE CREDITO M": 53,
   "": 0,
+};
+
+
+export const fcAnc: { [key: string]: string } = {
+  "FACTURA A": "NOTA DE CREDITO A",
+  "FACTURA B": "NOTA DE CREDITO B",
+  "FACTURA C": "NOTA DE CREDITO C",
+  "FACTURA M": "NOTA DE CREDITO M",
+  "FACTURA E": "NOTA DE CREDITO E",
+  "NOTA DE CREDITO A": "FACTURA A",
+  "NOTA DE CREDITO B": "FACTURA B",
+  "NOTA DE CREDITO C": "FACTURA C",
+  "NOTA DE CREDITO M": "FACTURA M",
+  "NOTA DE CREDITO E": "FACTURA E",
 };
 
 export const reverseComprobanteDictionary: { [key: number]: string } = {
