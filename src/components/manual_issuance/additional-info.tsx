@@ -144,7 +144,7 @@ export default function AdditionalInfoCard({
                       <Input
                         {...field}
                         value={field.value ?? ""}
-                        placeholder="ingrese un concepto"
+                        placeholder="Ingrese un concepto"
                       />
                     )}
                   />,
@@ -168,15 +168,21 @@ export default function AdditionalInfoCard({
                         onChange={(e) => {
                           const importe = parseFloat(e.target.value) || 0; // Manejo de valores no numéricos
                           field.onChange(importe);
-                          if (onValueChange) onValueChange();
-
-                          const iva = (importe * IVA_TASA) / 100;
+                          
+                          const ivaCalcular = isNaN(IVA_TASA) ? 0 : IVA_TASA;
+                          // console.log("IVA_TASA",IVA_TASA);
+                          // if(isNaN(IVA_TASA)){
+                          //   IVA_TASA = 1;
+                          // }
+                          const iva = (importe * (ivaCalcular ?? 1)) / 100;
+                          console.log("iva",iva);
                           const total = importe + iva;
                           conceptsForm.setValue(
                             `concepts.${index}.total`,
                             total
                           );
                           conceptsForm.setValue(`concepts.${index}.iva`, iva);
+                          if (onValueChange) onValueChange();
                         }}
                         value={field.value ?? 0}
                       />
@@ -191,7 +197,11 @@ export default function AdditionalInfoCard({
               element={{
                 key: "IVA",
                 // Mostrar el IVA como porcentaje
-                value: <p>{IVA_TASA.toFixed(2)}%</p>,
+                value: <p className="px-[12px] py-[8px]">
+                {(
+                  conceptsForm.getValues(`concepts.${index}.iva`) ?? 0
+                ).toFixed(2)}
+              </p>,
               }}
             />
             <ElementCard
@@ -199,7 +209,7 @@ export default function AdditionalInfoCard({
               element={{
                 key: "TOTAL",
                 value: (
-                  <p>
+                  <p className="px-[12px] py-[8px]">
                     {(
                       conceptsForm.getValues(`concepts.${index}.total`) ?? 0
                     ).toFixed(2)}

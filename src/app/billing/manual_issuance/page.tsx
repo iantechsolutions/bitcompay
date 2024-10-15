@@ -96,7 +96,7 @@ export default function Page() {
     for (const attribute of res.tributes) {
       otherAttributes += Number(attribute.amount);
     }
-
+    console.log(conceptsForm.getValues().concepts);
     switch (valueToNameComprobanteMap[tipoComprobante]) {
       case "Factura":
         for (const concept of conceptsForm.getValues().concepts) {
