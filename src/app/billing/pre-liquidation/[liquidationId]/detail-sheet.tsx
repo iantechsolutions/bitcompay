@@ -27,6 +27,7 @@ type DetailSheetProps = {
     cuit: string;
   };
   open: boolean;
+  liquidationId: string;
   setOpen: (open: boolean) => void;
 };
 
@@ -39,7 +40,7 @@ export function formatCurrency(amount: number) {
     currencyDisplay: "narrowSymbol",
   }).format(amount);
 }
-export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
+export default function DetailSheet({ data, open, setOpen,liquidationId }: DetailSheetProps) {
   const { data: familyGroup } = api.family_groups.getWithAportes.useQuery({
     family_groupsId: data.id,
   });
@@ -49,8 +50,12 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
     aportesOS = [...aportesOS, ...integrant.aportes_os];
   });
 
+
+  console.log("comprobantes");
+  console.log(data.comprobantes);
+
   let comprobanteNCReciente = data.comprobantes.find(
-    (comprobante) => comprobante.origin === "Nota de credito"
+    (comprobante) => comprobante.origin === "Nota de credito" && comprobante.liquidation_id === data.id
   );
   let comprobanteFCReciente = data.comprobantes.find(
     (comprobante) => comprobante.origin === "Factura"

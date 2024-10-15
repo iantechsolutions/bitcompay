@@ -246,6 +246,7 @@ export function DataTable<TData, TValue>({
                 ))}
                 {detailData && (
                   <DetailSheet
+                    liquidationId={liquidationId}
                     open={open}
                     setOpen={setOpen}
                     data={detailData}
