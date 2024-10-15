@@ -31,22 +31,25 @@ type DetailSheetProps = {
 };
 
 export function formatCurrency(amount: number) {
-  return (Intl.NumberFormat("es-AR", {
+  return Intl.NumberFormat("es-AR", {
     style: "currency",
     currency: "ARS",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
     currencyDisplay: "narrowSymbol",
-  }).format(amount));
-}; 
+  }).format(amount);
+}
 export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
-  const {data: familyGroup} = api.family_groups.getWithAportes.useQuery({family_groupsId: data.id})
-  let aportesOS: RouterOutputs["aportes_os"]["list"] = []
+  const { data: familyGroup } = api.family_groups.getWithAportes.useQuery({
+    family_groupsId: data.id,
+  });
+
+  let aportesOS: RouterOutputs["aportes_os"]["list"] = [];
   familyGroup?.integrants?.map((integrant) => {
-  aportesOS = [...aportesOS, ...integrant.aportes_os]  
-  })
-    
-  let comprobanteNCReciente =   data.comprobantes.find(
+    aportesOS = [...aportesOS, ...integrant.aportes_os];
+  });
+
+  let comprobanteNCReciente = data.comprobantes.find(
     (comprobante) => comprobante.origin === "Nota de credito"
   );
   let comprobanteFCReciente = data.comprobantes.find(
@@ -73,11 +76,11 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
   if (FCTotal && total_a_pagar) {
     saldo_a_pagar = FCTotal - total_a_pagar;
   }
-  
-  let total_aportes = 0
+
+  let total_aportes = 0;
   aportesOS?.forEach((aporte) => {
-    total_aportes += parseInt(aporte.amount)
-  })
+    total_aportes += parseInt(aporte.amount);
+  });
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -112,16 +115,14 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
           {comprobanteNCReciente && (
             <>
               <h1 className="text-base uppercase font-bold mb-3">
-              {String(comprobanteNCReciente.tipoComprobante).toLowerCase()}
+                {String(comprobanteNCReciente.tipoComprobante).toLowerCase()}
               </h1>
               <ContentTable comprobante={comprobanteNCReciente} />
               <div className="mt-3">
                 <div className="bg-[#DEF5DD] flex flex-row justify-between items-center p-3 rounded-md mt-2">
-                  <p className=" text-[#6952EB] font-[550]">
-                    Total:{" "}
-                  </p>
+                  <p className=" text-[#6952EB] font-[550]">Total: </p>
                   <p className="text-[#6952EB] font-[550]">
-                    {NCTotal ? `${ formatCurrency(NCTotal)}` : "N/A"}
+                    {NCTotal ? `${formatCurrency(NCTotal)}` : "N/A"}
                   </p>
                 </div>
               </div>
@@ -137,9 +138,7 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
               <ContentTable comprobante={comprobanteFCReciente} />
               <div className="mt-3">
                 <div className="bg-[#DEF5DD] flex flex-row justify-between items-center p-3 rounded-md mt-2">
-                  <p className=" text-[#6952EB] font-[550] ">
-                    Saldo a pagar:
-                  </p>
+                  <p className=" text-[#6952EB] font-[550] ">Saldo a pagar:</p>
                   <p className="text-[#6952EB] font-[550] ">
                     {saldo_a_pagar ? `${formatCurrency(saldo_a_pagar)}` : "N/A"}
                   </p>
@@ -149,19 +148,19 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
           )}
         </div>
         <div className="mt-4">
-          {aportesOS && (
+          {aportesOS && aportesOS.length > 0 && (
             <>
               <h1 className="text-base uppercase font-bold mb-3">
                 Detalle de aportes
               </h1>
-              <AportesTable aportesOS={aportesOS??[]} />
+              <AportesTable aportesOS={aportesOS ?? []} />
               <div className="mt-3">
                 <div className="bg-[#DEF5DD] flex flex-row justify-between items-center p-3 rounded-md mt-2">
-                  <p className=" text-[#6952EB] font-[550] ">
-                    Total:
-                  </p>
+                  <p className=" text-[#6952EB] font-[550] ">Total:</p>
                   <p className="text-[#6952EB] font-[550] ">
-                    {total_aportes ? `${formatCurrency(total_aportes)}` : "$0,00"}
+                    {total_aportes
+                      ? `${formatCurrency(total_aportes)}`
+                      : "$0,00"}
                   </p>
                 </div>
               </div>
