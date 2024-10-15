@@ -468,6 +468,7 @@ export default function AdditionalInfoCard({
                                   mode="single"
                                   initialFocus={true}
                                   onSelect={(date) => field.onChange(date)}
+                                  selected={field.value ?? new Date()}
                                 />
                               </PopoverContent>
                             </Popover>

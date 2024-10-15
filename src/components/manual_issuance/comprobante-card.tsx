@@ -113,6 +113,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                         initialFocus={true}
                         // Ensure the onChange event updates the form state
                         onSelect={(date) => field.onChange(date)}
+                        selected={field.value}
                       />
                     </PopoverContent>
                   </Popover>
@@ -237,6 +238,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                         mode="single"
                         initialFocus={true}
                         onSelect={(date) => field.onChange(date)}
+                        selected={field.value}
                       />
                     </PopoverContent>
                   </Popover>
@@ -281,6 +283,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                         mode="single"
                         initialFocus={true}
                         onSelect={(date) => field.onChange(date)}
+                        selected={field.value}
                       />
                     </PopoverContent>
                   </Popover>
@@ -324,6 +327,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                         mode="single"
                         initialFocus={true}
                         onSelect={(date) => field.onChange(date)}
+                        selected={field.value}
                       />
                     </PopoverContent>
                   </Popover>
@@ -408,6 +412,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                         mode="single"
                         initialFocus={true}
                         onSelect={(date) => field.onChange(date)}
+                        selected={field.value}
                       />
                     </PopoverContent>
                   </Popover>
@@ -450,6 +455,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                         mode="single"
                         initialFocus={true}
                         onSelect={(date) => field.onChange(date)}
+                        selected={field.value}
                       />
                     </PopoverContent>
                   </Popover>
@@ -494,6 +500,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                         mode="single"
                         initialFocus={true}
                         onSelect={(date) => field.onChange(date)}
+                        selected={field.value}
                       />
                     </PopoverContent>
                   </Popover>
@@ -537,6 +544,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                         mode="single"
                         initialFocus={true}
                         onSelect={(date) => field.onChange(date)}
+                        selected={field.value}
                       />
                     </PopoverContent>
                   </Popover>
@@ -583,6 +591,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                         mode="single"
                         initialFocus={true}
                         onSelect={(date) => field.onChange(date)}
+                        selected={field.value}
                       />
                     </PopoverContent>
                   </Popover>
