@@ -111,7 +111,7 @@ export default function CCDetail(props: {
           "-" +
           (event.comprobantes?.nroComprobante.toString().padStart(8) ?? "00000000"),
         status: "Pendiente",
-        iva: Number(event.comprobantes?.iva ?? 21),
+        iva: Number(event.comprobantes?.iva ?? 0),
         comprobantes: comprobantesTable,
         currentAccountAmount: formatCurrency(NCTotal ?? 0),
         saldo_a_pagar: formatCurrency(saldo_a_pagar ?? 0),
