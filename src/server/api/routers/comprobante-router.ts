@@ -447,9 +447,9 @@ async function approbatecomprobante(liquidationId: string) {
           await db
         .insert(schema.events)
         .values({
-          current_amount: lastEventAmount,
+          current_amount: (lastEventAmount + comprobante.importe),
           description: "NC",
-          event_amount: lastEventAmount + comprobante.importe,
+          event_amount: comprobante.importe,
           currentAccount_id: cc?.id,
           type: "NC",
           comprobante_id: comprobante.id,
@@ -529,9 +529,9 @@ async function approbatecomprobante(liquidationId: string) {
           await db
           .insert(schema.events)
           .values({
-            current_amount: lastEventAmount,
+            current_amount: (lastEventAmount - comprobante.importe),
             description: "FC",
-            event_amount: lastEventAmount - comprobante.importe,
+            event_amount: lastEventAmount,
             currentAccount_id: cc?.id,
             type: "FC",
             comprobante_id: comprobante.id,

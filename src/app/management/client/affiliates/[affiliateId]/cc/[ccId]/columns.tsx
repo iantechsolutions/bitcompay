@@ -21,14 +21,14 @@ import { RouterOutputs } from "~/trpc/shared";
 export type TableRecord = {
   date: Date;
   description: string;
-  amount: number;
+  amount: string;
   comprobanteType: string;
   comprobanteNumber: string;
   status: "Pagada" | "Pendiente";
   iva: number;
   comprobantes?: RouterOutputs["comprobantes"]["getByLiquidation"];
-  currentAccountAmount: number;
-  saldo_a_pagar: number;
+  currentAccountAmount: string;
+  saldo_a_pagar: string;
   nombre: string;
   cuit: string;
   [index: string]: any;
@@ -115,20 +115,23 @@ export const columns: ColumnDef<TableRecord>[] = [
     accessorKey: "amount",
     header: () => null,
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("amount"));
-      const formatted = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }).format(amount);
+      console.log("ivaRecibido");
+      console.log(row.getValue("iva"));
+      const ivaMostrar = (row.getValue("iva") as number).toString();
       return (
         <div className="relative h-full flex flex-col justify-center items-center mx-10 mr-14">
           <div className="absolute top-1/2 transform -translate-y-1/2 font-bold">
-            {formatted}
+            {" "}
+            {row.getValue("amount")}
           </div>
-          <div className="absolute top-1/2 transform translate-y-4 text-[#c4c4c4] text-xs">
-            IVA: {Math.round((row.getValue("iva") as number) * 100)} %
+          <div className="absolute top-1/2 transform translate-y-4 text-[#c4c4c4] text-xs flex flex-row gap-x-1">
+            <div>
+              
+              IVA:
+            </div>
+            <div>
+            {` ${ivaMostrar}%`}
+            </div>
           </div>
         </div>
       );
