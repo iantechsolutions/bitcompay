@@ -56,11 +56,7 @@ type comprobantes = RouterOutputs["comprobantes"]["getByLiquidation"];
 export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
   let comprobanteFCReciente = data?.comprobantes;
 
-  console.log(
-    "comprobantes",
-    comprobanteFCReciente,
-    data?.currentAccountAmount
-  );
+  console.log("comprobantes", comprobanteFCReciente, data);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -84,25 +80,34 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
             </ul>
           </SheetDescription>
         </SheetHeader>
-
-        <div className="flex flex-row border justify-between items-center px-4 py-5 gap-2 rounded-md mt-3">
-          <p className="text-base whitespace-nowrap font-medium-medium ">
-            Saldo actual{" "}
-          </p>
-          <p className="text-[#6952EB] whitespace-nowrap font-semibold text-lg">
-            {data?.currentAccountAmount}
-          </p>
-        </div>
-
-        {/* {data?.comprobantes && <div className="mt-5">
-          <ContentTable comprobante={comprobanteFCReciente} />
+        {data?.comprobanteType == "Apertura de CC" ? (
+          <div className="flex flex-row border justify-between items-center px-4 py-5 gap-2 rounded-md mt-3">
+            <p className="text-base whitespace-nowrap font-medium-medium ">
+              Saldo actual{" "}
+            </p>
+            <p className="text-[#6952EB] whitespace-nowrap font-semibold text-lg">
+              {data?.amount}
+            </p>
           </div>
-          } */}
+        ) : (
+          <>
+            <div className="flex flex-row border justify-between items-center px-4 py-5 gap-2 rounded-md mt-3">
+              <p className="text-base whitespace-nowrap font-medium-medium ">
+                Saldo actual{" "}
+              </p>
+              <p className="text-[#6952EB] whitespace-nowrap font-semibold text-lg">
+                {data?.currentAccountAmount}
+              </p>
+            </div>
 
-        <div className="bg-[#DEF5DD] flex flex-row justify-between items-center py-4 px-6 rounded-md mt-4">
-          <p className=" text-[#6952EB] font-semibold">Importe total: </p>
-          <p className="text-[#6952EB] font-semibold">{data?.saldo_a_pagar}</p>
-        </div>
+            <div className="bg-[#DEF5DD] flex flex-row justify-between items-center py-4 px-6 rounded-md mt-4">
+              <p className=" text-[#6952EB] font-semibold">Importe total: </p>
+              <p className="text-[#6952EB] font-semibold">
+                {data?.saldo_a_pagar}
+              </p>
+            </div>
+          </>
+        )}
       </SheetContent>
     </Sheet>
   );

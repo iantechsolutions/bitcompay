@@ -109,7 +109,7 @@ export function AddHealthInsurances(props: {
   const [floor, setFloor] = useState(OS?.floor ?? "");
   const [office, setOffice] = useState(OS?.office ?? "");
   const [initialValue, setInitialValue] = useState("0");
-  // const [type, setType] = useState(OS?.type ?? "");
+  const [isClient, setIsClient] = useState(OS?.isClient ?? false);
 
   const [dateState, setDateState] = useState<Date | undefined>(
     OS?.dateState ?? undefined
@@ -205,7 +205,7 @@ export function AddHealthInsurances(props: {
         user: user,
         cancelMotive: cancelMotive,
 
-        isClient: true,
+        isClient: isClient,
         dateState: dateState,
         responsibleName: responsibleName,
 
@@ -276,7 +276,7 @@ export function AddHealthInsurances(props: {
         phoneNumber: phoneNumber,
         email: email,
 
-        isClient: true,
+        isClient: isClient,
         state: state,
         dateState: dateState,
         responsibleName: user,
@@ -377,6 +377,22 @@ export function AddHealthInsurances(props: {
                 value={description}
                 onChange={(e) => setDescripcion(e.target.value)}
               />
+            </div>
+            <div>
+              <Label className="text-xs text-gray-500">Es cliente?</Label>
+              <Select
+                onValueChange={(value) => setIsClient(value === "true")}
+                value={isClient !== null ? String(isClient) : undefined}>
+                <SelectTrigger
+                  className="w-fit mb-2 border-[#bef0bb] border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right">
+                  <SelectValue placeholder="Seleccionar" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="true">Es cliente</SelectItem>
+                  <SelectItem value="false">No es cliente</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div />
             <div />
