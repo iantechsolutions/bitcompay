@@ -213,8 +213,6 @@ const preparedBillResponsible = db.query.integrants
   })
   .prepare("preparedBillResponsible");
 
-
-
 async function approbatecomprobante(liquidationId: string) {
   const start = Date.now();
   console.log(`[START] Function start: ${start}`);
@@ -262,8 +260,8 @@ async function approbatecomprobante(liquidationId: string) {
 
     const ccs = await db.query.currentAccount.findMany({
       with: {
-        events:true,
-      }
+        events: true,
+      },
     });
 
     console.log(`[TIMING] Current user fetch: ${Date.now() - userStart}ms`);
@@ -376,8 +374,7 @@ async function approbatecomprobante(liquidationId: string) {
 
         const ccFetchStart = Date.now();
         // const cachedCc = comprobante.family_group?.cc;
-        const cc =
-           ccs.find((x) => x.id == comprobante.family_group?.cc?.id);
+        const cc = ccs.find((x) => x.id == comprobante.family_group?.cc?.id);
         let lastEventAmount = 0;
         if (cc?.events && cc?.events.length > 0) {
           lastEventAmount = cc?.events.reduce((prev, current) => {
@@ -444,35 +441,26 @@ async function approbatecomprobante(liquidationId: string) {
               Importe: comprobante?.nroComprobante,
             },
           };
-          await db
-        .insert(schema.events)
-        .values({
-          current_amount: (lastEventAmount + comprobante.importe),
-          description: "NC",
-          event_amount: comprobante.importe,
-          currentAccount_id: cc?.id,
-          type: "NC",
-          comprobante_id: comprobante.id,
-        })
+          await db.insert(schema.events).values({
+            current_amount: lastEventAmount + comprobante.importe,
+            description: "NC",
+            event_amount: comprobante.importe,
+            currentAccount_id: cc?.id,
+            type: "NC",
+            comprobante_id: comprobante.id,
+          });
           // AAACAAAA
           await preparedUpdatePayment.execute({
             comprobanteId: comprobante?.previous_facturaId,
             statusId: statusCancelado?.id,
           });
         } else {
-
-
-
-
-          await db
-          .insert(schema.payments)
-          .values({
+          await db.insert(schema.payments).values({
             companyId:
               comprobante.family_group?.businessUnitData?.company?.id ?? "",
             invoice_number: comprobante?.nroComprobante,
             userId: user?.id ?? "",
-            g_c:
-              comprobante.family_group?.businessUnitData?.brand?.number ?? 0,
+            g_c: comprobante.family_group?.businessUnitData?.brand?.number ?? 0,
             name: billResponsible?.name ?? "",
             fiscal_id_type: billResponsible?.fiscal_id_type,
             fiscal_id_number: parseInt(
@@ -495,7 +483,6 @@ async function approbatecomprobante(liquidationId: string) {
             card_number: billResponsible?.pa[0]?.card_number,
             card_brand: billResponsible?.pa[0]?.card_brand,
             card_type: billResponsible?.pa[0]?.card_type,
-
           });
 
           data = {
@@ -526,16 +513,14 @@ async function approbatecomprobante(liquidationId: string) {
             },
           };
 
-          await db
-          .insert(schema.events)
-          .values({
-            current_amount: (lastEventAmount - comprobante.importe),
+          await db.insert(schema.events).values({
+            current_amount: lastEventAmount - comprobante.importe,
             description: "FC",
-            event_amount: (comprobante.importe * -1),
+            event_amount: comprobante.importe * -1,
             currentAccount_id: cc?.id,
             type: "FC",
             comprobante_id: comprobante.id,
-          })
+          });
         }
         console.log(
           `[TIMING] Comprobante process (comprobante ${index}): ${
@@ -564,7 +549,13 @@ async function approbatecomprobante(liquidationId: string) {
 
         const name = `FAC_${lastVoucher + 1}.pdf`; // NOMBRE        lastVoucher += 1;
 
-        await PDFFromHtml(html, name, afip, comprobante?.id ?? "", lastVoucher + 1);
+        await PDFFromHtml(
+          html,
+          name,
+          afip,
+          comprobante?.id ?? "",
+          lastVoucher + 1
+        );
         console.log(
           `[TIMING] PDF generation (comprobante ${index}): ${
             Date.now() - pdfGenerateStart
@@ -1182,7 +1173,13 @@ export const comprobantesRouter = createTRPCRouter({
         id: z.string(),
         billLink: z.string(),
         number: z.number(),
-        state: z.enum(["pendiente", "generada", "parcial", "anulada","apertura"]),
+        state: z.enum([
+          "pendiente",
+          "generada",
+          "parcial",
+          "anulada",
+          "apertura",
+        ]),
       })
     )
     .mutation(async ({ input: { id, billLink, number, state } }) => {
@@ -1299,7 +1296,10 @@ export async function preparateComprobante(
       let previous_bill = 0;
       if (grupo?.comprobantes.length > 0) {
         const listadoFac = grupo.comprobantes?.filter(
-          (x) => (x.origin == "Factura" && x.estado != "generada" || x.origin == "Factura" && x.estado != "apertura")
+          (x) =>
+            x.origin == "Factura" &&
+            x.estado !=
+              "generada" /* || x.origin == "Factura" && x.estado != "apertura" */
         );
         if (listadoFac.length > 0) {
           mostRecentFactura = listadoFac.reduce((prev, current) => {
@@ -1357,14 +1357,29 @@ export async function preparateComprobante(
       if (
         previous_bill > 0 &&
         (mostRecentFactura?.estado == "pendiente" ||
-          mostRecentFactura?.estado == "parcial")
+          mostRecentFactura?.estado == "parcial" ||
+          mostRecentFactura?.estado == "apertura")
       ) {
+
+        let previousTipoComprobante = fcAnc[grupo.modo?.description == "MIXTO" ? "FACTURA B" : "FACTURA A"  ]
+
+        switch (billResponsible?.afip_status?.toUpperCase()) {
+          case "MONOTRIBUTISTA":
+          case "RESPONSABLE INSCRIPTO":
+            previousTipoComprobante = "FACTURA A";
+          case "CONSUMIDOR FINAL":
+            previousTipoComprobante = "FACTURA B";
+        }
+
+        if(mostRecentFactura && mostRecentFactura.tipoComprobante && mostRecentFactura.tipoComprobante !== "Apertura de CC"){
+          previousTipoComprobante = fcAnc[mostRecentFactura.tipoComprobante]
+        }
         const notaCredito = await db
           .insert(schema.comprobantes)
           .values({
             ptoVenta: mostRecentFactura.ptoVenta,
             nroComprobante: mostRecentFactura.nroComprobante,
-            tipoComprobante: fcAnc[mostRecentFactura?.tipoComprobante ?? "0"],
+            tipoComprobante: fcAnc[previousTipoComprobante ?? ""],
             concepto: mostRecentFactura?.concepto ?? 0,
             tipoDocumento: tipoDocumento ?? 0,
             generated: new Date(),

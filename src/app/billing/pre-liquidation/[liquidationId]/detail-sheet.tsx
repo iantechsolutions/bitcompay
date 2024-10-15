@@ -40,7 +40,12 @@ export function formatCurrency(amount: number) {
     currencyDisplay: "narrowSymbol",
   }).format(amount);
 }
-export default function DetailSheet({ data, open, setOpen,liquidationId }: DetailSheetProps) {
+export default function DetailSheet({
+  data,
+  open,
+  setOpen,
+  liquidationId,
+}: DetailSheetProps) {
   const { data: familyGroup } = api.family_groups.getWithAportes.useQuery({
     family_groupsId: data.id,
   });
@@ -50,16 +55,19 @@ export default function DetailSheet({ data, open, setOpen,liquidationId }: Detai
     aportesOS = [...aportesOS, ...integrant.aportes_os];
   });
 
-
   console.log("comprobantes");
   console.log(data.comprobantes);
 
   let comprobanteNCReciente = data.comprobantes.find(
-    (comprobante) => comprobante.origin === "Nota de credito" && comprobante.liquidation_id === liquidationId
+    (comprobante) =>
+      comprobante.origin === "Nota de credito" &&
+      comprobante.liquidation_id === liquidationId
   );
   console.log("comprobanteNCReciente", comprobanteNCReciente);
   let comprobanteFCReciente = data.comprobantes.find(
-    (comprobante) => comprobante.origin === "Factura" && comprobante.liquidation_id === liquidationId
+    (comprobante) =>
+      comprobante.origin === "Factura" &&
+      comprobante.liquidation_id === liquidationId
   );
   console.log("comprobanteFCReciente", comprobanteFCReciente);
 
@@ -97,7 +105,11 @@ export default function DetailSheet({ data, open, setOpen,liquidationId }: Detai
             Detalle del movimiento
           </SheetTitle>
           <SheetDescription>
-            <Link href={`/management/client/affiliates/${data.id}`}>
+            <Link
+              href={`/management/client/affiliates/${data.id}`}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
               <ul className="mt-2 text-base">
                 <li className="text-xs"> RECEPTOR </li>
                 <li className="font-medium text-[#3e3e3e]">
