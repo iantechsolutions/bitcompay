@@ -105,7 +105,7 @@ export const healthInsurancesRouter = createTRPCRouter({
         eq(schema.healthInsurances.companyId, companyId!),
         eq(schema.healthInsurances.isClient, true)
        ),
-      with: { cpData: true, aportes_os: true },
+      with: { cpData: true, aportes_os: true, comprobantes:true },
     });
     return healthInsurances;
   }),

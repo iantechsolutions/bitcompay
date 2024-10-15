@@ -106,6 +106,7 @@ export default function PaymentMethods({
                         mode="single"
                         initialFocus={true}
                         onSelect={(date) => field.onChange(date)}
+                        selected={field.value}
                       />
                     </PopoverContent>
                   </Popover>
@@ -184,6 +185,7 @@ export default function PaymentMethods({
                         mode="single"
                         initialFocus={true}
                         onSelect={(date) => field.onChange(date)}
+                        selected={field.value}
                       />
                     </PopoverContent>
                   </Popover>
@@ -227,6 +229,7 @@ export default function PaymentMethods({
                         mode="single"
                         initialFocus={true}
                         onSelect={(date) => field.onChange(date)}
+                        selected={field.value}
                       />
                     </PopoverContent>
                   </Popover>
@@ -289,6 +292,7 @@ export default function PaymentMethods({
                         mode="single"
                         initialFocus={true}
                         onSelect={(date) => field.onChange(date)}
+                        selected={field.value}
                       />
                     </PopoverContent>
                   </Popover>
@@ -351,6 +355,7 @@ export default function PaymentMethods({
                         mode="single"
                         initialFocus={true}
                         onSelect={(date) => field.onChange(date)}
+                        selected={field.value}
                       />
                     </PopoverContent>
                   </Popover>
@@ -394,6 +399,7 @@ export default function PaymentMethods({
                         mode="single"
                         initialFocus={true}
                         onSelect={(date) => field.onChange(date)}
+                        selected={field.value}
                       />
                     </PopoverContent>
                   </Popover>
@@ -490,6 +496,7 @@ export default function PaymentMethods({
                         mode="single"
                         initialFocus={true}
                         onSelect={(date) => field.onChange(date)}
+                        selected={field.value}
                       />
                     </PopoverContent>
                   </Popover>

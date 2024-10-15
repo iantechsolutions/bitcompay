@@ -137,6 +137,74 @@ export const eventsRouter = createTRPCRouter({
 
       return new_event;
     }),
+
+    createByTypeOS: protectedProcedure
+    .input(
+      z.object({
+        health_insurance_id: z.string(),
+        type: z.string(),
+        amount: z.number(),
+        comprobante_id: z.string(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const cc = await db.query.currentAccount.findFirst({
+        where: eq(
+          schema.currentAccount.health_insurance,
+          input.health_insurance_id ?? ""
+        ),
+      });
+      const lastEvent = await db.query.events.findFirst({
+        orderBy: [desc(schema.events.createdAt)],
+        where: eq(schema.events.currentAccount_id, cc?.id ?? ""),
+      });
+      let new_event;
+      switch (input.type) {
+        case "REC":
+          new_event = await db
+            .insert(schema.events)
+            .values({
+              description: "Recaudacion",
+              currentAccount_id: cc?.id,
+              comprobante_id: input.comprobante_id,
+              type: input.type,
+              event_amount: input.amount,
+              current_amount: (lastEvent?.current_amount ?? 0) + input.amount,
+            })
+            .returning();
+          break;
+        case "FC":
+          new_event = await db
+            .insert(schema.events)
+            .values({
+              description: "Comprobante Creado",
+              currentAccount_id: cc?.id,
+              comprobante_id: input.comprobante_id,
+              type: input.type,
+              event_amount: input.amount * -1,
+              current_amount: (lastEvent?.current_amount ?? 0) - input.amount,
+            })
+            .returning();
+          break;
+        case "NC":
+          new_event = await db
+            .insert(schema.events)
+            .values({
+              description: "Nota de credito",
+              currentAccount_id: cc?.id,
+              comprobante_id: input.comprobante_id,
+              type: input.type,
+              event_amount: input.amount,
+              current_amount: (lastEvent?.current_amount ?? 0) + input.amount,
+            })
+            .returning();
+          break;
+        default:
+          throw new Error("Tipo de evento no reconocido");
+      }
+
+      return new_event;
+    }),
   createByTypeOrg: protectedProcedure
     .input(
       z.object({
