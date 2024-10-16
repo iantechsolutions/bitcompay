@@ -54,12 +54,12 @@
 //   export default function DialogCC({ open, setOpen, data }: DialogCCProps) {
 
 // if (!detailData) {
-//     return toast.error("Error al imprimir");
+//     return toast.error("Error al descargar");
 //   } else if (
 //     !detailData.comprobantes ||
 //     detailData.comprobantes.length === 0
 //   ) {
-//     return toast.error("No hay comprobantes disponibles para imprimir");
+//     return toast.error("No hay comprobantes disponibles para descargar");
 //   } else {
 //     const url =
 //       "https://utfs.io/f/44838620-7323-4f58-816a-abf74035e972-sc8o5d";
