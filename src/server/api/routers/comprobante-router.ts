@@ -592,7 +592,17 @@ async function PDFFromHtml(
     file_name: name,
     options: options,
   });
+
   const upload = await utapi.uploadFilesFromUrl(res.file);
+  if (upload.error !== null) {
+    console.error(
+      "utapi.uploadFilesFromUrl error en comprobante PDFFromHtml",
+      upload.error
+    );
+  }
+
+  // console.log("upload", upload);
+  // console.log("res", res);
 
   // Verifica si 'upload' es un array o un objeto
   const uploadData = Array.isArray(upload) ? upload[0]?.data : upload?.data;
@@ -958,16 +968,17 @@ export const comprobantesRouter = createTRPCRouter({
               with: {
                 postal_code: true,
                 pa: true,
-              }
+              },
             },
           },
         });
         console.log("Encontro family_group");
         console.log(comprobanteGotten?.family_group?.id);
         if (family_group) {
-          
-          const billResponsible = family_group.integrants.find(x=>x.isBillResponsible);
-          
+          const billResponsible = family_group.integrants.find(
+            (x) => x.isBillResponsible
+          );
+
           // const billResponsible = await db.query.integrants.findFirst({
           //   where: and(
           //     eq(
@@ -976,7 +987,7 @@ export const comprobantesRouter = createTRPCRouter({
           //     ),
           //     eq(schema.integrants.isBillResponsible, true)
           //   ),
-            
+
           // });
           console.log(billResponsible);
           console.log(billResponsible?.pa[0]);
