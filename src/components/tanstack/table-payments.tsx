@@ -5,36 +5,43 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import Filters from "./filters";
 import { Column } from "@tanstack/react-table";
-import { api } from "~/trpc/react";
 import { cn } from "~/lib/utils";
 
-interface DataTableToolbarProps<TData, TValue> {
+// Define a TableRecord type that describes the structure of your table data.
+interface TableRecord {
+  // Define the properties of your table record here
+  id: string; // Example property
+  // Add other properties as needed
+}
+
+interface DataTableToolbarProps<TData extends TableRecord, TValue> {
+  // Constrain TData to TableRecord
   table: Table<TData>;
   searchColumn?: string;
   columns?: Column<TData, TValue>[];
   containerClassName?: string;
 }
 
-// Definimos el tipo de ref que vamos a usar con Filters
+// Define the type of ref that we will use with Filters
 interface FiltersRef {
   clearFilters: () => void;
 }
 
-export default function TableToolbar<TData, TValue>({
+export default function TableToolbarPayment<TData extends TableRecord, TValue>({
   table,
   columns,
   searchColumn,
   containerClassName,
 }: DataTableToolbarProps<TData, TValue>) {
-  const filtersRef = useRef<FiltersRef>(null); // Ref para el componente Filters
+  const filtersRef = useRef<FiltersRef>(null); // Ref for the Filters component
 
   console.log(table.getState().columnFilters);
 
   const handleClearFilters = () => {
     if (filtersRef.current) {
-      filtersRef.current.clearFilters(); // Llamamos a la función clearFilters del componente Filters
+      filtersRef.current.clearFilters(); // Call clearFilters function from Filters component
     }
-    table.resetColumnFilters(); // Reseteamos también los filtros de la tabla
+    table.resetColumnFilters(); // Also reset the table filters
   };
 
   return (
@@ -47,7 +54,7 @@ export default function TableToolbar<TData, TValue>({
         {searchColumn !== undefined && table.getColumn(searchColumn ?? "") && (
           <>
             <Input
-              placeholder={`Buscar por ... `}
+              placeholder={`Buscar por ${searchColumn}`}
               value={
                 (table
                   .getColumn(searchColumn ?? "")
@@ -79,9 +86,9 @@ export default function TableToolbar<TData, TValue>({
         )}
       </div>
       <div className="flex gap-1 pl-1 items-center">
-        {/* Pasamos la prop onClearFilters al componente Filters */}
+        {/* Pass the onClearFilters prop to the Filters component */}
         <Filters
-          ref={filtersRef} // Pasamos la referencia al componente Filters
+          ref={filtersRef} // Pass the reference to the Filters component
           table={table}
           columns={columns}
           onClearFilters={handleClearFilters}
@@ -90,7 +97,7 @@ export default function TableToolbar<TData, TValue>({
           {table.getState().columnFilters.length > 0 && (
             <Button
               variant="ghost"
-              onClick={handleClearFilters} // Llamamos a handleClearFilters aquí
+              onClick={handleClearFilters} // Call handleClearFilters here
               className="h-8 px-2 lg:px-3 font-semibold text-[#bef0bb] hover:text-[#bef0bb] hover:bg-white">
               Limpiar filtros
             </Button>
