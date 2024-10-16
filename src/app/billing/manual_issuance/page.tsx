@@ -215,21 +215,23 @@ export default function Page() {
             family_group_id: grupoFamiliarId,
             health_insurance_id: obraSocialId,
           });
-          const sumaTributos = otherTributesForm
-            .getValues()
-            .tributes.reduce((acc, tribute) => acc + Number(tribute.amount), 0);
           const comprobanteId = comprobante[0]?.id ?? "";
-          if (sumaTributos > 0) {
-            comprobante = [
-              await createItem({
-                amount: sumaTributos,
-                concept: "Tributos",
-                iva: 0,
-                total: sumaTributos,
+
+          const tributesPromise = otherTributesForm.getValues().tributes.map(async (tribute) => {
+            if (tribute.amount > 0){
+
+              await createTribute({
+                alicuota: tribute.aliquot,
+                amount: tribute.amount,
+                base_imponible: tribute.base,
                 comprobante_id: comprobanteId,
-              }),
-            ];
-          }
+                jurisdiction: tribute.jurisdiccion,
+                tribute: tribute.tribute,
+              })
+            }
+          })
+          const tributesResults = await Promise.all(tributesPromise);
+
           const promises = conceptsForm
             .getValues()
             .concepts.map(async (concept) => {
@@ -247,11 +249,7 @@ export default function Page() {
                 return comprobante;
               }
             });
-          console.log("preAwaitCoso");
-          console.log(comprobante);
           const results = await Promise.all(promises);
-          console.log(comprobante);
-          console.log(results);
           // comprobante = results[results.length - 1];
           // data = {
           //   CantReg: 1, // Cantidad de comprobantes a registrar
@@ -342,20 +340,20 @@ export default function Page() {
               }
             });
           const results = await Promise.all(promises);
-          const sumaTributos = otherTributesForm
-            .getValues()
-            .tributes.reduce((acc, tribute) => acc + Number(tribute.amount), 0);
-          if (sumaTributos > 0) {
-            comprobante = [
-              await createItem({
-                amount: sumaTributos,
-                concept: "Tributos",
-                iva: 0,
-                total: sumaTributos,
+          const tributesPromise = otherTributesForm.getValues().tributes.map(async (tribute) => {
+            if (tribute.amount > 0){
+
+              await createTribute({
+                alicuota: tribute.aliquot,
+                amount: tribute.amount,
+                base_imponible: tribute.base,
                 comprobante_id: comprobanteId,
-              }),
-            ];
-          }
+                jurisdiction: tribute.jurisdiccion,
+                tribute: tribute.tribute,
+              })
+            }
+          })
+          const tributesResults = await Promise.all(tributesPromise);
           // const event = createEventFamily({
           //   family_group_id: grupoFamiliarId,
           //   type: "REC",
@@ -409,20 +407,20 @@ export default function Page() {
             }),
           ];
 
-          const sumaTributos = otherTributesForm
-            .getValues()
-            .tributes.reduce((acc, tribute) => acc + Number(tribute.amount), 0);
-          if (sumaTributos > 0) {
-            comprobante = [
-              await createItem({
-                amount: sumaTributos,
-                concept: "Tributos",
-                iva: 0,
-                total: sumaTributos,
+          const tributesPromise = otherTributesForm.getValues().tributes.map(async (tribute) => {
+            if (tribute.amount > 0){
+
+              await createTribute({
+                alicuota: tribute.aliquot,
+                amount: tribute.amount,
+                base_imponible: tribute.base,
                 comprobante_id: comprobanteId,
-              }),
-            ];
-          }
+                jurisdiction: tribute.jurisdiccion,
+                tribute: tribute.tribute,
+              })
+            }
+          })
+          const tributesResults = await Promise.all(tributesPromise);
 
           // try {
           //   last_voucher = await afip.ElectronicBilling.getLastVoucher(
