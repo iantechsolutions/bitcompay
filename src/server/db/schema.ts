@@ -827,6 +827,7 @@ export const comprobantesRelations = relations(
   comprobantes,
   ({ one, many }) => ({
     items: many(items),
+    otherTributes: many(otherTributes),
     liquidations: one(liquidations, {
       fields: [comprobantes.liquidation_id],
       references: [liquidations.id],

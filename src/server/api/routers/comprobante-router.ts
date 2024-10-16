@@ -512,7 +512,8 @@ async function approbatecomprobante(liquidationId: string) {
               Importe: (Number(comprobante?.importe) * ivaFloat).toString(),
             },
           };
-
+          console.log("COMPROBANTE APROBADO");
+          console.log(comprobante.importe);
           await db.insert(schema.events).values({
             current_amount: lastEventAmount - comprobante.importe,
             description: "FC",
@@ -825,6 +826,7 @@ export const comprobantesRouter = createTRPCRouter({
         where: eq(schema.comprobantes.id, input.comprobanteId),
         with: {
           items: true,
+          otherTributes: true,
           family_group: {
             with: {
               integrants: {
@@ -926,6 +928,7 @@ export const comprobantesRouter = createTRPCRouter({
           },
           items: true,
           payments: true,
+          otherTributes:true,
         },
       });
       console.log("justo antes de crear payments");
