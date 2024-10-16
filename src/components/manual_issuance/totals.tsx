@@ -30,7 +30,7 @@ const Totals = ({ subTotal, iva, otherAttributes }: Props) => {
     currency: "ARS",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(subTotal - otherAttributes);
+  }).format(subTotal + otherAttributes + iva);
   return (
     <div className="border rounded-lg px-4 pt-5 pb-8">
       <p className=" text-lg font-semibold">Totales</p>

@@ -194,12 +194,15 @@ export default function AdditionalInfoCard({
               element={{
                 key: "IVA",
                 // Mostrar el IVA como porcentaje
-                value: (
+                value: visualizationSwitcher(
+                  visualization,
                   <p className="px-[12px] py-[8px]">
                     {(
                       conceptsForm.getValues(`concepts.${index}.iva`) ?? 0
                     ).toFixed(2)}
                   </p>
+                  ,
+                  (conceptsForm.getValues(`concepts.${index}.iva`) ?? 0).toFixed(2)
                 ),
               }}
             />
@@ -207,12 +210,15 @@ export default function AdditionalInfoCard({
               className="pr-1 pb-0 border-[#bef0bb]"
               element={{
                 key: "TOTAL",
-                value: (
+                value: visualizationSwitcher(
+                  visualization,
                   <p className="px-[12px] py-[8px]">
                     {(
                       conceptsForm.getValues(`concepts.${index}.total`) ?? 0
                     ).toFixed(2)}
                   </p>
+                  ,
+                  (conceptsForm.getValues(`concepts.${index}.total`) ?? 0).toFixed(2)
                 ),
               }}
             />
