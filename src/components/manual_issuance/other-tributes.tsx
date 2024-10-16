@@ -12,7 +12,7 @@ import {
 import ElementCard from "../affiliate-page/element-card";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { FormField } from "../ui/form";
-import { visualizationSwitcher } from "~/lib/utils";
+import { ivaDictionary, visualizationSwitcher } from "~/lib/utils";
 type OtherTributesForm = {
   tributes: {
     tribute: string;
@@ -27,38 +27,47 @@ interface Props {
   otherTributes: UseFormReturn<OtherTributesForm>;
   onAdd?: () => void;
 }
+
 const OtherTributes = ({ otherTributes, Visualization, onAdd }: Props) => {
   const { fields, remove, append } = useFieldArray({
     control: otherTributes.control,
     name: "tributes",
   });
+
+  const IVA_TASA = parseFloat(
+    ivaDictionary[Number(otherTributes.watch("tributes.0.aliquot"))] ?? "0"
+  );
   return (
-    <div className="border rounded-lg px-4 pt-5 pb-8 bg-[#F7F7F7]">
-      <h1 className="text-lg font-semibold">Otro tributos</h1>
+    <div className="flex flex-col gap-5  min-w-[250px] max-w-full border rounded-lg px-4 pt-5 pb-8 bg-[#F7F7F7] ">
+      <h1 className="flex flex-col gap-5 text-lg font-semibold">
+        Otro tributos
+      </h1>
       {fields.length === 0 && (
         <div className="flex justify-between px-2">
-          <p> no se agregaran otro tributos</p>
-          <Button
-            onClick={() => {
-              append({
-                tribute: "",
-                jurisdiccion: "",
-                base: 0,
-                aliquot: 0,
-                amount: 0,
-              });
-            }}
-          >
-            Agregar concepto
-          </Button>
+          <p> No se agregarán otro tributos</p>
+
+          {!Visualization && (
+            <Button
+              onClick={() => {
+                append({
+                  tribute: "",
+                  jurisdiccion: "",
+                  base: 0,
+                  aliquot: IVA_TASA,
+                  amount: 0,
+                });
+              }}>
+              Agregar concepto
+            </Button>
+          )}
         </div>
       )}
       {fields.map((fieldElement, index) => (
         <div
           key={fieldElement.id}
-          className=" w-full grid grid-flow-col gap-5 justify-stretch items-center"
-        >
+          className="w-full grid grid-flow-col gap-5 justify-stretch items-center">
           <ElementCard
+            className="pb-0 border-[#bef0bb]"
             element={{
               key: "TRIBUTOS",
               value: visualizationSwitcher(
@@ -69,8 +78,7 @@ const OtherTributes = ({ otherTributes, Visualization, onAdd }: Props) => {
                   render={({ field }) => (
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                      defaultValue={field.value}>
                       <SelectTrigger>
                         <SelectValue placeholder="Seleccionar tributos" />
                       </SelectTrigger>
@@ -86,21 +94,26 @@ const OtherTributes = ({ otherTributes, Visualization, onAdd }: Props) => {
               ),
             }}
           />
+
           <ElementCard
+            className="pr-1 pb-0 border-[#bef0bb]"
             element={{
               key: "JURISDICCION",
               value: visualizationSwitcher(
                 Visualization,
+
                 <FormField
                   name={`tributes.${index}.jurisdiccion`}
                   control={otherTributes.control}
                   render={({ field }) => (
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                      defaultValue={field.value}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar jurisdiccion" />
+                        <SelectValue
+                          placeholder="Seleccionar jurisdicción"
+                          className="truncate"
+                        />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="1">Provincias</SelectItem>
@@ -114,7 +127,9 @@ const OtherTributes = ({ otherTributes, Visualization, onAdd }: Props) => {
               ),
             }}
           />
+
           <ElementCard
+            className="pr-1 pb-0 border-[#bef0bb]"
             element={{
               key: "BASE IMPONIBLE",
               value: visualizationSwitcher(
@@ -122,13 +137,21 @@ const OtherTributes = ({ otherTributes, Visualization, onAdd }: Props) => {
                 <FormField
                   name={`tributes.${index}.base`}
                   control={otherTributes.control}
-                  render={({ field }) => <Input type="number" {...field} />}
+                  render={({ field }) => (
+                    <Input
+                      type="number"
+                      className="pr-1 pb-0 border-[#bef0bb]"
+                      {...field}
+                    />
+                  )}
                 />,
                 fieldElement.base
               ),
             }}
           />
+
           <ElementCard
+            className="pr-1 pb-0 border-[#bef0bb]"
             element={{
               key: "ALICUOTA",
               value: visualizationSwitcher(
@@ -136,13 +159,17 @@ const OtherTributes = ({ otherTributes, Visualization, onAdd }: Props) => {
                 <FormField
                   name={`tributes.${index}.aliquot`}
                   control={otherTributes.control}
-                  render={({ field }) => <Input type="number" {...field} />}
+                  render={({ field }) => (
+                    <Input type="number" className="w-full" {...field} />
+                  )}
                 />,
                 fieldElement.aliquot
               ),
             }}
           />
+
           <ElementCard
+            className="pr-1 pb-0 border-[#bef0bb]"
             element={{
               key: "IMPORTE",
               value: visualizationSwitcher(
@@ -153,6 +180,7 @@ const OtherTributes = ({ otherTributes, Visualization, onAdd }: Props) => {
                   render={({ field }) => (
                     <Input
                       type="number"
+                      className="w-full"
                       {...field}
                       onChange={(e) => {
                         field.onChange(e);
@@ -182,8 +210,7 @@ const OtherTributes = ({ otherTributes, Visualization, onAdd }: Props) => {
                     aliquot: 0,
                     amount: 0,
                   })
-                }
-              >
+                }>
                 <AddCircleIcon className="text-[#8bd087]" />
               </Button>
               <Button
@@ -195,8 +222,7 @@ const OtherTributes = ({ otherTributes, Visualization, onAdd }: Props) => {
                   if (onAdd) {
                     onAdd();
                   }
-                }}
-              >
+                }}>
                 <CancelCircleIcon className="text-[#ed4444]" />
               </Button>
             </div>

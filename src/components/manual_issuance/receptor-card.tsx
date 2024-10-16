@@ -25,7 +25,7 @@ const ReceptorCard = ({nombre, nroDocumentoDNI, nroDocumento, conditionIVA, cond
           className="pr-11 "
         ></ElementCard>
       </div>
-      <div className="w-full grid grid-flow-col justify-stretch px-4 gap-4 mt-3">
+      <div className="w-full grid grid-flow-col justify-stretch px-4 gap-4 mt-3 capitalize">
         <ElementCard
           className="grow-0"
           element={{

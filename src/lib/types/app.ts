@@ -12,7 +12,13 @@ export type TotalsType = {
     dateVencimiento: Date;
     dateDesde: Date;
     dateHasta: Date;
-    facturasEmitidas: Number;
+    facturasEmitidas: {
+      tipoComprobante: string | null;
+      puntoVenta: string;
+      nroComprobante: string;
+      importe: number;
+      iva: string;
+    };
   };
  export type ConceptsForm = {
     concepts: {
@@ -47,5 +53,6 @@ export type TotalsType = {
       dateEmision: Date | null;
       importe?: number; 
       iva?: number;
+      id: string;
     }[];
   };

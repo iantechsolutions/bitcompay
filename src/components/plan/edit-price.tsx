@@ -31,16 +31,16 @@ export default function EditPrice({
   plan?: RouterOutputs["plans"]["get"];
   fecha?: number;
 }) {
-  const [anio, setAnio] = useState(2020);
+  const [anio, setAnio] = useState(2022);
   const [mes, setMes] = useState(0);
-  const [vigente, setVigente] = useState<Date>();
-  const [percent, setPercent] = useState("");
+  const [percent, setPercent] = useState<number>(0);
   const [open, setOpen] = useState(false);
   const { mutateAsync: createPricePerAge, isLoading } =
     api.pricePerCondition.create.useMutation();
   const router = useRouter();
 
   async function handleUpdatePrice() {
+    console.log("Llego");
     if (plan?.pricesPerCondition) {
       if (
         plan?.pricesPerCondition.filter(
@@ -48,12 +48,12 @@ export default function EditPrice({
         ).length === 0
       ) {
         const validPrices = plan.pricesPerCondition.filter(
-          (x) => x.validy_date.getTime() === vigente?.getTime()
+          (x) => x.validy_date.getTime() === fecha
         );
         for (const price of validPrices) {
           await createPricePerAge({
             plan_id: plan.id ?? "",
-            amount: price.amount * (1 + parseFloat(percent) / 100),
+            amount: price.amount + price.amount * (percent / 100),
             from_age: price.from_age ?? 0,
             to_age: price.to_age ?? 0,
             condition: price.condition ?? "",
@@ -61,20 +61,21 @@ export default function EditPrice({
             validy_date: new Date(anio, mes, 1),
           });
         }
+
+        window.location.reload();
+        toast.success("Se actualizo el listado de precios");
         setOpen(false);
       } else {
         toast.error("Ya existe un listado de precios para el mes seleccionado");
       }
     }
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-    router.refresh();
   }
-
+  //dasdes
   return (
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button className="bg-transparent hover:bg-transparent p-0 text-[#3e3e3e] shadow-none h-5">
+          <Button className="bg-transparent w-full hover:bg-transparent p-0 text-[#3e3e3e] shadow-none h-5">
             <CreditCardPosIcon className="mr-1 h-4" /> Actualizar precio
           </Button>
         </DropdownMenuTrigger>
@@ -254,33 +255,33 @@ export default function EditPrice({
           <div className="w-1/4 text-gray-500 mb-2 ml-3">
             <Label>Año de Vigencia</Label>
             <Input
-              className="w-full border-[#BEF0BB] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
-              type="number"
-              min={new Date().getFullYear()}
+              className="w-full border-[#BEF0BB] border-0 border-b text-[#3E3E3E] bg-background rounded-none"
               value={anio}
-              onChange={(e) => setAnio(Number(e.target.value))}
+              type="number"
+              onChange={(e) => setAnio(parseInt(e.target.value))}
             />
           </div>
 
           <div className="w-1/4 text-gray-500 mb-2 ml-3">
-            <Label htmlFor="number">Porcentaje de aumento</Label>
+            <Label htmlFor="percent">Porcentaje de aumento</Label>
             <Input
-              id="number"
+              id="percent"
               className="w-full border-[#BEF0BB] border-0 border-b text-[#3E3E3E] bg-background rounded-none"
               placeholder="Ej: 30%"
               value={percent}
-              onChange={(e) => setPercent(e.target.value)}
+              type="number"
+              onChange={(e) => setPercent(parseInt(e.target.value))}
             />
           </div>
           <div>
             <Button
-              disabled={isLoading}
               onClick={handleUpdatePrice}
+              disabled={isLoading}
               className="bg-[#BEF0BB] hover:bg-[#BEF0BB] ml-3 rounded-full mr-4 px-6 text-black font-normal hover:text-[#3E3E3E]">
               {isLoading && (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}
-              <CreditCardPosIcon className="mr-2 h-5 font-medium-medium" />
+              <CreditCardPosIcon className="mr-2 h-5 font-medium-medium w-full" />
               Actualizar precio
             </Button>
           </div>

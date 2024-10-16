@@ -1382,6 +1382,8 @@ export const aportes_os = pgTable("aportes_os", {
     .references(() => integrants.id)
     .notNull(),
   cuil: varchar("cuil", { length: 255 }).notNull(),
+  // type: varchar("type", { length: 255 }).notNull(),}
+  // origen: varchar("origen", { length: 255 }).notNull(),
   process_date: timestamp("process_date", { mode: "date" }),
   contribution_date: timestamp("contribution_date", { mode: "date" }),
   support_date: timestamp("support_date", { mode: "date" }),
@@ -1404,5 +1406,24 @@ export const aportes_os_Relations = relations(aportes_os, ({ one }) => ({
   affiliate: one(integrants, {
     fields: [aportes_os.id_affiliate],
     references: [integrants.id],
+  }),
+}));
+
+export const otherTributes= pgTable("otherTributes", {
+  id:columnId,
+  tribute: varchar("tribute", { length: 255 }).notNull(),
+  jurisdiction: varchar("jurisdiction", { length: 255 }).notNull(),
+  alicuota: real("alicuota").notNull(),
+  base_imponible: real("base_imponible").notNull(),
+  amount: real("amount").notNull(),
+  comprobanteId: varchar("comprobanteId", { length: 255 }).references(
+    () => comprobantes.id
+  ),
+})
+
+export const otherTributesRelations = relations(otherTributes, ({ one }) => ({
+  comprobantes: one(comprobantes, {
+    fields: [otherTributes.comprobanteId],
+    references: [comprobantes.id],
   }),
 }));

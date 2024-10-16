@@ -49,7 +49,7 @@ export default function CCDetail(props: {
               </TableCell>
               <TableCell>{event?.description}</TableCell>
               <TableCell>{event?.type}</TableCell>
-              <TableCell>${formatCurrency(event?.event_amount * -1)}</TableCell>
+              <TableCell>{formatCurrency(event?.event_amount)}</TableCell>
                 </TableRow>
           ))}
         </TableBody>
@@ -75,7 +75,7 @@ export default function CCDetail(props: {
                 {dayjs(comprobante?.createdAt).format("YYYY-MM-DD hh:mm")}
               </TableCell>
               <TableCell>{comprobante?.tipoComprobante}</TableCell>
-              <TableCell>${formatCurrency(comprobante?.importe)}</TableCell>
+              <TableCell>{formatCurrency(comprobante?.importe)}</TableCell>
               <TableCell>{comprobante?.estado}</TableCell>
               <TableCell className="flex justify-center">
                 <Button

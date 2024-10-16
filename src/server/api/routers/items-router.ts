@@ -25,7 +25,7 @@ export const itemsRouter = createTRPCRouter({
         amount: z.number(),
         iva: z.number(),
         total: z.number(),
-        abono: z.number(),
+        abono: z.number().optional(),
         comprobante_id: z.string(),
       })
     )
@@ -40,6 +40,43 @@ export const itemsRouter = createTRPCRouter({
       });
       return new_item;
     }),
+
+
+  createReturnComp: protectedProcedure
+    .input(
+      z.object({
+        concept: z.string(),
+        amount: z.number(),
+        iva: z.number(),
+        total: z.number(),
+        abono: z.number().optional(),
+        comprobante_id: z.string(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const new_item = await db.insert(schema.items).values({
+        iva: input.iva,
+        concept: input.concept,
+        amount: input.amount,
+        total: input.total,
+        abono: input.abono,
+        comprobante_id: input.comprobante_id,
+      });
+
+      const comprobante = await db.query.comprobantes.findFirst({
+        where: eq(schema.comprobantes.id, input.comprobante_id),
+        with: {
+          family_group: {
+            with: { businessUnitData: { with: { brand: true } } },
+          },
+          items: true,
+        },
+      });
+      return comprobante;
+
+    }),
+
+  
   createReturnComprobante: protectedProcedure
     .input(
       z.object({

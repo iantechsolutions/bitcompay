@@ -79,7 +79,7 @@ export function ComboboxDemo({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn(" w-fit border-green-300 border-  text-[#3E3E3E] justify-start rounded-none hover:bg-transparent", classNameButton)}
+          className={cn("w-fit text-[#3E3E3E] justify-between rounded-none hover:bg-transparent", classNameButton)}
         >
           {label || title}
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50 justify-self-end" />

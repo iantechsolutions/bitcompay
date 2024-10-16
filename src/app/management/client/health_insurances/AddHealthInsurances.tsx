@@ -109,6 +109,7 @@ export function AddHealthInsurances(props: {
   const [floor, setFloor] = useState(OS?.floor ?? "");
   const [office, setOffice] = useState(OS?.office ?? "");
   const [initialValue, setInitialValue] = useState("0");
+  // const [isClient, setIsClient] = useState(OS?.isClient ?? false);
 
   const [dateState, setDateState] = useState<Date | undefined>(
     OS?.dateState ?? undefined
@@ -213,6 +214,8 @@ export function AddHealthInsurances(props: {
         excelEmployerDocument: excelEmployerDocument,
         excelSupportPeriod: excelSupportPeriod,
         excelContributionperiod: excelContributionperiod,
+        // origen: origen,
+
         // initialValue: initialValue,
         // responsibleName: responsibleName,
         // sellCondition: sellCondition,
@@ -284,6 +287,7 @@ export function AddHealthInsurances(props: {
         excelEmployerDocument: excelEmployerDocument,
         excelSupportPeriod: excelSupportPeriod,
         excelContributionperiod: excelContributionperiod,
+        // origen: origen,
         // initialValue: initialValue,
       });
 
@@ -374,6 +378,22 @@ export function AddHealthInsurances(props: {
                 onChange={(e) => setDescripcion(e.target.value)}
               />
             </div>
+            <div>
+              {/* <Label className="text-xs text-gray-500">Es cliente?</Label>
+              <Select
+                onValueChange={(value) => setIsClient(value === "true")}
+                value={isClient !== null ? String(isClient) : undefined}>
+                <SelectTrigger
+                  className="w-fit mb-2 border-[#bef0bb] border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+              hover:none justify-self-right">
+                  <SelectValue placeholder="Seleccionar" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="true">Es cliente</SelectItem>
+                  <SelectItem value="false">No es cliente</SelectItem>
+                </SelectContent>
+              </Select> */}
+            </div>
             <div />
             <div />
 
@@ -385,7 +405,8 @@ export function AddHealthInsurances(props: {
               <Select onValueChange={setBusinessUnit} value={businessUnit}>
                 <SelectTrigger
                   className="w-fit mb-2 border-[#bef0bb] border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right">
+              hover:none justify-self-right"
+                >
                   <SelectValue placeholder="Seleccione una UN" />
                 </SelectTrigger>
                 <SelectContent>
@@ -428,13 +449,11 @@ export function AddHealthInsurances(props: {
                   <SelectValue placeholder="Seleccione uno" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="monotributista">
-                    Monotributista</SelectItem>
+                  <SelectItem value="monotributista">Monotributista</SelectItem>
                   <SelectItem value="responsable_inscripto">
                     Responsable inscripto
                   </SelectItem>
-                  <SelectItem value="exento">
-                    Exento</SelectItem>
+                  <SelectItem value="exento">Exento</SelectItem>
                   <SelectItem value="consumidor_final">
                     Consumidor final
                   </SelectItem>
@@ -449,8 +468,7 @@ export function AddHealthInsurances(props: {
                   <SelectValue placeholder="Seleccione uno" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="monotributista">
-                    Monotributista</SelectItem>
+                  <SelectItem value="monotributista">Monotributista</SelectItem>
                   <SelectItem value="responsable_inscripto">
                     Responsable inscripto
                   </SelectItem>
@@ -559,10 +577,12 @@ export function AddHealthInsurances(props: {
               </Label>
               <Select
                 onValueChange={setFiscalPostalCode}
-                value={fiscalPostalCode}>
+                value={fiscalPostalCode}
+              >
                 <SelectTrigger
                   className=" mb-2 border-[#bef0bb] border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right w-full">
+              hover:none justify-self-right w-full"
+                >
                   <SelectValue placeholder="0" />
                 </SelectTrigger>
                 <SelectContent>
@@ -587,7 +607,113 @@ export function AddHealthInsurances(props: {
                 onChange={(e) => setFiscalCountry(e.target.value)}
               />
             </div>
-
+            <p className="col-span-4 mt-3 px-1 py-2 justify-start text-black font-xs text-sm font-semibold">
+              Información de la cuenta
+            </p>
+            <div>
+              <Label htmlFor="state" className="text-xs text-gray-500">
+                ESTADO
+              </Label>
+              <Select onValueChange={setState} value={state}>
+                <SelectTrigger className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
+                  <SelectValue placeholder="Seleccionar estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ACTIVO">ACTIVO</SelectItem>
+                  <SelectItem value="INACTIVO">INACTIVO</SelectItem>
+                  <SelectItem value="BAJA">BAJA</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="postal_code" className="text-xs text-gray-500">
+                FECHA DE ESTADO
+              </Label>
+              <Popover open={openCalendar} onOpenChange={setOpenCalendar}>
+                <PopoverTrigger asChild={true} autoFocus={false}>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "text-left flex justify-between font-medium w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none pr-0 pl-0",
+                      !dateState && "text-muted-foreground"
+                    )}
+                    onClick={() => setOpenCalendar(!openCalendar)} // Controla la apertura
+                  >
+                    {dateState ? (
+                      format(dateState, "PPP")
+                    ) : (
+                      <span>Seleccionar fecha</span>
+                    )}
+                    <Calendar01Icon className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="end" className="p-0" >
+                  <Calendar
+                    mode="single"
+                    selected={dateState}
+                    onSelect={(date) => {
+                      setDateState(date); // Asigna la fecha seleccionada
+                      setOpenCalendar(false); // Cierra el Popover automáticamente
+                    }}
+                    initialFocus={true}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div>
+              <Label htmlFor="user" className="text-xs text-gray-500">
+                USUARIO
+              </Label>
+              <Input
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                id="user"
+                placeholder="..."
+                value={user}
+                onChange={(e) => setUser(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="cancelMotive" className="text-xs text-gray-500">
+                MOTIVO DE BAJA
+              </Label>
+              <Input
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                id="cancelMotive"
+                placeholder="..."
+                value={cancelMotive}
+                onChange={(e) => setCancelMotive(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="user" className="text-xs text-gray-500">
+                NOMBRE DEL RESPONSABLE
+              </Label>
+              <Input
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                id="user"
+                placeholder="..."
+                value={responsibleName}
+                onChange={(e) => setResponsibleName(e.target.value)}
+              />
+            </div>
+            {/* {OS ? null : (
+              <div>
+                <Label htmlFor="initialValue">Saldo inicial</Label>
+                <Input
+                  id="initialValue"
+                  placeholder="..."
+                  value={initialValue}
+                  onChange={(e) => setInitialValue(e.target.value)}
+                />
+              </div>
+            )} */}
+            <div className="flex items-center justify-center">
+              {error && (
+                <span className="text-red-600 text-xs text-center">
+                  {error}
+                </span>
+              )}
+            </div>
             <p className="col-span-4 mt-3 px-1 py-2 justify-start text-black font-xs text-sm font-semibold">
               Datos de Contacto
             </p>
@@ -693,113 +819,7 @@ export function AddHealthInsurances(props: {
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
-            <p className="col-span-4 mt-3 px-1 py-2 justify-start text-black font-xs text-sm font-semibold">
-              Información de la cuenta
-            </p>
-            <div>
-              <Label htmlFor="state" className="text-xs text-gray-500">
-                ESTADO
-              </Label>
-              <Select onValueChange={setState} value={state}>
-                <SelectTrigger className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none ">
-                  <SelectValue placeholder="Seleccionar estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ACTIVO">ACTIVO</SelectItem>
-                  <SelectItem value="INACTIVO">INACTIVO</SelectItem>
-                  <SelectItem value="BAJA">BAJA</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="postal_code" className="text-xs text-gray-500">
-                FECHA DE ESTADO
-              </Label>
-              <Popover open={openCalendar} onOpenChange={setOpenCalendar}>
-                <PopoverTrigger asChild={true}>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "text-left flex justify-between font-medium w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none pr-0 pl-0",
-                      !dateState && "text-muted-foreground"
-                    )}
-                    onClick={() => setOpenCalendar(!openCalendar)} // Controla la apertura
-                  >
-                    {dateState ? (
-                      format(dateState, "PPP")
-                    ) : (
-                      <span>Seleccionar fecha</span>
-                    )}
-                    <Calendar01Icon className="h-4 w-4" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="p-0 overflow-y-scroll">
-                  <Calendar
-                    mode="single"
-                    selected={dateState}
-                    onSelect={(date) => {
-                      setDateState(date); // Asigna la fecha seleccionada
-                      setOpenCalendar(false); // Cierra el Popover automáticamente
-                    }}
-                    initialFocus={true}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div>
-              <Label htmlFor="user" className="text-xs text-gray-500">
-                USUARIO
-              </Label>
-              <Input
-                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
-                id="user"
-                placeholder="..."
-                value={user}
-                onChange={(e) => setUser(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="cancelMotive" className="text-xs text-gray-500">
-                MOTIVO DE BAJA
-              </Label>
-              <Input
-                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
-                id="cancelMotive"
-                placeholder="..."
-                value={cancelMotive}
-                onChange={(e) => setCancelMotive(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="user" className="text-xs text-gray-500">
-                NOMBRE DEL RESPONSABLE
-              </Label>
-              <Input
-                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
-                id="user"
-                placeholder="..."
-                value={responsibleName}
-                onChange={(e) => setResponsibleName(e.target.value)}
-              />
-            </div>
-            {/* {OS ? null : (
-              <div>
-                <Label htmlFor="initialValue">Saldo inicial</Label>
-                <Input
-                  id="initialValue"
-                  placeholder="..."
-                  value={initialValue}
-                  onChange={(e) => setInitialValue(e.target.value)}
-                />
-              </div>
-            )} */}
-            <div className="flex items-center justify-center">
-              {error && (
-                <span className="text-red-600 text-xs text-center">
-                  {error}
-                </span>
-              )}
-            </div>
+
             <p className="col-span-4 mt-3 px-1 py-2 justify-start text-black font-xs text-sm font-semibold">
               Asignar columnas de excel
             </p>
@@ -830,7 +850,8 @@ export function AddHealthInsurances(props: {
             <div>
               <Label
                 htmlFor="excelEmployerDocument"
-                className="text-xs text-gray-500">
+                className="text-xs text-gray-500"
+              >
                 CUIT EMPRESA
               </Label>
               <Input
@@ -844,7 +865,8 @@ export function AddHealthInsurances(props: {
             <div>
               <Label
                 htmlFor="excelContributionperiod"
-                className="text-xs text-gray-500">
+                className="text-xs text-gray-500"
+              >
                 Periodo de pago
               </Label>
               <Input
@@ -858,7 +880,8 @@ export function AddHealthInsurances(props: {
             <div>
               <Label
                 htmlFor="excelSupportPeriod"
-                className="text-xs text-gray-500">
+                className="text-xs text-gray-500"
+              >
                 Periodo de soporte
               </Label>
               <Input
@@ -869,6 +892,18 @@ export function AddHealthInsurances(props: {
                 onChange={(e) => setExcelSupportPeriod(e.target.value)}
               />
             </div>
+            {/* <div>
+              <Label htmlFor="type" className="text-xs text-gray-500">
+                Tipo
+              </Label>
+              <Input
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                id="type"
+                placeholder="..."
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+              />
+            </div> */}
             {/* {OS ? null : (
               <div>
                 <Label htmlFor="initialValue">Saldo inicial</Label>
@@ -893,7 +928,8 @@ export function AddHealthInsurances(props: {
               <Button
                 disabled={isPending}
                 onClick={handleEdit}
-                className="mt-7 font-medium mb-2 rounded-full w-fit bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3E3E3E] flex items-center justify-start justify-left">
+                className="mt-7 font-medium mb-2 rounded-full w-fit bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3E3E3E] flex items-center justify-start justify-left"
+              >
                 {isPending ? (
                   <Loader2Icon className="mr-2 animate-spin" size={20} />
                 ) : (
@@ -907,7 +943,8 @@ export function AddHealthInsurances(props: {
               <Button
                 disabled={isLoading}
                 onClick={handleCreate}
-                className="mt-7 font-medium mb-2 rounded-full w-fit bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3E3E3E] flex items-center self-start">
+                className="mt-7 font-medium mb-2 rounded-full w-fit bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3E3E3E] flex items-center self-start"
+              >
                 {isLoading ? (
                   <Loader2Icon className="mr-2 animate-spin" size={20} />
                 ) : (

@@ -40,7 +40,7 @@ export default function HealthInsurancePage(props: {
     bussinessUnitId: props.healthInsurance?.businessUnit ?? "",
   });
 
-  const {data: postalCodes} = api.postal_code.list.useQuery();
+  const { data: postalCodes } = api.postal_code.list.useQuery();
   const [isPending, setIsLoading] = useState<boolean>(false);
   const { data: cc } = api.currentAccount.getByHealthInsurance.useQuery({
     healthInsuranceId: props.healthInsurance?.id ?? "",
@@ -56,7 +56,6 @@ export default function HealthInsurancePage(props: {
     });
   }
   currentAmount = lastEvent?.current_amount ?? 0;
- 
 
   const { mutateAsync: updateHealthInsurance, isLoading } =
     api.healthInsurances.change.useMutation();
@@ -85,7 +84,12 @@ export default function HealthInsurancePage(props: {
     "Numero IIBB": props.healthInsurance?.IIBBNumber,
     "Condición de venta": props.healthInsurance?.sellCondition,
   };
-  const fiscalPostalCode= postalCodes?.find((postalCode) => postalCode.id === props.healthInsurance?.fiscalPostalCode);
+  const fiscalPostalCode = postalCodes?.find(
+    (postalCode) => postalCode.id === props.healthInsurance?.fiscalPostalCode
+  );
+  const postalCode = postalCodes?.find(
+    (postalCode) => postalCode.id === props.healthInsurance?.postal_code
+  );
   const facturacion = {
     "Domicilio fiscal": props.healthInsurance?.fiscalAddress,
     Piso: props.healthInsurance?.fiscalFloor,
@@ -102,17 +106,21 @@ export default function HealthInsurancePage(props: {
     Oficina: props.healthInsurance?.office,
     Localidad: props.healthInsurance?.locality,
     Provincia: props.healthInsurance?.province,
-    "Código postal": props.healthInsurance?.postal_code,
+    "Código postal": postalCode?.cp ?? "No se encontro C.P.",
     Teléfono: props.healthInsurance?.phoneNumber,
     "E-mail": props.healthInsurance?.email,
   };
 
   const accountInfo = {
     Estado: props.healthInsurance?.state,
-    "Fecha de estado": dayjs(props.healthInsurance?.dateState).format("DD/MM/YYYY"),
+    "Fecha de estado": dayjs(props.healthInsurance?.dateState).format(
+      "DD/MM/YYYY"
+    ),
     Usuario: props.healthInsurance?.user,
     "Motivo de baja": props.healthInsurance?.cancelMotive,
-  };1
+    // "Es cliente?": props.healthInsurance?.isClient ? "Si" : "No",
+  };
+  1;
 
   return (
     <LayoutContainer>
@@ -134,9 +142,20 @@ export default function HealthInsurancePage(props: {
             <div className="grid grid-cols-2 items-center">
               <div>
                 <p className="text-sm font-medium">SALDO ACTUAL</p>
-                <span className="text-[#CD3D3B] text-center text-xl font-bold">
-                  $ {currentAmount}
-                </span>
+                {currentAmount !== undefined ? (
+                  <span
+                    className={`text-2xl font-bold ${
+                      currentAmount > 0
+                        ? "text-[#6952EB]"
+                        : currentAmount < 0
+                        ? "text-[#EB2727]"
+                        : "text-black"
+                    }`}>
+                    {currentAmount.toFixed(2)}
+                  </span>
+                ) : (
+                  <span className={`text-2xl font-bold text-black`}>0.00</span>
+                )}
               </div>
               <div>
                 <Button
@@ -177,7 +196,7 @@ export default function HealthInsurancePage(props: {
         <div>
           <Accordion className="w-full" type="multiple">
             <AccordionItem value="item-1">
-              <AccordionTrigger className="font-semibold" name="editIcon">
+              <AccordionTrigger className="font-semibold" name="">
                 Datos básicos
               </AccordionTrigger>
               <AccordionContent className="pt-6 pl-5">

@@ -9,7 +9,7 @@ import { TableRecord } from "./columns";
 import { AddHealthInsurances } from "./AddHealthInsurances";
 
 export default function Home() {
-  const obraSocial = api.healthInsurances.list.useQuery().data;
+  const obraSocial = api.healthInsurances.listClient.useQuery().data;
   const tableRecords: TableRecord[] = [];
   if (obraSocial) {
     for (const os of obraSocial) {
@@ -20,7 +20,7 @@ export default function Home() {
           os?.identificationNumber ?? "SIN NRO DE IDENTIFICACION",
         responsibleName: os?.responsibleName ?? "SIN NOMBRE DE RESPONSABLE",
         fiscal_id_number: os?.fiscal_id_number ?? "SIN CUIL/CUIT",
-        afip_status: os?.afip_status ?? "SIN ESTADO AFIP",
+        "Estado AFIP": os?.afip_status ?? "SIN ESTADO AFIP",
       });
     }
   }

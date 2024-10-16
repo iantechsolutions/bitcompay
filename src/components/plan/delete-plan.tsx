@@ -16,14 +16,15 @@ import { useRouter } from "next/navigation";
 import { asTRPCError } from "~/lib/errors";
 
 export default function DeleteButton(props: { id: string }) {
+  const [openDelete, setOpenDelete] = useState<boolean>(false);
   const router = useRouter();
   const planId = props?.id;
   const [error, setError] = useState<boolean>(false);
-  const { data: familiGroups } = api.family_groups.getbyPlans.useQuery({
+  const { data: family_groups } = api.family_groups.getbyPlans.useQuery({
     planId: planId,
   });
   async function handleDelete() {
-    if (familiGroups) {
+    if (family_groups?.data) {
       setError(true);
       return toast.error("No se pudo eliminar el plan");
     } else {
@@ -31,10 +32,9 @@ export default function DeleteButton(props: { id: string }) {
         await deletePlan({
           planId: props.id ?? "",
         });
-
+        setOpenDelete(false);
+        window.location.reload();
         toast.success("El plan se eliminado correctamente");
-        router.push("/management/sales/plans");
-        router.refresh();
       } catch (e) {
         const error = asTRPCError(e)!;
         toast.error(error.message);
@@ -42,7 +42,7 @@ export default function DeleteButton(props: { id: string }) {
     }
   }
   const { mutateAsync: deletePlan, isLoading } = api.plans.delete.useMutation();
-  const [openDelete, setOpenDelete] = useState<boolean>(false);
+
   return (
     <>
       <Button

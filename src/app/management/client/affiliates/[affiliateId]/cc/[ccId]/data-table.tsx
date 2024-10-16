@@ -41,13 +41,13 @@ export default function DataTable<Tdata, Tvalue>({
       columnFilters,
     },
   });
-  const desiredColumns = ["status", "comprobanteType"];
+  const desiredColumns = ["Estado", "Tipo comprobante"];
   const filteredColumns = Array.from(table.getAllColumns()).filter((column) =>
     desiredColumns.includes(column.id!)
   );
   return (
     <div>
-    <TableToolbar table={table} searchColumn="status" columns={filteredColumns} containerClassName="py-2" />
+    <TableToolbar table={table} searchColumn="Estado" columns={filteredColumns} containerClassName="py-2" />
     <Table>
         <TableBody className="mt-0">
             {table.getRowModel().rows.map((row)=>(

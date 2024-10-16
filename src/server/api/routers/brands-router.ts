@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { createId } from "~/lib/utils";
 import { db, schema } from "~/server/db";
@@ -177,10 +177,62 @@ export const brandsRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input }) => {
-      await db.delete(schema.brands).where(eq(schema.brands.id, input.brandId));
-      await db
-        .delete(schema.companiesToBrands)
-        .where(eq(schema.companiesToBrands.brandId, input.brandId));
+      const businessUnits = await db.query.bussinessUnits.findMany({
+        where: eq(schema.bussinessUnits.brandId, input.brandId),
+      });
+
+      const familyGroupsIds = (
+        await db.query.family_groups.findMany({
+          where: inArray(
+            schema.family_groups.businessUnit,
+            businessUnits.map((v) => v.id)
+          ),
+        })
+      ).map((v) => v.id);
+
+      const integrantsIds = (
+        await db.query.integrants.findMany({
+          where: inArray(schema.integrants.family_group_id, familyGroupsIds),
+        })
+      ).map((v) => v.id);
+
+      await db.transaction(async (tx) => {
+        await tx
+          .delete(schema.liquidations)
+          .where(eq(schema.liquidations.brandId, input.brandId));
+        await tx
+          .delete(schema.uploadedOutputFiles)
+          .where(eq(schema.uploadedOutputFiles.brandId, input.brandId));
+        await tx
+          .delete(schema.differentialsValues)
+          .where(
+            inArray(schema.differentialsValues.integrant_id, integrantsIds)
+          );
+        await tx
+          .delete(schema.contributions)
+          .where(inArray(schema.contributions.integrant_id, integrantsIds));
+        await tx
+          .delete(schema.pa)
+          .where(inArray(schema.pa.integrant_id, integrantsIds));
+        await tx
+          .delete(schema.integrants)
+          .where(inArray(schema.integrants.id, integrantsIds));
+        await tx
+          .delete(schema.family_groups)
+          .where(inArray(schema.family_groups.id, familyGroupsIds));
+        await tx
+          .delete(schema.plans)
+          .where(eq(schema.plans.brand_id, input.brandId));
+        await tx
+          .delete(schema.bussinessUnits)
+          .where(eq(schema.bussinessUnits.brandId, input.brandId));
+        await tx
+          .delete(schema.brands)
+          .where(eq(schema.brands.id, input.brandId));
+        await tx
+          .delete(schema.companiesToBrands)
+          .where(eq(schema.companiesToBrands.brandId, input.brandId));
+      });
     }),
 
   addRelation: protectedProcedure

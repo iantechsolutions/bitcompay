@@ -20,23 +20,28 @@ import { Input } from "../ui/input";
 import { valueToNameComprobanteMap } from "~/lib/utils";
 import { visualizationSwitcher } from "~/lib/utils";
 import dayjs from "dayjs";
-type ManualGenInputs = {
-  puntoVenta: string;
-  tipoDeConcepto: string;
-  alicuota: string;
-  dateEmision: Date;
-  dateVencimiento: Date;
-  dateDesde: Date;
-  dateHasta: Date;
-  facturasEmitidas: Number;
-};
+import { RouterOutputs } from "~/trpc/shared";
+import { ManualGenInputs } from "~/lib/types/app";
+import { useState } from "react";
+import { ComboboxDemo } from "../ui/combobox";
 interface ComprobanteCardProps {
   visualization: boolean;
   form: UseFormReturn<ManualGenInputs>;
   tipoComprobante: string;
   setTipoComprobante: (e: string) => void;
+  comprobantes?: RouterOutputs["comprobantes"]["getByEntity"];
+  onValueChange?: () => void;
 }
-export default function ComprobanteCard(props: ComprobanteCardProps) {
+export default function ComprobanteCard({
+  onValueChange,
+  visualization,
+  form,
+  tipoComprobante,
+  setTipoComprobante,
+  comprobantes,
+}: ComprobanteCardProps) {
+  const [concept, setConcept] = useState(true);
+
   setDefaultOptions({ locale: es });
   const Map: Record<string, React.ReactNode> = {
     default: <></>,
@@ -47,9 +52,9 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
           element={{
             key: "Punto de venta",
             value: visualizationSwitcher(
-              props.visualization,
+              visualization,
               <FormField
-                control={props.form.control}
+                control={form.control}
                 name="puntoVenta"
                 render={({ field }) => (
                   <Select
@@ -76,7 +81,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                   </Select>
                 )}
               />,
-              props.form.getValues("puntoVenta")
+              form.getValues("puntoVenta")
             ),
           }}
         />
@@ -85,38 +90,42 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
           element={{
             key: "Fecha de emisión",
             value: visualizationSwitcher(
-              props.visualization,
+              visualization,
               <FormField
                 name="dateEmision"
-                control={props.form.control}
+                control={form.control}
                 render={({ field }) => (
                   <Popover>
                     <PopoverTrigger asChild={true}>
-                  
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "dd/MM/yyyy")
-                          ) : (
-                            <span>Seleccionar fecha</span>
-                          )}
-                          <Calendar01Icon className="h-4 w-4" />
-                        </Button>
-                     
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value && dayjs(field.value).isValid() ? (
+                          format(field.value, "dd/MM/yyyy")
+                        ) : (
+                          <span>Seleccionar fecha</span>
+                        )}
+                        <Calendar01Icon className="h-4 w-4" />
+                      </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" initialFocus={true} />
+                      <Calendar
+                        mode="single"
+                        initialFocus={true}
+                        // Ensure the onChange event updates the form state
+                        onSelect={(date) => field.onChange(date)}
+                        selected={field.value}
+                      />
                     </PopoverContent>
                   </Popover>
                 )}
               />,
-              dayjs(props.form.getValues("dateEmision")).format("DD/MM/YYYY") ??
-                "no hay fecha seleccionada"
+              dayjs(form.getValues("dateEmision")).format("DD/MM/YYYY") ??
+                "No hay fecha seleccionada"
             ),
           }}
         />
@@ -126,10 +135,10 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
           element={{
             key: "Alicuota",
             value: visualizationSwitcher(
-              props.visualization,
+              visualization,
               <FormField
                 name="alicuota"
-                control={props.form.control}
+                control={form.control}
                 render={({ field }) => (
                   <Select
                     onValueChange={field.onChange}
@@ -159,7 +168,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                   </Select>
                 )}
               />,
-              props.form.getValues("alicuota")
+              form.getValues("alicuota")
             ),
           }}
         />
@@ -168,13 +177,16 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
           element={{
             key: "Tipo de concepto",
             value: visualizationSwitcher(
-              props.visualization,
+              visualization,
               <FormField
                 name="tipoDeConcepto"
-                control={props.form.control}
+                control={form.control}
                 render={({ field }) => (
                   <Select
-                    onValueChange={field.onChange}
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      setConcept(value === "1");
+                    }}
                     defaultValue={field.value}
                   >
                     <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8">
@@ -198,7 +210,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                   </Select>
                 )}
               />,
-              props.form.getValues("tipoDeConcepto")
+              form.getValues("tipoDeConcepto")
             ),
           }}
         />
@@ -207,10 +219,10 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
           element={{
             key: "Fecha de vencimiento",
             value: visualizationSwitcher(
-              props.visualization,
+              visualization,
               <FormField
                 name="dateVencimiento"
-                control={props.form.control}
+                control={form.control}
                 render={({ field }) => (
                   <Popover>
                     <PopoverTrigger asChild={true}>
@@ -221,7 +233,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                           !field.value && "text-muted-foreground"
                         )}
                       >
-                        {field.value ? (
+                        {field.value && dayjs(field.value).isValid() ? (
                           format(field.value, "dd/MM/yyyy")
                         ) : (
                           <span>Seleccionar fecha</span>
@@ -230,95 +242,113 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" initialFocus={true} />
+                      <Calendar
+                        mode="single"
+                        initialFocus={true}
+                        onSelect={(date) => field.onChange(date)}
+                        selected={field.value}
+                      />
                     </PopoverContent>
                   </Popover>
                 )}
               />,
-              dayjs(props.form.getValues("dateVencimiento")).format(
-                "DD/MM/YYYY"
-              ) ?? "no hay fecha seleccionada"
+              dayjs(form.getValues("dateVencimiento")).format("DD/MM/YYYY") ??
+                "No hay fecha seleccionada"
             ),
           }}
         />
-        <ElementCard
-          className="pr-1 pb-0 border-[#bef0bb]"
-          element={{
-            key: "Fecha inicio de servicio",
-            value: visualizationSwitcher(
-              props.visualization,
-              <FormField
-                name="dateDesde"
-                control={props.form.control}
-                render={({ field }) => (
-                  <Popover>
-                    <PopoverTrigger asChild={true}>
-                      <Button
-                        variant={"outline"}
-                        //   disabled={concepto == "" || concepto == "1"}
-                        className={cn(
-                          "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "dd/MM/yyyy")
-                        ) : (
-                          <span>Seleccionar fecha</span>
-                        )}
-                        <Calendar01Icon className="h-4 w-4" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" initialFocus={true} />
-                    </PopoverContent>
-                  </Popover>
-                )}
-              />,
-              dayjs(props.form.getValues("dateDesde")).format("DD/MM/YYYY") ??
-                "no hay fecha seleccionada"
-            ),
-          }}
-        />
-        <ElementCard
-          className="pr-1 pb-0 border-[#bef0bb]"
-          element={{
-            key: "Fecha fin de servicio",
-            value: visualizationSwitcher(
-              props.visualization,
-              <FormField
-                name="dateHasta"
-                control={props.form.control}
-                render={({ field }) => (
-                  <Popover>
-                    <PopoverTrigger asChild={true}>
-                      <Button
-                        variant={"outline"}
-                        // disabled={concepto == "" || concepto == "1"}
-                        className={cn(
-                          "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "dd/MM/yyyy")
-                        ) : (
-                          <span>Seleccionar fecha</span>
-                        )}
-                        <Calendar01Icon className="h-4 w-4" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" initialFocus={true} />
-                    </PopoverContent>
-                  </Popover>
-                )}
-              />,
-              dayjs(props.form.getValues("dateHasta")).format("DD/MM/YYYY") ??
-                "no hay fecha seleccionada"
-            ),
-          }}
-        />
+        {concept ? null : (
+          <>
+            <ElementCard
+              className="pr-1 pb-0 border-[#bef0bb]"
+              element={{
+                key: "Fecha inicio de servicio",
+                value: visualizationSwitcher(
+                  visualization,
+                  <FormField
+                    name="dateDesde"
+                    control={form.control}
+                    render={({ field }) => (
+                      <Popover>
+                        <PopoverTrigger asChild={true}>
+                          <Button
+                            variant={"outline"}
+                            //   disabled={concepto == "" || concepto == "1"}
+                            className={cn(
+                              "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value && dayjs(field.value).isValid() ? (
+                              format(field.value, "dd/MM/yyyy")
+                            ) : (
+                              <span>Seleccionar fecha</span>
+                            )}
+                            <Calendar01Icon className="h-4 w-4" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <Calendar
+                            mode="single"
+                            initialFocus={true}
+                            onSelect={(date) => field.onChange(date)}
+                            selected={field.value}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    )}
+                  />,
+                  dayjs(form.getValues("dateDesde")).format("DD/MM/YYYY") ??
+                    "No hay fecha seleccionada"
+                ),
+              }}
+            />
+            <ElementCard
+              className="pr-1 pb-0 border-[#bef0bb]"
+              element={{
+                key: "Fecha fin de servicio",
+                value: visualizationSwitcher(
+                  visualization,
+                  <FormField
+                    name="dateHasta"
+                    control={form.control}
+                    render={({ field }) => (
+                      <Popover>
+                        <PopoverTrigger asChild={true}>
+                          <Button
+                            variant={"outline"}
+                            // disabled={concepto == "" || concepto == "1"}
+                            className={cn(
+                              "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value && dayjs(field.value).isValid() ? (
+                              format(field.value, "dd/MM/yyyy")
+                            ) : (
+                              <span>Seleccionar fecha</span>
+                            )}
+                            <Calendar01Icon className="h-4 w-4" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <Calendar
+                            mode="single"
+                            initialFocus={true}
+                            onSelect={(date) => field.onChange(date)}
+                            selected={field.value}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    )}
+                  />,
+                  dayjs(form.getValues("dateHasta")).format("DD/MM/YYYY") ??
+                    "No hay fecha seleccionada"
+                ),
+              }}
+            />
+          </>
+        )}
       </>
     ),
     "Nota de crédito": (
@@ -328,9 +358,9 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
           element={{
             key: "Punto de venta",
             value: visualizationSwitcher(
-              props.visualization,
+              visualization,
               <FormField
-                control={props.form.control}
+                control={form.control}
                 name="puntoVenta"
                 render={({ field }) => (
                   <Select
@@ -357,7 +387,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                   </Select>
                 )}
               />,
-              props.form.getValues("puntoVenta")
+              form.getValues("puntoVenta")
             ),
           }}
         />
@@ -366,10 +396,10 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
           element={{
             key: "Fecha de emisión",
             value: visualizationSwitcher(
-              props.visualization,
+              visualization,
               <FormField
                 name="dateEmision"
-                control={props.form.control}
+                control={form.control}
                 render={({ field }) => (
                   <Popover>
                     <PopoverTrigger asChild={true}>
@@ -380,7 +410,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                           !field.value && "text-muted-foreground"
                         )}
                       >
-                        {field.value ? (
+                        {field.value && dayjs(field.value).isValid() ? (
                           format(field.value, "dd/MM/yyyy")
                         ) : (
                           <span>Seleccionar fecha</span>
@@ -389,13 +419,18 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" initialFocus={true} />
+                      <Calendar
+                        mode="single"
+                        initialFocus={true}
+                        onSelect={(date) => field.onChange(date)}
+                        selected={field.value}
+                      />
                     </PopoverContent>
                   </Popover>
                 )}
               />,
-              dayjs(props.form.getValues("dateEmision")).format("DD/MM/YYYY") ??
-                "no hay fecha seleccionada"
+              dayjs(form.getValues("dateEmision")).format("DD/MM/YYYY") ??
+                "No hay fecha seleccionada"
             ),
           }}
         />
@@ -404,10 +439,10 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
           element={{
             key: "Fecha de vencimiento",
             value: visualizationSwitcher(
-              props.visualization,
+              visualization,
               <FormField
                 name="dateVencimiento"
-                control={props.form.control}
+                control={form.control}
                 render={({ field }) => (
                   <Popover>
                     <PopoverTrigger asChild={true}>
@@ -418,7 +453,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                           !field.value && "text-muted-foreground"
                         )}
                       >
-                        {field.value ? (
+                        {field.value && dayjs(field.value).isValid() ? (
                           format(field.value, "dd/MM/yyyy")
                         ) : (
                           <span>Seleccionar fecha</span>
@@ -427,14 +462,18 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" initialFocus={true} />
+                      <Calendar
+                        mode="single"
+                        initialFocus={true}
+                        onSelect={(date) => field.onChange(date)}
+                        selected={field.value}
+                      />
                     </PopoverContent>
                   </Popover>
                 )}
               />,
-              dayjs(props.form.getValues("dateVencimiento")).format(
-                "DD/MM/YYYY"
-              ) ?? "no hay fecha seleccionada"
+              dayjs(form.getValues("dateVencimiento")).format("DD/MM/YYYY") ??
+                "No hay fecha seleccionada"
             ),
           }}
         />
@@ -443,10 +482,10 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
           element={{
             key: "Fecha inicio de servicio",
             value: visualizationSwitcher(
-              props.visualization,
+              visualization,
               <FormField
                 name="dateDesde"
-                control={props.form.control}
+                control={form.control}
                 render={({ field }) => (
                   <Popover>
                     <PopoverTrigger asChild={true}>
@@ -458,7 +497,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                           !field.value && "text-muted-foreground"
                         )}
                       >
-                        {field.value ? (
+                        {field.value && dayjs(field.value).isValid() ? (
                           format(field.value, "dd/MM/yyyy")
                         ) : (
                           <span>Seleccionar fecha</span>
@@ -467,13 +506,18 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" initialFocus={true} />
+                      <Calendar
+                        mode="single"
+                        initialFocus={true}
+                        onSelect={(date) => field.onChange(date)}
+                        selected={field.value}
+                      />
                     </PopoverContent>
                   </Popover>
                 )}
               />,
-              dayjs(props.form.getValues("dateDesde")).format("DD/MM/YYYY") ??
-                "no hay fecha seleccionada"
+              dayjs(form.getValues("dateDesde")).format("DD/MM/YYYY") ??
+                "No hay fecha seleccionada"
             ),
           }}
         />
@@ -482,10 +526,10 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
           element={{
             key: "Fecha fin de servicio",
             value: visualizationSwitcher(
-              props.visualization,
+              visualization,
               <FormField
                 name="dateHasta"
-                control={props.form.control}
+                control={form.control}
                 render={({ field }) => (
                   <Popover>
                     <PopoverTrigger asChild={true}>
@@ -497,7 +541,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                           !field.value && "text-muted-foreground"
                         )}
                       >
-                        {field.value ? (
+                        {field.value && dayjs(field.value).isValid() ? (
                           format(field.value, "dd/MM/yyyy")
                         ) : (
                           <span>Seleccionar fecha</span>
@@ -506,13 +550,18 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" initialFocus={true} />
+                      <Calendar
+                        mode="single"
+                        initialFocus={true}
+                        onSelect={(date) => field.onChange(date)}
+                        selected={field.value}
+                      />
                     </PopoverContent>
                   </Popover>
                 )}
               />,
-              dayjs(props.form.getValues("dateHasta")).format("DD/MM/YYYY") ??
-                "no hay fecha seleccionada"
+              dayjs(form.getValues("dateHasta")).format("DD/MM/YYYY") ??
+                "No hay fecha seleccionada"
             ),
           }}
         />
@@ -525,10 +574,10 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
           element={{
             key: "Fecha de emisión",
             value: visualizationSwitcher(
-              props.visualization,
+              visualization,
               <FormField
                 name="dateEmision"
-                control={props.form.control}
+                control={form.control}
                 render={({ field }) => (
                   <Popover>
                     <PopoverTrigger asChild={true}>
@@ -539,7 +588,7 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                           !field.value && "text-muted-foreground"
                         )}
                       >
-                        {field.value ? (
+                        {field.value && dayjs(field.value).isValid() ? (
                           format(field.value, "dd/MM/yyyy")
                         ) : (
                           <span>Seleccionar fecha</span>
@@ -548,13 +597,18 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" initialFocus={true} />
+                      <Calendar
+                        mode="single"
+                        initialFocus={true}
+                        onSelect={(date) => field.onChange(date)}
+                        selected={field.value}
+                      />
                     </PopoverContent>
                   </Popover>
                 )}
               />,
-              dayjs(props.form.getValues("dateEmision")).format("DD/MM/YYYY") ??
-                "no hay fecha seleccionada"
+              dayjs(form.getValues("dateEmision")).format("DD/MM/YYYY") ??
+                "No hay fecha seleccionada"
             ),
           }}
         />
@@ -563,35 +617,80 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
           element={{
             key: "Facturas emitidas",
             value: visualizationSwitcher(
-              props.visualization,
+              visualization,
               <FormField
-                control={props.form.control}
-                name="facturasEmitidas"
+                control={form.control}
+                name="facturasEmitidas.nroComprobante"
                 render={({ field }) => (
-                  <Input
-                    type="number"
-                    className="w-full border-none focus:ring-transparent"
-                    placeholder="Facturas emitidas"
-                    {...field}
-                    value={field.value as number}
+                  <ComboboxDemo
+                    options={
+                      comprobantes
+                        ?.filter(
+                          (comprobante) =>
+                            comprobante.tipoComprobante !== "0" &&
+                            (comprobante.estado === "parcial" ||
+                              comprobante.estado === "pendiente")
+                        )
+                        .slice(0, 10).map((comprobante) => ({
+                          value: comprobante.id.toString(),
+                          label:
+                            comprobante.nroComprobante.toString() +
+                            " - " +
+                            comprobante.importe.toString(),
+                        })) ?? []
+                    }
+                    title="Facturas emitidas"
+                    placeholder="Seleccionar facturas..."
+                    classNameButton="border-none focus:ring-transparent px-0 py-0 h-8 w-full"
+                    value={field.value}
+                    onSelectionChange={(e) => {
+                      for (const comprobante of comprobantes ?? []) {
+                        if (comprobante.id.toString() === e) {
+                          form.setValue(
+                            "facturasEmitidas.importe",
+                            comprobante.importe
+                          );
+                          form.setValue(
+                            "facturasEmitidas.iva",
+                            comprobante.iva
+                          );
+
+                          form.setValue(
+                            "facturasEmitidas.nroComprobante",
+                            comprobante.nroComprobante.toString()
+                          );
+                          form.setValue(
+                            "facturasEmitidas.tipoComprobante",
+                            comprobante.tipoComprobante
+                          );
+                          form.setValue(
+                            "facturasEmitidas.puntoVenta",
+                            comprobante.ptoVenta.toString()
+                          );
+                          if (onValueChange) onValueChange();
+                          break;
+                        }
+                      }
+                    }}
                   />
                 )}
               />,
-              props.form.getValues("facturasEmitidas").toString() ??
-                "no hay facturas emitidas"
+              ((form.getValues("facturasEmitidas").nroComprobante.toString() +
+              " - " +
+              form.getValues("facturasEmitidas").importe.toString()))
             ),
           }}
         />
       </>
     ),
   };
-  const comprobanteValueTipo = valueToNameComprobanteMap[props.tipoComprobante];
+  const comprobanteValueTipo = valueToNameComprobanteMap[tipoComprobante];
   return (
     <>
       <div className="border rounded-lg px-6 pt-7 pb-8">
         <p className=" text-lg font-semibold">Datos del Comprobante</p>
         <div className="mt-3 w-full">
-          <Form {...props.form}>
+          <Form {...form}>
             <form
               className={cn(
                 comprobanteValueTipo == "Recibo" &&
@@ -605,10 +704,10 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                 element={{
                   key: "Tipo Comprobante",
                   value: visualizationSwitcher(
-                    props.visualization,
+                    visualization,
                     <Select
-                      onValueChange={(e) => props.setTipoComprobante(e)}
-                      defaultValue={props.tipoComprobante}
+                      onValueChange={(e) => setTipoComprobante(e)}
+                      defaultValue={tipoComprobante}
                     >
                       <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8">
                         <SelectValue placeholder="Seleccionar comprobante..." />
@@ -621,12 +720,11 @@ export default function ComprobanteCard(props: ComprobanteCardProps) {
                         <SelectItem value="8">NOTA DE CREDITO B</SelectItem>
                       </SelectContent>
                     </Select>,
-                    reverseComprobanteDictionary[Number(props.tipoComprobante)]
+                    reverseComprobanteDictionary[Number(tipoComprobante)]
                   ),
                 }}
               />
-              {props.tipoComprobante != "" &&
-                Map[comprobanteValueTipo ?? "default"]}
+              {tipoComprobante != "" && Map[comprobanteValueTipo ?? "default"]}
             </form>
           </Form>
         </div>

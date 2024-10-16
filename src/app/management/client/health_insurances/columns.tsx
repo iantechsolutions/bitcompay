@@ -7,7 +7,7 @@ export type TableRecord = {
   identificationNumber: string;
   responsibleName: string;
   fiscal_id_number: string;
-  afip_status: string;
+  "Estado AFIP": string;
 };
 
 export const columns: ColumnDef<TableRecord>[] = [
@@ -59,14 +59,14 @@ export const columns: ColumnDef<TableRecord>[] = [
     },
   },
   {
-    accessorKey: "afip_status",
+    accessorKey: "Estado AFIP",
     header: () => (
       <div className="text-center  text-medium">Estado AFIP</div>
     ),
     cell: ({ row }) => {
       return (
         <div className="text-center  ">
-          {row.getValue("afip_status")}
+          {row.getValue("Estado AFIP")}
         </div>
       );
     },

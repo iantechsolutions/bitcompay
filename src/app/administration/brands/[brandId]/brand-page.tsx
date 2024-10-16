@@ -112,10 +112,7 @@ export default function BrandPage({
       );
       return;
     }
-    if (!utility || utility.length != 8) {
-      toast.error("No ha ingresado una utilidad de senapsa valida");
-      return;
-    }
+
     try {
       const companiesIdArray = Array.from(relCompanies)
         .map((company) => company?.id)
@@ -152,7 +149,7 @@ export default function BrandPage({
       setBillType(brand.bill_type ?? "");
     }
   }, [brand]);
-  
+
   const [logoUrl, setLogoUrl] = useState(brand.logo_url ?? "");
 
   return (
@@ -208,7 +205,7 @@ export default function BrandPage({
                   </div>
                   <div>
                     <Label htmlFor="utility">
-                    Código de utilidad (8 otorgada por senapsa)
+                      Código de utilidad (8 otorgada por senapsa)
                     </Label>
                     <Input
                       id="utility"
@@ -228,7 +225,8 @@ export default function BrandPage({
                     <Label htmlFor="concept">Concepto</Label>
                     <Select
                       onValueChange={(e) => setConcept(e)}
-                      value={concept ?? ""}>
+                      value={concept ?? ""}
+                    >
                       <SelectTrigger className="w-[180px] font-bold">
                         <SelectValue placeholder="Seleccionar concepto..." />
                       </SelectTrigger>
@@ -240,16 +238,18 @@ export default function BrandPage({
                     </Select>
                   </div>
                   <div className="col-span-3">
-                    <Label htmlFor="code">Código Prisma (máx. 4 caracteres)</Label>
-               <Input
-                  id="prisma-code"
-                  placeholder="0"
-                  value={code}
-                   onChange={(e) => setCode(e.target.value)}
-                   required
-                   maxLength={4}
+                    <Label htmlFor="code">
+                      Código Prisma (máx. 4 caracteres)
+                    </Label>
+                    <Input
+                      id="prisma-code"
+                      placeholder="0"
+                      value={code}
+                      onChange={(e) => setCode(e.target.value)}
+                      required
+                      maxLength={4}
                     />
-              </div>
+                  </div>
                   <div className="col-span-2">
                     <Label htmlFor="iva">IVA</Label>
                     <Select value={iva} onValueChange={(e) => setIva(e)}>
@@ -266,30 +266,12 @@ export default function BrandPage({
                       </SelectContent>
                     </Select>
                   </div>
-                  {/* <div className="col-span-2">
-                    <Label htmlFor="billtype">Tipo de factura</Label>
-                    <div>
-                      <ComboboxDemo
-                        title="Seleccionar factura..."
-                        placeholder="Factura X"
-                        value={billType}
-                        options={[
-                          { value: "FACTURA A", label: "FACTURA A" },
-                          { value: "FACTURA B", label: "FACTURA B" },
-                          { value: "FACTURA C", label: "FACTURA C" },
-                          { value: "FACTURA D", label: "FACTURA M" },
-                          { value: "FACTURA E", label: "FACTURA E" },
-                        ]}
-                        onionChange={(e) => setBillType(e)}
-                      />
-                    </div>
-                  </div> */}
                   <div>
-                    <Label> Actualizar logo de marca</Label>
-                    {brand.logo_url && (
+                    <Label> Actualizar Logo Marca</Label>
+                    {logoUrl && (
                       <div className="mt-2">
                         <Image
-                          src={brand.logo_url!}
+                          src={logoUrl!}
                           alt="logo marca"
                           width={100}
                           height={100}
@@ -317,11 +299,6 @@ export default function BrandPage({
                         setLogoUrl(file.url);
                       }}
                     />
-                    {logoUrl && (
-                <div className="mt-2">
-               <Image src={logoUrl} alt="logo marca" width={100} height={100} />
-                  </div>
-                   )}
                   </div>
                 </div>
               </Card>
@@ -411,7 +388,8 @@ function Deletebrand(props: { brandId: string }) {
           <AlertDialogAction
             className="bg-red-500 active:bg-red-700 hover:bg-red-600"
             onClick={handleDelete}
-            disabled={isLoading}>
+            disabled={isLoading}
+          >
             Eliminar
           </AlertDialogAction>
         </AlertDialogFooter>

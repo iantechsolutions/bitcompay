@@ -98,46 +98,81 @@ export default function LoginForm({ setShowRegister }: LoginFormProps) {
     return <ForgotPasswordPage />;
   }
   return (
-    <div className="flex flex-col px-10 pt-5 pb-7 bg-white rounded-2xl">
-      <Link className="w-20 h-auto flex justify-between" href={`/signin`}>
-        <ArrowLeftIcon /> Volver
-      </Link>
+    <div className="flex flex-col px-10 pt-5 pb-7 bg-white rounded-3xl">
       <div className="flex flex-col items-center px-10 pt-3 pb-7 bg-white rounded-2xl">
-        <Image
-          src="/public/bitcom-03.png"
-          alt="bitcom_logo"
-          width={160}
-          height={80}
-        />
-        <p className="text-lg mt-7">
-          Acceso a <span className="font-bold"> Entidades</span>
+        <p className="text-lg mt-7 font-bold">
+          Inicia sesión en{" "}
+          <Image
+            className="inline-block"
+            src="/public/bitcom-03.png"
+            alt="bitcom_logo"
+            width={160}
+            height={80}
+          />
         </p>
-        <p className="text-muted-foreground text-xs font-medium">
-          Ingrese sus datos para{" "}
-          <span className="font-bold"> iniciar sesion</span>
+        <p className="text-muted-foreground text-sm opacity-80 font-medium">
+          Acceso a entidades
         </p>
-        <Button
-          className="w-full px-20 py-3 mt-6 mb-3 text-black bg-[#DEDEDE] hover:bg-[#DEDEDE] "
-          onClick={showGoogle}>
-          <img src="public/google-icon.svg" alt="google icon" />
-          Ingresar con Google <ChevronRight className="h-4" />{" "}
-        </Button>
+        <div className="w-full items-center flex justify-center gap-3">
+          <Button
+            variant="outline"
+            className="px-10 py-3 mt-6 mb-3 text-black rounded-lg border-[#e4e4e4] shadow-none"
+            onClick={showGoogle}
+          >
+            <img
+              src="public/apple-icon.svg"
+              alt="apple icon"
+              className="h-5 w-auto"
+            />
+          </Button>
+          <Button
+            variant="outline"
+            className="px-10 py-3 mt-6 mb-3 text-black rounded-lg border-[#e4e4e4] shadow-none"
+            onClick={showGoogle}
+          >
+            <img
+              src="public/facebook-icon.svg"
+              alt="facebook icon"
+              className="h-5 w-auto"
+            />
+          </Button>
+          <Button
+            variant="outline"
+            className="px-10 py-3 mt-6 mb-3 text-black rounded-lg border border-[#e4e4e4] shadow-none"
+            onClick={showGoogle}
+          >
+            <img
+              src="public/google-icon.svg"
+              alt="google icon"
+              className="h-5 w-auto"
+            />
+          </Button>
+        </div>
 
+        <div className="flex items-center my-3 w-full">
+          <hr className="flex-grow border-gray-300" />
+          <span className="mx-2 text-gray-500 font-semibold text-sm">o</span>
+          <hr className="flex-grow border-gray-300" />
+        </div>
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-8 w-full flex flex-col items-center">
+            className="space-y-5 w-full flex flex-col items-start"
+          >
             {error && <p className="text-red-500 text-sm">{error}</p>}
             <FormField
               control={form.control}
               name="username"
               render={({ field }) => (
                 <FormItem className="w-full">
-                  <FormLabel className="text-muted-foreground text-sm opacity-70 font-medium-medium ">
-                    Mail
+                  <FormLabel className="text-muted-foreground text-xs font-thin pl-2 ">
+                    Email o nombre de usuario
                   </FormLabel>
                   <FormControl>
-                    <Input {...field} className="w-full" />
+                    <Input
+                      {...field}
+                      className="w-full border border-[#e4e4e4] rounded-lg py-4 h-11"
+                    />
                   </FormControl>
                 </FormItem>
               )}
@@ -149,14 +184,14 @@ export default function LoginForm({ setShowRegister }: LoginFormProps) {
                 name="password"
                 render={({ field }) => (
                   <FormItem className="w-full">
-                    <FormLabel className="text-muted-foreground text-sm opacity-70 font-medium-medium ">
+                    <FormLabel className="text-muted-foreground text-xs font-thin pl-2 ">
                       Contraseña
                     </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         type={showPassword ? "text" : "password"}
-                        className="w-full"
+                        className="w-full border border-[#e4e4e4] rounded-lg py-4 h-11"
                       />
                     </FormControl>
                   </FormItem>
@@ -169,7 +204,8 @@ export default function LoginForm({ setShowRegister }: LoginFormProps) {
                   // variant="outline"
                   variant="ghost"
                   size="icon"
-                  type="button">
+                  type="button"
+                >
                   {showPassword ? (
                     <Eye className="h-4 opacity-80 text-muted-foreground" />
                   ) : (
@@ -180,23 +216,25 @@ export default function LoginForm({ setShowRegister }: LoginFormProps) {
             </div>
             <p
               onClick={() => setShowForgotPassword(true)}
-              className="text-xs font-semibold text-muted-foreground mt-2 hover:cursor-pointer">
-              Recupero de contraseña
+              className="text-xs text-[#85CE81] pl-2 font-semibold mt-2 hover:cursor-pointer"
+            >
+              Recuperar contraseña
             </p>
-
             <Button
-              className="w-full px-20 h-8 py-3 my-1 text-black bg-[#1BDFB7] hover:bg-[#1BDFB7] "
-              disabled={loading}>
+              className="w-full h-8 py-5  rounded-full flex justify-between text-[#477b43] font-bold bg-[#BEF0BB] hover:bg-[#BEF0BB] "
+              disabled={loading}
+            >
               {loading && (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
               )}
-              Ingresar <ChevronRight className=" h-4" />
+              Ingresar <ChevronRight className=" h-6" />
             </Button>
             <p className="text-muted-foreground opacity-60 text-xs">
               ¿No tiene una cuenta?{" "}
               <span
-                className="text-[#1BDFB7] font-bold opacity-100 hover:cursor-pointer"
-                onClick={() => setShowRegister(true)}>
+                className="text-[#3e3e3e] underline font-bold hover:cursor-pointer"
+                onClick={() => setShowRegister(true)}
+              >
                 Registrarme
               </span>
             </p>
