@@ -1,7 +1,6 @@
 "use client";
 
 import { Search } from "lucide-react";
-
 import {
   ColumnDef,
   flexRender,
@@ -32,10 +31,32 @@ import { RouterOutputs } from "~/trpc/shared";
 import { TableRecord } from "./columns";
 import DataTableSummary from "~/components/tanstack/summary";
 import { useRouter } from "next/navigation";
+import TableToolbarPayment from "~/components/tanstack/table-payments";
+
+export const recHeaders = [
+  { key: "name", label: "Apellido y Nombre", width: 200 },
+  { key: "fiscal_id_number", label: "Nro ID Fiscal", width: 140 },
+  {
+    key: "invoice_number",
+    label: "Nro Comprobante",
+    width: 140,
+    alwaysRequired: true,
+  },
+  { key: "g_c", label: "Marca", width: 50 },
+  { key: "product_number", label: "Producto", width: 80, alwaysRequired: true },
+  { key: "period", label: "Período", width: 140 },
+  { key: "first_due_amount", label: "Importe 1er Vto.", width: 140 },
+  { key: "first_due_date", label: "Fecha 1er Vto.", width: 140 },
+  { key: "additional_info", label: "Info. Adicional", width: 250 },
+  { key: "payment_date", label: "Fecha de Pago/Débito", width: 140 },
+  { key: "collected_amount", label: "Importe a cobrar", width: 140 },
+  { key: "recollected_amount", label: "Importe cobrado", width: 140 },
+  { key: "statusId", label: "Estado de Pago", width: 140 },
+];
 
 interface DataTableProps<TData, TValue> {
+  data: TData[]; // Cambiado a tipo específico
   columns: ColumnDef<TData, TValue>[];
-  data: TData[];
   setLoading: Dispatch<SetStateAction<boolean>>;
 }
 
@@ -59,27 +80,27 @@ export function DataTable<TData, TValue>({
       columnFilters,
     },
   });
+
   const router = useRouter();
 
-  const handleRowClick = (row: Row<TData>) => {
-    setLoading(true);
-    // este timeout es para que el loader sea visible antes de que se cuelgue
-    setTimeout(() => {
-      const originalData = row.original as { id: string };
-      router.push(`/billing/pre-liquidation/${originalData.id}`);
-    }, 100);
-  };
-
+  // const handleRowClick = (row: Row<TableRecord>) => {
+  //   // Asegúrate de que el tipo coincida
+  //   setLoading(true);
+  //   setTimeout(() => {
+  //     const originalData = row.original as { id: string };
+  //     router.push(`/billing/pre-liquidation/${originalData.id}`);
+  //   }, 100);
+  // };
   const desiredColumns = ["Marca", "UN"];
   const filteredColumns = Array.from(table.getAllColumns()).filter((column) =>
     desiredColumns.includes(column.id!)
   );
   return (
     <>
-      <TableToolbar
-        table={table}
-        columns={filteredColumns}
-        searchColumn="number"
+      <TableToolbarPayment
+        table={table as any}
+        columns={filteredColumns as any}
+        searchColumn="invoice_number"
       />
       <Table>
         <TableHeader>
@@ -87,18 +108,16 @@ export function DataTable<TData, TValue>({
             <TableRow
               className="bg-[#F7F7F7] hover:bg-[#F7F7F7] rounded-lg "
               key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                );
-              })}
+              {headerGroup.headers.map((header) => (
+                <TableHead key={header.id}>
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                </TableHead>
+              ))}
             </TableRow>
           ))}
         </TableHeader>
@@ -108,7 +127,6 @@ export function DataTable<TData, TValue>({
               {table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  onClick={() => handleRowClick(row)}
                   className="border-b-2 border-gray-200 border-x-0 hover:bg-[#d7d3d395] hover:cursor-pointer">
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

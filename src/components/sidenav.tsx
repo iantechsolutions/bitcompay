@@ -42,8 +42,8 @@ export function SidenavItem(props: {
       : false;
 
   const activeColor = props.IsChild ? "bg-[#DEF5DD]" : "bg-[#BEF0BB]";
-  const className = `flex w-fit gap-[0.3vw] px-2 py-2 items-center rounded-full max-w-60
-  md:text-sm lg:text-base xl:text-lg xxl:text-xl w-full mr-2 ${
+  const className = `flex w-fit gap-[0.3vw] px-2 py-2 items-center rounded-full max-w-52
+  md:text-sm lg:text-base w-full mr-2 ${
     isActive ? activeColor : ""
   } ${props.className}`;
 
@@ -90,11 +90,11 @@ export function SideNavTrigger(props: {
 }) {
   return (
     <li
-      className={`flex items-center text-left md:text-sm lg:text-base xl:text-lg px-1 py-[1vh] font-thin ${
+      className={`flex items-center text-left md:text-sm lg:text-base px-1 py-[1vh] font-thin ${
         props.className
       } ${props.isActive ? "text-[#6952EB] font-semibold" : ""}`}
     >
-      <div className="px-[0.5vw]">
+      <div className="px-1 mr-1">
         {props.isActive ? props.activeIcon : props.icon}
       </div>
       {props.children}

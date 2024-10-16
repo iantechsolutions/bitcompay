@@ -627,10 +627,11 @@ export default function ComprobanteCard({
                       comprobantes
                         ?.filter(
                           (comprobante) =>
-                            comprobante.estado === "parcial" ||
-                            comprobante.estado === "pendiente"
+                            comprobante.tipoComprobante !== "0" &&
+                            (comprobante.estado === "parcial" ||
+                              comprobante.estado === "pendiente")
                         )
-                        ?.map((comprobante) => ({
+                        .slice(0, 10).map((comprobante) => ({
                           value: comprobante.id.toString(),
                           label:
                             comprobante.nroComprobante.toString() +
@@ -674,8 +675,9 @@ export default function ComprobanteCard({
                   />
                 )}
               />,
-              form.getValues("facturasEmitidas").toString() ??
-                "no hay facturas emitidas"
+              ((form.getValues("facturasEmitidas").nroComprobante.toString() +
+              " - " +
+              form.getValues("facturasEmitidas").importe.toString()))
             ),
           }}
         />

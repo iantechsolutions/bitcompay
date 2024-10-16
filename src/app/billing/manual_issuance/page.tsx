@@ -198,7 +198,7 @@ export default function Page() {
 
           comprobante = await createComprobante({
             billLink: "",
-            estado: "pendiente",
+            estado: "generada",
             concepto: Number(concepto) ?? 0,
             importe: Number(subTotal) + Number(ivaTotal) + Number(tributos),
             iva: iva ?? "0",
@@ -240,10 +240,10 @@ export default function Page() {
               if (concept.importe > 0) {
                 comprobante = [
                   await createItem({
-                    amount: concept.importe,
+                    amount: Number(concept.importe),
                     concept: concept.concepto,
                     iva: concept.iva,
-                    total: concept.total,
+                    total: Number(concept.total),
                     comprobante_id: comprobanteId,
                   }),
                 ];
@@ -305,7 +305,7 @@ export default function Page() {
           // });
         } else if (tipoComprobante == "0") {
           comprobante = await createComprobante({
-            estado: "pendiente",
+            estado: "generada",
             billLink: "", //deberiamos poner un link ?
             concepto: Number(concepto) ?? 0,
             importe: Number(subTotal) + Number(ivaTotal) + Number(tributos),
@@ -324,6 +324,15 @@ export default function Page() {
             health_insurance_id: obraSocialId,
           });
           const comprobanteId = comprobante[0]?.id ?? "";
+          comprobante = [await createItem({
+
+            amount: Number(form.getValues().facturasEmitidas.importe),
+            concept: "Factura relacionada",
+            iva: 0,
+            total: Number(form.getValues().facturasEmitidas.importe),
+            comprobante_id: comprobanteId,
+          })]
+
 
           const promises = otherConceptsForm
             .getValues()
@@ -331,10 +340,10 @@ export default function Page() {
               if (concept.importe > 0) {
                 comprobante = [
                   await createItem({
-                    amount: concept.importe,
+                    amount: Number(concept.importe),
                     concept: concept.description,
                     iva: 0,
-                    total: concept.importe,
+                    total: Number(concept.importe),
                     comprobante_id: comprobanteId,
                   }),
                 ];
@@ -378,7 +387,7 @@ export default function Page() {
           let ivaFloat = (100 + parseFloat(facSeleccionada?.iva ?? "0")) / 100;
           const importeBase = (facSeleccionada?.importe ?? 0) / ivaFloat;
           comprobante = await createComprobante({
-            estado: "pendiente",
+            estado: "generada",
             billLink: "",
             concepto: facSeleccionada?.concepto ?? 0,
             importe: facSeleccionada?.importe ?? 0,
@@ -401,7 +410,7 @@ export default function Page() {
           const comprobanteId = comprobante[0]?.id ?? "";
           comprobante = [
             await createItem({
-              amount: importeBase,
+              amount: Number(importeBase),
               concept: "Factura a cancelar",
               iva: importeBase * (ivaFloat - 1),
               total: facSeleccionada?.importe,

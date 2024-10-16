@@ -210,7 +210,7 @@ export default function CompanySidenav() {
           alt="logo"
         />
       </div>
-      <Sidenav className="w-[18vw] min-w-44 bg-white pr-5 pl-4">
+      <Sidenav className="w-[18vw] min-w-44 max-w-60 bg-white pr-5 pl-4">
         <SidenavItem
           className="w-[11vw] bg-white text-sideNav"
           href={`/`}
@@ -238,7 +238,7 @@ export default function CompanySidenav() {
               </SidenavSeparator>
             </div>
             <SidenavItem
-              className="flex text-sideNav  gap-[0vw] "
+              className="flex text-sideNav  gap-0 "
               icon={
                 <LayoutDashboardIcon
                   strokeWidth={1}
@@ -936,7 +936,7 @@ export default function CompanySidenav() {
                 activeIcon={
                   <img
                     src="/public/sidebar/Frame-9.png"
-                    className="w-8 h-auto"
+                    className="w-7 h-auto"
                   />
                 }
                 href={`/billing/pre-liquidation`}
@@ -949,13 +949,13 @@ export default function CompanySidenav() {
                 icon={
                   <img
                     src="/public/sidebar/Frame-10.png"
-                    className=" min-w-7 h-auto"
+                    className=" w-7 h-6"
                   />
                 }
                 activeIcon={
                   <img
                     src="/public/sidebar/Frame-11.png"
-                    className=" w-7 h-auto"
+                    className=" w-7 h-6"
                   />
                 }
                 href={`/billing/liquidation`}
