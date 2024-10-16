@@ -317,21 +317,9 @@ async function approbatecomprobante(liquidationId: string) {
     const { results, errors } = await PromisePool.withConcurrency(1000)
       .for(liquidation?.comprobantes)
       .process(async (comprobante, index) => {
-        const comprobanteCod =
-          comprobanteDictionary[comprobante.tipoComprobante ?? ""];
 
         let lastVoucher = 0;
         const lastVoucherStart = Date.now();
-        try {
-          lastVoucher = await afip.ElectronicBilling.getLastVoucher(
-            comprobante?.ptoVenta,
-            comprobanteCod
-          );
-        } catch(e) {
-          console.log("Error al obtener el último comprobante");
-          console.log(e);
-          lastVoucher = 0;
-        }
         console.log(
           `[TIMING] Last voucher fetch (comprobante ${index}): ${
             Date.now() - lastVoucherStart
@@ -408,10 +396,32 @@ async function approbatecomprobante(liquidationId: string) {
 
         const processStart = Date.now();
         if (comprobante?.origin == "Nota de credito") {
+
+          const comprobanteAnterior = await db.query.comprobantes.findFirst({
+            where: eq(schema.comprobantes.id, comprobante?.previous_facturaId ?? ""),
+          })
+          const comprobanteCod = comprobanteDictionary[comprobanteAnterior?.tipoComprobante ?? ""];
+          const comprobantecodNC = comprobanteDictionary[fcAnc[comprobanteAnterior?.tipoComprobante ?? ""] ?? ""];
+          console.log("tiposComprobantes");
+          console.log(comprobanteCod);
+          console.log(comprobantecodNC);
+          try {
+            lastVoucher = await afip.ElectronicBilling.getLastVoucher(
+              comprobanteAnterior?.ptoVenta,
+              comprobantecodNC
+            );
+            // console.log("lastVoucher")
+          } catch(e) {
+            console.log("Error al obtener el último comprobante");
+            console.log(e);
+            lastVoucher = 0;
+          }
+          
+
           data = {
             CantReg: 1, // Cantidad de comprobantes a registrar
             PtoVta: comprobante?.ptoVenta,
-            CbteTipo: comprobanteCod?.toString() ?? "",
+            CbteTipo: comprobantecodNC?.toString() ?? "",
             Concepto: Number(comprobante?.concepto),
             DocTipo: comprobante?.tipoDocumento,
             DocNro: comprobante?.nroDocumento,
@@ -423,23 +433,21 @@ async function approbatecomprobante(liquidationId: string) {
             FchVtoPago: formatDate(comprobante?.due_date ?? new Date()),
             ImpTotal: comprobante?.importe,
             ImpTotConc: 0,
-            ImpNeto: (Number(comprobante?.importe) / (1 + ivaFloat)).toString(),
+            ImpNeto: (Number(comprobante?.importe) / (1 + ivaFloat)).toFixed(2),
             ImpOpEx: 0,
-            ImpIVA: (Number(comprobante?.importe) - (Number(comprobante?.importe) / (1 + ivaFloat))).toString(),
+            ImpIVA: (Number(comprobante?.importe) - (Number(comprobante?.importe) / (1 + ivaFloat))).toFixed(2),
             ImpTrib: 0,
             MonId: "PES",
             MonCotiz: 1,
             Iva: {
               Id: ivaId,
               BaseImp: (Number(comprobante?.importe) / (1 + ivaFloat)),
-              Importe: (Number(comprobante?.importe) - (Number(comprobante?.importe) / (1 + ivaFloat))).toString(),
+              Importe: (Number(comprobante?.importe) - (Number(comprobante?.importe) / (1 + ivaFloat))).toFixed(2),
             },
             CbtesAsoc: {
-              Tipo: comprobanteDictionary[
-                fcAnc[comprobante.tipoComprobante ?? ""] ?? ""
-              ],
+              Tipo: comprobanteCod,
               PtoVta: comprobante?.ptoVenta,
-              Importe: comprobante?.nroComprobante,
+              Nro: comprobanteAnterior?.nroComprobante,
             },
           };
 
@@ -474,6 +482,21 @@ async function approbatecomprobante(liquidationId: string) {
             statusId: statusCancelado?.id,
           });
         } else {
+
+          const comprobanteCod =
+          comprobanteDictionary[comprobante.tipoComprobante ?? ""];
+          try {
+            lastVoucher = await afip.ElectronicBilling.getLastVoucher(
+              comprobante?.ptoVenta,
+              comprobanteCod
+            );
+            // console.log("lastVoucher")
+          } catch(e) {
+            console.log("Error al obtener el último comprobante");
+            console.log(e);
+            lastVoucher = 0;
+          }
+
           console.log("afip numbers");
           console.log("ivaFloat", ivaFloat);
           console.log(
@@ -510,16 +533,16 @@ async function approbatecomprobante(liquidationId: string) {
             FchVtoPago: formatDate(comprobante?.due_date ?? new Date()),
             ImpTotal: comprobante?.importe,
             ImpTotConc: 0,
-            ImpNeto: (Number(comprobante?.importe) / (1 + ivaFloat)).toString(),
+            ImpNeto: (Number(comprobante?.importe) / (1 + ivaFloat)).toFixed(2),
             ImpOpEx: 0,
-            ImpIVA: (Number(comprobante?.importe) - (Number(comprobante?.importe) / (1 + ivaFloat))).toString(),
+            ImpIVA: (Number(comprobante?.importe) - (Number(comprobante?.importe) / (1 + ivaFloat))).toFixed(2),
             ImpTrib: 0,
             MonId: "PES",
             MonCotiz: 1,
             Iva: {
               Id: ivaId,
               BaseImp: (Number(comprobante?.importe) / (1 + ivaFloat)),
-              Importe: (Number(comprobante?.importe) - (Number(comprobante?.importe) / (1 + ivaFloat))).toString(),
+              Importe: (Number(comprobante?.importe) - (Number(comprobante?.importe) / (1 + ivaFloat))).toFixed(2),
             },
           };
           // try {
