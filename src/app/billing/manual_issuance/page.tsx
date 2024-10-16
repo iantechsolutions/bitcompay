@@ -75,6 +75,7 @@ export default function Page() {
   const { mutateAsync: createComprobante } =
     api.comprobantes.create.useMutation();
   const { mutateAsync: createItem } = api.items.create.useMutation();
+  const { mutateAsync: createTribute } = api.tributes.create.useMutation();
   const { data: company } = api.companies.get.useQuery();
   const { data: marcas } = api.brands.list.useQuery();
   const { data: gruposFamiliar } = api.family_groups.list.useQuery();
@@ -194,9 +195,7 @@ export default function Page() {
         if (tipoComprobante == "1" || tipoComprobante == "6") {
           let ivaFloat =
             (100 + parseFloat(ivaDictionary[Number(iva)] ?? "0")) / 100;
-          // const billResponsible = gruposFamiliar
-          //   ?.find((x) => x.id == grupoFamiliarId)
-          //   ?.integrants.find((x) => x.isBillResponsible);
+
           comprobante = await createComprobante({
             billLink: "",
             estado: "pendiente",
@@ -220,6 +219,17 @@ export default function Page() {
             .getValues()
             .tributes.reduce((acc, tribute) => acc + Number(tribute.amount), 0);
           const comprobanteId = comprobante[0]?.id ?? "";
+
+          for (const tribute of otherTributesForm.getValues().tributes) {
+            const tributo = await createTribute({
+              tribute: tribute.tribute,
+              jurisdiction: tribute.jurisdiccion,
+              base_imponible: tribute.base,
+              amount: tribute.amount,
+              alicuota: tribute.aliquot,
+              comprobante_id: comprobanteId,
+            });
+          }
           const tributo = await createItem({
             amount: sumaTributos,
             concept: "Tributos",
@@ -290,9 +300,6 @@ export default function Page() {
           //   comprobante_id: comprobante[0]?.id ?? "",
           // });
         } else if (tipoComprobante == "0") {
-          // iva = 0;
-
-          //
           comprobante = await createComprobante({
             estado: "pendiente",
             billLink: "", //deberiamos poner un link ?
@@ -481,76 +488,10 @@ export default function Page() {
 
         console.log("testtt2");
 
-        // if (data) {
-        //   try {
-        //     const res = await afip.ElectronicBilling.createVoucher(data);
-        //   } catch (error) {
-        //     console.log(error);
-        //   }
-        // }
-        // const billResponsible = gruposFamiliar
-        //   ?.find((x: { id: string; }) => x.id == grupoFamiliarId)
-        //   ?.integrants.find((x: { isBillResponsible: any; }) => x.isBillResponsible);
-        // const obraSocial = obrasSociales?.find((x: { id: string; }) => x.id == obraSocialId);
-
         if (comprobante && comprobante[0]) {
           setCreatedComprobante(comprobante[0]);
-          // const html = htmlBill(
-          //   comprobante[0],
-          //   company,
-          //   undefined,
-          //   2,
-          //   marcas?.find((x: { id: string; }) => x.id === brandId),
-          //   nombre,
-          //   billResponsible
-          //     ? billResponsible?.address ??
-          //         "" + " " + (billResponsible?.address_number ?? "")
-          //     : obraSocial?.adress ?? "",
-          //   (billResponsible
-          //     ? billResponsible?.locality
-          //     : obraSocial?.locality) ?? "",
-          //   (billResponsible
-          //     ? billResponsible?.province
-          //     : obraSocial?.province) ?? "",
-          //   (billResponsible
-          //     ? billResponsible?.postal_code?.cp
-          //     : obraSocial?.cpData?.cp) ?? "",
-          //   (billResponsible
-          //     ? billResponsible?.fiscal_id_type
-          //     : obraSocial?.fiscal_id_type) ?? "",
-          //   (billResponsible
-          //     ? billResponsible?.fiscal_id_number
-          //     : obraSocial?.fiscal_id_number?.toString()) ?? "",
-          //   (billResponsible
-          //     ? billResponsible?.afip_status
-          //     : obraSocial?.afip_status) ?? ""
-          // );
-          // const options = {
-          //   width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
-          //   marginLeft: 0.8, // Margen izquierdo en pulgadas. Usar 0.1 para ticket
-          //   marginRight: 0.8, // Margen derecho en pulgadas. Usar 0.1 para ticket
-          //   marginTop: 0.4, // Margen superior en pulgadas. Usar 0.1 para ticket
-          //   marginBottom: 0.4, // Margen inferior en pulgadas. Usar 0.1 para ticket
-          // };
-          // const name = (last_voucher + 1).toString() + ".pdf";
-          // const resHtml = await afip.ElectronicBilling.createPDF({
-          //   html: html,
-          //   file_name: name,
-          //   options: options,
-          // });
-          // const updatedComprobante = await updateComprobante({
-          //   id: comprobante[0]?.id ?? "",
-          //   billLink: resHtml.file,
-          //   number: last_voucher + 1,
-          // });
-          // console.log("resultadHTML", resHtml);
-          // if (resHtml.file) {
-          //   window.open(resHtml.file, "_blank");
-          // }
         }
         setLoading(false);
-        // toast.success("La factura se creo correctamente");
-        // router.push("/dashboard");
         setPage("confirmationPage");
       })();
     } catch {
