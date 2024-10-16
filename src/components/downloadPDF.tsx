@@ -67,8 +67,6 @@
 //       return toast.error("El enlace del comprobante no está disponible");
 //     }
 
-//     toast.success("Descargando el archivo...");
-
 //     setTimeout(() => {
 //       const link = document.createElement("a");
 //       link.href = url;
@@ -78,4 +76,14 @@
 //       link.click();
 //       document.body.removeChild(link);
 //     }, 1000);
-//   }}
+//     return toast.success("PDF descargado con exito");
+//   }
+
+//   return (
+//     <Button
+//       onClick={downloadPDF}
+//       className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none">
+//       Descargar pdf
+//     </Button>
+//   );
+// }
