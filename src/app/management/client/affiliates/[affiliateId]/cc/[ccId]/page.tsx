@@ -14,8 +14,8 @@ import { RouterOutputs } from "~/trpc/shared";
 import { formatCurrency } from "~/app/billing/pre-liquidation/[liquidationId]/detail-sheet";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import 'dayjs/locale/es'
-dayjs.locale('es')
+import "dayjs/locale/es";
+dayjs.locale("es");
 export default function CCDetail(props: {
   params: { ccId: string; affiliateId: string };
 }) {
@@ -90,21 +90,18 @@ export default function CCDetail(props: {
     console.log("events", events);
 
     for (const event of events) {
-      // console.log("saldo_a_pagar");
-      // console.log(saldo_a_pagar);
-      console.log("event", formatCurrency(event.event_amount));
       if (event.comprobantes) {
         tableRows.push({
           date: event.createdAt,
           description: event.description,
           amount: formatCurrency(event.event_amount),
-          // comprobanteType: "Nota de credito A",
           "Tipo comprobante":
             event.comprobantes?.tipoComprobante ?? "FACTURA A",
           comprobanteNumber:
-            (event.comprobantes?.ptoVenta.toString().padStart(5,"0") ?? "00000") +
+            (event.comprobantes?.ptoVenta.toString().padStart(5, "0") ??
+              "00000") +
             "-" +
-            (event.comprobantes?.nroComprobante.toString().padStart(8,"0") ??
+            (event.comprobantes?.nroComprobante.toString().padStart(8, "0") ??
               "00000000"),
           Estado: "Pendiente",
           iva: Number(event.comprobantes?.iva ?? 0),
@@ -152,10 +149,9 @@ export default function CCDetail(props: {
     for (const row of tableRows) {
       const rowData: string[] = Object.entries(row).reduce(
         (acc, [key, value]) => {
-          if(key==="date"){
+          if (key === "date") {
             acc.push(dayjs(value).format("DD/MM/YYYY"));
-          }
-          else if (key !== "event" && key !== "comprobantes") {
+          } else if (key !== "event" && key !== "comprobantes") {
             acc.push(value.toString());
           }
           return acc;
@@ -198,7 +194,7 @@ export default function CCDetail(props: {
                     : "text-black"
                 }`}
               >
-                {new Intl.NumberFormat("es-AR",{
+                {new Intl.NumberFormat("es-AR", {
                   style: "currency",
                   currency: "ARS",
                   minimumFractionDigits: 2,
