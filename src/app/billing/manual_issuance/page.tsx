@@ -324,19 +324,20 @@ export default function Page() {
             health_insurance_id: obraSocialId,
           });
           const comprobanteId = comprobante[0]?.id ?? "";
-          comprobante = [await createItem({
-
-            amount: Number(form.getValues().facturasEmitidas.importe),
-            concept: "Factura relacionada",
-            iva: 0,
-            total: Number(form.getValues().facturasEmitidas.importe),
-            comprobante_id: comprobanteId,
-          })]
-
+          comprobante = [
+            await createItem({
+              amount: Number(form.getValues().facturasEmitidas.importe),
+              concept: "Factura relacionada",
+              iva: 0,
+              total: Number(form.getValues().facturasEmitidas.importe),
+              comprobante_id: comprobanteId,
+            }),
+          ];
 
           const promises = otherConceptsForm
             .getValues()
             .otherConcepts.map(async (concept) => {
+              console.log("lol");
               if (concept.importe > 0) {
                 comprobante = [
                   await createItem({
@@ -355,9 +356,9 @@ export default function Page() {
             .tributes.map(async (tribute) => {
               if (tribute.amount > 0) {
                 await createTribute({
-                  alicuota: tribute.aliquot,
-                  amount: tribute.amount,
-                  base_imponible: tribute.base,
+                  alicuota: Number(tribute.aliquot),
+                  amount: Number(tribute.amount),
+                  base_imponible: Number(tribute.base),
                   comprobante_id: comprobanteId,
                   jurisdiction: tribute.jurisdiccion,
                   tribute: tribute.tribute,
@@ -578,7 +579,7 @@ export default function Page() {
       ],
     },
   });
-  console.log("comprobante tipo", valueToNameComprobanteMap[tipoComprobante]);
+  console.log("comprobante tipoo", valueToNameComprobanteMap[tipoComprobante]);
   const asociatedFCForm = useForm<AsociatedFCForm>({
     defaultValues: {
       comprobantes: [
@@ -593,7 +594,6 @@ export default function Page() {
       ],
     },
   });
-
   const otherConceptsForm = useForm<otherConceptsForm>({
     defaultValues: { otherConcepts: [{ description: "", importe: 0 }] },
   });
