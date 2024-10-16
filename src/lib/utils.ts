@@ -774,7 +774,7 @@ font-size:10px;
 
        <div class="tributos" style="display:flex; flex-direction: row;justify-content:space-between; padding-left:40px; padding-right:40px">
 	
-       ${totalTributes > 0 && (`<div class="tribute-grid" style="display: grid; grid-template-columns: repeat(5, 1fr);grid-auto-rows: min-content;">
+       ${totalTributes > 0 ? (`<div class="tribute-grid" style="display: grid; grid-template-columns: repeat(5, 1fr);grid-auto-rows: min-content;">
     <!-- Use div or span instead of p for inline layout if needed -->
     <div><p style="font-weight: 600; margin: 0;">TRIBUTO</p></div>
     <div><p style="font-weight: 600; margin: 0;">JURISDICCIÓN</p></div>
@@ -793,12 +793,12 @@ font-size:10px;
       )
       .join("\n")}
 
-  </div>`)}
+  </div>`) : ("<div style='width: 70px;'></div>")}
 
   <div style="display:flex; flex-direction:column; margin-bottom: 10px; font-weight:500;">
 		<p style="font-size:12px; text-align:right; ">Sub-total: ${formatNumberAsCurrency(subtotal ?? 0)}</p>
     <p style="font-size:12px; text-align:right">IVA: ${formatNumberAsCurrency(iva ?? 0)}</p>
-		${totalTributes > 0 && (`<p style="font-size:12px; text-align:right">Otros Tributos: ${formatNumberAsCurrency(totalTributes ?? 0)}</p>`)}
+		${totalTributes > 0 ? (`<p style="font-size:12px; text-align:right">Otros Tributos: ${formatNumberAsCurrency(totalTributes ?? 0)}</p>`) : ("")}
     
     <p style="font-size:12px; text-align:right">Pagos a cuenta: $XX.XXX,XX</p>
 	</div>
