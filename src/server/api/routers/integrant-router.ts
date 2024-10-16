@@ -88,53 +88,59 @@ export const integrantsRouter = createTRPCRouter({
   change: protectedProcedure
     .input(
       z.object({
-        iva: z.string(),
+        iva: z.string().optional(),
         id: z.string(),
-        affiliate_type: z.string(),
-        relationship: z.string(),
+        affiliate_type: z.string().optional(),
+        relationship: z.string().optional(),
         name: z.string(),
-        id_type: z.string(),
-        id_number: z.string(),
-        birth_date: z.string().transform((value) => new Date(value)),
+        id_type: z.string().optional(),
+        id_number: z.string().optional(),
+        state: z.string().optional(),
+        birth_date: z.date().optional(),
         gender: z.enum(["MASCULINO", "FEMENINO", "OTRO"]),
         civil_status: z.enum(["SOLTERO", "CASADO", "DIVORCIADO", "VIUDO"]),
-        nationality: z.string(),
-        extention: z.string(),
-        afip_status: z.string(),
-        fiscal_id_type: z.string(),
-        fiscal_id_number: z.string(),
-        address: z.string(),
-        address_number: z.string(),
-        phone_number: z.string(),
-        cellphone_number: z.string(),
-        email: z.string(),
-        floor: z.string(),
-        department: z.string(),
-        localidad: z.string(),
-        partido: z.string(),
-        provincia: z.string(),
-        cp: z.string(),
-        zona: z.string(),
-        isHolder: z.boolean(),
-        isPaymentHolder: z.boolean(),
-        isAffiliate: z.boolean(),
-        isBillResponsible: z.boolean(),
-        family_group_id: z.string(),
-        postal_codeId: z.string(),
+        nationality: z.string().optional(),
+        extention: z.string().optional(),
+        afip_status: z.string().optional(),
+        fiscal_id_type: z.string().optional(),
+        fiscal_id_number: z.string().optional(),
+        address: z.string().optional(),
+        address_number: z.string().optional(),
+        phone_number: z.string().optional(),
+        cellphone_number: z.string().optional(),
+        email: z.string().optional(),
+        floor: z.string().optional(),
+        department: z.string().optional(),
+        localidad: z.string().optional(),
+        partido: z.string().optional(),
+        provincia: z.string().optional(),
+        cp: z.string().optional(),
+        zona: z.string().optional(),
+        isHolder: z.boolean().optional(),
+        isPaymentHolder: z.boolean().optional(),
+        isAffiliate: z.boolean().optional(),
+        isBillResponsible: z.boolean().optional(),
+        family_group_id: z.string().optional(),
+        postal_codeId: z.string().optional(),
         validity: z.date().optional(),
       })
     )
-    .mutation(async ({ input: { id, ...input } }) => {
-      console.log("Function called");
+    .mutation(async ({ input }) => {
+      try {
+        console.log("Input de la mutación:", input);
+        console.log("Nombre:", input.name);
+        const updatedIntegrants = await db
+          .update(schema.integrants)
+          .set(input)
+          .where(eq(schema.integrants.id, input.id));
 
-      const updatedintegrants = await db
-        .update(schema.integrants)
-        .set(input)
-        .where(eq(schema.integrants.id, id));
-      console.log(updatedintegrants);
-      return updatedintegrants;
+        console.log("bobo", updatedIntegrants);
+        return updatedIntegrants;
+      } catch (error) {
+        console.error("Error al actualizar:", error);
+        throw new Error("No se pudo actualizar el integrante.");
+      }
     }),
-
   delete: protectedProcedure
     .input(
       z.object({

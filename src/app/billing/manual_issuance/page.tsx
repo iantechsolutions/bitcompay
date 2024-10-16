@@ -222,9 +222,9 @@ export default function Page() {
             .tributes.map(async (tribute) => {
               if (tribute.amount > 0) {
                 await createTribute({
-                  alicuota: tribute.aliquot,
-                  amount: tribute.amount,
-                  base_imponible: tribute.base,
+                  alicuota: Number(tribute.aliquot),
+                  amount: Number(tribute.amount),
+                  base_imponible: Number(tribute.base),
                   comprobante_id: comprobanteId,
                   jurisdiction: tribute.jurisdiccion,
                   tribute: tribute.tribute,
@@ -424,9 +424,9 @@ export default function Page() {
             .tributes.map(async (tribute) => {
               if (tribute.amount > 0) {
                 await createTribute({
-                  alicuota: tribute.aliquot,
-                  amount: tribute.amount,
-                  base_imponible: tribute.base,
+                  alicuota: Number(tribute.aliquot),
+                  amount: Number(tribute.amount),
+                  base_imponible: Number(tribute.base),
                   comprobante_id: comprobanteId,
                   jurisdiction: tribute.jurisdiccion,
                   tribute: tribute.tribute,
@@ -710,7 +710,6 @@ export default function Page() {
   if (!grupoFamiliarId && !obraSocialId) {
     return (
       <LayoutContainer>
-        {/* <GeneratedPopup url={generatedUrlPopup} /> */}
         <section>
           <div>
             <Title>Generación de comprobantes</Title>

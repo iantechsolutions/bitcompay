@@ -35,13 +35,13 @@ import TableToolbarPayment from "~/components/tanstack/table-payments";
 
 export const recHeaders = [
   { key: "name", label: "Apellido y Nombre", width: 200 },
-  { key: "fiscal_id_number", label: "Nro ID Fiscal", width: 140 },
-  {
-    key: "invoice_number",
-    label: "Nro Comprobante",
-    width: 140,
-    alwaysRequired: true,
-  },
+  // { key: "fiscal_id_number", label: "Nro ID Fiscal", width: 140 },
+  // {
+  //   key: "invoice_number",
+  //   label: "Nro Comprobante",
+  //   width: 140,
+  //   alwaysRequired: true,
+  // },
   { key: "g_c", label: "Marca", width: 50 },
   { key: "product_number", label: "Producto", width: 80, alwaysRequired: true },
   { key: "period", label: "Período", width: 140 },
@@ -49,7 +49,7 @@ export const recHeaders = [
   { key: "first_due_date", label: "Fecha 1er Vto.", width: 140 },
   { key: "additional_info", label: "Info. Adicional", width: 250 },
   { key: "payment_date", label: "Fecha de Pago/Débito", width: 140 },
-  { key: "collected_amount", label: "Importe a cobrar", width: 140 },
+  // { key: "collected_amount", label: "Importe a cobrar", width: 140 },
   { key: "recollected_amount", label: "Importe cobrado", width: 140 },
   { key: "statusId", label: "Estado de Pago", width: 140 },
 ];
