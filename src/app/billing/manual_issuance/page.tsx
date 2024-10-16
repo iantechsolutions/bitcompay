@@ -198,7 +198,7 @@ export default function Page() {
 
           comprobante = await createComprobante({
             billLink: "",
-            estado: "pendiente",
+            estado: "generada",
             concepto: Number(concepto) ?? 0,
             importe: Number(subTotal) + Number(ivaTotal) + Number(tributos),
             iva: iva ?? "0",
@@ -217,19 +217,20 @@ export default function Page() {
           });
           const comprobanteId = comprobante[0]?.id ?? "";
 
-          const tributesPromise = otherTributesForm.getValues().tributes.map(async (tribute) => {
-            if (tribute.amount > 0){
-
-              await createTribute({
-                alicuota: tribute.aliquot,
-                amount: tribute.amount,
-                base_imponible: tribute.base,
-                comprobante_id: comprobanteId,
-                jurisdiction: tribute.jurisdiccion,
-                tribute: tribute.tribute,
-              })
-            }
-          })
+          const tributesPromise = otherTributesForm
+            .getValues()
+            .tributes.map(async (tribute) => {
+              if (tribute.amount > 0) {
+                await createTribute({
+                  alicuota: tribute.aliquot,
+                  amount: tribute.amount,
+                  base_imponible: tribute.base,
+                  comprobante_id: comprobanteId,
+                  jurisdiction: tribute.jurisdiccion,
+                  tribute: tribute.tribute,
+                });
+              }
+            });
           const tributesResults = await Promise.all(tributesPromise);
 
           const promises = conceptsForm
@@ -239,10 +240,10 @@ export default function Page() {
               if (concept.importe > 0) {
                 comprobante = [
                   await createItem({
-                    amount: concept.importe,
+                    amount: Number(concept.importe),
                     concept: concept.concepto,
                     iva: concept.iva,
-                    total: concept.total,
+                    total: Number(concept.total),
                     comprobante_id: comprobanteId,
                   }),
                 ];
@@ -304,7 +305,7 @@ export default function Page() {
           // });
         } else if (tipoComprobante == "0") {
           comprobante = await createComprobante({
-            estado: "pendiente",
+            estado: "generada",
             billLink: "", //deberiamos poner un link ?
             concepto: Number(concepto) ?? 0,
             importe: Number(subTotal) + Number(ivaTotal) + Number(tributos),
@@ -323,6 +324,15 @@ export default function Page() {
             health_insurance_id: obraSocialId,
           });
           const comprobanteId = comprobante[0]?.id ?? "";
+          comprobante = [await createItem({
+
+            amount: Number(form.getValues().facturasEmitidas.importe),
+            concept: "Factura relacionada",
+            iva: 0,
+            total: Number(form.getValues().facturasEmitidas.importe),
+            comprobante_id: comprobanteId,
+          })]
+
 
           const promises = otherConceptsForm
             .getValues()
@@ -330,29 +340,30 @@ export default function Page() {
               if (concept.importe > 0) {
                 comprobante = [
                   await createItem({
-                    amount: concept.importe,
+                    amount: Number(concept.importe),
                     concept: concept.description,
                     iva: 0,
-                    total: concept.importe,
+                    total: Number(concept.importe),
                     comprobante_id: comprobanteId,
                   }),
                 ];
               }
             });
           const results = await Promise.all(promises);
-          const tributesPromise = otherTributesForm.getValues().tributes.map(async (tribute) => {
-            if (tribute.amount > 0){
-
-              await createTribute({
-                alicuota: tribute.aliquot,
-                amount: tribute.amount,
-                base_imponible: tribute.base,
-                comprobante_id: comprobanteId,
-                jurisdiction: tribute.jurisdiccion,
-                tribute: tribute.tribute,
-              })
-            }
-          })
+          const tributesPromise = otherTributesForm
+            .getValues()
+            .tributes.map(async (tribute) => {
+              if (tribute.amount > 0) {
+                await createTribute({
+                  alicuota: tribute.aliquot,
+                  amount: tribute.amount,
+                  base_imponible: tribute.base,
+                  comprobante_id: comprobanteId,
+                  jurisdiction: tribute.jurisdiccion,
+                  tribute: tribute.tribute,
+                });
+              }
+            });
           const tributesResults = await Promise.all(tributesPromise);
           // const event = createEventFamily({
           //   family_group_id: grupoFamiliarId,
@@ -376,7 +387,7 @@ export default function Page() {
           let ivaFloat = (100 + parseFloat(facSeleccionada?.iva ?? "0")) / 100;
           const importeBase = (facSeleccionada?.importe ?? 0) / ivaFloat;
           comprobante = await createComprobante({
-            estado: "pendiente",
+            estado: "generada",
             billLink: "",
             concepto: facSeleccionada?.concepto ?? 0,
             importe: facSeleccionada?.importe ?? 0,
@@ -399,7 +410,7 @@ export default function Page() {
           const comprobanteId = comprobante[0]?.id ?? "";
           comprobante = [
             await createItem({
-              amount: importeBase,
+              amount: Number(importeBase),
               concept: "Factura a cancelar",
               iva: importeBase * (ivaFloat - 1),
               total: facSeleccionada?.importe,
@@ -407,19 +418,20 @@ export default function Page() {
             }),
           ];
 
-          const tributesPromise = otherTributesForm.getValues().tributes.map(async (tribute) => {
-            if (tribute.amount > 0){
-
-              await createTribute({
-                alicuota: tribute.aliquot,
-                amount: tribute.amount,
-                base_imponible: tribute.base,
-                comprobante_id: comprobanteId,
-                jurisdiction: tribute.jurisdiccion,
-                tribute: tribute.tribute,
-              })
-            }
-          })
+          const tributesPromise = otherTributesForm
+            .getValues()
+            .tributes.map(async (tribute) => {
+              if (tribute.amount > 0) {
+                await createTribute({
+                  alicuota: tribute.aliquot,
+                  amount: tribute.amount,
+                  base_imponible: tribute.base,
+                  comprobante_id: comprobanteId,
+                  jurisdiction: tribute.jurisdiccion,
+                  tribute: tribute.tribute,
+                });
+              }
+            });
           const tributesResults = await Promise.all(tributesPromise);
 
           // try {
@@ -687,8 +699,7 @@ export default function Page() {
                 const blob = await req.blob();
                 saveAs(blob, "comprobante.pdf");
               }
-            }}
-          >
+            }}>
             Descargar
           </AlertDialogAction>
         </AlertDialogFooter>
@@ -707,8 +718,7 @@ export default function Page() {
           <div className="flex flex-row justify-between gap-8 ">
             <Select
               onValueChange={(e) => handleGrupoFamilarChange(e)}
-              value={grupoFamiliarId}
-            >
+              value={grupoFamiliarId}>
               <SelectTriggerMagnify className=" w-full bg-[#FAFAFA] font-normal text-[#747474]">
                 <SelectValue placeholder="Buscar afiliado.." />
               </SelectTriggerMagnify>
@@ -718,8 +728,7 @@ export default function Page() {
                     <SelectItem
                       key={gruposFamiliar?.id}
                       value={gruposFamiliar?.id}
-                      className="rounded-none"
-                    >
+                      className="rounded-none">
                       {
                         gruposFamiliar?.integrants.find(
                           (x: { isHolder: any }) => x.isHolder
@@ -731,8 +740,7 @@ export default function Page() {
             </Select>
             <Select
               onValueChange={(e) => handleObraSocialChange(e)}
-              value={obraSocialId}
-            >
+              value={obraSocialId}>
               <SelectTriggerMagnify className="w-full bg-[#FAFAFA] font-normal text-[#747474]">
                 <SelectValue placeholder="Buscar por obra social.." />
               </SelectTriggerMagnify>
@@ -742,8 +750,7 @@ export default function Page() {
                     <SelectItem
                       key={obrasSocial?.id}
                       value={obrasSocial?.id}
-                      className="rounded-none"
-                    >
+                      className="rounded-none">
                       {obrasSocial?.initials}
                     </SelectItem>
                   ))}
@@ -771,8 +778,7 @@ export default function Page() {
                   className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 mr-3 shadow-none"
                   // onClick={() => setOpen(true)}
                   disabled={loading}
-                  onClick={generateComprobante}
-                >
+                  onClick={generateComprobante}>
                   {loading ? (
                     <Loader2Icon className="mr-2 animate-spin" size={20} />
                   ) : (
@@ -793,8 +799,7 @@ export default function Page() {
             <div className="flex flex-row justify-between gap-8 ">
               <Select
                 onValueChange={(e) => handleGrupoFamilarChange(e)}
-                value={grupoFamiliarId}
-              >
+                value={grupoFamiliarId}>
                 <SelectTriggerMagnify className=" w-full bg-[#FAFAFA] font-normal text-[#747474]">
                   <SelectValue placeholder="Buscar afiliado.." />
                 </SelectTriggerMagnify>
@@ -804,8 +809,7 @@ export default function Page() {
                       <SelectItem
                         key={gruposFamiliar?.id}
                         value={gruposFamiliar?.id}
-                        className="rounded-none"
-                      >
+                        className="rounded-none">
                         {
                           gruposFamiliar?.integrants.find(
                             (x: { isHolder: any }) => x.isHolder
@@ -817,8 +821,7 @@ export default function Page() {
               </Select>
               <Select
                 onValueChange={(e) => handleObraSocialChange(e)}
-                value={obraSocialId}
-              >
+                value={obraSocialId}>
                 <SelectTriggerMagnify className="w-full bg-[#FAFAFA] font-normal text-[#747474]">
                   <SelectValue placeholder="Buscar por obra social.." />
                 </SelectTriggerMagnify>
@@ -828,8 +831,7 @@ export default function Page() {
                       <SelectItem
                         key={obrasSocial?.id}
                         value={obrasSocial?.id}
-                        className="rounded-none"
-                      >
+                        className="rounded-none">
                         {obrasSocial?.name}
                       </SelectItem>
                     ))}
@@ -892,8 +894,7 @@ export default function Page() {
               onClick={() => {
                 generateComprobante();
               }}
-              disabled={loading}
-            >
+              disabled={loading}>
               Siguiente
               {loading ? (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />

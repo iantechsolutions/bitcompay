@@ -310,46 +310,40 @@ const confirmationPage = ({
         const event = createEventFamily({
           family_group_id: fgId,
           type: "FC",
-          amount: ivaFloat * importe + tributos,
+          amount: createdComprobante.importe ?? 0,
           comprobante_id: createdComprobante.id ?? "",
         });
       } else if (osId) {
         const event = createEventOS({
           health_insurance_id: osId ?? "",
           type: "FC",
-          amount: ivaFloat * importe + tributos,
+          amount: createdComprobante.importe ?? 0,
           comprobante_id: createdComprobante.id ?? "",
         });
       }
     }
-    if (tipoComprobante == "0") {
-      const otrosConceptos = otherConcepts.getValues();
-      const importe = otrosConceptos.otherConcepts.reduce(
-        (acc, concept) => acc + Number(concept.importe),
-        0
-      );
-
+    else if (tipoComprobante == "0") {
       if (fgId) {
         const event = createEventFamily({
           family_group_id: fgId,
           type: "REC",
-          amount: importe,
+          amount: createdComprobante.importe ?? 0,
           comprobante_id: createdComprobante.id ?? "",
         });
       } else if (osId) {
         const event = createEventOS({
           health_insurance_id: osId,
           type: "REC",
-          amount: importe,
+          amount: createdComprobante.importe ?? 0,
           comprobante_id: createdComprobante.id ?? "",
         });
       }
 
-      const eventOrg = createEventOrg({
-        type: "REC",
-        amount: importe,
-        comprobante_id: createdComprobante.id ?? "",
-      });
+      // const eventOrg = createEventOrg({
+      //   type: "REC",
+      //   amount: createdComprobante.importe ?? 0,
+      //   comprobante_id: createdComprobante.id ?? "",
+      // });
     } else if (
       fcSeleccionada &&
       (tipoComprobante == "3" || tipoComprobante == "8")
@@ -377,7 +371,7 @@ const confirmationPage = ({
 
     //reemplazar por comprobante creado
     if (createdComprobante) {
-      console.log(createdComprobante,"createdComprobante");
+      console.log(createdComprobante, "createdComprobante");
       const html = htmlBill(
         createdComprobante,
         company,
@@ -483,10 +477,19 @@ const confirmationPage = ({
       <div className="self-end flex gap-1">
         <Button
           onClick={() => changePage("formPage")}
-          className="h-7 bg-[#f7f7f7] hover:bg-[#f7f7f7] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
-        >
+          className="h-7 bg-[#f7f7f7] hover:bg-[#f7f7f7] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none">
           <ChevronLeftCircleIcon className="mr-2 h-4 w-auto" /> Volver
         </Button>
+        {/* <Button
+          className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
+          onClick={() => {
+            // handleCreate();
+            DownloadPDF((url = { htmlBill }));
+            // handleCreate();
+          }}>
+          <CircleCheck className="h-4 w-auto mr-2" />
+          Descargar
+        </Button> */}
         <Button
           className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
           onClick={() => {
@@ -494,8 +497,7 @@ const confirmationPage = ({
             handleAFIP();
             // handleCreate();
           }}
-          disabled={loading}
-        >
+          disabled={loading}>
           {loading ? (
             <Loader2Icon className="mr-2 animate-spin" size={20} />
           ) : (

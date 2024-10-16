@@ -594,21 +594,19 @@ async function PDFFromHtml(
   });
 
   const upload = await utapi.uploadFilesFromUrl(res.file);
-  if(Array.isArray(upload)){
+  if (Array.isArray(upload)) {
     if (upload[0]?.data !== null) {
       console.error(
         "utapi.uploadFilesFromUrl error en comprobante PDFFromHtml",
-        upload[0]?.error);
-  }
-  }
-  else if (upload.data !== null)
-     {
-      console.error(
-        "utapi.uploadFilesFromUrl error en comprobante PDFFromHtml",
-        upload.error
+        upload[0]?.error
       );
+    }
+  } else if (upload.data !== null) {
+    console.error(
+      "utapi.uploadFilesFromUrl error en comprobante PDFFromHtml",
+      upload.error
+    );
   }
-    
 
   // console.log("upload", upload);
   // console.log("res", res);

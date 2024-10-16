@@ -533,7 +533,7 @@ export const excelDeserializationRouter = createTRPCRouter({
               // product: product?.id,
             });
           }
-          const contribution = parseFloat(row.contribution ?? "");
+          const contribution = parseFloat(row.contribution ?? "0");
           console.log("creando aportes");
           await db.insert(schema.contributions).values({
             employeeContribution: 0,
