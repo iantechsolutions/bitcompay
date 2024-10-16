@@ -1348,7 +1348,16 @@ export async function preparateComprobante(
 
       const totalAportes = grupo.integrants
         .flatMap((part) => part.aportes_os)
-        .filter((a) => a.contribution_date === dateDesde)
+        .filter((a) =>           
+          {
+            if (!a.contribution_date || !dateDesde) return false;
+            dateDesde?.setMonth(dateDesde.getMonth() - 1);
+            return (
+              a.contribution_date?.getMonth() === dateDesde.getMonth() &&
+              a.contribution_date?.getFullYear() === dateDesde.getFullYear()
+            ) 
+          }
+          )
         .reduce((sum, aporte) => sum + parseInt(aporte.amount), 0);
 
       //calculate importe
