@@ -45,18 +45,21 @@ const OtherTributes = ({ otherTributes, Visualization, onAdd }: Props) => {
       {fields.length === 0 && (
         <div className="flex justify-between px-2">
           <p> No se agregarán otro tributos</p>
-          <Button
-            onClick={() => {
-              append({
-                tribute: "",
-                jurisdiccion: "",
-                base: 0,
-                aliquot: IVA_TASA,
-                amount: 0,
-              });
-            }}>
-            Agregar concepto
-          </Button>
+
+          {!Visualization && (
+            <Button
+              onClick={() => {
+                append({
+                  tribute: "",
+                  jurisdiccion: "",
+                  base: 0,
+                  aliquot: IVA_TASA,
+                  amount: 0,
+                });
+              }}>
+              Agregar concepto
+            </Button>
+          )}
         </div>
       )}
       {fields.map((fieldElement, index) => (

@@ -594,7 +594,17 @@ async function PDFFromHtml(
   });
 
   const upload = await utapi.uploadFilesFromUrl(res.file);
-  if (upload.error !== null) {
+  if (Array.isArray(upload)) {
+    upload.forEach((fileResponse) => {
+      if (fileResponse.error) {
+        console.error(
+          "utapi.uploadFilesFromUrl error en comprobante PDFFromHtml",
+          fileResponse.error
+        );
+      }
+    });
+  } else if (upload.error) {
+    // Si es un objeto y tiene error
     console.error(
       "utapi.uploadFilesFromUrl error en comprobante PDFFromHtml",
       upload.error

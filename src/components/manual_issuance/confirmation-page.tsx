@@ -33,6 +33,7 @@ import {
 } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
+import DownloadPDF from "../downloadPDF";
 
 interface Props {
   changePage: (page: "formPage" | "confirmationPage") => void;
@@ -286,7 +287,6 @@ const confirmationPage = ({
           Nro: fcSeleccionada[0]?.nroComprobante ?? 0,
         },
       };
-    
     } else {
       toast.error("Error, revise que todos los campos esten completos");
       return null;
@@ -301,7 +301,7 @@ const confirmationPage = ({
         return null;
       }
     }
-    if (tipoComprobante == "1" || tipoComprobante == "6"){
+    if (tipoComprobante == "1" || tipoComprobante == "6") {
       if (fgId) {
         const event = createEventFamily({
           family_group_id: fgId,
@@ -318,7 +318,7 @@ const confirmationPage = ({
         });
       }
     }
-    if (tipoComprobante == "0"){
+    if (tipoComprobante == "0") {
       const otrosConceptos = otherConcepts.getValues();
       const importe = otrosConceptos.otherConcepts.reduce(
         (acc, concept) => acc + Number(concept.importe),
@@ -346,9 +346,10 @@ const confirmationPage = ({
         amount: importe,
         comprobante_id: createdComprobante.id ?? "",
       });
-    }
-
-    else if(fcSeleccionada &&  (tipoComprobante == "3" || tipoComprobante == "8")){
+    } else if (
+      fcSeleccionada &&
+      (tipoComprobante == "3" || tipoComprobante == "8")
+    ) {
       if (fgId) {
         const event = createEventFamily({
           family_group_id: fgId,
@@ -420,7 +421,7 @@ const confirmationPage = ({
         number: last_voucher + 1,
         state: "pendiente",
       });
-      
+
       if (resHtml.file) {
         window.open(resHtml.file, "_blank");
       }
@@ -450,9 +451,7 @@ const confirmationPage = ({
 
       <AdditionalInfoCard
         // comprobantes={}
-        possibleComprobanteTipo={
-          fcSeleccionada[0]?.tipoComprobante ?? ""
-        }
+        possibleComprobanteTipo={fcSeleccionada[0]?.tipoComprobante ?? ""}
         fcSeleccionada={fcSeleccionada}
         setFcSeleccionada={setFcSeleccionada}
         visualization={true}
@@ -471,18 +470,26 @@ const confirmationPage = ({
       <div className="self-end flex gap-1">
         <Button
           onClick={() => changePage("formPage")}
-          className="h-7 bg-[#f7f7f7] hover:bg-[#f7f7f7] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
-        >
+          className="h-7 bg-[#f7f7f7] hover:bg-[#f7f7f7] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none">
           <ChevronLeftCircleIcon className="mr-2 h-4 w-auto" /> Volver
         </Button>
+        {/* <Button
+          className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
+          onClick={() => {
+            // handleCreate();
+            DownloadPDF((url = { htmlBill }));
+            // handleCreate();
+          }}>
+          <CircleCheck className="h-4 w-auto mr-2" />
+          Descargar
+        </Button> */}
         <Button
           className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
           onClick={() => {
             // handleCreate();
             handleAFIP();
             // handleCreate();
-          }}
-        >
+          }}>
           <CircleCheck className="h-4 w-auto mr-2" />
           Aprobar
         </Button>

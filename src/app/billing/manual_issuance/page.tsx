@@ -60,13 +60,12 @@ function formatDate(date: Date | undefined) {
 export default function Page() {
   const { mutateAsync: createComprobante } =
     api.comprobantes.create.useMutation();
-    const { mutateAsync: createItem } =
-    api.items.create.useMutation();
+  const { mutateAsync: createItem } = api.items.create.useMutation();
   const { data: company } = api.companies.get.useQuery();
   const { data: marcas } = api.brands.list.useQuery();
   const { data: gruposFamiliar } = api.family_groups.list.useQuery();
   const { data: obrasSociales } = api.healthInsurances.listClient.useQuery();
-  const {data: comprobantesEntidad} = api.comprobantes.getByEntity.useQuery();
+  const { data: comprobantesEntidad } = api.comprobantes.getByEntity.useQuery();
   const [subTotal, setSubTotal] = useState<number>(0);
   const [ivaTotal, setIvaTotal] = useState<number>(0);
   const [otherAttributes, setOtherAttributes] = useState<number>(0);
@@ -110,7 +109,7 @@ export default function Page() {
           subTotal += Number(concepts.importe);
         }
         const importe = form.getValues().facturasEmitidas.importe;
-        subTotal+= form.getValues().facturasEmitidas.importe; 
+        subTotal += form.getValues().facturasEmitidas.importe;
       case "Nota de crédito":
         for (const comprobante of asociatedFCForm.getValues().comprobantes) {
           console.log("comprobante del forms", comprobante);
@@ -203,18 +202,17 @@ export default function Page() {
             family_group_id: grupoFamiliarId,
             health_insurance_id: obraSocialId,
           });
-          const sumaTributos = otherTributesForm.getValues().tributes.reduce(
-            (acc, tribute) => acc + Number(tribute.amount),
-            0
-          );
-          const comprobanteId = comprobante[0]?.id ?? ""
+          const sumaTributos = otherTributesForm
+            .getValues()
+            .tributes.reduce((acc, tribute) => acc + Number(tribute.amount), 0);
+          const comprobanteId = comprobante[0]?.id ?? "";
           const tributo = await createItem({
             amount: sumaTributos,
             concept: "Tributos",
             iva: 0,
-            total: subTotal ,
+            total: subTotal,
             comprobante_id: comprobanteId,
-          })
+          });
           conceptsForm.getValues().concepts.forEach(async (concept) => {
             await createItem({
               amount: concept.importe,
@@ -222,8 +220,8 @@ export default function Page() {
               iva: concept.iva,
               total: concept.total,
               comprobante_id: comprobanteId,
-            })
-          })
+            });
+          });
           // data = {
           //   CantReg: 1, // Cantidad de comprobantes a registrar
           //   PtoVta: Number(form.getValues().puntoVenta),
@@ -314,7 +312,9 @@ export default function Page() {
           fcSeleccionada &&
           (tipoComprobante == "3" || tipoComprobante == "8")
         ) {
-          const facSeleccionada = comprobantes?.find((x) => x.id == fcSeleccionada[0]?.id);
+          const facSeleccionada = comprobantes?.find(
+            (x) => x.id == fcSeleccionada[0]?.id
+          );
 
           let ivaFloat = (100 + parseFloat(facSeleccionada?.iva ?? "0")) / 100;
 
@@ -655,8 +655,7 @@ export default function Page() {
           <div className="flex flex-row justify-between gap-8 ">
             <Select
               onValueChange={(e) => handleGrupoFamilarChange(e)}
-              value={grupoFamiliarId}
-            >
+              value={grupoFamiliarId}>
               <SelectTriggerMagnify className=" w-full bg-[#FAFAFA] font-normal text-[#747474]">
                 <SelectValue placeholder="Buscar afiliado.." />
               </SelectTriggerMagnify>
@@ -666,8 +665,7 @@ export default function Page() {
                     <SelectItem
                       key={gruposFamiliar?.id}
                       value={gruposFamiliar?.id}
-                      className="rounded-none"
-                    >
+                      className="rounded-none">
                       {
                         gruposFamiliar?.integrants.find(
                           (x: { isHolder: any }) => x.isHolder
@@ -679,8 +677,7 @@ export default function Page() {
             </Select>
             <Select
               onValueChange={(e) => handleObraSocialChange(e)}
-              value={obraSocialId}
-            >
+              value={obraSocialId}>
               <SelectTriggerMagnify className="w-full bg-[#FAFAFA] font-normal text-[#747474]">
                 <SelectValue placeholder="Buscar por obra social.." />
               </SelectTriggerMagnify>
@@ -690,8 +687,7 @@ export default function Page() {
                     <SelectItem
                       key={obrasSocial?.id}
                       value={obrasSocial?.id}
-                      className="rounded-none"
-                    >
+                      className="rounded-none">
                       {obrasSocial?.initials}
                     </SelectItem>
                   ))}
@@ -717,8 +713,7 @@ export default function Page() {
                   className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 mr-3 shadow-none"
                   // onClick={() => setOpen(true)}
                   disabled={loading}
-                  onClick={generateComprobante}
-                >
+                  onClick={generateComprobante}>
                   {loading ? (
                     <Loader2Icon className="mr-2 animate-spin" size={20} />
                   ) : (
@@ -739,8 +734,7 @@ export default function Page() {
             <div className="flex flex-row justify-between gap-8 ">
               <Select
                 onValueChange={(e) => handleGrupoFamilarChange(e)}
-                value={grupoFamiliarId}
-              >
+                value={grupoFamiliarId}>
                 <SelectTriggerMagnify className=" w-full bg-[#FAFAFA] font-normal text-[#747474]">
                   <SelectValue placeholder="Buscar afiliado.." />
                 </SelectTriggerMagnify>
@@ -750,8 +744,7 @@ export default function Page() {
                       <SelectItem
                         key={gruposFamiliar?.id}
                         value={gruposFamiliar?.id}
-                        className="rounded-none"
-                      >
+                        className="rounded-none">
                         {
                           gruposFamiliar?.integrants.find(
                             (x: { isHolder: any }) => x.isHolder
@@ -763,8 +756,7 @@ export default function Page() {
               </Select>
               <Select
                 onValueChange={(e) => handleObraSocialChange(e)}
-                value={obraSocialId}
-              >
+                value={obraSocialId}>
                 <SelectTriggerMagnify className="w-full bg-[#FAFAFA] font-normal text-[#747474]">
                   <SelectValue placeholder="Buscar por obra social.." />
                 </SelectTriggerMagnify>
@@ -774,8 +766,7 @@ export default function Page() {
                       <SelectItem
                         key={obrasSocial?.id}
                         value={obrasSocial?.id}
-                        className="rounded-none"
-                      >
+                        className="rounded-none">
                         {obrasSocial?.name}
                       </SelectItem>
                     ))}
@@ -837,8 +828,7 @@ export default function Page() {
               className="flex justify-between px-4 py-4 rounded-full self-end bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e]"
               onClick={() => {
                 generateComprobante();
-              }}
-            >
+              }}>
               Siguiente
               {loading ? (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />

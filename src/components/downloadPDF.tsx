@@ -45,37 +45,32 @@
 //   import { asTRPCError } from "~/lib/errors";
 //   import { TableRecord } from "../columns";
 
-//   type DialogCCProps = {
-//     open: boolean;
-//     setOpen: (open: boolean) => void;
-//     data?: TableRecord;
-//   };
+import { toast } from "sonner";
+import { Button } from "./ui/button";
 
-//   export default function DialogCC({ open, setOpen, data }: DialogCCProps) {
+export default function DownloadPDF(url: string) {
+  async function downloadPDF() {
+    if (!url) {
+      return toast.error("El enlace del comprobante no está disponible");
+    }
 
-// if (!detailData) {
-//     return toast.error("Error al imprimir");
-//   } else if (
-//     !detailData.comprobantes ||
-//     detailData.comprobantes.length === 0
-//   ) {
-//     return toast.error("No hay comprobantes disponibles para imprimir");
-//   } else {
-//     const url =
-//       "https://utfs.io/f/44838620-7323-4f58-816a-abf74035e972-sc8o5d";
-//     if (!url) {
-//       return toast.error("El enlace del comprobante no está disponible");
-//     }
+    setTimeout(() => {
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "archivo.pdf";
+      link.target = "_blank";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }, 1000);
+    return toast.success("PDF descargado con exito");
+  }
 
-//     toast.success("Descargando el archivo...");
-
-//     setTimeout(() => {
-//       const link = document.createElement("a");
-//       link.href = url;
-//       link.download = "archivo.pdf";
-//       link.target = "_blank";
-//       document.body.appendChild(link);
-//       link.click();
-//       document.body.removeChild(link);
-//     }, 1000);
-//   }}
+  return (
+    <Button
+      onClick={downloadPDF}
+      className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none">
+      Descargar pdf
+    </Button>
+  );
+}
