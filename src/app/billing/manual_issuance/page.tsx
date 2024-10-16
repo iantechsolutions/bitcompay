@@ -60,13 +60,13 @@ function formatDate(date: Date | undefined) {
 export default function Page() {
   const { mutateAsync: createComprobante } =
     api.comprobantes.create.useMutation();
-    const { mutateAsync: createItem } =
-    api.items.create.useMutation();
+  const { mutateAsync: createItem } = api.items.create.useMutation();
+  const { mutateAsync: createTribute } = api.tributes.create.useMutation();
   const { data: company } = api.companies.get.useQuery();
   const { data: marcas } = api.brands.list.useQuery();
   const { data: gruposFamiliar } = api.family_groups.list.useQuery();
   const { data: obrasSociales } = api.healthInsurances.listClient.useQuery();
-  const {data: comprobantesEntidad} = api.comprobantes.getByEntity.useQuery();
+  const { data: comprobantesEntidad } = api.comprobantes.getByEntity.useQuery();
   const [subTotal, setSubTotal] = useState<number>(0);
   const [ivaTotal, setIvaTotal] = useState<number>(0);
   const [otherAttributes, setOtherAttributes] = useState<number>(0);
@@ -110,7 +110,7 @@ export default function Page() {
           subTotal += Number(concepts.importe);
         }
         const importe = form.getValues().facturasEmitidas.importe;
-        subTotal+= form.getValues().facturasEmitidas.importe; 
+        subTotal += form.getValues().facturasEmitidas.importe;
       case "Nota de crédito":
         for (const comprobante of asociatedFCForm.getValues().comprobantes) {
           console.log("comprobante del forms", comprobante);
@@ -181,9 +181,7 @@ export default function Page() {
         if (tipoComprobante == "1" || tipoComprobante == "6") {
           let ivaFloat =
             (100 + parseFloat(ivaDictionary[Number(iva)] ?? "0")) / 100;
-          // const billResponsible = gruposFamiliar
-          //   ?.find((x) => x.id == grupoFamiliarId)
-          //   ?.integrants.find((x) => x.isBillResponsible);
+
           comprobante = await createComprobante({
             billLink: "",
             estado: "pendiente",
@@ -203,18 +201,28 @@ export default function Page() {
             family_group_id: grupoFamiliarId,
             health_insurance_id: obraSocialId,
           });
-          const sumaTributos = otherTributesForm.getValues().tributes.reduce(
-            (acc, tribute) => acc + Number(tribute.amount),
-            0
-          );
-          const comprobanteId = comprobante[0]?.id ?? ""
+          const sumaTributos = otherTributesForm
+            .getValues()
+            .tributes.reduce((acc, tribute) => acc + Number(tribute.amount), 0);
+          const comprobanteId = comprobante[0]?.id ?? "";
+
+          for (const tribute of otherTributesForm.getValues().tributes) {
+            const tributo = await createTribute({
+              tribute: tribute.tribute,
+              jurisdiction: tribute.jurisdiccion,
+              base_imponible: tribute.base,
+              amount: tribute.amount,
+              alicuota: tribute.aliquot,
+              comprobante_id: comprobanteId,
+            });
+          }
           const tributo = await createItem({
             amount: sumaTributos,
             concept: "Tributos",
             iva: 0,
-            total: subTotal ,
+            total: subTotal,
             comprobante_id: comprobanteId,
-          })
+          });
           conceptsForm.getValues().concepts.forEach(async (concept) => {
             await createItem({
               amount: concept.importe,
@@ -222,63 +230,9 @@ export default function Page() {
               iva: concept.iva,
               total: concept.total,
               comprobante_id: comprobanteId,
-            })
-          })
-          // data = {
-          //   CantReg: 1, // Cantidad de comprobantes a registrar
-          //   PtoVta: Number(form.getValues().puntoVenta),
-          //   CbteTipo: Number(tipoComprobante),
-          //   Concepto: Number(concepto),
-          //   DocTipo: idDictionary[tipoDocumento ?? ""],
-          //   DocNro: nroDocumento ?? 0,
-          //   CbteDesde: last_voucher + 1,
-          //   CbteHasta: last_voucher + 1,
-          //   CbteFch: parseInt(fecha?.replace(/-/g, "") ?? ""),
-          //   FchServDesde:
-          //     concepto != "1"
-          //       ? formatDate(form.getValues().dateDesde ?? new Date())
-          //       : null,
-          //   FchServHasta:
-          //     concepto != "1"
-          //       ? formatDate(form.getValues().dateHasta ?? new Date())
-          //       : null,
-          //   FchVtoPago:
-          //     concepto != "1"
-          //       ? formatDate(form.getValues().dateVencimiento ?? new Date())
-          //       : null,
-          //   ImpTotal:
-          //     Math.round(
-          //       100 * (Number(importe) * ivaFloat + Number(tributos))
-          //     ) / 100,
-          //   ImpTotConc: 0,
-          //   ImpNeto: Number(importe),
-          //   ImpOpEx: 0,
-          //   ImpIVA:
-          //     Math.round(
-          //       100 * (Number(importe ?? 0) * ivaFloat - Number(importe))
-          //     ) / 100,
-          //   ImpTrib: 0,
-          //   MonId: "PES",
-          //   MonCotiz: 1,
-          //   Iva: {
-          //     Id: iva,
-          //     BaseImp: Number(importe),
-          //     Importe:
-          //       Math.round(
-          //         100 * (Number(importe ?? 0) * ivaFloat - Number(importe))
-          //       ) / 100,
-          //   },
-          // };
-          // const event = createEventFamily({
-          //   family_group_id: grupoFamiliarId,
-          //   type: "FC",
-          //   amount: comprobante[0]?.importe ?? 0,
-          //   comprobante_id: comprobante[0]?.id ?? "",
-          // });
+            });
+          });
         } else if (tipoComprobante == "0") {
-          // iva = 0;
-
-          //
           comprobante = await createComprobante({
             estado: "pendiente",
             billLink: "", //deberiamos poner un link ?
@@ -298,23 +252,13 @@ export default function Page() {
             family_group_id: grupoFamiliarId,
             health_insurance_id: obraSocialId,
           });
-
-          // const event = createEventFamily({
-          //   family_group_id: grupoFamiliarId,
-          //   type: "REC",
-          //   amount: comprobante[0]?.importe ?? 0,
-          //   comprobante_id: comprobante[0]?.id ?? "",
-          // });
-          // const eventOrg = createEventOrg({
-          //   type: "REC",
-          //   amount: comprobante[0]?.importe ?? 0,
-          //   comprobante_id: comprobante[0]?.id ?? "",
-          // });
         } else if (
           fcSeleccionada &&
           (tipoComprobante == "3" || tipoComprobante == "8")
         ) {
-          const facSeleccionada = comprobantes?.find((x) => x.id == fcSeleccionada[0]?.id);
+          const facSeleccionada = comprobantes?.find(
+            (x) => x.id == fcSeleccionada[0]?.id
+          );
 
           let ivaFloat = (100 + parseFloat(facSeleccionada?.iva ?? "0")) / 100;
 
@@ -338,78 +282,6 @@ export default function Page() {
             previous_facturaId: facSeleccionada?.id,
             health_insurance_id: obraSocialId,
           });
-          // try {
-          //   last_voucher = await afip.ElectronicBilling.getLastVoucher(
-          //     form.getValues().puntoVenta,
-          //     tipoComprobante
-          //   );
-          // } catch {
-          //   last_voucher = 0;
-          // }
-
-          // data = {
-          //   CantReg: 1, // Cantidad de comprobantes a registrar
-          //   PtoVta: comprobante[0]?.ptoVenta,
-          //   CbteTipo: Number(tipoComprobante),
-          //   Concepto: Number(comprobante[0]?.concepto),
-          //   DocTipo: Number(comprobante[0]?.tipoDocumento),
-          //   DocNro: comprobante[0]?.nroDocumento ?? "0",
-          //   CbteDesde: last_voucher + 1,
-          //   CbteHasta: last_voucher + 1,
-          //   CbteFch: parseInt(fecha?.replace(/-/g, "") ?? ""),
-          //   FchServDesde:
-          //     concepto != "1"
-          //       ? formatDate(comprobante[0]?.fromPeriod ?? new Date())
-          //       : null,
-          //   FchServHasta:
-          //     concepto != "1"
-          //       ? formatDate(comprobante[0]?.toPeriod ?? new Date())
-          //       : null,
-          //   FchVtoPago:
-          //     concepto != "1"
-          //       ? formatDate(comprobante[0]?.due_date ?? new Date())
-          //       : null,
-          //   ImpTotal: comprobante[0]?.importe,
-          //   ImpTotConc: 0,
-          //   ImpNeto:
-          //     (Number(comprobante[0]?.importe) / ivaFloat).toFixed(2) ?? "0",
-          //   ImpOpEx: 0,
-          //   ImpIVA:
-          //     Math.round(
-          //       100 *
-          //         ((comprobante[0]?.importe ?? 0) -
-          //           Number(comprobante[0]?.importe) / ivaFloat)
-          //     ) / 100,
-
-          //   ImpTrib: 0,
-          //   MonId: "PES",
-          //   MonCotiz: 1,
-          //   Iva: {
-          //     Id: reversedIvaDictionary[comprobante[0]?.iva ?? "0"],
-          //     BaseImp: (Number(comprobante[0]?.importe) / ivaFloat).toFixed(2),
-          //     Importe:
-          //       Math.round(
-          //         100 *
-          //           ((comprobante[0]?.importe ?? 0) -
-          //             parseFloat(
-          //               (Number(comprobante[0]?.importe) / ivaFloat).toFixed(2)
-          //             ))
-          //       ) / 100,
-          //   },
-          //   CbtesAsoc: {
-          //     Tipo: comprobanteDictionary[
-          //       facSeleccionada?.tipoComprobante ?? ""
-          //     ],
-          //     PtoVta: facSeleccionada?.ptoVenta ?? 1,
-          //     Nro: facSeleccionada?.nroComprobante ?? 0,
-          //   },
-          // };
-          // const event = createEventFamily({
-          //   family_group_id: grupoFamiliarId,
-          //   type: "NC",
-          //   amount: comprobante[0]?.importe ?? 0,
-          //   comprobante_id: comprobante[0]?.id ?? "",
-          // });
         } else {
           toast.error("Error, revise que todos los campos esten completos");
           return null;
@@ -417,76 +289,10 @@ export default function Page() {
 
         console.log("testtt2");
 
-        // if (data) {
-        //   try {
-        //     const res = await afip.ElectronicBilling.createVoucher(data);
-        //   } catch (error) {
-        //     console.log(error);
-        //   }
-        // }
-        // const billResponsible = gruposFamiliar
-        //   ?.find((x: { id: string; }) => x.id == grupoFamiliarId)
-        //   ?.integrants.find((x: { isBillResponsible: any; }) => x.isBillResponsible);
-        // const obraSocial = obrasSociales?.find((x: { id: string; }) => x.id == obraSocialId);
-
         if (comprobante && comprobante[0]) {
           setCreatedComprobante(comprobante[0]);
-          // const html = htmlBill(
-          //   comprobante[0],
-          //   company,
-          //   undefined,
-          //   2,
-          //   marcas?.find((x: { id: string; }) => x.id === brandId),
-          //   nombre,
-          //   billResponsible
-          //     ? billResponsible?.address ??
-          //         "" + " " + (billResponsible?.address_number ?? "")
-          //     : obraSocial?.adress ?? "",
-          //   (billResponsible
-          //     ? billResponsible?.locality
-          //     : obraSocial?.locality) ?? "",
-          //   (billResponsible
-          //     ? billResponsible?.province
-          //     : obraSocial?.province) ?? "",
-          //   (billResponsible
-          //     ? billResponsible?.postal_code?.cp
-          //     : obraSocial?.cpData?.cp) ?? "",
-          //   (billResponsible
-          //     ? billResponsible?.fiscal_id_type
-          //     : obraSocial?.fiscal_id_type) ?? "",
-          //   (billResponsible
-          //     ? billResponsible?.fiscal_id_number
-          //     : obraSocial?.fiscal_id_number?.toString()) ?? "",
-          //   (billResponsible
-          //     ? billResponsible?.afip_status
-          //     : obraSocial?.afip_status) ?? ""
-          // );
-          // const options = {
-          //   width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
-          //   marginLeft: 0.8, // Margen izquierdo en pulgadas. Usar 0.1 para ticket
-          //   marginRight: 0.8, // Margen derecho en pulgadas. Usar 0.1 para ticket
-          //   marginTop: 0.4, // Margen superior en pulgadas. Usar 0.1 para ticket
-          //   marginBottom: 0.4, // Margen inferior en pulgadas. Usar 0.1 para ticket
-          // };
-          // const name = (last_voucher + 1).toString() + ".pdf";
-          // const resHtml = await afip.ElectronicBilling.createPDF({
-          //   html: html,
-          //   file_name: name,
-          //   options: options,
-          // });
-          // const updatedComprobante = await updateComprobante({
-          //   id: comprobante[0]?.id ?? "",
-          //   billLink: resHtml.file,
-          //   number: last_voucher + 1,
-          // });
-          // console.log("resultadHTML", resHtml);
-          // if (resHtml.file) {
-          //   window.open(resHtml.file, "_blank");
-          // }
         }
         setLoading(false);
-        // toast.success("La factura se creo correctamente");
-        // router.push("/dashboard");
         setPage("confirmationPage");
       })();
     } catch {
