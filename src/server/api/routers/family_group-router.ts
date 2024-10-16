@@ -108,11 +108,8 @@ function makeSummary(
       Number(original_comprobante?.iva ?? "0")
     );
     summary.SUBTOTAL += subTotal;
-    console.log("total");
-    console.log(total);
-    console.log("iva");
-    console.log(Number(original_comprobante?.iva ?? "0"));
-    const iva = computeIva((subTotal-saldo_anterior), Number(original_comprobante?.iva ?? "0"));
+
+    const iva = computeIva((total-saldo_anterior), Number(original_comprobante?.iva ?? "0"));
     summary.IVA += iva;
     summary["TOTAL A FACTURAR"] += total;
   });
