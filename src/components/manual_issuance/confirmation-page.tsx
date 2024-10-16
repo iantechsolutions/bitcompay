@@ -321,8 +321,7 @@ const confirmationPage = ({
           comprobante_id: createdComprobante.id ?? "",
         });
       }
-    }
-    else if (tipoComprobante == "0") {
+    } else if (tipoComprobante == "0") {
       if (fgId) {
         const event = createEventFamily({
           family_group_id: fgId,
@@ -483,9 +482,9 @@ const confirmationPage = ({
         {/* <Button
           className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
           onClick={() => {
-            // handleCreate();
+           
             DownloadPDF((url = { htmlBill }));
-            // handleCreate();
+
           }}>
           <CircleCheck className="h-4 w-auto mr-2" />
           Descargar

@@ -50,16 +50,10 @@ export default function Page() {
           first_due_date: dayjs(transaction?.first_due_date).format(
             "DD/MM/YYYY"
           ),
-          additional_info: transaction?.additional_info ?? "NO INFO",
+          additional_info: transaction?.additional_info ?? "",
           payment_date: dayjs(transaction?.payment_date).format("DD/MM/YYYY"),
-          collected_amount:
-            transaction?.collected_amount?.toString() ??
-            "" ??
-            "NO COLLECTED AMOUNT",
-          recollected_amount:
-            transaction?.recollected_amount?.toString() ??
-            "" ??
-            "NO RECOLLECTED AMOUNT",
+          collected_amount: transaction?.collected_amount?.toString() ?? "",
+          recollected_amount: transaction?.recollected_amount?.toString() ?? "",
           // comment: "NO COMMENT",
           statusId: status ?? "", // Puedes ajustar según el contexto
           // processDate: dayjs(transaction?.payment_date).format(
