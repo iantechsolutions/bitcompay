@@ -496,57 +496,43 @@ const confirmationPage = ({
         iva={ivaTotal}
         otherAttributes={otherAttributes}
       />
+
+      {!finishedAFIP && 
       <div className="self-end flex gap-1">
-        {
-          !finishedAFIP &&
-          <Button
-          onClick={() => changePage("formPage")}
-          className="h-7 bg-[#f7f7f7] hover:bg-[#f7f7f7] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none">
-          <ChevronLeftCircleIcon className="mr-2 h-4 w-auto" /> Volver
-          </Button>
-        }
-        {/* <Button
-          className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
-          onClick={() => {
-            // handleCreate();
-            DownloadPDF((url = { htmlBill }));
-            // handleCreate();
-          }}>
-          <CircleCheck className="h-4 w-auto mr-2" />
-          Descargar
-        </Button> */}
+      <Button
+      onClick={() => changePage("formPage")}
+      className="h-7 bg-[#f7f7f7] hover:bg-[#f7f7f7] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none">
+      <ChevronLeftCircleIcon className="mr-2 h-4 w-auto" /> Volver
+      </Button>
 
 
-        {
-          !finishedAFIP ?
+      <>
+      <Button
+      className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
+      onClick={() => {
+        // handleCreate();
+        handleAFIP();
+        // handleCreate();
+      }}
+      disabled={loading}>
+      {loading ? (
+        <Loader2Icon className="mr-2 animate-spin" size={20} />
+      ) : (
+        <CircleCheck className="h-4 w-auto mr-2" />
+      )}
+      Aprobar
+    </Button>
+    <Button className="h-7 bg-[#f9c3c3] hover:bg-[#f9c3c3] text-[#4B4B4B] text-sm rounded-2xl py-4 px-4 shadow-none">
+      <CircleX className="h-4 w-auto mr-2" />
+      Anular
+    </Button>
+    </>
+      </div>
+      }
 
 
-          <>
-          <Button
-          className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
-          onClick={() => {
-            // handleCreate();
-            handleAFIP();
-            // handleCreate();
-          }}
-          disabled={loading}>
-          {loading ? (
-            <Loader2Icon className="mr-2 animate-spin" size={20} />
-          ) : (
-            <CircleCheck className="h-4 w-auto mr-2" />
-          )}
-          Aprobar
-        </Button>
-        <Button className="h-7 bg-[#f9c3c3] hover:bg-[#f9c3c3] text-[#4B4B4B] text-sm rounded-2xl py-4 px-4 shadow-none">
-          <CircleX className="h-4 w-auto mr-2" />
-          Anular
-        </Button>
-        </>
-          :
-
-
-          <>
-          
+{finishedAFIP && 
+      <div className="self-end flex gap-1">
           <Button
           className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
           onClick={() => {
@@ -573,12 +559,10 @@ const confirmationPage = ({
           Crear nueva
         </Button>
 
-          </>
-
-
-        }
-        
+      
       </div>
+      }
+      
     </section>
   );
 };
