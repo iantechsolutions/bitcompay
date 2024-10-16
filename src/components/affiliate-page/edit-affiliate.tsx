@@ -98,7 +98,8 @@ export default function EditAffiliate({
   const router = useRouter();
   const [openCalendar, setOpenCalendar] = useState(false);
 
-  const { mutateAsync: updateAffiliate } = api.integrants.change.useMutation();
+  const { mutateAsync: updateAffiliate, isLoading } =
+    api.integrants.change.useMutation();
 
   // useEffect(() => {
   //   if (Affiliate) {
@@ -131,7 +132,6 @@ export default function EditAffiliate({
     const errors: string[] = [];
     if (!name) errors.push("Nombre");
     if (!estado) errors.push("estado");
-    if (!motivoBaja) errors.push("motivo de baja");
     if (!birthDate) errors.push("fecha de Nacimiento");
     if (!civilStatus) errors.push("estado Civil");
     if (!fiscalIdType) errors.push("Tipo de ID Fiscal");
@@ -522,6 +522,7 @@ export default function EditAffiliate({
             </Button>
             <Button
               onClick={HandleUpdate}
+              disabled={isLoading}
               variant="bitcompay"
               className="font-medium text-xs rounded-full py-1 px-5  text-[#3e3e3e] z-0">
               Modificar

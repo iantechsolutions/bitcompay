@@ -26,7 +26,7 @@ import DetailSheet from "./components_acciones/detail-sheet";
 import DialogCC from "./components_acciones/dialog";
 import { RouterOutputs } from "~/trpc/shared";
 import { toast } from "sonner";
-dayjs.locale('es')
+dayjs.locale("es");
 export type TableRecord = {
   date: Date;
   description: string;
@@ -126,8 +126,7 @@ export const columns: ColumnDef<TableRecord>[] = [
       return (
         <div>
           <div
-            className={`rounded-full inline-block font-bold ${style} px-7 py-1`}
-          >
+            className={`rounded-full inline-block font-bold ${style} px-7 py-1`}>
             {" "}
             {row.getValue("Estado")}
           </div>
@@ -154,14 +153,15 @@ export const columns: ColumnDef<TableRecord>[] = [
       return (
         <div className="relative h-full flex flex-col justify-center items-center mx-10 mr-14">
           {amount === 0 ? (
-            <span className="">{originalAmount}</span>
+            <span className="absolute top-1/2 transform -translate-y-1/2 font-bold">
+              {originalAmount}
+            </span>
           ) : (
             <span
               className={`"absolute top-1/2 transform -translate-y-1/2 font-bold ${
                 amount > 0 ? "text-[#6952EB]" : "text-[#EB2727]"
-              }`}
-            >
-              {amount}
+              }`}>
+              {amount.toFixed(2)}
             </span>
           )}
           <div className="absolute top-1/2 transform translate-y-4 text-[#c4c4c4] text-xs flex flex-row gap-x-1">
@@ -195,10 +195,7 @@ export const columns: ColumnDef<TableRecord>[] = [
         setDialOpen(!dialogOpen);
       };
 
-      const print = async () => {
-        let detailData = row.original as TableRecord;
-
-        setDetailData(detailData);
+      const print = async (detailData: TableRecord | null) => {
         console.log("Detail Data for Print:", detailData?.comprobantes);
 
         const comprobante = detailData?.comprobantes?.find(
@@ -207,9 +204,7 @@ export const columns: ColumnDef<TableRecord>[] = [
             parseInt(detailData?.comprobanteNumber)
         );
 
-        if (!detailData) {
-          return toast.error("Error al descargar");
-        } else if (!comprobante || !comprobante?.billLink) {
+        if (!comprobante || !comprobante?.billLink) {
           return toast.error("No hay comprobantes disponibles para descargar");
         } else {
           const url = comprobante.billLink ?? "";
@@ -252,7 +247,7 @@ export const columns: ColumnDef<TableRecord>[] = [
                 <ViewIcon className="mr-1 h-4" /> Ver
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => print()}>
+              <DropdownMenuItem onClick={() => print(detailData)}>
                 <Download className="mr-1 h-4" /> Descargar
               </DropdownMenuItem>
               <DropdownMenuSeparator />
