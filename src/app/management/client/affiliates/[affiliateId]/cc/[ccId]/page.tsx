@@ -175,7 +175,7 @@ export default function CCDetail(props: {
     const blob = new Blob([excelBuffer], {
       type: "application/octet-stream",
     });
-    saveAs(blob, `movimientos-cc.xlsx`);
+    saveAs(blob, `movimientos-cc-${grupo?.numericalId}.xlsx`);
   }
   return (
     <LayoutContainer>
