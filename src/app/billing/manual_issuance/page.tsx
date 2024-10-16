@@ -766,7 +766,7 @@ export default function Page() {
             </div>
             <div className="flex flex-row justify-between">
               <p className=" text-lg font-semibold">Receptor</p>
-              <div className="pb-2">
+              {/* <div className="pb-2">
                 <Button
                   className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 mr-3 shadow-none"
                   // onClick={() => setOpen(true)}
@@ -787,7 +787,7 @@ export default function Page() {
                   <CircleX className="h-4 w-auto mr-2" />
                   Anular
                 </Button>
-              </div>
+              </div> */}
             </div>
 
             <div className="flex flex-row justify-between gap-8 ">
