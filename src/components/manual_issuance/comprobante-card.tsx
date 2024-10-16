@@ -29,7 +29,7 @@ interface ComprobanteCardProps {
   form: UseFormReturn<ManualGenInputs>;
   tipoComprobante: string;
   setTipoComprobante: (e: string) => void;
-  comprobantesEntidad?: RouterOutputs["comprobantes"]["getByEntity"];
+  comprobantes?: RouterOutputs["comprobantes"]["getByEntity"];
   onValueChange?: () => void;
 }
 export default function ComprobanteCard({
@@ -38,7 +38,7 @@ export default function ComprobanteCard({
   form,
   tipoComprobante,
   setTipoComprobante,
-  comprobantesEntidad,
+  comprobantes,
 }: ComprobanteCardProps) {
   const [concept, setConcept] = useState(true);
 
@@ -624,17 +624,26 @@ export default function ComprobanteCard({
                 render={({ field }) => (
                   <ComboboxDemo
                     options={
-                      comprobantesEntidad?.map((comprobante) => ({
-                        value: comprobante.id.toString(),
-                        label: comprobante.nroComprobante.toString(),
-                      })) ?? []
+                      comprobantes
+                        ?.filter(
+                          (comprobante) =>
+                            comprobante.estado === "parcial" ||
+                            comprobante.estado === "pendiente"
+                        )
+                        ?.map((comprobante) => ({
+                          value: comprobante.id.toString(),
+                          label:
+                            comprobante.nroComprobante.toString() +
+                            " - " +
+                            comprobante.importe.toString(),
+                        })) ?? []
                     }
                     title="Facturas emitidas"
                     placeholder="Seleccionar facturas..."
                     classNameButton="border-none focus:ring-transparent px-0 py-0 h-8 w-full"
                     value={field.value}
                     onSelectionChange={(e) => {
-                      for (const comprobante of comprobantesEntidad ?? []) {
+                      for (const comprobante of comprobantes ?? []) {
                         if (comprobante.id.toString() === e) {
                           form.setValue(
                             "facturasEmitidas.importe",

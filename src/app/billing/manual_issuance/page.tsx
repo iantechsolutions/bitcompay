@@ -80,7 +80,7 @@ export default function Page() {
   const { data: marcas } = api.brands.list.useQuery();
   const { data: gruposFamiliar } = api.family_groups.list.useQuery();
   const { data: obrasSociales } = api.healthInsurances.listClient.useQuery();
-  const { data: comprobantesEntidad } = api.comprobantes.getByEntity.useQuery();
+  // const { data: comprobantesEntidad } = api.comprobantes.getByEntity.useQuery();
   const [subTotal, setSubTotal] = useState<number>(0);
   const [ivaTotal, setIvaTotal] = useState<number>(0);
   const [otherAttributes, setOtherAttributes] = useState<number>(0);
@@ -847,7 +847,7 @@ export default function Page() {
 
             <ComprobanteCard
               onValueChange={computeTotals}
-              comprobantesEntidad={comprobantesEntidad}
+              comprobantes={comprobantes}
               visualization={false}
               form={form}
               tipoComprobante={tipoComprobante}
