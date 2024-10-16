@@ -41,7 +41,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
             className={`text-[#3E3E3E] font-family ${montserrat.className}`}>
             <TRPCReactProvider cookies={cookies().toString()}>
               {props.children}
-              <Toaster />
+              <Toaster closeButton  />
             </TRPCReactProvider>
           </body>
         </html>
@@ -71,7 +71,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
                 )}
                 {!company && checkRole("admin") && props.children}
               </AppLayout>
-              <Toaster />
+              <Toaster  closeButton />
             </TRPCReactProvider>
           </body>
         </html>

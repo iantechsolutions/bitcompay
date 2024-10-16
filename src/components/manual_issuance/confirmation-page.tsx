@@ -2,7 +2,9 @@ import {
   ChevronLeftCircleIcon,
   CircleCheck,
   CircleX,
+  Download,
   Loader2Icon,
+  RefreshCcw,
 } from "lucide-react";
 import { Title } from "../title";
 import { useRouter } from "next/navigation";
@@ -32,6 +34,7 @@ import {
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
 import { useState } from "react";
+import { saveAs } from "file-saver";
 
 interface Props {
   changePage: (page: "formPage" | "confirmationPage") => void;
@@ -63,7 +66,6 @@ interface Props {
   marcas?: any;
   createdComprobante: Comprobante;
   reloadPage: () => void;
-  setGeneratedUrlPopup: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 function formatDate(date: Date | undefined) {
@@ -107,12 +109,14 @@ const confirmationPage = ({
   marcas,
   createdComprobante,
   reloadPage,
-  setGeneratedUrlPopup,
 }: Props) => {
   // function generateComprobante(){
 
   // }
   const [loading, setIsLoading] = useState(false);
+  const [finishedAFIP, setFinishedAFIP] = useState(false);
+  const [url,setUrl] = useState<string | null>(null);
+  const [loadingDownload, setLoadingDownload] = useState(false);
   const { mutateAsync: createEventFamily } =
     api.events.createByType.useMutation();
   const { mutateAsync: createEventOS } =
@@ -120,7 +124,7 @@ const confirmationPage = ({
   const { mutateAsync: createEventOrg } =
     api.events.createByTypeOrg.useMutation();
   const { mutateAsync: updateComprobante } =
-    api.comprobantes.addBillLinkAndNumberAndEstado.useMutation();
+    api.comprobantes.approbate.useMutation();
   const router = useRouter();
 
   function handleApprove() {
@@ -142,6 +146,23 @@ const confirmationPage = ({
     console.log(ivaTotal);
     console.log("otherAttributes");
     console.log(otherAttributes);
+  }
+
+
+  async function handleDownload(){
+    try{
+      setLoadingDownload(true);
+      if (url !== null) {
+        const req = await fetch(url);
+        const blob = await req.blob();
+        saveAs(blob, "comprobante.pdf");
+      }
+      setLoadingDownload(false);
+    }
+    catch(e){
+      toast.error("Error descargando el archivo");
+      setLoadingDownload(false);
+    }
   }
 
   async function handleAFIP() {
@@ -423,12 +444,13 @@ const confirmationPage = ({
 
       toast.success("La factura se creo correctamente");
       setIsLoading(false);
-      reloadPage();
+      setFinishedAFIP(true);
+      setUrl(resHtml.file);
+      // reloadPage();
 
-      if (resHtml.file) {
-        setGeneratedUrlPopup(resHtml.file);
-        // window.open(resHtml.file, "_blank");
-      }
+      // if (resHtml.file) {
+      //   // window.open(resHtml.file, "_blank");
+      // }
     } else {
       toast.error(
         "Error creando el comprobante, la factura ya fue enviada a AFIP"
@@ -475,11 +497,14 @@ const confirmationPage = ({
         otherAttributes={otherAttributes}
       />
       <div className="self-end flex gap-1">
-        <Button
+        {
+          !finishedAFIP &&
+          <Button
           onClick={() => changePage("formPage")}
           className="h-7 bg-[#f7f7f7] hover:bg-[#f7f7f7] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none">
           <ChevronLeftCircleIcon className="mr-2 h-4 w-auto" /> Volver
-        </Button>
+          </Button>
+        }
         {/* <Button
           className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
           onClick={() => {
@@ -490,7 +515,14 @@ const confirmationPage = ({
           <CircleCheck className="h-4 w-auto mr-2" />
           Descargar
         </Button> */}
-        <Button
+
+
+        {
+          !finishedAFIP ?
+
+
+          <>
+          <Button
           className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
           onClick={() => {
             // handleCreate();
@@ -509,6 +541,43 @@ const confirmationPage = ({
           <CircleX className="h-4 w-auto mr-2" />
           Anular
         </Button>
+        </>
+          :
+
+
+          <>
+          
+          <Button
+          className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
+          onClick={() => {
+            // handleCreate();
+            handleDownload();
+            // handleCreate();
+          }}
+          disabled={loading}>
+          {loading ? (
+            <Loader2Icon className="mr-2 animate-spin" size={20} />
+          ) : (
+            <Download className="h-4 w-auto mr-2" />
+          )}
+          Descargar
+        </Button>
+        <Button className="h-7 bg-[#f9c3c3] hover:bg-[#f9c3c3] text-[#4B4B4B] text-sm rounded-2xl py-4 px-4 shadow-none"
+          onClick={() => {
+            if(reloadPage){
+              reloadPage()
+            }
+          }}
+        >
+          <RefreshCcw className="h-4 w-auto mr-2" />
+          Crear nueva
+        </Button>
+
+          </>
+
+
+        }
+        
       </div>
     </section>
   );
