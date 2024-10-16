@@ -122,7 +122,7 @@ export default function ProcedurePage(props: ProcedurePageProps) {
             name: member.name,
             id_type: member.id_type,
             id_number: member.id_number,
-            birth_date: member.birth_date.toString(),
+            birth_date: member.birth_date,
             gender: gender ?? null,
             civil_status: status,
             extention: member.extention,
@@ -300,7 +300,7 @@ export default function ProcedurePage(props: ProcedurePageProps) {
                   <Tabs>
                     <TabsList>
                       <TabsTrigger value="general_info">
-                      Información general
+                        Información general
                       </TabsTrigger>
                       <TabsTrigger value="members">Integrantes</TabsTrigger>
                       <TabsTrigger value="billing">

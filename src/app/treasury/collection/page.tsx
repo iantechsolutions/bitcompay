@@ -37,29 +37,31 @@ export default function Page() {
       if (transaction) {
         tableData.push({
           name: `${transaction?.name ?? "NO LAST NAME"}`,
-          fiscal_id_number:
-            transaction?.fiscal_id_number?.toString() ??
-            "NO ID FISCAL" ??
-            "NO ID FISCAL",
-          invoice_number: String(transaction?.invoice_number) ?? "NO NUMBER",
-          g_c: brand ?? "",
-          product_number: product ?? "",
+          // fiscal_id_number:
+          //   transaction?.fiscal_id_number?.toString() ??
+          //   "NO ID FISCAL" ??
+          //   "NO ID FISCAL",
+          // invoice_number: String(transaction?.invoice_number) ?? "NO NUMBER",
+          g_c: brand ?? "-",
+          product_number: product ?? "-",
           period: dayjs(transaction?.period).format("MM/YYYY"),
           first_due_amount:
             transaction?.first_due_amount?.toFixed(2) ?? "0.00" ?? "NO AMOUNT",
           first_due_date: dayjs(transaction?.first_due_date).format(
             "DD/MM/YYYY"
           ),
-          additional_info: transaction?.additional_info ?? "",
-          payment_date: dayjs(transaction?.payment_date).format("DD/MM/YYYY"),
-          collected_amount: transaction?.collected_amount?.toString() ?? "",
-          recollected_amount: transaction?.recollected_amount?.toString() ?? "",
+          additional_info: transaction?.additional_info ?? "-",
+          payment_date: transaction?.payment_date
+            ? dayjs(transaction.payment_date).isValid()
+              ? dayjs(transaction.payment_date).format("DD/MM/YYYY")
+              : "Fecha no válida"
+            : "-",
+          // collected_amount: transaction?.collected_amount?.toString() ?? "-",
+          recollected_amount:
+            transaction?.recollected_amount?.toString() ?? "-",
           // comment: "NO COMMENT",
-          statusId: status ?? "", // Puedes ajustar según el contexto
-          // processDate: dayjs(transaction?.payment_date).format(
-          //   "DD/MM/YYYY hh:mm:ss"
-          // ),
-          // UN: transaction?.bussinessUnits ?? "NO BU",
+          statusId: status ?? "-",
+          // collected_amount: "-"
         });
       }
     }
