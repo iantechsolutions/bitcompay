@@ -115,7 +115,7 @@ const confirmationPage = ({
   // }
   const [loading, setIsLoading] = useState(false);
   const [finishedAFIP, setFinishedAFIP] = useState(false);
-  const [url,setUrl] = useState<string | null>(null);
+  const [url, setUrl] = useState<string | null>(null);
   const [loadingDownload, setLoadingDownload] = useState(false);
   const { mutateAsync: createEventFamily } =
     api.events.createByType.useMutation();
@@ -148,9 +148,8 @@ const confirmationPage = ({
     console.log(otherAttributes);
   }
 
-
-  async function handleDownload(){
-    try{
+  async function handleDownload() {
+    try {
       setLoadingDownload(true);
       if (url !== null) {
         const req = await fetch(url);
@@ -158,8 +157,7 @@ const confirmationPage = ({
         saveAs(blob, "comprobante.pdf");
       }
       setLoadingDownload(false);
-    }
-    catch(e){
+    } catch (e) {
       toast.error("Error descargando el archivo");
       setLoadingDownload(false);
     }
@@ -342,8 +340,7 @@ const confirmationPage = ({
           comprobante_id: createdComprobante.id ?? "",
         });
       }
-    }
-    else if (tipoComprobante == "0") {
+    } else if (tipoComprobante == "0") {
       if (fgId) {
         const event = createEventFamily({
           family_group_id: fgId,
@@ -497,72 +494,68 @@ const confirmationPage = ({
         otherAttributes={otherAttributes}
       />
 
-      {!finishedAFIP && 
-      <div className="self-end flex gap-1">
-      <Button
-      onClick={() => changePage("formPage")}
-      className="h-7 bg-[#f7f7f7] hover:bg-[#f7f7f7] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none">
-      <ChevronLeftCircleIcon className="mr-2 h-4 w-auto" /> Volver
-      </Button>
+      {!finishedAFIP && (
+        <div className="self-end flex gap-1">
+          <Button
+            onClick={() => changePage("formPage")}
+            className="h-7 bg-[#f7f7f7] hover:bg-[#f7f7f7] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none">
+            <ChevronLeftCircleIcon className="mr-2 h-4 w-auto" /> Volver
+          </Button>
 
-
-      <>
-      <Button
-      className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
-      onClick={() => {
-        // handleCreate();
-        handleAFIP();
-        // handleCreate();
-      }}
-      disabled={loading}>
-      {loading ? (
-        <Loader2Icon className="mr-2 animate-spin" size={20} />
-      ) : (
-        <CircleCheck className="h-4 w-auto mr-2" />
+          <>
+            <Button
+              className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
+              onClick={() => {
+                // handleCreate();
+                handleAFIP();
+                // handleCreate();
+              }}
+              disabled={loading}>
+              {loading ? (
+                <Loader2Icon className="mr-2 animate-spin" size={20} />
+              ) : (
+                <CircleCheck className="h-4 w-auto mr-2" />
+              )}
+              Aprobar
+            </Button>
+            <Button className="h-7 bg-[#f9c3c3] hover:bg-[#f9c3c3] text-[#4B4B4B] text-sm rounded-2xl py-4 px-4 shadow-none">
+              <CircleX className="h-4 w-auto mr-2" />
+              Anular
+            </Button>
+          </>
+        </div>
       )}
-      Aprobar
-    </Button>
-    <Button className="h-7 bg-[#f9c3c3] hover:bg-[#f9c3c3] text-[#4B4B4B] text-sm rounded-2xl py-4 px-4 shadow-none">
-      <CircleX className="h-4 w-auto mr-2" />
-      Anular
-    </Button>
-    </>
-      </div>
-      }
 
 
 {finishedAFIP && 
       <div className=" self-start flex gap-1">
           <Button
-          className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
-          onClick={() => {
-            // handleCreate();
-            handleDownload();
-            // handleCreate();
-          }}
-          disabled={loading}>
-          {loading ? (
-            <Loader2Icon className="mr-2 animate-spin" size={20} />
-          ) : (
-            <Download className="h-4 w-auto mr-2" />
-          )}
-          Descargar
-        </Button>
-        <Button className="h-7 bg-[#f9c3c3] hover:bg-[#f9c3c3] text-[#4B4B4B] text-sm rounded-2xl py-4 px-4 shadow-none"
-          onClick={() => {
-            if(reloadPage){
-              reloadPage()
-            }
-          }}
-        >
-          <RefreshCcw className="h-4 w-auto mr-2" />
-          Crear nueva
-        </Button>
-
-      
-      </div>
-      }
-      
+            className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
+            onClick={() => {
+              // handleCreate();
+              handleDownload();
+              // handleCreate();
+            }}
+            disabled={loading}>
+            {loading ? (
+              <Loader2Icon className="mr-2 animate-spin" size={20} />
+            ) : (
+              <Download className="h-4 w-auto mr-2" />
+            )}
+            Descargar
+          </Button>
+          <Button
+            className="h-7 bg-[#f9c3c3] hover:bg-[#f9c3c3] text-[#4B4B4B] text-sm rounded-2xl py-4 px-4 shadow-none"
+            onClick={() => {
+              if (reloadPage) {
+                reloadPage();
+              }
+            }}>
+            <RefreshCcw className="h-4 w-auto mr-2" />
+            Crear nueva
+          </Button>
+        </div>
+      )}
     </section>
   );
 };
