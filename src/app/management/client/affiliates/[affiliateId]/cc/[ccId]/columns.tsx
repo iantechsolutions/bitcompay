@@ -10,6 +10,7 @@ import {
   CircleCheck,
   CircleX,
   CalendarIcon,
+  Download,
 } from "lucide-react";
 import Edit02Icon from "~/components/icons/edit-02-stroke-rounded";
 import { Button } from "~/components/ui/button";
@@ -126,7 +127,8 @@ export const columns: ColumnDef<TableRecord>[] = [
       return (
         <div>
           <div
-            className={`rounded-full inline-block font-bold ${style} px-7 py-1`}>
+            className={`rounded-full inline-block font-bold ${style} px-7 py-1`}
+          >
             {" "}
             {row.getValue("status")}
           </div>
@@ -158,7 +160,8 @@ export const columns: ColumnDef<TableRecord>[] = [
             <span
               className={`"absolute top-1/2 transform -translate-y-1/2 font-bold ${
                 amount > 0 ? "text-[#6952EB]" : "text-[#EB2727]"
-              }`}>
+              }`}
+            >
               {amount}
             </span>
           )}
@@ -206,9 +209,9 @@ export const columns: ColumnDef<TableRecord>[] = [
         );
 
         if (!detailData) {
-          return toast.error("Error al imprimir");
+          return toast.error("Error al descargar");
         } else if (!comprobante || !comprobante?.billLink) {
-          return toast.error("No hay comprobantes disponibles para imprimir");
+          return toast.error("No hay comprobantes disponibles para descargar");
         } else {
           const url = comprobante.billLink ?? "";
           const filename = comprobante.billLink ?? "";
@@ -251,7 +254,7 @@ export const columns: ColumnDef<TableRecord>[] = [
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => print()}>
-                <Printer className="mr-1 h-4" /> Imprimir
+                <Download className="mr-1 h-4" /> Descargar
               </DropdownMenuItem>
               <DropdownMenuSeparator />
 

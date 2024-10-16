@@ -40,7 +40,7 @@ import { clerkRouter } from "./routers/clerk-router";
 import { zoneRouter } from "./routers/zone-router";
 import { aportes_osRouter } from "./routers/aporte-os-router";
 import { liquidations_countersRouter } from "./routers/liquidationCounter-router";
-
+import {tributesRouter} from "./routers/tributes-router";
 /**
  * This is the primary router for your server.
  *
@@ -88,6 +88,7 @@ export const appRouter = createTRPCRouter({
   zone: zoneRouter,
   aportes_os: aportes_osRouter,
   liquidations_counter: liquidations_countersRouter,
+  tributes: tributesRouter,
 });
 
 // export type definition of API

@@ -46,6 +46,20 @@ import {
   type otherConceptsForm,
 } from "~/lib/types/app";
 import { type Comprobante } from "~/server/db/schema";
+import { Popover, PopoverContent } from "~/components/ui/popover";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
+import { saveAs } from "file-saver";
+
 function formatDate(date: Date | undefined) {
   if (date) {
     const year = date.getFullYear();
@@ -60,13 +74,13 @@ function formatDate(date: Date | undefined) {
 export default function Page() {
   const { mutateAsync: createComprobante } =
     api.comprobantes.create.useMutation();
-    const { mutateAsync: createItem } =
-    api.items.createReturnComp.useMutation();
+  const { mutateAsync: createItem } = api.items.createReturnComp.useMutation();
+  const { mutateAsync: createTribute } = api.tributes.create.useMutation();
   const { data: company } = api.companies.get.useQuery();
   const { data: marcas } = api.brands.list.useQuery();
   const { data: gruposFamiliar } = api.family_groups.list.useQuery();
   const { data: obrasSociales } = api.healthInsurances.listClient.useQuery();
-  const {data: comprobantesEntidad} = api.comprobantes.getByEntity.useQuery();
+  const { data: comprobantesEntidad } = api.comprobantes.getByEntity.useQuery();
   const [subTotal, setSubTotal] = useState<number>(0);
   const [ivaTotal, setIvaTotal] = useState<number>(0);
   const [otherAttributes, setOtherAttributes] = useState<number>(0);
@@ -110,7 +124,7 @@ export default function Page() {
           subTotal += Number(concepts.importe);
         }
         const importe = form.getValues().facturasEmitidas.importe;
-        subTotal+= form.getValues().facturasEmitidas.importe; 
+        subTotal += form.getValues().facturasEmitidas.importe;
       case "Nota de crédito":
         for (const comprobante of asociatedFCForm.getValues().comprobantes) {
           console.log("comprobante del forms", comprobante);
@@ -181,9 +195,7 @@ export default function Page() {
         if (tipoComprobante == "1" || tipoComprobante == "6") {
           let ivaFloat =
             (100 + parseFloat(ivaDictionary[Number(iva)] ?? "0")) / 100;
-          // const billResponsible = gruposFamiliar
-          //   ?.find((x) => x.id == grupoFamiliarId)
-          //   ?.integrants.find((x) => x.isBillResponsible);
+
           comprobante = await createComprobante({
             billLink: "",
             estado: "pendiente",
@@ -203,38 +215,42 @@ export default function Page() {
             family_group_id: grupoFamiliarId,
             health_insurance_id: obraSocialId,
           });
-          const sumaTributos = otherTributesForm.getValues().tributes.reduce(
-            (acc, tribute) => acc + Number(tribute.amount),
-            0
-          );
-          const comprobanteId = comprobante[0]?.id ?? ""
-          if(sumaTributos > 0){
-
-            comprobante = [await createItem({
-              amount: sumaTributos,
-              concept: "Tributos",
-              iva: 0,
-              total: sumaTributos,
-              comprobante_id: comprobanteId,
-            })]
-          }
-          const promises = conceptsForm.getValues().concepts.map(async (concept) => {
-            console.log("concept",concept);
-            if(concept.importe > 0){
-              comprobante = [await createItem({
-                amount: concept.importe,
-                concept: concept.concepto,
-                iva: concept.iva,
-                total: concept.total,
+          const sumaTributos = otherTributesForm
+            .getValues()
+            .tributes.reduce((acc, tribute) => acc + Number(tribute.amount), 0);
+          const comprobanteId = comprobante[0]?.id ?? "";
+          if (sumaTributos > 0) {
+            comprobante = [
+              await createItem({
+                amount: sumaTributos,
+                concept: "Tributos",
+                iva: 0,
+                total: sumaTributos,
                 comprobante_id: comprobanteId,
-              })]
-              return comprobante;
-            }
-          })
-          console.log("preAwaitCoso")
-          console.log(comprobante)
+              }),
+            ];
+          }
+          const promises = conceptsForm
+            .getValues()
+            .concepts.map(async (concept) => {
+              console.log("concept", concept);
+              if (concept.importe > 0) {
+                comprobante = [
+                  await createItem({
+                    amount: concept.importe,
+                    concept: concept.concepto,
+                    iva: concept.iva,
+                    total: concept.total,
+                    comprobante_id: comprobanteId,
+                  }),
+                ];
+                return comprobante;
+              }
+            });
+          console.log("preAwaitCoso");
+          console.log(comprobante);
           const results = await Promise.all(promises);
-          console.log(comprobante)
+          console.log(comprobante);
           console.log(results);
           // comprobante = results[results.length - 1];
           // data = {
@@ -289,9 +305,6 @@ export default function Page() {
           //   comprobante_id: comprobante[0]?.id ?? "",
           // });
         } else if (tipoComprobante == "0") {
-          // iva = 0;
-          console.log("ENTRA RECIBO");
-          //
           comprobante = await createComprobante({
             estado: "pendiente",
             billLink: "", //deberiamos poner un link ?
@@ -311,33 +324,37 @@ export default function Page() {
             family_group_id: grupoFamiliarId,
             health_insurance_id: obraSocialId,
           });
-          const comprobanteId = comprobante[0]?.id ?? ""
-          
-          const promises = otherConceptsForm.getValues().otherConcepts.map(async (concept) => {
-            if(concept.importe > 0) {
-              comprobante = [await createItem({
-                amount: concept.importe,
-                concept: concept.description,
-                iva: 0,
-                total: concept.importe,
-                comprobante_id: comprobanteId,
-              })]
-            }
-          })
-          const results = await Promise.all(promises);
-          const sumaTributos = otherTributesForm.getValues().tributes.reduce(
-            (acc, tribute) => acc + Number(tribute.amount),
-            0 
-          )
-          if(sumaTributos > 0){
+          const comprobanteId = comprobante[0]?.id ?? "";
 
-            comprobante = [await createItem({
-              amount: sumaTributos,
-              concept: "Tributos",
-              iva: 0,
-              total: sumaTributos,
-              comprobante_id: comprobanteId,
-            })]
+          const promises = otherConceptsForm
+            .getValues()
+            .otherConcepts.map(async (concept) => {
+              if (concept.importe > 0) {
+                comprobante = [
+                  await createItem({
+                    amount: concept.importe,
+                    concept: concept.description,
+                    iva: 0,
+                    total: concept.importe,
+                    comprobante_id: comprobanteId,
+                  }),
+                ];
+              }
+            });
+          const results = await Promise.all(promises);
+          const sumaTributos = otherTributesForm
+            .getValues()
+            .tributes.reduce((acc, tribute) => acc + Number(tribute.amount), 0);
+          if (sumaTributos > 0) {
+            comprobante = [
+              await createItem({
+                amount: sumaTributos,
+                concept: "Tributos",
+                iva: 0,
+                total: sumaTributos,
+                comprobante_id: comprobanteId,
+              }),
+            ];
           }
           // const event = createEventFamily({
           //   family_group_id: grupoFamiliarId,
@@ -354,11 +371,12 @@ export default function Page() {
           fcSeleccionada &&
           (tipoComprobante == "3" || tipoComprobante == "8")
         ) {
-          console.log("ENTRA NC");
-          const facSeleccionada = comprobantes?.find((x) => x.id == fcSeleccionada[0]?.id);
+          const facSeleccionada = comprobantes?.find(
+            (x) => x.id == fcSeleccionada[0]?.id
+          );
 
           let ivaFloat = (100 + parseFloat(facSeleccionada?.iva ?? "0")) / 100;
-          const importeBase = (facSeleccionada?.importe ?? 0)/ivaFloat;
+          const importeBase = (facSeleccionada?.importe ?? 0) / ivaFloat;
           comprobante = await createComprobante({
             estado: "pendiente",
             billLink: "",
@@ -380,28 +398,30 @@ export default function Page() {
             health_insurance_id: obraSocialId,
           });
 
-          const comprobanteId = comprobante[0]?.id ?? ""
-          comprobante = [await createItem({
-            amount: importeBase,
-            concept: "Factura a cancelar",
-            iva: importeBase * (ivaFloat - 1),
-            total: facSeleccionada?.importe,
-            comprobante_id: comprobanteId,
-          })]
-
-          const sumaTributos = otherTributesForm.getValues().tributes.reduce(
-            (acc, tribute) => acc + Number(tribute.amount),
-            0 
-          )
-          if(sumaTributos > 0){
-
-            comprobante = [await createItem({
-              amount: sumaTributos,
-              concept: "Tributos",
-              iva: 0,
-              total: sumaTributos,
+          const comprobanteId = comprobante[0]?.id ?? "";
+          comprobante = [
+            await createItem({
+              amount: importeBase,
+              concept: "Factura a cancelar",
+              iva: importeBase * (ivaFloat - 1),
+              total: facSeleccionada?.importe,
               comprobante_id: comprobanteId,
-            })]
+            }),
+          ];
+
+          const sumaTributos = otherTributesForm
+            .getValues()
+            .tributes.reduce((acc, tribute) => acc + Number(tribute.amount), 0);
+          if (sumaTributos > 0) {
+            comprobante = [
+              await createItem({
+                amount: sumaTributos,
+                concept: "Tributos",
+                iva: 0,
+                total: sumaTributos,
+                comprobante_id: comprobanteId,
+              }),
+            ];
           }
 
           // try {
@@ -483,78 +503,12 @@ export default function Page() {
 
         console.log("testtt2");
 
-        // if (data) {
-        //   try {
-        //     const res = await afip.ElectronicBilling.createVoucher(data);
-        //   } catch (error) {
-        //     console.log(error);
-        //   }
-        // }
-        // const billResponsible = gruposFamiliar
-        //   ?.find((x: { id: string; }) => x.id == grupoFamiliarId)
-        //   ?.integrants.find((x: { isBillResponsible: any; }) => x.isBillResponsible);
-        // const obraSocial = obrasSociales?.find((x: { id: string; }) => x.id == obraSocialId);
-
         if (comprobante && comprobante[0]) {
           console.log(comprobante[0]);
           console.log("comprobante[0]");
           setCreatedComprobante(comprobante[0]);
-          // const html = htmlBill(
-          //   comprobante[0],
-          //   company,
-          //   undefined,
-          //   2,
-          //   marcas?.find((x: { id: string; }) => x.id === brandId),
-          //   nombre,
-          //   billResponsible
-          //     ? billResponsible?.address ??
-          //         "" + " " + (billResponsible?.address_number ?? "")
-          //     : obraSocial?.adress ?? "",
-          //   (billResponsible
-          //     ? billResponsible?.locality
-          //     : obraSocial?.locality) ?? "",
-          //   (billResponsible
-          //     ? billResponsible?.province
-          //     : obraSocial?.province) ?? "",
-          //   (billResponsible
-          //     ? billResponsible?.postal_code?.cp
-          //     : obraSocial?.cpData?.cp) ?? "",
-          //   (billResponsible
-          //     ? billResponsible?.fiscal_id_type
-          //     : obraSocial?.fiscal_id_type) ?? "",
-          //   (billResponsible
-          //     ? billResponsible?.fiscal_id_number
-          //     : obraSocial?.fiscal_id_number?.toString()) ?? "",
-          //   (billResponsible
-          //     ? billResponsible?.afip_status
-          //     : obraSocial?.afip_status) ?? ""
-          // );
-          // const options = {
-          //   width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
-          //   marginLeft: 0.8, // Margen izquierdo en pulgadas. Usar 0.1 para ticket
-          //   marginRight: 0.8, // Margen derecho en pulgadas. Usar 0.1 para ticket
-          //   marginTop: 0.4, // Margen superior en pulgadas. Usar 0.1 para ticket
-          //   marginBottom: 0.4, // Margen inferior en pulgadas. Usar 0.1 para ticket
-          // };
-          // const name = (last_voucher + 1).toString() + ".pdf";
-          // const resHtml = await afip.ElectronicBilling.createPDF({
-          //   html: html,
-          //   file_name: name,
-          //   options: options,
-          // });
-          // const updatedComprobante = await updateComprobante({
-          //   id: comprobante[0]?.id ?? "",
-          //   billLink: resHtml.file,
-          //   number: last_voucher + 1,
-          // });
-          // console.log("resultadHTML", resHtml);
-          // if (resHtml.file) {
-          //   window.open(resHtml.file, "_blank");
-          // }
         }
         setLoading(false);
-        // toast.success("La factura se creo correctamente");
-        // router.push("/dashboard");
         setPage("confirmationPage");
       })();
     } catch {
@@ -596,6 +550,10 @@ export default function Page() {
       },
     },
   });
+
+  const [generatedUrlPopup, setGeneratedUrlPopup] = useState<string | null>(
+    null
+  );
 
   const conceptsForm = useForm<ConceptsForm>({
     defaultValues: {
@@ -713,9 +671,37 @@ export default function Page() {
     router.refresh();
   };
 
+  const GeneratedPopup = ({ url }: { url: string | null }) => (
+    <AlertDialog open={url !== null}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Se generó el comprobante</AlertDialogTitle>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={() => setGeneratedUrlPopup(null)}>
+            Cerrar
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={async () => {
+              setGeneratedUrlPopup(null);
+              if (url !== null) {
+                const req = await fetch(url);
+                const blob = await req.blob();
+                saveAs(blob, "comprobante.pdf");
+              }
+            }}
+          >
+            Descargar
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+
   if (!grupoFamiliarId && !obraSocialId) {
     return (
       <LayoutContainer>
+        <GeneratedPopup url={generatedUrlPopup} />
         <section>
           <div>
             <Title>Generación de comprobantes</Title>
@@ -770,9 +756,11 @@ export default function Page() {
       </LayoutContainer>
     );
   }
+
   return (
     <>
       <LayoutContainer>
+        <GeneratedPopup url={generatedUrlPopup} />
         {page === "formPage" && (
           <section className="space-y-5 flex flex-col">
             <div>
@@ -948,6 +936,7 @@ export default function Page() {
             obrasSociales={obrasSociales}
             marcas={marcas}
             createdComprobante={createdComprobante}
+            setGeneratedUrlPopup={setGeneratedUrlPopup}
           />
         )}
       </LayoutContainer>

@@ -186,8 +186,7 @@ export function htmlBill(
   producto: any,
   voucher: number,
   brand: /* outerOutputs["brands"]["list"][number] */
-    | InferSelectModel<typeof schema.brands>
-    | undefined,
+  InferSelectModel<typeof schema.brands> | undefined,
   name: string,
   domicilio: string,
   localidad: string,
@@ -211,8 +210,7 @@ export function htmlBill(
 
   const conceptosList = generateConcepts(comprobante?.items ?? []);
   const amountsList = generateAmounts(comprobante?.items ?? []);
-  const htmlContent =
-   `<!DOCTYPE html>
+  const htmlContent = `<!DOCTYPE html>
   <html lang="en">
     <head>
       <meta charset="UTF-8" />
@@ -237,6 +235,8 @@ export function htmlBill(
         padding: 1 rem;
         -webkit-print-color-adjust: exact; 
 		print-color-adjust: exact;
+    font-family: "Open Sans", sans-serif;
+    color: #3e3e3e
       }
       header {
         display: flex;
@@ -542,7 +542,7 @@ p {
 
 .line {
     width: 1px;
-    height: 30px;
+    height: 60px;
     background-color: #ccc;
     margin: 0 auto 0;
 }
@@ -639,16 +639,13 @@ font-size:10px;
   
           <div class="items-2" style="text-align:center">
         <div class="icon">
-				<span>${getTagForTipoComprobante(
-          comprobanteDictionary[
-            comprobante?.tipoComprobante
-          ]?.toString() ?? ""
-        )}</span>
+				<span>A
+        </span>
 			  </div>
 			<div class="line"></div>
         </div>
   
-        <div class="items-3">
+        <div class="items-3" style="padding-bottom: 5px;">
           <div>
            <h3 style=" font-size: 16px; font-weight:500; padding-bottom:3px;">
             ${comprobante?.tipoComprobante ?? ""} </h3>
@@ -662,8 +659,8 @@ font-size:10px;
           	<p> C.U.I.T:${company.cuit}</p>
             <p> Ingresos Brutos: XXXX</p>
           <p> Fecha de Inicio de Actividad: ${dateNormalFormat(
-              company.activity_start_date
-            )}</p>
+            company.activity_start_date
+          )}</p>
         </div>
       </header>
   
@@ -688,7 +685,9 @@ font-size:10px;
 				<span><span style="font-weight:600; opacity:70;margin-right:4px;">Condición AFIP:</span>${afip_status}</span>
      	</div>
       	<div>
-				<span><span style="font-weight:600; opacity:70;margin-right:4px;">Período:</span>${dateNormalFormat(comprobante?.fromPeriod)}</span>
+				<span><span style="font-weight:600; opacity:70;margin-right:4px;">Período:</span>${dateNormalFormat(
+          comprobante?.fromPeriod
+        )}</span>
 			</div>	
       	</div>
 		<div style="display:flex; flex-direction:column; justify-content:start">
@@ -758,8 +757,10 @@ font-size:10px;
 		<div style="font-size:12px;padding-left:40px; width:350px">
     ${numeroALetras(Math.floor(comprobante?.importe ?? 0))}
 		</div>
-		<div style="color:#6952EB; font-size:18px;font-weight:600; padding-right: 40px; display:flex; flex-direction:row">
-		<div style="padding-right:15px">TOTAL A PAGAR:</div>${formatNumberAsCurrency(comprobante?.importe ?? 0)}
+		<div style="color:#6952EB; font-size:16px;font-weight:600; padding-right: 40px; display:flex; flex-direction:row">
+		<div style="padding-right:15px">TOTAL A PAGAR:</div>${formatNumberAsCurrency(
+      comprobante?.importe ?? 0
+    )}
 		</div>
 	</div>
 
@@ -775,17 +776,17 @@ font-size:10px;
           <div class="payment">
             <span>Lectura de código de barras</span>  
           <img
-            style="width:30px; height:30px;"
+            style="width:30px; height:32px;"
             src="https://utfs.io/f/79d56fb6-2cb7-4760-bbc6-add1a1e434f6-tkdz7.png"
             alt=""
           />
           <img
-             style="width:63px; height:15px;"
+             style="width:63px; height:38px;"
             src="https://utfs.io/f/501ea573-2d69-4f4b-9ae3-95531c540d9c-h1yi1.jpg"
             alt=""
           />
           <img
-            style="width:72px; height:18px;"
+            style="width:55px; height:35px;"
             src="https://utfs.io/f/781ea16d-cac2-46de-9b9a-e59db510e17b-8b1bm4.png"
             alt=""
           />
@@ -1046,7 +1047,6 @@ export const comprobanteDictionary: { [key: string]: number } = {
   "NOTA DE CREDITO M": 53,
   "": 0,
 };
-
 
 export const fcAnc: { [key: string]: string } = {
   "FACTURA A": "NOTA DE CREDITO A",
