@@ -31,9 +31,9 @@ export type TableRecord = {
   date: Date;
   description: string;
   amount: string;
-  comprobanteType: string;
+  "Tipo comprobante": string;
   comprobanteNumber: string;
-  status: "Pagada" | "Pendiente";
+  Estado: "Pagada" | "Pendiente";
   iva: number;
   comprobantes?: RouterOutputs["comprobantes"]["getByLiquidation"];
   currentAccountAmount: string;
@@ -86,7 +86,7 @@ export const columns: ColumnDef<TableRecord>[] = [
           </p>
           <p className="text-[#c4c4c4] text-xs absolute top-1/2 transform translate-y-4">
             {" "}
-            {row.getValue("comprobanteType")} - №{" "}
+            {row.getValue("Tipo comprobante")} - №{" "}
             {row.getValue("comprobanteNumber")}{" "}
           </p>
         </div>
@@ -94,7 +94,7 @@ export const columns: ColumnDef<TableRecord>[] = [
     },
   },
   {
-    accessorKey: "comprobanteType",
+    accessorKey: "Tipo comprobante",
     header: () => null,
     cell: ({ row }) => {
       return null;
@@ -115,12 +115,12 @@ export const columns: ColumnDef<TableRecord>[] = [
     },
   },
   {
-    accessorKey: "status",
+    accessorKey: "Estado",
     header: () => null,
     cell: ({ row }) => {
-      const status = row.getValue("status");
+      const Estado = row.getValue("Estado");
       const style =
-        status === "pagado"
+        Estado === "pagado"
           ? "bg-[#DDF9CC] text-[#4E9F1D]"
           : "bg-[#F9E7CC] text-[#F69709]";
       return (
@@ -128,7 +128,7 @@ export const columns: ColumnDef<TableRecord>[] = [
           <div
             className={`rounded-full inline-block font-bold ${style} px-7 py-1`}>
             {" "}
-            {row.getValue("status")}
+            {row.getValue("Estado")}
           </div>
         </div>
       );

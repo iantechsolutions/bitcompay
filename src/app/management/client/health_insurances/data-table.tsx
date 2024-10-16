@@ -57,7 +57,7 @@ export function DataTable<TData, TValue>({
     router.push(`/management/client/health_insurances/${originalData.id}`);
   };
 
-  const desiredColumns = ["afip_status"];
+  const desiredColumns = ["Estado AFIP"];
   const filteredColumns = Array.from(table.getAllColumns()).filter((column) =>
     desiredColumns.includes(column.id!)
   );

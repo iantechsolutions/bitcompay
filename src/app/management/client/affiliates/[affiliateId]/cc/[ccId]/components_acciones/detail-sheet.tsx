@@ -26,9 +26,9 @@ type DetailSheetProps = {
     date: Date;
     description: string;
     amount: string;
-    comprobanteType: string;
+    "Tipo comprobante": string;
     comprobanteNumber: string;
-    status: "Pagada" | "Pendiente";
+    Estado: "Pagada" | "Pendiente";
     iva: number;
     comprobantes?: RouterOutputs["comprobantes"]["getByLiquidation"];
     currentAccountAmount: string;
@@ -80,7 +80,7 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
             </ul>
           </SheetDescription>
         </SheetHeader>
-        {data?.comprobanteType == "Apertura de CC" ? (
+        {data && data["Tipo comprobante"] == "Apertura de CC" ? (
           <div className="flex flex-row border justify-between items-center px-4 py-5 gap-2 rounded-md mt-3">
             <p className="text-base whitespace-nowrap font-medium-medium ">
               Saldo actual{" "}
