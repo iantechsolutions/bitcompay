@@ -323,12 +323,13 @@ async function approbatecomprobante(liquidationId: string) {
         let lastVoucher = 0;
         const lastVoucherStart = Date.now();
         try {
-          // lastVoucher = await afip.ElectronicBilling.getLastVoucher(
-          //   comprobante?.ptoVenta,
-          //   comprobanteCod
-          // );
-          // last_voucher = 0;
-        } catch {
+          lastVoucher = await afip.ElectronicBilling.getLastVoucher(
+            comprobante?.ptoVenta,
+            comprobanteCod
+          );
+        } catch(e) {
+          console.log("Error al obtener el último comprobante");
+          console.log(e);
           lastVoucher = 0;
         }
         console.log(
@@ -441,6 +442,24 @@ async function approbatecomprobante(liquidationId: string) {
               Importe: comprobante?.nroComprobante,
             },
           };
+
+          try{
+            const res = await afip.ElectronicBilling.createVoucher(data);
+          }
+          catch(e){
+            console.log("Error al enviar el comprobante a AFIP");
+            console.log(comprobante);
+            console.log(e);
+            console.log(fecha);
+            console.log(lastVoucher);
+            // return null;
+          }
+
+          await db.update(schema.comprobantes).set({
+            estado: "pendiente",
+            nroComprobante: lastVoucher + 1,
+          }).where(eq(schema.comprobantes.id, comprobante.id));
+          
           await db.insert(schema.events).values({
             current_amount: lastEventAmount + comprobante.importe,
             description: "NC",
@@ -455,6 +474,64 @@ async function approbatecomprobante(liquidationId: string) {
             statusId: statusCancelado?.id,
           });
         } else {
+
+          data = {
+            CantReg: 1, // Cantidad de comprobantes a registrar
+            PtoVta: comprobante?.ptoVenta,
+            CbteTipo: comprobanteCod?.toString() ?? "",
+            Concepto: Number(comprobante?.concepto),
+            DocTipo: comprobante?.tipoDocumento,
+            DocNro: comprobante?.nroDocumento,
+            CbteDesde: lastVoucher + 1,
+            CbteHasta: lastVoucher + 1,
+            CbteFch: parseInt(fecha?.replace(/-/g, "") ?? ""),
+            FchServDesde: formatDate(comprobante?.fromPeriod ?? new Date()),
+            FchServHasta: formatDate(comprobante?.toPeriod ?? new Date()),
+            FchVtoPago: formatDate(comprobante?.due_date ?? new Date()),
+            ImpTotal: comprobante?.importe,
+            ImpTotConc: 0,
+            ImpNeto: (Number(comprobante?.importe) / (1 + ivaFloat)).toString(),
+            ImpOpEx: 0,
+            ImpIVA: (Number(comprobante?.importe) * ivaFloat).toString(),
+            ImpTrib: 0,
+            MonId: "PES",
+            MonCotiz: 1,
+            Iva: {
+              Id: ivaId,
+              BaseImp: 0,
+              Importe: (Number(comprobante?.importe) * ivaFloat).toString(),
+            },
+          };
+          // try {
+          try{
+            const res = await afip.ElectronicBilling.createVoucher(data);
+          }
+          catch(e){
+            console.log("Error al enviar el comprobante a AFIP");
+            console.log(comprobante);
+            console.log(e);
+            console.log(fecha);
+            console.log(lastVoucher);
+            // return null;
+          }
+          // } catch (e) {
+          //   console.error("Error al enviar el comprobante a AFIP:", e); // Esto imprime el error completo
+          //   console.log("Comprobante:", comprobante);
+          //   console.log("Fecha:", fecha);
+          //   console.log("Último Voucher:", lastVoucher);
+          
+          //   // Si quieres más detalles sobre el stack trace:
+          //   console.error(e);
+          // }
+          
+
+          await db.update(schema.comprobantes).set({
+            estado: "pendiente",
+            nroComprobante: lastVoucher + 1,
+          }).where(eq(schema.comprobantes.id, comprobante.id));
+          
+
+
           await db.insert(schema.payments).values({
             companyId:
               comprobante.family_group?.businessUnitData?.company?.id ?? "",
@@ -485,33 +562,6 @@ async function approbatecomprobante(liquidationId: string) {
             card_type: billResponsible?.pa[0]?.card_type,
           });
 
-          data = {
-            CantReg: 1, // Cantidad de comprobantes a registrar
-            PtoVta: comprobante?.ptoVenta,
-            CbteTipo: comprobanteCod?.toString() ?? "",
-            Concepto: Number(comprobante?.concepto),
-            DocTipo: comprobante?.tipoDocumento,
-            DocNro: comprobante?.nroDocumento,
-            CbteDesde: lastVoucher + 1,
-            CbteHasta: lastVoucher + 1,
-            CbteFch: parseInt(fecha?.replace(/-/g, "") ?? ""),
-            FchServDesde: formatDate(comprobante?.fromPeriod ?? new Date()),
-            FchServHasta: formatDate(comprobante?.toPeriod ?? new Date()),
-            FchVtoPago: formatDate(comprobante?.due_date ?? new Date()),
-            ImpTotal: comprobante?.importe,
-            ImpTotConc: 0,
-            ImpNeto: (Number(comprobante?.importe) / (1 + ivaFloat)).toString(),
-            ImpOpEx: 0,
-            ImpIVA: (Number(comprobante?.importe) * ivaFloat).toString(),
-            ImpTrib: 0,
-            MonId: "PES",
-            MonCotiz: 1,
-            Iva: {
-              Id: ivaId,
-              BaseImp: 0,
-              Importe: (Number(comprobante?.importe) * ivaFloat).toString(),
-            },
-          };
           console.log("COMPROBANTE APROBADO");
           console.log(comprobante.importe);
           await db.insert(schema.events).values({
@@ -1312,13 +1362,16 @@ export async function preparateComprobante(
       let mostRecentFactura;
       let ivaFloatAnterior = 1;
       let previous_bill = 0;
+      console.log("grupoComprobantes", grupo.comprobantes);
+      console.log("grupoComprobantesLenght", grupo.comprobantes.length);
+
       if (grupo?.comprobantes.length > 0) {
         const listadoFac = grupo.comprobantes?.filter(
           (x) =>
             x.origin == "Factura" &&
-            x.estado !=
-              "generada" /* || x.origin == "Factura" && x.estado != "apertura" */
+            x.estado != "generada" /* || x.origin == "Factura" && x.estado != "apertura" */
         );
+        console.log("listadoFac",listadoFac);
         if (listadoFac.length > 0) {
           mostRecentFactura = listadoFac.reduce((prev, current) => {
             return prev.createdAt.getTime() > current.createdAt.getTime()
