@@ -20,6 +20,7 @@ import { api } from "~/trpc/react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { RouterOutputs } from "~/trpc/shared";
+import { Input } from "../ui/input";
 
 interface EditFamilyGroupProps {
   open: boolean;
@@ -45,19 +46,9 @@ export default function EditFamilyGroup({
   const [motivoBaja, setMotivoBaja] = useState("");
   const [bonus, setBonus] = useState(familyGroup?.bonus ?? "");
   const router = useRouter();
-  const { mutateAsync: updateFamilyGroup } =
+  const { mutateAsync: updateFamilyGroup, isLoading } =
     api.family_groups.change.useMutation();
 
-  useEffect(() => {
-    if (familyGroup) {
-      setModalidad(familyGroup.modo?.id ?? "");
-      setUnidadNegocio(familyGroup.businessUnit ?? "");
-      setPlan(familyGroup?.plan?.id ?? "");
-      setEstado(familyGroup.state ?? "");
-      setBonus(familyGroup.bonus ?? "");
-      setEstado(familyGroup.state ?? "");
-    }
-  }, [familyGroup]);
   function validateFields() {
     const errors: string[] = [];
     if (!modalidad) errors.push("modalidad");
@@ -108,13 +99,16 @@ export default function EditFamilyGroup({
         <DialogContent className="sm:max-w-[600px] gap-4 m-4 rounded-2xl p-4">
           <DialogHeader>
             <div className="flex items-center">
-              {/* <Edit02Icon className="mr-1 h-3" /> */}
               <DialogTitle>
                 Grupo familiar N° {familyGroup?.numericalId}
               </DialogTitle>
             </div>
           </DialogHeader>
 
+          {/* Información General */}
+          <h3 className="text-lg font-semibold mt-4 mb-2">
+            Información General
+          </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             {/* Modalidad */}
             <div>
@@ -204,35 +198,58 @@ export default function EditFamilyGroup({
                 </SelectContent>
               </Select>
             </div>
+          </div>
 
-            {/* Zona
-            <div>
-              <Label htmlFor="zona" className="text-xs mb-2 block">
-                Zona
+          {/* Separador para la Información Fiscal */}
+          {/* <h3 className="text-lg font-semibold mt-6 mb-2">
+            Información Fiscal
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4"> */}
+          {/* Aquí puedes añadir más campos relacionados con la información fiscal */}
+          {/* Ejemplo de campos de información fiscal */}
+          {/* <div>
+              <Label htmlFor="fiscalIdType" className="text-xs mb-2 block">
+                Tipo de ID Fiscal
               </Label>
-              <Select onValueChange={setZona} value={zona}>
+              <Select onValueChange={setFiscalIdType} value={fiscalIdType}>
                 <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none">
-                  <SelectValue placeholder="Seleccione una zona" />
+                  <SelectValue placeholder="Seleccione un tipo de ID" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="zona1">Zona 1</SelectItem>
-                  <SelectItem value="zona2">Zona 2</SelectItem>
+                  <SelectItem value="tipo1">Tipo 1</SelectItem>
+                  <SelectItem value="tipo2">Tipo 2</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            */}
-          </div>
+
+            <div>
+              <Label htmlFor="fiscalIdNumber" className="text-xs mb-2 block">
+                Número de ID Fiscal
+              </Label>
+              <Input
+                type="text"
+                id="fiscalIdNumber"
+                value={fiscalIdNumber}
+                onChange={(e) => setFiscalIdNumber(e.target.value)}
+                placeholder="Ingrese el número de ID"
+              />
+            </div> */}
+
+          {/* Otros campos fiscales pueden ser añadidos aquí */}
+          {/* </div> */}
 
           <DialogFooter>
             <Button
               variant="outline"
               onClick={() => setOpen(false)}
-              className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none">
+              className=" bg-[#F7F7F7] hover:bg-[#DEF5DD] text-[#3e3e3e] font-medium text-xs rounded-full py-1 px-5">
               Cancelar
             </Button>
             <Button
+              disabled={isLoading}
               onClick={() => HandleUpdate()}
-              className="ml-2 border-green-300 border-0 border-b bg-background text-[#3E3E3E] rounded-none">
+              variant="bitcompay"
+              className="font-medium text-xs rounded-full py-1 px-5  text-[#3e3e3e] z-0">
               Actualizar
             </Button>
           </DialogFooter>

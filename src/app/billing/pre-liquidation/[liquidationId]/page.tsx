@@ -79,6 +79,7 @@ export default async function Home(props: {
   // })) || [{ value: "", label: "" }];
 
   const periodo = dayjs.utc(preliquidation?.period).format("MM/YYYY") ?? "-";
+
   const headers = [
     "NRO. GF",
     "Nombre",
