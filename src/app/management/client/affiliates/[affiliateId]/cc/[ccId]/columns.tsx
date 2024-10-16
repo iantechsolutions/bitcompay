@@ -26,8 +26,7 @@ import DetailSheet from "./components_acciones/detail-sheet";
 import DialogCC from "./components_acciones/dialog";
 import { RouterOutputs } from "~/trpc/shared";
 import { toast } from "sonner";
-import { Span } from "next/dist/trace";
-
+dayjs.locale('es')
 export type TableRecord = {
   date: Date;
   description: string;

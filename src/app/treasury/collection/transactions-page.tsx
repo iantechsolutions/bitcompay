@@ -3,27 +3,28 @@
 import { useLayoutEffect, useState } from "react";
 import { LargeTable } from "~/components/table";
 import { recHeaders } from "~/server/uploads/validators";
-// import { TransactionsFiltersDialog } from "./transactions-filters";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import "dayjs/locale/es"; // import the locale
+import "dayjs/locale/es"; // Importar el idioma
 import { type RouterOutputs } from "~/trpc/shared";
 import LayoutContainer from "~/components/layout-container";
+
 dayjs.extend(utc);
 dayjs.locale("es");
+
 export default function TransactionsPage(props: {
   transactions: RouterOutputs["transactions"]["list"];
 }) {
-  const [height, setHeight] = useState(600);
+  const [height, setHeight] = useState(0); // Inicializa a 0
 
   useLayoutEffect(() => {
     function handleResize() {
-      setHeight(window.innerHeight - (90 + 24));
+      setHeight(window.innerHeight - (90 + 24)); // Ajusta la altura según el tamaño de la ventana
     }
 
     window.addEventListener("resize", handleResize);
 
-    handleResize();
+    handleResize(); // Llama a la función al cargar el componente
 
     return () => {
       window.removeEventListener("resize", handleResize);
@@ -38,7 +39,9 @@ export default function TransactionsPage(props: {
   });
 
   return (
-    <div>
+    <div className="overflow-x-auto max-h-[calc(100vh-114px)]">
+      {" "}
+      {/* Ajusta la altura máxima según sea necesario */}
       <LargeTable height={height} headers={recHeaders} rows={tableRows} />
     </div>
   );
