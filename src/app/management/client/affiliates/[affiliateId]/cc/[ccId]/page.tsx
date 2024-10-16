@@ -198,7 +198,12 @@ export default function CCDetail(props: {
                     : "text-black"
                 }`}
               >
-                {lastEvent.current_amount.toFixed(2)}
+                {new Intl.NumberFormat("es-AR",{
+                  style: "currency",
+                  currency: "ARS",
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }).format(lastEvent.current_amount)}
               </span>
             ) : (
               <span className={`text-2xl font-bold text-black`}>0.00</span>
