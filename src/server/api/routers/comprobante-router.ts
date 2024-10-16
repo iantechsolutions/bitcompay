@@ -425,14 +425,14 @@ async function approbatecomprobante(liquidationId: string) {
             ImpTotConc: 0,
             ImpNeto: (Number(comprobante?.importe) / (1 + ivaFloat)).toString(),
             ImpOpEx: 0,
-            ImpIVA: (Number(comprobante?.importe) * ivaFloat).toString(),
+            ImpIVA: (Number(comprobante?.importe) - (Number(comprobante?.importe) / (1 + ivaFloat))).toString(),
             ImpTrib: 0,
             MonId: "PES",
             MonCotiz: 1,
             Iva: {
               Id: ivaId,
-              BaseImp: 0,
-              Importe: (Number(comprobante?.importe) * ivaFloat).toString(),
+              BaseImp: (Number(comprobante?.importe) / (1 + ivaFloat)),
+              Importe: (Number(comprobante?.importe) - (Number(comprobante?.importe) / (1 + ivaFloat))).toString(),
             },
             CbtesAsoc: {
               Tipo: comprobanteDictionary[
@@ -452,7 +452,7 @@ async function approbatecomprobante(liquidationId: string) {
             console.log(e);
             console.log(fecha);
             console.log(lastVoucher);
-            // return null;
+            return null;
           }
 
           await db.update(schema.comprobantes).set({
@@ -474,7 +474,27 @@ async function approbatecomprobante(liquidationId: string) {
             statusId: statusCancelado?.id,
           });
         } else {
-
+          console.log("afip numbers");
+          console.log("ivaFloat", ivaFloat);
+          console.log(
+            "ImpTotal: ", comprobante?.importe
+          )
+          console.log(
+            "ImpTotConc: ", 0
+          )
+          console.log(
+            "ImpNeto: ", (Number(comprobante?.importe) / (1 + ivaFloat)).toString()
+          )
+          console.log(
+            "ImpOpEx: ", 0
+          )
+          console.log(
+            "ImpTrib", 0
+          )
+          console.log(
+            "ImpIVA: ", (Number(comprobante?.importe) - (Number(comprobante?.importe) / (1 + ivaFloat))).toString()
+          )
+          
           data = {
             CantReg: 1, // Cantidad de comprobantes a registrar
             PtoVta: comprobante?.ptoVenta,
@@ -492,14 +512,14 @@ async function approbatecomprobante(liquidationId: string) {
             ImpTotConc: 0,
             ImpNeto: (Number(comprobante?.importe) / (1 + ivaFloat)).toString(),
             ImpOpEx: 0,
-            ImpIVA: (Number(comprobante?.importe) * ivaFloat).toString(),
+            ImpIVA: (Number(comprobante?.importe) - (Number(comprobante?.importe) / (1 + ivaFloat))).toString(),
             ImpTrib: 0,
             MonId: "PES",
             MonCotiz: 1,
             Iva: {
               Id: ivaId,
-              BaseImp: 0,
-              Importe: (Number(comprobante?.importe) * ivaFloat).toString(),
+              BaseImp: (Number(comprobante?.importe) / (1 + ivaFloat)),
+              Importe: (Number(comprobante?.importe) - (Number(comprobante?.importe) / (1 + ivaFloat))).toString(),
             },
           };
           // try {
@@ -512,7 +532,7 @@ async function approbatecomprobante(liquidationId: string) {
             console.log(e);
             console.log(fecha);
             console.log(lastVoucher);
-            // return null;
+            return null;
           }
           // } catch (e) {
           //   console.error("Error al enviar el comprobante a AFIP:", e); // Esto imprime el error completo
@@ -1424,9 +1444,10 @@ export async function preparateComprobante(
           bonificacion,
           abono,
           differential_amount,
-          totalAportes,
           previous_bill,
-          saldo
+          saldo,
+          totalAportes
+          
         );
       if (ivaPostFiltro && ivaPostFiltro == "3") {
         ivaFloat = 1;
