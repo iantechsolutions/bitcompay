@@ -3,6 +3,7 @@ import {
   ChevronRightCircleIcon,
   CircleCheck,
   CircleX,
+  Loader2Icon,
 } from "lucide-react";
 import { Title } from "../title";
 import GeneralCard from "./general-card";
@@ -33,6 +34,7 @@ import {
 } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
+import { useState } from "react";
 
 interface Props {
   changePage: (page: "formPage" | "confirmationPage") => void;
@@ -111,6 +113,7 @@ const confirmationPage = ({
   // function generateComprobante(){
 
   // }
+  const [loading, setIsLoading] = useState(false);
   const { mutateAsync: createEventFamily } =
     api.events.createByType.useMutation();
   const { mutateAsync: createEventOS } =
@@ -143,6 +146,7 @@ const confirmationPage = ({
   }
 
   async function handleAFIP() {
+    setIsLoading(true);
     handleApprove();
     const formValues = form.getValues();
     const concepto = formValues.tipoDeConcepto;
@@ -289,6 +293,7 @@ const confirmationPage = ({
     
     } else {
       toast.error("Error, revise que todos los campos esten completos");
+      setIsLoading(false);
       return null;
     }
 
@@ -298,6 +303,7 @@ const confirmationPage = ({
       } catch (error) {
         console.log(error);
         toast.error("Error enviando a AFIP: " + error);
+        setIsLoading(false);
         return null;
       }
     }
@@ -425,7 +431,12 @@ const confirmationPage = ({
         window.open(resHtml.file, "_blank");
       }
       toast.success("La factura se creo correctamente");
+      setIsLoading(false);
       reloadPage();
+    }
+    else{
+      toast.error("Error creando el comprobante, la factura ya fue enviada a AFIP");
+      setIsLoading(false);
     }
   }
 
@@ -482,8 +493,14 @@ const confirmationPage = ({
             handleAFIP();
             // handleCreate();
           }}
+          disabled={loading}
         >
-          <CircleCheck className="h-4 w-auto mr-2" />
+          {
+            loading ?
+             <Loader2Icon className="mr-2 animate-spin" size={20} /> :
+             <CircleCheck className="h-4 w-auto mr-2" />
+          }
+          
           Aprobar
         </Button>
         <Button className="h-7 bg-[#f9c3c3] hover:bg-[#f9c3c3] text-[#4B4B4B] text-sm rounded-2xl py-4 px-4 shadow-none">

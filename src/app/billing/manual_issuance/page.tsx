@@ -220,18 +220,71 @@ export default function Page() {
             amount: sumaTributos,
             concept: "Tributos",
             iva: 0,
-            total: subTotal,
+            total: sumaTributos,
             comprobante_id: comprobanteId,
           });
           conceptsForm.getValues().concepts.forEach(async (concept) => {
-            await createItem({
-              amount: concept.importe,
-              concept: concept.concepto,
-              iva: concept.iva,
-              total: concept.total,
-              comprobante_id: comprobanteId,
-            });
+            if (concept.importe > 0) {
+              await createItem({
+                amount: concept.importe,
+                concept: concept.concepto,
+                iva: concept.iva,
+                total: concept.total,
+                comprobante_id: comprobanteId,
+              });
+            }
           });
+          // data = {
+          //   CantReg: 1, // Cantidad de comprobantes a registrar
+          //   PtoVta: Number(form.getValues().puntoVenta),
+          //   CbteTipo: Number(tipoComprobante),
+          //   Concepto: Number(concepto),
+          //   DocTipo: idDictionary[tipoDocumento ?? ""],
+          //   DocNro: nroDocumento ?? 0,
+          //   CbteDesde: last_voucher + 1,
+          //   CbteHasta: last_voucher + 1,
+          //   CbteFch: parseInt(fecha?.replace(/-/g, "") ?? ""),
+          //   FchServDesde:
+          //     concepto != "1"
+          //       ? formatDate(form.getValues().dateDesde ?? new Date())
+          //       : null,
+          //   FchServHasta:
+          //     concepto != "1"
+          //       ? formatDate(form.getValues().dateHasta ?? new Date())
+          //       : null,
+          //   FchVtoPago:
+          //     concepto != "1"
+          //       ? formatDate(form.getValues().dateVencimiento ?? new Date())
+          //       : null,
+          //   ImpTotal:
+          //     Math.round(
+          //       100 * (Number(importe) * ivaFloat + Number(tributos))
+          //     ) / 100,
+          //   ImpTotConc: 0,
+          //   ImpNeto: Number(importe),
+          //   ImpOpEx: 0,
+          //   ImpIVA:
+          //     Math.round(
+          //       100 * (Number(importe ?? 0) * ivaFloat - Number(importe))
+          //     ) / 100,
+          //   ImpTrib: 0,
+          //   MonId: "PES",
+          //   MonCotiz: 1,
+          //   Iva: {
+          //     Id: iva,
+          //     BaseImp: Number(importe),
+          //     Importe:
+          //       Math.round(
+          //         100 * (Number(importe ?? 0) * ivaFloat - Number(importe))
+          //       ) / 100,
+          //   },
+          // };
+          // const event = createEventFamily({
+          //   family_group_id: grupoFamiliarId,
+          //   type: "FC",
+          //   amount: comprobante[0]?.importe ?? 0,
+          //   comprobante_id: comprobante[0]?.id ?? "",
+          // });
         } else if (tipoComprobante == "0") {
           comprobante = await createComprobante({
             estado: "pendiente",
@@ -252,6 +305,43 @@ export default function Page() {
             family_group_id: grupoFamiliarId,
             health_insurance_id: obraSocialId,
           });
+          const comprobanteId = comprobante[0]?.id ?? "";
+          otherConceptsForm
+            .getValues()
+            .otherConcepts.forEach(async (concept) => {
+              if (concept.importe > 0) {
+                await createItem({
+                  amount: concept.importe,
+                  concept: concept.description,
+                  iva: 0,
+                  total: concept.importe,
+                  comprobante_id: comprobanteId,
+                });
+              }
+            });
+          const sumaTributos = otherTributesForm
+            .getValues()
+            .tributes.reduce((acc, tribute) => acc + Number(tribute.amount), 0);
+          if (sumaTributos > 0) {
+            const tributo = await createItem({
+              amount: sumaTributos,
+              concept: "Tributos",
+              iva: 0,
+              total: sumaTributos,
+              comprobante_id: comprobanteId,
+            });
+          }
+          // const event = createEventFamily({
+          //   family_group_id: grupoFamiliarId,
+          //   type: "REC",
+          //   amount: comprobante[0]?.importe ?? 0,
+          //   comprobante_id: comprobante[0]?.id ?? "",
+          // });
+          // const eventOrg = createEventOrg({
+          //   type: "REC",
+          //   amount: comprobante[0]?.importe ?? 0,
+          //   comprobante_id: comprobante[0]?.id ?? "",
+          // });
         } else if (
           fcSeleccionada &&
           (tipoComprobante == "3" || tipoComprobante == "8")
@@ -261,7 +351,7 @@ export default function Page() {
           );
 
           let ivaFloat = (100 + parseFloat(facSeleccionada?.iva ?? "0")) / 100;
-
+          const importeBase = (facSeleccionada?.importe ?? 0) / ivaFloat;
           comprobante = await createComprobante({
             estado: "pendiente",
             billLink: "",
@@ -282,6 +372,101 @@ export default function Page() {
             previous_facturaId: facSeleccionada?.id,
             health_insurance_id: obraSocialId,
           });
+
+          const comprobanteId = comprobante[0]?.id ?? "";
+          await createItem({
+            amount: importeBase,
+            concept: "Factura a cancelar",
+            iva: importeBase * (ivaFloat - 1),
+            total: facSeleccionada?.importe,
+            comprobante_id: comprobanteId,
+          });
+
+          const sumaTributos = otherTributesForm
+            .getValues()
+            .tributes.reduce((acc, tribute) => acc + Number(tribute.amount), 0);
+          if (sumaTributos > 0) {
+            const tributo = await createItem({
+              amount: sumaTributos,
+              concept: "Tributos",
+              iva: 0,
+              total: sumaTributos,
+              comprobante_id: comprobanteId,
+            });
+          }
+
+          // try {
+          //   last_voucher = await afip.ElectronicBilling.getLastVoucher(
+          //     form.getValues().puntoVenta,
+          //     tipoComprobante
+          //   );
+          // } catch {
+          //   last_voucher = 0;
+          // }
+
+          // data = {
+          //   CantReg: 1, // Cantidad de comprobantes a registrar
+          //   PtoVta: comprobante[0]?.ptoVenta,
+          //   CbteTipo: Number(tipoComprobante),
+          //   Concepto: Number(comprobante[0]?.concepto),
+          //   DocTipo: Number(comprobante[0]?.tipoDocumento),
+          //   DocNro: comprobante[0]?.nroDocumento ?? "0",
+          //   CbteDesde: last_voucher + 1,
+          //   CbteHasta: last_voucher + 1,
+          //   CbteFch: parseInt(fecha?.replace(/-/g, "") ?? ""),
+          //   FchServDesde:
+          //     concepto != "1"
+          //       ? formatDate(comprobante[0]?.fromPeriod ?? new Date())
+          //       : null,
+          //   FchServHasta:
+          //     concepto != "1"
+          //       ? formatDate(comprobante[0]?.toPeriod ?? new Date())
+          //       : null,
+          //   FchVtoPago:
+          //     concepto != "1"
+          //       ? formatDate(comprobante[0]?.due_date ?? new Date())
+          //       : null,
+          //   ImpTotal: comprobante[0]?.importe,
+          //   ImpTotConc: 0,
+          //   ImpNeto:
+          //     (Number(comprobante[0]?.importe) / ivaFloat).toFixed(2) ?? "0",
+          //   ImpOpEx: 0,
+          //   ImpIVA:
+          //     Math.round(
+          //       100 *
+          //         ((comprobante[0]?.importe ?? 0) -
+          //           Number(comprobante[0]?.importe) / ivaFloat)
+          //     ) / 100,
+
+          //   ImpTrib: 0,
+          //   MonId: "PES",
+          //   MonCotiz: 1,
+          //   Iva: {
+          //     Id: reversedIvaDictionary[comprobante[0]?.iva ?? "0"],
+          //     BaseImp: (Number(comprobante[0]?.importe) / ivaFloat).toFixed(2),
+          //     Importe:
+          //       Math.round(
+          //         100 *
+          //           ((comprobante[0]?.importe ?? 0) -
+          //             parseFloat(
+          //               (Number(comprobante[0]?.importe) / ivaFloat).toFixed(2)
+          //             ))
+          //       ) / 100,
+          //   },
+          //   CbtesAsoc: {
+          //     Tipo: comprobanteDictionary[
+          //       facSeleccionada?.tipoComprobante ?? ""
+          //     ],
+          //     PtoVta: facSeleccionada?.ptoVenta ?? 1,
+          //     Nro: facSeleccionada?.nroComprobante ?? 0,
+          //   },
+          // };
+          // const event = createEventFamily({
+          //   family_group_id: grupoFamiliarId,
+          //   type: "NC",
+          //   amount: comprobante[0]?.importe ?? 0,
+          //   comprobante_id: comprobante[0]?.id ?? "",
+          // });
         } else {
           toast.error("Error, revise que todos los campos esten completos");
           return null;
@@ -518,7 +703,7 @@ export default function Page() {
             </div>
             <div className="flex flex-row justify-between">
               <p className=" text-lg font-semibold">Receptor</p>
-              <div className="pb-2">
+              {/* <div className="pb-2">
                 <Button
                   className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 mr-3 shadow-none"
                   // onClick={() => setOpen(true)}
@@ -539,7 +724,7 @@ export default function Page() {
                   <CircleX className="h-4 w-auto mr-2" />
                   Anular
                 </Button>
-              </div>
+              </div> */}
             </div>
 
             <div className="flex flex-row justify-between gap-8 ">
