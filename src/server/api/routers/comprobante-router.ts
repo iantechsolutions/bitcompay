@@ -1637,7 +1637,7 @@ async function calculateAmount(
 
   const precioNuevo = abono - bonificacion + diferencial;
   if (saldo > 0) {
-    amount = (previous_bill + interest + precioNuevo) * ivaFloat - totalAportes;
+    amount = previous_bill + interest + precioNuevo * ivaFloat - totalAportes;
   } else {
     amount = precioNuevo * ivaFloat - totalAportes;
   }
