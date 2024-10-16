@@ -66,7 +66,8 @@ export default function CCDetail(props: {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {comprobantes?.map((comprobante) => (
+          {comprobantes?.filter(x=>x.estado!="generada")
+          .map((comprobante) => (
             <TableRow
               key={comprobante.id}
               className="border-b-2 border-gray-200 border-x-0 text-center  "
