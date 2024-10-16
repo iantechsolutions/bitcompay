@@ -1,5 +1,6 @@
 import Afip from "@afipsdk/afip.js";
 import { type ClassValue, clsx } from "clsx";
+import { sub } from "date-fns";
 import { fi } from "date-fns/locale";
 import { InferSelectModel } from "drizzle-orm";
 import { nanoid } from "nanoid";
@@ -203,6 +204,47 @@ export function htmlBill(
   afip_status: string
 ) {
   
+  const subtotal = comprobante?.items.reduce(
+    (acc: number, item: { amount: number }) => acc + (item?.amount ?? 0),
+    0
+  )
+
+  const iva = comprobante?.items.reduce(
+    (acc: number, item: { iva: number }) => acc + (item?.iva ?? 0),
+    0
+  )
+
+  const totalTributes = comprobante?.otherTributes.reduce(
+    (acc: number, tribute: { amount: number }) => acc + (tribute?.amount ?? 0),
+    0
+  )
+
+ const total = subtotal + iva + totalTributes
+  
+// const tribute = comprobante?.otherTributes.reduce(
+//   (acc: number, tribute: { tribute: string }) => acc + (tribute?.tribute ?? 0),
+//   0
+// )
+
+// const jurisdiction = comprobante?.otherTributes.reduce(
+//   (acc: number, tribute: {  jurisdiction: string }) => acc + (tribute?.jurisdiction ?? 0),
+//   0
+// )
+// const alicuota = comprobante?.otherTributes.reduce(
+//   (acc: number, tribute: { alicuota: number }) => acc + (tribute?.alicuota ?? 0),
+//   0
+// )
+// const base_imponible = comprobante?.otherTributes.reduce(
+//   (acc: number, tribute: { base_imponible: number }) => acc + (tribute?.base_imponible ?? 0),
+//   0
+// )
+// const tributeAmount = comprobante?.otherTributes.reduce(
+//   (acc: number, tribute: { amount: number }) => acc + (tribute?.amount ?? 0),
+//   0
+// )
+
+
+
   let canales: any;
   if (producto) {
     canales = producto?.channels;
@@ -252,6 +294,10 @@ export function htmlBill(
         border-bottom: 1px solid #ccc;
         width: 100%;
       }
+        
+        .tribute-grid div {
+padding-bottom:3px
+}
 
         .items-1 {
         margin-left:40px;
@@ -663,7 +709,7 @@ font-size:10px;
 
           <p> Fecha de Emisión: ${dateNormalFormat(new Date())}</p>
           	<p> C.U.I.T:${company.cuit}</p>
-            <p> Ingresos Brutos: XXXX</p>
+            <p> Ingresos Brutos: 0</p>
           <p> Fecha de Inicio de Actividad: ${dateNormalFormat(
             company.activity_start_date
           )}</p>
@@ -727,33 +773,33 @@ font-size:10px;
 
 
        <div class="tributos" style="display:flex; flex-direction: row;justify-content:space-between; padding-left:40px; padding-right:40px">
-	<div style="display:flex; flex-direction: row;justify-content:space-between; gap:15px">
-		<div style="display:flex; flex-direction:column">
-			<p style="font-weight:600">TRIBUTO</p>
-			<p>Ret. Imp. Gan. XXXX</p>
-		</div>
-		<div style="display:flex; flex-direction:column">
-			<p style="font-weight:600">JURISDICCIÓN</p>
-			<p>Buenos Aires XXXX</p>
-		</div>
-		<div style="display:flex; flex-direction:column">
-			<p style="font-weight:600">ALICUOTA</p>
-			<p>X%</p>
-		</div>
-		<div style="display:flex; flex-direction:column">
-			<p style="font-weight:600">BASE IMPONIBLE</p>
-			<p>$XX,XX</p>
-		</div>
-		<div style="display:flex; flex-direction:column">
-			<p style="font-weight:600">IMPORTE</p>
-			<p>$XX,XX</p>
-		</div>
-	</div>
+	
+       ${totalTributes > 0 && (`<div class="tribute-grid" style="display: grid; grid-template-columns: repeat(5, 1fr);grid-auto-rows: min-content;">
+    <!-- Use div or span instead of p for inline layout if needed -->
+    <div><p style="font-weight: 600; margin: 0;">TRIBUTO</p></div>
+    <div><p style="font-weight: 600; margin: 0;">JURISDICCIÓN</p></div>
+    <div><p style="font-weight: 600; margin: 0;">ALICUOTA</p></div>
+    <div><p style="font-weight: 600; margin: 0;">BASE IMPONIBLE</p></div>
+    <div><p style="font-weight: 600; margin: 0;">IMPORTE</p></div>
+    <!-- Example content -->
+    ${comprobante.otherTributes
+      .map(
+        (tribute: any) =>
+          `<div><span>${tribute.tribute}</span></div>
+          <div><span>${tribute.jurisdiction}</span></div>
+          <div><span>${formatNumberAsCurrency(tribute.alicuota)}</span></div>
+          <div><span>${formatNumberAsCurrency(tribute.base)}</span></div>
+          <div><span>${formatNumberAsCurrency(tribute.amount)}</span></div>`
+      )
+      .join("\n")}
+
+  </div>`)}
 
   <div style="display:flex; flex-direction:column; margin-bottom: 10px; font-weight:500;">
-		<p style="font-size:12px; text-align:right; ">Sub-total: $XX.XXX,XX</p>
-    <p style="font-size:12px; text-align:right">IVA 10,5%: $XX.XXX,XX</p>
-		<p style="font-size:12px; text-align:right">Otros Tributos: $XX.XXX,XX</p>
+		<p style="font-size:12px; text-align:right; ">Sub-total: ${formatNumberAsCurrency(subtotal ?? 0)}</p>
+    <p style="font-size:12px; text-align:right">IVA: ${formatNumberAsCurrency(iva ?? 0)}</p>
+		${totalTributes > 0 && (`<p style="font-size:12px; text-align:right">Otros Tributos: ${formatNumberAsCurrency(totalTributes ?? 0)}</p>`)}
+    
     <p style="font-size:12px; text-align:right">Pagos a cuenta: $XX.XXX,XX</p>
 	</div>
 </div>
@@ -761,11 +807,11 @@ font-size:10px;
 <section style="padding-bottom: 15px; border-bottom:1px solid #ccc ">
 	<div class="resumen-total">
 		<div style="font-size:12px;padding-left:40px; width:350px">
-    ${numeroALetras(Math.floor(comprobante?.importe ?? 0))}
+    ${numeroALetras(Math.floor(total ?? 0))}
 		</div>
 		<div style="color:#6952EB; font-size:16px;font-weight:600; padding-right: 40px; display:flex; flex-direction:row">
 		<div style="padding-right:15px">TOTAL A PAGAR:</div>${formatNumberAsCurrency(
-      comprobante?.importe ?? 0
+      total ?? 0
     )}
 		</div>
 	</div>
@@ -784,18 +830,15 @@ font-size:10px;
           <img
             style="width:30px; height:32px;"
             src="https://utfs.io/f/79d56fb6-2cb7-4760-bbc6-add1a1e434f6-tkdz7.png"
-            alt=""
           />
           <img
              style="width:60px; height:40px;"
             src="https://utfs.io/f/501ea573-2d69-4f4b-9ae3-95531c540d9c-h1yi1.jpg"
-            alt=""
           />
           <img
             style="width:55px; height:35px;"
             src="https://getlogovector.com/wp-content/uploads/2023/12/mercado-pago-logo-vector-2023.png"
-            alt=""
-          />
+            />
            </div>
            
           <div class="payment" style="height: 40px; padding-left: 35px; padding-right: 35px;">
@@ -803,26 +846,19 @@ font-size:10px;
           <img
             style="width:100px; height:15px;"
             src="https://utfs.io/f/a215f09e-25e8-4eb3-9d1c-6adf1d17baa5-pvvezi.png"
-            alt=""
           />
          </div>
-
           <div class="payment">
             <span>Débito automático</span>
             <img
-              style=""
               src="/comprobantes/visa-deb.svg"
-              alt=""
             />
           <img
-            style=""
             src="/comprobantes/visa.svg"
-            alt=""
-          />
+            />
           <img
            style="width:40px; height:30px;"
             src="https://utfs.io/f/23711681-416d-4155-9894-4e6c8584219f-mgfpcc.png"
-            alt=""
           />
         </div>
          </div>
@@ -834,15 +870,13 @@ font-size:10px;
           <img
             class="qr"
             src="https://utfs.io/f/2dd25618-943b-41f4-8c0e-363fc8ba3228-n3iun9.png"
-            alt=""
-	style="height: 100px; width:100px; "
+	style="height: 100px; width:100px;"
           />
 
            <div style="display: flex; flex-direction: column; padding-left:10px; ">
           <img
              style="width:100px; height:40px;"
             src="/comprobantes/logo-afip.png"
-            alt=""
           />
 
           <p style="color: #333; font-style: italic; font-weight: 500; margin-bottom: 10px;">Comprobante autorizado</p>
@@ -856,7 +890,6 @@ font-size:10px;
             <img
               class="bp-logo"
               src="https://utfs.io/f/fa110834-238b-4880-a8c2-eedebe9e6b6e-mnl13r.png"
-              alt=""
             />
           </p>
           </div>
@@ -867,9 +900,7 @@ font-size:10px;
           <p>FECHA TOPE PARA EL PAGO EN REDES: XX/XX/XXXX</p>
           <p>CANALES CON LECTURA DE CÓDIGO DE BARRAS: </p>
           <img
-            style=""
             src="/comprobantes/codigo-barra.svg"
-            alt=""
           />
         </div>
       </section>
