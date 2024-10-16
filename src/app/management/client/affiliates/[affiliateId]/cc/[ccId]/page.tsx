@@ -14,6 +14,8 @@ import { RouterOutputs } from "~/trpc/shared";
 import { formatCurrency } from "~/app/billing/pre-liquidation/[liquidationId]/detail-sheet";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import 'dayjs/locale/es'
+dayjs.locale('es')
 export default function CCDetail(props: {
   params: { ccId: string; affiliateId: string };
 }) {
