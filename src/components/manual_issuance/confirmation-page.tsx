@@ -377,6 +377,7 @@ const confirmationPage = ({
 
     //reemplazar por comprobante creado
     if (createdComprobante) {
+      console.log(createdComprobante,"createdComprobante");
       const html = htmlBill(
         createdComprobante,
         company,

@@ -74,7 +74,7 @@ function formatDate(date: Date | undefined) {
 export default function Page() {
   const { mutateAsync: createComprobante } =
     api.comprobantes.create.useMutation();
-  const { mutateAsync: createItem } = api.items.create.useMutation();
+  const { mutateAsync: createItem } = api.items.createReturnComp.useMutation();
   const { mutateAsync: createTribute } = api.tributes.create.useMutation();
   const { data: company } = api.companies.get.useQuery();
   const { data: marcas } = api.brands.list.useQuery();
@@ -116,7 +116,7 @@ export default function Page() {
     switch (valueToNameComprobanteMap[tipoComprobante]) {
       case "Factura":
         for (const concept of conceptsForm.getValues().concepts) {
-          subTotal += Number(concept.total);
+          subTotal += Number(concept.importe);
           ivaTotal += Number(concept.iva);
         }
       case "Recibo":
@@ -200,7 +200,7 @@ export default function Page() {
             billLink: "",
             estado: "pendiente",
             concepto: Number(concepto) ?? 0,
-            importe: Number(subTotal) * ivaFloat + Number(tributos),
+            importe: Number(subTotal) + Number(ivaTotal) + Number(tributos),
             iva: iva ?? "0",
             nroDocumento: Number(nroDocumento) ?? 0,
             ptoVenta: Number(form.getValues().puntoVenta) ?? 0,
@@ -215,39 +215,42 @@ export default function Page() {
             family_group_id: grupoFamiliarId,
             health_insurance_id: obraSocialId,
           });
-          const sumaTributos = otherTributesForm
-            .getValues()
-            .tributes.reduce((acc, tribute) => acc + Number(tribute.amount), 0);
           const comprobanteId = comprobante[0]?.id ?? "";
 
-          for (const tribute of otherTributesForm.getValues().tributes) {
-            const tributo = await createTribute({
-              tribute: tribute.tribute,
-              jurisdiction: tribute.jurisdiccion,
-              base_imponible: tribute.base,
-              amount: tribute.amount,
-              alicuota: tribute.aliquot,
-              comprobante_id: comprobanteId,
-            });
-          }
-          const tributo = await createItem({
-            amount: sumaTributos,
-            concept: "Tributos",
-            iva: 0,
-            total: sumaTributos,
-            comprobante_id: comprobanteId,
-          });
-          conceptsForm.getValues().concepts.forEach(async (concept) => {
-            if (concept.importe > 0) {
-              await createItem({
-                amount: concept.importe,
-                concept: concept.concepto,
-                iva: concept.iva,
-                total: concept.total,
+          const tributesPromise = otherTributesForm.getValues().tributes.map(async (tribute) => {
+            if (tribute.amount > 0){
+
+              await createTribute({
+                alicuota: tribute.aliquot,
+                amount: tribute.amount,
+                base_imponible: tribute.base,
                 comprobante_id: comprobanteId,
-              });
+                jurisdiction: tribute.jurisdiccion,
+                tribute: tribute.tribute,
+              })
             }
-          });
+          })
+          const tributesResults = await Promise.all(tributesPromise);
+
+          const promises = conceptsForm
+            .getValues()
+            .concepts.map(async (concept) => {
+              console.log("concept", concept);
+              if (concept.importe > 0) {
+                comprobante = [
+                  await createItem({
+                    amount: concept.importe,
+                    concept: concept.concepto,
+                    iva: concept.iva,
+                    total: concept.total,
+                    comprobante_id: comprobanteId,
+                  }),
+                ];
+                return comprobante;
+              }
+            });
+          const results = await Promise.all(promises);
+          // comprobante = results[results.length - 1];
           // data = {
           //   CantReg: 1, // Cantidad de comprobantes a registrar
           //   PtoVta: Number(form.getValues().puntoVenta),
@@ -304,7 +307,7 @@ export default function Page() {
             estado: "pendiente",
             billLink: "", //deberiamos poner un link ?
             concepto: Number(concepto) ?? 0,
-            importe: Number(subTotal) * ivaFloat + Number(tributos),
+            importe: Number(subTotal) + Number(ivaTotal) + Number(tributos),
             iva: "0",
             nroDocumento: Number(nroDocumento) ?? 0,
             ptoVenta: Number(form.getValues().puntoVenta) ?? 0,
@@ -320,31 +323,37 @@ export default function Page() {
             health_insurance_id: obraSocialId,
           });
           const comprobanteId = comprobante[0]?.id ?? "";
-          otherConceptsForm
+
+          const promises = otherConceptsForm
             .getValues()
-            .otherConcepts.forEach(async (concept) => {
+            .otherConcepts.map(async (concept) => {
               if (concept.importe > 0) {
-                await createItem({
-                  amount: concept.importe,
-                  concept: concept.description,
-                  iva: 0,
-                  total: concept.importe,
-                  comprobante_id: comprobanteId,
-                });
+                comprobante = [
+                  await createItem({
+                    amount: concept.importe,
+                    concept: concept.description,
+                    iva: 0,
+                    total: concept.importe,
+                    comprobante_id: comprobanteId,
+                  }),
+                ];
               }
             });
-          const sumaTributos = otherTributesForm
-            .getValues()
-            .tributes.reduce((acc, tribute) => acc + Number(tribute.amount), 0);
-          if (sumaTributos > 0) {
-            const tributo = await createItem({
-              amount: sumaTributos,
-              concept: "Tributos",
-              iva: 0,
-              total: sumaTributos,
-              comprobante_id: comprobanteId,
-            });
-          }
+          const results = await Promise.all(promises);
+          const tributesPromise = otherTributesForm.getValues().tributes.map(async (tribute) => {
+            if (tribute.amount > 0){
+
+              await createTribute({
+                alicuota: tribute.aliquot,
+                amount: tribute.amount,
+                base_imponible: tribute.base,
+                comprobante_id: comprobanteId,
+                jurisdiction: tribute.jurisdiccion,
+                tribute: tribute.tribute,
+              })
+            }
+          })
+          const tributesResults = await Promise.all(tributesPromise);
           // const event = createEventFamily({
           //   family_group_id: grupoFamiliarId,
           //   type: "REC",
@@ -388,26 +397,30 @@ export default function Page() {
           });
 
           const comprobanteId = comprobante[0]?.id ?? "";
-          await createItem({
-            amount: importeBase,
-            concept: "Factura a cancelar",
-            iva: importeBase * (ivaFloat - 1),
-            total: facSeleccionada?.importe,
-            comprobante_id: comprobanteId,
-          });
-
-          const sumaTributos = otherTributesForm
-            .getValues()
-            .tributes.reduce((acc, tribute) => acc + Number(tribute.amount), 0);
-          if (sumaTributos > 0) {
-            const tributo = await createItem({
-              amount: sumaTributos,
-              concept: "Tributos",
-              iva: 0,
-              total: sumaTributos,
+          comprobante = [
+            await createItem({
+              amount: importeBase,
+              concept: "Factura a cancelar",
+              iva: importeBase * (ivaFloat - 1),
+              total: facSeleccionada?.importe,
               comprobante_id: comprobanteId,
-            });
-          }
+            }),
+          ];
+
+          const tributesPromise = otherTributesForm.getValues().tributes.map(async (tribute) => {
+            if (tribute.amount > 0){
+
+              await createTribute({
+                alicuota: tribute.aliquot,
+                amount: tribute.amount,
+                base_imponible: tribute.base,
+                comprobante_id: comprobanteId,
+                jurisdiction: tribute.jurisdiccion,
+                tribute: tribute.tribute,
+              })
+            }
+          })
+          const tributesResults = await Promise.all(tributesPromise);
 
           // try {
           //   last_voucher = await afip.ElectronicBilling.getLastVoucher(
@@ -489,6 +502,8 @@ export default function Page() {
         console.log("testtt2");
 
         if (comprobante && comprobante[0]) {
+          console.log(comprobante[0]);
+          console.log("comprobante[0]");
           setCreatedComprobante(comprobante[0]);
         }
         setLoading(false);
@@ -877,6 +892,7 @@ export default function Page() {
               onClick={() => {
                 generateComprobante();
               }}
+              disabled={loading}
             >
               Siguiente
               {loading ? (
