@@ -26,7 +26,7 @@ export function makeExcelRows(
     );
 
     const last_event = fg.cc?.events.at(0);
-
+    console.log("last_event", last_event);
     // const saldo_anterior = toNumberOrZero(
     //   original_comprobante?.items.find(
     //     (item) => item.concept === "Saldo anterior"

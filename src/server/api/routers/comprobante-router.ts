@@ -1506,7 +1506,7 @@ export async function preparateComprobante(
           .values({
             ptoVenta: mostRecentFactura.ptoVenta,
             nroComprobante: mostRecentFactura.nroComprobante,
-            tipoComprobante: fcAnc[previousTipoComprobante ?? ""],
+            tipoComprobante: previousTipoComprobante ?? "",
             concepto: mostRecentFactura?.concepto ?? 0,
             tipoDocumento: tipoDocumento ?? 0,
             generated: new Date(),
