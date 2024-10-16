@@ -105,13 +105,13 @@ export default function CCDetail(props: {
           description: event.description,
           amount: formatCurrency(event.event_amount),
           // comprobanteType: "Nota de credito A",
-          comprobanteType: event.comprobantes?.tipoComprobante ?? "FACTURA A",
+          "Tipo comprobante": event.comprobantes?.tipoComprobante ?? "FACTURA A",
           comprobanteNumber:
             (event.comprobantes?.ptoVenta.toString().padStart(5) ?? "00000") +
             "-" +
             (event.comprobantes?.nroComprobante.toString().padStart(8) ??
               "00000000"),
-          status: "Pendiente",
+          Estado: "Pendiente",
           iva: Number(event.comprobantes?.iva ?? 0),
           comprobantes: comprobantesTable,
           currentAccountAmount: formatCurrency(NCTotal ?? 0),
@@ -126,9 +126,9 @@ export default function CCDetail(props: {
           description: event.description,
           amount: formatCurrency(event.event_amount),
           // comprobanteType: "Nota de credito A",
-          comprobanteType: "Apertura de CC",
+          "Tipo comprobante": "Apertura de CC",
           comprobanteNumber: "00000" + "-" + "00000000",
-          status: "Pendiente",
+          Estado: "Pendiente",
           iva: 0,
           comprobantes: comprobantesTable,
           currentAccountAmount: formatCurrency(NCTotal ?? 0),
