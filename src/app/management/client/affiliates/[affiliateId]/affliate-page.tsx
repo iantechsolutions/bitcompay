@@ -375,7 +375,7 @@ export default function AffiliatePage(props: {
             <div className=" grid grid-cols-2 items-center">
               <div>
                 <p className="text-sm">SALDO ACTUAL</p>
-                <span className="text-[#EB2727] text-xl font-bold">
+                <span className={cn("text-xl font-bold ", (lastEvent?.current_amount ?? 0) > 0 ? "text-[#6952EB]" : (lastEvent?.current_amount ?? 0)==0 ? "text-blacl" : "text-[#EB2727]")}>
                   $
                   {lastEvent?.current_amount !== undefined
                     ? lastEvent.current_amount.toFixed(2)
