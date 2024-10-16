@@ -46,6 +46,20 @@ import {
   type otherConceptsForm,
 } from "~/lib/types/app";
 import { type Comprobante } from "~/server/db/schema";
+import { Popover, PopoverContent } from "~/components/ui/popover";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
+import { saveAs } from "file-saver";
+
 function formatDate(date: Date | undefined) {
   if (date) {
     const year = date.getFullYear();
@@ -520,6 +534,10 @@ export default function Page() {
     },
   });
 
+  const [generatedUrlPopup, setGeneratedUrlPopup] = useState<string | null>(
+    null
+  );
+
   const conceptsForm = useForm<ConceptsForm>({
     defaultValues: {
       concepts: [{ concepto: "", importe: 0, iva: 0, total: 0 }],
@@ -636,9 +654,37 @@ export default function Page() {
     router.refresh();
   };
 
+  const GeneratedPopup = ({ url }: { url: string | null }) => (
+    <AlertDialog open={url !== null}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Se generó el comprobante</AlertDialogTitle>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={() => setGeneratedUrlPopup(null)}>
+            Cerrar
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={async () => {
+              setGeneratedUrlPopup(null);
+              if (url !== null) {
+                const req = await fetch(url);
+                const blob = await req.blob();
+                saveAs(blob, "comprobante.pdf");
+              }
+            }}
+          >
+            Descargar
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+
   if (!grupoFamiliarId && !obraSocialId) {
     return (
       <LayoutContainer>
+        <GeneratedPopup url={generatedUrlPopup} />
         <section>
           <div>
             <Title>Generación de comprobantes</Title>
@@ -693,9 +739,11 @@ export default function Page() {
       </LayoutContainer>
     );
   }
+
   return (
     <>
       <LayoutContainer>
+        <GeneratedPopup url={generatedUrlPopup} />
         {page === "formPage" && (
           <section className="space-y-5 flex flex-col">
             <div>
@@ -870,6 +918,7 @@ export default function Page() {
             obrasSociales={obrasSociales}
             marcas={marcas}
             createdComprobante={createdComprobante}
+            setGeneratedUrlPopup={setGeneratedUrlPopup}
           />
         )}
       </LayoutContainer>

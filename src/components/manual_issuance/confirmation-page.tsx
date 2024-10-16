@@ -1,16 +1,13 @@
 import {
   ChevronLeftCircleIcon,
-  ChevronRightCircleIcon,
   CircleCheck,
   CircleX,
   Loader2Icon,
 } from "lucide-react";
 import { Title } from "../title";
-import GeneralCard from "./general-card";
 import { useRouter } from "next/navigation";
 import { Button } from "../ui/button";
 import { UseFormReturn } from "react-hook-form";
-import ElementCard from "../affiliate-page/element-card";
 import ReceptorCard from "./receptor-card";
 import ComprobanteCard from "./comprobante-card";
 import AdditionalInfoCard from "./additional-info";
@@ -66,6 +63,7 @@ interface Props {
   marcas?: any;
   createdComprobante: Comprobante;
   reloadPage: () => void;
+  setGeneratedUrlPopup: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 function formatDate(date: Date | undefined) {
@@ -109,6 +107,7 @@ const confirmationPage = ({
   marcas,
   createdComprobante,
   reloadPage,
+  setGeneratedUrlPopup,
 }: Props) => {
   // function generateComprobante(){
 
@@ -290,24 +289,23 @@ const confirmationPage = ({
           Nro: fcSeleccionada[0]?.nroComprobante ?? 0,
         },
       };
-    
     } else {
       toast.error("Error, revise que todos los campos esten completos");
       setIsLoading(false);
       return null;
     }
 
-    // if (data) {
-    //   try {
-    //     const res = await afip.ElectronicBilling.createVoucher(data);
-    //   } catch (error) {
-    //     console.log(error);
-    //     toast.error("Error enviando a AFIP: " + error);
-    //     setIsLoading(false);
-    //     return null;
-    //   }
-    // }
-    if (tipoComprobante == "1" || tipoComprobante == "6"){
+    if (data) {
+      try {
+        const res = await afip.ElectronicBilling.createVoucher(data);
+      } catch (error) {
+        console.log(error);
+        toast.error("Error enviando a AFIP: " + error);
+        setIsLoading(false);
+        return null;
+      }
+    }
+    if (tipoComprobante == "1" || tipoComprobante == "6") {
       if (fgId) {
         const event = createEventFamily({
           family_group_id: fgId,
@@ -324,7 +322,7 @@ const confirmationPage = ({
         });
       }
     }
-    if (tipoComprobante == "0"){
+    if (tipoComprobante == "0") {
       const otrosConceptos = otherConcepts.getValues();
       const importe = otrosConceptos.otherConcepts.reduce(
         (acc, concept) => acc + Number(concept.importe),
@@ -352,9 +350,10 @@ const confirmationPage = ({
         amount: importe,
         comprobante_id: createdComprobante.id ?? "",
       });
-    }
-
-    else if(fcSeleccionada &&  (tipoComprobante == "3" || tipoComprobante == "8")){
+    } else if (
+      fcSeleccionada &&
+      (tipoComprobante == "3" || tipoComprobante == "8")
+    ) {
       if (fgId) {
         const event = createEventFamily({
           family_group_id: fgId,
@@ -426,16 +425,19 @@ const confirmationPage = ({
         number: last_voucher + 1,
         state: "pendiente",
       });
-      
-      if (resHtml.file) {
-        window.open(resHtml.file, "_blank");
-      }
+
       toast.success("La factura se creo correctamente");
       setIsLoading(false);
       reloadPage();
-    }
-    else{
-      toast.error("Error creando el comprobante, la factura ya fue enviada a AFIP");
+
+      if (resHtml.file) {
+        setGeneratedUrlPopup(resHtml.file);
+        // window.open(resHtml.file, "_blank");
+      }
+    } else {
+      toast.error(
+        "Error creando el comprobante, la factura ya fue enviada a AFIP"
+      );
       setIsLoading(false);
     }
   }
@@ -461,9 +463,7 @@ const confirmationPage = ({
 
       <AdditionalInfoCard
         // comprobantes={}
-        possibleComprobanteTipo={
-          fcSeleccionada[0]?.tipoComprobante ?? ""
-        }
+        possibleComprobanteTipo={fcSeleccionada[0]?.tipoComprobante ?? ""}
         fcSeleccionada={fcSeleccionada}
         setFcSeleccionada={setFcSeleccionada}
         visualization={true}
@@ -495,12 +495,11 @@ const confirmationPage = ({
           }}
           disabled={loading}
         >
-          {
-            loading ?
-             <Loader2Icon className="mr-2 animate-spin" size={20} /> :
-             <CircleCheck className="h-4 w-auto mr-2" />
-          }
-          
+          {loading ? (
+            <Loader2Icon className="mr-2 animate-spin" size={20} />
+          ) : (
+            <CircleCheck className="h-4 w-auto mr-2" />
+          )}
           Aprobar
         </Button>
         <Button className="h-7 bg-[#f9c3c3] hover:bg-[#f9c3c3] text-[#4B4B4B] text-sm rounded-2xl py-4 px-4 shadow-none">
