@@ -1277,7 +1277,6 @@ export async function preparateComprobante(
         100;
 
       //calculate contribution
-      const contribution = await getGroupContribution(grupo);
 
       //calculate differential_amount
       const differential_amount = await getDifferentialAmount(
@@ -1361,7 +1360,6 @@ export async function preparateComprobante(
           interest,
           ivaFloat,
           bonificacion,
-          contribution,
           abono,
           differential_amount,
           totalAportes,
@@ -1465,12 +1463,12 @@ export async function preparateComprobante(
           -1 * bonificacion
         );
       }
-      if (contribution != 0) {
+      if (totalAportes != 0) {
         createcomprobanteItem(
           ivaFloat,
           comprobante[0]?.id ?? "",
           "Aporte",
-          -1 * contribution
+          -1 * totalAportes
         );
       }
       if (interest != 0) {
@@ -1535,7 +1533,6 @@ async function calculateAmount(
   interest: number,
   iva: number,
   bonificacion: number,
-  contribution: number,
   abono: number,
   diferencial: number,
   previous_bill: number,
@@ -1558,7 +1555,7 @@ async function calculateAmount(
     ivaCodigo = "3";
   }
   if (modo?.description == "PRIVADO") {
-    contribution = 0;
+    totalAportes = 0;
   }
 
   if (totalAportes) {
@@ -1573,14 +1570,13 @@ async function calculateAmount(
     saldo,
     iva,
     ivaCodigo,
-    contribution,
     totalAportes
   );
-  const precioNuevo = abono - bonificacion + diferencial + totalAportes;
+  const precioNuevo = abono - bonificacion + diferencial;
   if (saldo > 0) {
-    amount = (previous_bill + interest + precioNuevo) * iva - contribution;
+    amount = (previous_bill + interest + precioNuevo) * iva - totalAportes;
   } else {
-    amount = precioNuevo * iva - contribution;
+    amount = precioNuevo * iva - totalAportes;
   }
 
   console.log("papel", precioNuevo, amount, ivaCodigo);
