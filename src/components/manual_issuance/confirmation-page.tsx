@@ -1,15 +1,13 @@
 import {
   ChevronLeftCircleIcon,
-  ChevronRightCircleIcon,
   CircleCheck,
   CircleX,
+  Loader2Icon,
 } from "lucide-react";
 import { Title } from "../title";
-import GeneralCard from "./general-card";
 import { useRouter } from "next/navigation";
 import { Button } from "../ui/button";
 import { UseFormReturn } from "react-hook-form";
-import ElementCard from "../affiliate-page/element-card";
 import ReceptorCard from "./receptor-card";
 import ComprobanteCard from "./comprobante-card";
 import AdditionalInfoCard from "./additional-info";
@@ -33,7 +31,7 @@ import {
 } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
-import DownloadPDF from "../downloadPDF";
+import { useState } from "react";
 
 interface Props {
   changePage: (page: "formPage" | "confirmationPage") => void;
@@ -65,6 +63,7 @@ interface Props {
   marcas?: any;
   createdComprobante: Comprobante;
   reloadPage: () => void;
+  setGeneratedUrlPopup: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 function formatDate(date: Date | undefined) {
@@ -108,10 +107,12 @@ const confirmationPage = ({
   marcas,
   createdComprobante,
   reloadPage,
+  setGeneratedUrlPopup,
 }: Props) => {
   // function generateComprobante(){
 
   // }
+  const [loading, setIsLoading] = useState(false);
   const { mutateAsync: createEventFamily } =
     api.events.createByType.useMutation();
   const { mutateAsync: createEventOS } =
@@ -144,6 +145,7 @@ const confirmationPage = ({
   }
 
   async function handleAFIP() {
+    setIsLoading(true);
     handleApprove();
     const formValues = form.getValues();
     const concepto = formValues.tipoDeConcepto;
@@ -289,6 +291,7 @@ const confirmationPage = ({
       };
     } else {
       toast.error("Error, revise que todos los campos esten completos");
+      setIsLoading(false);
       return null;
     }
 
@@ -298,6 +301,7 @@ const confirmationPage = ({
       } catch (error) {
         console.log(error);
         toast.error("Error enviando a AFIP: " + error);
+        setIsLoading(false);
         return null;
       }
     }
@@ -373,6 +377,7 @@ const confirmationPage = ({
 
     //reemplazar por comprobante creado
     if (createdComprobante) {
+      console.log(createdComprobante, "createdComprobante");
       const html = htmlBill(
         createdComprobante,
         company,
@@ -422,11 +427,19 @@ const confirmationPage = ({
         state: "pendiente",
       });
 
-      if (resHtml.file) {
-        window.open(resHtml.file, "_blank");
-      }
       toast.success("La factura se creo correctamente");
+      setIsLoading(false);
       reloadPage();
+
+      if (resHtml.file) {
+        setGeneratedUrlPopup(resHtml.file);
+        // window.open(resHtml.file, "_blank");
+      }
+    } else {
+      toast.error(
+        "Error creando el comprobante, la factura ya fue enviada a AFIP"
+      );
+      setIsLoading(false);
     }
   }
 
@@ -489,8 +502,13 @@ const confirmationPage = ({
             // handleCreate();
             handleAFIP();
             // handleCreate();
-          }}>
-          <CircleCheck className="h-4 w-auto mr-2" />
+          }}
+          disabled={loading}>
+          {loading ? (
+            <Loader2Icon className="mr-2 animate-spin" size={20} />
+          ) : (
+            <CircleCheck className="h-4 w-auto mr-2" />
+          )}
           Aprobar
         </Button>
         <Button className="h-7 bg-[#f9c3c3] hover:bg-[#f9c3c3] text-[#4B4B4B] text-sm rounded-2xl py-4 px-4 shadow-none">

@@ -28,7 +28,7 @@ interface ComprobanteCardProps {
   form: UseFormReturn<ManualGenInputs>;
   tipoComprobante: string;
   setTipoComprobante: (e: string) => void;
-  comprobantesEntidad?: RouterOutputs["comprobantes"]["getByEntity"];
+  comprobantes?: RouterOutputs["comprobantes"]["getByEntity"];
   onValueChange?:()=> void;
 }
 export default function ComprobanteCard({
@@ -37,7 +37,7 @@ export default function ComprobanteCard({
   form,
   tipoComprobante,
   setTipoComprobante,
-  comprobantesEntidad,
+  comprobantes,
 }: ComprobanteCardProps) {
   const [concept, setConcept] = useState(true);
 
@@ -609,9 +609,9 @@ export default function ComprobanteCard({
                 name="facturasEmitidas.nroComprobante"
                 render={({ field }) => (
                   <Select
-                    value={form.getValues().facturasEmitidas.nroComprobante}
+                    defaultValue={field.value}
                     onValueChange={(e) => {
-                      for (const comprobante of comprobantesEntidad ?? []) {
+                      for (const comprobante of comprobantes ?? []) {
                         if (comprobante.id.toString() === e) {
                           form.setValue(
                             "facturasEmitidas.importe",
@@ -640,16 +640,29 @@ export default function ComprobanteCard({
                       }
                     }}
                   >
-                    <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8">
-                      <SelectValue placeholder="Seleccionar facturas..." />
-                    </SelectTrigger>
+                    <FormControl>
+                      <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8">
+                        <SelectValue placeholder="Seleccionar facturas..." />
+                      </SelectTrigger>
+                    </FormControl>
                     <SelectContent>
-                      {comprobantesEntidad?.slice(0,10)?.map((comprobante) => (
+                      {
+                      
+                      
+                      comprobantes
+                        ?.filter(
+                          (comprobante) =>
+                            (comprobante.estado === "parcial" ||
+                              comprobante.estado === "pendiente")
+                        )
+                        .slice(0, 10).map((comprobante) => (
                         <SelectItem
                           key={comprobante.id}
                           value={comprobante.id.toString()}
                         >
-                          {comprobante.nroComprobante}
+                          {comprobante.nroComprobante +
+                                        " - " +
+                                        comprobante.importe}
                         </SelectItem>
                       ))}
                     </SelectContent>

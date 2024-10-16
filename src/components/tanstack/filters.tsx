@@ -79,7 +79,36 @@ const Filters = forwardRef<FiltersRef, FiltersProps<any, any>>(
         }
       });
     };
-
+    function getSelectOptions (column: Column<any, any>) {
+      if (apiFetchMap[column.id]) {
+        return apiFetchMap[column.id]?.map((item) =>
+          hasName(item) ? (
+            <SelectItem
+              key={item.id}
+              value={item?.name}
+            >
+              {item?.name}
+            </SelectItem>
+          ) : (
+            <SelectItem
+              key={item.id}
+              value={item?.description}
+            >
+              {item?.description}
+            </SelectItem>
+          )
+        )
+      }
+      
+      return Array.from(column.getFacetedUniqueValues().keys()).map((item)=> (
+        <SelectItem
+          key={item}
+          value={item}
+        >
+          {item}
+        </SelectItem>
+      ))
+    }
     return (
       <div className="flex items-center bg-[#DEF5DD] rounded-full">
         <Button
@@ -137,23 +166,7 @@ const Filters = forwardRef<FiltersRef, FiltersProps<any, any>>(
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {apiFetchMap[column.id]?.map((item) =>
-                                hasName(item) ? (
-                                  <SelectItem
-                                    key={item.id}
-                                    value={item?.name}
-                                  >
-                                    {item?.name}
-                                  </SelectItem>
-                                ) : (
-                                  <SelectItem
-                                    key={item.id}
-                                    value={item?.description}
-                                  >
-                                    {item?.description}
-                                  </SelectItem>
-                                )
-                              )}
+                              {getSelectOptions(column)}
                             </SelectContent>
                           </Select>
                         </FormItem>

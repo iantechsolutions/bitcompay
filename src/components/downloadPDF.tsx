@@ -45,14 +45,27 @@
 //   import { asTRPCError } from "~/lib/errors";
 //   import { TableRecord } from "../columns";
 
-import { toast } from "sonner";
-import { Button } from "./ui/button";
+//   type DialogCCProps = {
+//     open: boolean;
+//     setOpen: (open: boolean) => void;
+//     data?: TableRecord;
+//   };
 
-export default function DownloadPDF(url: string) {
-  async function downloadPDF() {
-    if (!url) {
-      return toast.error("El enlace del comprobante no está disponible");
-    }
+//   export default function DialogCC({ open, setOpen, data }: DialogCCProps) {
+
+// if (!detailData) {
+//     return toast.error("Error al descargar");
+//   } else if (
+//     !detailData.comprobantes ||
+//     detailData.comprobantes.length === 0
+//   ) {
+//     return toast.error("No hay comprobantes disponibles para descargar");
+//   } else {
+//     const url =
+//       "https://utfs.io/f/44838620-7323-4f58-816a-abf74035e972-sc8o5d";
+//     if (!url) {
+//       return toast.error("El enlace del comprobante no está disponible");
+//     }
 
     setTimeout(() => {
       const link = document.createElement("a");

@@ -46,6 +46,20 @@ import {
   type otherConceptsForm,
 } from "~/lib/types/app";
 import { type Comprobante } from "~/server/db/schema";
+import { Popover, PopoverContent } from "~/components/ui/popover";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
+import { saveAs } from "file-saver";
+
 function formatDate(date: Date | undefined) {
   if (date) {
     const year = date.getFullYear();
@@ -60,12 +74,13 @@ function formatDate(date: Date | undefined) {
 export default function Page() {
   const { mutateAsync: createComprobante } =
     api.comprobantes.create.useMutation();
-  const { mutateAsync: createItem } = api.items.create.useMutation();
+  const { mutateAsync: createItem } = api.items.createReturnComp.useMutation();
+  const { mutateAsync: createTribute } = api.tributes.create.useMutation();
   const { data: company } = api.companies.get.useQuery();
   const { data: marcas } = api.brands.list.useQuery();
   const { data: gruposFamiliar } = api.family_groups.list.useQuery();
   const { data: obrasSociales } = api.healthInsurances.listClient.useQuery();
-  const { data: comprobantesEntidad } = api.comprobantes.getByEntity.useQuery();
+  // const { data: comprobantesEntidad } = api.comprobantes.getByEntity.useQuery();
   const [subTotal, setSubTotal] = useState<number>(0);
   const [ivaTotal, setIvaTotal] = useState<number>(0);
   const [otherAttributes, setOtherAttributes] = useState<number>(0);
@@ -101,7 +116,7 @@ export default function Page() {
     switch (valueToNameComprobanteMap[tipoComprobante]) {
       case "Factura":
         for (const concept of conceptsForm.getValues().concepts) {
-          subTotal += Number(concept.total);
+          subTotal += Number(concept.importe);
           ivaTotal += Number(concept.iva);
         }
       case "Recibo":
@@ -180,14 +195,12 @@ export default function Page() {
         if (tipoComprobante == "1" || tipoComprobante == "6") {
           let ivaFloat =
             (100 + parseFloat(ivaDictionary[Number(iva)] ?? "0")) / 100;
-          // const billResponsible = gruposFamiliar
-          //   ?.find((x) => x.id == grupoFamiliarId)
-          //   ?.integrants.find((x) => x.isBillResponsible);
+
           comprobante = await createComprobante({
             billLink: "",
             estado: "pendiente",
             concepto: Number(concepto) ?? 0,
-            importe: Number(subTotal) * ivaFloat + Number(tributos),
+            importe: Number(subTotal) + Number(ivaTotal) + Number(tributos),
             iva: iva ?? "0",
             nroDocumento: Number(nroDocumento) ?? 0,
             ptoVenta: Number(form.getValues().puntoVenta) ?? 0,
@@ -202,26 +215,43 @@ export default function Page() {
             family_group_id: grupoFamiliarId,
             health_insurance_id: obraSocialId,
           });
-          const sumaTributos = otherTributesForm
-            .getValues()
-            .tributes.reduce((acc, tribute) => acc + Number(tribute.amount), 0);
           const comprobanteId = comprobante[0]?.id ?? "";
-          const tributo = await createItem({
-            amount: sumaTributos,
-            concept: "Tributos",
-            iva: 0,
-            total: subTotal,
-            comprobante_id: comprobanteId,
-          });
-          conceptsForm.getValues().concepts.forEach(async (concept) => {
-            await createItem({
-              amount: concept.importe,
-              concept: concept.concepto,
-              iva: concept.iva,
-              total: concept.total,
-              comprobante_id: comprobanteId,
+
+          const tributesPromise = otherTributesForm
+            .getValues()
+            .tributes.map(async (tribute) => {
+              if (tribute.amount > 0) {
+                await createTribute({
+                  alicuota: tribute.aliquot,
+                  amount: tribute.amount,
+                  base_imponible: tribute.base,
+                  comprobante_id: comprobanteId,
+                  jurisdiction: tribute.jurisdiccion,
+                  tribute: tribute.tribute,
+                });
+              }
             });
-          });
+          const tributesResults = await Promise.all(tributesPromise);
+
+          const promises = conceptsForm
+            .getValues()
+            .concepts.map(async (concept) => {
+              console.log("concept", concept);
+              if (concept.importe > 0) {
+                comprobante = [
+                  await createItem({
+                    amount: concept.importe,
+                    concept: concept.concepto,
+                    iva: concept.iva,
+                    total: concept.total,
+                    comprobante_id: comprobanteId,
+                  }),
+                ];
+                return comprobante;
+              }
+            });
+          const results = await Promise.all(promises);
+          // comprobante = results[results.length - 1];
           // data = {
           //   CantReg: 1, // Cantidad de comprobantes a registrar
           //   PtoVta: Number(form.getValues().puntoVenta),
@@ -274,14 +304,11 @@ export default function Page() {
           //   comprobante_id: comprobante[0]?.id ?? "",
           // });
         } else if (tipoComprobante == "0") {
-          // iva = 0;
-
-          //
           comprobante = await createComprobante({
             estado: "pendiente",
             billLink: "", //deberiamos poner un link ?
             concepto: Number(concepto) ?? 0,
-            importe: Number(subTotal) * ivaFloat + Number(tributos),
+            importe: Number(subTotal) + Number(ivaTotal) + Number(tributos),
             iva: "0",
             nroDocumento: Number(nroDocumento) ?? 0,
             ptoVenta: Number(form.getValues().puntoVenta) ?? 0,
@@ -296,7 +323,39 @@ export default function Page() {
             family_group_id: grupoFamiliarId,
             health_insurance_id: obraSocialId,
           });
+          const comprobanteId = comprobante[0]?.id ?? "";
 
+          const promises = otherConceptsForm
+            .getValues()
+            .otherConcepts.map(async (concept) => {
+              if (concept.importe > 0) {
+                comprobante = [
+                  await createItem({
+                    amount: concept.importe,
+                    concept: concept.description,
+                    iva: 0,
+                    total: concept.importe,
+                    comprobante_id: comprobanteId,
+                  }),
+                ];
+              }
+            });
+          const results = await Promise.all(promises);
+          const tributesPromise = otherTributesForm
+            .getValues()
+            .tributes.map(async (tribute) => {
+              if (tribute.amount > 0) {
+                await createTribute({
+                  alicuota: tribute.aliquot,
+                  amount: tribute.amount,
+                  base_imponible: tribute.base,
+                  comprobante_id: comprobanteId,
+                  jurisdiction: tribute.jurisdiccion,
+                  tribute: tribute.tribute,
+                });
+              }
+            });
+          const tributesResults = await Promise.all(tributesPromise);
           // const event = createEventFamily({
           //   family_group_id: grupoFamiliarId,
           //   type: "REC",
@@ -317,7 +376,7 @@ export default function Page() {
           );
 
           let ivaFloat = (100 + parseFloat(facSeleccionada?.iva ?? "0")) / 100;
-
+          const importeBase = (facSeleccionada?.importe ?? 0) / ivaFloat;
           comprobante = await createComprobante({
             estado: "pendiente",
             billLink: "",
@@ -338,6 +397,34 @@ export default function Page() {
             previous_facturaId: facSeleccionada?.id,
             health_insurance_id: obraSocialId,
           });
+
+          const comprobanteId = comprobante[0]?.id ?? "";
+          comprobante = [
+            await createItem({
+              amount: importeBase,
+              concept: "Factura a cancelar",
+              iva: importeBase * (ivaFloat - 1),
+              total: facSeleccionada?.importe,
+              comprobante_id: comprobanteId,
+            }),
+          ];
+
+          const tributesPromise = otherTributesForm
+            .getValues()
+            .tributes.map(async (tribute) => {
+              if (tribute.amount > 0) {
+                await createTribute({
+                  alicuota: tribute.aliquot,
+                  amount: tribute.amount,
+                  base_imponible: tribute.base,
+                  comprobante_id: comprobanteId,
+                  jurisdiction: tribute.jurisdiccion,
+                  tribute: tribute.tribute,
+                });
+              }
+            });
+          const tributesResults = await Promise.all(tributesPromise);
+
           // try {
           //   last_voucher = await afip.ElectronicBilling.getLastVoucher(
           //     form.getValues().puntoVenta,
@@ -417,76 +504,12 @@ export default function Page() {
 
         console.log("testtt2");
 
-        // if (data) {
-        //   try {
-        //     const res = await afip.ElectronicBilling.createVoucher(data);
-        //   } catch (error) {
-        //     console.log(error);
-        //   }
-        // }
-        // const billResponsible = gruposFamiliar
-        //   ?.find((x: { id: string; }) => x.id == grupoFamiliarId)
-        //   ?.integrants.find((x: { isBillResponsible: any; }) => x.isBillResponsible);
-        // const obraSocial = obrasSociales?.find((x: { id: string; }) => x.id == obraSocialId);
-
         if (comprobante && comprobante[0]) {
+          console.log(comprobante[0]);
+          console.log("comprobante[0]");
           setCreatedComprobante(comprobante[0]);
-          // const html = htmlBill(
-          //   comprobante[0],
-          //   company,
-          //   undefined,
-          //   2,
-          //   marcas?.find((x: { id: string; }) => x.id === brandId),
-          //   nombre,
-          //   billResponsible
-          //     ? billResponsible?.address ??
-          //         "" + " " + (billResponsible?.address_number ?? "")
-          //     : obraSocial?.adress ?? "",
-          //   (billResponsible
-          //     ? billResponsible?.locality
-          //     : obraSocial?.locality) ?? "",
-          //   (billResponsible
-          //     ? billResponsible?.province
-          //     : obraSocial?.province) ?? "",
-          //   (billResponsible
-          //     ? billResponsible?.postal_code?.cp
-          //     : obraSocial?.cpData?.cp) ?? "",
-          //   (billResponsible
-          //     ? billResponsible?.fiscal_id_type
-          //     : obraSocial?.fiscal_id_type) ?? "",
-          //   (billResponsible
-          //     ? billResponsible?.fiscal_id_number
-          //     : obraSocial?.fiscal_id_number?.toString()) ?? "",
-          //   (billResponsible
-          //     ? billResponsible?.afip_status
-          //     : obraSocial?.afip_status) ?? ""
-          // );
-          // const options = {
-          //   width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
-          //   marginLeft: 0.8, // Margen izquierdo en pulgadas. Usar 0.1 para ticket
-          //   marginRight: 0.8, // Margen derecho en pulgadas. Usar 0.1 para ticket
-          //   marginTop: 0.4, // Margen superior en pulgadas. Usar 0.1 para ticket
-          //   marginBottom: 0.4, // Margen inferior en pulgadas. Usar 0.1 para ticket
-          // };
-          // const name = (last_voucher + 1).toString() + ".pdf";
-          // const resHtml = await afip.ElectronicBilling.createPDF({
-          //   html: html,
-          //   file_name: name,
-          //   options: options,
-          // });
-          // const updatedComprobante = await updateComprobante({
-          //   id: comprobante[0]?.id ?? "",
-          //   billLink: resHtml.file,
-          //   number: last_voucher + 1,
-          // });
-          // console.log("resultadHTML", resHtml);
-          // if (resHtml.file) {
-          //   window.open(resHtml.file, "_blank");
-          // }
         }
         setLoading(false);
-        // toast.success("La factura se creo correctamente");
-        // router.push("/dashboard");
         setPage("confirmationPage");
       })();
     } catch {
@@ -528,6 +551,10 @@ export default function Page() {
       },
     },
   });
+
+  const [generatedUrlPopup, setGeneratedUrlPopup] = useState<string | null>(
+    null
+  );
 
   const conceptsForm = useForm<ConceptsForm>({
     defaultValues: {
@@ -645,9 +672,36 @@ export default function Page() {
     router.refresh();
   };
 
+  const GeneratedPopup = ({ url }: { url: string | null }) => (
+    <AlertDialog open={url !== null}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Se generó el comprobante</AlertDialogTitle>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={() => setGeneratedUrlPopup(null)}>
+            Cerrar
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={async () => {
+              setGeneratedUrlPopup(null);
+              if (url !== null) {
+                const req = await fetch(url);
+                const blob = await req.blob();
+                saveAs(blob, "comprobante.pdf");
+              }
+            }}>
+            Descargar
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+
   if (!grupoFamiliarId && !obraSocialId) {
     return (
       <LayoutContainer>
+        <GeneratedPopup url={generatedUrlPopup} />
         <section>
           <div>
             <Title>Generación de comprobantes</Title>
@@ -698,9 +752,11 @@ export default function Page() {
       </LayoutContainer>
     );
   }
+
   return (
     <>
       <LayoutContainer>
+        <GeneratedPopup url={generatedUrlPopup} />
         {page === "formPage" && (
           <section className="space-y-5 flex flex-col">
             <div>
@@ -708,7 +764,7 @@ export default function Page() {
             </div>
             <div className="flex flex-row justify-between">
               <p className=" text-lg font-semibold">Receptor</p>
-              <div className="pb-2">
+              {/* <div className="pb-2">
                 <Button
                   className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 mr-3 shadow-none"
                   // onClick={() => setOpen(true)}
@@ -728,7 +784,7 @@ export default function Page() {
                   <CircleX className="h-4 w-auto mr-2" />
                   Anular
                 </Button>
-              </div>
+              </div> */}
             </div>
 
             <div className="flex flex-row justify-between gap-8 ">
@@ -784,7 +840,7 @@ export default function Page() {
 
             <ComprobanteCard
               onValueChange={computeTotals}
-              comprobantesEntidad={comprobantesEntidad}
+              comprobantes={comprobantes}
               visualization={false}
               form={form}
               tipoComprobante={tipoComprobante}
@@ -828,7 +884,8 @@ export default function Page() {
               className="flex justify-between px-4 py-4 rounded-full self-end bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e]"
               onClick={() => {
                 generateComprobante();
-              }}>
+              }}
+              disabled={loading}>
               Siguiente
               {loading ? (
                 <Loader2Icon className="mr-2 animate-spin" size={20} />
@@ -869,6 +926,7 @@ export default function Page() {
             obrasSociales={obrasSociales}
             marcas={marcas}
             createdComprobante={createdComprobante}
+            setGeneratedUrlPopup={setGeneratedUrlPopup}
           />
         )}
       </LayoutContainer>

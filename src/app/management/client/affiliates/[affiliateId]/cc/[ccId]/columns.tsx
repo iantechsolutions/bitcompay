@@ -10,6 +10,7 @@ import {
   CircleCheck,
   CircleX,
   CalendarIcon,
+  Download,
 } from "lucide-react";
 import Edit02Icon from "~/components/icons/edit-02-stroke-rounded";
 import { Button } from "~/components/ui/button";
@@ -31,9 +32,9 @@ export type TableRecord = {
   date: Date;
   description: string;
   amount: string;
-  comprobanteType: string;
+  "Tipo comprobante": string;
   comprobanteNumber: string;
-  status: "Pagada" | "Pendiente";
+  Estado: "Pagada" | "Pendiente";
   iva: number;
   comprobantes?: RouterOutputs["comprobantes"]["getByLiquidation"];
   currentAccountAmount: string;
@@ -86,7 +87,7 @@ export const columns: ColumnDef<TableRecord>[] = [
           </p>
           <p className="text-[#c4c4c4] text-xs absolute top-1/2 transform translate-y-4">
             {" "}
-            {row.getValue("comprobanteType")} - №{" "}
+            {row.getValue("Tipo comprobante")} - №{" "}
             {row.getValue("comprobanteNumber")}{" "}
           </p>
         </div>
@@ -94,7 +95,7 @@ export const columns: ColumnDef<TableRecord>[] = [
     },
   },
   {
-    accessorKey: "comprobanteType",
+    accessorKey: "Tipo comprobante",
     header: () => null,
     cell: ({ row }) => {
       return null;
@@ -115,20 +116,21 @@ export const columns: ColumnDef<TableRecord>[] = [
     },
   },
   {
-    accessorKey: "status",
+    accessorKey: "Estado",
     header: () => null,
     cell: ({ row }) => {
-      const status = row.getValue("status");
+      const Estado = row.getValue("Estado");
       const style =
-        status === "pagado"
+        Estado === "pagado"
           ? "bg-[#DDF9CC] text-[#4E9F1D]"
           : "bg-[#F9E7CC] text-[#F69709]";
       return (
         <div>
           <div
-            className={`rounded-full inline-block font-bold ${style} px-7 py-1`}>
+            className={`rounded-full inline-block font-bold ${style} px-7 py-1`}
+          >
             {" "}
-            {row.getValue("status")}
+            {row.getValue("Estado")}
           </div>
         </div>
       );
@@ -158,7 +160,8 @@ export const columns: ColumnDef<TableRecord>[] = [
             <span
               className={`"absolute top-1/2 transform -translate-y-1/2 font-bold ${
                 amount > 0 ? "text-[#6952EB]" : "text-[#EB2727]"
-              }`}>
+              }`}
+            >
               {amount}
             </span>
           )}
@@ -206,9 +209,9 @@ export const columns: ColumnDef<TableRecord>[] = [
         );
 
         if (!detailData) {
-          return toast.error("Error al imprimir");
+          return toast.error("Error al descargar");
         } else if (!comprobante || !comprobante?.billLink) {
-          return toast.error("No hay comprobantes disponibles para imprimir");
+          return toast.error("No hay comprobantes disponibles para descargar");
         } else {
           const url = comprobante.billLink ?? "";
           const filename = comprobante.billLink ?? "";
@@ -251,7 +254,7 @@ export const columns: ColumnDef<TableRecord>[] = [
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => print()}>
-                <Printer className="mr-1 h-4" /> Imprimir
+                <Download className="mr-1 h-4" /> Descargar
               </DropdownMenuItem>
               <DropdownMenuSeparator />
 
