@@ -562,9 +562,9 @@ export default function Page() {
     },
   });
 
-  const [generatedUrlPopup, setGeneratedUrlPopup] = useState<string | null>(
-    null
-  );
+  // const [generatedUrlPopup, setGeneratedUrlPopup] = useState<string | null>(
+  //   null
+  // );
 
   const conceptsForm = useForm<ConceptsForm>({
     defaultValues: {
@@ -681,36 +681,36 @@ export default function Page() {
     router.refresh();
   };
 
-  const GeneratedPopup = ({ url }: { url: string | null }) => (
-    <AlertDialog open={url !== null}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Se generó el comprobante</AlertDialogTitle>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => setGeneratedUrlPopup(null)}>
-            Cerrar
-          </AlertDialogCancel>
-          <AlertDialogAction
-            onClick={async () => {
-              setGeneratedUrlPopup(null);
-              if (url !== null) {
-                const req = await fetch(url);
-                const blob = await req.blob();
-                saveAs(blob, "comprobante.pdf");
-              }
-            }}>
-            Descargar
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  );
+  // const GeneratedPopup = ({ url }: { url: string | null }) => (
+  //   <AlertDialog open={url !== null}>
+  //     <AlertDialogContent>
+  //       <AlertDialogHeader>
+  //         <AlertDialogTitle>Se generó el comprobante</AlertDialogTitle>
+  //       </AlertDialogHeader>
+  //       <AlertDialogFooter>
+  //         <AlertDialogCancel onClick={() => setGeneratedUrlPopup(null)}>
+  //           Cerrar
+  //         </AlertDialogCancel>
+  //         <AlertDialogAction
+  //           onClick={async () => {
+  //             setGeneratedUrlPopup(null);
+  //             if (url !== null) {
+  //               const req = await fetch(url);
+  //               const blob = await req.blob();
+  //               saveAs(blob, "comprobante.pdf");
+  //             }
+  //           }}>
+  //           Descargar
+  //         </AlertDialogAction>
+  //       </AlertDialogFooter>
+  //     </AlertDialogContent>
+  //   </AlertDialog>
+  // );
 
   if (!grupoFamiliarId && !obraSocialId) {
     return (
       <LayoutContainer>
-        <GeneratedPopup url={generatedUrlPopup} />
+        {/* <GeneratedPopup url={generatedUrlPopup} /> */}
         <section>
           <div>
             <Title>Generación de comprobantes</Title>
@@ -765,7 +765,7 @@ export default function Page() {
   return (
     <>
       <LayoutContainer>
-        <GeneratedPopup url={generatedUrlPopup} />
+        {/* <GeneratedPopup url={generatedUrlPopup} /> */}
         {page === "formPage" && (
           <section className="space-y-5 flex flex-col">
             <div>
@@ -935,7 +935,7 @@ export default function Page() {
             obrasSociales={obrasSociales}
             marcas={marcas}
             createdComprobante={createdComprobante}
-            setGeneratedUrlPopup={setGeneratedUrlPopup}
+            // setGeneratedUrlPopup={setGeneratedUrlPopup}
           />
         )}
       </LayoutContainer>

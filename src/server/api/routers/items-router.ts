@@ -70,6 +70,7 @@ export const itemsRouter = createTRPCRouter({
             with: { businessUnitData: { with: { brand: true } } },
           },
           items: true,
+          otherTributes: true,
         },
       });
       return comprobante;

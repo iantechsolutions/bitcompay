@@ -512,7 +512,8 @@ async function approbatecomprobante(liquidationId: string) {
               Importe: (Number(comprobante?.importe) * ivaFloat).toString(),
             },
           };
-
+          console.log("COMPROBANTE APROBADO");
+          console.log(comprobante.importe);
           await db.insert(schema.events).values({
             current_amount: lastEventAmount - comprobante.importe,
             description: "FC",
@@ -825,6 +826,7 @@ export const comprobantesRouter = createTRPCRouter({
         where: eq(schema.comprobantes.id, input.comprobanteId),
         with: {
           items: true,
+          otherTributes: true,
           family_group: {
             with: {
               integrants: {
@@ -926,124 +928,10 @@ export const comprobantesRouter = createTRPCRouter({
           },
           items: true,
           payments: true,
+          otherTributes:true,
         },
       });
       console.log("justo antes de crear payments");
-
-      if (
-        input.tipoComprobante?.toUpperCase() === "NOTA DE CREDITO A" ||
-        input.tipoComprobante?.toUpperCase() === "NOTA DE CREDITO B"
-      ) {
-        console.log("entro NC ");
-        const statusCancelado = await db.query.paymentStatus.findFirst({
-          where: eq(schema.paymentStatus.code, "90"),
-        });
-        console.log("Encontro status");
-        console.log(input);
-        const res = await db
-          .update(schema.payments)
-          .set({
-            statusId: statusCancelado?.id,
-          })
-          .where(
-            eq(schema.payments.comprobante_id, input.previous_facturaId ?? "")
-          );
-        console.log("Actualizo payments");
-      } else if (
-        input.tipoComprobante?.toUpperCase() === "FACTURA A" ||
-        input.tipoComprobante?.toUpperCase() === "FACTURA B"
-      ) {
-        console.log("entro FC ");
-        const status = await db.query.paymentStatus.findFirst({
-          where: eq(schema.paymentStatus.code, "91"),
-        });
-        console.log("Encontro status");
-        const user = await currentUser();
-        const family_group = await db.query.family_groups.findFirst({
-          where: eq(
-            schema.family_groups.id,
-            comprobanteGotten?.family_group?.id ?? ""
-          ),
-          with: {
-            businessUnitData: {
-              with: {
-                brand: true,
-              },
-            },
-            plan: true,
-            integrants: {
-              with: {
-                postal_code: true,
-                pa: true,
-              },
-            },
-          },
-        });
-        console.log("Encontro family_group");
-        console.log(comprobanteGotten?.family_group?.id);
-        if (family_group) {
-          const billResponsible = family_group.integrants.find(
-            (x) => x.isBillResponsible
-          );
-
-          // const billResponsible = await db.query.integrants.findFirst({
-          //   where: and(
-          //     eq(
-          //       schema.integrants.family_group_id,
-          //       comprobanteGotten?.family_group?.id ?? ""
-          //     ),
-          //     eq(schema.integrants.isBillResponsible, true)
-          //   ),
-
-          // });
-          console.log(billResponsible);
-          console.log(billResponsible?.pa[0]);
-          console.log(billResponsible?.pa[0]?.product_id);
-          const producto = await db.query.products.findFirst({
-            where: eq(
-              schema.products.id,
-              billResponsible?.pa[0]?.product_id ?? ""
-            ),
-          });
-          console.log("Encontro producto");
-          console.log(producto);
-          console.log("Entro?");
-
-          const payment = await db
-            .insert(schema.payments)
-            .values({
-              companyId: ctx.session.orgId ?? "",
-              invoice_number: comprobanteGotten?.nroComprobante ?? 0,
-              userId: user?.id ?? "",
-              g_c: family_group?.businessUnitData?.brand?.number ?? 0,
-              name: billResponsible?.name ?? "",
-              fiscal_id_type: billResponsible?.fiscal_id_type,
-              fiscal_id_number: parseInt(
-                billResponsible?.fiscal_id_number ?? "0"
-              ),
-              du_type: billResponsible?.id_type,
-              du_number: parseInt(billResponsible?.id_number ?? "0"),
-              affiliate_number:
-                (family_group?.plan?.plan_code ?? "") +
-                (billResponsible?.id_number ?? ""),
-              product: producto?.id,
-              period: comprobanteGotten?.due_date,
-              first_due_amount: comprobanteGotten?.importe,
-              first_due_date: comprobanteGotten?.due_date,
-              cbu: billResponsible?.pa[0]?.CBU,
-              comprobante_id: comprobanteGotten?.id,
-              documentUploadId: "0AspRyw8g4jgDAuNGAeBX",
-              product_number: producto?.number ?? 0,
-              statusId: status?.id,
-              card_number: billResponsible?.pa[0]?.card_number,
-              card_brand: billResponsible?.pa[0]?.card_brand,
-              card_type: billResponsible?.pa[0]?.card_type,
-              // address: billResponsible?.address,
-            })
-            .returning();
-          console.log("Creo payment");
-        }
-      }
       return [comprobanteGotten];
     }),
   createManual: protectedProcedure
@@ -1178,7 +1066,7 @@ export const comprobantesRouter = createTRPCRouter({
         .where(eq(schema.comprobantes.id, id));
       return updatedProvider;
     }),
-  addBillLinkAndNumberAndEstado: protectedProcedure
+  approbate: protectedProcedure
     .input(
       z.object({
         id: z.string(),
@@ -1193,7 +1081,7 @@ export const comprobantesRouter = createTRPCRouter({
         ]),
       })
     )
-    .mutation(async ({ input: { id, billLink, number, state } }) => {
+    .mutation(async ({ input: { id, billLink, number, state },ctx }) => {
       const updatedProvider = await db
         .update(schema.comprobantes)
         .set({
@@ -1201,7 +1089,125 @@ export const comprobantesRouter = createTRPCRouter({
           nroComprobante: number,
           estado: state,
         })
-        .where(eq(schema.comprobantes.id, id));
+        .where(eq(schema.comprobantes.id, id)).returning();
+
+        const tipoComprobante = updatedProvider[0]?.tipoComprobante;
+        const previous_facturaId = updatedProvider[0]?.previous_facturaId;
+        if (
+        tipoComprobante?.toUpperCase() === "NOTA DE CREDITO A" ||
+        tipoComprobante?.toUpperCase() === "NOTA DE CREDITO B"
+      ) {
+        console.log("entro NC ");
+        const statusCancelado = await db.query.paymentStatus.findFirst({
+          where: eq(schema.paymentStatus.code, "90"),
+        });
+        const res = await db
+          .update(schema.payments)
+          .set({
+            statusId: statusCancelado?.id,
+          })
+          .where(
+            eq(schema.payments.comprobante_id, previous_facturaId ?? "")
+          );
+        console.log("Actualizo payments");
+      } else if (
+        tipoComprobante?.toUpperCase() === "FACTURA A" ||
+        tipoComprobante?.toUpperCase() === "FACTURA B"
+      ) {
+        console.log("entro FC ");
+        const status = await db.query.paymentStatus.findFirst({
+          where: eq(schema.paymentStatus.code, "91"),
+        });
+        console.log("Encontro status");
+        const user = await currentUser();
+        const family_group = await db.query.family_groups.findFirst({
+          where: eq(
+            schema.family_groups.id,
+            updatedProvider[0]?.family_group_id ?? ""
+          ),
+          with: {
+            businessUnitData: {
+              with: {
+                brand: true,
+              },
+            },
+            plan: true,
+            integrants: {
+              with: {
+                postal_code: true,
+                pa: true,
+              },
+            },
+          },
+        });
+        console.log("Encontro family_group");
+        console.log(updatedProvider[0]?.family_group_id);
+        if (family_group) {
+          const billResponsible = family_group.integrants.find(
+            (x) => x.isBillResponsible
+          );
+
+          // const billResponsible = await db.query.integrants.findFirst({
+          //   where: and(
+          //     eq(
+          //       schema.integrants.family_group_id,
+          //       comprobanteGotten?.family_group?.id ?? ""
+          //     ),
+          //     eq(schema.integrants.isBillResponsible, true)
+          //   ),
+
+          // });
+          console.log(billResponsible);
+          console.log(billResponsible?.pa[0]);
+          console.log(billResponsible?.pa[0]?.product_id);
+          const producto = await db.query.products.findFirst({
+            where: eq(
+              schema.products.id,
+              billResponsible?.pa[0]?.product_id ?? ""
+            ),
+          });
+          console.log("Encontro producto");
+          console.log(producto);
+          console.log("Entro?");
+
+          const payment = await db
+            .insert(schema.payments)
+            .values({
+              companyId: ctx.session.orgId ?? "",
+              invoice_number: updatedProvider[0]?.nroComprobante ?? 0,
+              userId: user?.id ?? "",
+              g_c: family_group?.businessUnitData?.brand?.number ?? 0,
+              name: billResponsible?.name ?? "",
+              fiscal_id_type: billResponsible?.fiscal_id_type,
+              fiscal_id_number: parseInt(
+                billResponsible?.fiscal_id_number ?? "0"
+              ),
+              du_type: billResponsible?.id_type,
+              du_number: parseInt(billResponsible?.id_number ?? "0"),
+              affiliate_number:
+                (family_group?.plan?.plan_code ?? "") +
+                (billResponsible?.id_number ?? ""),
+              product: producto?.id,
+              period: updatedProvider[0]?.due_date,
+              first_due_amount: updatedProvider[0]?.importe,
+              first_due_date: updatedProvider[0]?.due_date,
+              cbu: billResponsible?.pa[0]?.CBU,
+              comprobante_id: updatedProvider[0]?.id,
+              documentUploadId: "0AspRyw8g4jgDAuNGAeBX",
+              product_number: producto?.number ?? 0,
+              statusId: status?.id,
+              card_number: billResponsible?.pa[0]?.card_number,
+              card_brand: billResponsible?.pa[0]?.card_brand,
+              card_type: billResponsible?.pa[0]?.card_type,
+              // address: billResponsible?.address,
+            })
+            .returning();
+          console.log("Creo payment");
+        }
+      }
+
+
+
       const updatedPayments = await db
         .update(schema.payments)
         .set({

@@ -100,14 +100,20 @@ function formatNumberAsCurrency(amount: number): string {
   }).format(amount);
 }
 
-function getTagForTipoComprobante(tipoComprobante: string): string {
-  if (tipoComprobante.includes("A")) {
+let comprobanteCortado = "ss";
+
+function getTagForTipoComprobante(tipoComprobante: string):string{
+  comprobanteCortado = tipoComprobante;
+  if (tipoComprobante.includes(" A")) {
+    comprobanteCortado = comprobanteCortado.replace(" A", "");
     return "A";
   }
-  if (tipoComprobante.includes("B")) {
+  else if (tipoComprobante.includes(" B")) {
+    comprobanteCortado = comprobanteCortado.replace(" B", "")
     return "B";
+  } else {
+    return "X";
   }
-  return "X";
 }
 
 function getIimageForLogo(logo: string | null) {
@@ -196,6 +202,7 @@ export function htmlBill(
   id_number: string,
   afip_status: string
 ) {
+  
   let canales: any;
   if (producto) {
     canales = producto?.channels;
@@ -207,7 +214,7 @@ export function htmlBill(
   // console.log(voucher);
 
   // moví funciones porque es lento redefinirlas constantemente
-
+  
   const conceptosList = generateConcepts(comprobante?.items ?? []);
   const amountsList = generateAmounts(comprobante?.items ?? []);
   const htmlContent = `<!DOCTYPE html>
@@ -639,8 +646,7 @@ font-size:10px;
   
           <div class="items-2" style="text-align:center">
         <div class="icon">
-				<span>A
-        </span>
+				<span>${getTagForTipoComprobante(comprobante?.tipoComprobante ?? "")}</span>
 			  </div>
 			<div class="line"></div>
         </div>
@@ -648,7 +654,7 @@ font-size:10px;
         <div class="items-3" style="padding-bottom: 5px;">
           <div>
            <h3 style=" font-size: 16px; font-weight:500; padding-bottom:3px;">
-            ${comprobante?.tipoComprobante ?? ""} </h3>
+            ${comprobanteCortado ?? ""} </h3>
            <h3 style=" font-size: 14px; font-weight:400; padding-bottom:3px;">
             N° ${comprobante?.ptoVenta.toString().padStart(4, "0")}-${voucher
     .toString()
@@ -781,21 +787,21 @@ font-size:10px;
             alt=""
           />
           <img
-             style="width:63px; height:38px;"
+             style="width:60px; height:40px;"
             src="https://utfs.io/f/501ea573-2d69-4f4b-9ae3-95531c540d9c-h1yi1.jpg"
             alt=""
           />
           <img
             style="width:55px; height:35px;"
-            src="https://utfs.io/f/781ea16d-cac2-46de-9b9a-e59db510e17b-8b1bm4.png"
+            src="https://getlogovector.com/wp-content/uploads/2023/12/mercado-pago-logo-vector-2023.png"
             alt=""
           />
            </div>
            
-          <div class="payment" style="padding-left: 40px; padding-right: 40px;">
+          <div class="payment" style="height: 40px; padding-left: 35px; padding-right: 35px;">
             <span>Código de pago electrónico</span>
           <img
-            style="width:90px; height:30px;"
+            style="width:100px; height:15px;"
             src="https://utfs.io/f/a215f09e-25e8-4eb3-9d1c-6adf1d17baa5-pvvezi.png"
             alt=""
           />
@@ -804,17 +810,17 @@ font-size:10px;
           <div class="payment">
             <span>Débito automático</span>
             <img
-               style="width:54px; height:30px;"
-              src="https://utfs.io/f/8d48ec18-1d0b-4e61-9db3-e304cb732abf-q42cl4.png"
+              style=""
+              src="/comprobantes/visa-deb.svg"
               alt=""
             />
           <img
-             style="width:54px; height:23px;"
-            src="https://utfs.io/f/6f4442e1-57c1-4df8-a810-29258735b429-reuj6w.png"
+            style=""
+            src="/comprobantes/visa.svg"
             alt=""
           />
           <img
-           style="width:45px; height:33px;"
+           style="width:40px; height:30px;"
             src="https://utfs.io/f/23711681-416d-4155-9894-4e6c8584219f-mgfpcc.png"
             alt=""
           />
@@ -860,7 +866,11 @@ font-size:10px;
            <p>CÓDIGO DE PAGO ELECTRÓNICO: XXXX-XXXXXXXX</p>
           <p>FECHA TOPE PARA EL PAGO EN REDES: XX/XX/XXXX</p>
           <p>CANALES CON LECTURA DE CÓDIGO DE BARRAS: </p>
-          ${true ? getIimageForBarcode() : null}
+          <img
+            style=""
+            src="/comprobantes/codigo-barra.svg"
+            alt=""
+          />
         </div>
       </section>
     </body>
