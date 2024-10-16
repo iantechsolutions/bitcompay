@@ -555,7 +555,7 @@ const confirmationPage = ({
             Crear nueva
           </Button>
         </div>
-      )}
+      }
     </section>
   );
 };
