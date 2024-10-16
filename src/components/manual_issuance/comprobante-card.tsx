@@ -652,6 +652,7 @@ export default function ComprobanteCard({
                       comprobantes
                         ?.filter(
                           (comprobante) =>
+                            comprobante.tipoComprobante !== "0" &&
                             (comprobante.estado === "parcial" ||
                               comprobante.estado === "pendiente")
                         )
@@ -669,7 +670,7 @@ export default function ComprobanteCard({
                   </Select>
                 )}
               />,
-              form.getValues("facturasEmitidas").toString() ??
+              form.getValues("facturasEmitidas").nroComprobante ??
                 "no hay facturas emitidas"
             ),
           }}

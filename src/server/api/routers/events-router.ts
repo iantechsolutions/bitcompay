@@ -161,6 +161,8 @@ export const eventsRouter = createTRPCRouter({
       let new_event;
       switch (input.type) {
         case "REC":
+          console.log(input.type);
+          console.log("caso REC");
           new_event = await db
             .insert(schema.events)
             .values({
@@ -174,6 +176,8 @@ export const eventsRouter = createTRPCRouter({
             .returning();
           break;
         case "FC":
+          console.log(input.type);
+          console.log("caso FC");
           new_event = await db
             .insert(schema.events)
             .values({
@@ -187,6 +191,8 @@ export const eventsRouter = createTRPCRouter({
             .returning();
           break;
         case "NC":
+          console.log(input.type);
+          console.log("caso NC");
           new_event = await db
             .insert(schema.events)
             .values({

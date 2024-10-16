@@ -310,46 +310,40 @@ const confirmationPage = ({
         const event = createEventFamily({
           family_group_id: fgId,
           type: "FC",
-          amount: ivaFloat * importe + tributos,
+          amount: createdComprobante.importe ?? 0,
           comprobante_id: createdComprobante.id ?? "",
         });
       } else if (osId) {
         const event = createEventOS({
           health_insurance_id: osId ?? "",
           type: "FC",
-          amount: ivaFloat * importe + tributos,
+          amount: createdComprobante.importe ?? 0,
           comprobante_id: createdComprobante.id ?? "",
         });
       }
     }
-    if (tipoComprobante == "0") {
-      const otrosConceptos = otherConcepts.getValues();
-      const importe = otrosConceptos.otherConcepts.reduce(
-        (acc, concept) => acc + Number(concept.importe),
-        0
-      );
-
+    else if (tipoComprobante == "0") {
       if (fgId) {
         const event = createEventFamily({
           family_group_id: fgId,
           type: "REC",
-          amount: importe,
+          amount: createdComprobante.importe ?? 0,
           comprobante_id: createdComprobante.id ?? "",
         });
       } else if (osId) {
         const event = createEventOS({
           health_insurance_id: osId,
           type: "REC",
-          amount: importe,
+          amount: createdComprobante.importe ?? 0,
           comprobante_id: createdComprobante.id ?? "",
         });
       }
 
-      const eventOrg = createEventOrg({
-        type: "REC",
-        amount: importe,
-        comprobante_id: createdComprobante.id ?? "",
-      });
+      // const eventOrg = createEventOrg({
+      //   type: "REC",
+      //   amount: createdComprobante.importe ?? 0,
+      //   comprobante_id: createdComprobante.id ?? "",
+      // });
     } else if (
       fcSeleccionada &&
       (tipoComprobante == "3" || tipoComprobante == "8")
