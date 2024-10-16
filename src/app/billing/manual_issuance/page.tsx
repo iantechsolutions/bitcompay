@@ -46,6 +46,20 @@ import {
   type otherConceptsForm,
 } from "~/lib/types/app";
 import { type Comprobante } from "~/server/db/schema";
+import { Popover, PopoverContent } from "~/components/ui/popover";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
+import { saveAs } from "file-saver";
+
 function formatDate(date: Date | undefined) {
   if (date) {
     const year = date.getFullYear();
@@ -60,13 +74,12 @@ function formatDate(date: Date | undefined) {
 export default function Page() {
   const { mutateAsync: createComprobante } =
     api.comprobantes.create.useMutation();
-    const { mutateAsync: createItem } =
-    api.items.create.useMutation();
+  const { mutateAsync: createItem } = api.items.create.useMutation();
   const { data: company } = api.companies.get.useQuery();
   const { data: marcas } = api.brands.list.useQuery();
   const { data: gruposFamiliar } = api.family_groups.list.useQuery();
   const { data: obrasSociales } = api.healthInsurances.listClient.useQuery();
-  const {data: comprobantesEntidad} = api.comprobantes.getByEntity.useQuery();
+  const { data: comprobantesEntidad } = api.comprobantes.getByEntity.useQuery();
   const [subTotal, setSubTotal] = useState<number>(0);
   const [ivaTotal, setIvaTotal] = useState<number>(0);
   const [otherAttributes, setOtherAttributes] = useState<number>(0);
@@ -110,7 +123,7 @@ export default function Page() {
           subTotal += Number(concepts.importe);
         }
         const importe = form.getValues().facturasEmitidas.importe;
-        subTotal+= form.getValues().facturasEmitidas.importe; 
+        subTotal += form.getValues().facturasEmitidas.importe;
       case "Nota de crédito":
         for (const comprobante of asociatedFCForm.getValues().comprobantes) {
           console.log("comprobante del forms", comprobante);
@@ -203,30 +216,28 @@ export default function Page() {
             family_group_id: grupoFamiliarId,
             health_insurance_id: obraSocialId,
           });
-          const sumaTributos = otherTributesForm.getValues().tributes.reduce(
-            (acc, tribute) => acc + Number(tribute.amount),
-            0
-          );
-          const comprobanteId = comprobante[0]?.id ?? ""
+          const sumaTributos = otherTributesForm
+            .getValues()
+            .tributes.reduce((acc, tribute) => acc + Number(tribute.amount), 0);
+          const comprobanteId = comprobante[0]?.id ?? "";
           const tributo = await createItem({
             amount: sumaTributos,
             concept: "Tributos",
             iva: 0,
             total: sumaTributos,
             comprobante_id: comprobanteId,
-          })
+          });
           conceptsForm.getValues().concepts.forEach(async (concept) => {
-            if(concept.importe > 0){
-
+            if (concept.importe > 0) {
               await createItem({
                 amount: concept.importe,
                 concept: concept.concepto,
                 iva: concept.iva,
                 total: concept.total,
                 comprobante_id: comprobanteId,
-              })
+              });
             }
-          })
+          });
           // data = {
           //   CantReg: 1, // Cantidad de comprobantes a registrar
           //   PtoVta: Number(form.getValues().puntoVenta),
@@ -301,32 +312,31 @@ export default function Page() {
             family_group_id: grupoFamiliarId,
             health_insurance_id: obraSocialId,
           });
-          const comprobanteId = comprobante[0]?.id ?? ""
-          otherConceptsForm.getValues().otherConcepts.forEach(async (concept) => {
-            if(concept.importe > 0) {
-
-              await createItem({
-                amount: concept.importe,
-                concept: concept.description,
-                iva: 0,
-                total: concept.importe,
-                comprobante_id: comprobanteId,
-              })
-            }
-          })
-          const sumaTributos = otherTributesForm.getValues().tributes.reduce(
-            (acc, tribute) => acc + Number(tribute.amount),
-            0 
-          )
-          if(sumaTributos > 0){
-
+          const comprobanteId = comprobante[0]?.id ?? "";
+          otherConceptsForm
+            .getValues()
+            .otherConcepts.forEach(async (concept) => {
+              if (concept.importe > 0) {
+                await createItem({
+                  amount: concept.importe,
+                  concept: concept.description,
+                  iva: 0,
+                  total: concept.importe,
+                  comprobante_id: comprobanteId,
+                });
+              }
+            });
+          const sumaTributos = otherTributesForm
+            .getValues()
+            .tributes.reduce((acc, tribute) => acc + Number(tribute.amount), 0);
+          if (sumaTributos > 0) {
             const tributo = await createItem({
               amount: sumaTributos,
               concept: "Tributos",
               iva: 0,
               total: sumaTributos,
               comprobante_id: comprobanteId,
-            })
+            });
           }
           // const event = createEventFamily({
           //   family_group_id: grupoFamiliarId,
@@ -343,10 +353,12 @@ export default function Page() {
           fcSeleccionada &&
           (tipoComprobante == "3" || tipoComprobante == "8")
         ) {
-          const facSeleccionada = comprobantes?.find((x) => x.id == fcSeleccionada[0]?.id);
+          const facSeleccionada = comprobantes?.find(
+            (x) => x.id == fcSeleccionada[0]?.id
+          );
 
           let ivaFloat = (100 + parseFloat(facSeleccionada?.iva ?? "0")) / 100;
-          const importeBase = (facSeleccionada?.importe ?? 0)/ivaFloat;
+          const importeBase = (facSeleccionada?.importe ?? 0) / ivaFloat;
           comprobante = await createComprobante({
             estado: "pendiente",
             billLink: "",
@@ -368,28 +380,26 @@ export default function Page() {
             health_insurance_id: obraSocialId,
           });
 
-          const comprobanteId = comprobante[0]?.id ?? ""
+          const comprobanteId = comprobante[0]?.id ?? "";
           await createItem({
             amount: importeBase,
             concept: "Factura a cancelar",
             iva: importeBase * (ivaFloat - 1),
             total: facSeleccionada?.importe,
             comprobante_id: comprobanteId,
-          })
+          });
 
-          const sumaTributos = otherTributesForm.getValues().tributes.reduce(
-            (acc, tribute) => acc + Number(tribute.amount),
-            0 
-          )
-          if(sumaTributos > 0){
-
+          const sumaTributos = otherTributesForm
+            .getValues()
+            .tributes.reduce((acc, tribute) => acc + Number(tribute.amount), 0);
+          if (sumaTributos > 0) {
             const tributo = await createItem({
               amount: sumaTributos,
               concept: "Tributos",
               iva: 0,
               total: sumaTributos,
               comprobante_id: comprobanteId,
-            })
+            });
           }
 
           // try {
@@ -583,6 +593,10 @@ export default function Page() {
     },
   });
 
+  const [generatedUrlPopup, setGeneratedUrlPopup] = useState<string | null>(
+    null
+  );
+
   const conceptsForm = useForm<ConceptsForm>({
     defaultValues: {
       concepts: [{ concepto: "", importe: 0, iva: 0, total: 0 }],
@@ -699,9 +713,37 @@ export default function Page() {
     router.refresh();
   };
 
+  const GeneratedPopup = ({ url }: { url: string | null }) => (
+    <AlertDialog open={url !== null}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Se generó el comprobante</AlertDialogTitle>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={() => setGeneratedUrlPopup(null)}>
+            Cerrar
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={async () => {
+              setGeneratedUrlPopup(null);
+              if (url !== null) {
+                const req = await fetch(url);
+                const blob = await req.blob();
+                saveAs(blob, "comprobante.pdf");
+              }
+            }}
+          >
+            Descargar
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+
   if (!grupoFamiliarId && !obraSocialId) {
     return (
       <LayoutContainer>
+        <GeneratedPopup url={generatedUrlPopup} />
         <section>
           <div>
             <Title>Generación de comprobantes</Title>
@@ -756,9 +798,11 @@ export default function Page() {
       </LayoutContainer>
     );
   }
+
   return (
     <>
       <LayoutContainer>
+        <GeneratedPopup url={generatedUrlPopup} />
         {page === "formPage" && (
           <section className="space-y-5 flex flex-col">
             <div>
@@ -933,6 +977,7 @@ export default function Page() {
             obrasSociales={obrasSociales}
             marcas={marcas}
             createdComprobante={createdComprobante}
+            setGeneratedUrlPopup={setGeneratedUrlPopup}
           />
         )}
       </LayoutContainer>
