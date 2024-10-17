@@ -537,7 +537,7 @@ async function approbatecomprobante(liquidationId: string) {
             console.log("Error al enviar el comprobante a AFIP");
             console.log(e);
             comprobanteEstado = "error";
-            return null;
+            // return null;
           }
 
           await db
@@ -594,41 +594,44 @@ async function approbatecomprobante(liquidationId: string) {
             Date.now() - processStart
           }ms`
         );
+        if (comprobanteEstado!="error"){
 
-        const pdfGenerateStart = Date.now();
-        const html = htmlBill(
-          comprobante,
-          comprobante.family_group?.businessUnitData!.company,
-          producto,
-          lastVoucher + 1,
-          comprobante.family_group?.businessUnitData!.brand,
-          billResponsible?.name ?? "",
-          (billResponsible?.address ?? "") +
-            " " +
-            (billResponsible?.address_number ?? ""),
-          billResponsible?.locality ?? "",
-          billResponsible?.province ?? "",
-          billResponsible?.postal_code?.cp ?? "",
-          billResponsible?.fiscal_id_type ?? "",
-          billResponsible?.fiscal_id_number ?? "",
-          billResponsible?.afip_status ?? ""
-        );
+        
+          const pdfGenerateStart = Date.now();
+          const html = htmlBill(
+            comprobante,
+            comprobante.family_group?.businessUnitData!.company,
+            producto,
+            lastVoucher + 1,
+            comprobante.family_group?.businessUnitData!.brand,
+            billResponsible?.name ?? "",
+            (billResponsible?.address ?? "") +
+              " " +
+              (billResponsible?.address_number ?? ""),
+            billResponsible?.locality ?? "",
+            billResponsible?.province ?? "",
+            billResponsible?.postal_code?.cp ?? "",
+            billResponsible?.fiscal_id_type ?? "",
+            billResponsible?.fiscal_id_number ?? "",
+            billResponsible?.afip_status ?? ""
+          );
 
-        const name = `FAC_${lastVoucher + 1}.pdf`; // NOMBRE        lastVoucher += 1;
+          const name = `FAC_${lastVoucher + 1}.pdf`; // NOMBRE        lastVoucher += 1;
 
-        await PDFFromHtml(
-          html,
-          name,
-          afip,
-          comprobante?.id ?? "",
-          lastVoucher + 1,
-          comprobanteEstado
-        );
-        console.log(
-          `[TIMING] PDF generation (comprobante ${index}): ${
-            Date.now() - pdfGenerateStart
-          }ms`
-        );
+          await PDFFromHtml(
+            html,
+            name,
+            afip,
+            comprobante?.id ?? "",
+            lastVoucher + 1,
+            comprobanteEstado
+          );
+          console.log(
+            `[TIMING] PDF generation (comprobante ${index}): ${
+              Date.now() - pdfGenerateStart
+            }ms`
+          );
+        }
       });
 
     console.log(
