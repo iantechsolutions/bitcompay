@@ -4,6 +4,7 @@ import { computeBase, computeIva, toNumberOrZero } from "~/lib/utils";
 
 export function makeExcelRows(
   fgs: RouterOutputs["family_groups"]["getByLiquidationFiltered"],
+  liquidationId: string,
   excelRowsRef: (string | number)[][] | null,
   tableRowsRef: TableRecord[] | null // por referencia
 ) {
@@ -19,7 +20,9 @@ export function makeExcelRows(
     excelRow.push(name);
     excelRow.push(cuit);
 
-    const original_comprobante = fg?.comprobantes?.find(
+    const original_comprobante = fg?.comprobantes
+    ?.filter(x=>x.liquidation_id === liquidationId)
+    .find(
       (comprobante) =>
         comprobante.origin?.toLowerCase() === "factura" &&
         comprobante.tipoComprobante !== "Apertura de CC"
