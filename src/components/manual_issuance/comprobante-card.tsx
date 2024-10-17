@@ -611,8 +611,8 @@ export default function ComprobanteCard({
                         ?.filter(
                           (comprobante) =>
                             comprobante.tipoComprobante !== "0" &&
-                            (comprobante.estado.toUpperCase() === "PARCIAL" ||
-                              comprobante.estado.toUpperCase() === "PENDIENTE")
+                            (comprobante.estado?.toUpperCase() === "PARCIAL" ||
+                              comprobante.estado?.toUpperCase() === "PENDIENTE")
                         )
                         .slice(0, 10)
                         .map((comprobante) => ({
