@@ -289,11 +289,7 @@ async function approbatecomprobante(liquidationId: string) {
     const userStart = Date.now();
     const user = await currentUser();
 
-    const ccs = await db.query.currentAccount.findMany({
-      with: {
-        events: true,
-      },
-    });
+    
 
     console.log(`[TIMING] Current user fetch: ${Date.now() - userStart}ms`);
 
@@ -341,6 +337,7 @@ async function approbatecomprobante(liquidationId: string) {
     const promisePoolStart = Date.now();
     const { results, errors } = await PromisePool.withConcurrency(1000)
       .for(liquidation?.comprobantes)
+      
       .process(async (comprobante, index) => {
         let lastVoucher = 0;
         const lastVoucherStart = Date.now();
@@ -387,15 +384,7 @@ async function approbatecomprobante(liquidationId: string) {
 
         const ccFetchStart = Date.now();
         // const cachedCc = comprobante.family_group?.cc;
-        const cc = ccs.find((x) => x.id == comprobante.family_group?.cc?.id);
         let lastEventAmount = 0;
-        if (cc?.events && cc?.events.length > 0) {
-          lastEventAmount = cc?.events.reduce((prev, current) => {
-            return new Date(prev.createdAt) > new Date(current.createdAt)
-              ? prev
-              : current;
-          }).current_amount;
-        }
         console.log(
           `[TIMING] Current account transaction (comprobante ${index}): ${
             Date.now() - ccFetchStart
@@ -433,19 +422,6 @@ async function approbatecomprobante(liquidationId: string) {
               comprobanteDictionary[
                 fcAnc[comprobanteAnterior?.tipoComprobante ?? ""] ?? ""
               ];
-
-            try {
-              console.log("lastVoucher", lastVoucher);
-              lastVoucher = await afip.ElectronicBilling.getLastVoucher(
-                comprobanteAnterior?.ptoVenta,
-                comprobantecodNC
-              );
-              console.log("lastVoucher", lastVoucher);
-            } catch (e) {
-              console.log("Error al obtener el último comprobante");
-              console.log(e);
-              lastVoucher = 0;
-            }
 
             data = {
               CantReg: 1, // Cantidad de comprobantes a registrar
@@ -490,6 +466,19 @@ async function approbatecomprobante(liquidationId: string) {
             const temp = await createNextVoucher(data, afip);
             comprobanteEstado = temp.result;
             lastVoucher = temp.res?.voucherNumber ?? 0;
+            const ccs = await db.query.currentAccount.findMany({
+              with: {
+                events: true,
+              },
+            });
+            const cc = ccs.find((x) => x.id == comprobante.family_group?.cc?.id);
+            if (cc?.events && cc?.events.length > 0) {
+              lastEventAmount = cc?.events.reduce((prev, current) => {
+                return new Date(prev.createdAt) > new Date(current.createdAt)
+                  ? prev
+                  : current;
+              }).current_amount;
+            }
             await db.insert(schema.events).values({
               current_amount: lastEventAmount + comprobante.importe,
               description: "NC",
@@ -506,26 +495,13 @@ async function approbatecomprobante(liquidationId: string) {
             await db
               .update(schema.comprobantes)
               .set({
-                estado: comprobanteEstado,
+                estado: "error",
               })
               .where(eq(schema.comprobantes.id, comprobante.id));
           }
         } else {
           const comprobanteCod =
             comprobanteDictionary[comprobante.tipoComprobante ?? ""];
-          try {
-            // lastVoucher = await afip.ElectronicBilling.getLastVoucher(
-            //   comprobante?.ptoVenta,
-            //   comprobanteCod
-            // );
-            lastVoucher = 120;
-            console.log("lastVoucher", lastVoucher);
-            // console.log("lastVoucher")
-          } catch (e) {
-            console.log("Error al obtener el último comprobante");
-            console.log(e);
-            lastVoucher = 0;
-          }
 
           data = {
             CantReg: 1, // Cantidad de comprobantes a registrar
@@ -606,6 +582,21 @@ async function approbatecomprobante(liquidationId: string) {
             });
             console.log("COMPROBANTE APROBADO");
             console.log(comprobante.importe);
+            //wait 1 second
+            await new Promise((resolve) => setTimeout(resolve, 1500));
+            const ccs = await db.query.currentAccount.findMany({
+              with: {
+                events: true,
+              },
+            });
+            const cc = ccs.find((x) => x.id == comprobante.family_group?.cc?.id);
+            if (cc?.events && cc?.events.length > 0) {
+              lastEventAmount = cc?.events.reduce((prev, current) => {
+                return new Date(prev.createdAt) > new Date(current.createdAt)
+                  ? prev
+                  : current;
+              }).current_amount;
+            }
             await db.insert(schema.events).values({
               current_amount: lastEventAmount - comprobante.importe,
               description: "FC",
@@ -785,16 +776,16 @@ async function getGroupAmount(grupo: grupoCompleto, date: Date) {
   console.log("La casa", importe);
   return importe;
 }
-async function getGroupContribution(grupo: grupoCompleto) {
-  let importe = 0;
-  grupo.integrants?.forEach((integrant) => {
-    if (integrant?.contribution?.amount) {
-      const contributionIntegrante = integrant?.contribution?.amount ?? 0;
-      importe += contributionIntegrante;
-    }
-  });
-  return importe;
-}
+// async function getGroupContribution(grupo: grupoCompleto) {
+//   let importe = 0;
+//   grupo.integrants?.forEach((integrant) => {
+//     if (integrant?.contribution?.amount) {
+//       const contributionIntegrante = integrant?.contribution?.amount ?? 0;
+//       importe += contributionIntegrante;
+//     }
+//   });
+//   return importe;
+// }
 async function getDifferentialAmount(grupo: grupoCompleto, fechaPreliq: Date) {
   let importe = 0;
   grupo.integrants?.forEach((integrant) => {
@@ -844,7 +835,6 @@ export async function getGruposForLiquidation(brandId: string, date: Date) {
       abonos: true,
       integrants: {
         with: {
-          contribution: true,
           differentialsValues: true,
           pa: true,
           aportes_os: true,
@@ -1749,14 +1739,6 @@ function getBillingData(
           new_registration: boolean | null;
           integrant_id: string | null;
         }[];
-        contribution: {
-          id: string;
-          amount: number;
-          integrant_id: string | null;
-          employerContribution: number;
-          employeeContribution: number;
-          cuitEmployer: string;
-        } | null;
         differentialsValues: {
           id: string;
           createdAt: Date;

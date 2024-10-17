@@ -74,7 +74,7 @@ function makeSummary(
 
     const bonificacion = toNumberOrZero(
       original_comprobante?.items.find(
-        (item) => item.concept === "BONIFICACIÓN"
+        (item) => item.concept === "Bonificación"
       )?.amount
     );
     summary["BONIFICACIÓN"] += bonificacion;
@@ -103,20 +103,22 @@ function makeSummary(
       parseFloat(original_comprobante?.importe?.toFixed(2)!)
     );
 
-    const subTotal = computeBase(
-      total,
-      Number(original_comprobante?.iva ?? "0")
-    );
+    const subTotal =
+      computeBase(
+        total + saldo_anterior,
+        Number(original_comprobante?.iva ?? "0")
+      ) - saldo_anterior;
     summary.SUBTOTAL += subTotal;
 
     const iva = computeIva(
-      total - saldo_anterior,
+      total + saldo_anterior,
       Number(original_comprobante?.iva ?? "0")
     );
     summary.IVA += iva;
     summary["TOTAL A FACTURAR"] += total;
   });
-
+  //invierto el simbolo en saldo anterior
+  summary["SALDO ANTERIOR"] = summary["SALDO ANTERIOR"] * -1;
   return summary;
 }
 
@@ -273,7 +275,6 @@ export const family_groupsRouter = createTRPCRouter({
           comprobantes: true,
           integrants: {
             with: {
-              contribution: true,
               differentialsValues: true,
               pa: true,
             },
@@ -309,7 +310,6 @@ export const family_groupsRouter = createTRPCRouter({
           },
           integrants: {
             with: {
-              contribution: true,
               differentialsValues: true,
               pa: {
                 with: {
@@ -717,7 +717,6 @@ export const family_groupsRouter = createTRPCRouter({
           abonos: true,
           integrants: {
             with: {
-              contribution: true,
               differentialsValues: true,
             },
           },

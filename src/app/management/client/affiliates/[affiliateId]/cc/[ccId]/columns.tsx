@@ -37,7 +37,9 @@ export type TableRecord = {
   comprobanteNumber: number;
   Estado: "Pagada" | "Pendiente";
   iva: number;
-  comprobantes?: RouterOutputs["comprobantes"]["getByLiquidation"][number] | null;
+  comprobantes?:
+    | RouterOutputs["comprobantes"]["getByLiquidation"][number]
+    | null;
   currentAccountAmount: number;
   saldo_a_pagar: number;
   nombre: string;
@@ -69,18 +71,19 @@ export const AjustarDialog = () => {
     setSelectedDate(e.target.value);
   };
 };
-
+export function mostrarNroComprobante(ptoVenta: number, nroComprobante: number) {
+  return `${ptoVenta.toString().padStart(4, "0")}-${nroComprobante
+    .toString()
+    .padStart(8, "0")}`;
+}
 export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "description",
     header: () => null,
     cell: ({ row }) => {
-      const comprobanteNumber = (row.getValue("comprobanteNumber") as number)
-        .toString()
-        .padStart(8, "0");
-      const ptoVenta = (row.getValue("ptoVenta") as number)
-        .toString()
-        .padStart(4, "0");
+      const comprobanteNumber = row.getValue("comprobanteNumber") as number;
+      const ptoVenta = row.getValue("ptoVenta") as number;
+     
       return (
         <div className="relative h-20 flex flex-col justify-center w-96">
           <p className="absolute top-0 text-[#c4c4c4] text-xs">
@@ -93,8 +96,8 @@ export const columns: ColumnDef<TableRecord>[] = [
           </p>
           <p className="text-[#c4c4c4] text-xs absolute top-1/2 transform translate-y-4">
             {" "}
-            {row.getValue("Tipo comprobante")} - № {ptoVenta}-
-            {comprobanteNumber}
+            {row.getValue("Tipo comprobante")} -{" "}
+            № {mostrarNroComprobante(ptoVenta, comprobanteNumber)}{" "}
           </p>
         </div>
       );
@@ -147,7 +150,8 @@ export const columns: ColumnDef<TableRecord>[] = [
       return (
         <div>
           <div
-            className={`rounded-full inline-block font-bold ${style} px-7 py-1`}>
+            className={`rounded-full inline-block font-bold ${style} px-7 py-1`}
+          >
             {" "}
             {row.getValue("Estado")}
           </div>
@@ -162,7 +166,6 @@ export const columns: ColumnDef<TableRecord>[] = [
       const ivaMostrar = (row.getValue("iva") as number).toString();
 
       let amount = row.getValue("amount") as number;
-     
 
       return (
         <div className="relative h-full flex flex-col justify-center items-center mx-10 mr-14">
@@ -210,7 +213,7 @@ export const columns: ColumnDef<TableRecord>[] = [
         setDialOpen(!dialogOpen);
       };
 
-       const print = async () => {
+      const print = async () => {
         let detailData = row.original as TableRecord;
         setDetailData(detailData);
         const comprobantes = detailData?.comprobantes;
@@ -230,7 +233,7 @@ export const columns: ColumnDef<TableRecord>[] = [
                 throw new Error("Error en la descarga");
               }
               const blob = await response.blob();
-              saveAs(blob,"comprobante.pdf")
+              saveAs(blob, "comprobante.pdf");
             } catch (error) {
               console.error("Error al descargar el archivo:", error);
               toast.error("Error al descargar el archivo");
