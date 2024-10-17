@@ -285,7 +285,7 @@ async function approbatecomprobante(liquidationId: string) {
   });
   console.log(`[TIMING] Liquidation query: ${Date.now() - liquidationStart}ms`);
 
-  if (liquidation?.estado === "pendiente") {
+  if (liquidation?.estado.toLowerCase() === "pendiente") {
     const userStart = Date.now();
     const user = await currentUser();
 
@@ -1453,15 +1453,22 @@ export async function preparateComprobante(
       const tipoComprobante = getBillingData(billResponsible, grupo);
 
       const tipoDocumento = idDictionary[billResponsible?.fiscal_id_type ?? ""];
-
+      console.log("aportes GF")
+      console.log(grupo.integrants.flatMap((part) => part.aportes_os));
+      console.log("comparisonMonth", ((dateDesde?.getMonth() ?? 0) -1));
+      console.log("comparisonYear", dateDesde?.getFullYear());
+      
+      const fechaDesde = dateDesde;
+      fechaDesde?.setMonth((dateDesde?.getMonth() ?? 0) - 1);
       const totalAportes = grupo.integrants
         .flatMap((part) => part.aportes_os)
         .filter((a) => {
           if (!a.contribution_date || !dateDesde) return false;
-          dateDesde?.setMonth(dateDesde.getMonth() - 1);
+          console.log("contributionMonth", a.contribution_date?.getMonth());
+          console.log("contributionYear", a.contribution_date?.getFullYear());
           return (
-            a.contribution_date?.getMonth() === dateDesde.getMonth() &&
-            a.contribution_date?.getFullYear() === dateDesde.getFullYear()
+            a.contribution_date?.getMonth() === fechaDesde?.getMonth() &&
+            a.contribution_date?.getFullYear() === fechaDesde?.getFullYear()
           );
         })
         .reduce((sum, aporte) => sum + parseInt(aporte.amount), 0);
@@ -1657,6 +1664,15 @@ async function calculateAmount(
   saldo: number,
   totalAportes: number
 ) {
+  console.log("interes", interest)
+  console.log("ivaFloat", ivaFloat)
+  console.log("iva", iva)
+  console.log("bonificacion", bonificacion)
+  console.log("abono", abono)
+  console.log("diferencial", diferencial)
+  console.log("previous_bill", previous_bill)
+  console.log("saldo", saldo)
+  console.log("totalAportes", totalAportes)
   let amount = 0;
   let ivaCodigo = null;
   const { modo } = grupo;

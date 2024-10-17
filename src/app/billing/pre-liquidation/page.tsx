@@ -27,7 +27,7 @@ export default function Page() {
   const tableData: TableRecord[] = [];
   if (liquidationsFull) {
     liquidationsFull = liquidationsFull.filter(
-      (liquidation) => liquidation.estado === "pendiente"
+      (liquidation) => liquidation.estado.toLowerCase() === "pendiente"
     );
     for (const liquidation of liquidationsFull) {
       tableData.push({
