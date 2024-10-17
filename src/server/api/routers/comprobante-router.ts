@@ -1325,11 +1325,9 @@ export async function preparateComprobante(
         (parseFloat(
           grupo.bonus?.find(
             (bonus) =>
-              (bonus.from === null && bonus.to === null) ||
               (bonus.from !== null &&
-                bonus.to !== null &&
                 today >= bonus.from &&
-                today <= bonus.to)
+                ((bonus.to!== null && today <= bonus.to) || bonus.to === null))
           )?.amount ?? "0"
         ) *
           abono) /
