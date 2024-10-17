@@ -27,18 +27,19 @@ import DialogCC from "./components_acciones/dialog";
 import { RouterOutputs } from "~/trpc/shared";
 import { toast } from "sonner";
 import { saveAs } from "file-saver";
+import { formatNumberAsCurrency } from "~/lib/utils";
 dayjs.locale("es");
 export type TableRecord = {
   date: Date;
   description: string;
-  amount: string;
+  amount: number;
   "Tipo comprobante": string;
   comprobanteNumber: number;
   Estado: "Pagada" | "Pendiente";
   iva: number;
   comprobantes?: RouterOutputs["comprobantes"]["getByLiquidation"][number] | null;
-  currentAccountAmount: string;
-  saldo_a_pagar: string;
+  currentAccountAmount: number;
+  saldo_a_pagar: number;
   nombre: string;
   cuit: string;
   ptoVenta: number;
@@ -160,18 +161,14 @@ export const columns: ColumnDef<TableRecord>[] = [
     cell: ({ row }) => {
       const ivaMostrar = (row.getValue("iva") as number).toString();
 
-      let originalAmount = row.getValue("amount") as string;
-      originalAmount = originalAmount
-        .replace(/[$\s]/g, "")
-        .replace(/\./g, "")
-        .replace(/,/g, ".");
-      const amount = parseFloat(originalAmount);
+      let amount = row.getValue("amount") as number;
+     
 
       return (
         <div className="relative h-full flex flex-col justify-center items-center mx-10 mr-14">
           {amount === 0 ? (
             <span className="absolute top-1/2 transform -translate-y-1/2 font-bold">
-              {originalAmount}
+              {amount}
             </span>
           ) : (
             <span
@@ -179,7 +176,7 @@ export const columns: ColumnDef<TableRecord>[] = [
                 amount > 0 ? "text-[#6952EB]" : "text-[#EB2727]"
               }`}
             >
-              {originalAmount}
+              {formatNumberAsCurrency(amount)}
             </span>
           )}
           <div className="absolute top-1/2 transform translate-y-4 text-[#c4c4c4] text-xs flex flex-row gap-x-1">
@@ -273,11 +270,11 @@ export const columns: ColumnDef<TableRecord>[] = [
 
           {detailData && (
             <div>
-              {/* <DetailSheet
+              <DetailSheet
                 open={sheetOpen}
                 setOpen={setSheetOpen}
                 data={detailData}
-              /> */}
+              />
 
               <DialogCC
                 data={detailData}

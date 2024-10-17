@@ -31,7 +31,7 @@ dayjs.locale("es");
 
 import { clerkClient } from "@clerk/nextjs/server";
 import UpdateLiquidationEstadoDialog from "./approve-liquidation-dialog";
-import { computeBase, computeIva } from "~/lib/utils";
+import { computeBase, computeIva, formatDatejs } from "~/lib/utils";
 import DownloadExcelButton from "./downloadExcelButton";
 import RejectLiquidationDialog from "./reject-liquidation-dialog";
 import { ChevronLeft, CircleX } from "lucide-react";
@@ -149,8 +149,7 @@ export default async function Home(props: {
             <span className="">FECHA DE PROCESO</span>
             <br />
             <p className="font-medium text-sm">
-              {dayjs.utc(preliquidation?.createdAt).format("DD/MM/YYYY hh:mm") ??
-                "-"}
+              {formatDatejs(preliquidation?.createdAt)}
             </p>
           </li>
           <li className="">

@@ -11,6 +11,11 @@ import { schema } from "~/server/db";
 import { FamilyGroup } from "~/server/db/schema";
 import { api } from "~/trpc/server";
 import { RouterOutputs } from "~/trpc/shared";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import "dayjs/locale/es";
+dayjs.extend(utc);
+dayjs.locale("es");
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -58,6 +63,14 @@ export function calcularEdad(fechaNacimiento: Date): number {
   return edad;
 }
 
+type usedDates= 'hh:mm' | 'dd/mm/yyyy'
+export function formatDatejs(date: Date |undefined |null, format?:usedDates ): string{
+  if(!date) return "No hay fecha disponible"
+  if(format === 'hh:mm') return dayjs.utc(date).format("DD/MM/YYYY hh:mm");
+  return dayjs.utc(date).format("DD/MM/YYYY");
+
+
+}
 export function formatDate(date: Date | undefined) {
   if (date) {
     const year = date.getFullYear();
@@ -92,7 +105,7 @@ export function dateNormalFormat(date: Date | undefined | null) {
 export const topRightAbsoluteOnDesktopClassName =
   "md:absolute md:top-0 md:right-0 mr-10 mt-10";
 
-function formatNumberAsCurrency(amount: number): string {
+export function formatNumberAsCurrency(amount: number): string {
   return new Intl.NumberFormat("es-AR", {
     style: "currency",
     currency: "ARS",

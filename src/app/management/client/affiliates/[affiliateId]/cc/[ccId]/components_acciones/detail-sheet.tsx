@@ -21,17 +21,14 @@ import { useState } from "react";
 import { api } from "~/trpc/react";
 import ContentTable from "~/app/billing/liquidation/[liquidationId]/content-table";
 import { TableRecord } from "../columns";
-
+import { formatNumberAsCurrency } from "~/lib/utils";
 type DetailSheetProps = {
   data?: TableRecord;
   open: boolean;
   setOpen: (open: boolean) => void;
 };
 
-type comprobantes = RouterOutputs["comprobantes"]["getByLiquidation"];
-
 export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
-  let comprobanteFCReciente = data?.comprobantes;
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetContent className="sm:max-w-[550px] px-10 py-12 overflow-y-scroll">
@@ -58,18 +55,18 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
           <div className="flex flex-row border justify-between items-center px-4 py-5 gap-2 rounded-md mt-3">
             <p className="text-base whitespace-nowrap font-medium-medium ">
               Saldo actual{" "}
-              {comprobanteFCReciente ? comprobanteFCReciente.id : "vasd"}
             </p>
             <p
               className={`text-[#6952EB] whitespace-nowrap font-semibold text-lg${
                 Number(data?.amount) > 0 ? "text-[#6952EB]" : "text-[#EB2727]"
-              }`}>
+              }`}
+            >
               {" "}
               {data?.amount}
             </p>
           </div>
         ) : (
-          <>
+          <div className="space-y-3">
             <div className="flex flex-row border justify-between items-center px-4 py-5 gap-2 rounded-md mt-3">
               <p className="text-base whitespace-nowrap font-medium-medium ">
                 Saldo actual{" "}
@@ -79,18 +76,21 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
                   Number(data?.currentAccountAmount) > 0
                     ? "text-[#6952EB]"
                     : "text-[#EB2727]"
-                }`}>
-                {data?.currentAccountAmount}
+                }`}
+              >
+                {formatNumberAsCurrency(data?.currentAccountAmount ?? 0)}
               </p>
             </div>
-
+            {
+              data?.comprobantes && <ContentTable comprobante={data?.comprobantes}/>
+            }
             <div className="bg-[#DEF5DD] flex flex-row justify-between items-center py-4 px-6 rounded-md mt-4">
               <p className=" text-[#6952EB] font-semibold">Importe total: </p>
               <p className="text-[#6952EB] font-semibold">
-                {data?.saldo_a_pagar}
+                {formatNumberAsCurrency(data?.saldo_a_pagar ?? 0)}
               </p>
             </div>
-          </>
+          </div>
         )}
       </SheetContent>
     </Sheet>
