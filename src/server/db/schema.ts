@@ -800,7 +800,15 @@ export const comprobantes = pgTable("comprobantes", {
   iva: varchar("iva", { length: 255 }).notNull(),
   billLink: varchar("billLink", { length: 255 }).notNull(),
   estado: varchar("estado", {
-    enum: ["generada", "pendiente", "pagada", "parcial", "anulada", "apertura","error"],
+    enum: [
+      "generada",
+      "pendiente",
+      "pagada",
+      "parcial",
+      "anulada",
+      "apertura",
+      "error",
+    ],
   }),
   origin: varchar("origin", {
     enum: [
@@ -1410,8 +1418,8 @@ export const aportes_os_Relations = relations(aportes_os, ({ one }) => ({
   }),
 }));
 
-export const otherTributes= pgTable("otherTributes", {
-  id:columnId,
+export const otherTributes = pgTable("otherTributes", {
+  id: columnId,
   tribute: varchar("tribute", { length: 255 }).notNull(),
   jurisdiction: varchar("jurisdiction", { length: 255 }).notNull(),
   alicuota: real("alicuota").notNull(),
@@ -1420,7 +1428,7 @@ export const otherTributes= pgTable("otherTributes", {
   comprobanteId: varchar("comprobanteId", { length: 255 }).references(
     () => comprobantes.id
   ),
-})
+});
 
 export const otherTributesRelations = relations(otherTributes, ({ one }) => ({
   comprobantes: one(comprobantes, {
