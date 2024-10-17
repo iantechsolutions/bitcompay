@@ -149,7 +149,7 @@ export default async function Home(props: {
             <span className="">FECHA DE PROCESO</span>
             <br />
             <p className="font-medium text-sm">
-              {dayjs.utc(preliquidation?.period).format("DD/MM/YYYY hh:mm") ??
+              {dayjs.utc(preliquidation?.createdAt).format("DD/MM/YYYY hh:mm") ??
                 "-"}
             </p>
           </li>
