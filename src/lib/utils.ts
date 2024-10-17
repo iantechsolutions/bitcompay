@@ -11,6 +11,11 @@ import { schema } from "~/server/db";
 import { FamilyGroup } from "~/server/db/schema";
 import { api } from "~/trpc/server";
 import { RouterOutputs } from "~/trpc/shared";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import "dayjs/locale/es";
+dayjs.extend(utc);
+dayjs.locale("es");
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -58,6 +63,14 @@ export function calcularEdad(fechaNacimiento: Date): number {
   return edad;
 }
 
+type usedDates= 'hh:mm' | 'dd/mm/yyyy'
+export function formatDatejs(date: Date |undefined |null, format?:usedDates ): string{
+  if(!date) return "No hay fecha disponible"
+  if(format === 'hh:mm') return dayjs.utc(date).format("DD/MM/YYYY hh:mm");
+  return dayjs.utc(date).format("DD/MM/YYYY");
+
+
+}
 export function formatDate(date: Date | undefined) {
   if (date) {
     const year = date.getFullYear();
@@ -92,7 +105,7 @@ export function dateNormalFormat(date: Date | undefined | null) {
 export const topRightAbsoluteOnDesktopClassName =
   "md:absolute md:top-0 md:right-0 mr-10 mt-10";
 
-function formatNumberAsCurrency(amount: number): string {
+export function formatNumberAsCurrency(amount: number): string {
   return new Intl.NumberFormat("es-AR", {
     style: "currency",
     currency: "ARS",
@@ -203,21 +216,28 @@ export function htmlBill(
   id_number: string,
   afip_status: string
 ) {
-  
-  const subtotal = comprobante?.items.reduce(
-    (acc: number, item: { amount: number }) => acc + (item?.amount ?? 0),
-    0
-  )
+  let subtotal = 0;
+  let iva = 0;
+  if(comprobante.items.length > 0){
+    subtotal = comprobante.items.reduce(
+      (acc: number, item: { total: number }) => acc + (item?.total ?? 0),
+      0
+    )
+    const iva = comprobante?.items.reduce(
+      (acc: number, item: { iva: number }) => acc + (item?.iva ?? 0),
+      0
+    )
+  }
 
-  const iva = comprobante?.items.reduce(
-    (acc: number, item: { iva: number }) => acc + (item?.iva ?? 0),
-    0
-  )
+  let totalTributes = 0;
 
-  const totalTributes = comprobante?.otherTributes.reduce(
-    (acc: number, tribute: { amount: number }) => acc + (tribute?.amount ?? 0),
-    0
-  )
+  if(comprobante.otherTributes.length > 0){
+    totalTributes = comprobante.otherTributes.reduce(
+      (acc: number, tribute: { amount: number }) => acc + (tribute?.amount ?? 0),
+      0
+    )
+  }
+
 
  const total = subtotal + iva + totalTributes
   

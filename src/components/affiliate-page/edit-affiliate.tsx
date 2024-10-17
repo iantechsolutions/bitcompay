@@ -137,14 +137,6 @@ export default function EditAffiliate({
     if (!fiscalIdType) errors.push("Tipo de ID Fiscal");
     if (!fiscalIdNumber) errors.push("Número de ID Fiscal");
     if (!afipStatus) errors.push("Estado AFIP");
-    if (!address) errors.push("Dirección");
-    if (!addressNumber) errors.push("Número");
-    if (!phoneNumber) errors.push("Teléfono");
-    if (!cellphoneNumber) errors.push("Celular");
-    if (!email) errors.push("Email");
-    if (!locality) errors.push("Localidad");
-    if (!province) errors.push("Provincia");
-    if (!cp) errors.push("Código Postal");
     return errors;
   }
 
@@ -179,8 +171,8 @@ export default function EditAffiliate({
         email,
         localidad: locality,
         provincia: province,
-        cp,
-        zona: zona,
+        cp: cp,
+        zona: zona ?? null,
         // family_group_id: "",
         // floor: "",
         // department: "",
@@ -249,30 +241,7 @@ export default function EditAffiliate({
                 className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none"
               />
             </div>
-            <div>
-              <Label htmlFor="estado" className="text-xs mb-2 block">
-                Estado
-              </Label>
-              <Input
-                type="text"
-                id="estado"
-                value={estado}
-                onChange={(e) => setEstado(e.target.value)}
-                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none"
-              />
-            </div>
-            <div>
-              <Label htmlFor="motivoBaja" className="text-xs mb-2 block">
-                Motivo Baja
-              </Label>
-              <Input
-                type="text"
-                id="motivoBaja"
-                value={motivoBaja}
-                onChange={(e) => setMotivoBaja(e.target.value)}
-                className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none"
-              />
-            </div>
+
             <div>
               <Label htmlFor="birthDate" className="text-xs text-gray-500">
                 Fecha de Nacimiento
@@ -343,6 +312,35 @@ export default function EditAffiliate({
                 </SelectContent>
               </Select>
             </div>
+            <div>
+              <Label htmlFor="estado" className="text-xs mb-2 block">
+                Estado
+              </Label>
+              <Select onValueChange={setEstado} value={estado}>
+                <SelectTrigger className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none">
+                  <SelectValue placeholder="Seleccione uno" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ACTIVO">Activo</SelectItem>
+                  <SelectItem value="INACTIO">Inactivo</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {estado === "INACTIO" && (
+              <div>
+                <Label htmlFor="motivoBaja" className="text-xs mb-2 block">
+                  Motivo Baja
+                </Label>
+                <Input
+                  type="text"
+                  id="motivoBaja"
+                  value={motivoBaja}
+                  onChange={(e) => setMotivoBaja(e.target.value)}
+                  className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none"
+                />
+              </div>
+            )}
+
             <DialogTitle className="text-xs col-span-4">
               Información Fiscal
             </DialogTitle>
@@ -488,7 +486,7 @@ export default function EditAffiliate({
                 </SelectTrigger>
                 <SelectContent>
                   {zonas?.map((zonass) => (
-                    <SelectItem key={zonass.id} value={zonass.id}>
+                    <SelectItem key={zonass.id} value={zonass.name}>
                       {zonass.name}
                     </SelectItem>
                   ))}
@@ -505,7 +503,7 @@ export default function EditAffiliate({
                 </SelectTrigger>
                 <SelectContent>
                   {postalCode?.map((cp) => (
-                    <SelectItem key={cp.id} value={cp.id}>
+                    <SelectItem key={cp.id} value={cp.name}>
                       {cp.cp}
                     </SelectItem>
                   ))}

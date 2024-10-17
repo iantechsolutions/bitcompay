@@ -435,7 +435,7 @@ const confirmationPage = ({
         id: createdComprobante.id ?? "",
         billLink: resHtml?.file,
         number: last_voucher + 1,
-        state: "pendiente",
+        state: "Pendiente",
       });
 
       toast.success("La factura se creo correctamente");
@@ -525,9 +525,8 @@ const confirmationPage = ({
         </div>
       )}
 
-
-{finishedAFIP && 
-      <div className=" self-start flex gap-1">
+      {finishedAFIP && (
+        <div className=" self-start flex gap-1">
           <Button
             className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
             onClick={() => {
@@ -554,7 +553,7 @@ const confirmationPage = ({
             Crear nueva
           </Button>
         </div>
-      }
+      )}
     </section>
   );
 };

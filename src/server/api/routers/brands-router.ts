@@ -209,9 +209,6 @@ export const brandsRouter = createTRPCRouter({
             inArray(schema.differentialsValues.integrant_id, integrantsIds)
           );
         await tx
-          .delete(schema.contributions)
-          .where(inArray(schema.contributions.integrant_id, integrantsIds));
-        await tx
           .delete(schema.pa)
           .where(inArray(schema.pa.integrant_id, integrantsIds));
         await tx

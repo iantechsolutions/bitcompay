@@ -76,6 +76,8 @@ export default function GenerateChannelOutputPage(props: {
   });
 
   const [open, setOpen] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
+
   const [fileName, setFileName] = useState<string | null>(null);
   const [cardType, setCardType] = useState<string | null>(null);
   const [cardBrand, setCardBrand] = useState<string | null>(null);
@@ -95,9 +97,14 @@ export default function GenerateChannelOutputPage(props: {
   }, [cardBrand, cardType]);
 
   async function handleGenerate() {
-    if (!fileName || fileName?.length > 10) {
-      setError("no se puede asignar un nombre mayor a 10 caracteres");
-      return;
+    if (!fileName) {
+      setError("El nombre del archivo no puede estar vacío.");
+      return toast.error("El nombre del archivo no puede estar vacío.");
+    }
+
+    if (fileName.length > 10) {
+      setError("No se puede asignar un nombre mayor a 10 caracteres");
+      return toast.error("No se puede asignar un nombre mayor a 10 caracteres");
     }
     try {
       schema.parse({ texto: fileName });
@@ -123,18 +130,24 @@ export default function GenerateChannelOutputPage(props: {
       toast.success("Se ha generado el archivo");
       setError(null);
       setDisabled(true);
+      setOpenDialog(false);
     } catch {
       toast.error("Error");
     }
   }
 
+  const [disableName, setDisableName] = useState(false);
+
   function handleName(event: React.ChangeEvent<HTMLInputElement>) {
     const value = event.target.value;
+
     setFileName(value);
     try {
       schema.parse({ texto: value });
+      setDisableName(false);
       setError(null);
     } catch (_err) {
+      setDisableName(true);
       setError("ingresar un nombre menor a 10 caracteres");
     }
   }
@@ -187,7 +200,7 @@ export default function GenerateChannelOutputPage(props: {
             </Table>
           )}
 
-          <Dialog>
+          <Dialog open={openDialog} onOpenChange={setOpenDialog}>
             <DialogTrigger asChild={true}>
               <Button
                 disabled={isLoading || disabled}
@@ -314,9 +327,15 @@ export default function GenerateChannelOutputPage(props: {
                 </div>
               </div>
               <DialogFooter>
-                <DialogClose>
-                  <Button type="button" onClick={handleGenerate}>
-                    Generar archivo
+                <Button
+                  type="button"
+                  disabled={disableName}
+                  onClick={handleGenerate}>
+                  Generar archivo
+                </Button>
+                <DialogClose asChild>
+                  <Button type="button" onClick={() => setOpenDialog(false)}>
+                    Cerrar
                   </Button>
                 </DialogClose>
               </DialogFooter>

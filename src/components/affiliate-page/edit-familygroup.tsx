@@ -55,7 +55,6 @@ export default function EditFamilyGroup({
     if (!unidadNegocio) errors.push("unidad de negocio");
     if (!plan) errors.push("plan");
     if (!estado) errors.push("estado");
-    if (!motivoBaja) errors.push("motivo de baja");
 
     return errors;
   }
@@ -177,27 +176,28 @@ export default function EditFamilyGroup({
                   <SelectValue placeholder="Seleccione un estado" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="activo">Activo</SelectItem>
-                  <SelectItem value="inactivo">Inactivo</SelectItem>
+                  <SelectItem value="ACTIVO">Activo</SelectItem>
+                  <SelectItem value="INACTIVO">Inactivo</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Motivo Baja */}
-            <div>
-              <Label htmlFor="motivoBaja" className="text-xs mb-2 block">
-                Motivo de Baja
-              </Label>
-              <Select onValueChange={setMotivoBaja} value={motivoBaja}>
-                <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none">
-                  <SelectValue placeholder="Seleccione un motivo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="motivo1">Motivo 1</SelectItem>
-                  <SelectItem value="motivo2">Motivo 2</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {estado === "INACTIVO" && (
+              <div>
+                <Label htmlFor="motivoBaja" className="text-xs mb-2 block">
+                  Motivo de Baja
+                </Label>
+                <Select onValueChange={setMotivoBaja} value={motivoBaja}>
+                  <SelectTrigger className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none">
+                    <SelectValue placeholder="Seleccione un motivo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="motivo1">Motivo 1</SelectItem>
+                    <SelectItem value="motivo2">Motivo 2</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
 
           {/* Separador para la Información Fiscal */}

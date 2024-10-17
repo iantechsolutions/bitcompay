@@ -160,7 +160,7 @@ export function DataTable<TData, TValue>({
       delayedColumnFilters.length > 0
     ).then((data) => {
       const dataArray: TableRecord[] = [];
-      makeExcelRows(data, null, dataArray);
+      makeExcelRows(data,liquidationId, null, dataArray);
       setData(dataArray);
     });
   }, [pagination, delayedColumnFilters]);

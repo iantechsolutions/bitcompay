@@ -23,7 +23,6 @@ import { administrative_auditRouter } from "./routers/administrative_audit-route
 import { medical_auditRouter } from "./routers/medical_audit-router";
 import { paymentInfoRouter } from "./routers/payment_info-router";
 import { abonosRouter } from "./routers/abonos-router";
-import { contributionsRouter } from "./routers/contributions-router";
 import { differentialsRouter } from "./routers/differentials-router";
 import { differentialsValuesRouter } from "./routers/differentialValues-router";
 import { itemsRouter } from "./routers/items-router";
@@ -71,7 +70,6 @@ export const appRouter = createTRPCRouter({
   medical_audit: medical_auditRouter,
   pa: paymentInfoRouter,
   abonos: abonosRouter,
-  contributions: contributionsRouter,
   differentials: differentialsRouter,
   differentialsValues: differentialsValuesRouter,
   items: itemsRouter,

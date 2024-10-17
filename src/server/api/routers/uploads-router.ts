@@ -340,7 +340,7 @@ export const uploadsRouter = createTRPCRouter({
           });
           console.log("comprobante", comprobante);
 
-          const estado = comprobante?.importe! > value ? "parcial" : "pagada";
+          const estado = comprobante?.importe! > value ? "Parcial" : "Pagada";
           console.log("key", key);
           console.log("mapComprobantes", mapComprobantes);
           console.log("estado", estado);

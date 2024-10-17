@@ -49,7 +49,7 @@ export default function DownloadExcelButton({
             liquidationId,
           });
 
-          makeExcelRows(data, rows, null);
+          makeExcelRows(data,liquidationId, rows, null);
           await handleGenerate(rows);
         }}
       >

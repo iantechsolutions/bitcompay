@@ -351,12 +351,6 @@ export const companiesRouter = createTRPCRouter({
           ),
         });
         if (integrants.length > 0) {
-          await tx.delete(schema.contributions).where(
-            inArray(
-              schema.contributions.integrant_id,
-              integrants.map((i) => i.id)
-            )
-          );
           await tx.delete(schema.differentialsValues).where(
             inArray(
               schema.differentialsValues.integrant_id,

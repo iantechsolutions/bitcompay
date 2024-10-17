@@ -21,7 +21,7 @@ export default function Page(props: { params: { healthInsuranceId: string } }) {
 
   return (
     <LayoutContainer>
-      <Title>Cargar documento para generación masiva</Title>
+      <Title>Cargar aportes de obra social</Title>
 
       {errorMessage && <p className="text-red-500">{errorMessage}</p>}
 

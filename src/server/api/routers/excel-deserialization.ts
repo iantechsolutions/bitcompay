@@ -448,7 +448,7 @@ export const excelDeserializationRouter = createTRPCRouter({
               generated: new Date(),
               tipoDocumento: tipoDocumento ?? 0,
               tipoComprobante: "Apertura de CC",
-              estado: "apertura",
+              estado: "Apertura",
             });
           }
           console.log("Llego Llego");
@@ -533,15 +533,19 @@ export const excelDeserializationRouter = createTRPCRouter({
               // product: product?.id,
             });
           }
-          const contribution = parseFloat(row.contribution ?? "0");
-          console.log("creando aportes");
-          await db.insert(schema.contributions).values({
-            employeeContribution: 0,
-            employerContribution: contribution,
-            amount: contribution,
-            integrant_id: new_integrant[0]?.id ?? "",
-            cuitEmployer: " ", //a rellenar
-          });
+          // const contribution = parseFloat(row.contribution ?? "0");
+          // console.log("creando aportes");
+          // if(contribution > 0){
+
+          // }
+
+          // await db.insert(schema.contributions).values({
+          //   employeeContribution: 0,
+          //   employerContribution: contribution,
+          //   amount: contribution,
+          //   integrant_id: new_integrant[0]?.id ?? "",
+          //   cuitEmployer: " ", //a rellenar
+          // });
         }
 
         await db
