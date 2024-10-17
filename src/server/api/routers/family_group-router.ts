@@ -19,6 +19,7 @@ function makeSummary(
     aportes: { amount: number }[];
   }[],
   fgFiltered: {
+    
     comprobantes: {
       items: {
         amount: number | null;
@@ -27,6 +28,11 @@ function makeSummary(
       importe: number;
       iva: string;
     }[];
+    cc:{
+      events: {
+        current_amount: number;
+      }[];
+    }
   }[]
 ) {
   const summary = {
@@ -43,12 +49,21 @@ function makeSummary(
 
   fgFiltered.forEach((fg, index) => {
     const original_comprobante = fg.comprobantes.at(0);
+
+    // let lastAmount = 0;
+    // if(fg.cc.events.length > 0){
+    //   lastAmount = fg.cc.events.reduce((acc, event) => {
+    //     return (event.)
+    //   });
+    // }
+    let saldo_anterior = 0;
+    if((fg.cc?.events?.length ?? 0)  > 0){
+      const lastEvent = fg.cc?.events?.at(0);
+      saldo_anterior = toNumberOrZero(lastEvent?.current_amount);
+    }
+
     console.log("costas", original_comprobante);
-    const saldo_anterior = toNumberOrZero(
-      original_comprobante?.items.find(
-        (item) => item.concept === "Factura Anterior"
-      )?.amount
-    );
+
     summary["SALDO ANTERIOR"] += saldo_anterior;
 
     const cuota_planes = toNumberOrZero(
@@ -94,7 +109,7 @@ function makeSummary(
     );
     summary.SUBTOTAL += subTotal;
 
-    const iva = computeIva(total, Number(original_comprobante?.iva ?? "0"));
+    const iva = computeIva((total-saldo_anterior), Number(original_comprobante?.iva ?? "0"));
     summary.IVA += iva;
     summary["TOTAL A FACTURAR"] += total;
   });
@@ -347,7 +362,11 @@ export const family_groupsRouter = createTRPCRouter({
           plan: true,
           modo: true,
           integrants: { with: { differentialsValues: true } },
-          cc: true,
+          cc: {
+            with:{
+              events: true,
+            }
+          },
           businessUnitData: true,
           comprobantes: {
             with: {
@@ -422,10 +441,21 @@ export const family_groupsRouter = createTRPCRouter({
           ilike(schema.integrants.name, `%${input.name_contains}%`)
         );
       }
-
+      const liquidation = await db.query.liquidations.findFirst({
+        where: eq(schema.liquidations.id, input.liquidationId),
+      })
       const fg = await db.query.family_groups.findMany({
         with: {
           businessUnitData: true,
+          cc: {
+            with: {
+              events: {
+                limit: 1,
+                orderBy: [desc(schema.events.createdAt)],
+                where: lt(schema.events.createdAt, liquidation?.createdAt ?? new Date()),
+              },
+            },
+          },
           integrants: {
             where: and(...integrantsConditions),
             with: {
@@ -466,7 +496,7 @@ export const family_groupsRouter = createTRPCRouter({
       }));
 
       return {
-        summary: makeSummary(aportesPorGrupo, fgFiltered),
+        summary: makeSummary(aportesPorGrupo, fgFiltered as any),
         totalRows: fgFiltered.length,
       };
     }),

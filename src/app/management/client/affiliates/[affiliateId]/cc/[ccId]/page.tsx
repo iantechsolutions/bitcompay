@@ -189,8 +189,7 @@ export default function CCDetail(props: {
                     : lastEvent.current_amount < 0
                     ? "text-[#EB2727]"
                     : "text-black"
-                }`}
-              >
+                }`}>
                 {new Intl.NumberFormat("es-AR", {
                   style: "currency",
                   currency: "ARS",
@@ -219,8 +218,7 @@ export default function CCDetail(props: {
           className=" text-base px-16 py-6 mt-5 gap-3 text-[#3e3e3e] rounded-full font-medium"
           onClick={async () => {
             await handleExport();
-          }}
-        >
+          }}>
           <Download02Icon />
           Exportar
         </Button>

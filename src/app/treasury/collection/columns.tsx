@@ -4,8 +4,8 @@ import { ColumnDef } from "@tanstack/react-table";
 
 export type TableRecord = {
   name: string;
-  fiscal_id_number: string;
-  invoice_number: string;
+  // fiscal_id_number: string;
+  // invoice_number: string;
   g_c: string;
   product_number: string;
   period: string;
@@ -13,7 +13,7 @@ export type TableRecord = {
   first_due_date: string;
   additional_info: string;
   payment_date: string;
-  collected_amount: string;
+  // collected_amount: string;
   recollected_amount: string;
   statusId: string;
 };
@@ -30,28 +30,28 @@ export const columns: ColumnDef<TableRecord>[] = [
       <div className="text-center">{row.getValue("name")}</div>
     ),
   },
-  {
-    accessorKey: "fiscal_id_number",
-    header: () => (
-      <div className="text-center whitespace-nowrap text-medium">
-        Nro ID Fiscal
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div className="text-center">{row.getValue("fiscal_id_number")}</div>
-    ),
-  },
-  {
-    accessorKey: "invoice_number",
-    header: () => (
-      <div className="text-center whitespace-nowrap text-medium">
-        Nro Comprobante
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div className="text-center">{row.getValue("invoice_number")}</div>
-    ),
-  },
+  // {
+  //   accessorKey: "fiscal_id_number",
+  //   header: () => (
+  //     <div className="text-center whitespace-nowrap text-medium">
+  //       Nro ID Fiscal
+  //     </div>
+  //   ),
+  //   cell: ({ row }) => (
+  //     <div className="text-center">{row.getValue("fiscal_id_number")}</div>
+  //   ),
+  // },
+  // {
+  //   accessorKey: "invoice_number",
+  //   header: () => (
+  //     <div className="text-center whitespace-nowrap text-medium">
+  //       Nro Comprobante
+  //     </div>
+  //   ),
+  //   cell: ({ row }) => (
+  //     <div className="text-center">{row.getValue("invoice_number")}</div>
+  //   ),
+  // },
   {
     accessorKey: "g_c",
     header: () => (
@@ -121,17 +121,17 @@ export const columns: ColumnDef<TableRecord>[] = [
       <div className="text-center">{row.getValue("payment_date")}</div>
     ),
   },
-  {
-    accessorKey: "collected_amount",
-    header: () => (
-      <div className="text-center whitespace-nowrap text-medium">
-        Importe a cobrar
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div className="text-center">{row.getValue("collected_amount")}</div>
-    ),
-  },
+  // {
+  //   accessorKey: "collected_amount",
+  //   header: () => (
+  //     <div className="text-center whitespace-nowrap text-medium">
+  //       Importe a cobrar
+  //     </div>
+  //   ),
+  //   cell: ({ row }) => (
+  //     <div className="text-center">{row.getValue("collected_amount")}</div>
+  //   ),
+  // },
   {
     accessorKey: "recollected_amount",
     header: () => (

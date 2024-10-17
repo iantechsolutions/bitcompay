@@ -146,8 +146,7 @@ export const columns: ColumnDef<TableRecord>[] = [
       return (
         <div>
           <div
-            className={`rounded-full inline-block font-bold ${style} px-7 py-1`}
-          >
+            className={`rounded-full inline-block font-bold ${style} px-7 py-1`}>
             {" "}
             {row.getValue("Estado")}
           </div>
@@ -171,7 +170,9 @@ export const columns: ColumnDef<TableRecord>[] = [
       return (
         <div className="relative h-full flex flex-col justify-center items-center mx-10 mr-14">
           {amount === 0 ? (
-            <span className="">{originalAmount}</span>
+            <span className="absolute top-1/2 transform -translate-y-1/2 font-bold">
+              {originalAmount}
+            </span>
           ) : (
             <span
               className={`"absolute top-1/2 transform -translate-y-1/2 font-bold ${
@@ -212,12 +213,9 @@ export const columns: ColumnDef<TableRecord>[] = [
         setDialOpen(!dialogOpen);
       };
 
-      const print = async () => {
+       const print = async () => {
         let detailData = row.original as TableRecord;
-
         setDetailData(detailData);
-        console.log("Detail Data for Print:", detailData?.comprobantes);
-
         const comprobantes = detailData?.comprobantes;
         console.log("Comprobante descargar:", comprobantes?.billLink);
         if (!detailData) {
