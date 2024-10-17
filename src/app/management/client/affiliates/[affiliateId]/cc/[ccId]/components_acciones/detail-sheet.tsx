@@ -20,33 +20,10 @@ import { RouterOutputs } from "~/trpc/shared";
 import { useState } from "react";
 import { api } from "~/trpc/react";
 import ContentTable from "~/app/billing/liquidation/[liquidationId]/content-table";
+import { TableRecord } from "../columns";
 
 type DetailSheetProps = {
-  data?: {
-    date: Date;
-    description: string;
-    amount: string;
-    "Tipo comprobante": string;
-    comprobanteNumber: number;
-    Estado: "Pagada" | "Pendiente";
-    iva: number;
-    comprobantes?: RouterOutputs["comprobantes"]["getByLiquidation"][number];
-    currentAccountAmount: string;
-    saldo_a_pagar: string;
-    nombre: string;
-    cuit: string;
-    event: {
-      id: string;
-      description: string;
-      createdAt: Date;
-      comprobante_id: string | null;
-      type: "NC" | "FC" | "REC" | null;
-      currentAccount_id: string | null;
-      event_amount: number;
-      current_amount: number;
-    } | null;
-    [index: string]: any;
-  };
+  data?: TableRecord;
   open: boolean;
   setOpen: (open: boolean) => void;
 };
@@ -81,8 +58,13 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
           <div className="flex flex-row border justify-between items-center px-4 py-5 gap-2 rounded-md mt-3">
             <p className="text-base whitespace-nowrap font-medium-medium ">
               Saldo actual{" "}
+              {comprobanteFCReciente ? comprobanteFCReciente.id : "vasd"}
             </p>
-            <p className="text-[#6952EB] whitespace-nowrap font-semibold text-lg">
+            <p
+              className={`text-[#6952EB] whitespace-nowrap font-semibold text-lg${
+                Number(data?.amount) > 0 ? "text-[#6952EB]" : "text-[#EB2727]"
+              }`}>
+              {" "}
               {data?.amount}
             </p>
           </div>
@@ -92,7 +74,12 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
               <p className="text-base whitespace-nowrap font-medium-medium ">
                 Saldo actual{" "}
               </p>
-              <p className="text-[#6952EB] whitespace-nowrap font-semibold text-lg">
+              <p
+                className={`text-[#6952EB] whitespace-nowrap font-semibold text-lg${
+                  Number(data?.currentAccountAmount) > 0
+                    ? "text-[#6952EB]"
+                    : "text-[#EB2727]"
+                }`}>
                 {data?.currentAccountAmount}
               </p>
             </div>
