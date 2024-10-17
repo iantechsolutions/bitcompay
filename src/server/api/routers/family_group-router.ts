@@ -271,7 +271,6 @@ export const family_groupsRouter = createTRPCRouter({
           comprobantes: true,
           integrants: {
             with: {
-              contribution: true,
               differentialsValues: true,
               pa: true,
             },
@@ -307,7 +306,6 @@ export const family_groupsRouter = createTRPCRouter({
           },
           integrants: {
             with: {
-              contribution: true,
               differentialsValues: true,
               pa: {
                 with: {
@@ -715,7 +713,6 @@ export const family_groupsRouter = createTRPCRouter({
           abonos: true,
           integrants: {
             with: {
-              contribution: true,
               differentialsValues: true,
             },
           },

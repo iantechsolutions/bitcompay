@@ -678,7 +678,6 @@ export const integrantsRelations = relations(integrants, ({ one, many }) => ({
   }),
   pa: many(pa),
   aportes_os: many(aportes_os),
-  contribution: one(contributions),
   differentialsValues: many(differentialsValues),
 }));
 
@@ -724,24 +723,6 @@ export const integrantSchemaDB = insertintegrantSchema.pick({
   affiliate_number: true,
 });
 export type Integrant = z.infer<typeof selectintegrantSchema>;
-
-export const contributions = pgTable("contributions", {
-  id: columnId,
-  integrant_id: varchar("integrant_id", { length: 255 }).references(
-    () => integrants.id
-  ),
-  amount: real("amount").notNull(),
-  employerContribution: real("employerContribution").notNull(),
-  employeeContribution: real("employeeContribution ").notNull(),
-  cuitEmployer: varchar("bonus", { length: 255 }).notNull(),
-});
-
-export const contributionsRelations = relations(contributions, ({ one }) => ({
-  integrant: one(integrants, {
-    fields: [contributions.integrant_id],
-    references: [integrants.id],
-  }),
-}));
 
 export const differentials = pgTable("differentials", {
   id: columnId,
