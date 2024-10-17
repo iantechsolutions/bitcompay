@@ -1455,15 +1455,19 @@ export async function preparateComprobante(
       const tipoDocumento = idDictionary[billResponsible?.fiscal_id_type ?? ""];
       console.log("aportes GF")
       console.log(grupo.integrants.flatMap((part) => part.aportes_os));
-      console.log("comparisonMonth", ((dateDesde?.getMonth() ?? 0) -1));
-      console.log("comparisonYear", dateDesde?.getFullYear());
       
-      const fechaDesde = dateDesde;
-      fechaDesde?.setMonth((dateDesde?.getMonth() ?? 0) - 1);
+      console.log("dateDesde",dateDesde);
+      console.log("dateHasta",dateHasta);
+      const fechaDesde = new Date(dateHasta?.getTime() ?? 0);
+      const mesActual = dateHasta?.getMonth() ?? 0
+      fechaDesde?.setMonth((mesActual));
+      console.log("comparisonMonth", fechaDesde?.getMonth());
+      console.log("comparisonYear", fechaDesde?.getFullYear());
+      console.log("aportes", grupo.integrants.flatMap((part) => part.aportes_os))
       const totalAportes = grupo.integrants
         .flatMap((part) => part.aportes_os)
         .filter((a) => {
-          if (!a.contribution_date || !dateDesde) return false;
+          if (!a.contribution_date || !fechaDesde) return false;
           console.log("contributionMonth", a.contribution_date?.getMonth());
           console.log("contributionYear", a.contribution_date?.getFullYear());
           return (
