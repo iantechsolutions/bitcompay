@@ -27,6 +27,7 @@ dayjs.locale("es");
 import {
   Capitalize,
   cn,
+  formatNumberAsCurrency,
   getDifferentialAmount,
   getGroupContribution,
 } from "~/lib/utils";
@@ -387,10 +388,8 @@ export default function AffiliatePage(props: {
                       ? "text-blacl"
                       : "text-[#EB2727]"
                   )}>
-                  $
-                  {lastEvent?.current_amount !== undefined
-                    ? lastEvent.current_amount.toFixed(2)
-                    : "0.00"}
+                  
+                  {formatNumberAsCurrency(lastEvent?.current_amount ?? 0)}
                 </span>
               </div>
               <SaldoPopoverAffiliates

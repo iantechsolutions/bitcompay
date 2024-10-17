@@ -166,7 +166,22 @@ function getIimageForBarcode() {
 function generateConcepts(
   items: Array<{ concept: string | null; total: number | null }>
 ): string {
-  return items.map((item) => `<p>${item.concept}</p>`).join("");
+  // sumar bono + dif y ocultar dif
+  let bonoTotal = 0;
+
+  items.forEach((item) => {
+    if (item.concept === "bono") {
+      bonoTotal += item.total ?? 0;
+  }});
+
+  for (const item of items){
+    if (item.concept === "Diferencial" && item.total) {
+      item.total += bonoTotal;
+    }
+  }
+  return items.map((item) => {
+    if (item.concept === "Diferencial") return "";
+    return`<p>${item.concept}</p>`}).join("");
 }
 
 function generateAmounts(
@@ -272,7 +287,6 @@ export function htmlBill(
   if (comprobante) {
     const payment = comprobante.payments;
   }
-
   // console.log(voucher);
 
   // moví funciones porque es lento redefinirlas constantemente
