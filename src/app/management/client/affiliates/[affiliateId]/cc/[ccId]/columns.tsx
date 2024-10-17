@@ -27,11 +27,12 @@ import DialogCC from "./components_acciones/dialog";
 import { RouterOutputs } from "~/trpc/shared";
 import { toast } from "sonner";
 import { saveAs } from "file-saver";
+import { formatNumberAsCurrency } from "~/lib/utils";
 dayjs.locale("es");
 export type TableRecord = {
   date: Date;
   description: string;
-  amount: string;
+  amount: number;
   "Tipo comprobante": string;
   comprobanteNumber: number;
   Estado:
@@ -48,8 +49,8 @@ export type TableRecord = {
   comprobantes?:
     | RouterOutputs["comprobantes"]["getByLiquidation"][number]
     | null;
-  currentAccountAmount: string;
-  saldo_a_pagar: string;
+  currentAccountAmount: number;
+  saldo_a_pagar: number;
   nombre: string;
   cuit: string;
   ptoVenta: number;
@@ -79,18 +80,19 @@ export const AjustarDialog = () => {
     setSelectedDate(e.target.value);
   };
 };
-
+export function mostrarNroComprobante(ptoVenta: number, nroComprobante: number) {
+  return `${ptoVenta.toString().padStart(4, "0")}-${nroComprobante
+    .toString()
+    .padStart(8, "0")}`;
+}
 export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "description",
     header: () => null,
     cell: ({ row }) => {
-      const comprobanteNumber = (row.getValue("comprobanteNumber") as number)
-        .toString()
-        .padStart(8, "0");
-      const ptoVenta = (row.getValue("ptoVenta") as number)
-        .toString()
-        .padStart(4, "0");
+      const comprobanteNumber = row.getValue("comprobanteNumber") as number;
+      const ptoVenta = row.getValue("ptoVenta") as number;
+     
       return (
         <div className="relative h-20 flex flex-col justify-center w-96">
           <p className="absolute top-0 text-[#c4c4c4] text-xs">
@@ -103,8 +105,8 @@ export const columns: ColumnDef<TableRecord>[] = [
           </p>
           <p className="text-[#c4c4c4] text-xs absolute top-1/2 transform translate-y-4">
             {" "}
-            {row.getValue("Tipo comprobante")} - № {ptoVenta}-
-            {comprobanteNumber}
+            {row.getValue("Tipo comprobante")} -{" "}
+            № {mostrarNroComprobante(ptoVenta, comprobanteNumber)}{" "}
           </p>
         </div>
       );
@@ -161,7 +163,8 @@ export const columns: ColumnDef<TableRecord>[] = [
       return (
         <div>
           <div
-            className={`rounded-full inline-block font-bold ${style} px-7 py-1`}>
+            className={`rounded-full inline-block font-bold ${style} px-7 py-1`}
+          >
             {" "}
             {row.getValue("Estado")}
           </div>
@@ -175,25 +178,21 @@ export const columns: ColumnDef<TableRecord>[] = [
     cell: ({ row }) => {
       const ivaMostrar = (row.getValue("iva") as number).toString();
 
-      let originalAmount = row.getValue("amount") as string;
-      originalAmount = originalAmount
-        .replace(/[$\s]/g, "")
-        .replace(/\./g, "")
-        .replace(/,/g, ".");
-      const amount = parseFloat(originalAmount);
+      let amount = row.getValue("amount") as number;
 
       return (
         <div className="relative h-full flex flex-col justify-center items-center mx-10 mr-14">
           {amount === 0 ? (
             <span className="absolute top-1/2 transform -translate-y-1/2 font-bold">
-              {originalAmount}
+              {amount}
             </span>
           ) : (
             <span
               className={`"absolute top-1/2 transform -translate-y-1/2 font-bold ${
                 amount > 0 ? "text-[#6952EB]" : "text-[#EB2727]"
-              }`}>
-              {originalAmount}
+              }`}
+            >
+              {formatNumberAsCurrency(amount)}
             </span>
           )}
           <div className="absolute top-1/2 transform translate-y-4 text-[#c4c4c4] text-xs flex flex-row gap-x-1">
@@ -273,7 +272,8 @@ export const columns: ColumnDef<TableRecord>[] = [
               <DropdownMenuItem
                 onClick={async () => {
                   await print();
-                }}>
+                }}
+              >
                 <Download className="mr-1 h-4" /> Descargar
               </DropdownMenuItem>
               <DropdownMenuSeparator />
