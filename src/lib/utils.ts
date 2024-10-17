@@ -166,14 +166,21 @@ function getIimageForBarcode() {
 function generateConcepts(
   items: Array<{ concept: string | null; total: number | null }>
 ): string {
+  const filteredItems = items.filter(item => item.concept !== "Diferencial");
   return items.map((item) => `<p>${item.concept}</p>`).join("");
 }
 
 function generateAmounts(
   items: Array<{ concept: string | null; total: number | null }>
 ): string {
-  return items.map((item) => `<p>${formatNumberAsCurrency(item.total ?? 0)}</p>`).join("");
+  const diferencial = items.find(x => x.concept === "Diferencial")?.total ?? 0;
+  const abonoTotal = items.filter(x => x.concept === "Abono").reduce((acc, item) => acc + (item.total ?? 0), 0);
+
+  items = items.filter(x => x.concept !== "Abono");
+    items.push({ concept: "Abono", total: abonoTotal + diferencial });
+  return items.map(item => `<p>${item.total}</p>`).join("");
 }
+
 
 function getTextoForTipoComprobante(tipoComprobante: string) {
   switch (tipoComprobante) {
@@ -510,7 +517,7 @@ padding-bottom:3px
       margin-bottom: 3px;
       }
       .qr {
-        width: 150px;
+        width: 160px;
       }
 
       .cae-section {
@@ -531,7 +538,7 @@ padding-bottom:3px
       }
 
       .afip {
-        width: 150px;
+        width: 160px;
       }
 
       .bp-logo {
@@ -649,16 +656,14 @@ max-height:100%;
     font-weight: bold;
     font-size: 14px;
     letter-spacing: 0.05em;
-    opacity: 100;
     color: #3E3E3E;
 	background-color: #f1f1f1;
 	border-style : hidden;
 }
 
-.conceptotables-cell {
-  padding-top: 15px;
-  padding-bottom: 15px;
-  font-size: 12px;
+.conceptotables-cell p {
+  padding-top: 10px;
+  font-size: 13px;
 }
 
 .tributos {
@@ -672,16 +677,16 @@ padding-bottom: 0;
 .tributos div p {
 font-size:9px;
 font-weight: 500; 
-opacity: 100;
 margin-bottom: 0;
 padding-right: 10px;
 }
 
 .tributos div span {
-font-size:7px;
+font-size: 8px;
 font-family: "Montserrat", sans-serif;
 font-weight: 200; 
 margin: 0;
+padding: 0;
 }
 
 	.resumen-total {
@@ -749,18 +754,18 @@ margin: 0;
           <p> Fecha de Emisión: ${dateNormalFormat(new Date())}</p>
           	<p> C.U.I.T: ${company.cuit}</p>
             <p> Ingresos Brutos: 0</p>
-          <p> Fecha de Inicio de Actividad: ${dateNormalFormat(
+          <p style="margin-bottom:3px;"> Fecha de Inicio de Actividad: ${dateNormalFormat(
             company.activity_start_date
           )}</p>
         </div>
       </header>
   
     <div class="parte-2">	
-		  <div class="grid" style="display: grid; grid-template-columns: 1fr 1fr; column-gap: 50px; border-bottom: 1px solid #ccc;">
+		  <div class="grid" style="display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid #ccc; white-space: nowrap;">
         <div style="grid-column: 1 / span 1;">
           <span><span>Nombre/Razón Social:</span> ${name}</span>
         </div>
-        <div style="grid-column: 2 / span 1;">
+        <div style="padding-left: 220px; grid-column: 2 / span 1;">
           <span><span>${id_type}:</span> ${id_number}</span>
         </div>
         <div style="grid-column: 1 / span 2;">
@@ -769,13 +774,13 @@ margin: 0;
         <div style="grid-column: 1 / span 1;">
           <span><span>Condición de AFIP:</span> ${afip_status}</span>
         </div>
-        <div style="grid-column: 2 / span 1;">
+        <div style="padding-left: 220px; grid-column: 2 / span 1;">
           <span><span>Condición de venta:</span> ${sellCondition}</span>
         </div>
         <div style="grid-column: 1 / span 1;">
           <span><span>Período:</span> ${dateNormalFormat(comprobante?.fromPeriod)}</span>
         </div>
-        <div style="grid-column: 2 / span 1;">
+        <div style="padding-left: 220px; grid-column: 2 / span 1;">
           <span><span>Fecha de vencimiento:</span> ${dateNormalFormat(comprobante?.due_date)}</span>
         </div>
       </div>
@@ -868,7 +873,7 @@ margin: 0;
             />
            </div>
            
-          <div class="payment" style="padding-left: 50px; padding-right: 50px;">
+          <div class="payment" style="padding-left: 52px; padding-right: 52px;">
             <span>Código de pago electrónico</span>
           <img
             style="width:100px; height:13px;"
@@ -894,7 +899,7 @@ margin: 0;
             alt="Mastercard"
           />
           <img
-          style="width:20px; height:26px;"
+          style="width:22px; height:28px;"
             src="https://utfs.io/f/919786bf-15c7-41e3-be9a-d537e2bc8c4f-huj7i4.png"
             alt="CBU"
             />
