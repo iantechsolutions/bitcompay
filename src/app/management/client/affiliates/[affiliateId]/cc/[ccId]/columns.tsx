@@ -35,7 +35,16 @@ export type TableRecord = {
   amount: number;
   "Tipo comprobante": string;
   comprobanteNumber: number;
-  Estado: "Pagada" | "Pendiente";
+  Estado:
+    | "Generada"
+    | "Pendiente"
+    | "Pagada"
+    | "Parcial"
+    | "Anulada"
+    | "Apertura"
+    | "Error"
+    | "apertura"
+    | null;
   iva: number;
   comprobantes?:
     | RouterOutputs["comprobantes"]["getByLiquidation"][number]
@@ -144,8 +153,12 @@ export const columns: ColumnDef<TableRecord>[] = [
     cell: ({ row }) => {
       const Estado = row.getValue("Estado");
       const style =
-        Estado === "pagado"
+        Estado === "Pagada"
           ? "bg-[#DDF9CC] text-[#4E9F1D]"
+          : Estado === "Parcial"
+          ? "bg-[#CCE5F9] text-[#1D4E9F]"
+          : Estado === "Error"
+          ? "bg-[#F9CCCC] text-[#F91D1D]"
           : "bg-[#F9E7CC] text-[#F69709]";
       return (
         <div>

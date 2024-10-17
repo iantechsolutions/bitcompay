@@ -130,6 +130,7 @@ export default function GenerateChannelOutputPage(props: {
       toast.success("Se ha generado el archivo");
       setError(null);
       setDisabled(true);
+      setOpenDialog(false);
     } catch {
       toast.error("Error");
     }

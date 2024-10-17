@@ -90,7 +90,7 @@ export default function CCDetail(props: {
   const tableRows: TableRecord[] = [];
   if (events) {
     for (const event of events) {
-      console.log("event amount",event.event_amount);
+      console.log("event amount", event.event_amount);
       tableRows.push({
         date: event.createdAt,
         description: event.description,
@@ -98,7 +98,7 @@ export default function CCDetail(props: {
         "Tipo comprobante": event.comprobantes?.tipoComprobante ?? "FACTURA A",
         comprobanteNumber: event.comprobantes?.nroComprobante ?? 0,
         ptoVenta: event.comprobantes?.ptoVenta ?? 0,
-        Estado: "Pendiente",
+        Estado: event.comprobantes?.estado ?? "apertura",
         iva: Number(event.comprobantes?.iva ?? 0),
         comprobantes: event.comprobantes,
         currentAccountAmount: lastEvent?.current_amount ?? 0,
@@ -169,8 +169,7 @@ export default function CCDetail(props: {
                     : lastEvent.current_amount < 0
                     ? "text-[#EB2727]"
                     : "text-black"
-                }`}
-              >
+                }`}>
                 {new Intl.NumberFormat("es-AR", {
                   style: "currency",
                   currency: "ARS",
@@ -199,8 +198,7 @@ export default function CCDetail(props: {
           className=" text-base px-16 py-6 mt-5 gap-3 text-[#3e3e3e] rounded-full font-medium"
           onClick={async () => {
             await handleExport();
-          }}
-        >
+          }}>
           <Download02Icon />
           Exportar
         </Button>

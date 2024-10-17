@@ -431,7 +431,7 @@ export default function AffiliatePage(props: {
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2">
-              <AccordionTrigger className="font-semibold rounded-md overflow-hidden">
+              <AccordionTrigger className="font-semibold">
                 Integrantes
               </AccordionTrigger>
               <AccordionContent className="pt-6 pl-5">
@@ -445,8 +445,8 @@ export default function AffiliatePage(props: {
                           {int.name}
                         </AccordionTriggerIntegrant>
                         <AccordionContentIntegrant>
-                          <div className="flex justify-between">
-                            <p className="text-xs font-semibold">
+                          <div className="flex justify-between mt-2">
+                            <p className="text-sm font-semibold">
                               Información Personal
                             </p>
                             <EditAffiliate
@@ -455,7 +455,7 @@ export default function AffiliatePage(props: {
                               setOpen={setOpenAffiliate}
                             />
                           </div>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-stretch pt-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-stretch pt-4  mt-2">
                             {Object.entries(
                               integrantsPersonalData.get(int.id) ?? {}
                             ).map(([key, value]) => {

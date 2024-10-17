@@ -116,8 +116,7 @@ export default function AdditionalInfoCard({
                   iva: IVA_TASA, // Para mostrar como porcentaje
                   total: 0,
                 })
-              }
-            >
+              }>
               Agregar concepto
             </Button>
           </div>
@@ -125,8 +124,7 @@ export default function AdditionalInfoCard({
         {fields.map((fieldElement, index) => (
           <div
             key={fieldElement.id}
-            className="w-full grid grid-flow-col gap-5 justify-stretch items-center"
-          >
+            className="w-full grid grid-flow-col gap-5 justify-stretch items-center">
             <ElementCard
               className="pr-1 pb-0 border-[#bef0bb]"
               element={{
@@ -200,9 +198,10 @@ export default function AdditionalInfoCard({
                     {(
                       conceptsForm.getValues(`concepts.${index}.iva`) ?? 0
                     ).toFixed(2)}
-                  </p>
-                  ,
-                  (conceptsForm.getValues(`concepts.${index}.iva`) ?? 0).toFixed(2)
+                  </p>,
+                  (
+                    conceptsForm.getValues(`concepts.${index}.iva`) ?? 0
+                  ).toFixed(2)
                 ),
               }}
             />
@@ -216,9 +215,10 @@ export default function AdditionalInfoCard({
                     {(
                       conceptsForm.getValues(`concepts.${index}.total`) ?? 0
                     ).toFixed(2)}
-                  </p>
-                  ,
-                  (conceptsForm.getValues(`concepts.${index}.total`) ?? 0).toFixed(2)
+                  </p>,
+                  (
+                    conceptsForm.getValues(`concepts.${index}.total`) ?? 0
+                  ).toFixed(2)
                 ),
               }}
             />
@@ -236,8 +236,7 @@ export default function AdditionalInfoCard({
                       iva: parseInt(form.watch("alicuota")),
                       total: 0,
                     })
-                  }
-                >
+                  }>
                   <AddCircleIcon className="text-[#8bd087]" />
                 </Button>
                 <Button
@@ -248,8 +247,7 @@ export default function AdditionalInfoCard({
                   onClick={() => {
                     remove(index);
                     if (onValueChange) onValueChange();
-                  }}
-                >
+                  }}>
                   <CancelCircleIcon className="text-[#ed4444]" />
                 </Button>
               </div>
@@ -272,8 +270,7 @@ export default function AdditionalInfoCard({
                   dateEmision: new Date(),
                   id: "",
                 })
-              }
-            >
+              }>
               Agregar comprobante
             </Button>
           </div>
@@ -283,8 +280,7 @@ export default function AdditionalInfoCard({
             {asocFields.map((fieldElement, index) => (
               <div
                 className="w-full grid grid-flow-col gap-5 justify-stretch items-center"
-                key={index}
-              >
+                key={index}>
                 <ElementCard
                   className="pr-1 pb-0 border-[#bef0bb]"
                   element={{
@@ -342,8 +338,7 @@ export default function AdditionalInfoCard({
                         render={({ field }) => (
                           <Select
                             onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
+                            defaultValue={field.value}>
                             <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8">
                               <SelectValue placeholder="Seleccionar PV..." />
                             </SelectTrigger>
@@ -355,8 +350,7 @@ export default function AdditionalInfoCard({
                                 <SelectItem
                                   key={option.value}
                                   value={option.value}
-                                  className="rounded-none "
-                                >
+                                  className="rounded-none ">
                                   {option.label}
                                 </SelectItem>
                               ))}
@@ -420,8 +414,7 @@ export default function AdditionalInfoCard({
                                   }
                                 }
                               }}
-                              defaultValue={field.value}
-                            >
+                              defaultValue={field.value}>
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Seleccionar comprobante..." />
@@ -433,15 +426,14 @@ export default function AdditionalInfoCard({
                                     (comprobante) =>
                                       comprobante.tipoComprobante ===
                                         possibleComprobanteTipo &&
-                                      (comprobante.estado === "parcial" ||
-                                        comprobante.estado === "pendiente")
+                                      (comprobante.estado === "Parcial" ||
+                                        comprobante.estado === "Pendiente")
                                   )
                                   .slice(0, 10)
                                   .map((comprobante) => (
                                     <SelectItem
                                       key={comprobante.id}
-                                      value={comprobante.id}
-                                    >
+                                      value={comprobante.id}>
                                       {comprobante.nroComprobante +
                                         " - " +
                                         comprobante.importe}
@@ -477,8 +469,7 @@ export default function AdditionalInfoCard({
                                       "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                                       !field.value && "text-muted-foreground"
                                     )}
-                                    disabled
-                                  >
+                                    disabled>
                                     {field.value &&
                                     dayjs(field.value).isValid() ? (
                                       format(field.value, "dd/MM/yyyy")
@@ -516,8 +507,7 @@ export default function AdditionalInfoCard({
                       onClick={() => {
                         asocRemove(index);
                         if (onValueChange) onValueChange();
-                      }}
-                    >
+                      }}>
                       <CancelCircleIcon className="text-[#ed4444]" />
                     </Button>
                     <Button
@@ -533,8 +523,7 @@ export default function AdditionalInfoCard({
                           dateEmision: new Date(),
                           id: "",
                         })
-                      }
-                    >
+                      }>
                       <AddCircleIcon className="text-[#8bd087]" />
                     </Button>
                   </div>
@@ -561,8 +550,7 @@ export default function AdditionalInfoCard({
               <Button
                 onClick={() =>
                   otherConceptsAppend({ description: "", importe: 0 })
-                }
-              >
+                }>
                 Agregar concepto
               </Button>
             </div>
@@ -570,8 +558,7 @@ export default function AdditionalInfoCard({
           {otherConceptsFields.map((fieldElement, index) => (
             <div
               key={fieldElement.id}
-              className="w-full grid grid-flow-col gap-5 justify-stretch items-center"
-            >
+              className="w-full grid grid-flow-col gap-5 justify-stretch items-center">
               <ElementCard
                 element={{
                   key: "DESCRIPCIÓN",
@@ -624,8 +611,7 @@ export default function AdditionalInfoCard({
                     className="bg-transparent hover:bg-transparent border-none shadow-none"
                     onClick={() =>
                       otherConceptsAppend({ description: "", importe: 0 })
-                    }
-                  >
+                    }>
                     <AddCircleIcon className="text-[#8bd087]" />
                   </Button>
                   <Button
@@ -635,8 +621,7 @@ export default function AdditionalInfoCard({
                     onClick={(e) => {
                       otherConceptsRemove(index);
                       if (onValueChange) onValueChange();
-                    }}
-                  >
+                    }}>
                     <CancelCircleIcon className="text-[#ed4444]" />
                   </Button>
                 </div>

@@ -448,7 +448,7 @@ export const excelDeserializationRouter = createTRPCRouter({
               generated: new Date(),
               tipoDocumento: tipoDocumento ?? 0,
               tipoComprobante: "Apertura de CC",
-              estado: "apertura",
+              estado: "Apertura",
             });
           }
           console.log("Llego Llego");
@@ -538,7 +538,7 @@ export const excelDeserializationRouter = createTRPCRouter({
           // if(contribution > 0){
 
           // }
-          
+
           // await db.insert(schema.contributions).values({
           //   employeeContribution: 0,
           //   employerContribution: contribution,
