@@ -582,7 +582,8 @@ async function approbatecomprobante(liquidationId: string) {
             });
             console.log("COMPROBANTE APROBADO");
             console.log(comprobante.importe);
-
+            //wait 1 second
+            await new Promise((resolve) => setTimeout(resolve, 1500));
             const ccs = await db.query.currentAccount.findMany({
               with: {
                 events: true,
