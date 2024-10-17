@@ -419,8 +419,8 @@ const confirmationPage = ({
       );
       const options = {
         width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
-        marginLeft: 0.8, // Margen izquierdo en pulgadas. Usar 0.1 para ticket
-        marginRight: 0.8, // Margen derecho en pulgadas. Usar 0.1 para ticket
+        marginLeft: 0.3, // Margen izquierdo en pulgadas. Usar 0.1 para ticket
+        marginRight: 0.3, // Margen derecho en pulgadas. Usar 0.1 para ticket
         marginTop: 0.4, // Margen superior en pulgadas. Usar 0.1 para ticket
         marginBottom: 0.4, // Margen inferior en pulgadas. Usar 0.1 para ticket
       };
