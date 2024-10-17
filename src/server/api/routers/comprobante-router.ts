@@ -402,12 +402,12 @@ async function approbatecomprobante(liquidationId: string) {
             ];
 
           try {
-            console.log("lastVoucher",lastVoucher);
+            console.log("lastVoucher", lastVoucher);
             lastVoucher = await afip.ElectronicBilling.getLastVoucher(
               comprobanteAnterior?.ptoVenta,
               comprobantecodNC
             );
-            console.log("lastVoucher",lastVoucher);
+            console.log("lastVoucher", lastVoucher);
           } catch (e) {
             console.log("Error al obtener el último comprobante");
             console.log(e);
@@ -1327,9 +1327,9 @@ export async function preparateComprobante(
         (parseFloat(
           grupo.bonus?.find(
             (bonus) =>
-              (bonus.from !== null &&
-                today >= bonus.from &&
-                ((bonus.to!== null && today <= bonus.to) || bonus.to === null))
+              bonus.from !== null &&
+              today >= bonus.from &&
+              ((bonus.to !== null && today <= bonus.to) || bonus.to === null)
           )?.amount ?? "0"
         ) *
           abono) /

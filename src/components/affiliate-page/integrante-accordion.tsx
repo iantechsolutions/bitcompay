@@ -33,41 +33,23 @@ const AccordionTrigger = React.forwardRef<
   const isHolder = affiliate?.relationship === "Titular";
   const isBillResponsible = affiliate?.isBillResponsible;
   const isAffiliate = affiliate?.isAffiliate;
+  console.log("Affiliate data:", affiliate);
+  console.log(isHolder, isBillResponsible, isAffiliate);
   const badgeClassName = `rounded-full px-3 text-xs font-medium 
   ${
     isHolder ? "bg-[#DDF9CC] text-[#4C740C] px-4" : "text-[#3E3E3E] opacity-80"
   } `;
-  const [open, setOpen] = React.useState(false);
   return (
     <AccordionPrimitive.Header className="flex items-center">
       <AccordionPrimitive.Trigger
         ref={ref}
         className={cn(
-          "flex flex-1 items-center justify-between py-2 px-6 w-full text-sm bg-[#f7f7f7] rounded-full transition-all [&[data-state=open]>svg]:rotate-180",
+          "flex flex-1 items-center justify-between py-2 px-6 w-full text-sm  rounded-full transition-all [&[data-state=open]>svg]:rotate-180",
           className
         )}
         {...props}>
         {children}
         <div className="flex gap-2 justify-end ">
-          <div className={badgeClassName}>{isHolder ? "Titular " : ""}</div>
-          <div className={badgeClassName}>
-            {isBillResponsible ? "Responsable pagador " : ""}
-            <div className={badgeClassName}>
-              {isAffiliate ? "Afiliado " : ""}
-            </div>
-            <div className={badgeClassName}>
-              {!isHolder && !isBillResponsible && !isAffiliate
-                ? "Adherente"
-                : ""}
-            </div>
-          </div>
-          {affiliate ? (
-            <EditAffiliate
-              Affiliate={affiliate}
-              open={open}
-              setOpen={setOpen}
-            />
-          ) : null}
           <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200" />
         </div>
       </AccordionPrimitive.Trigger>
