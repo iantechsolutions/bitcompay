@@ -150,7 +150,7 @@ export function DataTable({
       delayedColumnFilters.length > 0
     ).then((data) => {
       const dataArray: TableRecord[] = [];
-      makeExcelRows(data, null, dataArray);
+      makeExcelRows(data,liquidationId, null, dataArray);
       setData(dataArray);
     });
   }, [pagination, delayedColumnFilters]);
@@ -200,8 +200,7 @@ export function DataTable({
                   return (
                     <TableHead
                       key={header.id}
-                      className="bg-[#f7f7f7] first:rounded-s-lg last:rounded-e-lg"
-                    >
+                      className="bg-[#f7f7f7] first:rounded-s-lg last:rounded-e-lg">
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -221,8 +220,7 @@ export function DataTable({
                   <TableRow
                     key={row.id}
                     onClick={() => handleRowClick(row)}
-                    className="border-b-2 border-[#f6f6f6] hover:bg-[#f6f6f6] hover:cursor-pointer"
-                  >
+                    className="border-b-2 border-[#f6f6f6] hover:bg-[#f6f6f6] hover:cursor-pointer">
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
                         {flexRender(
@@ -246,8 +244,7 @@ export function DataTable({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center"
-                >
+                  className="h-24 text-center">
                   No results.
                 </TableCell>
               </TableRow>

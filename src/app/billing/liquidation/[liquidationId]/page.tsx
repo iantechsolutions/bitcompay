@@ -31,7 +31,7 @@ dayjs.locale("es");
 
 import { clerkClient } from "@clerk/nextjs/server";
 import UpdateLiquidationEstadoDialog from "./approve-liquidation-dialog";
-import { computeBase, computeIva } from "~/lib/utils";
+import { computeBase, computeIva, formatDatejs } from "~/lib/utils";
 import DownloadExcelButton from "./downloadExcelButton";
 import RejectLiquidationDialog from "./reject-liquidation-dialog";
 import { ChevronLeft, CircleX } from "lucide-react";
@@ -89,7 +89,7 @@ export default async function Home(props: {
     "Total",
   ];
 
-  if (preliquidation?.estado !== "pendiente") {
+  if (preliquidation?.estado.toLowerCase() !== "pendiente") {
     headers.push("Factura");
   }
 
@@ -98,7 +98,7 @@ export default async function Home(props: {
       <div className="flex flex-row justify-between w-full">
         {/* <GoBackButton url="/billing/liquidation" /> */}
         <Title>Liquidación</Title>
-        {preliquidation?.estado === "pendiente" && (
+        {preliquidation?.estado.toLowerCase() === "pendiente" && (
           <>
             <div className="flex flex-row gap-1">
               <UpdateLiquidationEstadoDialog
@@ -149,8 +149,7 @@ export default async function Home(props: {
             <span className="">FECHA DE PROCESO</span>
             <br />
             <p className="font-medium text-sm">
-              {dayjs.utc(preliquidation?.period).format("DD/MM/YYYY hh:mm") ??
-                "-"}
+              {formatDatejs(preliquidation?.createdAt)}
             </p>
           </li>
           <li className="">
@@ -164,7 +163,7 @@ export default async function Home(props: {
             <span className="">FECHA DE EMISIÓN</span>
             <br />
             <p className="font-medium text-sm">
-              {dayjs.utc(preliquidation?.createdAt).format("DD/MM/YYYY") ?? "-"}
+              {formatDatejs(preliquidation?.createdAt)}
             </p>
           </li>
           <li>
@@ -176,22 +175,14 @@ export default async function Home(props: {
             <span className="">1° FECHA DE VENCIMIENTO</span>
             <br />
             <p className="font-medium text-sm">
-              {dayjs
-                .utc(
-                  preliquidation?.comprobantes[0]?.payments[0]?.first_due_date
-                )
-                .format("DD/MM/YYYY") ?? "-"}
+              {formatDatejs(preliquidation?.comprobantes[0]?.payments[0]?.first_due_date)}
             </p>
           </li>
           <li>
             <span className="">2° FECHA DE VENCIMIENTO</span>
             <br />
             <p className="font-medium text-sm">
-              {dayjs
-                .utc(
-                  preliquidation?.comprobantes[0]?.payments[0]?.second_due_date
-                )
-                .format("DD/MM/YYYY") ?? "-"}
+              {formatDatejs(preliquidation?.comprobantes[0]?.payments[0]?.second_due_date)}
             </p>
           </li>
           <li>

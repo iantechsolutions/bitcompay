@@ -145,6 +145,37 @@ const idDictionary: { [key: string]: number } = {
 //   const res = await afip.ElectronicBilling.createVoucher(data);
 // }
 
+interface VoucherResult {
+  res: { CAE: string; CAEFchVto: string; voucherNumber: number } | null;
+  result: "Pendiente" | "Error";
+}
+
+async function createNextVoucher(
+  data: any,
+  afip: Afip
+): Promise<VoucherResult> {
+  let result: "Pendiente" | "Error" = "Pendiente";
+  let res: { CAE: string; CAEFchVto: string; voucherNumber: number } | null =
+    null;
+  try {
+    res = await afip.ElectronicBilling.createNextVoucher(data);
+    console.log(res);
+  } catch (e) {
+    console.log(e);
+    console.log(e?.toString());
+    console.log(typeof e);
+    if (
+      e?.toString().startsWith("Error: (502) Error interno de base de datos") ||
+      e?.toString().startsWith("Error: (10016)")
+    ) {
+      result = (await createNextVoucher(data, afip)).result;
+    } else {
+      result = "Error";
+    }
+  }
+  return { res, result };
+}
+
 const preparedUpdatePayment = db
   .update(schema.payments)
   .set({
@@ -223,6 +254,7 @@ async function approbatecomprobante(liquidationId: string) {
       comprobantes: {
         with: {
           items: true,
+          otherTributes: true,
           family_group: {
             with: {
               integrants: {
@@ -253,15 +285,9 @@ async function approbatecomprobante(liquidationId: string) {
   });
   console.log(`[TIMING] Liquidation query: ${Date.now() - liquidationStart}ms`);
 
-  if (liquidation?.estado === "pendiente") {
+  if (liquidation?.estado.toLowerCase() === "pendiente") {
     const userStart = Date.now();
     const user = await currentUser();
-
-    const ccs = await db.query.currentAccount.findMany({
-      with: {
-        events: true,
-      },
-    });
 
     console.log(`[TIMING] Current user fetch: ${Date.now() - userStart}ms`);
 
@@ -309,6 +335,7 @@ async function approbatecomprobante(liquidationId: string) {
     const promisePoolStart = Date.now();
     const { results, errors } = await PromisePool.withConcurrency(1000)
       .for(liquidation?.comprobantes)
+
       .process(async (comprobante, index) => {
         let lastVoucher = 0;
         const lastVoucherStart = Date.now();
@@ -355,15 +382,7 @@ async function approbatecomprobante(liquidationId: string) {
 
         const ccFetchStart = Date.now();
         // const cachedCc = comprobante.family_group?.cc;
-        const cc = ccs.find((x) => x.id == comprobante.family_group?.cc?.id);
         let lastEventAmount = 0;
-        if (cc?.events && cc?.events.length > 0) {
-          lastEventAmount = cc?.events.reduce((prev, current) => {
-            return new Date(prev.createdAt) > new Date(current.createdAt)
-              ? prev
-              : current;
-          }).current_amount;
-        }
         console.log(
           `[TIMING] Current account transaction (comprobante ${index}): ${
             Date.now() - ccFetchStart
@@ -385,7 +404,7 @@ async function approbatecomprobante(liquidationId: string) {
         const ivaId = listado ? listado[0] : "0";
         const ivaFloat = parseFloat(comprobante?.iva ?? "0") / 100;
         let data = {};
-
+        let comprobanteEstado: "Pendiente" | "Error" = "Pendiente";
         const processStart = Date.now();
         if (comprobante?.origin == "Nota de credito") {
           const comprobanteAnterior = await db.query.comprobantes.findFirst({
@@ -394,107 +413,95 @@ async function approbatecomprobante(liquidationId: string) {
               comprobante?.previous_facturaId ?? ""
             ),
           });
-          const comprobanteCod =
-            comprobanteDictionary[comprobanteAnterior?.tipoComprobante ?? ""];
-          const comprobantecodNC =
-            comprobanteDictionary[
-              fcAnc[comprobanteAnterior?.tipoComprobante ?? ""] ?? ""
-            ];
+          if (comprobanteAnterior?.estado !== "Error") {
+            const comprobanteCod =
+              comprobanteDictionary[comprobanteAnterior?.tipoComprobante ?? ""];
+            const comprobantecodNC =
+              comprobanteDictionary[
+                fcAnc[comprobanteAnterior?.tipoComprobante ?? ""] ?? ""
+              ];
 
-          try {
-            lastVoucher = await afip.ElectronicBilling.getLastVoucher(
-              comprobanteAnterior?.ptoVenta,
-              comprobantecodNC
-            );
-          } catch (e) {
-            console.log("Error al obtener el último comprobante");
-            console.log(e);
-            lastVoucher = 0;
-          }
-
-          data = {
-            CantReg: 1, // Cantidad de comprobantes a registrar
-            PtoVta: comprobante?.ptoVenta,
-            CbteTipo: comprobantecodNC?.toString() ?? "",
-            Concepto: Number(comprobante?.concepto),
-            DocTipo: comprobante?.tipoDocumento,
-            DocNro: comprobante?.nroDocumento,
-            CbteDesde: lastVoucher + 1,
-            CbteHasta: lastVoucher + 1,
-            CbteFch: parseInt(fecha?.replace(/-/g, "") ?? ""),
-            FchServDesde: formatDate(comprobante?.fromPeriod ?? new Date()),
-            FchServHasta: formatDate(comprobante?.toPeriod ?? new Date()),
-            FchVtoPago: formatDate(comprobante?.due_date ?? new Date()),
-            ImpTotal: comprobante?.importe,
-            ImpTotConc: 0,
-            ImpNeto: (Number(comprobante?.importe) / (1 + ivaFloat)).toFixed(2),
-            ImpOpEx: 0,
-            ImpIVA: (
-              Number(comprobante?.importe) -
-              Number(comprobante?.importe) / (1 + ivaFloat)
-            ).toFixed(2),
-            ImpTrib: 0,
-            MonId: "PES",
-            MonCotiz: 1,
-            Iva: {
-              Id: ivaId,
-              BaseImp: Number(comprobante?.importe) / (1 + ivaFloat),
-              Importe: (
+            data = {
+              CantReg: 1, // Cantidad de comprobantes a registrar
+              PtoVta: comprobante?.ptoVenta,
+              CbteTipo: comprobantecodNC?.toString() ?? "",
+              Concepto: Number(comprobante?.concepto),
+              DocTipo: comprobante?.tipoDocumento,
+              DocNro: comprobante?.nroDocumento,
+              CbteDesde: lastVoucher + 1,
+              CbteHasta: lastVoucher + 1,
+              CbteFch: parseInt(fecha?.replace(/-/g, "") ?? ""),
+              FchServDesde: formatDate(comprobante?.fromPeriod ?? new Date()),
+              FchServHasta: formatDate(comprobante?.toPeriod ?? new Date()),
+              FchVtoPago: formatDate(comprobante?.due_date ?? new Date()),
+              ImpTotal: comprobante?.importe,
+              ImpTotConc: 0,
+              ImpNeto: (Number(comprobante?.importe) / (1 + ivaFloat)).toFixed(
+                2
+              ),
+              ImpOpEx: 0,
+              ImpIVA: (
                 Number(comprobante?.importe) -
                 Number(comprobante?.importe) / (1 + ivaFloat)
               ).toFixed(2),
-            },
-            CbtesAsoc: {
-              Tipo: comprobanteCod,
-              PtoVta: comprobante?.ptoVenta,
-              Nro: comprobanteAnterior?.nroComprobante,
-            },
-          };
-
-          try {
-            const res = await afip.ElectronicBilling.createVoucher(data);
-          } catch (e) {
-            console.log("Error al enviar el comprobante a AFIP");
-            console.log(e);
-
-            return null;
+              ImpTrib: 0,
+              MonId: "PES",
+              MonCotiz: 1,
+              Iva: {
+                Id: ivaId,
+                BaseImp: Number(comprobante?.importe) / (1 + ivaFloat),
+                Importe: (
+                  Number(comprobante?.importe) -
+                  Number(comprobante?.importe) / (1 + ivaFloat)
+                ).toFixed(2),
+              },
+              CbtesAsoc: {
+                Tipo: comprobanteCod,
+                PtoVta: comprobante?.ptoVenta,
+                Nro: comprobanteAnterior?.nroComprobante,
+              },
+            };
+            const temp = await createNextVoucher(data, afip);
+            comprobanteEstado = temp.result;
+            lastVoucher = temp.res?.voucherNumber ?? 0;
+            const ccs = await db.query.currentAccount.findMany({
+              with: {
+                events: true,
+              },
+            });
+            const cc = ccs.find(
+              (x) => x.id == comprobante.family_group?.cc?.id
+            );
+            if (cc?.events && cc?.events.length > 0) {
+              lastEventAmount = cc?.events.reduce((prev, current) => {
+                return new Date(prev.createdAt) > new Date(current.createdAt)
+                  ? prev
+                  : current;
+              }).current_amount;
+            }
+            await db.insert(schema.events).values({
+              current_amount: lastEventAmount + comprobante.importe,
+              description: "NC",
+              event_amount: comprobante.importe,
+              currentAccount_id: cc?.id,
+              type: "NC",
+              comprobante_id: comprobante.id,
+            });
+            await preparedUpdatePayment.execute({
+              comprobanteId: comprobante?.previous_facturaId,
+              statusId: statusCancelado?.id,
+            });
+          } else {
+            await db
+              .update(schema.comprobantes)
+              .set({
+                estado: "Error",
+              })
+              .where(eq(schema.comprobantes.id, comprobante.id));
           }
-
-          await db
-            .update(schema.comprobantes)
-            .set({
-              estado: "pendiente",
-              nroComprobante: lastVoucher + 1,
-            })
-            .where(eq(schema.comprobantes.id, comprobante.id));
-
-          await db.insert(schema.events).values({
-            current_amount: lastEventAmount + comprobante.importe,
-            description: "NC",
-            event_amount: comprobante.importe,
-            currentAccount_id: cc?.id,
-            type: "NC",
-            comprobante_id: comprobante.id,
-          });
-          // AAACAAAA
-          await preparedUpdatePayment.execute({
-            comprobanteId: comprobante?.previous_facturaId,
-            statusId: statusCancelado?.id,
-          });
         } else {
           const comprobanteCod =
             comprobanteDictionary[comprobante.tipoComprobante ?? ""];
-          try {
-            lastVoucher = await afip.ElectronicBilling.getLastVoucher(
-              comprobante?.ptoVenta,
-              comprobanteCod
-            );
-            // console.log("lastVoucher")
-          } catch (e) {
-            console.log("Error al obtener el último comprobante");
-            console.log(e);
-            lastVoucher = 0;
-          }
 
           data = {
             CantReg: 1, // Cantidad de comprobantes a registrar
@@ -530,104 +537,145 @@ async function approbatecomprobante(liquidationId: string) {
             },
           };
           // try {
-          try {
-            const res = await afip.ElectronicBilling.createVoucher(data);
-          } catch (e) {
-            console.log("Error al enviar el comprobante a AFIP");
+          const temp = await createNextVoucher(data, afip);
+          comprobanteEstado = temp.result;
+          lastVoucher = temp.res?.voucherNumber ?? 0;
 
-            console.log(e);
+          if (comprobanteEstado != "Error") {
+            await db
+              .update(schema.comprobantes)
+              .set({
+                estado: comprobanteEstado,
+                nroComprobante: lastVoucher + 1,
+              })
+              .where(eq(schema.comprobantes.id, comprobante.id));
 
-            return null;
+            await db.insert(schema.payments).values({
+              companyId:
+                comprobante.family_group?.businessUnitData?.company?.id ?? "",
+              invoice_number: comprobante?.nroComprobante,
+              userId: user?.id ?? "",
+              g_c:
+                comprobante.family_group?.businessUnitData?.brand?.number ?? 0,
+              name: billResponsible?.name ?? "",
+              fiscal_id_type: billResponsible?.fiscal_id_type,
+              fiscal_id_number: parseInt(
+                billResponsible?.fiscal_id_number ?? "0"
+              ),
+              du_type: billResponsible?.id_type,
+              du_number: parseInt(billResponsible?.id_number ?? "0"),
+              product: producto?.id,
+              affiliate_number:
+                (comprobante.family_group?.plan?.plan_code ?? "") +
+                (billResponsible?.id_number ?? ""),
+              period: comprobante?.due_date,
+              first_due_amount: comprobante?.importe,
+              first_due_date: comprobante?.due_date,
+              cbu: billResponsible?.pa[0]?.CBU,
+              comprobante_id: comprobante?.id,
+              documentUploadId: "0AspRyw8g4jgDAuNGAeBX",
+              product_number: producto?.number ?? 0,
+              statusId: status?.id,
+              card_number: billResponsible?.pa[0]?.card_number,
+              card_brand: billResponsible?.pa[0]?.card_brand,
+              card_type: billResponsible?.pa[0]?.card_type,
+            });
+            console.log("COMPROBANTE APROBADO");
+            console.log(comprobante.importe);
+            //wait 1 second
+            console.log("llegoooo", lastEventAmount, comprobante.importe);
+            await new Promise((resolve) => setTimeout(resolve, 1500));
+            const ccs = await db.query.currentAccount.findMany({
+              with: {
+                events: true,
+              },
+            });
+            const cc = ccs.find(
+              (x) => x.id == comprobante.family_group?.cc?.id
+            );
+            if (cc?.events && cc?.events.length > 0) {
+              lastEventAmount = cc?.events.reduce((prev, current) => {
+                return new Date(prev.createdAt) > new Date(current.createdAt)
+                  ? prev
+                  : current;
+              }).current_amount;
+            }
+
+            console.log(
+              "llegoooo",
+              lastEventAmount,
+              comprobante.importe,
+              cc?.id
+            );
+            await db.insert(schema.events).values({
+              current_amount: lastEventAmount - comprobante.importe,
+              description: "FC",
+              event_amount: comprobante.importe * -1,
+              currentAccount_id: cc?.id,
+              type: "FC",
+              comprobante_id: comprobante.id,
+            });
+          } else {
+            await db
+              .update(schema.comprobantes)
+              .set({
+                estado: comprobanteEstado,
+              })
+              .where(eq(schema.comprobantes.id, comprobante.id));
           }
-
-          await db
-            .update(schema.comprobantes)
-            .set({
-              estado: "pendiente",
-              nroComprobante: lastVoucher + 1,
-            })
-            .where(eq(schema.comprobantes.id, comprobante.id));
-
-          await db.insert(schema.payments).values({
-            companyId:
-              comprobante.family_group?.businessUnitData?.company?.id ?? "",
-            invoice_number: comprobante?.nroComprobante,
-            userId: user?.id ?? "",
-            g_c: comprobante.family_group?.businessUnitData?.brand?.number ?? 0,
-            name: billResponsible?.name ?? "",
-            fiscal_id_type: billResponsible?.fiscal_id_type,
-            fiscal_id_number: parseInt(
-              billResponsible?.fiscal_id_number ?? "0"
-            ),
-            du_type: billResponsible?.id_type,
-            du_number: parseInt(billResponsible?.id_number ?? "0"),
-            product: producto?.id,
-            affiliate_number:
-              (comprobante.family_group?.plan?.plan_code ?? "") +
-              (billResponsible?.id_number ?? ""),
-            period: comprobante?.due_date,
-            first_due_amount: comprobante?.importe,
-            first_due_date: comprobante?.due_date,
-            cbu: billResponsible?.pa[0]?.CBU,
-            comprobante_id: comprobante?.id,
-            documentUploadId: "0AspRyw8g4jgDAuNGAeBX",
-            product_number: producto?.number ?? 0,
-            statusId: status?.id,
-            card_number: billResponsible?.pa[0]?.card_number,
-            card_brand: billResponsible?.pa[0]?.card_brand,
-            card_type: billResponsible?.pa[0]?.card_type,
-          });
-
-          console.log("COMPROBANTE APROBADO");
-          console.log(comprobante.importe);
-          await db.insert(schema.events).values({
-            current_amount: lastEventAmount - comprobante.importe,
-            description: "FC",
-            event_amount: comprobante.importe * -1,
-            currentAccount_id: cc?.id,
-            type: "FC",
-            comprobante_id: comprobante.id,
-          });
         }
+        console.log("llegoooo");
+
         console.log(
           `[TIMING] Comprobante process (comprobante ${index}): ${
             Date.now() - processStart
           }ms`
         );
-
-        const pdfGenerateStart = Date.now();
-        const html = htmlBill(
-          comprobante,
-          comprobante.family_group?.businessUnitData!.company,
-          producto,
-          lastVoucher + 1,
-          comprobante.family_group?.businessUnitData!.brand,
-          billResponsible?.name ?? "",
-          (billResponsible?.address ?? "") +
-            " " +
-            (billResponsible?.address_number ?? ""),
-          billResponsible?.locality ?? "",
-          billResponsible?.province ?? "",
-          billResponsible?.postal_code?.cp ?? "",
-          billResponsible?.fiscal_id_type ?? "",
-          billResponsible?.fiscal_id_number ?? "",
-          billResponsible?.afip_status ?? ""
-        );
-
-        const name = `FAC_${lastVoucher + 1}.pdf`; // NOMBRE        lastVoucher += 1;
-
-        await PDFFromHtml(
-          html,
-          name,
-          afip,
-          comprobante?.id ?? "",
-          lastVoucher + 1
-        );
-        console.log(
-          `[TIMING] PDF generation (comprobante ${index}): ${
-            Date.now() - pdfGenerateStart
-          }ms`
-        );
+        console.log(`(comprobante ${index}): ${comprobanteEstado}`);
+        if (comprobanteEstado != "Error") {
+          console.log("1");
+          const pdfGenerateStart = Date.now();
+          console.log("2");
+          let html = "";
+          try {
+            html = htmlBill(
+              comprobante,
+              comprobante.family_group?.businessUnitData!.company,
+              producto,
+              lastVoucher + 1,
+              comprobante.family_group?.businessUnitData!.brand,
+              billResponsible?.name ?? "",
+              (billResponsible?.address ?? "") +
+                " " +
+                (billResponsible?.address_number ?? ""),
+              billResponsible?.locality ?? "",
+              billResponsible?.province ?? "",
+              billResponsible?.postal_code?.cp ?? "",
+              billResponsible?.fiscal_id_type ?? "",
+              billResponsible?.fiscal_id_number ?? "",
+              billResponsible?.afip_status ?? ""
+            );
+          } catch (e) {
+            console.log("Error en htmlBill");
+            console.log(e);
+          }
+          console.log("3");
+          const name = `FAC_${lastVoucher + 1}.pdf`; // NOMBRE        lastVoucher += 1;
+          console.log("4. prepdf comprobante: ", index);
+          await PDFFromHtml(
+            html,
+            name,
+            afip,
+            comprobante?.id ?? "",
+            lastVoucher + 1,
+            comprobanteEstado
+          );
+          console.log(
+            `5. [TIMING] PDF generation (comprobante ${index}): ${
+              Date.now() - pdfGenerateStart
+            }ms`
+          );
+        }
       });
 
     console.log(
@@ -645,7 +693,8 @@ async function PDFFromHtml(
   name: string,
   afip: Afip,
   comprobanteId: string,
-  voucher: number
+  voucher: number,
+  comprobanteEstado: string
 ) {
   const options = {
     width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
@@ -659,7 +708,7 @@ async function PDFFromHtml(
     file_name: name,
     options: options,
   });
-
+  console.log("postafippdf");
   const upload = await utapi.uploadFilesFromUrl(res.file);
   if (Array.isArray(upload)) {
     if (upload[0]?.data !== null) {
@@ -674,17 +723,16 @@ async function PDFFromHtml(
       upload.error
     );
   }
-
+  console.log("postSubida");
   const uploadData = Array.isArray(upload) ? upload[0]?.data : upload?.data;
-
+  console.log("preupdatepdf");
   await preparedCompBillLink.execute({
     billLink: uploadData?.url ?? res.file ?? "",
-    estado: "pendiente",
+    estado: comprobanteEstado,
     voucher,
     comprobanteId,
   });
-
-  console.log("termino la funcion");
+  console.log("postupdatepdf");
 }
 async function createcomprobanteItem(
   ivaFloat: number,
@@ -739,16 +787,16 @@ async function getGroupAmount(grupo: grupoCompleto, date: Date) {
   console.log("La casa", importe);
   return importe;
 }
-async function getGroupContribution(grupo: grupoCompleto) {
-  let importe = 0;
-  grupo.integrants?.forEach((integrant) => {
-    if (integrant?.contribution?.amount) {
-      const contributionIntegrante = integrant?.contribution?.amount ?? 0;
-      importe += contributionIntegrante;
-    }
-  });
-  return importe;
-}
+// async function getGroupContribution(grupo: grupoCompleto) {
+//   let importe = 0;
+//   grupo.integrants?.forEach((integrant) => {
+//     if (integrant?.contribution?.amount) {
+//       const contributionIntegrante = integrant?.contribution?.amount ?? 0;
+//       importe += contributionIntegrante;
+//     }
+//   });
+//   return importe;
+// }
 async function getDifferentialAmount(grupo: grupoCompleto, fechaPreliq: Date) {
   let importe = 0;
   grupo.integrants?.forEach((integrant) => {
@@ -798,7 +846,6 @@ export async function getGruposForLiquidation(brandId: string, date: Date) {
       abonos: true,
       integrants: {
         with: {
-          contribution: true,
           differentialsValues: true,
           pa: true,
           aportes_os: true,
@@ -1089,7 +1136,7 @@ export const comprobantesRouter = createTRPCRouter({
         .insert(schema.liquidations)
         .values({
           brandId: input.brandId,
-          estado: "pendiente",
+          estado: "Pendiente",
           cuit: company?.cuit ?? "",
           period: input.dateDesde,
           userCreated: user?.id ?? "",
@@ -1135,11 +1182,11 @@ export const comprobantesRouter = createTRPCRouter({
         billLink: z.string(),
         number: z.number(),
         state: z.enum([
-          "pendiente",
-          "generada",
-          "parcial",
-          "anulada",
-          "apertura",
+          "Pendiente",
+          "Generada",
+          "Parcial",
+          "Anulada",
+          "Apertura",
         ]),
       })
     )
@@ -1325,11 +1372,9 @@ export async function preparateComprobante(
         (parseFloat(
           grupo.bonus?.find(
             (bonus) =>
-              (bonus.from === null && bonus.to === null) ||
-              (bonus.from !== null &&
-                bonus.to !== null &&
-                today >= bonus.from &&
-                today <= bonus.to)
+              bonus.from !== null &&
+              today >= bonus.from &&
+              ((bonus.to !== null && today <= bonus.to) || bonus.to === null)
           )?.amount ?? "0"
         ) *
           abono) /
@@ -1379,7 +1424,7 @@ export async function preparateComprobante(
           (x) =>
             x.origin == "Factura" &&
             x.estado !=
-              "generada" /* || x.origin == "Factura" && x.estado != "apertura" */
+              "Generada" /* || x.origin == "Factura" && x.estado != "apertura" */
         );
         console.log("listadoFac", listadoFac);
         if (listadoFac.length > 0) {
@@ -1408,15 +1453,26 @@ export async function preparateComprobante(
       const tipoComprobante = getBillingData(billResponsible, grupo);
 
       const tipoDocumento = idDictionary[billResponsible?.fiscal_id_type ?? ""];
-
+      console.log("aportes GF")
+      console.log(grupo.integrants.flatMap((part) => part.aportes_os));
+      
+      console.log("dateDesde",dateDesde);
+      console.log("dateHasta",dateHasta);
+      const fechaDesde = new Date(dateHasta?.getTime() ?? 0);
+      const mesActual = dateHasta?.getMonth() ?? 0
+      fechaDesde?.setMonth((mesActual));
+      console.log("comparisonMonth", fechaDesde?.getMonth());
+      console.log("comparisonYear", fechaDesde?.getFullYear());
+      console.log("aportes", grupo.integrants.flatMap((part) => part.aportes_os))
       const totalAportes = grupo.integrants
         .flatMap((part) => part.aportes_os)
         .filter((a) => {
-          if (!a.contribution_date || !dateDesde) return false;
-          dateDesde?.setMonth(dateDesde.getMonth() - 1);
+          if (!a.contribution_date || !fechaDesde) return false;
+          console.log("contributionMonth", a.contribution_date?.getMonth());
+          console.log("contributionYear", a.contribution_date?.getFullYear());
           return (
-            a.contribution_date?.getMonth() === dateDesde.getMonth() &&
-            a.contribution_date?.getFullYear() === dateDesde.getFullYear()
+            a.contribution_date?.getMonth() === fechaDesde?.getMonth() &&
+            a.contribution_date?.getFullYear() === fechaDesde?.getFullYear()
           );
         })
         .reduce((sum, aporte) => sum + parseInt(aporte.amount), 0);
@@ -1445,9 +1501,9 @@ export async function preparateComprobante(
       //creamos una NC virtual anulando la última factura si la ultima factura tiene importe
       if (
         previous_bill > 0 &&
-        (mostRecentFactura?.estado == "pendiente" ||
-          mostRecentFactura?.estado == "parcial" ||
-          mostRecentFactura?.estado == "apertura")
+        (mostRecentFactura?.estado == "Pendiente" ||
+          mostRecentFactura?.estado == "Parcial" ||
+          mostRecentFactura?.estado == "Apertura")
       ) {
         let previousTipoComprobante =
           fcAnc[grupo.modo?.description == "MIXTO" ? "FACTURA B" : "FACTURA A"];
@@ -1487,7 +1543,7 @@ export async function preparateComprobante(
             liquidation_id: liquidationId,
             family_group_id: grupo.id,
             origin: "Nota de credito",
-            estado: "generada",
+            estado: "Generada",
             previous_facturaId: mostRecentFactura?.id,
           })
           .returning();
@@ -1522,7 +1578,7 @@ export async function preparateComprobante(
           liquidation_id: liquidationId,
           family_group_id: grupo.id,
           origin: "Factura",
-          estado: "generada",
+          estado: "Generada",
         })
         .returning();
       //creamos items de fc para visualizacion
@@ -1612,6 +1668,15 @@ async function calculateAmount(
   saldo: number,
   totalAportes: number
 ) {
+  console.log("interes", interest)
+  console.log("ivaFloat", ivaFloat)
+  console.log("iva", iva)
+  console.log("bonificacion", bonificacion)
+  console.log("abono", abono)
+  console.log("diferencial", diferencial)
+  console.log("previous_bill", previous_bill)
+  console.log("saldo", saldo)
+  console.log("totalAportes", totalAportes)
   let amount = 0;
   let ivaCodigo = null;
   const { modo } = grupo;
@@ -1705,14 +1770,6 @@ function getBillingData(
           new_registration: boolean | null;
           integrant_id: string | null;
         }[];
-        contribution: {
-          id: string;
-          amount: number;
-          integrant_id: string | null;
-          employerContribution: number;
-          employeeContribution: number;
-          cuitEmployer: string;
-        } | null;
         differentialsValues: {
           id: string;
           createdAt: Date;
@@ -1765,12 +1822,13 @@ function checkExistingBill(
     iva: string;
     billLink: string;
     estado:
-      | "generada"
-      | "pendiente"
-      | "pagada"
-      | "parcial"
-      | "anulada"
-      | "apertura"
+      | "Generada"
+      | "Pendiente"
+      | "Pagada"
+      | "Parcial"
+      | "Anulada"
+      | "Apertura"
+      | "Error"
       | null;
     origin:
       | "anulada"

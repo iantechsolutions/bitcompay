@@ -35,6 +35,7 @@ import { api } from "~/trpc/react";
 import { toast } from "sonner";
 import { useState } from "react";
 import { saveAs } from "file-saver";
+import { useAFIP } from "~/app/afip-provider";
 
 interface Props {
   changePage: (page: "formPage" | "confirmationPage") => void;
@@ -51,7 +52,6 @@ interface Props {
   ivaTotal: number;
   name: string;
   document: string;
-  afip: any;
   fiscal_document: string;
   ivaCondition: string;
   sell_condition: string;
@@ -99,7 +99,6 @@ const confirmationPage = ({
   document,
   fiscal_document,
   ivaCondition,
-  afip,
   sell_condition,
   document_type,
   brandId,
@@ -162,7 +161,7 @@ const confirmationPage = ({
       setLoadingDownload(false);
     }
   }
-
+  const { afipObject, setAfipObject } = useAFIP();
   async function handleAFIP() {
     setIsLoading(true);
     handleApprove();
@@ -186,7 +185,7 @@ const confirmationPage = ({
     const fcSelec = asociatedFCForm.getValues().comprobantes[0]?.id;
     if (tipoComprobante == "1" || tipoComprobante == "6") {
       try {
-        last_voucher = await afip.ElectronicBilling.getLastVoucher(
+        last_voucher = await afipObject?.ElectronicBilling.getLastVoucher(
           form.getValues().puntoVenta,
           tipoComprobante
         );
@@ -245,7 +244,7 @@ const confirmationPage = ({
       // const facSeleccionada = comprobantes?.find((x) => x.id == fcSelec);
       let ivaFloat = (100 + parseFloat(fcSeleccionada[0]?.iva ?? "0")) / 100;
       try {
-        last_voucher = await afip.ElectronicBilling.getLastVoucher(
+        last_voucher = await afipObject?.ElectronicBilling.getLastVoucher(
           form.getValues().puntoVenta,
           tipoComprobante
         );
@@ -314,16 +313,16 @@ const confirmationPage = ({
       return null;
     }
 
-    if (data) {
-      try {
-        const res = await afip.ElectronicBilling.createVoucher(data);
-      } catch (error) {
-        console.log(error);
-        toast.error("Error enviando a AFIP: " + error);
-        setIsLoading(false);
-        return null;
-      }
-    }
+    // if (data) {
+    //   try {
+    //     const res = await afip.ElectronicBilling.createVoucher(data);
+    //   } catch (error) {
+    //     console.log(error);
+    //     toast.error("Error enviando a AFIP: " + error);
+    //     setIsLoading(false);
+    //     return null;
+    //   }
+    // }
     if (tipoComprobante == "1" || tipoComprobante == "6") {
       if (fgId) {
         const event = createEventFamily({
@@ -420,13 +419,13 @@ const confirmationPage = ({
       );
       const options = {
         width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
-        marginLeft: 0.8, // Margen izquierdo en pulgadas. Usar 0.1 para ticket
-        marginRight: 0.8, // Margen derecho en pulgadas. Usar 0.1 para ticket
+        marginLeft: 0.3, // Margen izquierdo en pulgadas. Usar 0.1 para ticket
+        marginRight: 0.3, // Margen derecho en pulgadas. Usar 0.1 para ticket
         marginTop: 0.4, // Margen superior en pulgadas. Usar 0.1 para ticket
         marginBottom: 0.4, // Margen inferior en pulgadas. Usar 0.1 para ticket
       };
       const pdfname = (last_voucher + 1).toString() + ".pdf";
-      const resHtml = await afip.ElectronicBilling.createPDF({
+      const resHtml = await afipObject?.ElectronicBilling.createPDF({
         html: html,
         file_name: pdfname,
         options: options,
@@ -434,15 +433,15 @@ const confirmationPage = ({
 
       const updatedComprobante = await updateComprobante({
         id: createdComprobante.id ?? "",
-        billLink: resHtml.file,
+        billLink: resHtml?.file,
         number: last_voucher + 1,
-        state: "pendiente",
+        state: "Pendiente",
       });
 
       toast.success("La factura se creo correctamente");
       setIsLoading(false);
       setFinishedAFIP(true);
-      setUrl(resHtml.file);
+      setUrl(resHtml?.file);
       // reloadPage();
 
       // if (resHtml.file) {
@@ -526,9 +525,8 @@ const confirmationPage = ({
         </div>
       )}
 
-
-{finishedAFIP && 
-      <div className=" self-start flex gap-1">
+      {finishedAFIP && (
+        <div className=" self-start flex gap-1">
           <Button
             className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
             onClick={() => {
@@ -555,7 +553,7 @@ const confirmationPage = ({
             Crear nueva
           </Button>
         </div>
-      }
+      )}
     </section>
   );
 };

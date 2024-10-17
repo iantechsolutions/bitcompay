@@ -10,7 +10,6 @@ import * as React from "react";
 import { Button } from "~/components/ui/button";
 import {
   htmlBill,
-  ingresarAfip,
   comprobanteDictionary,
   reversedIvaDictionary,
   ivaDictionary,
@@ -59,6 +58,7 @@ import {
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
 import { saveAs } from "file-saver";
+import { useAFIP } from "~/app/afip-provider";
 
 function formatDate(date: Date | undefined) {
   if (date) {
@@ -89,20 +89,20 @@ export default function Page() {
   const [fcSeleccionada, setFcSeleccionada] = useState<Comprobante[]>([]);
   const [comprobantes, setComprobantes] = useState<any[]>();
   const [selectedComprobante, setSelectedComprobante] = useState<any>(null);
-  const [afip, setAfip] = useState<any>(null);
+  // const [afip, setAfip] = useState<Afip | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    async function loginAfip() {
-      const afip = await ingresarAfip();
-      setLoading(false);
-      const voucherTypes = await afip.ElectronicBilling.getVoucherTypes();
-      const ivaTypes = await afip.ElectronicBilling.getAliquotTypes();
-      setAfip(afip);
-    }
+  // useEffect(() => {
+  //   async function loginAfip() {
+  //     const afip = await ingresarAfip();
+  //     setLoading(false);
+  //     const voucherTypes = await afip.ElectronicBilling.getVoucherTypes();
+  //     const ivaTypes = await afip.ElectronicBilling.getAliquotTypes();
+  //     setAfip(afip);
+  //   }
 
-    loginAfip();
-  }, []);
+  //   loginAfip();
+  // }, []);
 
   function computeTotals() {
     let subTotal = 0;
@@ -198,7 +198,7 @@ export default function Page() {
 
           comprobante = await createComprobante({
             billLink: "",
-            estado: "generada",
+            estado: "Generada",
             concepto: Number(concepto) ?? 0,
             importe: Number(subTotal) + Number(ivaTotal) + Number(tributos),
             iva: iva ?? "0",
@@ -305,7 +305,7 @@ export default function Page() {
           // });
         } else if (tipoComprobante == "0") {
           comprobante = await createComprobante({
-            estado: "generada",
+            estado: "Generada",
             billLink: "", //deberiamos poner un link ?
             concepto: Number(concepto) ?? 0,
             importe: Number(subTotal) + Number(ivaTotal) + Number(tributos),
@@ -388,7 +388,7 @@ export default function Page() {
           let ivaFloat = (100 + parseFloat(facSeleccionada?.iva ?? "0")) / 100;
           const importeBase = (facSeleccionada?.importe ?? 0) / ivaFloat;
           comprobante = await createComprobante({
-            estado: "generada",
+            estado: "Generada",
             billLink: "",
             concepto: facSeleccionada?.concepto ?? 0,
             importe: facSeleccionada?.importe ?? 0,
@@ -541,7 +541,7 @@ export default function Page() {
   const [servicioprod, setservicioprod] = useState("Servicio");
   const [obraSocialId, setObraSocialId] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [grupoFamiliarId, setGrupoFamiliarId] = useState("");
   const form = useForm<ManualGenInputs>({
     defaultValues: {
@@ -923,7 +923,6 @@ export default function Page() {
             name={nombre}
             ivaCondition={ivaCondition}
             sell_condition={sellCondition}
-            afip={afip}
             document_type={tipoDocumento}
             otherAttributes={otherAttributes}
             fgId={grupoFamiliarId}

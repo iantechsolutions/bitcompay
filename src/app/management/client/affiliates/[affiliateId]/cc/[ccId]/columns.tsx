@@ -26,20 +26,34 @@ import DetailSheet from "./components_acciones/detail-sheet";
 import DialogCC from "./components_acciones/dialog";
 import { RouterOutputs } from "~/trpc/shared";
 import { toast } from "sonner";
+import { saveAs } from "file-saver";
+import { formatNumberAsCurrency } from "~/lib/utils";
 dayjs.locale("es");
 export type TableRecord = {
   date: Date;
   description: string;
-  amount: string;
+  amount: number;
   "Tipo comprobante": string;
-  comprobanteNumber: string;
-  Estado: "Pagada" | "Pendiente";
+  comprobanteNumber: number;
+  Estado:
+    | "Generada"
+    | "Pendiente"
+    | "Pagada"
+    | "Parcial"
+    | "Anulada"
+    | "Apertura"
+    | "Error"
+    | "apertura"
+    | null;
   iva: number;
-  comprobantes?: RouterOutputs["comprobantes"]["getByLiquidation"];
-  currentAccountAmount: string;
-  saldo_a_pagar: string;
+  comprobantes?:
+    | RouterOutputs["comprobantes"]["getByLiquidation"][number]
+    | null;
+  currentAccountAmount: number;
+  saldo_a_pagar: number;
   nombre: string;
   cuit: string;
+  ptoVenta: number;
   event: {
     id: string;
     description: string;
@@ -66,14 +80,19 @@ export const AjustarDialog = () => {
     setSelectedDate(e.target.value);
   };
 };
-
-const print = () => {};
-
+export function mostrarNroComprobante(ptoVenta: number, nroComprobante: number) {
+  return `${ptoVenta.toString().padStart(4, "0")}-${nroComprobante
+    .toString()
+    .padStart(8, "0")}`;
+}
 export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "description",
     header: () => null,
     cell: ({ row }) => {
+      const comprobanteNumber = row.getValue("comprobanteNumber") as number;
+      const ptoVenta = row.getValue("ptoVenta") as number;
+     
       return (
         <div className="relative h-20 flex flex-col justify-center w-96">
           <p className="absolute top-0 text-[#c4c4c4] text-xs">
@@ -86,8 +105,8 @@ export const columns: ColumnDef<TableRecord>[] = [
           </p>
           <p className="text-[#c4c4c4] text-xs absolute top-1/2 transform translate-y-4">
             {" "}
-            {row.getValue("Tipo comprobante")} - №{" "}
-            {row.getValue("comprobanteNumber")}{" "}
+            {row.getValue("Tipo comprobante")} -{" "}
+            № {mostrarNroComprobante(ptoVenta, comprobanteNumber)}{" "}
           </p>
         </div>
       );
@@ -108,6 +127,20 @@ export const columns: ColumnDef<TableRecord>[] = [
     },
   },
   {
+    accessorKey: "ptoVenta",
+    header: () => null,
+    cell: ({ row }) => {
+      return null;
+    },
+  },
+  {
+    accessorKey: "date",
+    header: () => null,
+    cell: ({ row }) => {
+      return null;
+    },
+  },
+  {
     accessorKey: "iva",
     header: () => null,
     cell: ({ row }) => {
@@ -120,13 +153,18 @@ export const columns: ColumnDef<TableRecord>[] = [
     cell: ({ row }) => {
       const Estado = row.getValue("Estado");
       const style =
-        Estado === "pagado"
+        Estado === "Pagada"
           ? "bg-[#DDF9CC] text-[#4E9F1D]"
+          : Estado === "Parcial"
+          ? "bg-[#CCE5F9] text-[#1D4E9F]"
+          : Estado === "Error"
+          ? "bg-[#F9CCCC] text-[#F91D1D]"
           : "bg-[#F9E7CC] text-[#F69709]";
       return (
         <div>
           <div
-            className={`rounded-full inline-block font-bold ${style} px-7 py-1`}>
+            className={`rounded-full inline-block font-bold ${style} px-7 py-1`}
+          >
             {" "}
             {row.getValue("Estado")}
           </div>
@@ -138,30 +176,23 @@ export const columns: ColumnDef<TableRecord>[] = [
     accessorKey: "amount",
     header: () => null,
     cell: ({ row }) => {
-      console.log("ivaRecibido");
-      console.log(row.getValue("iva"));
       const ivaMostrar = (row.getValue("iva") as number).toString();
 
-      let originalAmount = row.getValue("amount") as string;
-      originalAmount = originalAmount
-        .replace(/[$\s]/g, "")
-        .replace(/\./g, "")
-        .replace(/,/g, ".");
-      const amount = parseFloat(originalAmount);
-      console.log("originalAmount", originalAmount);
-      console.log("das das", originalAmount);
+      let amount = row.getValue("amount") as number;
+
       return (
         <div className="relative h-full flex flex-col justify-center items-center mx-10 mr-14">
           {amount === 0 ? (
             <span className="absolute top-1/2 transform -translate-y-1/2 font-bold">
-              {originalAmount}
+              {amount}
             </span>
           ) : (
             <span
               className={`"absolute top-1/2 transform -translate-y-1/2 font-bold ${
                 amount > 0 ? "text-[#6952EB]" : "text-[#EB2727]"
-              }`}>
-              {amount.toFixed(2)}
+              }`}
+            >
+              {formatNumberAsCurrency(amount)}
             </span>
           )}
           <div className="absolute top-1/2 transform translate-y-4 text-[#c4c4c4] text-xs flex flex-row gap-x-1">
@@ -195,20 +226,18 @@ export const columns: ColumnDef<TableRecord>[] = [
         setDialOpen(!dialogOpen);
       };
 
-      const print = async (detailData: TableRecord | null) => {
-        console.log("Detail Data for Print:", detailData?.comprobantes);
-
-        const comprobante = detailData?.comprobantes?.find(
-          (comprobante) =>
-            comprobante?.nroComprobante ===
-            parseInt(detailData?.comprobanteNumber)
-        );
-
-        if (!comprobante || !comprobante?.billLink) {
+      const print = async () => {
+        let detailData = row.original as TableRecord;
+        setDetailData(detailData);
+        const comprobantes = detailData?.comprobantes;
+        console.log("Comprobante descargar:", comprobantes?.billLink);
+        if (!detailData) {
+          return toast.error("Error al descargar");
+        } else if (!comprobantes || !comprobantes?.billLink) {
           return toast.error("No hay comprobantes disponibles para descargar");
         } else {
-          const url = comprobante.billLink ?? "";
-          const filename = comprobante.billLink ?? "";
+          const url = comprobantes.billLink ?? "";
+          const filename = comprobantes.billLink ?? "";
 
           if (confirm("¿Desea descargar el archivo?")) {
             try {
@@ -217,14 +246,7 @@ export const columns: ColumnDef<TableRecord>[] = [
                 throw new Error("Error en la descarga");
               }
               const blob = await response.blob();
-              const link = document.createElement("a");
-              link.href = URL.createObjectURL(blob);
-              link.download = filename;
-
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-              URL.revokeObjectURL(link.href);
+              saveAs(blob, "comprobante.pdf");
             } catch (error) {
               console.error("Error al descargar el archivo:", error);
               toast.error("Error al descargar el archivo");
@@ -247,7 +269,11 @@ export const columns: ColumnDef<TableRecord>[] = [
                 <ViewIcon className="mr-1 h-4" /> Ver
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => print(detailData)}>
+              <DropdownMenuItem
+                onClick={async () => {
+                  await print();
+                }}
+              >
                 <Download className="mr-1 h-4" /> Descargar
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -261,7 +287,6 @@ export const columns: ColumnDef<TableRecord>[] = [
           {detailData && (
             <div>
               <DetailSheet
-                // liquidationId={detailData.id}
                 open={sheetOpen}
                 setOpen={setSheetOpen}
                 data={detailData}

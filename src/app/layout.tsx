@@ -16,6 +16,7 @@ import { checkRole } from "~/lib/utils/server/roles";
 import { api } from "~/trpc/server";
 import { getServerAuthSession } from "~/server/auth";
 import { headers } from "next/headers";
+import { AFIPProvider } from "./afip-provider";
 
 dayjs.locale("es");
 const montserrat = Montserrat({
@@ -40,7 +41,9 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
           <body
             className={`text-[#3E3E3E] font-family ${montserrat.className}`}>
             <TRPCReactProvider cookies={cookies().toString()}>
-              {props.children}
+              <AFIPProvider>
+                {props.children}
+              </AFIPProvider>
               <Toaster closeButton  />
             </TRPCReactProvider>
           </body>
@@ -60,6 +63,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
           <body
             className={`text-[#3E3E3E] font-family ${montserrat.className}`}>
             <TRPCReactProvider cookies={cookies().toString()}>
+            <AFIPProvider>
               <AppLayout
                 headerClass="bg-white z-20"
                 sidenavClass="top-0"
@@ -72,6 +76,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
                 {!company && checkRole("admin") && props.children}
               </AppLayout>
               <Toaster  closeButton />
+              </AFIPProvider>
             </TRPCReactProvider>
           </body>
         </html>
