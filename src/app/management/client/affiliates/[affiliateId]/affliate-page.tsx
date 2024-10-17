@@ -36,6 +36,8 @@ import { SaldoPopoverAffiliates } from "./saldoPopoverAffiliates";
 import ElementCard from "~/components/affiliate-page/element-card";
 import BonusDialog from "./cc/[ccId]/components_acciones/bonusDialog";
 import { checkRole } from "~/lib/utils/react/roles";
+import EditAffiliate from "~/components/affiliate-page/edit-affiliate";
+import { useState } from "react";
 
 export default function AffiliatePage(props: {
   isAdmin: boolean;
@@ -358,6 +360,8 @@ export default function AffiliatePage(props: {
     );
   };
 
+  const [openAffiliate, setOpenAffiliate] = useState(false);
+
   return (
     <LayoutContainer>
       <section className="relative">
@@ -441,9 +445,16 @@ export default function AffiliatePage(props: {
                           {int.name}
                         </AccordionTriggerIntegrant>
                         <AccordionContentIntegrant>
-                          <p className="text-xs font-semibold">
-                            Información Personal
-                          </p>
+                          <div className="flex justify-between">
+                            <p className="text-xs font-semibold">
+                              Información Personal
+                            </p>
+                            <EditAffiliate
+                              Affiliate={int}
+                              open={openAffiliate}
+                              setOpen={setOpenAffiliate}
+                            />
+                          </div>
                           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-stretch pt-4">
                             {Object.entries(
                               integrantsPersonalData.get(int.id) ?? {}
