@@ -385,7 +385,7 @@ async function approbatecomprobante(liquidationId: string) {
         const ivaId = listado ? listado[0] : "0";
         const ivaFloat = parseFloat(comprobante?.iva ?? "0") / 100;
         let data = {};
-
+        let comprobanteEstado: "pendiente" | "error" = "pendiente";
         const processStart = Date.now();
         if (comprobante?.origin == "Nota de credito") {
           const comprobanteAnterior = await db.query.comprobantes.findFirst({
@@ -402,10 +402,12 @@ async function approbatecomprobante(liquidationId: string) {
             ];
 
           try {
+            console.log("lastVoucher",lastVoucher);
             lastVoucher = await afip.ElectronicBilling.getLastVoucher(
               comprobanteAnterior?.ptoVenta,
               comprobantecodNC
             );
+            console.log("lastVoucher",lastVoucher);
           } catch (e) {
             console.log("Error al obtener el último comprobante");
             console.log(e);
@@ -450,20 +452,19 @@ async function approbatecomprobante(liquidationId: string) {
               Nro: comprobanteAnterior?.nroComprobante,
             },
           };
-
           try {
             const res = await afip.ElectronicBilling.createVoucher(data);
           } catch (e) {
             console.log("Error al enviar el comprobante a AFIP");
             console.log(e);
-
-            return null;
+            comprobanteEstado = "error";
+            // return null;
           }
 
           await db
             .update(schema.comprobantes)
             .set({
-              estado: "pendiente",
+              estado: comprobanteEstado,
               nroComprobante: lastVoucher + 1,
             })
             .where(eq(schema.comprobantes.id, comprobante.id));
@@ -534,16 +535,15 @@ async function approbatecomprobante(liquidationId: string) {
             const res = await afip.ElectronicBilling.createVoucher(data);
           } catch (e) {
             console.log("Error al enviar el comprobante a AFIP");
-
             console.log(e);
-
+            comprobanteEstado = "error";
             return null;
           }
 
           await db
             .update(schema.comprobantes)
             .set({
-              estado: "pendiente",
+              estado: comprobanteEstado,
               nroComprobante: lastVoucher + 1,
             })
             .where(eq(schema.comprobantes.id, comprobante.id));
@@ -621,7 +621,8 @@ async function approbatecomprobante(liquidationId: string) {
           name,
           afip,
           comprobante?.id ?? "",
-          lastVoucher + 1
+          lastVoucher + 1,
+          comprobanteEstado
         );
         console.log(
           `[TIMING] PDF generation (comprobante ${index}): ${
@@ -645,7 +646,8 @@ async function PDFFromHtml(
   name: string,
   afip: Afip,
   comprobanteId: string,
-  voucher: number
+  voucher: number,
+  comprobanteEstado: string
 ) {
   const options = {
     width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket
@@ -679,7 +681,7 @@ async function PDFFromHtml(
 
   await preparedCompBillLink.execute({
     billLink: uploadData?.url ?? res.file ?? "",
-    estado: "pendiente",
+    estado: comprobanteEstado,
     voucher,
     comprobanteId,
   });
@@ -1325,11 +1327,9 @@ export async function preparateComprobante(
         (parseFloat(
           grupo.bonus?.find(
             (bonus) =>
-              (bonus.from === null && bonus.to === null) ||
               (bonus.from !== null &&
-                bonus.to !== null &&
                 today >= bonus.from &&
-                today <= bonus.to)
+                ((bonus.to!== null && today <= bonus.to) || bonus.to === null))
           )?.amount ?? "0"
         ) *
           abono) /
@@ -1771,6 +1771,7 @@ function checkExistingBill(
       | "parcial"
       | "anulada"
       | "apertura"
+      | "error"
       | null;
     origin:
       | "anulada"

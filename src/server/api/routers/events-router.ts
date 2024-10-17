@@ -20,7 +20,11 @@ export const eventsRouter = createTRPCRouter({
         where: eq(schema.events.currentAccount_id, input.ccId),
         orderBy: [desc(schema.events.createdAt)],
         with: {
-          comprobantes: true,
+          comprobantes: {
+            with:{
+              items: true
+            }
+          },
         },
       });
       return events;

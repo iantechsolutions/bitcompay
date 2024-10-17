@@ -800,7 +800,7 @@ export const comprobantes = pgTable("comprobantes", {
   iva: varchar("iva", { length: 255 }).notNull(),
   billLink: varchar("billLink", { length: 255 }).notNull(),
   estado: varchar("estado", {
-    enum: ["generada", "pendiente", "pagada", "parcial", "anulada", "apertura"],
+    enum: ["generada", "pendiente", "pagada", "parcial", "anulada", "apertura","error"],
   }),
   origin: varchar("origin", {
     enum: [
