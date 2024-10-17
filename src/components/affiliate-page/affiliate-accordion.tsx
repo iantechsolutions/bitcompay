@@ -102,12 +102,12 @@ const AccordionTrigger = React.forwardRef<
         {children}
         <div className="flex gap-2 justify-end">
           <div className={badgeClassName}>{isHolder ? "Titular" : null}</div>
-          <div className={badgeClassName}>
-            {isBillResponsible ? "Responsable pagador" : null}
-          </div>
-          <div className={badgeClassName}>
-            {isAffiliate ? "Afiliado" : null}
-          </div>
+          {isBillResponsible ? (
+            <div className={badgeClassName}>"Responsable pagador"</div>
+          ) : null}
+          {isAffiliate ? (
+            <div className={badgeClassName}>"Afiliado"</div>
+          ) : null}
           {!isHolder && !isBillResponsible && !isAffiliate ? (
             <div className={badgeClassName}>"Adherente"</div>
           ) : null}

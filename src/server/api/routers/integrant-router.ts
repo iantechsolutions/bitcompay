@@ -114,8 +114,8 @@ export const integrantsRouter = createTRPCRouter({
         localidad: z.string().optional(),
         partido: z.string().optional(),
         provincia: z.string().optional(),
-        cp: z.string().optional(),
-        zona: z.string().optional(),
+        cp: z.string().nullable(),
+        zona: z.string().nullable(),
         isHolder: z.boolean().optional(),
         isPaymentHolder: z.boolean().optional(),
         isAffiliate: z.boolean().optional(),
@@ -127,14 +127,47 @@ export const integrantsRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       try {
-        console.log("Input de la mutación:", input);
-        console.log("Nombre:", input.name);
         const updatedIntegrants = await db
           .update(schema.integrants)
-          .set(input)
+          .set({
+            iva: input.iva,
+            id: input.id,
+            affiliate_type: input.affiliate_type,
+            relationship: input.relationship,
+            name: input.name,
+            id_type: input.id_type,
+            id_number: input.id_number,
+            state: input.state,
+            birth_date: input.birth_date,
+            gender: input.gender,
+            civil_status: input.civil_status,
+            nationality: input.nationality,
+            extention: input.extention,
+            afip_status: input.afip_status,
+            fiscal_id_type: input.fiscal_id_type,
+            fiscal_id_number: input.fiscal_id_number,
+            address: input.address,
+            address_number: input.address_number,
+            phone_number: input.phone_number,
+            cellphone_number: input.cellphone_number,
+            email: input.email,
+            floor: input.floor,
+            department: input.department,
+            locality: input.localidad,
+            partido: input.partido,
+            province: input.provincia,
+            cp: input.cp,
+            zone: input.zona,
+            isHolder: input.isHolder,
+            isPaymentHolder: input.isPaymentHolder,
+            isAffiliate: input.isAffiliate,
+            isBillResponsible: input.isBillResponsible,
+            family_group_id: input.family_group_id,
+            postal_codeId: input.postal_codeId,
+            validity: input.validity,
+          })
           .where(eq(schema.integrants.id, input.id));
 
-        console.log("bobo", updatedIntegrants);
         return updatedIntegrants;
       } catch (error) {
         console.error("Error al actualizar:", error);

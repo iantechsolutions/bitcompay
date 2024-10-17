@@ -171,8 +171,8 @@ export default function EditAffiliate({
         email,
         localidad: locality,
         provincia: province,
-        cp,
-        zona: zona,
+        cp: cp,
+        zona: zona ?? null,
         // family_group_id: "",
         // floor: "",
         // department: "",
@@ -486,7 +486,7 @@ export default function EditAffiliate({
                 </SelectTrigger>
                 <SelectContent>
                   {zonas?.map((zonass) => (
-                    <SelectItem key={zonass.id} value={zonass.id}>
+                    <SelectItem key={zonass.id} value={zonass.name}>
                       {zonass.name}
                     </SelectItem>
                   ))}
@@ -503,7 +503,7 @@ export default function EditAffiliate({
                 </SelectTrigger>
                 <SelectContent>
                   {postalCode?.map((cp) => (
-                    <SelectItem key={cp.id} value={cp.id}>
+                    <SelectItem key={cp.id} value={cp.name}>
                       {cp.cp}
                     </SelectItem>
                   ))}
