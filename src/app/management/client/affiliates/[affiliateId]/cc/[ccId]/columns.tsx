@@ -36,7 +36,9 @@ export type TableRecord = {
   comprobanteNumber: number;
   Estado: "Pagada" | "Pendiente";
   iva: number;
-  comprobantes?: RouterOutputs["comprobantes"]["getByLiquidation"][number] | null;
+  comprobantes?:
+    | RouterOutputs["comprobantes"]["getByLiquidation"][number]
+    | null;
   currentAccountAmount: string;
   saldo_a_pagar: string;
   nombre: string;
@@ -177,8 +179,7 @@ export const columns: ColumnDef<TableRecord>[] = [
             <span
               className={`"absolute top-1/2 transform -translate-y-1/2 font-bold ${
                 amount > 0 ? "text-[#6952EB]" : "text-[#EB2727]"
-              }`}
-            >
+              }`}>
               {originalAmount}
             </span>
           )}
@@ -213,7 +214,7 @@ export const columns: ColumnDef<TableRecord>[] = [
         setDialOpen(!dialogOpen);
       };
 
-       const print = async () => {
+      const print = async () => {
         let detailData = row.original as TableRecord;
         setDetailData(detailData);
         const comprobantes = detailData?.comprobantes;
@@ -233,7 +234,7 @@ export const columns: ColumnDef<TableRecord>[] = [
                 throw new Error("Error en la descarga");
               }
               const blob = await response.blob();
-              saveAs(blob,"comprobante.pdf")
+              saveAs(blob, "comprobante.pdf");
             } catch (error) {
               console.error("Error al descargar el archivo:", error);
               toast.error("Error al descargar el archivo");
@@ -259,8 +260,7 @@ export const columns: ColumnDef<TableRecord>[] = [
               <DropdownMenuItem
                 onClick={async () => {
                   await print();
-                }}
-              >
+                }}>
                 <Download className="mr-1 h-4" /> Descargar
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -273,11 +273,11 @@ export const columns: ColumnDef<TableRecord>[] = [
 
           {detailData && (
             <div>
-              {/* <DetailSheet
+              <DetailSheet
                 open={sheetOpen}
                 setOpen={setSheetOpen}
                 data={detailData}
-              /> */}
+              />
 
               <DialogCC
                 data={detailData}

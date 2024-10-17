@@ -58,7 +58,6 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
           <div className="flex flex-row border justify-between items-center px-4 py-5 gap-2 rounded-md mt-3">
             <p className="text-base whitespace-nowrap font-medium-medium ">
               Saldo actual{" "}
-              {comprobanteFCReciente ? comprobanteFCReciente.id : "vasd"}
             </p>
             <p
               className={`text-[#6952EB] whitespace-nowrap font-semibold text-lg${
