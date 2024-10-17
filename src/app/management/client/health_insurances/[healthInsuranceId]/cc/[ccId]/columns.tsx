@@ -22,26 +22,22 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { ChangeEvent, useState } from "react";
-import DetailSheet from "./components_acciones/detail-sheet";
-import DialogCC from "./components_acciones/dialog";
+import DetailSheet from "./detail-sheet";
 import { RouterOutputs } from "~/trpc/shared";
 import { toast } from "sonner";
-import { saveAs } from "file-saver";
-dayjs.locale("es");
+dayjs.locale('es')
 export type TableRecord = {
   date: Date;
   description: string;
   amount: string;
   "Tipo comprobante": string;
-  comprobanteNumber: number;
+  comprobanteNumber: string;
   Estado: "Pagada" | "Pendiente";
   iva: number;
-  comprobantes?: RouterOutputs["comprobantes"]["getByLiquidation"][number] | null;
+  comprobantes?: RouterOutputs["comprobantes"]["getByLiquidation"];
   currentAccountAmount: string;
   saldo_a_pagar: string;
   nombre: string;
-  cuit: string;
-  ptoVenta: number;
   event: {
     id: string;
     description: string;
@@ -69,17 +65,13 @@ export const AjustarDialog = () => {
   };
 };
 
+const print = () => {};
+
 export const columns: ColumnDef<TableRecord>[] = [
   {
     accessorKey: "description",
     header: () => null,
     cell: ({ row }) => {
-      const comprobanteNumber = (row.getValue("comprobanteNumber") as number)
-        .toString()
-        .padStart(8, "0");
-      const ptoVenta = (row.getValue("ptoVenta") as number)
-        .toString()
-        .padStart(4, "0");
       return (
         <div className="relative h-20 flex flex-col justify-center w-96">
           <p className="absolute top-0 text-[#c4c4c4] text-xs">
@@ -92,8 +84,8 @@ export const columns: ColumnDef<TableRecord>[] = [
           </p>
           <p className="text-[#c4c4c4] text-xs absolute top-1/2 transform translate-y-4">
             {" "}
-            {row.getValue("Tipo comprobante")} - № {ptoVenta}-
-            {comprobanteNumber}
+            {row.getValue("Tipo comprobante")} - №{" "}
+            {row.getValue("comprobanteNumber")}{" "}
           </p>
         </div>
       );
@@ -108,20 +100,6 @@ export const columns: ColumnDef<TableRecord>[] = [
   },
   {
     accessorKey: "comprobanteNumber",
-    header: () => null,
-    cell: ({ row }) => {
-      return null;
-    },
-  },
-  {
-    accessorKey: "ptoVenta",
-    header: () => null,
-    cell: ({ row }) => {
-      return null;
-    },
-  },
-  {
-    accessorKey: "date",
     header: () => null,
     cell: ({ row }) => {
       return null;
@@ -146,7 +124,8 @@ export const columns: ColumnDef<TableRecord>[] = [
       return (
         <div>
           <div
-            className={`rounded-full inline-block font-bold ${style} px-7 py-1`}>
+            className={`rounded-full inline-block font-bold ${style} px-7 py-1`}
+          >
             {" "}
             {row.getValue("Estado")}
           </div>
@@ -158,6 +137,8 @@ export const columns: ColumnDef<TableRecord>[] = [
     accessorKey: "amount",
     header: () => null,
     cell: ({ row }) => {
+      console.log("ivaRecibido");
+      console.log(row.getValue("iva"));
       const ivaMostrar = (row.getValue("iva") as number).toString();
 
       let originalAmount = row.getValue("amount") as string;
@@ -166,20 +147,18 @@ export const columns: ColumnDef<TableRecord>[] = [
         .replace(/\./g, "")
         .replace(/,/g, ".");
       const amount = parseFloat(originalAmount);
-
+      console.log("originalAmount", originalAmount);
       return (
         <div className="relative h-full flex flex-col justify-center items-center mx-10 mr-14">
           {amount === 0 ? (
-            <span className="absolute top-1/2 transform -translate-y-1/2 font-bold">
-              {originalAmount}
-            </span>
+            <span className="">{originalAmount}</span>
           ) : (
             <span
               className={`"absolute top-1/2 transform -translate-y-1/2 font-bold ${
                 amount > 0 ? "text-[#6952EB]" : "text-[#EB2727]"
               }`}
             >
-              {originalAmount}
+              {amount}
             </span>
           )}
           <div className="absolute top-1/2 transform translate-y-4 text-[#c4c4c4] text-xs flex flex-row gap-x-1">
@@ -213,18 +192,25 @@ export const columns: ColumnDef<TableRecord>[] = [
         setDialOpen(!dialogOpen);
       };
 
-       const print = async () => {
+      const print = async () => {
         let detailData = row.original as TableRecord;
+
         setDetailData(detailData);
-        const comprobantes = detailData?.comprobantes;
-        console.log("Comprobante descargar:", comprobantes?.billLink);
+        console.log("Detail Data for Print:", detailData?.comprobantes);
+
+        const comprobante = detailData?.comprobantes?.find(
+          (comprobante) =>
+            comprobante?.nroComprobante ===
+            parseInt(detailData?.comprobanteNumber)
+        );
+
         if (!detailData) {
           return toast.error("Error al descargar");
-        } else if (!comprobantes || !comprobantes?.billLink) {
+        } else if (!comprobante || !comprobante?.billLink) {
           return toast.error("No hay comprobantes disponibles para descargar");
         } else {
-          const url = comprobantes.billLink ?? "";
-          const filename = comprobantes.billLink ?? "";
+          const url = comprobante.billLink ?? "";
+          const filename = comprobante.billLink ?? "";
 
           if (confirm("¿Desea descargar el archivo?")) {
             try {
@@ -233,7 +219,14 @@ export const columns: ColumnDef<TableRecord>[] = [
                 throw new Error("Error en la descarga");
               }
               const blob = await response.blob();
-              saveAs(blob,"comprobante.pdf")
+              const link = document.createElement("a");
+              link.href = URL.createObjectURL(blob);
+              link.download = filename;
+
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              URL.revokeObjectURL(link.href);
             } catch (error) {
               console.error("Error al descargar el archivo:", error);
               toast.error("Error al descargar el archivo");
@@ -256,11 +249,7 @@ export const columns: ColumnDef<TableRecord>[] = [
                 <ViewIcon className="mr-1 h-4" /> Ver
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={async () => {
-                  await print();
-                }}
-              >
+              <DropdownMenuItem onClick={() => print()}>
                 <Download className="mr-1 h-4" /> Descargar
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -273,16 +262,11 @@ export const columns: ColumnDef<TableRecord>[] = [
 
           {detailData && (
             <div>
-              {/* <DetailSheet
+              <DetailSheet
+                // liquidationId={detailData.id}
                 open={sheetOpen}
                 setOpen={setSheetOpen}
                 data={detailData}
-              /> */}
-
-              <DialogCC
-                data={detailData}
-                open={dialogOpen}
-                setOpen={setDialOpen}
               />
             </div>
           )}

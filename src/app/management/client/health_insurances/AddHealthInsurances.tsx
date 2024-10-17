@@ -405,8 +405,7 @@ export function AddHealthInsurances(props: {
               <Select onValueChange={setBusinessUnit} value={businessUnit}>
                 <SelectTrigger
                   className="w-fit mb-2 border-[#bef0bb] border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right"
-                >
+              hover:none justify-self-right">
                   <SelectValue placeholder="Seleccione una UN" />
                 </SelectTrigger>
                 <SelectContent>
@@ -577,12 +576,10 @@ export function AddHealthInsurances(props: {
               </Label>
               <Select
                 onValueChange={setFiscalPostalCode}
-                value={fiscalPostalCode}
-              >
+                value={fiscalPostalCode}>
                 <SelectTrigger
                   className=" mb-2 border-[#bef0bb] border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right w-full"
-                >
+              hover:none justify-self-right w-full">
                   <SelectValue placeholder="0" />
                 </SelectTrigger>
                 <SelectContent>
@@ -647,7 +644,7 @@ export function AddHealthInsurances(props: {
                     <Calendar01Icon className="h-4 w-4" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent align="end" className="p-0" >
+                <PopoverContent align="end" className="p-0">
                   <Calendar
                     mode="single"
                     selected={dateState}
@@ -850,8 +847,7 @@ export function AddHealthInsurances(props: {
             <div>
               <Label
                 htmlFor="excelEmployerDocument"
-                className="text-xs text-gray-500"
-              >
+                className="text-xs text-gray-500">
                 CUIT EMPRESA
               </Label>
               <Input
@@ -865,8 +861,7 @@ export function AddHealthInsurances(props: {
             <div>
               <Label
                 htmlFor="excelContributionperiod"
-                className="text-xs text-gray-500"
-              >
+                className="text-xs text-gray-500">
                 Periodo de pago
               </Label>
               <Input
@@ -880,8 +875,7 @@ export function AddHealthInsurances(props: {
             <div>
               <Label
                 htmlFor="excelSupportPeriod"
-                className="text-xs text-gray-500"
-              >
+                className="text-xs text-gray-500">
                 Periodo de soporte
               </Label>
               <Input
@@ -928,8 +922,7 @@ export function AddHealthInsurances(props: {
               <Button
                 disabled={isPending}
                 onClick={handleEdit}
-                className="mt-7 font-medium mb-2 rounded-full w-fit bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3E3E3E] flex items-center justify-start justify-left"
-              >
+                className="mt-7 font-medium mb-2 rounded-full w-fit bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3E3E3E] flex items-center justify-start justify-left">
                 {isPending ? (
                   <Loader2Icon className="mr-2 animate-spin" size={20} />
                 ) : (
@@ -943,8 +936,7 @@ export function AddHealthInsurances(props: {
               <Button
                 disabled={isLoading}
                 onClick={handleCreate}
-                className="mt-7 font-medium mb-2 rounded-full w-fit bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3E3E3E] flex items-center self-start"
-              >
+                className="mt-7 font-medium mb-2 rounded-full w-fit bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3E3E3E] flex items-center self-start">
                 {isLoading ? (
                   <Loader2Icon className="mr-2 animate-spin" size={20} />
                 ) : (

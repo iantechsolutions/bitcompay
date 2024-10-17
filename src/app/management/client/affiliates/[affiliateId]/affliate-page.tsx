@@ -6,13 +6,14 @@ import {
   Accordion,
   AccordionContent,
   AccordionItem,
-  AccordionTrigger,
+  AccordionTriggerFG,
+  AccordionTrigger as AccordionTriggerIntegrant,
 } from "~/components/affiliate-page/affiliate-accordion";
 import {
   Accordion as AccordionIntegrant,
   AccordionContent as AccordionContentIntegrant,
   AccordionItem as AccordionItemIntegrant,
-  AccordionTrigger as AccordionTriggerIntegrant,
+  AccordionTrigger,
 } from "~/components/affiliate-page/integrante-accordion";
 
 import { Card } from "~/components/ui/card";
@@ -35,6 +36,8 @@ import { SaldoPopoverAffiliates } from "./saldoPopoverAffiliates";
 import ElementCard from "~/components/affiliate-page/element-card";
 import BonusDialog from "./cc/[ccId]/components_acciones/bonusDialog";
 import { checkRole } from "~/lib/utils/react/roles";
+import EditAffiliate from "~/components/affiliate-page/edit-affiliate";
+import { useState } from "react";
 
 export default function AffiliatePage(props: {
   isAdmin: boolean;
@@ -253,7 +256,7 @@ export default function AffiliatePage(props: {
               value: (
                 <div className="flex items-center">
                   {" "}
-                  {bankLogoMap["Banco Industrial y Comercial de China"]} 
+                  {bankLogoMap["Banco Industrial y Comercial de China"]}
                   Banco Industrial y Comercial de China
                 </div>
               ),
@@ -357,6 +360,8 @@ export default function AffiliatePage(props: {
     );
   };
 
+  const [openAffiliate, setOpenAffiliate] = useState(false);
+
   return (
     <LayoutContainer>
       <section className="relative">
@@ -364,18 +369,24 @@ export default function AffiliatePage(props: {
           Grupo familiar Nº {grupo?.numericalId}
         </h2>
 
-        
-          <div className="absolute top-0 right-0">
-            <BonusDialog />
-          </div>
-        
+        <div className="absolute top-0 right-0">
+          <BonusDialog />
+        </div>
 
         <div className="flex gap-3 mt-5 mb-10">
           <Card className="flex-auto py-4 px-6 w-1/2  items-center">
             <div className=" grid grid-cols-2 items-center">
               <div>
                 <p className="text-sm">SALDO ACTUAL</p>
-                <span className="text-[#EB2727] text-xl font-bold">
+                <span
+                  className={cn(
+                    "text-xl font-bold ",
+                    (lastEvent?.current_amount ?? 0) > 0
+                      ? "text-[#6952EB]"
+                      : (lastEvent?.current_amount ?? 0) == 0
+                      ? "text-blacl"
+                      : "text-[#EB2727]"
+                  )}>
                   $
                   {lastEvent?.current_amount !== undefined
                     ? lastEvent.current_amount.toFixed(2)
@@ -403,9 +414,12 @@ export default function AffiliatePage(props: {
             defaultValue={["item-1", "item-2", "item-3"]}
             type="multiple">
             <AccordionItem value="item-1">
-              <AccordionTrigger className="font-semibold" name="editIcon">
+              <AccordionTriggerFG
+                className="font-semibold"
+                name="editIcon"
+                FamilyGroup={grupo}>
                 Datos del grupo familiar
-              </AccordionTrigger>
+              </AccordionTriggerFG>
               <AccordionContent className="pt-6 pl-5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 p-3 rounded-md">
                   {Object.entries(familyGroupData).map(([key, value]) => {
@@ -417,96 +431,116 @@ export default function AffiliatePage(props: {
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2">
-              <AccordionTrigger
-                className="font-semibold rounded-md overflow-hidden"
-                >
+              <AccordionTrigger className="font-semibold rounded-md overflow-hidden">
                 Integrantes
               </AccordionTrigger>
               <AccordionContent className="pt-6 pl-5">
                 <AccordionIntegrant
                   type="multiple"
                   className="rounded-md overflow-hidden">
-                  {integrant?.map((int) => (
-                    <AccordionItemIntegrant value={int.id}>
-                      <AccordionTriggerIntegrant
-                        relationship={int?.relationship}
-                        affiliate={int}>
-                        {int.name}
-                      </AccordionTriggerIntegrant>
-                      <AccordionContentIntegrant>
-                        <p className="text-xs font-semibold">
-                          Información Personal
-                        </p>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-stretch pt-4">
-                          {Object.entries(
-                            integrantsPersonalData.get(int.id) ?? {}
-                          ).map(([key, value]) => {
-                            const isCredentialRelated =
-                              key === "Nº. CREDENCIAL" ||
-                              key == "EXTENSION" ||
-                              key == "Nº AFILIADO" ||
-                              key == "TIPO DOCUMENTO";
-                            value =
-                              typeof value === "string" && !isCredentialRelated
-                                ? Capitalize(value)
-                                : value;
-                            return (
-                              <ElementCard key={key} element={{ key, value }} />
-                            );
-                          })}
-                        </div>
-                        <p className="text-xs font-semibold my-3 mt-8">
-                          Información Fiscal
-                        </p>
-                        <div className="flex flex-1 flex-wrap justify-start gap-8 pt-2">
-                          {Object.entries(
-                            integrantsFiscalData.get(int?.id ?? "") ?? {}
-                          ).map(([key, value]) => {
-                            value =
-                              typeof value === "string" &&
-                              key != "TIPO DE ID FISCAL"
-                                ? Capitalize(value)
-                                : value;
-                            return (
-                              <ElementCard key={key} element={{ key, value }} />
-                            );
-                          })}
-                        </div>
-                        <p className="text-xs font-semibold my-3 mt-8">
-                          Información de contacto
-                        </p>
-                        <div className="flex flex-1 flex-wrap justify-start gap-8 pt-2">
-                          {Object.entries(
-                            integrantsContactData.get(int?.id ?? "") ?? {}
-                          ).map(([key, value]) => {
-                            value =
-                              typeof value === "string" && key != "EMAIL"
-                                ? Capitalize(value)
-                                : value;
-                            return (
-                              <ElementCard key={key} element={{ key, value }} />
-                            );
-                          })}
-                        </div>
-                        <p className="text-xs font-semibold my-3 mt-8">
-                          Información sobre el plan
-                        </p>
-                        <div className="flex flex-1 flex-wrap justify-start gap-8 pt-2">
-                          {Object.entries(
-                            integrantsPlanData.get(int?.id ?? "") ?? {}
-                          ).map(([key, value]) => {
-                            value =
-                              typeof value === "string"
-                                ? Capitalize(value)
-                                : value;
-                            return (
-                              <ElementCard key={key} element={{ key, value }} />
-                            );
-                          })}
-                        </div>
-                      </AccordionContentIntegrant>
-                    </AccordionItemIntegrant>
-                  ))}
+                  {integrant ? (
+                    integrant?.map((int) => (
+                      <AccordionItemIntegrant value={int.id} key={int.id}>
+                        <AccordionTriggerIntegrant affiliate={int}>
+                          {int.name}
+                        </AccordionTriggerIntegrant>
+                        <AccordionContentIntegrant>
+                          <div className="flex justify-between">
+                            <p className="text-xs font-semibold">
+                              Información Personal
+                            </p>
+                            <EditAffiliate
+                              Affiliate={int}
+                              open={openAffiliate}
+                              setOpen={setOpenAffiliate}
+                            />
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-stretch pt-4">
+                            {Object.entries(
+                              integrantsPersonalData.get(int.id) ?? {}
+                            ).map(([key, value]) => {
+                              const isCredentialRelated =
+                                key === "Nº. CREDENCIAL" ||
+                                key == "EXTENSION" ||
+                                key == "Nº AFILIADO" ||
+                                key == "TIPO DOCUMENTO";
+                              value =
+                                typeof value === "string" &&
+                                !isCredentialRelated
+                                  ? Capitalize(value)
+                                  : value;
+                              return (
+                                <ElementCard
+                                  key={key}
+                                  element={{ key, value }}
+                                />
+                              );
+                            })}
+                          </div>
+                          <p className="text-xs font-semibold my-3 mt-8">
+                            Información Fiscal
+                          </p>
+                          <div className="flex flex-1 flex-wrap justify-start gap-8 pt-2">
+                            {Object.entries(
+                              integrantsFiscalData.get(int?.id ?? "") ?? {}
+                            ).map(([key, value]) => {
+                              value =
+                                typeof value === "string" &&
+                                key != "TIPO DE ID FISCAL"
+                                  ? Capitalize(value)
+                                  : value;
+                              return (
+                                <ElementCard
+                                  key={key}
+                                  element={{ key, value }}
+                                />
+                              );
+                            })}
+                          </div>
+                          <p className="text-xs font-semibold my-3 mt-8">
+                            Información de contacto
+                          </p>
+                          <div className="flex flex-1 flex-wrap justify-start gap-8 pt-2">
+                            {Object.entries(
+                              integrantsContactData.get(int?.id ?? "") ?? {}
+                            ).map(([key, value]) => {
+                              value =
+                                typeof value === "string" && key != "EMAIL"
+                                  ? Capitalize(value)
+                                  : value;
+                              return (
+                                <ElementCard
+                                  key={key}
+                                  element={{ key, value }}
+                                />
+                              );
+                            })}
+                          </div>
+                          <p className="text-xs font-semibold my-3 mt-8">
+                            Información sobre el plan
+                          </p>
+                          <div className="flex flex-1 flex-wrap justify-start gap-8 pt-2">
+                            {Object.entries(
+                              integrantsPlanData.get(int?.id ?? "") ?? {}
+                            ).map(([key, value]) => {
+                              value =
+                                typeof value === "string"
+                                  ? Capitalize(value)
+                                  : value;
+                              return (
+                                <ElementCard
+                                  key={key}
+                                  element={{ key, value }}
+                                />
+                              );
+                            })}
+                          </div>
+                        </AccordionContentIntegrant>
+                      </AccordionItemIntegrant>
+                    ))
+                  ) : (
+                    <p className="text-sm font-semibold">No hay integrantes</p>
+                  )}
                 </AccordionIntegrant>
               </AccordionContent>
             </AccordionItem>

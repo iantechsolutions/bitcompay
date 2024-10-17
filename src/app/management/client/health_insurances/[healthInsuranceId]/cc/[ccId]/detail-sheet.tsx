@@ -20,10 +20,32 @@ import { RouterOutputs } from "~/trpc/shared";
 import { useState } from "react";
 import { api } from "~/trpc/react";
 import ContentTable from "~/app/billing/liquidation/[liquidationId]/content-table";
-import { TableRecord } from "../columns";
 
 type DetailSheetProps = {
-  data?: TableRecord;
+  data?: {
+    date: Date;
+    description: string;
+    amount: string;
+    "Tipo comprobante": string;
+    comprobanteNumber: string;
+    Estado: "Pagada" | "Pendiente";
+    iva: number;
+    comprobantes?: RouterOutputs["comprobantes"]["getByLiquidation"];
+    currentAccountAmount: string;
+    saldo_a_pagar: string;
+    nombre: string;
+    event: {
+      id: string;
+      description: string;
+      createdAt: Date;
+      comprobante_id: string | null;
+      type: "NC" | "FC" | "REC" | null;
+      currentAccount_id: string | null;
+      event_amount: number;
+      current_amount: number;
+    } | null;
+    [index: string]: any;
+  };
   open: boolean;
   setOpen: (open: boolean) => void;
 };
@@ -32,6 +54,9 @@ type comprobantes = RouterOutputs["comprobantes"]["getByLiquidation"];
 
 export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
   let comprobanteFCReciente = data?.comprobantes;
+
+  console.log("comprobantes", comprobanteFCReciente, data);
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetContent className="sm:max-w-[550px] px-10 py-12 overflow-y-scroll">
@@ -58,13 +83,8 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
           <div className="flex flex-row border justify-between items-center px-4 py-5 gap-2 rounded-md mt-3">
             <p className="text-base whitespace-nowrap font-medium-medium ">
               Saldo actual{" "}
-              {comprobanteFCReciente ? comprobanteFCReciente.id : "vasd"}
             </p>
-            <p
-              className={`text-[#6952EB] whitespace-nowrap font-semibold text-lg${
-                Number(data?.amount) > 0 ? "text-[#6952EB]" : "text-[#EB2727]"
-              }`}>
-              {" "}
+            <p className="text-[#6952EB] whitespace-nowrap font-semibold text-lg">
               {data?.amount}
             </p>
           </div>
@@ -74,12 +94,7 @@ export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
               <p className="text-base whitespace-nowrap font-medium-medium ">
                 Saldo actual{" "}
               </p>
-              <p
-                className={`text-[#6952EB] whitespace-nowrap font-semibold text-lg${
-                  Number(data?.currentAccountAmount) > 0
-                    ? "text-[#6952EB]"
-                    : "text-[#EB2727]"
-                }`}>
+              <p className="text-[#6952EB] whitespace-nowrap font-semibold text-lg">
                 {data?.currentAccountAmount}
               </p>
             </div>

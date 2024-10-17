@@ -4,6 +4,7 @@ import { computeBase, computeIva, toNumberOrZero } from "~/lib/utils";
 
 export function makeExcelRows(
   fgs: RouterOutputs["family_groups"]["getByLiquidationFiltered"],
+  liquidationId: string,
   excelRowsRef: (string | number)[][] | null,
   tableRowsRef: TableRecord[] | null // por referencia
 ) {
@@ -19,7 +20,9 @@ export function makeExcelRows(
     excelRow.push(name);
     excelRow.push(cuit);
 
-    const original_comprobante = fg?.comprobantes?.find(
+    const original_comprobante = fg?.comprobantes
+    ?.filter(x=>x.liquidation_id === liquidationId)
+    .find(
       (comprobante) =>
         comprobante.origin?.toLowerCase() === "factura" &&
         comprobante.tipoComprobante !== "Apertura de CC"
@@ -91,11 +94,11 @@ export function makeExcelRows(
     }
 
     const subTotal = computeBase(
-      total,
+      (total + saldo_anterior),
       Number(original_comprobante?.iva ?? "0")
-    );
+    ) - saldo_anterior;
 
-    const iva = computeIva(total, Number(original_comprobante?.iva ?? "0"));
+    const iva = computeIva(total + saldo_anterior, Number(original_comprobante?.iva ?? "0"));
     excelRow.push(subTotal);
     excelRow.push(iva);
     excelRow.push(total);
@@ -105,7 +108,7 @@ export function makeExcelRows(
     // });
     let currentAccountAmount = -1;
     if (typeof original_comprobante?.importe === "number") {
-      currentAccountAmount = saldo_anterior - original_comprobante.importe;
+      currentAccountAmount = saldo_anterior;
     }
 
     const plan = fg?.plan?.description ?? "";
@@ -120,7 +123,7 @@ export function makeExcelRows(
         cuit,
         "Saldo anterior":
           //  eventPreComprobante?.current_amount ??
-          saldo_anterior,
+          saldo_anterior * -1,
         "cuota plan": cuota_planes,
         bonificacion,
         diferencial: diferencial,

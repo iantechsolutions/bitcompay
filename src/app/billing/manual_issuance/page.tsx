@@ -10,7 +10,6 @@ import * as React from "react";
 import { Button } from "~/components/ui/button";
 import {
   htmlBill,
-  ingresarAfip,
   comprobanteDictionary,
   reversedIvaDictionary,
   ivaDictionary,
@@ -59,6 +58,7 @@ import {
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
 import { saveAs } from "file-saver";
+import { useAFIP } from "~/app/afip-provider";
 
 function formatDate(date: Date | undefined) {
   if (date) {
@@ -89,21 +89,22 @@ export default function Page() {
   const [fcSeleccionada, setFcSeleccionada] = useState<Comprobante[]>([]);
   const [comprobantes, setComprobantes] = useState<any[]>();
   const [selectedComprobante, setSelectedComprobante] = useState<any>(null);
-  const [afip, setAfip] = useState<any>(null);
+  // const [afip, setAfip] = useState<Afip | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    async function loginAfip() {
-      const afip = await ingresarAfip();
-      setLoading(false);
-      const voucherTypes = await afip.ElectronicBilling.getVoucherTypes();
-      const ivaTypes = await afip.ElectronicBilling.getAliquotTypes();
-      setAfip(afip);
-    }
+  // useEffect(() => {
+  //   async function loginAfip() {
+  //     const afip = await ingresarAfip();
+  //     setLoading(false);
+  //     const voucherTypes = await afip.ElectronicBilling.getVoucherTypes();
+  //     const ivaTypes = await afip.ElectronicBilling.getAliquotTypes();
+  //     setAfip(afip);
+  //   }
 
-    loginAfip();
-  }, []);
+  //   loginAfip();
+  // }, []);
 
+  
   function computeTotals() {
     let subTotal = 0;
     let ivaTotal = 0;
@@ -222,9 +223,9 @@ export default function Page() {
             .tributes.map(async (tribute) => {
               if (tribute.amount > 0) {
                 await createTribute({
-                  alicuota: tribute.aliquot,
-                  amount: tribute.amount,
-                  base_imponible: tribute.base,
+                  alicuota: Number(tribute.aliquot),
+                  amount: Number(tribute.amount),
+                  base_imponible: Number(tribute.base),
                   comprobante_id: comprobanteId,
                   jurisdiction: tribute.jurisdiccion,
                   tribute: tribute.tribute,
@@ -324,19 +325,20 @@ export default function Page() {
             health_insurance_id: obraSocialId,
           });
           const comprobanteId = comprobante[0]?.id ?? "";
-          comprobante = [await createItem({
-
-            amount: Number(form.getValues().facturasEmitidas.importe),
-            concept: "Factura relacionada",
-            iva: 0,
-            total: Number(form.getValues().facturasEmitidas.importe),
-            comprobante_id: comprobanteId,
-          })]
-
+          comprobante = [
+            await createItem({
+              amount: Number(form.getValues().facturasEmitidas.importe),
+              concept: "Factura relacionada",
+              iva: 0,
+              total: Number(form.getValues().facturasEmitidas.importe),
+              comprobante_id: comprobanteId,
+            }),
+          ];
 
           const promises = otherConceptsForm
             .getValues()
             .otherConcepts.map(async (concept) => {
+              console.log("lol");
               if (concept.importe > 0) {
                 comprobante = [
                   await createItem({
@@ -355,9 +357,9 @@ export default function Page() {
             .tributes.map(async (tribute) => {
               if (tribute.amount > 0) {
                 await createTribute({
-                  alicuota: tribute.aliquot,
-                  amount: tribute.amount,
-                  base_imponible: tribute.base,
+                  alicuota: Number(tribute.aliquot),
+                  amount: Number(tribute.amount),
+                  base_imponible: Number(tribute.base),
                   comprobante_id: comprobanteId,
                   jurisdiction: tribute.jurisdiccion,
                   tribute: tribute.tribute,
@@ -423,9 +425,9 @@ export default function Page() {
             .tributes.map(async (tribute) => {
               if (tribute.amount > 0) {
                 await createTribute({
-                  alicuota: tribute.aliquot,
-                  amount: tribute.amount,
-                  base_imponible: tribute.base,
+                  alicuota: Number(tribute.aliquot),
+                  amount: Number(tribute.amount),
+                  base_imponible: Number(tribute.base),
                   comprobante_id: comprobanteId,
                   jurisdiction: tribute.jurisdiccion,
                   tribute: tribute.tribute,
@@ -540,7 +542,7 @@ export default function Page() {
   const [servicioprod, setservicioprod] = useState("Servicio");
   const [obraSocialId, setObraSocialId] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [grupoFamiliarId, setGrupoFamiliarId] = useState("");
   const form = useForm<ManualGenInputs>({
     defaultValues: {
@@ -561,9 +563,9 @@ export default function Page() {
     },
   });
 
-  const [generatedUrlPopup, setGeneratedUrlPopup] = useState<string | null>(
-    null
-  );
+  // const [generatedUrlPopup, setGeneratedUrlPopup] = useState<string | null>(
+  //   null
+  // );
 
   const conceptsForm = useForm<ConceptsForm>({
     defaultValues: {
@@ -578,7 +580,7 @@ export default function Page() {
       ],
     },
   });
-  console.log("comprobante tipo", valueToNameComprobanteMap[tipoComprobante]);
+  console.log("comprobante tipoo", valueToNameComprobanteMap[tipoComprobante]);
   const asociatedFCForm = useForm<AsociatedFCForm>({
     defaultValues: {
       comprobantes: [
@@ -593,7 +595,6 @@ export default function Page() {
       ],
     },
   });
-
   const otherConceptsForm = useForm<otherConceptsForm>({
     defaultValues: { otherConcepts: [{ description: "", importe: 0 }] },
   });
@@ -681,36 +682,35 @@ export default function Page() {
     router.refresh();
   };
 
-  const GeneratedPopup = ({ url }: { url: string | null }) => (
-    <AlertDialog open={url !== null}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Se generó el comprobante</AlertDialogTitle>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => setGeneratedUrlPopup(null)}>
-            Cerrar
-          </AlertDialogCancel>
-          <AlertDialogAction
-            onClick={async () => {
-              setGeneratedUrlPopup(null);
-              if (url !== null) {
-                const req = await fetch(url);
-                const blob = await req.blob();
-                saveAs(blob, "comprobante.pdf");
-              }
-            }}>
-            Descargar
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  );
+  // const GeneratedPopup = ({ url }: { url: string | null }) => (
+  //   <AlertDialog open={url !== null}>
+  //     <AlertDialogContent>
+  //       <AlertDialogHeader>
+  //         <AlertDialogTitle>Se generó el comprobante</AlertDialogTitle>
+  //       </AlertDialogHeader>
+  //       <AlertDialogFooter>
+  //         <AlertDialogCancel onClick={() => setGeneratedUrlPopup(null)}>
+  //           Cerrar
+  //         </AlertDialogCancel>
+  //         <AlertDialogAction
+  //           onClick={async () => {
+  //             setGeneratedUrlPopup(null);
+  //             if (url !== null) {
+  //               const req = await fetch(url);
+  //               const blob = await req.blob();
+  //               saveAs(blob, "comprobante.pdf");
+  //             }
+  //           }}>
+  //           Descargar
+  //         </AlertDialogAction>
+  //       </AlertDialogFooter>
+  //     </AlertDialogContent>
+  //   </AlertDialog>
+  // );
 
   if (!grupoFamiliarId && !obraSocialId) {
     return (
       <LayoutContainer>
-        <GeneratedPopup url={generatedUrlPopup} />
         <section>
           <div>
             <Title>Generación de comprobantes</Title>
@@ -765,7 +765,7 @@ export default function Page() {
   return (
     <>
       <LayoutContainer>
-        <GeneratedPopup url={generatedUrlPopup} />
+        {/* <GeneratedPopup url={generatedUrlPopup} /> */}
         {page === "formPage" && (
           <section className="space-y-5 flex flex-col">
             <div>
@@ -924,7 +924,6 @@ export default function Page() {
             name={nombre}
             ivaCondition={ivaCondition}
             sell_condition={sellCondition}
-            afip={afip}
             document_type={tipoDocumento}
             otherAttributes={otherAttributes}
             fgId={grupoFamiliarId}
@@ -935,7 +934,7 @@ export default function Page() {
             obrasSociales={obrasSociales}
             marcas={marcas}
             createdComprobante={createdComprobante}
-            setGeneratedUrlPopup={setGeneratedUrlPopup}
+            // setGeneratedUrlPopup={setGeneratedUrlPopup}
           />
         )}
       </LayoutContainer>

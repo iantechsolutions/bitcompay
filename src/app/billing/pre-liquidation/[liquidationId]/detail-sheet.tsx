@@ -93,6 +93,7 @@ export default function DetailSheet({
   }
 
   let total_aportes = 0;
+  
   aportesOS?.forEach((aporte) => {
     total_aportes += parseInt(aporte.amount);
   });
@@ -170,7 +171,7 @@ export default function DetailSheet({
             </>
           )}
         </div>
-        <div className="mt-4">
+        {/* <div className="mt-4">
           {aportesOS && aportesOS.length > 0 && (
             <>
               <h1 className="text-base uppercase font-bold mb-3">
@@ -189,7 +190,7 @@ export default function DetailSheet({
               </div>
             </>
           )}
-        </div>
+        </div> */}
       </SheetContent>
     </Sheet>
   );

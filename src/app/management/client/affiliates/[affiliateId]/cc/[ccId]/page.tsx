@@ -1,14 +1,6 @@
 "use client";
 import { FileText } from "lucide-react";
 import { Title } from "~/components/title";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "~/components/ui/tablePreliq";
 import { api } from "~/trpc/react";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
@@ -19,9 +11,11 @@ import DataTable from "./data-table";
 import { Card } from "~/components/ui/card";
 import Download02Icon from "~/components/icons/download-02-stroke-rounded";
 import { RouterOutputs } from "~/trpc/shared";
-import BonusDialog from "./components_acciones/bonusDialog";
 import { formatCurrency } from "~/app/billing/pre-liquidation/[liquidationId]/detail-sheet";
-
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import "dayjs/locale/es";
+dayjs.locale("es");
 export default function CCDetail(props: {
   params: { ccId: string; affiliateId: string };
 }) {
@@ -36,11 +30,13 @@ export default function CCDetail(props: {
   const { data: cc } = api.currentAccount.getByFamilyGroup.useQuery({
     familyGroupId: grupos ?? "",
   });
-  const lastEvent = cc?.events.reduce((prev, current) => {
-    return new Date(prev.createdAt) > new Date(current.createdAt)
-      ? prev
-      : current;
-  });
+  const lastEvent = cc?.events?.length
+    ? cc.events.reduce((prev, current) => {
+        return new Date(prev.createdAt) > new Date(current.createdAt)
+          ? prev
+          : current;
+      })
+    : null;
   const comprobantes = grupo?.comprobantes;
   let lastComprobante;
   if (comprobantes && comprobantes?.length! > 0) {
@@ -53,7 +49,7 @@ export default function CCDetail(props: {
   const nextExpirationDate = lastComprobante?.due_date
     ? dayjs(lastComprobante?.due_date).format("DD-MM-YYYY")
     : "-";
-  console.log("aca");
+
   let comprobanteNCReciente = comprobantes?.find(
     (comprobante) => comprobante.origin === "Nota de credito"
   );
@@ -93,27 +89,20 @@ export default function CCDetail(props: {
   }
   const tableRows: TableRecord[] = [];
   if (events) {
-    console.log("events", events);
-
     for (const event of events) {
-      // console.log("saldo_a_pagar");
-      // console.log(saldo_a_pagar);
-      console.log("event", formatCurrency(event.event_amount));
       if (event.comprobantes) {
+        console.log("links comprobantes",event.comprobantes.billLink, event.comprobantes.id);
         tableRows.push({
           date: event.createdAt,
           description: event.description,
           amount: formatCurrency(event.event_amount),
-          // comprobanteType: "Nota de credito A",
-          "Tipo comprobante": event.comprobantes?.tipoComprobante ?? "FACTURA A",
-          comprobanteNumber:
-            (event.comprobantes?.ptoVenta.toString().padStart(5) ?? "00000") +
-            "-" +
-            (event.comprobantes?.nroComprobante.toString().padStart(8) ??
-              "00000000"),
+          "Tipo comprobante":
+            event.comprobantes?.tipoComprobante ?? "FACTURA A",
+          comprobanteNumber: event.comprobantes?.nroComprobante ?? 0,
+          ptoVenta: event.comprobantes?.ptoVenta ?? 0,
           Estado: "Pendiente",
           iva: Number(event.comprobantes?.iva ?? 0),
-          comprobantes: comprobantesTable,
+          comprobantes: event.comprobantes,
           currentAccountAmount: formatCurrency(NCTotal ?? 0),
           saldo_a_pagar: formatCurrency(saldo_a_pagar ?? 0),
           nombre: afiliado?.name ?? "",
@@ -125,12 +114,12 @@ export default function CCDetail(props: {
           date: event.createdAt,
           description: event.description,
           amount: formatCurrency(event.event_amount),
-          // comprobanteType: "Nota de credito A",
           "Tipo comprobante": "Apertura de CC",
-          comprobanteNumber: "00000" + "-" + "00000000",
+          comprobanteNumber: 0,
+          ptoVenta: 0,
           Estado: "Pendiente",
           iva: 0,
-          comprobantes: comprobantesTable,
+          comprobantes: event.comprobantes,
           currentAccountAmount: formatCurrency(NCTotal ?? 0),
           saldo_a_pagar: formatCurrency(saldo_a_pagar ?? 0),
           nombre: afiliado?.name ?? "",
@@ -140,7 +129,47 @@ export default function CCDetail(props: {
       }
     }
   }
-  //dasdas
+  async function handleExport() {
+    const excelHeaders = [
+      "Fecha",
+      "Descripción",
+      "Monto",
+      "Tipo comprobante",
+      "N° comprobante",
+      "Estado",
+      "IVA",
+      "Saldo actual",
+      "Saldo a pagar",
+      "Nombre",
+      "CUIT",
+    ];
+    const excelContent = [excelHeaders];
+    for (const row of tableRows) {
+      const rowData: string[] = Object.entries(row).reduce(
+        (acc, [key, value]) => {
+          if (key === "date") {
+            acc.push(dayjs(value).format("DD/MM/YYYY"));
+          } else if (key !== "event" && key !== "comprobantes") {
+            acc.push(value.toString());
+          }
+          return acc;
+        },
+        [] as string[]
+      );
+      excelContent.push(rowData);
+    }
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(excelContent);
+    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+    const excelBuffer = XLSX.write(wb, {
+      type: "array",
+      bookType: "xlsx",
+    });
+    const blob = new Blob([excelBuffer], {
+      type: "application/octet-stream",
+    });
+    saveAs(blob, `movimientos-cc-${grupo?.numericalId}.xlsx`);
+  }
   return (
     <LayoutContainer>
       <Title>Movimientos cuenta corriente</Title>
@@ -161,7 +190,12 @@ export default function CCDetail(props: {
                     ? "text-[#EB2727]"
                     : "text-black"
                 }`}>
-                {lastEvent.current_amount.toFixed(2)}
+                {new Intl.NumberFormat("es-AR", {
+                  style: "currency",
+                  currency: "ARS",
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }).format(lastEvent.current_amount)}
               </span>
             ) : (
               <span className={`text-2xl font-bold text-black`}>0.00</span>
@@ -181,7 +215,10 @@ export default function CCDetail(props: {
       <div className="flex flex-auto justify-end">
         <Button
           variant="bitcompay"
-          className=" text-base px-16 py-6 mt-5 gap-3 text-[#3e3e3e] rounded-full font-medium">
+          className=" text-base px-16 py-6 mt-5 gap-3 text-[#3e3e3e] rounded-full font-medium"
+          onClick={async () => {
+            await handleExport();
+          }}>
           <Download02Icon />
           Exportar
         </Button>

@@ -2,7 +2,9 @@ import {
   ChevronLeftCircleIcon,
   CircleCheck,
   CircleX,
+  Download,
   Loader2Icon,
+  RefreshCcw,
 } from "lucide-react";
 import { Title } from "../title";
 import { useRouter } from "next/navigation";
@@ -32,6 +34,8 @@ import {
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
 import { useState } from "react";
+import { saveAs } from "file-saver";
+import { useAFIP } from "~/app/afip-provider";
 
 interface Props {
   changePage: (page: "formPage" | "confirmationPage") => void;
@@ -48,7 +52,6 @@ interface Props {
   ivaTotal: number;
   name: string;
   document: string;
-  afip: any;
   fiscal_document: string;
   ivaCondition: string;
   sell_condition: string;
@@ -63,7 +66,6 @@ interface Props {
   marcas?: any;
   createdComprobante: Comprobante;
   reloadPage: () => void;
-  setGeneratedUrlPopup: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 function formatDate(date: Date | undefined) {
@@ -97,7 +99,6 @@ const confirmationPage = ({
   document,
   fiscal_document,
   ivaCondition,
-  afip,
   sell_condition,
   document_type,
   brandId,
@@ -107,12 +108,14 @@ const confirmationPage = ({
   marcas,
   createdComprobante,
   reloadPage,
-  setGeneratedUrlPopup,
 }: Props) => {
   // function generateComprobante(){
 
   // }
   const [loading, setIsLoading] = useState(false);
+  const [finishedAFIP, setFinishedAFIP] = useState(false);
+  const [url, setUrl] = useState<string | null>(null);
+  const [loadingDownload, setLoadingDownload] = useState(false);
   const { mutateAsync: createEventFamily } =
     api.events.createByType.useMutation();
   const { mutateAsync: createEventOS } =
@@ -120,7 +123,7 @@ const confirmationPage = ({
   const { mutateAsync: createEventOrg } =
     api.events.createByTypeOrg.useMutation();
   const { mutateAsync: updateComprobante } =
-    api.comprobantes.addBillLinkAndNumberAndEstado.useMutation();
+    api.comprobantes.approbate.useMutation();
   const router = useRouter();
 
   function handleApprove() {
@@ -144,6 +147,21 @@ const confirmationPage = ({
     console.log(otherAttributes);
   }
 
+  async function handleDownload() {
+    try {
+      setLoadingDownload(true);
+      if (url !== null) {
+        const req = await fetch(url);
+        const blob = await req.blob();
+        saveAs(blob, "comprobante.pdf");
+      }
+      setLoadingDownload(false);
+    } catch (e) {
+      toast.error("Error descargando el archivo");
+      setLoadingDownload(false);
+    }
+  }
+  const { afipObject, setAfipObject } = useAFIP();
   async function handleAFIP() {
     setIsLoading(true);
     handleApprove();
@@ -167,7 +185,7 @@ const confirmationPage = ({
     const fcSelec = asociatedFCForm.getValues().comprobantes[0]?.id;
     if (tipoComprobante == "1" || tipoComprobante == "6") {
       try {
-        last_voucher = await afip.ElectronicBilling.getLastVoucher(
+        last_voucher = await afipObject?.ElectronicBilling.getLastVoucher(
           form.getValues().puntoVenta,
           tipoComprobante
         );
@@ -226,7 +244,7 @@ const confirmationPage = ({
       // const facSeleccionada = comprobantes?.find((x) => x.id == fcSelec);
       let ivaFloat = (100 + parseFloat(fcSeleccionada[0]?.iva ?? "0")) / 100;
       try {
-        last_voucher = await afip.ElectronicBilling.getLastVoucher(
+        last_voucher = await afipObject?.ElectronicBilling.getLastVoucher(
           form.getValues().puntoVenta,
           tipoComprobante
         );
@@ -295,16 +313,16 @@ const confirmationPage = ({
       return null;
     }
 
-    if (data) {
-      try {
-        const res = await afip.ElectronicBilling.createVoucher(data);
-      } catch (error) {
-        console.log(error);
-        toast.error("Error enviando a AFIP: " + error);
-        setIsLoading(false);
-        return null;
-      }
-    }
+    // if (data) {
+    //   try {
+    //     const res = await afip.ElectronicBilling.createVoucher(data);
+    //   } catch (error) {
+    //     console.log(error);
+    //     toast.error("Error enviando a AFIP: " + error);
+    //     setIsLoading(false);
+    //     return null;
+    //   }
+    // }
     if (tipoComprobante == "1" || tipoComprobante == "6") {
       if (fgId) {
         const event = createEventFamily({
@@ -321,8 +339,7 @@ const confirmationPage = ({
           comprobante_id: createdComprobante.id ?? "",
         });
       }
-    }
-    else if (tipoComprobante == "0") {
+    } else if (tipoComprobante == "0") {
       if (fgId) {
         const event = createEventFamily({
           family_group_id: fgId,
@@ -408,7 +425,7 @@ const confirmationPage = ({
         marginBottom: 0.4, // Margen inferior en pulgadas. Usar 0.1 para ticket
       };
       const pdfname = (last_voucher + 1).toString() + ".pdf";
-      const resHtml = await afip.ElectronicBilling.createPDF({
+      const resHtml = await afipObject?.ElectronicBilling.createPDF({
         html: html,
         file_name: pdfname,
         options: options,
@@ -416,19 +433,20 @@ const confirmationPage = ({
 
       const updatedComprobante = await updateComprobante({
         id: createdComprobante.id ?? "",
-        billLink: resHtml.file,
+        billLink: resHtml?.file,
         number: last_voucher + 1,
         state: "pendiente",
       });
 
       toast.success("La factura se creo correctamente");
       setIsLoading(false);
-      reloadPage();
+      setFinishedAFIP(true);
+      setUrl(resHtml?.file);
+      // reloadPage();
 
-      if (resHtml.file) {
-        setGeneratedUrlPopup(resHtml.file);
-        // window.open(resHtml.file, "_blank");
-      }
+      // if (resHtml.file) {
+      //   // window.open(resHtml.file, "_blank");
+      // }
     } else {
       toast.error(
         "Error creando el comprobante, la factura ya fue enviada a AFIP"
@@ -474,42 +492,69 @@ const confirmationPage = ({
         iva={ivaTotal}
         otherAttributes={otherAttributes}
       />
-      <div className="self-end flex gap-1">
-        <Button
-          onClick={() => changePage("formPage")}
-          className="h-7 bg-[#f7f7f7] hover:bg-[#f7f7f7] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none">
-          <ChevronLeftCircleIcon className="mr-2 h-4 w-auto" /> Volver
-        </Button>
-        {/* <Button
-          className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
-          onClick={() => {
-            // handleCreate();
-            DownloadPDF((url = { htmlBill }));
-            // handleCreate();
-          }}>
-          <CircleCheck className="h-4 w-auto mr-2" />
-          Descargar
-        </Button> */}
-        <Button
-          className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
-          onClick={() => {
-            // handleCreate();
-            handleAFIP();
-            // handleCreate();
-          }}
-          disabled={loading}>
-          {loading ? (
-            <Loader2Icon className="mr-2 animate-spin" size={20} />
-          ) : (
-            <CircleCheck className="h-4 w-auto mr-2" />
-          )}
-          Aprobar
-        </Button>
-        <Button className="h-7 bg-[#f9c3c3] hover:bg-[#f9c3c3] text-[#4B4B4B] text-sm rounded-2xl py-4 px-4 shadow-none">
-          <CircleX className="h-4 w-auto mr-2" />
-          Anular
-        </Button>
-      </div>
+
+      {!finishedAFIP && (
+        <div className="self-end flex gap-1">
+          <Button
+            onClick={() => changePage("formPage")}
+            className="h-7 bg-[#f7f7f7] hover:bg-[#f7f7f7] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none">
+            <ChevronLeftCircleIcon className="mr-2 h-4 w-auto" /> Volver
+          </Button>
+
+          <>
+            <Button
+              className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
+              onClick={() => {
+                // handleCreate();
+                handleAFIP();
+                // handleCreate();
+              }}
+              disabled={loading}>
+              {loading ? (
+                <Loader2Icon className="mr-2 animate-spin" size={20} />
+              ) : (
+                <CircleCheck className="h-4 w-auto mr-2" />
+              )}
+              Aprobar
+            </Button>
+            <Button className="h-7 bg-[#f9c3c3] hover:bg-[#f9c3c3] text-[#4B4B4B] text-sm rounded-2xl py-4 px-4 shadow-none">
+              <CircleX className="h-4 w-auto mr-2" />
+              Anular
+            </Button>
+          </>
+        </div>
+      )}
+
+
+{finishedAFIP && 
+      <div className=" self-start flex gap-1">
+          <Button
+            className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
+            onClick={() => {
+              // handleCreate();
+              handleDownload();
+              // handleCreate();
+            }}
+            disabled={loading}>
+            {loading ? (
+              <Loader2Icon className="mr-2 animate-spin" size={20} />
+            ) : (
+              <Download className="h-4 w-auto mr-2" />
+            )}
+            Descargar
+          </Button>
+          <Button
+            className="h-7 bg-[#f9c3c3] hover:bg-[#f9c3c3] text-[#4B4B4B] text-sm rounded-2xl py-4 px-4 shadow-none"
+            onClick={() => {
+              if (reloadPage) {
+                reloadPage();
+              }
+            }}>
+            <RefreshCcw className="h-4 w-auto mr-2" />
+            Crear nueva
+          </Button>
+        </div>
+      }
     </section>
   );
 };

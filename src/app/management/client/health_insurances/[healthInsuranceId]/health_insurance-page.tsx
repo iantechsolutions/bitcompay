@@ -151,7 +151,12 @@ export default function HealthInsurancePage(props: {
                         ? "text-[#EB2727]"
                         : "text-black"
                     }`}>
-                    {currentAmount.toFixed(2)}
+                    {new Intl.NumberFormat("es-AR", {
+                      style: "currency",
+                      currency: "ARS",
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    }).format(currentAmount)}
                   </span>
                 ) : (
                   <span className={`text-2xl font-bold text-black`}>0.00</span>
