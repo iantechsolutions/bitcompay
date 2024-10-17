@@ -91,7 +91,11 @@ export default function CCDetail(props: {
   if (events) {
     for (const event of events) {
       if (event.comprobantes) {
-        console.log("links comprobantes",event.comprobantes.billLink, event.comprobantes.id);
+        console.log(
+          "links comprobantes",
+          event.comprobantes.billLink,
+          event.comprobantes.id
+        );
         tableRows.push({
           date: event.createdAt,
           description: event.description,
@@ -100,7 +104,7 @@ export default function CCDetail(props: {
             event.comprobantes?.tipoComprobante ?? "FACTURA A",
           comprobanteNumber: event.comprobantes?.nroComprobante ?? 0,
           ptoVenta: event.comprobantes?.ptoVenta ?? 0,
-          Estado: "Pendiente",
+          Estado: event.comprobantes?.estado ?? "apertura",
           iva: Number(event.comprobantes?.iva ?? 0),
           comprobantes: event.comprobantes,
           currentAccountAmount: formatCurrency(NCTotal ?? 0),
@@ -117,7 +121,7 @@ export default function CCDetail(props: {
           "Tipo comprobante": "Apertura de CC",
           comprobanteNumber: 0,
           ptoVenta: 0,
-          Estado: "Pendiente",
+          Estado: "apertura",
           iva: 0,
           comprobantes: event.comprobantes,
           currentAccountAmount: formatCurrency(NCTotal ?? 0),

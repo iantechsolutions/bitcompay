@@ -782,13 +782,13 @@ export const comprobantes = pgTable("comprobantes", {
   billLink: varchar("billLink", { length: 255 }).notNull(),
   estado: varchar("estado", {
     enum: [
-      "generada",
-      "pendiente",
-      "pagada",
-      "parcial",
-      "anulada",
-      "apertura",
-      "error",
+      "Generada",
+      "Pendiente",
+      "Pagada",
+      "Parcial",
+      "Anulada",
+      "Apertura",
+      "Error",
     ],
   }),
   origin: varchar("origin", {
