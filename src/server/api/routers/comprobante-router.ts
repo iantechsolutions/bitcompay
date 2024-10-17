@@ -535,9 +535,8 @@ async function approbatecomprobante(liquidationId: string) {
             const res = await afip.ElectronicBilling.createVoucher(data);
           } catch (e) {
             console.log("Error al enviar el comprobante a AFIP");
-
             console.log(e);
-
+            comprobanteEstado = "error";
             return null;
           }
 
