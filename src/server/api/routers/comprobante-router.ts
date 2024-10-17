@@ -776,16 +776,16 @@ async function getGroupAmount(grupo: grupoCompleto, date: Date) {
   console.log("La casa", importe);
   return importe;
 }
-async function getGroupContribution(grupo: grupoCompleto) {
-  let importe = 0;
-  grupo.integrants?.forEach((integrant) => {
-    if (integrant?.contribution?.amount) {
-      const contributionIntegrante = integrant?.contribution?.amount ?? 0;
-      importe += contributionIntegrante;
-    }
-  });
-  return importe;
-}
+// async function getGroupContribution(grupo: grupoCompleto) {
+//   let importe = 0;
+//   grupo.integrants?.forEach((integrant) => {
+//     if (integrant?.contribution?.amount) {
+//       const contributionIntegrante = integrant?.contribution?.amount ?? 0;
+//       importe += contributionIntegrante;
+//     }
+//   });
+//   return importe;
+// }
 async function getDifferentialAmount(grupo: grupoCompleto, fechaPreliq: Date) {
   let importe = 0;
   grupo.integrants?.forEach((integrant) => {
@@ -835,7 +835,6 @@ export async function getGruposForLiquidation(brandId: string, date: Date) {
       abonos: true,
       integrants: {
         with: {
-          contribution: true,
           differentialsValues: true,
           pa: true,
           aportes_os: true,
@@ -1740,14 +1739,6 @@ function getBillingData(
           new_registration: boolean | null;
           integrant_id: string | null;
         }[];
-        contribution: {
-          id: string;
-          amount: number;
-          integrant_id: string | null;
-          employerContribution: number;
-          employeeContribution: number;
-          cuitEmployer: string;
-        } | null;
         differentialsValues: {
           id: string;
           createdAt: Date;
