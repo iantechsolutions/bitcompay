@@ -145,6 +145,31 @@ const idDictionary: { [key: string]: number } = {
 //   const res = await afip.ElectronicBilling.createVoucher(data);
 // }
 
+
+interface VoucherResult {
+  res: { CAE: string; CAEFchVto: string; voucherNumber: number } | null;
+  result: "pendiente" | "error";
+}
+
+async function createNextVoucher(data: any, afip: Afip): Promise<VoucherResult> {
+  let result: "pendiente" | "error" = "pendiente";
+  let res: { CAE: string; CAEFchVto: string; voucherNumber: number } | null = null;
+  try {
+    res = await afip.ElectronicBilling.createNextVoucher(data);
+    console.log(res);
+  } catch (e) {
+    console.log(e);
+    console.log(e?.toString());
+    console.log(typeof e);
+    if (e?.toString().startsWith("Error: (502) Error interno de base de datos") || e?.toString().startsWith("Error: (10016)")) {
+      result = (await createNextVoucher(data, afip)).result;
+    } else {
+      result = "error";
+    }
+  }
+  return { res, result };
+}
+
 const preparedUpdatePayment = db
   .update(schema.payments)
   .set({
@@ -394,7 +419,9 @@ async function approbatecomprobante(liquidationId: string) {
               comprobante?.previous_facturaId ?? ""
             ),
           });
-          const comprobanteCod =
+          if(comprobanteAnterior?.estado=="error"){
+            
+            const comprobanteCod =
             comprobanteDictionary[comprobanteAnterior?.tipoComprobante ?? ""];
           const comprobantecodNC =
             comprobanteDictionary[
@@ -402,11 +429,11 @@ async function approbatecomprobante(liquidationId: string) {
             ];
 
           try {
-            console.log("lastVoucher",lastVoucher);
-            lastVoucher = await afip.ElectronicBilling.getLastVoucher(
-              comprobanteAnterior?.ptoVenta,
-              comprobantecodNC
-            );
+            // lastVoucher = await afip.ElectronicBilling.getLastVoucher(
+            //   comprobanteAnterior?.ptoVenta,
+            //   comprobantecodNC
+            // );
+            lastVoucher = 120
             console.log("lastVoucher",lastVoucher);
           } catch (e) {
             console.log("Error al obtener el último comprobante");
@@ -452,23 +479,9 @@ async function approbatecomprobante(liquidationId: string) {
               Nro: comprobanteAnterior?.nroComprobante,
             },
           };
-          try {
-            const res = await afip.ElectronicBilling.createVoucher(data);
-          } catch (e) {
-            console.log("Error al enviar el comprobante a AFIP");
-            console.log(e);
-            comprobanteEstado = "error";
-            // return null;
-          }
-
-          await db
-            .update(schema.comprobantes)
-            .set({
-              estado: comprobanteEstado,
-              nroComprobante: lastVoucher + 1,
-            })
-            .where(eq(schema.comprobantes.id, comprobante.id));
-
+          const temp = await createNextVoucher(data, afip);
+          comprobanteEstado = temp.result;
+          lastVoucher = temp.res?.voucherNumber ?? 0;
           await db.insert(schema.events).values({
             current_amount: lastEventAmount + comprobante.importe,
             description: "NC",
@@ -477,19 +490,31 @@ async function approbatecomprobante(liquidationId: string) {
             type: "NC",
             comprobante_id: comprobante.id,
           });
-          // AAACAAAA
           await preparedUpdatePayment.execute({
             comprobanteId: comprobante?.previous_facturaId,
             statusId: statusCancelado?.id,
           });
+          
+          }
+          else{
+            await db
+              .update(schema.comprobantes)
+              .set({
+                estado: comprobanteEstado,
+              })
+            .where(eq(schema.comprobantes.id, comprobante.id));
+            
+          }
         } else {
           const comprobanteCod =
             comprobanteDictionary[comprobante.tipoComprobante ?? ""];
           try {
-            lastVoucher = await afip.ElectronicBilling.getLastVoucher(
-              comprobante?.ptoVenta,
-              comprobanteCod
-            );
+            // lastVoucher = await afip.ElectronicBilling.getLastVoucher(
+            //   comprobante?.ptoVenta,
+            //   comprobanteCod
+            // );
+            lastVoucher = 120
+            console.log("lastVoucher",lastVoucher);
             // console.log("lastVoucher")
           } catch (e) {
             console.log("Error al obtener el último comprobante");
@@ -531,16 +556,12 @@ async function approbatecomprobante(liquidationId: string) {
             },
           };
           // try {
-          try {
-            const res = await afip.ElectronicBilling.createVoucher(data);
-          } catch (e) {
-            console.log("Error al enviar el comprobante a AFIP");
-            console.log(e);
-            comprobanteEstado = "error";
-            // return null;
-          }
+            const temp = await createNextVoucher(data, afip);
+            comprobanteEstado = temp.result;
+            lastVoucher = temp.res?.voucherNumber ?? 0;
 
-          await db
+          if(comprobanteEstado != "error"){
+            await db
             .update(schema.comprobantes)
             .set({
               estado: comprobanteEstado,
@@ -548,56 +569,73 @@ async function approbatecomprobante(liquidationId: string) {
             })
             .where(eq(schema.comprobantes.id, comprobante.id));
 
-          await db.insert(schema.payments).values({
-            companyId:
-              comprobante.family_group?.businessUnitData?.company?.id ?? "",
-            invoice_number: comprobante?.nroComprobante,
-            userId: user?.id ?? "",
-            g_c: comprobante.family_group?.businessUnitData?.brand?.number ?? 0,
-            name: billResponsible?.name ?? "",
-            fiscal_id_type: billResponsible?.fiscal_id_type,
-            fiscal_id_number: parseInt(
-              billResponsible?.fiscal_id_number ?? "0"
-            ),
-            du_type: billResponsible?.id_type,
-            du_number: parseInt(billResponsible?.id_number ?? "0"),
-            product: producto?.id,
-            affiliate_number:
-              (comprobante.family_group?.plan?.plan_code ?? "") +
-              (billResponsible?.id_number ?? ""),
-            period: comprobante?.due_date,
-            first_due_amount: comprobante?.importe,
-            first_due_date: comprobante?.due_date,
-            cbu: billResponsible?.pa[0]?.CBU,
-            comprobante_id: comprobante?.id,
-            documentUploadId: "0AspRyw8g4jgDAuNGAeBX",
-            product_number: producto?.number ?? 0,
-            statusId: status?.id,
-            card_number: billResponsible?.pa[0]?.card_number,
-            card_brand: billResponsible?.pa[0]?.card_brand,
-            card_type: billResponsible?.pa[0]?.card_type,
-          });
+            await db.insert(schema.payments).values({
+              companyId:
+                comprobante.family_group?.businessUnitData?.company?.id ?? "",
+              invoice_number: comprobante?.nroComprobante,
+              userId: user?.id ?? "",
+              g_c: comprobante.family_group?.businessUnitData?.brand?.number ?? 0,
+              name: billResponsible?.name ?? "",
+              fiscal_id_type: billResponsible?.fiscal_id_type,
+              fiscal_id_number: parseInt(
+                billResponsible?.fiscal_id_number ?? "0"
+              ),
+              du_type: billResponsible?.id_type,
+              du_number: parseInt(billResponsible?.id_number ?? "0"),
+              product: producto?.id,
+              affiliate_number:
+                (comprobante.family_group?.plan?.plan_code ?? "") +
+                (billResponsible?.id_number ?? ""),
+              period: comprobante?.due_date,
+              first_due_amount: comprobante?.importe,
+              first_due_date: comprobante?.due_date,
+              cbu: billResponsible?.pa[0]?.CBU,
+              comprobante_id: comprobante?.id,
+              documentUploadId: "0AspRyw8g4jgDAuNGAeBX",
+              product_number: producto?.number ?? 0,
+              statusId: status?.id,
+              card_number: billResponsible?.pa[0]?.card_number,
+              card_brand: billResponsible?.pa[0]?.card_brand,
+              card_type: billResponsible?.pa[0]?.card_type,
+            });
+            console.log("COMPROBANTE APROBADO");
+            console.log(comprobante.importe);
+            await db.insert(schema.events).values({
+              current_amount: lastEventAmount - comprobante.importe,
+              description: "FC",
+              event_amount: comprobante.importe * -1,
+              currentAccount_id: cc?.id,
+              type: "FC",
+              comprobante_id: comprobante.id,
+            });
+          }
+          else{
+            await db
+            .update(schema.comprobantes)
+            .set({
+              estado: comprobanteEstado,
+            })
+            .where(eq(schema.comprobantes.id, comprobante.id));
+          }
+          
 
-          console.log("COMPROBANTE APROBADO");
-          console.log(comprobante.importe);
-          await db.insert(schema.events).values({
-            current_amount: lastEventAmount - comprobante.importe,
-            description: "FC",
-            event_amount: comprobante.importe * -1,
-            currentAccount_id: cc?.id,
-            type: "FC",
-            comprobante_id: comprobante.id,
-          });
+          
+
+          
         }
         console.log(
           `[TIMING] Comprobante process (comprobante ${index}): ${
             Date.now() - processStart
           }ms`
         );
+        console.log(`(comprobante ${index}): ${
+            comprobanteEstado
+          }`)
         if (comprobanteEstado!="error"){
 
-        
+          console.log("1")
           const pdfGenerateStart = Date.now();
+          console.log("2")
           const html = htmlBill(
             comprobante,
             comprobante.family_group?.businessUnitData!.company,
@@ -615,9 +653,9 @@ async function approbatecomprobante(liquidationId: string) {
             billResponsible?.fiscal_id_number ?? "",
             billResponsible?.afip_status ?? ""
           );
-
+          console.log("3")
           const name = `FAC_${lastVoucher + 1}.pdf`; // NOMBRE        lastVoucher += 1;
-
+          console.log("4. prepdf comprobante: ", index);
           await PDFFromHtml(
             html,
             name,
@@ -627,7 +665,7 @@ async function approbatecomprobante(liquidationId: string) {
             comprobanteEstado
           );
           console.log(
-            `[TIMING] PDF generation (comprobante ${index}): ${
+            `5. [TIMING] PDF generation (comprobante ${index}): ${
               Date.now() - pdfGenerateStart
             }ms`
           );
@@ -664,7 +702,7 @@ async function PDFFromHtml(
     file_name: name,
     options: options,
   });
-
+  console.log("postafippdf")
   const upload = await utapi.uploadFilesFromUrl(res.file);
   if (Array.isArray(upload)) {
     if (upload[0]?.data !== null) {
@@ -679,17 +717,16 @@ async function PDFFromHtml(
       upload.error
     );
   }
-
+  console.log("postSubida")
   const uploadData = Array.isArray(upload) ? upload[0]?.data : upload?.data;
-
+  console.log("preupdatepdf")
   await preparedCompBillLink.execute({
     billLink: uploadData?.url ?? res.file ?? "",
     estado: comprobanteEstado,
     voucher,
     comprobanteId,
   });
-
-  console.log("termino la funcion");
+  console.log("postupdatepdf")
 }
 async function createcomprobanteItem(
   ivaFloat: number,
