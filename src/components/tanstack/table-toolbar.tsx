@@ -27,9 +27,6 @@ export default function TableToolbar<TData, TValue>({
   containerClassName,
 }: DataTableToolbarProps<TData, TValue>) {
   const filtersRef = useRef<FiltersRef>(null); // Ref para el componente Filters
-
-  console.log(table.getState().columnFilters);
-
   const handleClearFilters = () => {
     if (filtersRef.current) {
       filtersRef.current.clearFilters(); // Llamamos a la función clearFilters del componente Filters

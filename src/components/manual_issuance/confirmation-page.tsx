@@ -314,16 +314,16 @@ const confirmationPage = ({
       return null;
     }
 
-    if (data) {
-      try {
-        const res = await afip.ElectronicBilling.createVoucher(data);
-      } catch (error) {
-        console.log(error);
-        toast.error("Error enviando a AFIP: " + error);
-        setIsLoading(false);
-        return null;
-      }
-    }
+    // if (data) {
+    //   try {
+    //     const res = await afip.ElectronicBilling.createVoucher(data);
+    //   } catch (error) {
+    //     console.log(error);
+    //     toast.error("Error enviando a AFIP: " + error);
+    //     setIsLoading(false);
+    //     return null;
+    //   }
+    // }
     if (tipoComprobante == "1" || tipoComprobante == "6") {
       if (fgId) {
         const event = createEventFamily({

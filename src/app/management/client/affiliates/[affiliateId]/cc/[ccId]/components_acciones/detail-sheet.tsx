@@ -27,10 +27,10 @@ type DetailSheetProps = {
     description: string;
     amount: string;
     "Tipo comprobante": string;
-    comprobanteNumber: string;
+    comprobanteNumber: number;
     Estado: "Pagada" | "Pendiente";
     iva: number;
-    comprobantes?: RouterOutputs["comprobantes"]["getByLiquidation"];
+    comprobantes?: RouterOutputs["comprobantes"]["getByLiquidation"][number];
     currentAccountAmount: string;
     saldo_a_pagar: string;
     nombre: string;
@@ -55,9 +55,6 @@ type comprobantes = RouterOutputs["comprobantes"]["getByLiquidation"];
 
 export default function DetailSheet({ data, open, setOpen }: DetailSheetProps) {
   let comprobanteFCReciente = data?.comprobantes;
-
-  console.log("comprobantes", comprobanteFCReciente, data);
-
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetContent className="sm:max-w-[550px] px-10 py-12 overflow-y-scroll">

@@ -30,11 +30,13 @@ export default function CCDetail(props: {
   const { data: cc } = api.currentAccount.getByFamilyGroup.useQuery({
     familyGroupId: grupos ?? "",
   });
-  const lastEvent = cc?.events.reduce((prev, current) => {
-    return new Date(prev.createdAt) > new Date(current.createdAt)
-      ? prev
-      : current;
-  });
+  const lastEvent = cc?.events?.length
+    ? cc.events.reduce((prev, current) => {
+        return new Date(prev.createdAt) > new Date(current.createdAt)
+          ? prev
+          : current;
+      })
+    : null;
   const comprobantes = grupo?.comprobantes;
   let lastComprobante;
   if (comprobantes && comprobantes?.length! > 0) {
@@ -47,7 +49,7 @@ export default function CCDetail(props: {
   const nextExpirationDate = lastComprobante?.due_date
     ? dayjs(lastComprobante?.due_date).format("DD-MM-YYYY")
     : "-";
-  console.log("aca");
+
   let comprobanteNCReciente = comprobantes?.find(
     (comprobante) => comprobante.origin === "Nota de credito"
   );
@@ -87,25 +89,20 @@ export default function CCDetail(props: {
   }
   const tableRows: TableRecord[] = [];
   if (events) {
-    console.log("events", events);
-
     for (const event of events) {
       if (event.comprobantes) {
+        console.log("links comprobantes",event.comprobantes.billLink, event.comprobantes.id);
         tableRows.push({
           date: event.createdAt,
           description: event.description,
           amount: formatCurrency(event.event_amount),
           "Tipo comprobante":
             event.comprobantes?.tipoComprobante ?? "FACTURA A",
-          comprobanteNumber:
-            (event.comprobantes?.ptoVenta.toString().padStart(5, "0") ??
-              "00000") +
-            "-" +
-            (event.comprobantes?.nroComprobante.toString().padStart(8, "0") ??
-              "00000000"),
+          comprobanteNumber: event.comprobantes?.nroComprobante ?? 0,
+          ptoVenta: event.comprobantes?.ptoVenta ?? 0,
           Estado: "Pendiente",
           iva: Number(event.comprobantes?.iva ?? 0),
-          comprobantes: comprobantesTable,
+          comprobantes: event.comprobantes,
           currentAccountAmount: formatCurrency(NCTotal ?? 0),
           saldo_a_pagar: formatCurrency(saldo_a_pagar ?? 0),
           nombre: afiliado?.name ?? "",
@@ -118,10 +115,11 @@ export default function CCDetail(props: {
           description: event.description,
           amount: formatCurrency(event.event_amount),
           "Tipo comprobante": "Apertura de CC",
-          comprobanteNumber: "00000" + "-" + "00000000",
+          comprobanteNumber: 0,
+          ptoVenta: 0,
           Estado: "Pendiente",
           iva: 0,
-          comprobantes: comprobantesTable,
+          comprobantes: event.comprobantes,
           currentAccountAmount: formatCurrency(NCTotal ?? 0),
           saldo_a_pagar: formatCurrency(saldo_a_pagar ?? 0),
           nombre: afiliado?.name ?? "",
@@ -158,7 +156,6 @@ export default function CCDetail(props: {
         },
         [] as string[]
       );
-      console.log("rowData", rowData, rowData.length);
       excelContent.push(rowData);
     }
     const wb = XLSX.utils.book_new();
