@@ -166,14 +166,21 @@ function getIimageForBarcode() {
 function generateConcepts(
   items: Array<{ concept: string | null; total: number | null }>
 ): string {
+  const filteredItems = items.filter(item => item.concept !== "Diferencial");
   return items.map((item) => `<p>${item.concept}</p>`).join("");
 }
 
 function generateAmounts(
   items: Array<{ concept: string | null; total: number | null }>
 ): string {
-  return items.map((item) => `<p>${formatNumberAsCurrency(item.total ?? 0)}</p>`).join("");
+  const diferencial = items.find(x => x.concept === "Diferencial")?.total ?? 0;
+  const abonoTotal = items.filter(x => x.concept === "Abono").reduce((acc, item) => acc + (item.total ?? 0), 0);
+
+  items = items.filter(x => x.concept !== "Abono");
+    items.push({ concept: "Abono", total: abonoTotal + diferencial });
+  return items.map(item => `<p>${item.total}</p>`).join("");
 }
+
 
 function getTextoForTipoComprobante(tipoComprobante: string) {
   switch (tipoComprobante) {

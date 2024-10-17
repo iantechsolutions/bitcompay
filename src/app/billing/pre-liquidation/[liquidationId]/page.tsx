@@ -95,7 +95,7 @@ export default async function Home(props: {
     "Total",
   ];
 
-  if (preliquidation?.estado !== "pendiente") {
+  if (preliquidation?.estado.toLowerCase() !== "pendiente") {
     headers.push("Factura");
   }
 
@@ -111,7 +111,7 @@ export default async function Home(props: {
       <div className="flex flex-row justify-between w-full">
         {/* <GoBackButton url="/billing/pre-liquidation" /> */}
         <Title>Preliquidación</Title>
-        {preliquidation?.estado === "pendiente" && (
+        {preliquidation?.estado.toLowerCase() === "pendiente" && (
           <>
             <div className="flex flex-row gap-4 mr-8">
               <UpdateLiquidationEstadoDialog
