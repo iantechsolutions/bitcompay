@@ -539,7 +539,7 @@ async function readResponseUploadContents(
       console.log("recordValues", recordValues);
       const largeNumber = recordValues[0];
       let affiliate_number = recordValues[1];
-      let importe_string = recordValues[2];
+      let importe_string = recordValues[3];
 
       let importe_final = parceImporte(importe_string ?? "0");
       const payment_date = recordValues[0]?.slice(1, 9);
@@ -548,7 +548,7 @@ async function readResponseUploadContents(
       // const fiscal_id_number = largeNumber?.slice(84, 104);
       // const invoice_number = largeNumber?.slice(16, 21);
       // const importe_final = largeNumber?.slice(48, 58);
-      affiliate_number = affiliate_number?.slice(1, 21).replace(/^0+/, "");
+      affiliate_number = affiliate_number?.slice(0, 21).replace(/^0+/, "");
       console.log(invoice_number!.replace(/^0+/, ""), "payments_date");
       console.log(
         "El numbero",
@@ -564,11 +564,18 @@ async function readResponseUploadContents(
       const date = dayjs(`${year}${month}${day}`, "YYYYMMDD").format(
         "YYYY-MM-DD"
       );
-      console.log("mate", date);
 
-      if (affiliate_number) {
+      const invoiceNumberCleaned = invoice_number
+        ? Number(invoice_number.replace(/^0+/, ""))
+        : undefined;
+
+      console.log("mate", affiliate_number, invoiceNumberCleaned);
+      if (affiliate_number && invoiceNumberCleaned) {
         const original_transaction = await db.query.payments.findFirst({
-          where: eq(schema.payments.affiliate_number, affiliate_number),
+          where: and(
+            eq(schema.payments.affiliate_number, affiliate_number),
+            eq(schema.payments.invoice_number, invoiceNumberCleaned)
+          ),
         });
         if (original_transaction) {
           original_transaction.payment_date = dayjs(
@@ -608,25 +615,31 @@ async function readResponseUploadContents(
       const largeNumber = recordValues[0];
       const largeNumber2 = recordValues[1];
 
-      const invoice_number = largeNumber?.slice(35, 40).replace(/^0+/, "");
-      const importe_final = largeNumber?.slice(57, 68);
-      const affiliate_number = largeNumber?.slice(1, 18).replace(/^0+/, "");
-      const payment_date = largeNumber?.slice(49, 57);
+      const invoice_number = largeNumber2;
+      const importe_final = recordValues[2]?.slice(17, 28);
+      const affiliate_number = largeNumber?.slice(1, 16).replace(/^0+/, "");
+      const payment_date = recordValues[2]?.slice(9, 17);
       const year = payment_date!.slice(0, 4);
       const month = payment_date!.slice(4, 6);
       const day = payment_date!.slice(6, 8);
 
       console.log("testamento", payment_date, year, month, day);
-      console.log(importe_final, "testtt", invoice_number);
+      console.log(Number(importe_final), "testtt", invoice_number);
       const date = dayjs(`${year}${month}${day}`, "YYYYMMDD").format(
         "YYYY-MM-DD"
       );
-
       console.log(date, "boludon", affiliate_number);
 
-      if (invoice_number) {
+      const invoiceNumberCleaned = invoice_number
+        ? Number(invoice_number.replace(/^0+/, ""))
+        : undefined;
+
+      if (invoiceNumberCleaned && affiliate_number) {
         const original_transaction = await db.query.payments.findFirst({
-          where: eq(schema.payments.affiliate_number, affiliate_number ?? ""),
+          where: and(
+            eq(schema.payments.affiliate_number, affiliate_number),
+            eq(schema.payments.invoice_number, invoiceNumberCleaned)
+          ),
         });
         if (original_transaction) {
           original_transaction.payment_date = dayjs(
@@ -685,10 +698,16 @@ async function readResponseUploadContents(
       console.log(importe_final);
       console.log("affiliate_number", affiliate_number);
       console.log("invoice_number", invoice_number);
+      const invoiceNumberCleaned = invoice_number
+        ? Number(invoice_number.replace(/^0+/, ""))
+        : undefined;
 
-      if (invoice_number) {
+      if (affiliate_number && invoiceNumberCleaned) {
         const original_transaction = await db.query.payments.findFirst({
-          where: eq(schema.payments.affiliate_number, affiliate_number ?? ""),
+          where: and(
+            eq(schema.payments.affiliate_number, affiliate_number),
+            eq(schema.payments.invoice_number, invoiceNumberCleaned)
+          ),
         });
         if (original_transaction) {
           original_transaction.payment_date = dayjs(
@@ -788,9 +807,10 @@ async function readResponseUploadContents(
         payment_date = recordValues[1]?.slice(8, 16);
 
         //Cómo leés los archivos de tarjetas de débito Visa:
-      } else if ( fileContent.startsWith("0RDEBLIQC") ||
-      fileContent.startsWith("0RDEBLIMC")
-    ) {
+      } else if (
+        fileContent.startsWith("0RDEBLIQC") ||
+        fileContent.startsWith("0RDEBLIMC")
+      ) {
         console.log("Eureka");
 
         const recordValues = line.trim().split(/\s{2,}/);
@@ -819,7 +839,7 @@ async function readResponseUploadContents(
       console.log(failed_error, "failed_error");
 
       console.log("mensaje", mensaje);
-      console.log(importe_final, "importe_final");
+      console.log(affiliate_number, "affiliate_number");
       // console.log(recordValues[4], "importe_final");
 
       const day = payment_date?.slice(0, 2);
@@ -831,19 +851,21 @@ async function readResponseUploadContents(
       );
 
       console.log(date, "date");
-
+      const invoiceNumberCleaned = invoice_number
+        ? Number(invoice_number.replace(/^0+/, ""))
+        : undefined;
       try {
         let original_transaction;
-        if (affiliate_number) {
+        if (affiliate_number && invoiceNumberCleaned) {
           original_transaction = await db.query.payments.findFirst({
-            where: eq(schema.payments.affiliate_number, affiliate_number),
-          });
-        } else if (invoice_number) {
-          original_transaction = await db.query.payments.findFirst({
-            where: eq(
-              schema.payments.invoice_number,
-              Number.parseInt(invoice_number)
+            where: and(
+              eq(schema.payments.affiliate_number, affiliate_number),
+              eq(schema.payments.invoice_number, invoiceNumberCleaned)
             ),
+          });
+        } else if (invoiceNumberCleaned) {
+          original_transaction = await db.query.payments.findFirst({
+            where: eq(schema.payments.invoice_number, invoiceNumberCleaned),
           });
         }
 
@@ -883,7 +905,7 @@ async function readResponseUploadContents(
     for (const line of lines) {
       if (recordIndex === 1) {
         const recordValues = line.trim().split(/\s{2,}/);
-       
+
         //trato el ultimo elemento que esta junto nro de factura y estado de pago
         const largeNumber = recordValues[2];
 
@@ -892,7 +914,6 @@ async function readResponseUploadContents(
         const observacion = recordValues[5]?.slice(16, 56);
 
         const payment_date = recordValues[4];
-
 
         const day = payment_date?.slice(6, 8);
         const month = payment_date?.slice(4, 6);
@@ -1290,7 +1311,7 @@ async function obtenerEstado(
   let estado;
 
   switch (true) {
-    case importe_final > suma_deuda:
+    case importe_final >= suma_deuda:
       estado = await db.query.paymentStatus.findFirst({
         where: eq(schema.paymentStatus.code, "00"),
       });

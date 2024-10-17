@@ -19,7 +19,6 @@ function makeSummary(
     aportes: { amount: number }[];
   }[],
   fgFiltered: {
-    
     comprobantes: {
       items: {
         amount: number | null;
@@ -28,11 +27,12 @@ function makeSummary(
       importe: number;
       iva: string;
     }[];
-    cc:{
+    cc: {
       events: {
         current_amount: number;
+        event_amount: number;
       }[];
-    }
+    };
   }[]
 ) {
   const summary = {
@@ -57,9 +57,9 @@ function makeSummary(
     //   });
     // }
     let saldo_anterior = 0;
-    if((fg.cc?.events?.length ?? 0)  > 0){
+    if ((fg.cc?.events?.length ?? 0) > 0) {
       const lastEvent = fg.cc?.events?.at(0);
-      saldo_anterior = toNumberOrZero(lastEvent?.current_amount);
+      saldo_anterior = toNumberOrZero(lastEvent?.event_amount);
     }
 
     console.log("costas", original_comprobante);
@@ -109,7 +109,10 @@ function makeSummary(
     );
     summary.SUBTOTAL += subTotal;
 
-    const iva = computeIva((total-saldo_anterior), Number(original_comprobante?.iva ?? "0"));
+    const iva = computeIva(
+      total - saldo_anterior,
+      Number(original_comprobante?.iva ?? "0")
+    );
     summary.IVA += iva;
     summary["TOTAL A FACTURAR"] += total;
   });
@@ -363,9 +366,9 @@ export const family_groupsRouter = createTRPCRouter({
           modo: true,
           integrants: { with: { differentialsValues: true } },
           cc: {
-            with:{
+            with: {
               events: true,
-            }
+            },
           },
           businessUnitData: true,
           comprobantes: {
@@ -443,7 +446,7 @@ export const family_groupsRouter = createTRPCRouter({
       }
       const liquidation = await db.query.liquidations.findFirst({
         where: eq(schema.liquidations.id, input.liquidationId),
-      })
+      });
       const fg = await db.query.family_groups.findMany({
         with: {
           businessUnitData: true,
@@ -452,7 +455,10 @@ export const family_groupsRouter = createTRPCRouter({
               events: {
                 limit: 1,
                 orderBy: [desc(schema.events.createdAt)],
-                where: lt(schema.events.createdAt, liquidation?.createdAt ?? new Date()),
+                where: lt(
+                  schema.events.createdAt,
+                  liquidation?.createdAt ?? new Date()
+                ),
               },
             },
           },
