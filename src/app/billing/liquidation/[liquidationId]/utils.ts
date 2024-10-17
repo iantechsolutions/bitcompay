@@ -91,11 +91,11 @@ export function makeExcelRows(
     }
 
     const subTotal = computeBase(
-      total,
+      (total + saldo_anterior),
       Number(original_comprobante?.iva ?? "0")
-    );
+    ) - saldo_anterior;
 
-    const iva = computeIva(total, Number(original_comprobante?.iva ?? "0"));
+    const iva = computeIva(total + saldo_anterior, Number(original_comprobante?.iva ?? "0"));
     excelRow.push(subTotal);
     excelRow.push(iva);
     excelRow.push(total);
@@ -120,7 +120,7 @@ export function makeExcelRows(
         cuit,
         "Saldo anterior":
           //  eventPreComprobante?.current_amount ??
-          saldo_anterior,
+          saldo_anterior * -1,
         "cuota plan": cuota_planes,
         bonificacion,
         diferencial: diferencial,

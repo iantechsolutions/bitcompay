@@ -74,7 +74,7 @@ function makeSummary(
 
     const bonificacion = toNumberOrZero(
       original_comprobante?.items.find(
-        (item) => item.concept === "BONIFICACIÓN"
+        (item) => item.concept?.toUpperCase() === "BONIFICACIÓN"
       )?.amount
     );
     summary["BONIFICACIÓN"] += bonificacion;
@@ -104,19 +104,17 @@ function makeSummary(
     );
 
     const subTotal = computeBase(
-      total,
+      (total + saldo_anterior),
       Number(original_comprobante?.iva ?? "0")
-    );
+    ) - saldo_anterior
     summary.SUBTOTAL += subTotal;
 
-    const iva = computeIva(
-      total - saldo_anterior,
-      Number(original_comprobante?.iva ?? "0")
-    );
+    const iva = computeIva(total + saldo_anterior, Number(original_comprobante?.iva ?? "0"));
     summary.IVA += iva;
     summary["TOTAL A FACTURAR"] += total;
   });
-
+  //invierto el simbolo en saldo anterior
+  summary["SALDO ANTERIOR"] = summary["SALDO ANTERIOR"] * -1;
   return summary;
 }
 
