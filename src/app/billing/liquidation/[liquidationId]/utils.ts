@@ -108,7 +108,7 @@ export function makeExcelRows(
     // });
     let currentAccountAmount = -1;
     if (typeof original_comprobante?.importe === "number") {
-      currentAccountAmount = saldo_anterior - original_comprobante.importe;
+      currentAccountAmount = saldo_anterior;
     }
 
     const plan = fg?.plan?.description ?? "";
