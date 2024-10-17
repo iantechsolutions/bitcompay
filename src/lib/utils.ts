@@ -203,21 +203,28 @@ export function htmlBill(
   id_number: string,
   afip_status: string
 ) {
-  
-  const subtotal = comprobante?.items.reduce(
-    (acc: number, item: { amount: number }) => acc + (item?.amount ?? 0),
-    0
-  )
+  let subtotal = 0;
+  let iva = 0;
+  if(comprobante.items.length > 0){
+    subtotal = comprobante.items.reduce(
+      (acc: number, item: { total: number }) => acc + (item?.total ?? 0),
+      0
+    )
+    const iva = comprobante?.items.reduce(
+      (acc: number, item: { iva: number }) => acc + (item?.iva ?? 0),
+      0
+    )
+  }
 
-  const iva = comprobante?.items.reduce(
-    (acc: number, item: { iva: number }) => acc + (item?.iva ?? 0),
-    0
-  )
+  let totalTributes = 0;
 
-  const totalTributes = comprobante?.otherTributes.reduce(
-    (acc: number, tribute: { amount: number }) => acc + (tribute?.amount ?? 0),
-    0
-  )
+  if(comprobante.otherTributes.length > 0){
+    totalTributes = comprobante.otherTributes.reduce(
+      (acc: number, tribute: { amount: number }) => acc + (tribute?.amount ?? 0),
+      0
+    )
+  }
+
 
  const total = subtotal + iva + totalTributes
   

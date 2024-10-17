@@ -254,6 +254,7 @@ async function approbatecomprobante(liquidationId: string) {
       comprobantes: {
         with: {
           items: true,
+          otherTributes:true,
           family_group: {
             with: {
               integrants: {
@@ -425,7 +426,7 @@ async function approbatecomprobante(liquidationId: string) {
               comprobante?.previous_facturaId ?? ""
             ),
           });
-          if (comprobanteAnterior?.estado == "error") {
+          if (comprobanteAnterior?.estado !== "error") {
             const comprobanteCod =
               comprobanteDictionary[comprobanteAnterior?.tipoComprobante ?? ""];
             const comprobantecodNC =
@@ -632,7 +633,9 @@ async function approbatecomprobante(liquidationId: string) {
           console.log("1");
           const pdfGenerateStart = Date.now();
           console.log("2");
-          const html = htmlBill(
+          let html = ""
+          try{
+          html = htmlBill(
             comprobante,
             comprobante.family_group?.businessUnitData!.company,
             producto,
@@ -649,6 +652,11 @@ async function approbatecomprobante(liquidationId: string) {
             billResponsible?.fiscal_id_number ?? "",
             billResponsible?.afip_status ?? ""
           );
+          }
+          catch(e){
+            console.log("Error en htmlBill");
+            console.log(e);
+          }
           console.log("3");
           const name = `FAC_${lastVoucher + 1}.pdf`; // NOMBRE        lastVoucher += 1;
           console.log("4. prepdf comprobante: ", index);
