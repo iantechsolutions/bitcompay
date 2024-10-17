@@ -35,6 +35,7 @@ import { api } from "~/trpc/react";
 import { toast } from "sonner";
 import { useState } from "react";
 import { saveAs } from "file-saver";
+import { useAFIP } from "~/app/afip-provider";
 
 interface Props {
   changePage: (page: "formPage" | "confirmationPage") => void;
@@ -51,7 +52,6 @@ interface Props {
   ivaTotal: number;
   name: string;
   document: string;
-  afip: any;
   fiscal_document: string;
   ivaCondition: string;
   sell_condition: string;
@@ -99,7 +99,6 @@ const confirmationPage = ({
   document,
   fiscal_document,
   ivaCondition,
-  afip,
   sell_condition,
   document_type,
   brandId,
@@ -162,7 +161,7 @@ const confirmationPage = ({
       setLoadingDownload(false);
     }
   }
-
+  const { afipObject, setAfipObject } = useAFIP();
   async function handleAFIP() {
     setIsLoading(true);
     handleApprove();
@@ -186,7 +185,7 @@ const confirmationPage = ({
     const fcSelec = asociatedFCForm.getValues().comprobantes[0]?.id;
     if (tipoComprobante == "1" || tipoComprobante == "6") {
       try {
-        last_voucher = await afip.ElectronicBilling.getLastVoucher(
+        last_voucher = await afipObject?.ElectronicBilling.getLastVoucher(
           form.getValues().puntoVenta,
           tipoComprobante
         );
@@ -245,7 +244,7 @@ const confirmationPage = ({
       // const facSeleccionada = comprobantes?.find((x) => x.id == fcSelec);
       let ivaFloat = (100 + parseFloat(fcSeleccionada[0]?.iva ?? "0")) / 100;
       try {
-        last_voucher = await afip.ElectronicBilling.getLastVoucher(
+        last_voucher = await afipObject?.ElectronicBilling.getLastVoucher(
           form.getValues().puntoVenta,
           tipoComprobante
         );
@@ -426,7 +425,7 @@ const confirmationPage = ({
         marginBottom: 0.4, // Margen inferior en pulgadas. Usar 0.1 para ticket
       };
       const pdfname = (last_voucher + 1).toString() + ".pdf";
-      const resHtml = await afip.ElectronicBilling.createPDF({
+      const resHtml = await afipObject?.ElectronicBilling.createPDF({
         html: html,
         file_name: pdfname,
         options: options,
@@ -434,7 +433,7 @@ const confirmationPage = ({
 
       const updatedComprobante = await updateComprobante({
         id: createdComprobante.id ?? "",
-        billLink: resHtml.file,
+        billLink: resHtml?.file,
         number: last_voucher + 1,
         state: "pendiente",
       });
@@ -442,7 +441,7 @@ const confirmationPage = ({
       toast.success("La factura se creo correctamente");
       setIsLoading(false);
       setFinishedAFIP(true);
-      setUrl(resHtml.file);
+      setUrl(resHtml?.file);
       // reloadPage();
 
       // if (resHtml.file) {
