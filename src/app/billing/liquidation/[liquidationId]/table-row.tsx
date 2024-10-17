@@ -150,7 +150,7 @@ export default function TableRowContainer({
           {" "}
           {toNumberOrZero(total)}
         </TableCell>
-        {preliquidation!.estado !== "pendiente" && (
+        {preliquidation!.estado.toLowerCase() !== "pendiente" && (
           <TableCell className="rounded-r-md border border-[#6cebd1]">
             {original_comprobante.billLink &&
             original_comprobante.billLink !== "" ? (
