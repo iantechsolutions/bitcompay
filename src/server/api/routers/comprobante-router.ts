@@ -1467,12 +1467,12 @@ export async function preparateComprobante(
       const totalAportes = grupo.integrants
         .flatMap((part) => part.aportes_os)
         .filter((a) => {
-          if (!a.contribution_date || !fechaDesde) return false;
-          console.log("contributionMonth", ((a.contribution_date?.getMonth() ?? 0) + 1));
-          console.log("contributionYear", a.contribution_date?.getFullYear());
+          if (!a.process_date || !fechaDesde) return false;
+          console.log("contributionMonth", ((a.process_date?.getMonth() ?? 0) + 1));
+          console.log("contributionYear", a.process_date?.getFullYear());
           return (
-            ((a.contribution_date?.getMonth() ?? 0) + 1) === fechaDesde?.getMonth() &&
-            a.contribution_date?.getFullYear() === fechaDesde?.getFullYear()
+            ((a.process_date?.getMonth() ?? 0) + 1) === fechaDesde?.getMonth() &&
+            a.process_date?.getFullYear() === fechaDesde?.getFullYear()
           );
         })
         .reduce((sum, aporte) => sum + parseInt(aporte.amount), 0);
