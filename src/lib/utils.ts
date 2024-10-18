@@ -1085,7 +1085,7 @@ function numeroALetras(numero: number | undefined): string {
   ];
   const centenas = [
     "",
-    "cien",
+    "ciento",
     "doscientos",
     "trescientos",
     "cuatrocientos",
@@ -1105,6 +1105,15 @@ function numeroALetras(numero: number | undefined): string {
     "diecisiete",
     "dieciocho",
     "diecinueve",
+    "veintiuno",
+    "veintidos",
+    "veintitres",
+    "veinticuatro",
+    "veinticinco",
+    "veintiseis",
+    "veintisiete",
+    "veintiocho",
+    "veintinueve",
   ];
 
   // Función para capitalizar la primera letra
@@ -1129,6 +1138,7 @@ function numeroALetras(numero: number | undefined): string {
     if (numero === 0) return "cero";
     if (numero < 10) return unidades[numero]!;
     if (numero >= 11 && numero < 20) return especiales[numero - 11]!;
+    if (numero >= 21 && numero < 30) return especiales[numero - 12]!;
     if (numero < 100) {
       return (
         decenas[Math.floor(numero / 10)] +
