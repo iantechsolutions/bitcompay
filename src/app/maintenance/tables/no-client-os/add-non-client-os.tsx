@@ -127,9 +127,9 @@ export function AddNonClientOs(props: {
 
   function validateFields() {
     const errors: string[] = [];
-    if(!identificationNumber) errors.push("Codigo");
-    if(!initials) errors.push("Sigla");
-    if(!description) errors.push("Descripcion");
+    if (!identificationNumber) errors.push("Codigo");
+    if (!initials) errors.push("Sigla");
+    if (!description) errors.push("Descripcion");
 
     return errors;
   }
@@ -150,6 +150,7 @@ export function AddNonClientOs(props: {
         name: razonsocial,
         description: description,
         isClient: false,
+        fiscal_id_number: fiscalIdNumber.toString() ?? "",
       });
 
       toast.success("Obra social creada correctamente");
@@ -179,6 +180,7 @@ export function AddNonClientOs(props: {
         initials: initials,
         name: razonsocial,
         description: description,
+        fiscal_id_number: fiscalIdNumber.toString() ?? "",
       });
 
       toast.success("Datos actualizados");
@@ -224,7 +226,7 @@ export function AddNonClientOs(props: {
             )}
           </DialogHeader>
           <div className="grid grid-cols-4 gap-y-4 gap-x-8 justify-between">
-          <div>
+            <div>
               <Label htmlFor="name" className="text-xs text-gray-500">
                 NOMBRE
               </Label>
@@ -234,6 +236,19 @@ export function AddNonClientOs(props: {
                 placeholder=""
                 value={razonsocial}
                 onChange={(e) => setRazonsocial(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="fiscalIdNumber" className="text-xs text-gray-500">
+                CUIT
+              </Label>
+              <Input
+                id="fiscalIdNumber"
+                className="w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                placeholder="0"
+                type="number"
+                value={fiscalIdNumber}
+                onChange={(e) => setFiscalIdNumber(e.target.value)}
               />
             </div>
             <div>

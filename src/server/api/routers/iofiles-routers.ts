@@ -243,7 +243,9 @@ export const iofilesRouter = createTRPCRouter({
             const newGenChannles = [...payment.genChannels, channel.id];
             console.log("updating gen Channels");
             try {
-              if (payment.genChannels.length === channelsList?.length! - 1) {
+              
+              if (payment.genChannels.length !== ((channelsList?.length ?? 0) - 1)) {
+                console.log("entro if, ", payment.genChannels.length, channelsList?.length);
                 // update statuses
                 await db
                   .update(schema.payments)
@@ -253,6 +255,7 @@ export const iofilesRouter = createTRPCRouter({
                   })
                   .where(eq(schema.payments.id, payment.id));
               } else {
+                console.log("no entro if, ", payment.genChannels.length, channelsList?.length);
                 await db
                   .update(schema.payments)
                   .set({

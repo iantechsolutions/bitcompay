@@ -580,7 +580,7 @@ async function approbatecomprobante(liquidationId: string) {
             await db.insert(schema.payments).values({
               companyId:
                 comprobante.family_group?.businessUnitData?.company?.id ?? "",
-              invoice_number: comprobante?.nroComprobante,
+              invoice_number: lastVoucher,
               userId: user?.id ?? "",
               g_c:
                 comprobante.family_group?.businessUnitData?.brand?.number ?? 0,
