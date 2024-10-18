@@ -205,8 +205,8 @@ function generateAmounts(
   items.push({ concept: "Abono", total: abonoTotal + (diferencial?.total ?? 0), amount: abonoAmount + (diferencial?.amount ?? 0)});
   items = items.sort((a, b) => (a.total ?? 0) - (b.total ?? 0));
   return items.map((item) => {
-    if (item.concept === "Saldo a favor" || item.concept === "Total factura") return "";
-    return ((`<p>${item.amount}</p>`))
+    if (item.concept === "Saldo a favor" || item.concept === "Total factura" || item.amount === 0) return "";
+    return ((`<p>${formatNumberAsCurrency(item.amount ?? 0)}</p>`))
   }).join("");
 }
 
@@ -247,7 +247,8 @@ export function htmlBill(
   domicilio: string,
   localidad: string,
   provincia: string,
-  sellCondition: string | undefined,
+  cp: string,
+  sellCondition: string,
   id_type: string,
   id_number: string,
   afip_status: string
@@ -308,7 +309,6 @@ export function htmlBill(
   }
 
   let saldoAfavor = comprobante?.items.find((x: any) => x.concept === "Saldo a favor");
-
 
   // console.log(voucher);
 
@@ -798,7 +798,7 @@ padding: 0;
           <span><span>${id_type}:</span> ${id_number}</span>
         </div>
         <div style="grid-column: 1 / span 2;">
-          <span><span>Domicilio:</span> ${domicilio} ${localidad} ${provincia}</span>
+          <span><span>Domicilio:</span> ${domicilio} ${localidad} ${cp} ${provincia}</span>
         </div>
         <div style="grid-column: 1 / span 1;">
           <span><span>Condición de AFIP:</span> ${afip_status}</span>

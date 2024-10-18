@@ -407,6 +407,7 @@ const confirmationPage = ({
         (billResponsible
           ? billResponsible?.postal_code?.cp
           : obraSocial?.cpData?.cp) ?? "",
+          sell_condition,
         (billResponsible
           ? billResponsible?.fiscal_id_type
           : obraSocial?.fiscal_id_type) ?? "",
