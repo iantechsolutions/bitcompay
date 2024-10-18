@@ -15,7 +15,7 @@ export function makeExcelRows(
       (integrante) => integrante?.isBillResponsible
     );
     const name = billResponsible?.name ?? "";
-    const cuit = billResponsible?.id_number ?? "";
+    const cuit = billResponsible?.fiscal_id_number ?? "";
     excelRow.push(fg?.numericalId ?? "");
     excelRow.push(name);
     excelRow.push(cuit);

@@ -23,6 +23,18 @@ export const aportes_osRouter = createTRPCRouter({
 
       return aportes_os;
     }),
+  getByAffiliate: protectedProcedure
+    .input(
+      z.object({
+        affiliateId: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      const aportes_os = await db.query.aportes_os.findMany({
+        where: eq(schema.aportes_os.id_affiliate, input.affiliateId),
+      });
+      return aportes_os;
+    }),
   getByOS: protectedProcedure
     .input(
       z.object({
