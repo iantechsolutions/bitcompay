@@ -150,39 +150,47 @@ export default function Page() {
       setLogo(marcas[0]?.logo_url ?? "");
     }
 
-    if (
-      (tipoComprobante != "0" &&
-        (!form.getValues().puntoVenta ||
-          !form.getValues().dateEmision ||
-          !tipoComprobante ||
-          !iva ||
-          !form.getValues().dateVencimiento ||
-          !subTotal ||
-          !tributos)) ||
-      (tipoComprobante == "0" &&
-        (!form.getValues().dateEmision ||
-          !tipoComprobante ||
-          !form.getValues().dateVencimiento ||
-          !subTotal ||
-          !tributos))
-    ) {
-      console.log(!form.getValues().puntoVenta);
-      console.log(!form.getValues().dateEmision);
-      console.log(!tipoComprobante);
-      console.log(!concepto);
-      console.log(!iva);
-      console.log(!form.getValues().dateVencimiento);
-      console.log(!subTotal);
-      console.log(!tributos);
 
-      toast.error("Ingrese los valores requeridos");
+    if(!form.getValues().dateEmision){
+      toast.error("Ingrese la fecha de emisión");
       return null;
     }
+
+    if(!tipoComprobante){
+      toast.error("Ingrese el tipo de comprobante");
+      return null;
+    }
+
+    if(!form.getValues().dateVencimiento){
+      toast.error("Ingrese la fecha de vencimiento");
+      return null;
+    }
+
+    if(!subTotal){
+      toast.error("Ingrese el importe");
+      return null;
+    }
+
+    if(!tributos){
+      toast.error("Ingrese los tributos");
+      return null;
+    }
+
+    if(tipoComprobante != "0" && !iva){
+      toast.error("Ingrese el IVA");
+      return null;
+    }
+
+    if(tipoComprobante != "0" && !form.getValues().puntoVenta){
+      toast.error("Ingrese el punto de venta");
+      return null;
+    }
+
     if (
       concepto !== "1" &&
       (!form.getValues().dateDesde || !form.getValues().dateHasta)
     ) {
-      toast.error("Ingrese los valores requeridos");
+      toast.error("Ingrese las fechas de servicio");
       return null;
     }
     try {
