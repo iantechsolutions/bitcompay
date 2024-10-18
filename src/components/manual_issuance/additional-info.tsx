@@ -426,8 +426,8 @@ export default function AdditionalInfoCard({
                                     (comprobante) =>
                                       comprobante.tipoComprobante ===
                                         possibleComprobanteTipo &&
-                                      (comprobante.estado === "Parcial" ||
-                                        comprobante.estado === "Pendiente")
+                                      (comprobante.estado?.toUpperCase() === "PARCIAL" ||
+                                        comprobante.estado?.toUpperCase() === "PENDIENTE")
                                   )
                                   .slice(0, 10)
                                   .map((comprobante) => (

@@ -319,10 +319,10 @@ export default function AddPreLiquidation() {
               <Select
                 onValueChange={(e) => setMes(Number(e))}
                 defaultValue={mes?.toString()}>
-                <SelectTrigger className="w-full  border-[#BEF0BB] border-0 border-b text-[#3E3E3E] bg-background rounded-none">
+                <SelectTrigger className="w-full border-[#BEF0BB] border-0 border-b text-[#3E3E3E] bg-background rounded-none">
                   <SelectValue placeholder="Seleccione un mes" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="h-[220px]">
                   <SelectItem
                     value="1"
                     disabled={new Date(anio, 1, 1) < new Date()}>

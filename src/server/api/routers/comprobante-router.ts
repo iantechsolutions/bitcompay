@@ -285,7 +285,7 @@ async function approbatecomprobante(liquidationId: string) {
   });
   console.log(`[TIMING] Liquidation query: ${Date.now() - liquidationStart}ms`);
 
-  if (liquidation?.estado === "pendiente") {
+  if (liquidation?.estado.toLowerCase() === "pendiente") {
     const userStart = Date.now();
     const user = await currentUser();
 
@@ -1453,15 +1453,26 @@ export async function preparateComprobante(
       const tipoComprobante = getBillingData(billResponsible, grupo);
 
       const tipoDocumento = idDictionary[billResponsible?.fiscal_id_type ?? ""];
-
+      console.log("aportes GF")
+      console.log(grupo.integrants.flatMap((part) => part.aportes_os));
+      
+      console.log("dateDesde",dateDesde);
+      console.log("dateHasta",dateHasta);
+      const fechaDesde = new Date(dateHasta?.getTime() ?? 0);
+      const mesActual = dateHasta?.getMonth() ?? 0
+      fechaDesde?.setMonth((mesActual));
+      console.log("comparisonMonth", fechaDesde?.getMonth());
+      console.log("comparisonYear", fechaDesde?.getFullYear());
+      console.log("aportes", grupo.integrants.flatMap((part) => part.aportes_os))
       const totalAportes = grupo.integrants
         .flatMap((part) => part.aportes_os)
         .filter((a) => {
-          if (!a.contribution_date || !dateDesde) return false;
-          dateDesde?.setMonth(dateDesde.getMonth() - 1);
+          if (!a.process_date || !fechaDesde) return false;
+          console.log("contributionMonth", ((a.process_date?.getMonth() ?? 0) + 1));
+          console.log("contributionYear", a.process_date?.getFullYear());
           return (
-            a.contribution_date?.getMonth() === dateDesde.getMonth() &&
-            a.contribution_date?.getFullYear() === dateDesde.getFullYear()
+            ((a.process_date?.getMonth() ?? 0) + 1) === fechaDesde?.getMonth() &&
+            a.process_date?.getFullYear() === fechaDesde?.getFullYear()
           );
         })
         .reduce((sum, aporte) => sum + parseInt(aporte.amount), 0);
@@ -1657,6 +1668,15 @@ async function calculateAmount(
   saldo: number,
   totalAportes: number
 ) {
+  console.log("interes", interest)
+  console.log("ivaFloat", ivaFloat)
+  console.log("iva", iva)
+  console.log("bonificacion", bonificacion)
+  console.log("abono", abono)
+  console.log("diferencial", diferencial)
+  console.log("previous_bill", previous_bill)
+  console.log("saldo", saldo)
+  console.log("totalAportes", totalAportes)
   let amount = 0;
   let ivaCodigo = null;
   const { modo } = grupo;

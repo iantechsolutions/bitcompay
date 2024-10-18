@@ -758,7 +758,7 @@ export const requiredColumns = [
 ];
 
 export const recHeadersOS: TableHeaders = [
-  { key: "cuil", label: "CUIT", width: 140 },
+  { key: "cuil", label: "CUIL", width: 140 },
   { key: "contribution_date", label: "PERIODO", width: 140 },
   { key: "support_date", label: "PERIODO SOPORTE", width: 140 },
   { key: "excelAmount", label: "MONTO", width: 140 },
@@ -766,7 +766,7 @@ export const recHeadersOS: TableHeaders = [
 ];
 
 export const requiredColumnsOS = [
-  { key: "cuil", label: "CUIT", width: 140 },
+  { key: "cuil", label: "CUIL", width: 140 },
   // { key: "contribution_date", label: "PERIODO", width: 140 },
   { key: "excelAmount", label: "MONTO", width: 140 },
 ];
