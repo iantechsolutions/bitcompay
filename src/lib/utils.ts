@@ -164,25 +164,26 @@ function getIimageForBarcode() {
 }
 
 function generateConcepts(
-  items: Array<{ concept: string | null; total: number | null }>
+  items: Array<{ concept: string | null; total: number | null;amount:number | null }>
 ): string {
-  let bonoTotal = 0;
+  // let bonoTotal = 0;
 
-  items.forEach((item) => {
-    if (item.concept === "bono") {
-      bonoTotal += item.total ?? 0;
-    }
-  });
+  // items.forEach((item) => {
+  //   if (item.concept === "bono") {
+  //     bonoTotal += item.total ?? 0;
+  //   }
+  // });
 
-  for (const item of items) {
-    if (item.concept === "Diferencial" && item.total) {
-      item.total += bonoTotal;
-    }
-  }
+  // for (const item of items) {
+  //   if (item.concept === "Diferencial" && item.total) {
+  //     item.total += bonoTotal;
+  //   }
+  // }
+
   items = items.sort((a, b) => (a.total ?? 0) - (b.total ?? 0));
   return items
     .map((item) => {
-      if (item.concept === "Diferencial" || item.concept === "Saldo a favor") return "";
+      if (item.concept === "Diferencial" || item.concept === "Saldo a favor" || item.concept === "Total factura" || item.amount===0) return "";
       return `<p>${item.concept}</p>`;
     }).join("");
 }
@@ -193,9 +194,9 @@ function generateAmounts(
   const diferencial =
     items.find((x) => x.concept === "Diferencial");
   
-    const abonoTotal = items
-    .filter((x) => x.concept === "Abono")
-    .reduce((acc, item) => acc + (item.total ?? 0), 0);
+  const abonoTotal = items
+  .filter((x) => x.concept === "Abono")
+  .reduce((acc, item) => acc + (item.total ?? 0), 0);
 
   const abonoAmount = items
   .filter((x) => x.concept === "Abono")
@@ -205,7 +206,7 @@ function generateAmounts(
   items.push({ concept: "Abono", total: abonoTotal + (diferencial?.total ?? 0), amount: abonoAmount + (diferencial?.amount ?? 0)});
   items = items.sort((a, b) => (a.total ?? 0) - (b.total ?? 0));
   return items.map((item) => {
-    if (item.concept === "Saldo a favor" || item.concept === "Total factura" || item.amount === 0) return "";
+    if (item.concept === "Saldo a favor" || item.concept=="Diferencial" ||  item.concept === "Total factura" || item.amount === 0) return "";
     return ((`<p>${formatNumberAsCurrency(item.amount ?? 0)}</p>`))
   }).join("");
 }
