@@ -148,6 +148,7 @@ const idDictionary: { [key: string]: number } = {
 interface VoucherResult {
   res: { CAE: string; CAEFchVto: string; voucherNumber: number } | null;
   result: "Pendiente" | "Error";
+  error?: string;
 }
 
 async function createNextVoucher(
@@ -157,6 +158,7 @@ async function createNextVoucher(
   let result: "Pendiente" | "Error" = "Pendiente";
   let res: { CAE: string; CAEFchVto: string; voucherNumber: number } | null =
     null;
+  let error: string = "";
   try {
     res = await afip.ElectronicBilling.createNextVoucher(data);
     console.log(res);
@@ -171,9 +173,10 @@ async function createNextVoucher(
       result = (await createNextVoucher(data, afip)).result;
     } else {
       result = "Error";
+      error = e?.toString() ?? "Desconocido";
     }
   }
-  return { res, result };
+  return { res, result, error };
 }
 
 const preparedUpdatePayment = db
@@ -405,6 +408,7 @@ async function approbatecomprobante(liquidationId: string) {
         const ivaFloat = parseFloat(comprobante?.iva ?? "0") / 100;
         let data = {};
         let comprobanteEstado: "Pendiente" | "Error" = "Pendiente";
+        let afipError = "";
         const processStart = Date.now();
         if (comprobante?.origin == "Nota de credito") {
           const comprobanteAnterior = await db.query.comprobantes.findFirst({
@@ -463,6 +467,7 @@ async function approbatecomprobante(liquidationId: string) {
             };
             const temp = await createNextVoucher(data, afip);
             comprobanteEstado = temp.result;
+            afipError = temp.error ?? "";
             lastVoucher = temp.res?.voucherNumber ?? 0;
             const ccs = await db.query.currentAccount.findMany({
               with: {
@@ -491,11 +496,19 @@ async function approbatecomprobante(liquidationId: string) {
               comprobanteId: comprobante?.previous_facturaId,
               statusId: statusCancelado?.id,
             });
+            await db
+              .update(schema.comprobantes)
+              .set({
+                estado: comprobanteEstado,
+                nroComprobante: lastVoucher,
+              })
+              .where(eq(schema.comprobantes.id, comprobante.id));
           } else {
             await db
               .update(schema.comprobantes)
               .set({
                 estado: "Error",
+                afipError: afipError,
               })
               .where(eq(schema.comprobantes.id, comprobante.id));
           }
@@ -538,6 +551,7 @@ async function approbatecomprobante(liquidationId: string) {
           };
           // try {
           const temp = await createNextVoucher(data, afip);
+          afipError = temp.error ?? "Desconocido";
           comprobanteEstado = temp.result;
           lastVoucher = temp.res?.voucherNumber ?? 0;
 
@@ -546,7 +560,7 @@ async function approbatecomprobante(liquidationId: string) {
               .update(schema.comprobantes)
               .set({
                 estado: comprobanteEstado,
-                nroComprobante: lastVoucher + 1,
+                nroComprobante: lastVoucher,
               })
               .where(eq(schema.comprobantes.id, comprobante.id));
 
@@ -620,6 +634,7 @@ async function approbatecomprobante(liquidationId: string) {
               .update(schema.comprobantes)
               .set({
                 estado: comprobanteEstado,
+                afipError: afipError,
               })
               .where(eq(schema.comprobantes.id, comprobante.id));
           }
@@ -642,7 +657,7 @@ async function approbatecomprobante(liquidationId: string) {
               comprobante,
               comprobante.family_group?.businessUnitData!.company,
               producto,
-              lastVoucher + 1,
+              lastVoucher,
               comprobante.family_group?.businessUnitData!.brand,
               billResponsible?.name ?? "",
               (billResponsible?.address ?? "") +
@@ -660,14 +675,14 @@ async function approbatecomprobante(liquidationId: string) {
             console.log(e);
           }
           console.log("3");
-          const name = `FAC_${lastVoucher + 1}.pdf`; // NOMBRE        lastVoucher += 1;
+          const name = `FAC_${lastVoucher}.pdf`; // NOMBRE        lastVoucher += 1;
           console.log("4. prepdf comprobante: ", index);
           await PDFFromHtml(
             html,
             name,
             afip,
             comprobante?.id ?? "",
-            lastVoucher + 1,
+            lastVoucher,
             comprobanteEstado
           );
           console.log(
@@ -1715,6 +1730,10 @@ async function calculateAmount(
   //   amount = saldo + interest + precioNuevo - contribution;
   //
   // }
+
+  if (amount <= 0){
+    amount = 1;
+  }
 
   return { amount, ivaCodigo };
 }
