@@ -1052,94 +1052,95 @@ function getPaymentMethods(tipoComprobante: string) {
          </div>
       </section>`;
   } else if (tipoComprobante.includes("NOTA DE")) {
-    return ""; 
+    return ' '; 
   } else {
-    return renderMediosDePago('cheque');
+    // return renderMediosDePago('cheque');
+    return ' ';
   }
 }
-    function renderMediosDePago(medioDePago: keyof typeof mediosDePagoDetalles): string {
-      let output = '';
-      const detalles = mediosDePagoDetalles[medioDePago];
+//     function renderMediosDePago(medioDePago: keyof typeof mediosDePagoDetalles): string {
+//       let output = '';
+//       const detalles = mediosDePagoDetalles[medioDePago];
     
-      if (medioDePago === 'cheque' && detalles) {
-        output = `
-      <section style="padding-left:40px; padding-right:40px; padding-top: 15px; padding-bottom: 5px;">
-        <div style="margin-bottom: 8px;">
-          <h2 style="color: #3E3E3E; font-weight: bold; font-size:16px; display: inline;">
-            Medios de pago:
-          </h2>
-          <span style="color: #3E3E3E; font-weight: normal; font-size:16px;">
-            Cheque
-          </span>
-        </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; color: #3E3E3E; font-size: 16px;">
-          <div>
-            <span style="font-weight:600; margin-right:10px;">N° de cheque:</span>${detalles.numeroCheque}
-          </div>
-          <div>
-            <span style="font-weight:600; margin-right:10px;">Banco: </span>${detalles.banco}
-          </div>
-          <div>
-            <span style="font-weight:600; margin-right:10px;">Fecha de pago:</span>${detalles.fechaPago}
-          </div>
-        </div>
-      </section>
-    `;
-  } else if (medioDePago === 'chequeDiferido' && detalles) {
-    output = `
-      <section style="padding-left:40px; padding-right:40px; padding-top: 15px; padding-bottom: 5px;">
-        <div style="margin-bottom: 8px;">
-          <h2 style="color: #3E3E3E; font-weight: bold; font-size:16px; display: inline;">
-            Medios de pago:
-          </h2>
-          <span style="color: #3E3E3E; font-weight: normal; font-size:16px;">
-            Cheque de pago diferido
-          </span>
-        </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; color: #3E3E3E; font-size: 16px;">
-          <div>
-            <span style="font-weight:600; margin-right:10px;">N° de cheque:</span>${detalles.numeroCheque}
-          </div>
-          <div>
-            <span style="font-weight:600; margin-right:10px;">Banco:</span>${detalles.banco}
-          </div>
-          <div>
-            <span style="font-weight:600; margin-right:10px;">Fecha de emisión:</span>${detalles.fechaEmision}
-          </div>
-          <div>
-            <span style="font-weight:600; margin-right:10px;">Fecha de pago:</span>${detalles.fechaPago}
-          </div>
-        </div>
-      </section>
-    `;
-  } else if (medioDePago === 'tarjeta' && detalles) {
-    output = `
-      <section style="padding-left:40px; padding-right:40px; padding-top: 15px; padding-bottom: 5px;">
-        <div style="margin-bottom: 8px;">
-          <h2 style="color: #3E3E3E; font-weight: bold; font-size:16px; display: inline;">
-            Medios de pago:
-          </h2>
-          <span style="color: #3E3E3E; font-weight: normal; font-size:16px;">
-            Tarjeta
-          </span>
-        </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; color: #3E3E3E; font-size: 16px;">
-          <div>
-            <span style="font-weight:600; margin-right:10px;">Bandera:</span>${detalles.bandera}
-          </div>
-          <div>
-            <span style="font-weight:600; margin-right:10px;">Tipo de tarjeta:</span>${detalles.tipoTarjeta}
-          </div>
-        </div>
-      </section>
-    `;
-  }
-  const medioDePagoSeleccionado = 'cheque';
-const paymentDetailsSection = renderMediosDePago(medioDePagoSeleccionado as keyof typeof mediosDePagoDetalles);
-console.log(paymentDetailsSection);
+//       if (medioDePago === 'cheque' && detalles) {
+//         output = `
+//       <section style="padding-left:40px; padding-right:40px; padding-top: 15px; padding-bottom: 5px;">
+//         <div style="margin-bottom: 8px;">
+//           <h2 style="color: #3E3E3E; font-weight: bold; font-size:16px; display: inline;">
+//             Medios de pago:
+//           </h2>
+//           <span style="color: #3E3E3E; font-weight: normal; font-size:16px;">
+//             Cheque
+//           </span>
+//         </div>
+//         <div style="display: flex; justify-content: space-between; align-items: center; color: #3E3E3E; font-size: 16px;">
+//           <div>
+//             <span style="font-weight:600; margin-right:10px;">N° de cheque:</span>${detalles.numeroCheque}
+//           </div>
+//           <div>
+//             <span style="font-weight:600; margin-right:10px;">Banco: </span>${detalles.banco}
+//           </div>
+//           <div>
+//             <span style="font-weight:600; margin-right:10px;">Fecha de pago:</span>${detalles.fechaPago}
+//           </div>
+//         </div>
+//       </section>
+//     `;
+//   } else if (medioDePago === 'chequeDiferido' && detalles) {
+//     output = `
+//       <section style="padding-left:40px; padding-right:40px; padding-top: 15px; padding-bottom: 5px;">
+//         <div style="margin-bottom: 8px;">
+//           <h2 style="color: #3E3E3E; font-weight: bold; font-size:16px; display: inline;">
+//             Medios de pago:
+//           </h2>
+//           <span style="color: #3E3E3E; font-weight: normal; font-size:16px;">
+//             Cheque de pago diferido
+//           </span>
+//         </div>
+//         <div style="display: flex; justify-content: space-between; align-items: center; color: #3E3E3E; font-size: 16px;">
+//           <div>
+//             <span style="font-weight:600; margin-right:10px;">N° de cheque:</span>${detalles.numeroCheque}
+//           </div>
+//           <div>
+//             <span style="font-weight:600; margin-right:10px;">Banco:</span>${detalles.banco}
+//           </div>
+//           <div>
+//             <span style="font-weight:600; margin-right:10px;">Fecha de emisión:</span>${detalles.fechaEmision}
+//           </div>
+//           <div>
+//             <span style="font-weight:600; margin-right:10px;">Fecha de pago:</span>${detalles.fechaPago}
+//           </div>
+//         </div>
+//       </section>
+//     `;
+//   } else if (medioDePago === 'tarjeta' && detalles) {
+//     output = `
+//       <section style="padding-left:40px; padding-right:40px; padding-top: 15px; padding-bottom: 5px;">
+//         <div style="margin-bottom: 8px;">
+//           <h2 style="color: #3E3E3E; font-weight: bold; font-size:16px; display: inline;">
+//             Medios de pago:
+//           </h2>
+//           <span style="color: #3E3E3E; font-weight: normal; font-size:16px;">
+//             Tarjeta
+//           </span>
+//         </div>
+//         <div style="display: flex; justify-content: space-between; align-items: center; color: #3E3E3E; font-size: 16px;">
+//           <div>
+//             <span style="font-weight:600; margin-right:10px;">Bandera:</span>${detalles.bandera}
+//           </div>
+//           <div>
+//             <span style="font-weight:600; margin-right:10px;">Tipo de tarjeta:</span>${detalles.tipoTarjeta}
+//           </div>
+//         </div>
+//       </section>
+//     `;
+//   }
+//   const medioDePagoSeleccionado = 'cheque';
+// const paymentDetailsSection = renderMediosDePago(medioDePagoSeleccionado as keyof typeof mediosDePagoDetalles);
+// console.log(paymentDetailsSection);
 
-  return output;
-}
+//   return output;
+// }
 
 export async function ingresarAfip() {
   //CUIT QUE QUEREMOS QUE COBRE
@@ -1256,15 +1257,15 @@ function numeroALetras(numero: number | undefined): string {
   };
 
   // Función para obtener los decimales de un número
-  const obtenerDecimales = (numero: number | undefined): string => {
-    if (!numero) return "00";
+  const obtenerDecimales = (numero: number | undefined): string | null => {
+    if (!numero) return null;
     let numeroStr = numero.toString();
     let partes = numeroStr.split(".");
     if (partes.length === 2) {
       let decimales = partes[1]!.substring(0, 2);
       return decimales.padEnd(2, "0");
     }
-    return "00";
+    return null;
   };
 
   // Función recursiva para convertir la parte entera en letras
@@ -1324,7 +1325,7 @@ function numeroALetras(numero: number | undefined): string {
     let resultadoParteEntera = convertirParteEntera(parteEntera);
 
     return (
-      capitalizarPrimeraLetra(resultadoParteEntera) + ` con ${parteDecimal}/100`
+      capitalizarPrimeraLetra(resultadoParteEntera) + `${parteDecimal ? `con ${parteDecimal}/100`: ""}`
     );
   }
 
