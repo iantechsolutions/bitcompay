@@ -515,11 +515,10 @@ export const excelDeserializationRouter = createTRPCRouter({
                 product: true,
               },
             });
-            console.log("lectura prod");
             const product = companyProducts.find(
-              (x) => (x.product && x.product.name) ?? "" === row.product
+              (x) => x.product && ((x.product.name ?? "") === row.product)
             )?.product;
-            console.log("post lectura prod");
+            console.log("productis",product);
             await db.insert(schema.pa).values({
               card_number: row.card_number?.toString() ?? null,
               CBU: row.cbu,
