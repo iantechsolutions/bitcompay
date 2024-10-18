@@ -682,7 +682,8 @@ async function approbatecomprobante(liquidationId: string) {
               comprobante.family_group?.sale_condition ?? "",
               billResponsible?.fiscal_id_type ?? "",
               billResponsible?.fiscal_id_number ?? "",
-              billResponsible?.afip_status ?? ""
+              billResponsible?.afip_status ?? "",
+              billResponsible?.pa?.find((x) => x.CBU)?.CBU ?? "",
             );
           } catch (e) {
             console.log("Error en htmlBill");
