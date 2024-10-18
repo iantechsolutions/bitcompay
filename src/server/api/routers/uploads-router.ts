@@ -192,7 +192,7 @@ export const uploadsRouter = createTRPCRouter({
                 recollected_amount: record.recollected_amount,
               })
               .where(
-                or(
+                and(
                   eq(schema.payments.invoice_number, invoiceNumber),
                   eq(schema.payments.affiliate_number, affiliate_number)
                 )
