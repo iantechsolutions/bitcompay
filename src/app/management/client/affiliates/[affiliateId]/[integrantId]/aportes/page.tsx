@@ -39,9 +39,9 @@ export default function AportesDetalles(props: {
         amount: aporte.amount,
         id_affiliate: aporte.id_affiliate,
         cuil: aporte.cuil,
-        process_date: aporte.process_date,
-        contribution_date: aporte.contribution_date,
-        support_date: aporte.support_date,
+        "Fecha de proceso": aporte.process_date ?? null,
+        "Fecha de contribución": aporte.contribution_date ?? null,
+        "Fecha de soporte": aporte.support_date ?? null,
       });
     });
   }
@@ -53,7 +53,7 @@ export default function AportesDetalles(props: {
       <div className="flex gap-3 mt-5 mb-10">
         <Card className="py-4 px-6 w-1/4 grid grid-cols-2 items-center">
           <div className="flex flex-col">
-            <p className="text-base font-medium block">SALDO ACTUAL</p>
+            <p className="text-base font-medium block">Aportes registrados </p>
 
             <h1>{aportes?.length}</h1>
           </div>

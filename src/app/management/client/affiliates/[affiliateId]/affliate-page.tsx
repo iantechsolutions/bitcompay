@@ -166,7 +166,6 @@ export default function AffiliatePage(props: {
     HASTA: bonusValido?.to
       ? dayjs(bonusValido?.to).utc().format("DD-MM-YYYY")
       : "-",
-    APORTES: grupo ? formattedAportes : "-",
     ORIGEN: "",
     "FECHA APORTES": "-",
     "PERIODO APORTADO": "-",

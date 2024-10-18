@@ -79,35 +79,26 @@ const Filters = forwardRef<FiltersRef, FiltersProps<any, any>>(
         }
       });
     };
-    function getSelectOptions (column: Column<any, any>) {
+    function getSelectOptions(column: Column<any, any>) {
       if (apiFetchMap[column.id]) {
         return apiFetchMap[column.id]?.map((item) =>
           hasName(item) ? (
-            <SelectItem
-              key={item.id}
-              value={item?.name}
-            >
+            <SelectItem key={item.id} value={item?.name}>
               {item?.name}
             </SelectItem>
           ) : (
-            <SelectItem
-              key={item.id}
-              value={item?.description}
-            >
+            <SelectItem key={item.id} value={item?.description}>
               {item?.description}
             </SelectItem>
           )
-        )
+        );
       }
-      
-      return Array.from(column.getFacetedUniqueValues().keys()).map((item)=> (
-        <SelectItem
-          key={item}
-          value={item}
-        >
+
+      return Array.from(column.getFacetedUniqueValues().keys()).map((item) => (
+        <SelectItem key={item} value={item}>
           {item}
         </SelectItem>
-      ))
+      ));
     }
     return (
       <div className="flex items-center bg-[#DEF5DD] rounded-full">
@@ -115,12 +106,8 @@ const Filters = forwardRef<FiltersRef, FiltersProps<any, any>>(
           variant={"outline"}
           className="rounded-full px-5 py-5 gap-2 font-medium bg-[#c0f4bc] hover:bg-[#c0f4bc] h-7 text-black shadow-none hover:text-black "
           color="#0DA485"
-          onClick={() => setShowFilters(!showFilters)}
-        >
-          <img
-            src="/public/tables/Frame-22.png"
-            className={`h-5 w-auto`}
-          />
+          onClick={() => setShowFilters(!showFilters)}>
+          <img src="/public/tables/Frame-22.png" className={`h-5 w-auto`} />
           Filtros
         </Button>
         <div
@@ -128,8 +115,7 @@ const Filters = forwardRef<FiltersRef, FiltersProps<any, any>>(
             showFilters
               ? "opacity-100 max-h-[500px] pr-2"
               : "opacity-0 max-h-0 max-w-[0px]"
-          }`}
-        >
+          }`}>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <div className="flex gap-3">
@@ -150,8 +136,7 @@ const Filters = forwardRef<FiltersRef, FiltersProps<any, any>>(
                                 [column.id]: value,
                               }));
                             }}
-                            value={filterValues[column.id] ?? ""}
-                          >
+                            value={filterValues[column.id] ?? ""}>
                             <FormControl>
                               <SelectTrigger
                                 className="border-none"
@@ -160,8 +145,7 @@ const Filters = forwardRef<FiltersRef, FiltersProps<any, any>>(
                                     strokeWidth={1.4}
                                     className="h-3 w-auto"
                                   />
-                                }
-                              >
+                                }>
                                 <SelectValue placeholder={column.id} />
                               </SelectTrigger>
                             </FormControl>
