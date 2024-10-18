@@ -65,6 +65,7 @@ interface Props {
   obrasSociales?: any;
   marcas?: any;
   createdComprobante: Comprobante;
+  relatedComprobanteRecibo?: string;
   reloadPage: () => void;
 }
 
@@ -108,6 +109,7 @@ const confirmationPage = ({
   marcas,
   createdComprobante,
   reloadPage,
+  relatedComprobanteRecibo
 }: Props) => {
   // function generateComprobante(){
 
@@ -124,6 +126,8 @@ const confirmationPage = ({
     api.events.createByTypeOrg.useMutation();
   const { mutateAsync: updateComprobante } =
     api.comprobantes.approbate.useMutation();
+  const { mutateAsync: changeComprobanteState } =
+    api.comprobantes.updateStatus.useMutation();
   const router = useRouter();
   
   function handleApprove() {
@@ -355,6 +359,14 @@ const confirmationPage = ({
           comprobante_id: createdComprobante.id ?? "",
         });
       }
+
+
+
+      const updatedComprobanteEstado = await changeComprobanteState({
+        comprobanteId: relatedComprobanteRecibo ?? "",
+        status: "Pagada",
+      });
+
 
       // const eventOrg = createEventOrg({
       //   type: "REC",

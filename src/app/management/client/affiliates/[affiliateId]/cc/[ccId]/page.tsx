@@ -100,7 +100,7 @@ export default function CCDetail(props: {
         "Tipo comprobante": event.comprobantes?.tipoComprobante ?? "FACTURA A",
         comprobanteNumber: event.comprobantes?.nroComprobante ?? 0,
         ptoVenta: event.comprobantes?.ptoVenta ?? 0,
-        Estado: event.comprobantes?.estado ?? "apertura",
+        Estado: ((event.comprobantes?.estado ?? event.description) ?? "Apertura"),
         iva: Number(event.comprobantes?.iva ?? 0),
         comprobantes: event.comprobantes,
         currentAccountAmount: lastEvent?.current_amount ?? 0,

@@ -28,7 +28,8 @@ export default withUt({
         responsiveSM: "1.8vh",
       },
       backgroundImage: {
-        "bg-singnin": "url('/landing_images/fondo compu.jpg')",
+        "bg-singnin": "url('/landing_images/login-bg.png')",
+        "bg-vector-singnin": "url('/landing_images/login-vector.png')",
       },
       colors: {
         boxShadow: {
