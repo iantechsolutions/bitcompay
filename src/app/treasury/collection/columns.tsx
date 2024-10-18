@@ -6,8 +6,8 @@ export type TableRecord = {
   name: string;
   // fiscal_id_number: string;
   // invoice_number: string;
-  g_c: string;
-  product_number: string;
+  Marca: string;
+  Producto: string;
   period: string;
   first_due_amount: string;
   first_due_date: string;
@@ -15,7 +15,7 @@ export type TableRecord = {
   payment_date: string;
   // collected_amount: string;
   recollected_amount: string;
-  statusId: string;
+  Estado: string;
 };
 
 export const columns: ColumnDef<TableRecord>[] = [
@@ -53,19 +53,21 @@ export const columns: ColumnDef<TableRecord>[] = [
   //   ),
   // },
   {
-    accessorKey: "g_c",
+    accessorKey: "Marca",
     header: () => (
       <div className="text-center whitespace-nowrap text-medium">Marca</div>
     ),
-    cell: ({ row }) => <div className="text-center">{row.getValue("g_c")}</div>,
+    cell: ({ row }) => (
+      <div className="text-center">{row.getValue("Marca")}</div>
+    ),
   },
   {
-    accessorKey: "product_number",
+    accessorKey: "Producto",
     header: () => (
       <div className="text-center whitespace-nowrap text-medium">Producto</div>
     ),
     cell: ({ row }) => (
-      <div className="text-center">{row.getValue("product_number")}</div>
+      <div className="text-center">{row.getValue("Producto")}</div>
     ),
   },
   {
@@ -144,14 +146,14 @@ export const columns: ColumnDef<TableRecord>[] = [
     ),
   },
   {
-    accessorKey: "statusId",
+    accessorKey: "Estado",
     header: () => (
       <div className="text-center whitespace-nowrap text-medium">
         Estado de Pago
       </div>
     ),
     cell: ({ row }) => (
-      <div className="text-center">{row.getValue("statusId")}</div>
+      <div className="text-center">{row.getValue("Estado")}</div>
     ),
   },
 ];

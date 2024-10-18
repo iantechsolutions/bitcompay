@@ -10,7 +10,8 @@ export default function SignInComponent() {
     return null;
   };
   return (
-    <LayoutContainer className="flex h-screen w-screen justify-center items-center bg-bg-singnin bg-cover bg-scroll rounded-none max-w-full space-y-0 m-0 md:m-0 2xl:m-0">
+    <LayoutContainer className="relative flex h-screen w-screen justify-center items-center bg-bg-singnin bg-cover bg-scroll rounded-none max-w-full space-y-0 m-0 md:m-0 2xl:m-0">
+      <img src="/landing_images/login-vector.png" className="w-32 h-24 absolute top-10 left-80" />
       {showRegister ? (
         <RegisterForm setShowRegister={setShowRegister} />
       ) : (
