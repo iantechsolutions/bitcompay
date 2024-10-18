@@ -1059,9 +1059,9 @@ function getPaymentMethods(tipoComprobante: string) {
   }
 }
 
-    function renderMediosDePago(medioDePago: keyof typeof mediosDePagoDetalles): string {
-      let output = '';
-      const detalles = mediosDePagoDetalles[medioDePago];
+    // function renderMediosDePago(medioDePago: keyof typeof mediosDePagoDetalles): string {
+    //   let output = '';
+    //   const detalles = mediosDePagoDetalles[medioDePago];
     
 //       if (medioDePago === 'cheque' && detalles) {
 //         output = `
