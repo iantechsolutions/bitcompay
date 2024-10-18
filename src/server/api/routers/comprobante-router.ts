@@ -1646,12 +1646,12 @@ export async function preparateComprobante(
       //   differential_amount
       // );
       // console.log(ivaFloat, comprobante[0]?.importe ?? "", "Total factura");
-      // createcomprobanteItem(
-      //   ivaFloat,
-      //   comprobante[0]?.id ?? "",
-      //   "Total factura",
-      //   (comprobante[0]?.importe ?? 0) / ivaFloat
-      // );
+      createcomprobanteItem(
+        ivaFloat,
+        comprobante[0]?.id ?? "",
+        "Total factura",
+        (comprobante[0]?.importe ?? 0) / ivaFloat
+      );
 
       // await createcomprobanteItem(
       //   ivaFloat,
