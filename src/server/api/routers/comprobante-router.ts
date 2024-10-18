@@ -148,7 +148,7 @@ const idDictionary: { [key: string]: number } = {
 interface VoucherResult {
   res: { CAE: string; CAEFchVto: string; voucherNumber: number } | null;
   result: "Pendiente" | "Error";
-  error?: string;
+  error?: string | undefined;
 }
 
 async function createNextVoucher(
@@ -158,7 +158,7 @@ async function createNextVoucher(
   let result: "Pendiente" | "Error" = "Pendiente";
   let res: { CAE: string; CAEFchVto: string; voucherNumber: number } | null =
     null;
-  let error: string = "";
+  let error: string | undefined = "";
   try {
     res = await afip.ElectronicBilling.createNextVoucher(data);
     console.log(res);
@@ -170,7 +170,7 @@ async function createNextVoucher(
       e?.toString().startsWith("Error: (502) Error interno de base de datos") ||
       e?.toString().startsWith("Error: (10016)")
     ) {
-      result = (await createNextVoucher(data, afip)).result;
+      ({res,result,error} = await createNextVoucher(data, afip));
     } else {
       result = "Error";
       error = e?.toString() ?? "Desconocido";
