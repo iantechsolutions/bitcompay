@@ -37,6 +37,7 @@ import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import { api } from "~/trpc/react";
 import { cachedAsyncFetch } from "~/lib/cache";
 import { makeExcelRows } from "./utils";
+import { cn } from "~/lib/utils";
 
 type TData =
   RouterOutputs["family_groups"]["getByLiquidationFiltered"]["results"][0];
@@ -228,22 +229,26 @@ export function DataTable<TData, TValue>({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               <>
-                {table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    onClick={() => handleRowClick(row)}
-                    className="border-b-2 border-gray-200 border-x-0 hover:bg-[#d7d3d395] hover:cursor-pointer"
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
+                {table.getRowModel().rows.map((row) => {
+                  const error = row.getValue("error");
+                  return (
+                    <TableRow
+                      key={row.id}
+                      onClick={() => handleRowClick(row)}
+                      className={error ? "border-b-2 border-gray-200 border-x-0 hover:cursor-pointer bg-[#eb272753] hover:bg-[#eb272753]" : "border-b-2 border-gray-200 border-x-0 hover:bg-[#d7d3d395] hover:cursor-pointer"}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  )
+
+                })}
                 {detailData && (
                   <DetailSheet
                     liquidationId={liquidationId}
