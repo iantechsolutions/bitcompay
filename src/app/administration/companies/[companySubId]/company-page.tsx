@@ -108,7 +108,7 @@ export default function CompanyPage({
 
   return (
     <LayoutContainer>
-      <GoBackButton url={""} />
+      <GoBackButton url={"/administration/companies"} />
       <section className="space-y-2">
         <div className="flex justify-between">
           <Title>{company.name}</Title>
@@ -320,7 +320,8 @@ function DeleteChannel(props: { companySubId: string }) {
           <AlertDialogAction
             className="bg-red-500 hover:bg-red-600 active:bg-red-700"
             onClick={handleDelete}
-            disabled={isLoading}>
+            disabled={isLoading}
+          >
             {isLoading && (
               <Loader2Icon className="mr-2 animate-spin" size={20} />
             )}
