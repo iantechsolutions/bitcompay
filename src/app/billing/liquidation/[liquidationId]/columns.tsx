@@ -24,6 +24,7 @@ export type TableRecord = {
   currentAccountAmount: number;
   Plan: string;
   modo: string;
+  error: boolean;
 };
 
 export const columns: ColumnDef<TableRecord>[] = [
@@ -249,5 +250,10 @@ export const columns: ColumnDef<TableRecord>[] = [
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));
     },
+  },
+  {
+    accessorKey: "error",
+    header: () => null,
+    cell: () => null,
   },
 ];

@@ -132,10 +132,11 @@ export function makeExcelRows(
         subtotal: subTotal,
         iva,
         total,
-        comprobantes: fg?.comprobantes!,
+        comprobantes: fg?.comprobantes.filter(x=>x.liquidation_id==liquidationId) ?? [],
         currentAccountAmount,
         Plan: plan,
         modo,
+        error: fg?.comprobantes?.filter(x=>x.liquidation_id==liquidationId)?.some((x) => x.estado?.toLowerCase() === "error"),
       });
     }
   });
