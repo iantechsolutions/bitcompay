@@ -27,7 +27,7 @@ import DialogCC from "./components_acciones/dialog";
 import { RouterOutputs } from "~/trpc/shared";
 import { toast } from "sonner";
 import { saveAs } from "file-saver";
-import { formatNumberAsCurrency } from "~/lib/utils";
+import { Capitalize, formatNumberAsCurrency } from "~/lib/utils";
 dayjs.locale("es");
 export type TableRecord = {
   date: Date;
@@ -166,7 +166,7 @@ export const columns: ColumnDef<TableRecord>[] = [
           <div
             className={`rounded-full inline-block font-bold capitalize ${style} px-7 py-1`}>
             {" "}
-            {row.getValue("Estado")}
+            {Capitalize(row.getValue("Estado"))}
           </div>
         </div>
       );
