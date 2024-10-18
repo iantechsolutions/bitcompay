@@ -575,7 +575,7 @@ export default function Page() {
   const otherTributesForm = useForm<OtherTributesForm>({
     defaultValues: {
       tributes: [
-        { tribute: "", jurisdiccion: "", base: 0, aliquot: 0, amount: 0 },
+        // { tribute: "", jurisdiccion: "", base: 0, aliquot: 0, amount: 0 },
       ],
     },
   });

@@ -360,7 +360,7 @@ function generateDebitoDirecto(
 
     const fiscalNumber = formatString(
       " ",
-      transaction.affiliate_number!.toString(),
+      transaction.fiscal_id_number!.toString(),
       22,
       true
     );
@@ -468,7 +468,7 @@ function generatePagomiscuentas(
 
     const affiliate_number = formatString(
       " ",
-      transaction.affiliate_number!.toString(),
+      transaction.fiscal_id_number!.toString(),
       19,
       true
     );
@@ -604,7 +604,7 @@ async function generatePagoFacil(
 
     const fiscal_id_number = formatString(
       "0",
-      transaction.affiliate_number ?? "",
+      transaction?.fiscal_id_number?.toString() ?? "",
       18,
       false
     );
@@ -654,7 +654,7 @@ async function generatePagoFacil(
 
     const fiscal_id_number_bar_code = formatString(
       "0",
-      transaction.affiliate_number!.toString(),
+      transaction.fiscal_id_number!.toString(),
       14,
       false
     );
@@ -671,7 +671,7 @@ async function generatePagoFacil(
       "+",
       fiscal_id_number,
       "   ",
-      transaction.affiliate_number
+      transaction.fiscal_id_number
     );
 
     let payment_type = "T";
@@ -737,7 +737,7 @@ function generateRapiPago(
     let register_type = "5";
     const fiscal_id_number = formatString(
       "0",
-      transaction.affiliate_number!.toString(),
+      transaction.fiscal_id_number!.toString(),
       19,
       false
     );
@@ -934,7 +934,7 @@ function generateDebitoAutomatico(props: generateDAprops) {
 
     const affiliate_number = formatString(
       "0",
-      payment?.affiliate_number ?? "",
+      payment.fiscal_id_number?.toString() ?? "",
       15,
       false
     );
