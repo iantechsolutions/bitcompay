@@ -237,6 +237,12 @@ function getTextoForTipoComprobante(tipoComprobante: string) {
   }
 }
 
+function alturaConceptosTable(tipoComprobante: string) {
+  if (tipoComprobante.includes("FACTURA")) return "height: 280px;";
+  else if (tipoComprobante.includes("NOTA DE")) return "height: 450px;";
+  else return "height: 350px;";
+}
+
 export function htmlBill(
   comprobante: any,
   company: any,
@@ -311,6 +317,7 @@ export function htmlBill(
 
   let saldoAfavor = comprobante?.items.find((x: any) => x.concept === "Saldo a favor");
 
+
   // console.log(voucher);
 
   // moví funciones porque es lento redefinirlas constantemente
@@ -348,7 +355,7 @@ export function htmlBill(
         display: flex;
         flex-direction: row;
         justify-content: space-between;
-        border-bottom: 1px solid #D9D9D9;
+        border-bottom: 1.1px solid #D9D9D9;
         width: 100%;
       }
         
@@ -386,7 +393,7 @@ padding-bottom:3px
       }
 
       .items-3 {
-        padding-bottom: 1px;
+        padding-bottom: 1.1px;
         margin-right:30px;
         display: flex;
         flex-direction: column;
@@ -404,7 +411,7 @@ padding-bottom:3px
         justify-content: space-between;
  	      font-size: 12px;
         flex-direction: column;
-	      padding-top: 1px; 
+	      padding-top: 1.1px; 
         color: #3E3E3E;
       }
         .parte-2 div span {
@@ -455,7 +462,7 @@ padding-bottom:3px
         align: right;
         margin-bottom: 1rem; 
         border-top: none;
-        border-bottom: 1px solid #D9D9D9;
+        border-bottom: 1.1px solid #D9D9D9;
       }
 
       .parte-3 p {
@@ -468,7 +475,7 @@ padding-bottom:3px
         display: flex;
         justify-content: space-between;
         margin-bottom: 1rem; 
-        border-bottom: 1px solid #D9D9D9;
+        border-bottom: 1.1px solid #D9D9D9;
         padding-bottom: 20px;
         flex-direction: column;
 
@@ -485,7 +492,7 @@ padding-bottom:3px
       .parte-4 {
         display: flex;
         justify-content: space-between;
-        border-bottom: 1px solid #D9D9D9;
+        border-bottom: 1.1px solid #D9D9D9;
       }
 
       .parte-4 p {
@@ -654,7 +661,7 @@ padding-bottom:3px
 }
 
 .line {
-    width: 1px;
+    width: 1.1px;
     height: 40px;
     background-color: #D9D9D9;
     margin: 0 auto 0;
@@ -671,6 +678,7 @@ padding-bottom: 10px;
 
 .conceptotables-container{
   margin-top: 10px;
+  ${alturaConceptosTable(comprobante?.tipoComprobante)};
 }
 
 .conceptotables {
@@ -698,7 +706,7 @@ max-height:100%;
 
 .tributos {
 padding-top: 15px;
-border-top: 1px solid #D9D9D9;
+border-top: 1.1px solid #D9D9D9;
 padding-bottom: 0;
 }
 .tributos div {
@@ -791,7 +799,7 @@ padding: 0;
       </header>
   
     <div class="parte-2">	
-		  <div class="grid" style="display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid #D9D9D9; white-space: nowrap;">
+		  <div class="grid" style="display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1.1px solid #D9D9D9; white-space: nowrap;">
         <div style="grid-column: 1 / span 1;">
           <span><span>Nombre/Razón Social:</span> ${name}</span>
         </div>
@@ -821,7 +829,7 @@ padding: 0;
 </div>
 
   
-    <div class="conceptotables-container" style="height: 280px;">
+    <div class="conceptotables-container">
         <table class="conceptotables">
             <thead>
                 <tr>
@@ -886,7 +894,7 @@ padding: 0;
 	</div>
 </div>
   
-<section style="padding-bottom: 15px; border-bottom:1px solid #D9D9D9 ">
+<section style="padding-bottom: 15px; border-bottom: 1.1px solid #D9D9D9 ">
 	<div class="resumen-total">
 		<div style="font-size:12px;padding-left: 30px; width:350px">
     ${numeroALetras(total ?? 0)}
@@ -898,13 +906,99 @@ padding: 0;
 		</div>
 	</div>
 
-  <div style="font-size:10px; padding-left: 30px; padding-top:10px; width:350px; white-space: nowrap; font-style: italic;">
+  ${comprobante.tipoComprobante.includes("FACTURA") && `<div style="font-size:10px; padding-left: 30px; padding-top:10px; width:350px; white-space: nowrap; font-style: italic;">
 			Esta factura se debitará en fecha de vencimiento en CBU: XXXXXXXXXXXXXXXXXXXXXXXXX.
-		</div>
+		</div>`}
 </section>
 
-     
-       <section style="padding-left: 30px;  padding-right:30px; padding-top: 15px; padding-bottom: 5px;">
+       ${getPaymentMethods(comprobante.tipoComprobante)}
+  
+       <section class="qr-section">
+        <div style="display: flex; flex-direction: column; ">
+        <div style="display: flex; justify-content: flex-start;" >
+          <img
+            class="qr"
+            src="https://utfs.io/f/f5ff576b-2f11-41b2-8549-39cb4800c7b2-ejsh86.png"
+	style="height: 100px; width:100px;"
+          />
+
+           <div style="display: flex; flex-direction: column; padding-top:10px; ">
+          <img
+             style="width:80px; height:20px;"
+            src="https://utfs.io/f/8478197f-57ba-4f39-8beb-cdffb1c432cf-m15jgy.png"
+            alt="logo-AFIP"
+          />
+
+          <p style="color: #3e3e3e; font-style: italic; font-weight: 500; margin-top:4px; margin-bottom: 12px;">Comprobante autorizado</p>
+          <p>CAE N° 74172124728083</p>
+          <p style="white-space: nowrap">Fecha Vto de CAE: XX/XX/XXXX</p>
+        </div>
+          </div>
+         <div style="">
+          <p style="padding-left:7px;">
+            Powered by
+            <img
+              class="bp-logo"
+              src="https://utfs.io/f/fa110834-238b-4880-a8c2-eedebe9e6b6e-mnl13r.png"
+              alt="logo-Bitcompay"
+            />
+          </p>
+          </div>
+          </div>
+
+         ${comprobante?.tipoComprobante.includes("FACTURA") ? (
+    `<div class="cae-section" style="text-align: left; ">
+        <p>Fecha tope para el pago en redes: XX/XX/XXXX</p>
+           <p>Código de pago electrónico PMC: XXXX-XXXXXXXX</p>
+          <p>Canales con lectura de código de barras: </p>
+          <img
+          style="width:340px; height:60px;"
+            src="https://utfs.io/f/7ed13ab6-deaa-4257-ad38-7ce19f312f4e-huj7js.png"
+            alt="barcode"
+          />
+        </div>`
+  ) : ''}
+</div>
+      </section>
+    </body>
+  </html>`;
+
+  return htmlContent;
+}
+
+type MedioDePagoDetalles = {
+  numeroCheque?: string;
+  banco?: string;
+  fechaPago?: string;
+  fechaEmision?: string;
+  bandera?: string;
+  tipoTarjeta?: string;
+};
+
+const mediosDePagoDetalles: Record<typeof medioDePago[number], MedioDePagoDetalles> = {
+  cheque: {
+    numeroCheque: '12345678',
+    banco: 'Banco Nacional',
+    fechaPago: '20/10/2024',
+  },
+  chequeDiferido: {
+    numeroCheque: '87654321',
+    banco: 'Banco Provincial',
+    fechaEmision: '01/10/2024',
+    fechaPago: '25/12/2024',
+  },
+  tarjeta: {
+    bandera: 'Visa',
+    tipoTarjeta: 'Crédito',
+  },
+  canalesDePago: {},
+};
+
+const medioDePago = ['cheque', 'chequeDiferido', 'tarjeta', 'canalesDePago'];
+function getPaymentMethods(tipoComprobante: string) {
+  
+  if (tipoComprobante.includes("FACTURA")) {
+    return `<section style="padding-left: 30px;  padding-right:30px; padding-top: 15px; padding-bottom: 5px;">
         <h2 style="color: #3E3E3E; font-weight: 500; font-size:16px;">Canales de pago habilitados </h2>
         <div style="display:flex; flex: 1 1 auto; justify-content: space-between; margin-top:20px; margin-bottom:5px; place-items: center;">
           <div class="payment">
@@ -956,56 +1050,95 @@ padding: 0;
             />
         </div>
          </div>
-      </section>
-  
-       <section class="qr-section">
-        <div style="display: flex; flex-direction: column; ">
-        <div style="display: flex; justify-content: flex-start;" >
-          <img
-            class="qr"
-            src="https://utfs.io/f/f5ff576b-2f11-41b2-8549-39cb4800c7b2-ejsh86.png"
-	style="height: 100px; width:100px;"
-          />
-
-           <div style="display: flex; flex-direction: column; padding-top:10px; ">
-          <img
-             style="width:80px; height:20px;"
-            src="https://utfs.io/f/8478197f-57ba-4f39-8beb-cdffb1c432cf-m15jgy.png"
-            alt="logo-AFIP"
-          />
-
-          <p style="color: #3e3e3e; font-style: italic; font-weight: 500; margin-top:4px; margin-bottom: 12px;">Comprobante autorizado</p>
-          <p>CAE N° 74172124728083</p>
-          <p style="white-space: nowrap">Fecha Vto de CAE: XX/XX/XXXX</p>
+      </section>`;
+  } else if (tipoComprobante.includes("NOTA DE")) {
+    return ""; 
+  } else {
+    return renderMediosDePago('cheque');
+  }
+}
+    function renderMediosDePago(medioDePago: keyof typeof mediosDePagoDetalles): string {
+      let output = '';
+      const detalles = mediosDePagoDetalles[medioDePago];
+    
+      if (medioDePago === 'cheque' && detalles) {
+        output = `
+      <section style="padding-left:40px; padding-right:40px; padding-top: 15px; padding-bottom: 5px;">
+        <div style="margin-bottom: 8px;">
+          <h2 style="color: #3E3E3E; font-weight: bold; font-size:16px; display: inline;">
+            Medios de pago:
+          </h2>
+          <span style="color: #3E3E3E; font-weight: normal; font-size:16px;">
+            Cheque
+          </span>
         </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; color: #3E3E3E; font-size: 16px;">
+          <div>
+            <span style="font-weight:600; margin-right:10px;">N° de cheque:</span>${detalles.numeroCheque}
           </div>
-         <div style="">
-          <p style="padding-left:7px;">
-            Powered by
-            <img
-              class="bp-logo"
-              src="https://utfs.io/f/fa110834-238b-4880-a8c2-eedebe9e6b6e-mnl13r.png"
-              alt="logo-Bitcompay"
-            />
-          </p>
+          <div>
+            <span style="font-weight:600; margin-right:10px;">Banco: </span>${detalles.banco}
           </div>
+          <div>
+            <span style="font-weight:600; margin-right:10px;">Fecha de pago:</span>${detalles.fechaPago}
           </div>
-
-        <div class="cae-section" style="text-align: left; ">
-        <p>Fecha tope para el pago en redes: XX/XX/XXXX</p>
-           <p>Código de pago electrónico PMC: XXXX-XXXXXXXX</p>
-          <p>Canales con lectura de código de barras: </p>
-          <img
-          style="width:340px; height:60px;"
-            src="https://utfs.io/f/7ed13ab6-deaa-4257-ad38-7ce19f312f4e-huj7js.png"
-            alt="barcode"
-          />
         </div>
       </section>
-    </body>
-  </html>`;
+    `;
+  } else if (medioDePago === 'chequeDiferido' && detalles) {
+    output = `
+      <section style="padding-left:40px; padding-right:40px; padding-top: 15px; padding-bottom: 5px;">
+        <div style="margin-bottom: 8px;">
+          <h2 style="color: #3E3E3E; font-weight: bold; font-size:16px; display: inline;">
+            Medios de pago:
+          </h2>
+          <span style="color: #3E3E3E; font-weight: normal; font-size:16px;">
+            Cheque de pago diferido
+          </span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; color: #3E3E3E; font-size: 16px;">
+          <div>
+            <span style="font-weight:600; margin-right:10px;">N° de cheque:</span>${detalles.numeroCheque}
+          </div>
+          <div>
+            <span style="font-weight:600; margin-right:10px;">Banco:</span>${detalles.banco}
+          </div>
+          <div>
+            <span style="font-weight:600; margin-right:10px;">Fecha de emisión:</span>${detalles.fechaEmision}
+          </div>
+          <div>
+            <span style="font-weight:600; margin-right:10px;">Fecha de pago:</span>${detalles.fechaPago}
+          </div>
+        </div>
+      </section>
+    `;
+  } else if (medioDePago === 'tarjeta' && detalles) {
+    output = `
+      <section style="padding-left:40px; padding-right:40px; padding-top: 15px; padding-bottom: 5px;">
+        <div style="margin-bottom: 8px;">
+          <h2 style="color: #3E3E3E; font-weight: bold; font-size:16px; display: inline;">
+            Medios de pago:
+          </h2>
+          <span style="color: #3E3E3E; font-weight: normal; font-size:16px;">
+            Tarjeta
+          </span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; color: #3E3E3E; font-size: 16px;">
+          <div>
+            <span style="font-weight:600; margin-right:10px;">Bandera:</span>${detalles.bandera}
+          </div>
+          <div>
+            <span style="font-weight:600; margin-right:10px;">Tipo de tarjeta:</span>${detalles.tipoTarjeta}
+          </div>
+        </div>
+      </section>
+    `;
+  }
+  const medioDePagoSeleccionado = 'cheque';
+const paymentDetailsSection = renderMediosDePago(medioDePagoSeleccionado as keyof typeof mediosDePagoDetalles);
+console.log(paymentDetailsSection);
 
-  return htmlContent;
+  return output;
 }
 
 export async function ingresarAfip() {
