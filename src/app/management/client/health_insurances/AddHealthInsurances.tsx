@@ -626,8 +626,8 @@ export function AddHealthInsurances(props: {
               <Label htmlFor="postal_code" className="text-xs text-gray-500">
                 FECHA DE ESTADO
               </Label>
-              <Popover open={openCalendar} onOpenChange={setOpenCalendar} modal={true}>
-                <PopoverTrigger asChild={true} autoFocus={false}>
+              <Popover open={openCalendar} onOpenChange={setOpenCalendar}>
+                <PopoverTrigger asChild={true}>
                   <Button
                     variant={"outline"}
                     className={cn(
