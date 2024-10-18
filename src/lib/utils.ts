@@ -260,6 +260,7 @@ export function htmlBill(
   afip_status: string,
   cbu: string,
 ) {
+  console.log("cbu es", cbu);
   let subtotal = 0;
   let iva = 0;
   if (comprobante.items.filter((x: any) => x.concept !== "Saldo a favor" && x.concept !== "Total factura").length > 0) {
@@ -318,7 +319,7 @@ export function htmlBill(
   let saldoAfavor = comprobante?.items.find((x: any) => x.concept === "Saldo a favor");
 
 
-  // console.log(voucher);
+
 
   // moví funciones porque es lento redefinirlas constantemente
 
@@ -906,8 +907,8 @@ padding: 0;
 		</div>
 	</div>
 
-  ${(comprobante.tipoComprobante.includes("FACTURA") && comprobante.cbu) ? `<div style="font-size:10px; padding-left: 30px; padding-top:10px; width:350px; white-space: nowrap; font-style: italic;">
-			Esta factura se debitará en fecha de vencimiento en CBU: ${comprobante.cbu}.
+  ${(comprobante.tipoComprobante.includes("FACTURA") && cbu) ? `<div style="font-size:10px; padding-left: 30px; padding-top:10px; width:350px; white-space: nowrap; font-style: italic;">
+			Esta factura se debitará en fecha de vencimiento en CBU: ${cbu}.
 		</div>` : " "}
 </section>
 
@@ -1137,7 +1138,6 @@ function getPaymentMethods(tipoComprobante: string) {
   }
   const medioDePagoSeleccionado = 'cheque';
 const paymentDetailsSection = renderMediosDePago(medioDePagoSeleccionado as keyof typeof mediosDePagoDetalles);
-console.log(paymentDetailsSection);
 
   return output;
 }
@@ -1166,8 +1166,7 @@ export async function ingresarAfip() {
   // });
 
   // const res = await afipCuit.CreateCert(_username, _password, alias);
-  // console.log("Certificado creado");
-  // console.log(res);
+
   const wsid = "wsfe";
 
   // // //ESTO CREA LA AUTORIZACION
@@ -1185,9 +1184,7 @@ export async function ingresarAfip() {
     // production: true,
   });
   // const serSer = await afip.CreateWSAuth(_username, _password, alias, wsid);
-  // console.log(serSer);
   // const salesPoints = await afip.ElectronicBilling.getSalesPoints();
-  // console.log(salesPoints);
   // const serSer = await afip.CreateWSAuth(username, password, alias, wsid);
 
   return afip;
@@ -1262,6 +1259,7 @@ function numeroALetras(numero: number | undefined): string {
     let partes = numeroStr.split(".");
     if (partes.length === 2) {
       let decimales = partes[1]!.substring(0, 2);
+      if (decimales === "00") return null;
       return decimales.padEnd(2, "0");
     }
     return null;

@@ -132,23 +132,23 @@ const confirmationPage = ({
   
   function handleApprove() {
     console.log("fcSeleccionada");
-    console.log(fcSeleccionada);
-    console.log("otherTributes");
-    console.log(otherTributes.getValues());
-    console.log("form");
-    console.log(form.getValues());
-    console.log("asociatedFCForm");
-    console.log(asociatedFCForm.getValues());
-    console.log("conceptsForm");
-    console.log(conceptsForm.getValues());
-    console.log("otherConcepts");
-    console.log(otherConcepts.getValues());
-    console.log("subTotal");
-    console.log(subTotal);
-    console.log("ivaTotal");
-    console.log(ivaTotal);
-    console.log("otherAttributes");
-    console.log(otherAttributes);
+    // console.log(fcSeleccionada);
+    // console.log("otherTributes");
+    // console.log(otherTributes.getValues());
+    // console.log("form");
+    // console.log(form.getValues());
+    // console.log("asociatedFCForm");
+    // console.log(asociatedFCForm.getValues());
+    // console.log("conceptsForm");
+    // console.log(conceptsForm.getValues());
+    // console.log("otherConcepts");
+    // console.log(otherConcepts.getValues());
+    // console.log("subTotal");
+    // console.log(subTotal);
+    // console.log("ivaTotal");
+    // console.log(ivaTotal);
+    // console.log("otherAttributes");
+    // console.log(otherAttributes);
   }
 
   async function handleDownload() {
@@ -181,7 +181,6 @@ const confirmationPage = ({
     const tributos = otherAttributes;
     let last_voucher = 0;
     let data = null;
-    console.log();
     let ivaFloat = (100 + parseFloat(ivaDictionary[Number(iva)] ?? "0")) / 100;
     const fecha = new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
       .toISOString()
@@ -397,10 +396,15 @@ const confirmationPage = ({
       ?.find((x: { id: string }) => x.id == fgId)
       ?.integrants.find((x: { isBillResponsible: any }) => x.isBillResponsible);
     const obraSocial = obrasSociales?.find((x: { id: string }) => x.id == osId);
+    
+    const pa = (billResponsible?.pa)
+    console.log("PA de Confirmation page es", pa);
+
+    const cbu = (billResponsible?.pa?.find((pa: { CBU: string }) => pa.CBU)?.CBU)
+    console.log("CBU de Confirmation page es", cbu);
 
     //reemplazar por comprobante creado
     if (createdComprobante) {
-      console.log(createdComprobante, "createdComprobante");
       const html = htmlBill(
         createdComprobante,
         company,
@@ -430,7 +434,7 @@ const confirmationPage = ({
           ? billResponsible?.afip_status
           : obraSocial?.afip_status) ?? "",
         (billResponsible
-            ? billResponsible?.pa?.CBU
+            ? billResponsible?.pa?.find((pa: { CBU: string }) => pa.CBU)?.CBU ?? ""
             : "" ) ?? "",
       );
       const options = {
