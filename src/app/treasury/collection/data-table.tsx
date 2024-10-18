@@ -98,11 +98,11 @@ export function DataTable<TData, TValue>({
   );
   return (
     <>
-      <TableToolbarPayment
+      {/* <TableToolbarPayment
         table={table as any}
         columns={filteredColumns as any}
         searchColumn="invoice_number"
-      />
+      /> */}
       <ScrollArea>
         <Table>
           <TableHeader>
