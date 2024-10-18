@@ -80,7 +80,10 @@ export const AjustarDialog = () => {
     setSelectedDate(e.target.value);
   };
 };
-export function mostrarNroComprobante(ptoVenta: number, nroComprobante: number) {
+export function mostrarNroComprobante(
+  ptoVenta: number,
+  nroComprobante: number
+) {
   return `${ptoVenta.toString().padStart(4, "0")}-${nroComprobante
     .toString()
     .padStart(8, "0")}`;
@@ -92,7 +95,7 @@ export const columns: ColumnDef<TableRecord>[] = [
     cell: ({ row }) => {
       const comprobanteNumber = row.getValue("comprobanteNumber") as number;
       const ptoVenta = row.getValue("ptoVenta") as number;
-     
+
       return (
         <div className="relative h-20 flex flex-col justify-center w-96">
           <p className="absolute top-0 text-[#c4c4c4] text-xs">
@@ -105,8 +108,8 @@ export const columns: ColumnDef<TableRecord>[] = [
           </p>
           <p className="text-[#c4c4c4] text-xs absolute top-1/2 transform translate-y-4">
             {" "}
-            {row.getValue("Tipo comprobante")} -{" "}
-            № {mostrarNroComprobante(ptoVenta, comprobanteNumber)}{" "}
+            {row.getValue("Tipo comprobante")} - №{" "}
+            {mostrarNroComprobante(ptoVenta, comprobanteNumber)}{" "}
           </p>
         </div>
       );
@@ -155,16 +158,13 @@ export const columns: ColumnDef<TableRecord>[] = [
       const style =
         Estado === "Pagada"
           ? "bg-[#DDF9CC] text-[#4E9F1D]"
-          : Estado === "Parcial"
-          ? "bg-[#CCE5F9] text-[#1D4E9F]"
           : Estado === "Error"
           ? "bg-[#F9CCCC] text-[#F91D1D]"
           : "bg-[#F9E7CC] text-[#F69709]";
       return (
         <div>
           <div
-            className={`rounded-full inline-block font-bold ${style} px-7 py-1`}
-          >
+            className={`rounded-full inline-block font-bold ${style} px-7 py-1`}>
             {" "}
             {row.getValue("Estado")}
           </div>
@@ -190,8 +190,7 @@ export const columns: ColumnDef<TableRecord>[] = [
             <span
               className={`"absolute top-1/2 transform -translate-y-1/2 font-bold ${
                 amount > 0 ? "text-[#6952EB]" : "text-[#EB2727]"
-              }`}
-            >
+              }`}>
               {formatNumberAsCurrency(amount)}
             </span>
           )}
@@ -272,8 +271,7 @@ export const columns: ColumnDef<TableRecord>[] = [
               <DropdownMenuItem
                 onClick={async () => {
                   await print();
-                }}
-              >
+                }}>
                 <Download className="mr-1 h-4" /> Descargar
               </DropdownMenuItem>
               <DropdownMenuSeparator />
