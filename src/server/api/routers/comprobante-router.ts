@@ -469,6 +469,9 @@ async function approbatecomprobante(liquidationId: string) {
             comprobanteEstado = temp.result;
             afipError = temp.error ?? "";
             lastVoucher = temp.res?.voucherNumber ?? 0;
+            if(comprobanteEstado != "Error"){
+
+            
             const ccs = await db.query.currentAccount.findMany({
               with: {
                 events: true,
@@ -503,12 +506,22 @@ async function approbatecomprobante(liquidationId: string) {
                 nroComprobante: lastVoucher,
               })
               .where(eq(schema.comprobantes.id, comprobante.id));
+             }
+            else{
+              await db
+                .update(schema.comprobantes)
+                .set({
+                  estado: comprobanteEstado,
+                  afipError: afipError,
+                })
+                .where(eq(schema.comprobantes.id, comprobante.id));
+            }
           } else {
             await db
               .update(schema.comprobantes)
               .set({
                 estado: "Error",
-                afipError: afipError,
+                afipError: "El comprobante anterior ya tenia un error de creacion",
               })
               .where(eq(schema.comprobantes.id, comprobante.id));
           }
@@ -1732,7 +1745,7 @@ async function calculateAmount(
   // }
 
   if (amount <= 0){
-    amount = 1;
+    amount = 0;
   }
 
   return { amount, ivaCodigo };
