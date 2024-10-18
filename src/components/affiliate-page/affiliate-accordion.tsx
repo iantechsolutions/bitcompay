@@ -77,15 +77,13 @@ const AccordionTrigger = React.forwardRef<
   CustomTriggerProps &
     React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>
 >(({ className, children, affiliate, ...props }, ref) => {
-  const [open, setOpen] = React.useState(false);
-
   const isHolder = affiliate?.relationship === "Titular";
   const isBillResponsible = affiliate?.isBillResponsible;
   const isAffiliate = affiliate?.isAffiliate;
 
   console.log(isHolder, isBillResponsible, isAffiliate);
 
-  const badgeClassName = `flex items-center justify-center rounded-full px-3 text-xs font-medium 
+  const badgeClassName = `flex items-center text-lg font-medium justify-center rounded-full px-3 text-xs font-medium 
   ${
     isHolder ? "bg-[#DDF9CC] text-[#4C740C] px-4" : "text-[#3E3E3E] opacity-80"
   }`;
@@ -95,7 +93,7 @@ const AccordionTrigger = React.forwardRef<
       <AccordionPrimitive.Trigger
         ref={ref}
         className={cn(
-          "flex flex-1 items-center justify-between py-2 px-6 w-full text-sm rounded-full transition-all [&[data-state=open]>svg]:rotate-180 bg-[#f7f7f7]",
+          "flex flex-1 items-center justify-between py-2 px-6 w-full text-base font-regular rounded-full transition-all [&[data-state=open]>svg]:rotate-180 bg-[#f7f7f7]",
           className
         )}
         {...props}>

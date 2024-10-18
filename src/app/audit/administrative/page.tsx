@@ -7,7 +7,7 @@ import { CircleUserRound } from "lucide-react";
 export default async function Page() {
   const procedure = await api.procedure.list.query();
   const procedureComplete = procedure.filter(
-    (procedure) => procedure.estado === "pendiente"
+    (procedure) => procedure.estado.toLowerCase() === "pendiente"
   );
 
   return (

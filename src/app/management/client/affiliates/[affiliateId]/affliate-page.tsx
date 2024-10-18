@@ -1,6 +1,6 @@
 "use client";
 import { api } from "~/trpc/react";
-import { Landmark } from "lucide-react";
+import { Eye, Landmark } from "lucide-react";
 import LayoutContainer from "~/components/layout-container";
 import {
   Accordion,
@@ -27,6 +27,7 @@ dayjs.locale("es");
 import {
   Capitalize,
   cn,
+  formatNumberAsCurrency,
   getDifferentialAmount,
   getGroupContribution,
 } from "~/lib/utils";
@@ -38,6 +39,8 @@ import BonusDialog from "./cc/[ccId]/components_acciones/bonusDialog";
 import { checkRole } from "~/lib/utils/react/roles";
 import EditAffiliate from "~/components/affiliate-page/edit-affiliate";
 import { useState } from "react";
+import Link from "next/link";
+import { Button } from "~/components/ui/button";
 
 export default function AffiliatePage(props: {
   isAdmin: boolean;
@@ -387,10 +390,7 @@ export default function AffiliatePage(props: {
                       ? "text-blacl"
                       : "text-[#EB2727]"
                   )}>
-                  $
-                  {lastEvent?.current_amount !== undefined
-                    ? lastEvent.current_amount.toFixed(2)
-                    : "0.00"}
+                  {formatNumberAsCurrency(lastEvent?.current_amount ?? 0)}
                 </span>
               </div>
               <SaldoPopoverAffiliates
@@ -431,7 +431,7 @@ export default function AffiliatePage(props: {
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2">
-              <AccordionTrigger className="font-semibold rounded-md overflow-hidden">
+              <AccordionTrigger className="font-semibold">
                 Integrantes
               </AccordionTrigger>
               <AccordionContent className="pt-6 pl-5">
@@ -445,8 +445,8 @@ export default function AffiliatePage(props: {
                           {int.name}
                         </AccordionTriggerIntegrant>
                         <AccordionContentIntegrant>
-                          <div className="flex justify-between">
-                            <p className="text-xs font-semibold">
+                          <div className="flex justify-between mt-2">
+                            <p className="text-sm font-semibold">
                               Información Personal
                             </p>
                             <EditAffiliate
@@ -455,7 +455,7 @@ export default function AffiliatePage(props: {
                               setOpen={setOpenAffiliate}
                             />
                           </div>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-stretch pt-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-stretch pt-4  mt-2">
                             {Object.entries(
                               integrantsPersonalData.get(int.id) ?? {}
                             ).map(([key, value]) => {
@@ -535,6 +535,16 @@ export default function AffiliatePage(props: {
                               );
                             })}
                           </div>
+                          <Button className="px-5 bg-[#F7F7F7] hover:bg-[#F7F7F7] text-[#3E3E3E] font-medium text-xs rounded-full border-none flex items-center gap-x-2">
+                            <Link
+                              href={`/management/client/affiliates/${int.family_group_id}/aportes`}
+                              className="flex items-center">
+                              <Eye className="mr-0 md:mr-2 w-4 h-4" />{" "}
+                              <span className="hidden md:inline">
+                                Ver aportes{" "}
+                              </span>
+                            </Link>
+                          </Button>
                         </AccordionContentIntegrant>
                       </AccordionItemIntegrant>
                     ))

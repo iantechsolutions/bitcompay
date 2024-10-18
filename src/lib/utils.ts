@@ -11,6 +11,11 @@ import { schema } from "~/server/db";
 import { FamilyGroup } from "~/server/db/schema";
 import { api } from "~/trpc/server";
 import { RouterOutputs } from "~/trpc/shared";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import "dayjs/locale/es";
+dayjs.extend(utc);
+dayjs.locale("es");
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -58,6 +63,15 @@ export function calcularEdad(fechaNacimiento: Date): number {
   return edad;
 }
 
+type usedDates = "hh:mm" | "dd/mm/yyyy";
+export function formatDatejs(
+  date: Date | undefined | null,
+  format?: usedDates
+): string {
+  if (!date) return "No hay fecha disponible";
+  if (format === "hh:mm") return dayjs.utc(date).format("DD/MM/YYYY hh:mm");
+  return dayjs.utc(date).format("DD/MM/YYYY");
+}
 export function formatDate(date: Date | undefined) {
   if (date) {
     const year = date.getFullYear();
@@ -92,7 +106,7 @@ export function dateNormalFormat(date: Date | undefined | null) {
 export const topRightAbsoluteOnDesktopClassName =
   "md:absolute md:top-0 md:right-0 mr-10 mt-10";
 
-function formatNumberAsCurrency(amount: number): string {
+export function formatNumberAsCurrency(amount: number): string {
   return new Intl.NumberFormat("es-AR", {
     style: "currency",
     currency: "ARS",
@@ -103,14 +117,13 @@ function formatNumberAsCurrency(amount: number): string {
 
 let comprobanteCortado = "ss";
 
-function getTagForTipoComprobante(tipoComprobante: string):string{
+function getTagForTipoComprobante(tipoComprobante: string): string {
   comprobanteCortado = tipoComprobante;
   if (tipoComprobante.includes(" A")) {
     comprobanteCortado = comprobanteCortado.replace(" A", "");
     return "A";
-  }
-  else if (tipoComprobante.includes(" B")) {
-    comprobanteCortado = comprobanteCortado.replace(" B", "")
+  } else if (tipoComprobante.includes(" B")) {
+    comprobanteCortado = comprobanteCortado.replace(" B", "");
     return "B";
   } else {
     return "X";
@@ -153,12 +166,39 @@ function getIimageForBarcode() {
 function generateConcepts(
   items: Array<{ concept: string | null; total: number | null }>
 ): string {
-  return items.map((item) => `<p>${item.concept}</p>`).join("");
+  // sumar bono + dif y ocultar dif
+  let bonoTotal = 0;
+
+  items.forEach((item) => {
+    if (item.concept === "bono") {
+      bonoTotal += item.total ?? 0;
+    }
+  });
+
+  for (const item of items) {
+    if (item.concept === "Diferencial" && item.total) {
+      item.total += bonoTotal;
+    }
+  }
+  return items
+    .map((item) => {
+      if (item.concept === "Diferencial") return "";
+      return `<p>${item.concept}</p>`;
+    })
+    .join("");
 }
 
 function generateAmounts(
   items: Array<{ concept: string | null; total: number | null }>
 ): string {
+  const diferencial =
+    items.find((x) => x.concept === "Diferencial")?.total ?? 0;
+  const abonoTotal = items
+    .filter((x) => x.concept === "Abono")
+    .reduce((acc, item) => acc + (item.total ?? 0), 0);
+
+  items = items.filter((x) => x.concept !== "Abono");
+  items.push({ concept: "Abono", total: abonoTotal + diferencial });
   return items.map((item) => `<p>${item.total}</p>`).join("");
 }
 
@@ -205,52 +245,50 @@ export function htmlBill(
 ) {
   let subtotal = 0;
   let iva = 0;
-  if(comprobante.items.length > 0){
+  if (comprobante.items.length > 0) {
     subtotal = comprobante.items.reduce(
       (acc: number, item: { total: number }) => acc + (item?.total ?? 0),
       0
-    )
+    );
     const iva = comprobante?.items.reduce(
       (acc: number, item: { iva: number }) => acc + (item?.iva ?? 0),
       0
-    )
+    );
   }
 
   let totalTributes = 0;
 
-  if(comprobante.otherTributes.length > 0){
+  if (comprobante.otherTributes.length > 0) {
     totalTributes = comprobante.otherTributes.reduce(
-      (acc: number, tribute: { amount: number }) => acc + (tribute?.amount ?? 0),
+      (acc: number, tribute: { amount: number }) =>
+        acc + (tribute?.amount ?? 0),
       0
-    )
+    );
   }
 
+  const total = subtotal + iva + totalTributes;
 
- const total = subtotal + iva + totalTributes
-  
-// const tribute = comprobante?.otherTributes.reduce(
-//   (acc: number, tribute: { tribute: string }) => acc + (tribute?.tribute ?? 0),
-//   0
-// )
+  // const tribute = comprobante?.otherTributes.reduce(
+  //   (acc: number, tribute: { tribute: string }) => acc + (tribute?.tribute ?? 0),
+  //   0
+  // )
 
-// const jurisdiction = comprobante?.otherTributes.reduce(
-//   (acc: number, tribute: {  jurisdiction: string }) => acc + (tribute?.jurisdiction ?? 0),
-//   0
-// )
-// const alicuota = comprobante?.otherTributes.reduce(
-//   (acc: number, tribute: { alicuota: number }) => acc + (tribute?.alicuota ?? 0),
-//   0
-// )
-// const base_imponible = comprobante?.otherTributes.reduce(
-//   (acc: number, tribute: { base_imponible: number }) => acc + (tribute?.base_imponible ?? 0),
-//   0
-// )
-// const tributeAmount = comprobante?.otherTributes.reduce(
-//   (acc: number, tribute: { amount: number }) => acc + (tribute?.amount ?? 0),
-//   0
-// )
-
-
+  // const jurisdiction = comprobante?.otherTributes.reduce(
+  //   (acc: number, tribute: {  jurisdiction: string }) => acc + (tribute?.jurisdiction ?? 0),
+  //   0
+  // )
+  // const alicuota = comprobante?.otherTributes.reduce(
+  //   (acc: number, tribute: { alicuota: number }) => acc + (tribute?.alicuota ?? 0),
+  //   0
+  // )
+  // const base_imponible = comprobante?.otherTributes.reduce(
+  //   (acc: number, tribute: { base_imponible: number }) => acc + (tribute?.base_imponible ?? 0),
+  //   0
+  // )
+  // const tributeAmount = comprobante?.otherTributes.reduce(
+  //   (acc: number, tribute: { amount: number }) => acc + (tribute?.amount ?? 0),
+  //   0
+  // )
 
   let canales: any;
   if (producto) {
@@ -259,11 +297,10 @@ export function htmlBill(
   if (comprobante) {
     const payment = comprobante.payments;
   }
-
   // console.log(voucher);
 
   // moví funciones porque es lento redefinirlas constantemente
-  
+
   const conceptosList = generateConcepts(comprobante?.items ?? []);
   const amountsList = generateAmounts(comprobante?.items ?? []);
   const htmlContent = `<!DOCTYPE html>
@@ -307,19 +344,19 @@ padding-bottom:3px
 }
 
         .items-1 {
-        margin-left:40px;
+
+        margin-left:30px;
         padding-bottom: 0;
       }
 
       .items-1 p {
-        font-size: 12px;
-        font-weight: 400;
-        color: #3E3E3E;
-margin-bottom:1px;
+        font-size: 11px;
+        font-weight: 50;
+        margin-bottom:5px;
       }
 
       .logo {
-        width: 25vw;
+        width: 30vw;
         height: auto;
         margin-bottom: 5px;
       }
@@ -336,34 +373,38 @@ margin-bottom:1px;
       }
 
       .items-3 {
-        padding-bottom: 0rem;
-        margin-right:40px;
+        padding-bottom: 1px;
+        margin-right:30px;
         display: flex;
         flex-direction: column;
       }
 
-      .items-3 h2 {
-        font-size: 1.7rem;
-        font-weight: 500;
-        line-height: 25px;
-      }
-
-      .items-3 p {
+      .items-3 div p {
         display: flex;
-        font-size: 12px;
-        color: #3E3E3E;
-margin-bottom:1px;
+        font-size: 11px;
+        font-weight: 50;
+        margin-bottom:5px;
       }
 
       .parte-2 {
          display: flex;
         justify-content: space-between;
-         margin-bottom: 1rem; 
- 	font-size: 12px;
+ 	      font-size: 12px;
         flex-direction: column;
-	padding-bottom: 3px; 
+	      padding-top: 1px; 
         color: #3E3E3E;
       }
+        .parte-2 div span {
+        font-weight: 200;
+        padding-bottom: 10px; 
+      }
+        .parte-2 div span span{
+        font-weight: 600;
+        margin-right:4px;
+        letter-spacing: 0.025em;
+      }
+
+
 
       .datos-1 {
         font-size: 16px;
@@ -372,12 +413,14 @@ margin-bottom:1px;
         line-height: 30px;
         color: #303030;
       }
+
       .datos-1 li p span {
-        font-weight: 600;
-        opacity: 70;
+        font-weight: 500;
+        color: #303030;
         flex: 1;
     margin-right: 1rem;
       }
+
       .datos-2 {
         font-size: 16px;
         list-style-type: none;
@@ -390,7 +433,7 @@ margin-bottom:1px;
 
       .datos-2 li p span {
         font-weight: 600;
-        opacity: 70;
+        color: #303030;
       }
 
       .parte-3 {
@@ -479,29 +522,32 @@ margin-bottom:1px;
         justify-content: space-between;
         gap: 10px;
         display: flex;
-        margin-top: 20px;
-        margin-left: 40px;
-    margin-right:40px;
+        margin-top: 10px;
+        margin-left: 30px;
+    margin-right:30px;
       }
 
-.qr-section p{
-font-size: 10px;
-margin-bottom: 1px;
-}
+      .qr-section p{
+      font-size: 10px;
+      color: #3e3e3e;
+      font-weight: 300;
+      margin-bottom: 3px;
+      }
       .qr {
-        width: 150px;
+        width: 160px;
       }
 
       .cae-section {
         flex-direction: column;
       }
       .cae-section p {
-        font-size: 12px;
-	height:15px;
+        font-size: 10px;
+        line-height:15px;
         font-weight: 400;
         color: #333;
         margin-bottom:0;
         padding-bottom: 0;
+	padding-left:6px;
       }
 
       .bold {
@@ -509,7 +555,7 @@ margin-bottom: 1px;
       }
 
       .afip {
-        width: 150px;
+        width: 160px;
       }
 
       .bp-logo {
@@ -594,63 +640,70 @@ margin-bottom: 1px;
     font-weight: bold;
 }
 
-p {
-    font-size: 14px;
-    color: #666;
-    margin-bottom: 5px;
-}
-
 .line {
     width: 1px;
-    height: 60px;
+    height: 40px;
     background-color: #ccc;
     margin: 0 auto 0;
 }
 
 .grid {
-	font-size: 15px;
-	padding-right: 40px;
-	padding-left: 40px
+	padding-right: 30px;
+	padding-left: 30px
 }
 
 .grid div {
 padding-bottom: 10px;
 }
 
-
-
-
-
+.conceptotables-container{
+  margin-top: 10px;
+}
 
 .conceptotables {
     width: 100%;
     border-collapse: collapse;
-	max-height:100%;
+max-height:100%;
 }
+
 
 .conceptotables-header {
     padding-top: 10px;
 	padding-bottom: 10px;
     font-weight: bold;
+    font-size: 14px;
+    letter-spacing: 0.05em;
     color: #3E3E3E;
 	background-color: #f1f1f1;
 	border-style : hidden;
 }
 
-.conceptotables-cell {
-    padding-top: 10px;
-	padding-bottom: 10px;
-    border-top: 1px solid #ddd;
-    color: #666;
-	border-style : hidden;
+.conceptotables-cell p {
+  padding-top: 10px;
+  font-size: 13px;
 }
 
-.tributos p {
-font-size:10px
-}
 .tributos {
 padding-top: 15px;
-border-top: 1px solid #ccc
+border-top: 1px solid #ccc;
+padding-bottom: 0;
+}
+.tributos div {
+padding-bottom: 0;
+}
+.tributos div p {
+font-size:9px;
+font-weight: 500; 
+margin-bottom: 0;
+padding-right: 10px;
+}
+
+.tributos div span {
+font-size: 8px;
+font-family: "Montserrat", sans-serif;
+font-weight: 200; 
+margin: 0;
+padding: 0;
 }
 
 	.resumen-total {
@@ -665,21 +718,21 @@ border-top: 1px solid #ccc
 	}
 .payment {
   position: relative;
-border-width: 0.25px;
+  border-width: 0.25px;
   border-style: solid;
-border-radius: 0.75rem;
-border-color: #D9D9D9;
-      display: flex;
+  border-radius: 0.75rem;
+  border-color: #D9D9D9;
+  display: flex;
   justify-content: space-evenly;
   gap: 1rem;
   padding: 0.5rem 1rem;
   place-items: center;
-
+  height: 40px;
 }
 
       .payment span{
-            position: absolute;
-font-size:10px;
+        position: absolute;
+        font-size:10px;
         background-color: #FFFFFF;
         top: -8px;
         padding: 0 8px;
@@ -698,6 +751,7 @@ font-size:10px;
         </div>
   
           <div class="items-2" style="text-align:center">
+          <div style="font-size: 15px; font-weight: 300; padding-bottom:12px; letter-spacing: 0.025em;"> ORIGINAL </div>
         <div class="icon">
 				<span>${getTagForTipoComprobante(comprobante?.tipoComprobante ?? "")}</span>
 			  </div>
@@ -706,167 +760,186 @@ font-size:10px;
   
         <div class="items-3" style="padding-bottom: 5px;">
           <div>
-           <h3 style=" font-size: 16px; font-weight:500; padding-bottom:3px;">
+           <h3 style=" font-size: 16px; font-weight:600; padding-bottom:4px; letter-spacing: 0.05em;">
             ${comprobanteCortado ?? ""} </h3>
-           <h3 style=" font-size: 14px; font-weight:400; padding-bottom:3px;">
+           <h3 style=" font-size: 14px; font-weight:450; padding-bottom:5px;">
             N° ${comprobante?.ptoVenta.toString().padStart(4, "0")}-${voucher
     .toString()
     .padStart(8, "0")}
           </h3>
 
           <p> Fecha de Emisión: ${dateNormalFormat(new Date())}</p>
-          	<p> C.U.I.T:${company.cuit}</p>
+          	<p> C.U.I.T: ${company.cuit}</p>
             <p> Ingresos Brutos: 0</p>
-          <p> Fecha de Inicio de Actividad: ${dateNormalFormat(
+          <p style="margin-bottom:3px;"> Fecha de Inicio de Actividad: ${dateNormalFormat(
             company.activity_start_date
           )}</p>
         </div>
       </header>
   
     <div class="parte-2">	
-		<div class="grid" style="display:flex; flex-direction:row; justify-content:space-between">
-          <div>
-				<span><span style="font-weight:600; opacity:70;margin-right:4px;">Nombre/Razón Social:</span>${name}</span>
-          </div>
-          <div>
-				<span><span style="font-weight:600; opacity:70;margin-right:4px;">${id_type}</span>${id_number}</span>
-			</div>
+		  <div class="grid" style="display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid #ccc; white-space: nowrap;">
+        <div style="grid-column: 1 / span 1;">
+          <span><span>Nombre/Razón Social:</span> ${name}</span>
+        </div>
+        <div style="padding-left: 220px; grid-column: 2 / span 1;">
+          <span><span>${id_type}:</span> ${id_number}</span>
+        </div>
+        <div style="grid-column: 1 / span 2;">
+          <span><span>Domicilio:</span> ${domicilio} ${localidad} ${provincia}</span>
+        </div>
+        <div style="grid-column: 1 / span 1;">
+          <span><span>Condición de AFIP:</span> ${afip_status}</span>
+        </div>
+        <div style="padding-left: 220px; grid-column: 2 / span 1;">
+          <span><span>Condición de venta:</span> ${sellCondition}</span>
+        </div>
+        <div style="grid-column: 1 / span 1;">
+          <span><span>Período:</span> ${dateNormalFormat(
+            comprobante?.fromPeriod
+          )}</span>
+        </div>
+        <div style="padding-left: 220px; grid-column: 2 / span 1;">
+          <span><span>Fecha de vencimiento:</span> ${dateNormalFormat(
+            comprobante?.due_date
+          )}</span>
+        </div>
       </div>
-		<div class="grid">
-		<div>
-          <span><span style="font-weight:600; opacity:70;margin-right:4px;">Domicilio:</span>${domicilio} ${localidad} ${provincia}</span>
-			</div>
-      	</div>
+</div>
 
-        <div class="grid" style="display:flex; flex-direction:row; justify-content:space-between">
-		<div style="display:flex; flex-direction:column; justify-content:start">
-			<div>
-				<span><span style="font-weight:600; opacity:70;margin-right:4px;">Condición AFIP:</span>${afip_status}</span>
-     	</div>
-      	<div>
-				<span><span style="font-weight:600; opacity:70;margin-right:4px;">Período:</span>${dateNormalFormat(
-          comprobante?.fromPeriod
-        )}</span>
-			</div>	
-      	</div>
-		<div style="display:flex; flex-direction:column; justify-content:start">
-			<div>
-				<span><span style="font-weight:600; opacity:70;margin-right:4px;">Condición de venta:</span>${sellCondition}</span>
-			</div>	
-			<div>
-				<span><span style="font-weight:600; opacity:70;margin-right:4px;">Fecha de vencimiento:</span>${dateNormalFormat(
-          comprobante?.due_date
-        )}</span>
-			</div>
-		</div>
-	  </div>
   
     <div class="conceptotables-container" style="height: 280px;">
         <table class="conceptotables">
             <thead>
                 <tr>
-                    <th class="conceptotables-header" style="text-align:left;padding-left:40px;background-color: #f0f0f0;border-top-left-radius:5px;border-bottom-left-radius:5px" >Conceptos</th>
-                    <th class="conceptotables-header" style="text-align:right;padding-right:40px;border-top-right-radius:5px;border-bottom-right-radius:5px">Importe</th>
+                    <th class="conceptotables-header" style="text-align:left;padding-left: 30px;background-color: #f0f0f0;border-top-left-radius:5px;border-bottom-left-radius:5px" >Conceptos</th>
+                    <th class="conceptotables-header" style="text-align:right; padding-right:30px;border-top-right-radius:5px;border-bottom-right-radius:5px">Importe</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td class="conceptotables-cell" style="text-align:left;padding-left:40px;"> ${conceptosList}</td>
-                    <td class="conceptotables-cell" style="text-align:right;padding-right:40px;">${amountsList}</td>
+                    <td class="conceptotables-cell" style="text-align:left;padding-left: 30px;"> ${conceptosList}</td>
+                     <td class="conceptotables-cell" style="text-align:right; padding-right:30px;">${amountsList}</td>
                 </tr>
             </tbody>
         </table>
     </div>
 
 
-       <div class="tributos" style="display:flex; flex-direction: row;justify-content:space-between; padding-left:40px; padding-right:40px">
+       <div class="tributos" style="display:flex; flex-direction: row;justify-content:space-between; padding-left: 30px; padding-right:30px">
 	
-       ${totalTributes > 0 ? (`<div class="tribute-grid" style="display: grid; grid-template-columns: repeat(5, 1fr);grid-auto-rows: min-content;">
-    <!-- Use div or span instead of p for inline layout if needed -->
-    <div><p style="font-weight: 600; margin: 0;">TRIBUTO</p></div>
-    <div><p style="font-weight: 600; margin: 0;">JURISDICCIÓN</p></div>
-    <div><p style="font-weight: 600; margin: 0;">ALICUOTA</p></div>
-    <div><p style="font-weight: 600; margin: 0;">BASE IMPONIBLE</p></div>
-    <div><p style="font-weight: 600; margin: 0;">IMPORTE</p></div>
-    <!-- Example content -->
+       ${
+         totalTributes > 0
+           ? `<div class="tribute-grid" style="display: grid; grid-template-columns: repeat(5, auto);grid-auto-rows: min-content;">
+    <div><p>TRIBUTO</p></div>
+    <div><p>JURISDICCIÓN</p></div>
+    <div><p>ALICUOTA</p></div>
+    <div><p>BASE IMPONIBLE</p></div>
+    <div><p>IMPORTE</p></div>
     ${comprobante.otherTributes
       .map(
         (tribute: any) =>
           `<div><span>${tribute.tribute}</span></div>
           <div><span>${tribute.jurisdiction}</span></div>
           <div><span>${formatNumberAsCurrency(tribute.alicuota)}</span></div>
-          <div><span>${formatNumberAsCurrency(tribute.base)}</span></div>
+          <div><span>${formatNumberAsCurrency(
+            tribute.base_imponible
+          )}</span></div>
           <div><span>${formatNumberAsCurrency(tribute.amount)}</span></div>`
       )
       .join("\n")}
 
-  </div>`) : ("<div style='width: 70px;'></div>")}
+  </div>`
+           : "<div style='width: 70px;'></div>"
+       }
 
-  <div style="display:flex; flex-direction:column; margin-bottom: 10px; font-weight:500;">
-		<p style="font-size:12px; text-align:right; ">Sub-total: ${formatNumberAsCurrency(subtotal ?? 0)}</p>
-    <p style="font-size:12px; text-align:right">IVA: ${formatNumberAsCurrency(iva ?? 0)}</p>
-		${totalTributes > 0 ? (`<p style="font-size:12px; text-align:right">Otros Tributos: ${formatNumberAsCurrency(totalTributes ?? 0)}</p>`) : ("")}
+  <div style="display:flex; flex-direction:column; margin-bottom: 10px; font-weight:400;">
+		<p style="font-size:12px; text-align:right; margin-right:0; padding-right:0;">Sub-total: ${formatNumberAsCurrency(
+      subtotal ?? 0
+    )}</p>
+    <p style="font-size:12px; text-align:right;  margin-right:0; padding-right:0; padding-top:5px;">IVA: ${formatNumberAsCurrency(
+      iva ?? 0
+    )}</p>
+		${
+      totalTributes > 0
+        ? `<p style="font-size:12px; text-align:right;  margin-right:0; padding-right:0; padding-top:5px;">Otros Tributos: ${formatNumberAsCurrency(
+            totalTributes ?? 0
+          )}</p>`
+        : ""
+    }
     
-    <p style="font-size:12px; text-align:right">Pagos a cuenta: $XX.XXX,XX</p>
+    <p style="font-size:12px; text-align:right; margin-right:0; padding-right:0; padding-top:5px;">Pagos a cuenta: $XX.XXX,XX</p>
 	</div>
 </div>
   
 <section style="padding-bottom: 15px; border-bottom:1px solid #ccc ">
 	<div class="resumen-total">
-		<div style="font-size:12px;padding-left:40px; width:350px">
-    ${numeroALetras(Math.floor(total ?? 0))}
+		<div style="font-size:12px;padding-left: 30px; width:350px">
+    ${numeroALetras(total ?? 0)}
 		</div>
-		<div style="color:#6952EB; font-size:16px;font-weight:600; padding-right: 40px; display:flex; flex-direction:row">
-		<div style="padding-right:15px">TOTAL A PAGAR:</div>${formatNumberAsCurrency(
-      total ?? 0
-    )}
+		<div style="color:#6952EB; font-size:16px;font-weight:600; padding-right: 30px; display:flex; flex-direction:row; letter-spacing: 0.05em;">
+		  <p style="padding-right:20px;">TOTAL A PAGAR:</p>${formatNumberAsCurrency(
+        total ?? 0
+      )}
 		</div>
 	</div>
 
-  <div style="font-size:12px;padding-left:40px; padding-top:10px; width:350px; white-space: nowrap; font-style: italic;">
+  <div style="font-size:10px; padding-left: 30px; padding-top:10px; width:350px; white-space: nowrap; font-style: italic;">
 			Esta factura se debitará en fecha de vencimiento en CBU: XXXXXXXXXXXXXXXXXXXXXXXXX.
 		</div>
 </section>
 
      
-       <section style="padding-left:40px; padding-right:40px; padding-top: 15px; padding-bottom: 5px;">
+       <section style="padding-left: 30px;  padding-right:30px; padding-top: 15px; padding-bottom: 5px;">
         <h2 style="color: #3E3E3E; font-weight: 500; font-size:16px;">Canales de pago habilitados </h2>
         <div style="display:flex; flex: 1 1 auto; justify-content: space-between; margin-top:20px; margin-bottom:5px; place-items: center;">
           <div class="payment">
             <span>Lectura de código de barras</span>  
           <img
-            style="width:30px; height:32px;"
+            style="width:30px; height:30px;"
             src="https://utfs.io/f/79d56fb6-2cb7-4760-bbc6-add1a1e434f6-tkdz7.png"
           />
           <img
-             style="width:60px; height:40px;"
+            style="width:60px; height:40px; z-index: -1;"
             src="https://utfs.io/f/501ea573-2d69-4f4b-9ae3-95531c540d9c-h1yi1.jpg"
           />
           <img
-            style="width:55px; height:35px;"
-            src="https://getlogovector.com/wp-content/uploads/2023/12/mercado-pago-logo-vector-2023.png"
+            style="width:65px; height:35px; z-index: 10;"
+            src="https://utfs.io/f/e4780803-70ba-4b70-bcf9-f8758eab3a19-b9363v.png"
+            alt="Mercadopago"
             />
            </div>
            
-          <div class="payment" style="height: 40px; padding-left: 35px; padding-right: 35px;">
+          <div class="payment" style="padding-left: 52px; padding-right: 52px;">
             <span>Código de pago electrónico</span>
           <img
-            style="width:100px; height:15px;"
+            style="width:100px; height:13px;"
             src="https://utfs.io/f/a215f09e-25e8-4eb3-9d1c-6adf1d17baa5-pvvezi.png"
+            alt="pagofacil"
           />
          </div>
-          <div class="payment">
+          <div class="payment" style="align-items: start;">
             <span>Débito automático</span>
             <img
-              src="/comprobantes/visa-deb.svg"
+            style="width:40px; height:22px;"
+              src="https://utfs.io/f/9383d71a-4feb-47e7-a160-23506688c5b1-j0x0oy.png"
+              alt="Visa-debit"
             />
           <img
-            src="/comprobantes/visa.svg"
+          style="width:38px; height:12px;z-index: 10;"
+            src="https://utfs.io/f/592ca28a-3c10-4b27-a8f3-4f976e83e8ab-r41bgf.png"
+            alt="Visa"
             />
           <img
-           style="width:40px; height:30px;"
+           style="width:28px; height:21px;z-index: 10;"
             src="https://utfs.io/f/23711681-416d-4155-9894-4e6c8584219f-mgfpcc.png"
+            alt="Mastercard"
           />
+          <img
+          style="width:22px; height:28px;"
+            src="https://utfs.io/f/919786bf-15c7-41e3-be9a-d537e2bc8c4f-huj7i4.png"
+            alt="CBU"
+            />
         </div>
          </div>
       </section>
@@ -876,38 +949,42 @@ font-size:10px;
         <div style="display: flex; justify-content: flex-start;" >
           <img
             class="qr"
-            src="https://utfs.io/f/2dd25618-943b-41f4-8c0e-363fc8ba3228-n3iun9.png"
+            src="https://utfs.io/f/f5ff576b-2f11-41b2-8549-39cb4800c7b2-ejsh86.png"
 	style="height: 100px; width:100px;"
           />
 
-           <div style="display: flex; flex-direction: column; padding-left:10px; ">
+           <div style="display: flex; flex-direction: column; padding-top:10px; ">
           <img
-             style="width:100px; height:40px;"
-            src="/comprobantes/logo-afip.png"
+             style="width:80px; height:20px;"
+            src="https://utfs.io/f/8478197f-57ba-4f39-8beb-cdffb1c432cf-m15jgy.png"
+            alt="logo-AFIP"
           />
 
-          <p style="color: #333; font-style: italic; font-weight: 500; margin-bottom: 10px;">Comprobante autorizado</p>
+          <p style="color: #3e3e3e; font-style: italic; font-weight: 500; margin-top:4px; margin-bottom: 12px;">Comprobante autorizado</p>
           <p>CAE N° XXXXXXXXX</p>
           <p style="white-space: nowrap">Fecha Vto de CAE: XX/XX/XXXX</p>
         </div>
           </div>
-         <div style="padding-top:5px;">
-          <p>
+         <div style="">
+          <p style="padding-left:7px;">
             Powered by
             <img
               class="bp-logo"
               src="https://utfs.io/f/fa110834-238b-4880-a8c2-eedebe9e6b6e-mnl13r.png"
+              alt="logo-Bitcompay"
             />
           </p>
           </div>
           </div>
 
-        <div class="cae-section" style="text-align: left;">
-           <p>CÓDIGO DE PAGO ELECTRÓNICO: XXXX-XXXXXXXX</p>
-          <p>FECHA TOPE PARA EL PAGO EN REDES: XX/XX/XXXX</p>
-          <p>CANALES CON LECTURA DE CÓDIGO DE BARRAS: </p>
+        <div class="cae-section" style="text-align: left; ">
+        <p>Fecha tope para el pago en redes: XX/XX/XXXX</p>
+           <p>Código de pago electrónico PMC: XXXX-XXXXXXXX</p>
+          <p>Canales con lectura de código de barras: </p>
           <img
-            src="/comprobantes/codigo-barra.svg"
+          style="width:340px; height:60px;"
+            src="https://utfs.io/f/7ed13ab6-deaa-4257-ad38-7ce19f312f4e-huj7js.png"
+            alt="barcode"
           />
         </div>
       </section>
@@ -1016,61 +1093,85 @@ function numeroALetras(numero: number | undefined): string {
     "dieciocho",
     "diecinueve",
   ];
-  if (numero) {
+
+  // Función para capitalizar la primera letra
+  const capitalizarPrimeraLetra = (texto: string): string => {
+    return texto.charAt(0).toUpperCase() + texto.slice(1);
+  };
+
+  // Función para obtener los decimales de un número
+  const obtenerDecimales = (numero: number | undefined): string => {
+    if (!numero) return "00";
+    let numeroStr = numero.toString();
+    let partes = numeroStr.split(".");
+    if (partes.length === 2) {
+      let decimales = partes[1]!.substring(0, 2);
+      return decimales.padEnd(2, "0");
+    }
+    return "00";
+  };
+
+  // Función recursiva para convertir la parte entera en letras
+  const convertirParteEntera = (numero: number): string => {
     if (numero === 0) return "cero";
     if (numero < 10) return unidades[numero]!;
     if (numero >= 11 && numero < 20) return especiales[numero - 11]!;
-    if (numero < 100)
+    if (numero < 100) {
       return (
         decenas[Math.floor(numero / 10)] +
         (numero % 10 !== 0 ? " y " + unidades[numero % 10] : "")
       );
+    }
     if (numero < 1000) {
       let centena = Math.floor(numero / 100);
       let resto = numero % 100;
       if (resto === 0 && centena === 1) return "cien";
       return (
-        centenas[centena] + (resto !== 0 ? " " + numeroALetras(resto) : "")
+        centenas[centena] +
+        (resto !== 0 ? " " + convertirParteEntera(resto) : "")
       );
     }
     if (numero < 1000000) {
       let miles = Math.floor(numero / 1000);
       let resto = numero % 1000;
-      if (miles === 1)
-        return "mil" + (resto !== 0 ? " " + numeroALetras(resto) : "");
+      if (miles === 1) {
+        return "mil" + (resto !== 0 ? " " + convertirParteEntera(resto) : "");
+      }
       return (
-        numeroALetras(miles) +
+        convertirParteEntera(miles) +
         " mil" +
-        (resto !== 0 ? " " + numeroALetras(resto) : "")
+        (resto !== 0 ? " " + convertirParteEntera(resto) : "")
       );
     }
     if (numero < 100000000) {
       let millones = Math.floor(numero / 1000000);
       let resto = numero % 1000000;
-      if (millones === 1)
-        return "un millón" + (resto !== 0 ? " " + numeroALetras(resto) : "");
+      if (millones === 1) {
+        return (
+          "un millón" + (resto !== 0 ? " " + convertirParteEntera(resto) : "")
+        );
+      }
       return (
-        numeroALetras(millones) +
+        convertirParteEntera(millones) +
         " millones" +
-        (resto !== 0 ? " " + numeroALetras(resto) : "")
+        (resto !== 0 ? " " + convertirParteEntera(resto) : "")
       );
     }
     return "Número fuera de rango";
-  }
-  return "";
-}
+  };
 
-function obtenerDecimales(numero: number | undefined) {
-  if (!numero) return "00";
-  console.log("numeroStr");
-  console.log(numero);
-  let numeroStr = numero.toString();
-  let partes = numeroStr.split(".");
-  if (partes.length === 2) {
-    let decimales = partes[1]!.substring(0, 2); // Obtiene los dos primeros decimales
-    return decimales.padEnd(2, "0"); // Asegura que siempre haya dos dígitos
+  if (numero) {
+    let parteEntera = Math.floor(numero);
+    let parteDecimal = obtenerDecimales(numero);
+
+    let resultadoParteEntera = convertirParteEntera(parteEntera);
+
+    return (
+      capitalizarPrimeraLetra(resultadoParteEntera) + ` con ${parteDecimal}/100`
+    );
   }
-  return "00"; // Retorna "00" si no hay parte decimal
+
+  return "";
 }
 
 export const valueToNameComprobanteMap: Record<string, string> = {

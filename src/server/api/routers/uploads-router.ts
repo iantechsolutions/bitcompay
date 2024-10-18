@@ -340,7 +340,7 @@ export const uploadsRouter = createTRPCRouter({
           });
           console.log("comprobante", comprobante);
 
-          const estado = comprobante?.importe! > value ? "parcial" : "pagada";
+          const estado = comprobante?.importe! > value ? "Parcial" : "Pagada";
           console.log("key", key);
           console.log("mapComprobantes", mapComprobantes);
           console.log("estado", estado);
@@ -569,11 +569,16 @@ async function readResponseUploadContents(
         ? Number(invoice_number.replace(/^0+/, ""))
         : undefined;
 
+      let fiscal_id_number = affiliate_number
+        ? Number(affiliate_number.replace(/^0+/, ""))
+        : undefined;
+
       console.log("mate", affiliate_number, invoiceNumberCleaned);
-      if (affiliate_number && invoiceNumberCleaned) {
+
+      if (fiscal_id_number && invoiceNumberCleaned) {
         const original_transaction = await db.query.payments.findFirst({
           where: and(
-            eq(schema.payments.affiliate_number, affiliate_number),
+            eq(schema.payments.fiscal_id_number, fiscal_id_number),
             eq(schema.payments.invoice_number, invoiceNumberCleaned)
           ),
         });
@@ -634,10 +639,14 @@ async function readResponseUploadContents(
         ? Number(invoice_number.replace(/^0+/, ""))
         : undefined;
 
-      if (invoiceNumberCleaned && affiliate_number) {
+      let fiscal_id_number = affiliate_number
+        ? Number(affiliate_number.replace(/^0+/, ""))
+        : undefined;
+
+      if (invoiceNumberCleaned && fiscal_id_number) {
         const original_transaction = await db.query.payments.findFirst({
           where: and(
-            eq(schema.payments.affiliate_number, affiliate_number),
+            eq(schema.payments.fiscal_id_number, fiscal_id_number),
             eq(schema.payments.invoice_number, invoiceNumberCleaned)
           ),
         });
@@ -702,10 +711,14 @@ async function readResponseUploadContents(
         ? Number(invoice_number.replace(/^0+/, ""))
         : undefined;
 
-      if (affiliate_number && invoiceNumberCleaned) {
+      let fiscal_id_number = affiliate_number
+        ? Number(affiliate_number.replace(/^0+/, ""))
+        : undefined;
+
+      if (fiscal_id_number && invoiceNumberCleaned) {
         const original_transaction = await db.query.payments.findFirst({
           where: and(
-            eq(schema.payments.affiliate_number, affiliate_number),
+            eq(schema.payments.fiscal_id_number, fiscal_id_number),
             eq(schema.payments.invoice_number, invoiceNumberCleaned)
           ),
         });
@@ -854,12 +867,17 @@ async function readResponseUploadContents(
       const invoiceNumberCleaned = invoice_number
         ? Number(invoice_number.replace(/^0+/, ""))
         : undefined;
+
+      let fiscal_id_number = affiliate_number
+        ? Number(affiliate_number.replace(/^0+/, ""))
+        : undefined;
+
       try {
         let original_transaction;
-        if (affiliate_number && invoiceNumberCleaned) {
+        if (fiscal_id_number && invoiceNumberCleaned) {
           original_transaction = await db.query.payments.findFirst({
             where: and(
-              eq(schema.payments.affiliate_number, affiliate_number),
+              eq(schema.payments.fiscal_id_number, fiscal_id_number),
               eq(schema.payments.invoice_number, invoiceNumberCleaned)
             ),
           });

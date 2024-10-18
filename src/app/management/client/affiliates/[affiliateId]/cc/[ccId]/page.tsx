@@ -90,43 +90,23 @@ export default function CCDetail(props: {
   const tableRows: TableRecord[] = [];
   if (events) {
     for (const event of events) {
-      if (event.comprobantes) {
-        console.log("links comprobantes",event.comprobantes.billLink, event.comprobantes.id);
-        tableRows.push({
-          date: event.createdAt,
-          description: event.description,
-          amount: formatCurrency(event.event_amount),
-          "Tipo comprobante":
-            event.comprobantes?.tipoComprobante ?? "FACTURA A",
-          comprobanteNumber: event.comprobantes?.nroComprobante ?? 0,
-          ptoVenta: event.comprobantes?.ptoVenta ?? 0,
-          Estado: "Pendiente",
-          iva: Number(event.comprobantes?.iva ?? 0),
-          comprobantes: event.comprobantes,
-          currentAccountAmount: formatCurrency(NCTotal ?? 0),
-          saldo_a_pagar: formatCurrency(saldo_a_pagar ?? 0),
-          nombre: afiliado?.name ?? "",
-          cuit: afiliado?.fiscal_id_number ?? "",
-          event: event,
-        });
-      } else {
-        tableRows.push({
-          date: event.createdAt,
-          description: event.description,
-          amount: formatCurrency(event.event_amount),
-          "Tipo comprobante": "Apertura de CC",
-          comprobanteNumber: 0,
-          ptoVenta: 0,
-          Estado: "Pendiente",
-          iva: 0,
-          comprobantes: event.comprobantes,
-          currentAccountAmount: formatCurrency(NCTotal ?? 0),
-          saldo_a_pagar: formatCurrency(saldo_a_pagar ?? 0),
-          nombre: afiliado?.name ?? "",
-          cuit: afiliado?.fiscal_id_number ?? "",
-          event: event,
-        });
-      }
+      console.log("event amount", event.event_amount);
+      tableRows.push({
+        date: event.createdAt,
+        description: event.description,
+        amount: event?.event_amount ?? 0,
+        "Tipo comprobante": event.comprobantes?.tipoComprobante ?? "FACTURA A",
+        comprobanteNumber: event.comprobantes?.nroComprobante ?? 0,
+        ptoVenta: event.comprobantes?.ptoVenta ?? 0,
+        Estado: event.comprobantes?.estado ?? "apertura",
+        iva: Number(event.comprobantes?.iva ?? 0),
+        comprobantes: event.comprobantes,
+        currentAccountAmount: lastEvent?.current_amount ?? 0,
+        saldo_a_pagar: event?.comprobantes?.importe ?? 0,
+        nombre: afiliado?.name ?? "",
+        cuit: afiliado?.fiscal_id_number ?? "",
+        event: event,
+      });
     }
   }
   async function handleExport() {

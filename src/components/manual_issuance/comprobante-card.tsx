@@ -59,8 +59,7 @@ export default function ComprobanteCard({
                 render={({ field }) => (
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                    defaultValue={field.value}>
                     <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8">
                       <SelectValue placeholder="Seleccionar PV..." />
                     </SelectTrigger>
@@ -72,8 +71,7 @@ export default function ComprobanteCard({
                         <SelectItem
                           key={option.value}
                           value={option.value}
-                          className="rounded-none "
-                        >
+                          className="rounded-none ">
                           {option.label}
                         </SelectItem>
                       ))}
@@ -102,8 +100,7 @@ export default function ComprobanteCard({
                         className={cn(
                           "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                           !field.value && "text-muted-foreground"
-                        )}
-                      >
+                        )}>
                         {field.value && dayjs(field.value).isValid() ? (
                           format(field.value, "dd/MM/yyyy")
                         ) : (
@@ -142,8 +139,7 @@ export default function ComprobanteCard({
                 render={({ field }) => (
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                    defaultValue={field.value}>
                     <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8 ">
                       <SelectValue placeholder="Seleccionar alicuota" />
                     </SelectTrigger>
@@ -159,8 +155,7 @@ export default function ComprobanteCard({
                         <SelectItem
                           key={option.value}
                           value={option.value}
-                          className="rounded-none "
-                        >
+                          className="rounded-none ">
                           {option.label}
                         </SelectItem>
                       ))}
@@ -187,8 +182,7 @@ export default function ComprobanteCard({
                       field.onChange(value);
                       setConcept(value === "1");
                     }}
-                    defaultValue={field.value}
-                  >
+                    defaultValue={field.value}>
                     <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8">
                       <SelectValue placeholder="Seleccionar concepto" />
                     </SelectTrigger>
@@ -201,8 +195,7 @@ export default function ComprobanteCard({
                         <SelectItem
                           key={option.value}
                           value={option.value}
-                          className="rounded-none "
-                        >
+                          className="rounded-none ">
                           {option.label}
                         </SelectItem>
                       ))}
@@ -231,8 +224,7 @@ export default function ComprobanteCard({
                         className={cn(
                           "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                           !field.value && "text-muted-foreground"
-                        )}
-                      >
+                        )}>
                         {field.value && dayjs(field.value).isValid() ? (
                           format(field.value, "dd/MM/yyyy")
                         ) : (
@@ -277,8 +269,7 @@ export default function ComprobanteCard({
                             className={cn(
                               "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                               !field.value && "text-muted-foreground"
-                            )}
-                          >
+                            )}>
                             {field.value && dayjs(field.value).isValid() ? (
                               format(field.value, "dd/MM/yyyy")
                             ) : (
@@ -321,8 +312,7 @@ export default function ComprobanteCard({
                             className={cn(
                               "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                               !field.value && "text-muted-foreground"
-                            )}
-                          >
+                            )}>
                             {field.value && dayjs(field.value).isValid() ? (
                               format(field.value, "dd/MM/yyyy")
                             ) : (
@@ -365,8 +355,7 @@ export default function ComprobanteCard({
                 render={({ field }) => (
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                    defaultValue={field.value}>
                     <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8">
                       <SelectValue placeholder="Seleccionar PV..." />
                     </SelectTrigger>
@@ -378,8 +367,7 @@ export default function ComprobanteCard({
                         <SelectItem
                           key={option.value}
                           value={option.value}
-                          className="rounded-none "
-                        >
+                          className="rounded-none ">
                           {option.label}
                         </SelectItem>
                       ))}
@@ -408,8 +396,7 @@ export default function ComprobanteCard({
                         className={cn(
                           "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                           !field.value && "text-muted-foreground"
-                        )}
-                      >
+                        )}>
                         {field.value && dayjs(field.value).isValid() ? (
                           format(field.value, "dd/MM/yyyy")
                         ) : (
@@ -451,8 +438,7 @@ export default function ComprobanteCard({
                         className={cn(
                           "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                           !field.value && "text-muted-foreground"
-                        )}
-                      >
+                        )}>
                         {field.value && dayjs(field.value).isValid() ? (
                           format(field.value, "dd/MM/yyyy")
                         ) : (
@@ -495,8 +481,7 @@ export default function ComprobanteCard({
                         className={cn(
                           "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                           !field.value && "text-muted-foreground"
-                        )}
-                      >
+                        )}>
                         {field.value && dayjs(field.value).isValid() ? (
                           format(field.value, "dd/MM/yyyy")
                         ) : (
@@ -539,8 +524,7 @@ export default function ComprobanteCard({
                         className={cn(
                           "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                           !field.value && "text-muted-foreground"
-                        )}
-                      >
+                        )}>
                         {field.value && dayjs(field.value).isValid() ? (
                           format(field.value, "dd/MM/yyyy")
                         ) : (
@@ -586,8 +570,7 @@ export default function ComprobanteCard({
                         className={cn(
                           "text-left flex justify-between font-medium w-full border-0 shadow-none hover:bg-white pr-0 pl-0",
                           !field.value && "text-muted-foreground"
-                        )}
-                      >
+                        )}>
                         {field.value && dayjs(field.value).isValid() ? (
                           format(field.value, "dd/MM/yyyy")
                         ) : (
@@ -628,10 +611,11 @@ export default function ComprobanteCard({
                         ?.filter(
                           (comprobante) =>
                             comprobante.tipoComprobante !== "0" &&
-                            (comprobante.estado === "parcial" ||
-                              comprobante.estado === "pendiente")
+                            (comprobante.estado?.toUpperCase() === "PARCIAL" ||
+                              comprobante.estado?.toUpperCase() === "PENDIENTE")
                         )
-                        .slice(0, 10).map((comprobante) => ({
+                        .slice(0, 10)
+                        .map((comprobante) => ({
                           value: comprobante.id.toString(),
                           label:
                             comprobante.nroComprobante.toString() +
@@ -675,9 +659,9 @@ export default function ComprobanteCard({
                   />
                 )}
               />,
-              ((form.getValues("facturasEmitidas").nroComprobante.toString() +
-              " - " +
-              form.getValues("facturasEmitidas").importe.toString()))
+              form.getValues("facturasEmitidas").nroComprobante.toString() +
+                " - " +
+                form.getValues("facturasEmitidas").importe.toString()
             ),
           }}
         />
@@ -697,8 +681,7 @@ export default function ComprobanteCard({
                   "w-full grid grid-flow-col justify-stretch gap-5",
                 comprobanteValueTipo != "Recibo" &&
                   "grid grid-cols-2 gap-4 gap-x-6"
-              )}
-            >
+              )}>
               <ElementCard
                 className="pr-1 pb-0 border-[#bef0bb]"
                 element={{
@@ -707,8 +690,7 @@ export default function ComprobanteCard({
                     visualization,
                     <Select
                       onValueChange={(e) => setTipoComprobante(e)}
-                      defaultValue={tipoComprobante}
-                    >
+                      defaultValue={tipoComprobante}>
                       <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8">
                         <SelectValue placeholder="Seleccionar comprobante..." />
                       </SelectTrigger>

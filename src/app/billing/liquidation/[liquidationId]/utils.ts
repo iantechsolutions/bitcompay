@@ -15,7 +15,7 @@ export function makeExcelRows(
       (integrante) => integrante?.isBillResponsible
     );
     const name = billResponsible?.name ?? "";
-    const cuit = billResponsible?.id_number ?? "";
+    const cuit = billResponsible?.fiscal_id_number ?? "";
     excelRow.push(fg?.numericalId ?? "");
     excelRow.push(name);
     excelRow.push(cuit);
@@ -132,10 +132,11 @@ export function makeExcelRows(
         subtotal: subTotal,
         iva,
         total,
-        comprobantes: fg?.comprobantes!,
+        comprobantes: fg?.comprobantes.filter(x=>x.liquidation_id==liquidationId) ?? [],
         currentAccountAmount,
         Plan: plan,
         modo,
+        error: fg?.comprobantes?.filter(x=>x.liquidation_id==liquidationId)?.some((x) => x.estado?.toLowerCase() === "error"),
       });
     }
   });

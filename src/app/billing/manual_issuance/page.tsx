@@ -104,7 +104,6 @@ export default function Page() {
   //   loginAfip();
   // }, []);
 
-  
   function computeTotals() {
     let subTotal = 0;
     let ivaTotal = 0;
@@ -199,7 +198,7 @@ export default function Page() {
 
           comprobante = await createComprobante({
             billLink: "",
-            estado: "generada",
+            estado: "Generada",
             concepto: Number(concepto) ?? 0,
             importe: Number(subTotal) + Number(ivaTotal) + Number(tributos),
             iva: iva ?? "0",
@@ -306,7 +305,7 @@ export default function Page() {
           // });
         } else if (tipoComprobante == "0") {
           comprobante = await createComprobante({
-            estado: "generada",
+            estado: "Generada",
             billLink: "", //deberiamos poner un link ?
             concepto: Number(concepto) ?? 0,
             importe: Number(subTotal) + Number(ivaTotal) + Number(tributos),
@@ -389,7 +388,7 @@ export default function Page() {
           let ivaFloat = (100 + parseFloat(facSeleccionada?.iva ?? "0")) / 100;
           const importeBase = (facSeleccionada?.importe ?? 0) / ivaFloat;
           comprobante = await createComprobante({
-            estado: "generada",
+            estado: "Generada",
             billLink: "",
             concepto: facSeleccionada?.concepto ?? 0,
             importe: facSeleccionada?.importe ?? 0,
@@ -576,7 +575,7 @@ export default function Page() {
   const otherTributesForm = useForm<OtherTributesForm>({
     defaultValues: {
       tributes: [
-        { tribute: "", jurisdiccion: "", base: 0, aliquot: 0, amount: 0 },
+        // { tribute: "", jurisdiccion: "", base: 0, aliquot: 0, amount: 0 },
       ],
     },
   });
