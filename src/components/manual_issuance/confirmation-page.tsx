@@ -125,7 +125,7 @@ const confirmationPage = ({
   const { mutateAsync: updateComprobante } =
     api.comprobantes.approbate.useMutation();
   const router = useRouter();
-
+  
   function handleApprove() {
     console.log("fcSeleccionada");
     console.log(fcSeleccionada);
@@ -315,7 +315,7 @@ const confirmationPage = ({
 
     if (data) {
       try {
-        const res = await afip.ElectronicBilling.createVoucher(data);
+        const res = await afipObject?.ElectronicBilling.createVoucher(data);
       } catch (error) {
         console.log(error);
         toast.error("Error enviando a AFIP: " + error);
