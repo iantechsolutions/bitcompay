@@ -151,103 +151,117 @@ export default function AddPreLiquidation() {
         Agregar preliquidación
       </AddElementButton>
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog
+        open={open}
+        onOpenChange={(isOpen) => {
+          if (!isLoading) {
+            setOpen(isOpen);
+          }
+        }}>
         <DialogContent>
           <DialogHeader className="flex mx-5 ">
-            <DialogTitle className="flex text-2xl">Crear preliquidación</DialogTitle>
-          
-          <div className="w-full text-gray-500 py-4 ">
-            <Label className="text-xs">MARCA</Label>
-            <Select onValueChange={handleBrandChange}>
-              <SelectTrigger
-                className="w-full  border-[#BEF0BB] border-0 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
+            <DialogTitle className="flex text-2xl">
+              Crear preliquidación
+            </DialogTitle>
+
+            <div className="w-full text-gray-500 py-4 ">
+              <Label className="text-xs">MARCA</Label>
+              <Select onValueChange={handleBrandChange}>
+                <SelectTrigger
+                  className="w-full  border-[#BEF0BB] border-0 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
               hover:none justify-self-right">
-                <SelectValue placeholder="Seleccione una marca" />
-              </SelectTrigger>
-              <SelectContent>
-                {marcas &&
-                  marcas.map((marca: any) => (
-                    <SelectItem
-                      key={marca?.id}
-                      value={marca?.id}
-                      className="rounded-none hover:focus:bg-green-300">
-                      {marca?.name}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="w-full flex flex-row gap-2 py-4 text-gray-500 justify-start">
-            <div className="w-1/2 pr-2">
-              <Label className="text-xs">1° FECHA DE VENCIMIENTO</Label>
-              <br />
-              <Popover open={popover1Open} onOpenChange={setPopover1Open}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"form"}
-                    className={cn(
-                      "w-full border-b border-[#BEF0BB] pl-3 text-left font-normal hover:bg-none hover:bg-transparent shadow-none overflow-hidden text-ellipsis whitespace-nowrap",
-                      !fechaVencimiento1 && "text-muted-foreground"
-                    )}>
-                    <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[#3E3E3E]">
-                      {fechaVencimiento1 ? (
-                        dayjs(fechaVencimiento1).format("D [de] MMMM [de] YYYY")
-                      ) : (
-                        <span>Seleccione una fecha</span>
-                      )}
-                    </p>
-                    <CalendarIcon className="ml-2 h-4 w-4 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={
-                      fechaVencimiento1
-                        ? new Date(fechaVencimiento1)
-                        : undefined
-                    }
-                    onSelect={(e) => FechasCreate(e)}
-                    disabled={(date: Date) => date < new Date()}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+                  <SelectValue placeholder="Seleccione una marca" />
+                </SelectTrigger>
+                <SelectContent>
+                  {marcas &&
+                    marcas.map((marca: any) => (
+                      <SelectItem
+                        key={marca?.id}
+                        value={marca?.id}
+                        className="rounded-none hover:focus:bg-green-300">
+                        {marca?.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
             </div>
-            <div className="w-1/2 pl-2">
-              <Label className="text-xs">2° FECHA DE VENCIMIENTO</Label>
-              <br />
-              <Popover open={popover2Open} onOpenChange={setPopover2Open}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"form"}
-                    className={cn(
-                      "w-full border-b border-[#BEF0BB] pl-3 text-left font-normal hover:bg-none hover:bg-transparent",
-                      !fechaVencimiento2 && "text-muted-foreground"
-                    )}>
-                    <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[#3E3E3E]">
-                      {fechaVencimiento2 ? (
-                        dayjs(fechaVencimiento2).format("D [de] MMMM [de] YYYY")
-                      ) : (
-                        <span>Seleccione una fecha</span>
-                      )}
-                    </p>
-                    <CalendarIcon className="ml-2 h-4 w-4 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={fechaVencimiento2 ? fechaVencimiento2 : undefined}
-                    onSelect={(e) => FechasCreate2(e)}
-                    disabled={(date: Date) => date < new Date()}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+            <div className="w-full flex flex-row gap-2 py-4 text-gray-500 justify-start">
+              <div className="w-1/2 pr-2">
+                <Label className="text-xs">1° FECHA DE VENCIMIENTO</Label>
+                <br />
+                <Popover open={popover1Open} onOpenChange={setPopover1Open}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"form"}
+                      className={cn(
+                        "w-full border-b border-[#BEF0BB] pl-3 text-left font-normal hover:bg-none hover:bg-transparent shadow-none overflow-hidden text-ellipsis whitespace-nowrap",
+                        !fechaVencimiento1 && "text-muted-foreground"
+                      )}>
+                      <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[#3E3E3E]">
+                        {fechaVencimiento1 ? (
+                          dayjs(fechaVencimiento1).format(
+                            "D [de] MMMM [de] YYYY"
+                          )
+                        ) : (
+                          <span>Seleccione una fecha</span>
+                        )}
+                      </p>
+                      <CalendarIcon className="ml-2 h-4 w-4 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={
+                        fechaVencimiento1
+                          ? new Date(fechaVencimiento1)
+                          : undefined
+                      }
+                      onSelect={(e) => FechasCreate(e)}
+                      disabled={(date: Date) => date < new Date()}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="w-1/2 pl-2">
+                <Label className="text-xs">2° FECHA DE VENCIMIENTO</Label>
+                <br />
+                <Popover open={popover2Open} onOpenChange={setPopover2Open}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"form"}
+                      className={cn(
+                        "w-full border-b border-[#BEF0BB] pl-3 text-left font-normal hover:bg-none hover:bg-transparent",
+                        !fechaVencimiento2 && "text-muted-foreground"
+                      )}>
+                      <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[#3E3E3E]">
+                        {fechaVencimiento2 ? (
+                          dayjs(fechaVencimiento2).format(
+                            "D [de] MMMM [de] YYYY"
+                          )
+                        ) : (
+                          <span>Seleccione una fecha</span>
+                        )}
+                      </p>
+                      <CalendarIcon className="ml-2 h-4 w-4 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={
+                        fechaVencimiento2 ? fechaVencimiento2 : undefined
+                      }
+                      onSelect={(e) => FechasCreate2(e)}
+                      disabled={(date: Date) => date < new Date()}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
-          </div>
-          {/* <div>
+            {/* <div>
             <Label>Fecha inicio de servicio</Label>
             <br />
             <Popover>
@@ -311,149 +325,149 @@ export default function AddPreLiquidation() {
               </PopoverContent>
             </Popover>
           </div> */}
-          <div className="w-full flex flex-row gap-2 py-4 text-gray-500">
-            <div className="w-1/2 pr-2">
-              <Label htmlFor="validy_date" className="text-xs">
-                MES DE VIGENCIA
-              </Label>
-              <Select
-                onValueChange={(e) => setMes(Number(e))}
-                defaultValue={mes?.toString()}>
-                <SelectTrigger className="w-full border-[#BEF0BB] border-0 border-b text-[#3E3E3E] bg-background rounded-none">
-                  <SelectValue placeholder="Seleccione un mes" />
-                </SelectTrigger>
-                <SelectContent className="h-[220px]">
-                  <SelectItem
-                    value="1"
-                    disabled={new Date(anio, 1, 1) < new Date()}>
-                    Enero
-                  </SelectItem>
-                  <SelectItem
-                    value="2"
-                    disabled={new Date(anio, 2, 1) < new Date()}>
-                    Febrero
-                  </SelectItem>
-                  <SelectItem
-                    value="3"
-                    disabled={new Date(anio, 3, 1) < new Date()}>
-                    Marzo
-                  </SelectItem>
-                  <SelectItem
-                    value="4"
-                    disabled={new Date(anio, 4, 1) < new Date()}>
-                    Abril
-                  </SelectItem>
-                  <SelectItem
-                    value="5"
-                    disabled={new Date(anio, 5, 1) < new Date()}>
-                    Mayo
-                  </SelectItem>
-                  <SelectItem
-                    value="6"
-                    disabled={new Date(anio, 6, 1) < new Date()}>
-                    Junio
-                  </SelectItem>
-                  <SelectItem
-                    value="7"
-                    disabled={new Date(anio, 7, 1) < new Date()}>
-                    Julio
-                  </SelectItem>
-                  <SelectItem
-                    value="8"
-                    disabled={new Date(anio, 8, 1) < new Date()}>
-                    Agosto
-                  </SelectItem>
-                  <SelectItem
-                    value="9"
-                    disabled={new Date(anio, 9, 1) < new Date()}>
-                    Septiembre
-                  </SelectItem>
-                  <SelectItem
-                    value="10"
-                    disabled={new Date(anio, 10, 1) < new Date()}>
-                    Octubre
-                  </SelectItem>
-                  <SelectItem
-                    value="11"
-                    disabled={new Date(anio, 11, 1) < new Date()}>
-                    Noviembre
-                  </SelectItem>
-                  <SelectItem
-                    value="12"
-                    disabled={new Date(anio, 12, 1) < new Date()}>
-                    Diciembre
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="w-full flex flex-row gap-2 py-4 text-gray-500">
+              <div className="w-1/2 pr-2">
+                <Label htmlFor="validy_date" className="text-xs">
+                  MES DE VIGENCIA
+                </Label>
+                <Select
+                  onValueChange={(e) => setMes(Number(e))}
+                  defaultValue={mes?.toString()}>
+                  <SelectTrigger className="w-full border-[#BEF0BB] border-0 border-b text-[#3E3E3E] bg-background rounded-none">
+                    <SelectValue placeholder="Seleccione un mes" />
+                  </SelectTrigger>
+                  <SelectContent className="h-[220px]">
+                    <SelectItem
+                      value="1"
+                      disabled={new Date(anio, 1, 1) < new Date()}>
+                      Enero
+                    </SelectItem>
+                    <SelectItem
+                      value="2"
+                      disabled={new Date(anio, 2, 1) < new Date()}>
+                      Febrero
+                    </SelectItem>
+                    <SelectItem
+                      value="3"
+                      disabled={new Date(anio, 3, 1) < new Date()}>
+                      Marzo
+                    </SelectItem>
+                    <SelectItem
+                      value="4"
+                      disabled={new Date(anio, 4, 1) < new Date()}>
+                      Abril
+                    </SelectItem>
+                    <SelectItem
+                      value="5"
+                      disabled={new Date(anio, 5, 1) < new Date()}>
+                      Mayo
+                    </SelectItem>
+                    <SelectItem
+                      value="6"
+                      disabled={new Date(anio, 6, 1) < new Date()}>
+                      Junio
+                    </SelectItem>
+                    <SelectItem
+                      value="7"
+                      disabled={new Date(anio, 7, 1) < new Date()}>
+                      Julio
+                    </SelectItem>
+                    <SelectItem
+                      value="8"
+                      disabled={new Date(anio, 8, 1) < new Date()}>
+                      Agosto
+                    </SelectItem>
+                    <SelectItem
+                      value="9"
+                      disabled={new Date(anio, 9, 1) < new Date()}>
+                      Septiembre
+                    </SelectItem>
+                    <SelectItem
+                      value="10"
+                      disabled={new Date(anio, 10, 1) < new Date()}>
+                      Octubre
+                    </SelectItem>
+                    <SelectItem
+                      value="11"
+                      disabled={new Date(anio, 11, 1) < new Date()}>
+                      Noviembre
+                    </SelectItem>
+                    <SelectItem
+                      value="12"
+                      disabled={new Date(anio, 12, 1) < new Date()}>
+                      Diciembre
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="w-1/2 pl-2">
+                <Label className="text-xs">AÑO DE VIGENCIA</Label>
+                <Input
+                  className="w-full  border-[#BEF0BB] border-0 border-b text-[#3E3E3E] bg-background rounded-none"
+                  type="number"
+                  min={new Date().getFullYear()}
+                  value={anio}
+                  onChange={(e) => setAnio(Number(e.target.value))}
+                />
+              </div>
             </div>
-            <div className="w-1/2 pl-2">
-              <Label className="text-xs">AÑO DE VIGENCIA</Label>
-              <Input
-                className="w-full  border-[#BEF0BB] border-0 border-b text-[#3E3E3E] bg-background rounded-none"
-                type="number"
-                min={new Date().getFullYear()}
-                value={anio}
-                onChange={(e) => setAnio(Number(e.target.value))}
-              />
+            <div className="flex flex-row py-4 gap-2  text-gray-500">
+              <div className="w-1/2 text-nowrap pr-2">
+                <Label htmlFor="name" className="text-xs">
+                  PUNTO DE VENTA A UTILIZAR
+                </Label>
+                <br />
+                <ComboboxDemo
+                  title="Seleccionar PV..."
+                  classNameButton="w-full flex justify-between items-center p-4  border-[#BEF0BB] border-0 border-b text-[#3E3E3E]"
+                  placeholder="_"
+                  options={[
+                    { value: "1", label: "1" },
+                    { value: "2", label: "2" },
+                  ]}
+                  onSelectionChange={(e) => {
+                    setPuntoVenta(e);
+                  }}
+                />
+              </div>
+              <div className="w-1/2 pl-2">
+                <Label htmlFor="interest" className="text-xs">
+                  {" "}
+                  INTERÉS (%)*{" "}
+                </Label>
+                <Input
+                  className="w-full  border-[#BEF0BB] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
+                  type="number"
+                  placeholder="0,00"
+                  value={interest ?? 0}
+                  onChange={(e) => {
+                    Number(e.target.value) >= 0 || e.target.value === ""
+                      ? setInterest(Number(e.target.value))
+                      : null;
+                  }}
+                />
+              </div>
             </div>
-          </div>
-          <div className="flex flex-row py-4 gap-2  text-gray-500">
-            <div className="w-1/2 text-nowrap pr-2">
-              <Label htmlFor="name" className="text-xs">
-                PUNTO DE VENTA A UTILIZAR
-              </Label>
-              <br />
-              <ComboboxDemo
-                title="Seleccionar PV..."
-                classNameButton="w-full flex justify-between items-center p-4  border-[#BEF0BB] border-0 border-b text-[#3E3E3E]"
-                placeholder="_"
-                options={[
-                  { value: "1", label: "1" },
-                  { value: "2", label: "2" },
-                ]}
-                onSelectionChange={(e) => {
-                  setPuntoVenta(e);
-                }}
-              />
+            <div className="py-4">
+              <h3 className="text-[#3E3E3E] font-thin text-opacity-80 text-[10px] italic justify-center">
+                *Aplica sobre saldos adeudados de períodos anteriores. Completar
+                con alícuota como porcentaje directo sobre la base del cálculo.
+              </h3>
             </div>
-            <div className="w-1/2 pl-2">
-              <Label htmlFor="interest" className="text-xs">
-                {" "}
-                INTERÉS (%)*{" "}
-              </Label>
-              <Input
-                className="w-full  border-[#BEF0BB] border-0 border-b text-[#3E3E3E] bg-background rounded-none "
-                type="number"
-                placeholder="0,00"
-                value={interest ?? 0}
-                onChange={(e) => {
-                  Number(e.target.value) >= 0 || e.target.value === ""
-                    ? setInterest(Number(e.target.value))
-                    : null;
-                }}
-              />
+            <div className="flex pt-4 pb-2 justify-center">
+              <Button
+                type="submit"
+                className="flex rounded-full w-fit justify-self-center bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#DEF5DD]"
+                disabled={isLoading}
+                onClick={handleCreate}>
+                {isLoading ? (
+                  <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
+                ) : (
+                  <CirclePlus className="h-4 mr-1 stroke-1" />
+                )}
+                Crear Preliquidación
+              </Button>
             </div>
-          </div>
-          <div className="py-4">
-            <h3 className="text-[#3E3E3E] font-thin text-opacity-80 text-[10px] italic justify-center">
-              *Aplica sobre saldos adeudados de períodos anteriores. Completar
-              con alícuota como porcentaje directo sobre la base del cálculo.
-            </h3>
-          </div>
-          <div className="flex pt-4 pb-2 justify-center">
-            <Button
-              type="submit"
-              className="flex rounded-full w-fit justify-self-center bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#DEF5DD]"
-              disabled={isLoading}
-              onClick={handleCreate}>
-              {isLoading ? (
-                <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
-              ) : (
-                <CirclePlus className="h-4 mr-1 stroke-1" />
-              )}
-              Crear Preliquidación
-            </Button>
-          </div>
           </DialogHeader>
         </DialogContent>
       </Dialog>
