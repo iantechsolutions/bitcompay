@@ -1258,7 +1258,7 @@ function numeroALetras(numero: number | undefined): string {
 
   const obtenerDecimales = (numero: number | undefined): string | null => {
     if (!numero) return null;
-    let numeroStr = numero.toString();
+    let numeroStr = numero.toFixed(2); 
     let partes = numeroStr.split(".");
     if (partes.length === 2) {
       let decimales = partes[1]!.substring(0, 2);
@@ -1323,7 +1323,7 @@ function numeroALetras(numero: number | undefined): string {
     let resultadoParteEntera = convertirParteEntera(parteEntera);
 
     return (
-      capitalizarPrimeraLetra(resultadoParteEntera) + `${parteDecimal ? `con ${parteDecimal}/100`:""}`
+      capitalizarPrimeraLetra(resultadoParteEntera) + `${parteDecimal ? ` con ${parteDecimal}/100`:""}`
     );
   }
 
