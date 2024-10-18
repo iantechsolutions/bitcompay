@@ -166,7 +166,6 @@ function getIimageForBarcode() {
 function generateConcepts(
   items: Array<{ concept: string | null; total: number | null }>
 ): string {
-  // sumar bono + dif y ocultar dif
   let bonoTotal = 0;
 
   items.forEach((item) => {
@@ -180,27 +179,37 @@ function generateConcepts(
       item.total += bonoTotal;
     }
   }
+  items = items.sort((a, b) => (a.total ?? 0) - (b.total ?? 0));
   return items
     .map((item) => {
-      if (item.concept === "Diferencial") return "";
+      if (item.concept === "Diferencial" || item.concept === "Saldo a favor") return "";
       return `<p>${item.concept}</p>`;
-    })
-    .join("");
+    }).join("");
 }
 
 function generateAmounts(
-  items: Array<{ concept: string | null; total: number | null }>
+  items: Array<{ concept: string | null; total: number | null; amount: number | null }>
 ): string {
   const diferencial =
-    items.find((x) => x.concept === "Diferencial")?.total ?? 0;
-  const abonoTotal = items
+    items.find((x) => x.concept === "Diferencial");
+  
+    const abonoTotal = items
     .filter((x) => x.concept === "Abono")
     .reduce((acc, item) => acc + (item.total ?? 0), 0);
 
+  const abonoAmount = items
+  .filter((x) => x.concept === "Abono")
+  .reduce((acc, item) => acc + (item.amount ?? 0), 0);
+
   items = items.filter((x) => x.concept !== "Abono");
-  items.push({ concept: "Abono", total: abonoTotal + diferencial });
-  return items.map((item) => `<p>${item.total}</p>`).join("");
+  items.push({ concept: "Abono", total: abonoTotal + (diferencial?.total ?? 0), amount: abonoAmount + (diferencial?.amount ?? 0)});
+  items = items.sort((a, b) => (a.total ?? 0) - (b.total ?? 0));
+  return items.map((item) => {
+    if (item.concept === "Saldo a favor" || item.concept === "Total factura") return "";
+    return ((`<p>${item.amount}</p>`))
+  }).join("");
 }
+
 
 function getTextoForTipoComprobante(tipoComprobante: string) {
   switch (tipoComprobante) {
@@ -245,12 +254,12 @@ export function htmlBill(
 ) {
   let subtotal = 0;
   let iva = 0;
-  if (comprobante.items.length > 0) {
-    subtotal = comprobante.items.reduce(
-      (acc: number, item: { total: number }) => acc + (item?.total ?? 0),
+  if (comprobante.items.filter((x: any) => x.concept !== "Saldo a favor" && x.concept !== "Total factura").length > 0) {
+    subtotal = comprobante.items.filter((x: any) => x.concept !== "Saldo a favor" && x.concept !== "Total factura").reduce(
+      (acc: number, item: { amount: number }) => acc + (item?.amount ?? 0),
       0
     );
-    const iva = comprobante?.items.reduce(
+    iva = comprobante?.items.filter((x: any) => x.concept !== "Saldo a favor" && x.concept !== "Total factura").reduce(
       (acc: number, item: { iva: number }) => acc + (item?.iva ?? 0),
       0
     );
@@ -297,6 +306,10 @@ export function htmlBill(
   if (comprobante) {
     const payment = comprobante.payments;
   }
+
+  let saldoAfavor = comprobante?.items.find((x: any) => x.concept === "Saldo a favor");
+
+
   // console.log(voucher);
 
   // moví funciones porque es lento redefinirlas constantemente
@@ -321,21 +334,20 @@ export function htmlBill(
         box-sizing: border-box;
         margin: 0;
         padding: 0;
-        font-family: "Roboto", sans-serif;
+        font-family: "Open Sans", sans-serif;
       }
 
       body {
         padding: 1 rem;
         -webkit-print-color-adjust: exact; 
 		print-color-adjust: exact;
-    font-family: "Open Sans", sans-serif;
     color: #3e3e3e
       }
       header {
         display: flex;
         flex-direction: row;
         justify-content: space-between;
-        border-bottom: 1px solid #ccc;
+        border-bottom: 1px solid #D9D9D9;
         width: 100%;
       }
         
@@ -442,7 +454,7 @@ padding-bottom:3px
         align: right;
         margin-bottom: 1rem; 
         border-top: none;
-        border-bottom: 1.6px solid #8fefdc;
+        border-bottom: 1px solid #D9D9D9;
       }
 
       .parte-3 p {
@@ -455,7 +467,7 @@ padding-bottom:3px
         display: flex;
         justify-content: space-between;
         margin-bottom: 1rem; 
-        border-bottom: 1.6px solid #8fefdc;
+        border-bottom: 1px solid #D9D9D9;
         padding-bottom: 20px;
         flex-direction: column;
 
@@ -472,7 +484,7 @@ padding-bottom:3px
       .parte-4 {
         display: flex;
         justify-content: space-between;
-        border-bottom: 1.6px solid #8fefdc;
+        border-bottom: 1px solid #D9D9D9;
       }
 
       .parte-4 p {
@@ -643,7 +655,7 @@ padding-bottom:3px
 .line {
     width: 1px;
     height: 40px;
-    background-color: #ccc;
+    background-color: #D9D9D9;
     margin: 0 auto 0;
 }
 
@@ -685,7 +697,7 @@ max-height:100%;
 
 .tributos {
 padding-top: 15px;
-border-top: 1px solid #ccc;
+border-top: 1px solid #D9D9D9;
 padding-bottom: 0;
 }
 .tributos div {
@@ -778,7 +790,7 @@ padding: 0;
       </header>
   
     <div class="parte-2">	
-		  <div class="grid" style="display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid #ccc; white-space: nowrap;">
+		  <div class="grid" style="display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid #D9D9D9; white-space: nowrap;">
         <div style="grid-column: 1 / span 1;">
           <span><span>Nombre/Razón Social:</span> ${name}</span>
         </div>
@@ -860,19 +872,20 @@ padding: 0;
     <p style="font-size:12px; text-align:right;  margin-right:0; padding-right:0; padding-top:5px;">IVA: ${formatNumberAsCurrency(
       iva ?? 0
     )}</p>
-		${
-      totalTributes > 0
+		${totalTributes > 0
         ? `<p style="font-size:12px; text-align:right;  margin-right:0; padding-right:0; padding-top:5px;">Otros Tributos: ${formatNumberAsCurrency(
             totalTributes ?? 0
           )}</p>`
         : ""
     }
+    ${saldoAfavor && saldoAfavor.total > 0 ?
+      `<p style="font-size:12px; text-align:right; margin-right:0; padding-right:0; padding-top:5px;">Pagos a cuenta: ${formatNumberAsCurrency(
+        saldoAfavor.total)} </p>`: ""}
     
-    <p style="font-size:12px; text-align:right; margin-right:0; padding-right:0; padding-top:5px;">Pagos a cuenta: $XX.XXX,XX</p>
 	</div>
 </div>
   
-<section style="padding-bottom: 15px; border-bottom:1px solid #ccc ">
+<section style="padding-bottom: 15px; border-bottom:1px solid #D9D9D9 ">
 	<div class="resumen-total">
 		<div style="font-size:12px;padding-left: 30px; width:350px">
     ${numeroALetras(total ?? 0)}
@@ -961,7 +974,7 @@ padding: 0;
           />
 
           <p style="color: #3e3e3e; font-style: italic; font-weight: 500; margin-top:4px; margin-bottom: 12px;">Comprobante autorizado</p>
-          <p>CAE N° XXXXXXXXX</p>
+          <p>CAE N° 74172124728083</p>
           <p style="white-space: nowrap">Fecha Vto de CAE: XX/XX/XXXX</p>
         </div>
           </div>
