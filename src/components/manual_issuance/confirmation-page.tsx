@@ -416,7 +416,10 @@ const confirmationPage = ({
           : obraSocial?.fiscal_id_number?.toString()) ?? "",
         (billResponsible
           ? billResponsible?.afip_status
-          : obraSocial?.afip_status) ?? ""
+          : obraSocial?.afip_status) ?? "",
+          (billResponsible
+            ? billResponsible?.pa?.CBU
+            : "" ) ?? "",
       );
       const options = {
         width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket

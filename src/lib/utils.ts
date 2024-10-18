@@ -258,7 +258,8 @@ export function htmlBill(
   sellCondition: string,
   id_type: string,
   id_number: string,
-  afip_status: string
+  afip_status: string,
+  cbu: string,
 ) {
   let subtotal = 0;
   let iva = 0;
@@ -906,9 +907,9 @@ padding: 0;
 		</div>
 	</div>
 
-  ${comprobante.tipoComprobante.includes("FACTURA") && `<div style="font-size:10px; padding-left: 30px; padding-top:10px; width:350px; white-space: nowrap; font-style: italic;">
-			Esta factura se debitará en fecha de vencimiento en CBU: XXXXXXXXXXXXXXXXXXXXXXXXX.
-		</div>`}
+  ${(comprobante.tipoComprobante.includes("FACTURA") && comprobante.cbu) ? `<div style="font-size:10px; padding-left: 30px; padding-top:10px; width:350px; white-space: nowrap; font-style: italic;">
+			Esta factura se debitará en fecha de vencimiento en CBU: ${comprobante.cbu}.
+		</div>` : " "}
 </section>
 
        ${getPaymentMethods(comprobante.tipoComprobante)}
@@ -957,7 +958,7 @@ padding: 0;
             alt="barcode"
           />
         </div>`
-  ) : ''}
+  ) : ""}
 </div>
       </section>
     </body>
@@ -1052,11 +1053,18 @@ function getPaymentMethods(tipoComprobante: string) {
          </div>
       </section>`;
   } else if (tipoComprobante.includes("NOTA DE")) {
-    return ""; 
+    return `<div style="height: 80px;"> </div>`; 
   } else {
-    return renderMediosDePago('cheque');
+    return `<div style="height: 80px;"> </div>`;
   }
 }
+/*************  ✨ Codeium Command ⭐  *************/
+/**
+ * Renderiza la sección de detalles de pago según el medio de pago seleccionado.
+ * @param medioDePago el medio de pago a renderizar
+ * @returns un string con el HTML de la sección de detalles de pago
+ */
+/******  09c66406-270a-4511-8335-3cac8aaa026a  *******/
     function renderMediosDePago(medioDePago: keyof typeof mediosDePagoDetalles): string {
       let output = '';
       const detalles = mediosDePagoDetalles[medioDePago];
@@ -1256,15 +1264,15 @@ function numeroALetras(numero: number | undefined): string {
   };
 
   // Función para obtener los decimales de un número
-  const obtenerDecimales = (numero: number | undefined): string => {
-    if (!numero) return "00";
+  const obtenerDecimales = (numero: number | undefined): string | null => {
+    if (!numero) return null;
     let numeroStr = numero.toString();
     let partes = numeroStr.split(".");
     if (partes.length === 2) {
       let decimales = partes[1]!.substring(0, 2);
       return decimales.padEnd(2, "0");
     }
-    return "00";
+    return null;
   };
 
   // Función recursiva para convertir la parte entera en letras
@@ -1324,7 +1332,7 @@ function numeroALetras(numero: number | undefined): string {
     let resultadoParteEntera = convertirParteEntera(parteEntera);
 
     return (
-      capitalizarPrimeraLetra(resultadoParteEntera) + ` con ${parteDecimal}/100`
+      capitalizarPrimeraLetra(resultadoParteEntera) + `${parteDecimal ? `con ${parteDecimal}/100`:""}`
     );
   }
 
