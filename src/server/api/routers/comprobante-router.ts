@@ -679,6 +679,7 @@ async function approbatecomprobante(liquidationId: string) {
               billResponsible?.locality ?? "",
               billResponsible?.province ?? "",
               billResponsible?.postal_code?.cp ?? "",
+              comprobante.family_group?.sale_condition ?? "",
               billResponsible?.fiscal_id_type ?? "",
               billResponsible?.fiscal_id_number ?? "",
               billResponsible?.afip_status ?? ""
