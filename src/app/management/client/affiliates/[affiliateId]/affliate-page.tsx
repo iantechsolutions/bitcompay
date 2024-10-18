@@ -535,16 +535,18 @@ export default function AffiliatePage(props: {
                               );
                             })}
                           </div>
-                          <Button className="px-5 bg-[#F7F7F7] hover:bg-[#F7F7F7] text-[#3E3E3E] font-medium text-xs rounded-full border-none flex items-center gap-x-2">
-                            <Link
-                              href={`/management/client/affiliates/${int.family_group_id}/aportes`}
-                              className="flex items-center">
-                              <Eye className="mr-0 md:mr-2 w-4 h-4" />{" "}
-                              <span className="hidden md:inline">
-                                Ver aportes{" "}
-                              </span>
-                            </Link>
-                          </Button>
+                          <div className="mt-6">
+                            <Button className="px-5 bg-[#F7F7F7] hover:bg-[#F7F7F7] text-[#3E3E3E] font-medium text-xs rounded-full border-none flex items-center gap-x-2">
+                              <Link
+                                href={`/management/client/affiliates/${int.family_group_id}/${int.id}/aportes`}
+                                className="flex items-center">
+                                <Eye className="mr-0 md:mr-2 w-4 h-4" />{" "}
+                                <span className="hidden md:inline">
+                                  Ver aportes{" "}
+                                </span>
+                              </Link>
+                            </Button>
+                          </div>
                         </AccordionContentIntegrant>
                       </AccordionItemIntegrant>
                     ))

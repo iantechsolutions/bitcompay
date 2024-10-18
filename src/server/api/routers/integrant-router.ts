@@ -23,6 +23,9 @@ export const integrantsRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const integrants = await db.query.integrants.findFirst({
         where: eq(schema.integrants.id, input.integrantsId),
+        with: {
+          aportes_os: true,
+        },
       });
 
       return integrants;
