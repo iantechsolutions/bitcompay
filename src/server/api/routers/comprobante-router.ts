@@ -1667,12 +1667,12 @@ export async function preparateComprobante(
         (comprobante[0]?.importe ?? 0) / ivaFloat
       );
 
-      await createcomprobanteItem(
-        ivaFloat,
-        comprobante[0]?.id ?? "",
-        "Total a pagar",
-        (comprobante[0]?.importe ?? 0 + saldo)
-      );
+      // await createcomprobanteItem(
+      //   ivaFloat,
+      //   comprobante[0]?.id ?? "",
+      //   "Total a pagar",
+      //   (comprobante[0]?.importe ?? 0 + saldo)
+      // );
       if (previous_bill - saldo > 0) {
         createcomprobanteItem(
           1,
