@@ -329,7 +329,7 @@ export default function GenerateChannelOutputPage(props: {
               <DialogFooter>
                 <Button
                   type="button"
-                  disabled={disableName}
+                  disabled={disableName  || isLoading}
                   onClick={handleGenerate}>
                   Generar archivo{" "}
                   {isLoading && <Loader2Icon className="ml-2 animate-spin" />}
