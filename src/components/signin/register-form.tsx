@@ -20,8 +20,8 @@ import {
 import { toast } from "sonner";
 
 type Inputs = {
- firstName: string;
- lastName: string;
+  firstName: string;
+  lastName: string;
   password: string;
   mail: string;
 };
@@ -45,8 +45,13 @@ export default function RegisterForm({ setShowRegister }: RegisterFormProps) {
     const { password, mail, firstName, lastName } = data;
     if (!isLoaded) return;
     try {
-      await signUp.create({ emailAddress: mail, password, firstName, lastName });
-            await signUp.prepareEmailAddressVerification({
+      await signUp.create({
+        emailAddress: mail,
+        password,
+        firstName,
+        lastName,
+      });
+      await signUp.prepareEmailAddressVerification({
         strategy: "email_code",
       });
       setErrors([]);
@@ -155,136 +160,89 @@ export default function RegisterForm({ setShowRegister }: RegisterFormProps) {
   }
 
   return (
-    <div className="flex flex-col items-center px-10 pt-3 pb-7 bg-white rounded-2xl">
-      <Image
-        src="/public/bitcom-03.png"
-        alt="bitcom_logo"
-        width={160}
-        height={80}
-      />
-      <p className="text-lg mt-7">
-        Acceso a <span className="font-bold">entidades</span>
-      </p>
-      <p className="text-muted-foreground text-xs font-medium mb-3">
-        Ingrese sus datos para <span className="font-bold">crear cuenta</span>
-      </p>
-
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-8 w-full flex flex-col items-center"
-        >
-          <FormField
-           control={form.control}
-           name="firstName"
-               render={({ field }) => (
-        <FormItem className="w-full">
-      <FormLabel className="text-muted-foreground text-sm opacity-70 font-medium-medium">
-        Nombre
-      </FormLabel>
-      <FormControl>
-        <Input {...field} className="w-full" />
-          </FormControl>
-            </FormItem>
-                )}
-                 />
+    <div className="flex flex-col px-20 pt-3 pb-5 bg-white rounded-3xl">
+      <div className="flex flex-col items-center w-[350px] pt-3 pb-7 bg-white rounded-2xl" >
+        <Image
+          src="/public/bitcom-03.png"
+          alt="bitcom_logo"
+          width={160}
+          height={80}
+        />
+        <p className="text-lg mt-3">
+          Acceso a <span className="font-bold">entidades</span>
+        </p>
+        <p className="text-muted-foreground text-xs font-medium mb-3">
+          Ingrese sus datos para <span className="font-bold">crear cuenta</span>
+        </p>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-5 w-full flex flex-col items-start"
+          >
             <FormField
               control={form.control}
-                 name="lastName"
-              render={({ field }) => (
-             <FormItem className="w-full">
-                 <FormLabel className="text-muted-foreground text-sm opacity-70 font-medium-medium">
-                       Apellido
-                 </FormLabel>
-                <FormControl>
-                <Input {...field} className="w-full" />
-               </FormControl>
-                </FormItem>
-            )}
-           />
-          <FormField
-            control={form.control}
-            name="mail"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel className="text-muted-foreground text-sm opacity-70 font-medium-medium ">
-                  Mail
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    className={
-                      errors.some(
-                        (e) =>
-                          e.code === "form_identifier_exists" ||
-                          e.code === "form_param_format_invalid"
-                      )
-                        ? "border-red-500"
-                        : "w-full"
-                    }
-                  />
-                </FormControl>
-                {errors && (
-                  <>
-                    {errors.some(
-                      (e) => e.code === "form_identifier_exists"
-                    ) && (
-                      <p className="text-red-500 text-sm">
-                        El mail ingresado ya esta registrado
-                      </p>
-                    )}
-                    {errors.some(
-                      (e) => e.code === "form_param_format_invalid"
-                    ) && (
-                      <p className="text-red-500 text-sm">
-                        El mail ingresado no es correcto
-                      </p>
-                    )}
-                  </>
-                )}
-              </FormItem>
-            )}
-          />
-
-          <div className="relative w-full">
-            <FormField
-              font-medium-medium
-              control={form.control}
-              name="password"
+              name="firstName"
               render={({ field }) => (
                 <FormItem className="w-full">
-                  <FormLabel className="text-muted-foreground text-sm opacity-70 font-medium-medium ">
-                    Contraseña
+                  <FormLabel className="text-muted-foreground text-xs font-thin pl-2">
+                    Nombre
+                  </FormLabel>
+                  <FormControl>
+                    <Input {...field} className="w-full border border-[#e4e4e4] rounded-lg py-4 h-11" />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="lastName"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel className="text-muted-foreground text-xs font-thin pl-2">
+                    Apellido
+                  </FormLabel>
+                  <FormControl>
+                    <Input {...field} className="w-full border border-[#e4e4e4] rounded-lg py-4 h-11" />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="mail"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel className="text-muted-foreground text-xs font-thin pl-2 ">
+                    Mail
                   </FormLabel>
                   <FormControl>
                     <Input
                       {...field}
-                      type={showPassword ? "text" : "password"}
                       className={
                         errors.some(
                           (e) =>
-                            e.code === "form_password_length_too_short" ||
-                            e.code === "form_password_size_in_bytes_exceeded"
+                            e.code === "form_identifier_exists" ||
+                            e.code === "form_param_format_invalid"
                         )
                           ? "border-red-500"
-                          : "w-full"
+                          : "w-full border border-[#e4e4e4] rounded-lg py-4 h-11"
                       }
                     />
                   </FormControl>
                   {errors && (
                     <>
                       {errors.some(
-                        (e) => e.code === "form_password_length_too_short"
+                        (e) => e.code === "form_identifier_exists"
                       ) && (
                         <p className="text-red-500 text-sm">
-                          La contraseña debe tener un minimo de 8 caracteres
+                          El mail ingresado ya esta registrado
                         </p>
                       )}
                       {errors.some(
-                        (e) => e.code === "form_password_size_in_bytes_exceeded"
+                        (e) => e.code === "form_param_format_invalid"
                       ) && (
                         <p className="text-red-500 text-sm">
-                          La contraseña debe tener un máximo de 20 caracteres
+                          El mail ingresado no es correcto
                         </p>
                       )}
                     </>
@@ -292,44 +250,89 @@ export default function RegisterForm({ setShowRegister }: RegisterFormProps) {
                 </FormItem>
               )}
             />
-            {form.watch().password && (
-              <Button
-                className="absolute right-2 top-9 rounded-full h-7 w-7"
-                onClick={() => setShowPassword(!showPassword)}
-                // variant="outline"
-                variant="ghost"
-                size="icon"
-                type="button"
-              >
-                {showPassword ? (
-                  <Eye className="h-4 opacity-80 text-muted-foreground" />
-                ) : (
-                  <EyeOff className="h-4 opacity-80 text-muted-foreground" />
+            <div className="relative w-full">
+              <FormField
+                font-medium-medium
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormLabel className="text-muted-foreground text-xs font-thin pl-2 ">
+                      Contraseña
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type={showPassword ? "text" : "password"}
+                        className={
+                          errors.some(
+                            (e) =>
+                              e.code === "form_password_length_too_short" ||
+                              e.code === "form_password_size_in_bytes_exceeded"
+                          )
+                            ? "border-red-500"
+                            : "w-full border border-[#e4e4e4] rounded-lg py-4 h-11"
+                        }
+                      />
+                    </FormControl>
+                    {errors && (
+                      <>
+                        {errors.some(
+                          (e) => e.code === "form_password_length_too_short"
+                        ) && (
+                          <p className="text-red-500 text-sm">
+                            La contraseña debe tener un minimo de 8 caracteres
+                          </p>
+                        )}
+                        {errors.some(
+                          (e) => e.code === "form_password_size_in_bytes_exceeded"
+                        ) && (
+                          <p className="text-red-500 text-sm">
+                            La contraseña debe tener un máximo de 20 caracteres
+                          </p>
+                        )}
+                      </>
+                    )}
+                  </FormItem>
                 )}
-              </Button>
-            )}
-          </div>
-          <div className=" w-full mb-4 flex flex-col items-center justify-center ">
-            <Button
-              type="submit"
-              className="w-full px-32 h-8 py-3 my-1 mt-4
-                text-[#3E3E3E] bg-[#1BDFB7] hover:bg-[#1BDFB7] "
-            >
-              Continuar <ChevronRight className=" h-4" />
-            </Button>
-
-            <p className="text-muted-foreground opacity-60 text-xs">
-              ¿Ya tiene una cuenta?{" "}
-              <span
-                className="text-[#1BDFB7] font-bold opacity-100 hover:cursor-pointer"
-                onClick={() => setShowRegister(false)}
+              />
+              {form.watch().password && (
+                <Button
+                  className="absolute right-2 top-9 rounded-full h-7 w-7"
+                  onClick={() => setShowPassword(!showPassword)}
+                  // variant="outline"
+                  variant="ghost"
+                  size="icon"
+                  type="button"
+                >
+                  {showPassword ? (
+                    <Eye className="h-4 opacity-80 text-muted-foreground" />
+                  ) : (
+                    <EyeOff className="h-4 opacity-80 text-muted-foreground" />
+                  )}
+                </Button>
+              )}
+            </div>
+            <div className=" w-full mb-4 flex flex-col items-center justify-center ">
+              <Button
+                type="submit"
+                className="w-full h-8 py-5  rounded-full flex justify-between text-[#477b43] font-bold bg-[#BEF0BB] hover:bg-[#BEF0BB]"
               >
-                Ingresar
-              </span>
-            </p>
-          </div>
-        </form>
-      </Form>
+                Continuar <ChevronRight className=" h-4" />
+              </Button>
+              <p className="text-muted-foreground opacity-60 text-xs mt-3">
+                ¿Ya tiene una cuenta?{" "}
+                <span
+                  className="text-[#3e3e3e] underline font-bold hover:cursor-pointer"
+                  onClick={() => setShowRegister(false)}
+                >
+                  Ingresar
+                </span>
+              </p>
+            </div>
+          </form>
+        </Form>
+      </div>
     </div>
   );
 }
