@@ -780,6 +780,7 @@ export const comprobantes = pgTable("comprobantes", {
   prodName: varchar("prodName", { length: 255 }).notNull(),
   iva: varchar("iva", { length: 255 }).notNull(),
   billLink: varchar("billLink", { length: 255 }).notNull(),
+  afipError: varchar("afipError", { length: 255 }),
   estado: varchar("estado", {
     enum: [
       "Generada",

@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronRight, FileText } from "lucide-react";
+import { ChevronDown, ChevronRight, FileText, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import { Button } from "~/components/ui/button";
 import {
@@ -14,6 +14,12 @@ import ContentTable from "./content-table";
 import { RouterOutputs } from "~/trpc/shared";
 import { useState } from "react";
 import { api } from "~/trpc/react";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogHeader,
+} from "~/components/ui/dialog";
 type DetailSheetProps = {
   data: {
     comprobantes: RouterOutputs["comprobantes"]["getByLiquidation"];
@@ -39,6 +45,8 @@ export default function DetailSheet({
 }: DetailSheetProps) {
   const [openFCAccordion, setOpenFCAccordion] = useState(true);
   const [openNCAccordion, setOpenNCAccordion] = useState(true);
+  const [openNCError, setOpenNCError] = useState(false);
+  const [openFCError, setOpenFCError] = useState(false);
   let comprobanteNCReciente = data.comprobantes.find(
     (comprobante) =>
       comprobante.origin === "Nota de credito" &&
@@ -123,7 +131,24 @@ export default function DetailSheet({
               </div>
               <div>
                 <div className="flex flex-auto justify-end">
-                  <Button
+
+                  {
+                    comprobanteNCReciente?.estado?.toLowerCase()==="error"
+                    ?
+                    (
+                      <Button
+                    className="text-base px-7 py-[1.27rem] mt-5 gap-3 bg-[#eb272753] hover:bg-[#eb272753] text-[#3e3e3e] rounded-full font-medium"
+                    onClick={() => {
+                      setOpenNCError(true);
+                    }}
+                  >
+                    <TriangleAlert className="h-5" />
+                    Este comprobante tiene errores
+                    </Button>
+                    )
+                    :
+                    (
+                    <Button
                     variant="bitcompay"
                     className="text-base px-7 py-[1.27rem] mt-5 gap-3 text-[#3e3e3e] rounded-full font-medium"
                     onClick={() => {
@@ -136,6 +161,9 @@ export default function DetailSheet({
                     <Download02Icon className="h-5" />
                     Descargar Comprobante
                   </Button>
+                    )
+                  }
+                  
                 </div>
               </div>
             </>
@@ -160,6 +188,23 @@ export default function DetailSheet({
               </div>
               <div>
                 <div className="flex flex-auto justify-end">
+                {
+                    comprobanteFCReciente?.estado?.toLowerCase()==="error" ?
+                    
+                    (
+                      <Button
+                    className="text-base px-7 py-[1.27rem] mt-5 gap-3 bg-[#eb272753] hover:bg-[#eb272753] text-[#3e3e3e] rounded-full font-medium"
+                    onClick={() => {
+                      setOpenFCError(true);
+                    }}
+                  >
+                    <TriangleAlert className="h-5" />
+                    Este comprobante tiene errores
+                    </Button>
+                    )
+                    :
+                    (
+
                   <Button
                     variant="bitcompay"
                     className="text-base px-7 py-[1.27rem] mt-5 gap-3 text-[#3e3e3e] rounded-full font-medium"
@@ -173,12 +218,51 @@ export default function DetailSheet({
                     <Download02Icon className="h-5" />
                     Descargar Comprobante
                   </Button>
+                    )
+                  }
+
+                  
                 </div>
               </div>
             </>
           )}
         </div>
       </SheetContent>
+
+      <Dialog open={openFCError} onOpenChange={setOpenFCError}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="ml-2">
+              {"Error enviandose a afip"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="pb-1">
+            Este comprobante no se pudo enviar a la AFIP por que surgio el siguiente error:
+          </div>
+          <div className="pb-2">
+            <p className=" text-xs">
+              {(comprobanteFCReciente?.afipError?.length ?? 0) > 200 ? ( comprobanteFCReciente?.afipError?.slice(0,200) + "..." ) : comprobanteFCReciente?.afipError }
+            </p>
+          </div>
+          <Button
+            className="h-7 bg-[#f7f7f7] hover:bg-[#f7f7f7] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
+            onClick={() => {setOpenFCError(false)}}
+            >
+              Cerrar
+            </Button>
+
+        </DialogContent>
+      </Dialog>
+      <Dialog open={openNCError} onOpenChange={setOpenNCError}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="ml-2">
+              {"Crear un plan"}
+            </DialogTitle>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+
     </Sheet>
   );
 }
