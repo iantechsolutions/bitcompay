@@ -312,6 +312,7 @@ export default function Page() {
           //   comprobante_id: comprobante[0]?.id ?? "",
           // });
         } else if (tipoComprobante == "0") {
+          setPreviousComprobanteReciboId(form.getValues().facturasEmitidas.id);
           comprobante = await createComprobante({
             estado: "Generada",
             billLink: "", //deberiamos poner un link ?
@@ -544,6 +545,7 @@ export default function Page() {
   const [sellCondition, setSellCondition] = useState("");
   const [nroDocumento, setNroDocumento] = useState("");
   const [nroDocumentoDNI, setNroDocumentoDNI] = useState("");
+  const [previousComprobanteReciboId, setPreviousComprobanteReciboId] = useState("");
   const [nombre, setNombre] = useState("");
   const [tributos, setTributos] = useState("0");
   const [servicioprod, setservicioprod] = useState("Servicio");
@@ -562,6 +564,7 @@ export default function Page() {
       alicuota: "",
       facturasEmitidas: {
         tipoComprobante: "",
+        id: "",
         puntoVenta: "",
         nroComprobante: "",
         importe: 0,
@@ -941,6 +944,7 @@ export default function Page() {
             obrasSociales={obrasSociales}
             marcas={marcas}
             createdComprobante={createdComprobante}
+            relatedComprobanteRecibo={previousComprobanteReciboId}
             // setGeneratedUrlPopup={setGeneratedUrlPopup}
           />
         )}

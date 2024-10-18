@@ -43,7 +43,8 @@ export type TableRecord = {
     | "Anulada"
     | "Apertura"
     | "Error"
-    | "apertura"
+    | "Recaudacion"
+    | string
     | null;
   iva: number;
   comprobantes?:
@@ -156,7 +157,7 @@ export const columns: ColumnDef<TableRecord>[] = [
     cell: ({ row }) => {
       const Estado = row.getValue("Estado");
       const style =
-        Estado === "Pagada"
+        (Estado === "Pagada" || Estado === "Recaudacion")
           ? "bg-[#DDF9CC] text-[#4E9F1D]"
           : Estado === "Error"
           ? "bg-[#F9CCCC] text-[#F91D1D]"
