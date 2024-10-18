@@ -41,6 +41,9 @@ export default function NonOsPage(props: {
               Identificación: {props.healthInsurance.identificationNumber}
             </p>
             <p className="text-sm font-medium text-gray-700">
+              CUIT: {props.healthInsurance.fiscal_id_number}
+            </p>
+            <p className="text-sm font-medium text-gray-700">
               Iniciales: {props.healthInsurance.initials}
             </p>
             <p className="text-sm font-medium text-gray-700">

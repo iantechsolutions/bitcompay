@@ -146,7 +146,8 @@ export default function AddPreLiquidation() {
       </Button> */}
       <AddElementButton
         onClick={() => setOpen(true)}
-        className="rounded-full gap-1 p-4 text-base text-[#3E3E3E] bg-[#BEF0BB] ">
+        className="rounded-full gap-1 p-4 text-base text-[#3E3E3E] bg-[#BEF0BB] "
+      >
         <PlusCircleIcon className="h-4" />
         Agregar preliquidación
       </AddElementButton>
@@ -157,7 +158,8 @@ export default function AddPreLiquidation() {
           if (!isLoading) {
             setOpen(isOpen);
           }
-        }}>
+        }}
+      >
         <DialogContent>
           <DialogHeader className="flex mx-5 ">
             <DialogTitle className="flex text-2xl">
@@ -169,7 +171,8 @@ export default function AddPreLiquidation() {
               <Select onValueChange={handleBrandChange}>
                 <SelectTrigger
                   className="w-full  border-[#BEF0BB] border-0 border-b text-[#3E3E3E] bg-background rounded-none shadow-none
-              hover:none justify-self-right">
+              hover:none justify-self-right"
+                >
                   <SelectValue placeholder="Seleccione una marca" />
                 </SelectTrigger>
                 <SelectContent>
@@ -178,7 +181,8 @@ export default function AddPreLiquidation() {
                       <SelectItem
                         key={marca?.id}
                         value={marca?.id}
-                        className="rounded-none hover:focus:bg-green-300">
+                        className="rounded-none hover:focus:bg-green-300"
+                      >
                         {marca?.name}
                       </SelectItem>
                     ))}
@@ -196,7 +200,8 @@ export default function AddPreLiquidation() {
                       className={cn(
                         "w-full border-b border-[#BEF0BB] pl-3 text-left font-normal hover:bg-none hover:bg-transparent shadow-none overflow-hidden text-ellipsis whitespace-nowrap",
                         !fechaVencimiento1 && "text-muted-foreground"
-                      )}>
+                      )}
+                    >
                       <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[#3E3E3E]">
                         {fechaVencimiento1 ? (
                           dayjs(fechaVencimiento1).format(
@@ -232,9 +237,10 @@ export default function AddPreLiquidation() {
                     <Button
                       variant={"form"}
                       className={cn(
-                        "w-full border-b border-[#BEF0BB] pl-3 text-left font-normal hover:bg-none hover:bg-transparent",
+                        "w-full border-b border-[#BEF0BB] pl-3 text-left font-normal hover:bg-none hover:bg-transparent shadow-none overflow-hidden text-ellipsis whitespace-nowrap",
                         !fechaVencimiento2 && "text-muted-foreground"
-                      )}>
+                      )}
+                    >
                       <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[#3E3E3E]">
                         {fechaVencimiento2 ? (
                           dayjs(fechaVencimiento2).format(
@@ -255,7 +261,7 @@ export default function AddPreLiquidation() {
                       }
                       onSelect={(e) => FechasCreate2(e)}
                       disabled={(date: Date) => date < new Date()}
-                      initialFocus
+                      
                     />
                   </PopoverContent>
                 </Popover>
@@ -332,69 +338,82 @@ export default function AddPreLiquidation() {
                 </Label>
                 <Select
                   onValueChange={(e) => setMes(Number(e))}
-                  defaultValue={mes?.toString()}>
+                  defaultValue={mes?.toString()}
+                >
                   <SelectTrigger className="w-full border-[#BEF0BB] border-0 border-b text-[#3E3E3E] bg-background rounded-none">
                     <SelectValue placeholder="Seleccione un mes" />
                   </SelectTrigger>
                   <SelectContent className="h-[220px]">
                     <SelectItem
                       value="1"
-                      disabled={new Date(anio, 1, 1) < new Date()}>
+                      disabled={new Date(anio, 1, 1) < new Date()}
+                    >
                       Enero
                     </SelectItem>
                     <SelectItem
                       value="2"
-                      disabled={new Date(anio, 2, 1) < new Date()}>
+                      disabled={new Date(anio, 2, 1) < new Date()}
+                    >
                       Febrero
                     </SelectItem>
                     <SelectItem
                       value="3"
-                      disabled={new Date(anio, 3, 1) < new Date()}>
+                      disabled={new Date(anio, 3, 1) < new Date()}
+                    >
                       Marzo
                     </SelectItem>
                     <SelectItem
                       value="4"
-                      disabled={new Date(anio, 4, 1) < new Date()}>
+                      disabled={new Date(anio, 4, 1) < new Date()}
+                    >
                       Abril
                     </SelectItem>
                     <SelectItem
                       value="5"
-                      disabled={new Date(anio, 5, 1) < new Date()}>
+                      disabled={new Date(anio, 5, 1) < new Date()}
+                    >
                       Mayo
                     </SelectItem>
                     <SelectItem
                       value="6"
-                      disabled={new Date(anio, 6, 1) < new Date()}>
+                      disabled={new Date(anio, 6, 1) < new Date()}
+                    >
                       Junio
                     </SelectItem>
                     <SelectItem
                       value="7"
-                      disabled={new Date(anio, 7, 1) < new Date()}>
+                      disabled={new Date(anio, 7, 1) < new Date()}
+                    >
                       Julio
                     </SelectItem>
                     <SelectItem
                       value="8"
-                      disabled={new Date(anio, 8, 1) < new Date()}>
+                      disabled={new Date(anio, 8, 1) < new Date()}
+                    >
                       Agosto
                     </SelectItem>
                     <SelectItem
                       value="9"
-                      disabled={new Date(anio, 9, 1) < new Date()}>
+                      disabled={new Date(anio, 9, 1) < new Date()}
+                    >
                       Septiembre
                     </SelectItem>
                     <SelectItem
                       value="10"
-                      disabled={new Date(anio, 10, 1) < new Date()}>
+                      disabled={new Date(anio, 10, 1) < new Date()}
+                    >
                       Octubre
                     </SelectItem>
                     <SelectItem
                       value="11"
-                      disabled={new Date(anio, 11, 1) < new Date()}>
+                      disabled={new Date(anio, 11, 1) < new Date()}
+                    >
                       Noviembre
                     </SelectItem>
                     <SelectItem
                       value="12"
-                      disabled={new Date(anio, 12, 1) < new Date()}>
+                      disabled={new Date(anio, 12, 1) < new Date()}
+                    >
                       Diciembre
                     </SelectItem>
                   </SelectContent>
@@ -459,7 +478,8 @@ export default function AddPreLiquidation() {
                 type="submit"
                 className="flex rounded-full w-fit justify-self-center bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#DEF5DD]"
                 disabled={isLoading}
-                onClick={handleCreate}>
+                onClick={handleCreate}
+              >
                 {isLoading ? (
                   <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
                 ) : (
