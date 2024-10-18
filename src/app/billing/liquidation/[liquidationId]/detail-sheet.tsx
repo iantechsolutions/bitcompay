@@ -257,9 +257,24 @@ export default function DetailSheet({
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="ml-2">
-              {"Crear un plan"}
+              {"Error enviandose a afip"}
             </DialogTitle>
           </DialogHeader>
+          <div className="pb-1">
+            Este comprobante no se pudo enviar a la AFIP por que surgio el siguiente error:
+          </div>
+          <div className="pb-2">
+            <p className=" text-xs">
+              {(comprobanteNCReciente?.afipError?.length ?? 0) > 200 ? ( comprobanteNCReciente?.afipError?.slice(0,200) + "..." ) : comprobanteNCReciente?.afipError }
+            </p>
+          </div>
+          <Button
+            className="h-7 bg-[#f7f7f7] hover:bg-[#f7f7f7] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
+            onClick={() => {setOpenNCError(false)}}
+            >
+              Cerrar
+            </Button>
+
         </DialogContent>
       </Dialog>
 
