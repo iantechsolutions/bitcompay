@@ -279,7 +279,7 @@ export function AddHealthInsurances(props: {
         isClient: true,
         state: state,
         dateState: dateState,
-        responsibleName: user,
+        responsibleName: responsibleName,
         cancelMotive: cancelMotive,
 
         excelDocument: excelDocument,

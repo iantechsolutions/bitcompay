@@ -42,8 +42,8 @@ export default function Page() {
           //   "NO ID FISCAL" ??
           //   "NO ID FISCAL",
           // invoice_number: String(transaction?.invoice_number) ?? "NO NUMBER",
-          g_c: brand ?? "-",
-          product_number: product ?? "-",
+          Marca: brand ?? "-",
+          Producto: product ?? "-",
           period: dayjs(transaction?.period).format("MM/YYYY"),
           first_due_amount:
             transaction?.first_due_amount?.toFixed(2) ?? "0.00" ?? "NO AMOUNT",
@@ -60,7 +60,7 @@ export default function Page() {
           recollected_amount:
             transaction?.recollected_amount?.toString() ?? "-",
           // comment: "NO COMMENT",
-          statusId: status ?? "-",
+          Estado: status ?? "-",
           // collected_amount: "-"
         });
       }

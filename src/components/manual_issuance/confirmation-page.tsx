@@ -125,7 +125,7 @@ const confirmationPage = ({
   const { mutateAsync: updateComprobante } =
     api.comprobantes.approbate.useMutation();
   const router = useRouter();
-
+  
   function handleApprove() {
     console.log("fcSeleccionada");
     console.log(fcSeleccionada);
@@ -313,16 +313,16 @@ const confirmationPage = ({
       return null;
     }
 
-    // if (data) {
-    //   try {
-    //     const res = await afip.ElectronicBilling.createVoucher(data);
-    //   } catch (error) {
-    //     console.log(error);
-    //     toast.error("Error enviando a AFIP: " + error);
-    //     setIsLoading(false);
-    //     return null;
-    //   }
-    // }
+    if (data) {
+      try {
+        const res = await afipObject?.ElectronicBilling.createVoucher(data);
+      } catch (error) {
+        console.log(error);
+        toast.error("Error enviando a AFIP: " + error);
+        setIsLoading(false);
+        return null;
+      }
+    }
     if (tipoComprobante == "1" || tipoComprobante == "6") {
       if (fgId) {
         const event = createEventFamily({
@@ -407,6 +407,7 @@ const confirmationPage = ({
         (billResponsible
           ? billResponsible?.postal_code?.cp
           : obraSocial?.cpData?.cp) ?? "",
+          sell_condition,
         (billResponsible
           ? billResponsible?.fiscal_id_type
           : obraSocial?.fiscal_id_type) ?? "",

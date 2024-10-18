@@ -59,7 +59,8 @@ export default function AffiliatePage(props: {
     familyGroupId: grupos ?? "",
   });
   // const cc = cuentasCorrientes?.find((cc) => cc.family_group === grupos);
-  const { data: company } = api.companies.get.useQuery(undefined);
+  // const { data: company } = api.companies.get.useQuery(undefined);
+
   const lastEvent = cc?.events.reduce((prev, current) => {
     return new Date(prev.createdAt) > new Date(current.createdAt)
       ? prev
@@ -166,7 +167,6 @@ export default function AffiliatePage(props: {
     HASTA: bonusValido?.to
       ? dayjs(bonusValido?.to).utc().format("DD-MM-YYYY")
       : "-",
-    APORTES: grupo ? formattedAportes : "-",
     ORIGEN: "",
     "FECHA APORTES": "-",
     "PERIODO APORTADO": "-",
@@ -535,16 +535,18 @@ export default function AffiliatePage(props: {
                               );
                             })}
                           </div>
-                          <Button className="px-5 bg-[#F7F7F7] hover:bg-[#F7F7F7] text-[#3E3E3E] font-medium text-xs rounded-full border-none flex items-center gap-x-2">
-                            <Link
-                              href={`/management/client/affiliates/${int.family_group_id}/aportes`}
-                              className="flex items-center">
-                              <Eye className="mr-0 md:mr-2 w-4 h-4" />{" "}
-                              <span className="hidden md:inline">
-                                Ver aportes{" "}
-                              </span>
-                            </Link>
-                          </Button>
+                          <div className="mt-6">
+                            <Button className="px-5 bg-[#F7F7F7] hover:bg-[#F7F7F7] text-[#3E3E3E] font-medium text-xs rounded-full border-none flex items-center gap-x-2">
+                              <Link
+                                href={`/management/client/affiliates/${int.family_group_id}/${int.id}/aportes`}
+                                className="flex items-center">
+                                <Eye className="mr-0 md:mr-2 w-4 h-4" />{" "}
+                                <span className="hidden md:inline">
+                                  Ver aportes{" "}
+                                </span>
+                              </Link>
+                            </Button>
+                          </div>
                         </AccordionContentIntegrant>
                       </AccordionItemIntegrant>
                     ))

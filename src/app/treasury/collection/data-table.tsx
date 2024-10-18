@@ -43,8 +43,8 @@ export const recHeaders = [
   //   width: 140,
   //   alwaysRequired: true,
   // },
-  { key: "g_c", label: "Marca", width: 50 },
-  { key: "product_number", label: "Producto", width: 80, alwaysRequired: true },
+  { key: "Marca", label: "Marca", width: 50 },
+  { key: "Producto", label: "Producto", width: 80, alwaysRequired: true },
   { key: "period", label: "Período", width: 140 },
   { key: "first_due_amount", label: "Importe 1er Vto.", width: 140 },
   { key: "first_due_date", label: "Fecha 1er Vto.", width: 140 },
@@ -52,7 +52,7 @@ export const recHeaders = [
   { key: "payment_date", label: "Fecha de Pago/Débito", width: 140 },
   // { key: "collected_amount", label: "Importe a cobrar", width: 140 },
   { key: "recollected_amount", label: "Importe cobrado", width: 140 },
-  { key: "statusId", label: "Estado de Pago", width: 140 },
+  { key: "Estado", label: "Estado de Pago", width: 140 },
 ];
 
 interface DataTableProps<TData, TValue> {
@@ -92,13 +92,13 @@ export function DataTable<TData, TValue>({
   //     router.push(`/billing/pre-liquidation/${originalData.id}`);
   //   }, 100);
   // };
-  const desiredColumns = ["Marca", "UN"];
+  const desiredColumns = ["Marca", "Producto", "Estado"];
   const filteredColumns = Array.from(table.getAllColumns()).filter((column) =>
     desiredColumns.includes(column.id!)
   );
   return (
     <>
-      <TableToolbarPayment
+      <TableToolbar
         table={table as any}
         columns={filteredColumns as any}
         searchColumn="invoice_number"
