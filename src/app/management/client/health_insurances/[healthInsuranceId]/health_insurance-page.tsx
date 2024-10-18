@@ -167,7 +167,7 @@ export default function HealthInsurancePage(props: {
                   className="flex flex-row bg-[#F7F7F7] hover:bg-[#DEF5DD] text-[#3e3e3e] font-medium text-xs rounded-full py-1 px-5"
                   onClick={() => {
                     if (!props.ccId) {
-                      alert("ccId is undefined");
+                      alert("Esta obra social no cuenta con billetera");
                       return;
                     }
                     router.push(
