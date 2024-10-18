@@ -205,7 +205,7 @@ export default function BrandPage({
                   </div>
                   <div>
                     <Label htmlFor="utility">
-                      Código de utilidad (8 otorgada por senapsa)
+                      Código de utilidad (otorgado por senapsa)
                     </Label>
                     <Input
                       id="utility"

@@ -144,7 +144,7 @@ export function AddBrandDialog() {
                 />
               </div>
               <div className="w-[250px] font-bold">
-                <Label htmlFor="utility">Código de utilidad(senapsa)</Label>
+                <Label htmlFor="utility">Código de utilidad (senapsa)</Label>
                 <Input
                   id="utility"
                   placeholder="0"
