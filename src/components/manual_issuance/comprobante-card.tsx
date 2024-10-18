@@ -610,7 +610,8 @@ export default function ComprobanteCard({
                       comprobantes
                         ?.filter(
                           (comprobante) =>
-                            comprobante.tipoComprobante !== "0" &&
+                            comprobante.tipoComprobante !== "Apertura de CC" &&
+                            comprobante.origin !== "Nota de credito" &&
                             (comprobante.estado?.toUpperCase() === "PARCIAL" ||
                               comprobante.estado?.toUpperCase() === "PENDIENTE")
                         )
@@ -633,6 +634,10 @@ export default function ComprobanteCard({
                           form.setValue(
                             "facturasEmitidas.importe",
                             comprobante.importe
+                          );
+                          form.setValue(
+                            "facturasEmitidas.id",
+                            comprobante.id
                           );
                           form.setValue(
                             "facturasEmitidas.iva",
