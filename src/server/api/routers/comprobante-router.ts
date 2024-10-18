@@ -1468,10 +1468,10 @@ export async function preparateComprobante(
         .flatMap((part) => part.aportes_os)
         .filter((a) => {
           if (!a.contribution_date || !fechaDesde) return false;
-          console.log("contributionMonth", a.contribution_date?.getMonth());
+          console.log("contributionMonth", ((a.contribution_date?.getMonth() ?? 0) + 1));
           console.log("contributionYear", a.contribution_date?.getFullYear());
           return (
-            a.contribution_date?.getMonth() === fechaDesde?.getMonth() &&
+            ((a.contribution_date?.getMonth() ?? 0) + 1) === fechaDesde?.getMonth() &&
             a.contribution_date?.getFullYear() === fechaDesde?.getFullYear()
           );
         })
