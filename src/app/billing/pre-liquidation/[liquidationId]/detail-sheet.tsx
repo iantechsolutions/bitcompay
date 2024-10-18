@@ -32,6 +32,9 @@ type DetailSheetProps = {
 };
 
 export function formatCurrency(amount: number) {
+  if (amount === 0) {
+    return "$ 0,00";
+  }
   return Intl.NumberFormat("es-AR", {
     style: "currency",
     currency: "ARS",
@@ -63,41 +66,34 @@ export default function DetailSheet({
       comprobante.origin === "Nota de credito" &&
       comprobante.liquidation_id === liquidationId
   );
-  console.log("comprobanteNCReciente", comprobanteNCReciente);
   let comprobanteFCReciente = data.comprobantes.find(
     (comprobante) =>
       comprobante.origin === "Factura" &&
       comprobante.liquidation_id === liquidationId
   );
-  console.log("comprobanteFCReciente", comprobanteFCReciente);
 
   let FCTotal = null;
   let NCTotal = null;
+  let saldo_a_favor = 0;
+  let saldo_a_pagar = 0;
   if (comprobanteFCReciente) {
     FCTotal = comprobanteFCReciente.items.find(
       (item) => item.concept === "Total factura"
     )?.total;
+
+    saldo_a_favor = comprobanteFCReciente.items.find(
+      (item) => item.concept === "Saldo a favor"
+    )?.total ?? 0;
   }
   if (comprobanteNCReciente) {
     NCTotal = comprobanteNCReciente.items.find(
       (item) => item.concept === "Nota de credito"
     )?.amount;
   }
-
-  const total_a_pagar = comprobanteFCReciente?.items.find(
-    (item) => item.concept == "Total a pagar"
-  )?.total;
-  let saldo_a_pagar = FCTotal;
-  if (FCTotal && total_a_pagar) {
-    saldo_a_pagar = FCTotal - total_a_pagar;
+  saldo_a_pagar = (FCTotal ?? 0) - (saldo_a_favor ?? 0)
+  if(saldo_a_pagar < 0){
+    saldo_a_pagar = 0;
   }
-
-  let total_aportes = 0;
-  
-  aportesOS?.forEach((aporte) => {
-    total_aportes += parseInt(aporte.amount);
-  });
-
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetContent className="sm:max-w-[550px] px-10 py-12 overflow-y-scroll">
@@ -164,7 +160,7 @@ export default function DetailSheet({
                 <div className="bg-[#DEF5DD] flex flex-row justify-between items-center p-3 rounded-md mt-2">
                   <p className=" text-[#6952EB] font-[550] ">Saldo a pagar:</p>
                   <p className="text-[#6952EB] font-[550] ">
-                    {saldo_a_pagar ? `${formatCurrency(saldo_a_pagar)}` : "N/A"}
+                    {(saldo_a_pagar!==null || saldo_a_pagar!==undefined) ? `${formatCurrency(saldo_a_pagar)}` : "N/A"}
                   </p>
                 </div>
               </div>

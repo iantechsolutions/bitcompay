@@ -52,9 +52,13 @@ export default function CCDetail(props: {
 
   let FCTotal = null;
   let NCTotal = null;
+  let saldo_a_favor = null;
   if (comprobanteFCReciente) {
     FCTotal = comprobanteFCReciente.items.find(
       (item) => item.concept === "Total factura"
+    )?.total;
+    saldo_a_favor = comprobanteFCReciente.items.find(
+      (item) => item.concept === "Saldo a favor"
     )?.total;
   }
   if (comprobanteNCReciente) {
@@ -63,14 +67,11 @@ export default function CCDetail(props: {
     )?.amount;
   }
 
-  const total_a_pagar = comprobanteFCReciente?.items.find(
-    (item) => item.concept == "Total a pagar"
-  )?.total;
-  let saldo_a_pagar = FCTotal;
-  if (FCTotal && total_a_pagar) {
-    saldo_a_pagar = FCTotal - total_a_pagar;
+  let saldo_a_pagar = (FCTotal ?? 0) - (saldo_a_favor ?? 0)
+  if(saldo_a_pagar < 0){
+    saldo_a_pagar = 0;
   }
-
+  
   const comprobantesTable: RouterOutputs["comprobantes"]["getByLiquidation"] =
     [];
   if (comprobanteFCReciente) {
