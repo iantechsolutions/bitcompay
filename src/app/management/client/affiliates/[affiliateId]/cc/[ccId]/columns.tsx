@@ -164,7 +164,7 @@ export const columns: ColumnDef<TableRecord>[] = [
       return (
         <div>
           <div
-            className={`rounded-full inline-block font-bold ${style} px-7 py-1`}>
+            className={`rounded-full inline-block font-bold capitalize ${style} px-7 py-1`}>
             {" "}
             {row.getValue("Estado")}
           </div>
