@@ -48,9 +48,9 @@ export default function DataTable<TData, TValue>({
   });
 
   const desiredColumns = [
-    "Fecha de Proceso",
-    "Fecha de Soporte",
-    "Fecha de Contribución",
+    "Fecha de proceso",
+    "Fecha de soporte",
+    "Fecha de contribución",
   ];
   const filteredColumns = Array.from(table.getAllColumns()).filter((column) =>
     desiredColumns.includes(column.id!)
@@ -58,12 +58,12 @@ export default function DataTable<TData, TValue>({
 
   return (
     <div>
-      <TableToolbar
+      {/* <TableToolbar
         table={table}
-        searchColumn="Fecha de Proceso"
+        searchColumn="Fecha de proceso"
         columns={filteredColumns}
         containerClassName="py-2"
-      />
+      /> */}
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (

@@ -17,6 +17,7 @@ import { saveAs } from "file-saver";
 import "dayjs/locale/es";
 import DataTable from "./data-table";
 import { columns, TableRecord } from "./columns";
+import { GoBackArrow } from "~/components/goback-arrow";
 dayjs.locale("es");
 export default function AportesDetalles(props: {
   params: { integrantId: string };
@@ -47,21 +48,25 @@ export default function AportesDetalles(props: {
   }
 
   return (
-    <LayoutContainer>
-      <Title>Aportes historicos</Title>
-      <h2 className=" font-semibold mb-2">{integrant?.name}</h2>
-      <div className="flex gap-3 mt-5 mb-10">
-        <Card className="py-4 px-6 w-1/4 grid grid-cols-2 items-center">
-          <div className="flex flex-col">
-            <p className="text-base font-medium block">Aportes registrados </p>
-
-            <h1>{aportes?.length}</h1>
-          </div>
-        </Card>
-      </div>
-      <DataTable data={tableRows} columns={columns} />
-      <div className="flex flex-auto justify-end">
-        {/* <Button
+    <>
+      <GoBackArrow />
+      <LayoutContainer>
+        <Title>Aportes historicos</Title>
+        <h2 className=" font-semibold mb-2">{integrant?.name}</h2>
+        <div className="flex gap-3 mt-5 mb-10">
+          <Card className="py-4 px-6 w-1/4 flex items-center border-2 border-gray-300">
+            {" "}
+            {/* Cambié grid a flex y añadí un borde para hacer más grueso */}
+            <p className="text-lg font-semibold">
+              {" "}
+              {/* Aumenté el tamaño y cambié a font-semibold para hacerlo más grueso */}
+              Aportes registrados: {aportes?.length}
+            </p>
+          </Card>
+        </div>
+        <DataTable data={tableRows} columns={columns} />
+        <div className="flex flex-auto justify-end">
+          {/* <Button
           variant="bitcompay"
           className=" text-base px-16 py-6 mt-5 gap-3 text-[#3e3e3e] rounded-full font-medium"
           onClick={async () => {
@@ -70,7 +75,8 @@ export default function AportesDetalles(props: {
           <Download02Icon />
           Exportar
         </Button> */}
-      </div>
-    </LayoutContainer>
+        </div>
+      </LayoutContainer>
+    </>
   );
 }
