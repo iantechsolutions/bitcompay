@@ -331,7 +331,8 @@ export default function GenerateChannelOutputPage(props: {
                   type="button"
                   disabled={disableName}
                   onClick={handleGenerate}>
-                  Generar archivo
+                  Generar archivo{" "}
+                  {isLoading && <Loader2Icon className="ml-2 animate-spin" />}
                 </Button>
                 <DialogClose asChild>
                   <Button type="button" onClick={() => setOpenDialog(false)}>

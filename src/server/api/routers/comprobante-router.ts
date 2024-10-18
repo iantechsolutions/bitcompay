@@ -148,7 +148,7 @@ const idDictionary: { [key: string]: number } = {
 interface VoucherResult {
   res: { CAE: string; CAEFchVto: string; voucherNumber: number } | null;
   result: "Pendiente" | "Error";
-  error?: string;
+  error?: string | undefined;
 }
 
 async function createNextVoucher(
@@ -158,7 +158,7 @@ async function createNextVoucher(
   let result: "Pendiente" | "Error" = "Pendiente";
   let res: { CAE: string; CAEFchVto: string; voucherNumber: number } | null =
     null;
-  let error: string = "";
+  let error: string | undefined = "";
   try {
     res = await afip.ElectronicBilling.createNextVoucher(data);
     console.log(res);
@@ -170,7 +170,7 @@ async function createNextVoucher(
       e?.toString().startsWith("Error: (502) Error interno de base de datos") ||
       e?.toString().startsWith("Error: (10016)")
     ) {
-      result = (await createNextVoucher(data, afip)).result;
+      ({res,result,error} = await createNextVoucher(data, afip));
     } else {
       result = "Error";
       error = e?.toString() ?? "Desconocido";
@@ -469,6 +469,9 @@ async function approbatecomprobante(liquidationId: string) {
             comprobanteEstado = temp.result;
             afipError = temp.error ?? "";
             lastVoucher = temp.res?.voucherNumber ?? 0;
+            if(comprobanteEstado != "Error"){
+
+            
             const ccs = await db.query.currentAccount.findMany({
               with: {
                 events: true,
@@ -503,12 +506,22 @@ async function approbatecomprobante(liquidationId: string) {
                 nroComprobante: lastVoucher,
               })
               .where(eq(schema.comprobantes.id, comprobante.id));
+             }
+            else{
+              await db
+                .update(schema.comprobantes)
+                .set({
+                  estado: comprobanteEstado,
+                  afipError: afipError,
+                })
+                .where(eq(schema.comprobantes.id, comprobante.id));
+            }
           } else {
             await db
               .update(schema.comprobantes)
               .set({
                 estado: "Error",
-                afipError: afipError,
+                afipError: "El comprobante anterior ya tenia un error de creacion",
               })
               .where(eq(schema.comprobantes.id, comprobante.id));
           }
@@ -1732,7 +1745,7 @@ async function calculateAmount(
   // }
 
   if (amount <= 0){
-    amount = 1;
+    amount = 0;
   }
 
   return { amount, ivaCodigo };
