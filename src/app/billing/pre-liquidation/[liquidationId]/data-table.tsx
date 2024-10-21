@@ -25,7 +25,7 @@ import { Sheet, SheetContent } from "~/components/ui/sheet";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { DataTablePagination } from "~/components/tanstack/pagination";
-import TableToolbar from "~/components/tanstack/table-toolbar";
+import TableToolbar from "~/components/tanstack/table-toolbar-OLD";
 import { useEffect, useState } from "react";
 import DetailSheet from "./detail-sheet";
 import { RouterOutputs } from "~/trpc/shared";
