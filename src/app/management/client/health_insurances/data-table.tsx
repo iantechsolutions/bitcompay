@@ -12,7 +12,7 @@ import {
   getFacetedUniqueValues,
   getFacetedRowModel,
 } from "@tanstack/react-table";
-
+import { rankItem } from "@tanstack/match-sorter-utils";
 import { TableCell } from "~/components/ui/table";
 import {
   Table,
@@ -36,20 +36,28 @@ export function DataTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [globalFilter, setGlobalFilter] = useState("");
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
-    state: {
-      columnFilters,
+    globalFilterFn: (row, columnId, filterValue) => {
+      const searchColumns = ["fiscal_id_number", "identificationNumber", "responsibleName"];
+      return searchColumns.some((col) => {
+        const value = row.getValue(col);
+        return rankItem(value?.toString() ?? "", filterValue).passed;
+      });
     },
+    state: {
+      globalFilter,
+    },
+    onGlobalFilterChange: setGlobalFilter,
   });
+
   const router = useRouter();
 
   const handleRowClick = (row: Row<TData>) => {
@@ -67,13 +75,13 @@ export function DataTable<TData, TValue>({
       <TableToolbar
         table={table}
         columns={filteredColumns}
-        searchColumn="responsibleName"
+        setGlobalFilter={setGlobalFilter} // Pasamos la función para actualizar el filtro global
       />
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow
-              className="bg-[#F7F7F7] hover:bg-[#F7F7F7] rounded-lg "
+              className="bg-[#F7F7F7] hover:bg-[#F7F7F7] rounded-lg"
               key={headerGroup.id}
             >
               {headerGroup.headers.map((header) => {

@@ -1,3 +1,4 @@
+import { rankItem } from "@tanstack/match-sorter-utils";
 import {
   ColumnDef,
   flexRender,
@@ -27,19 +28,26 @@ export default function DataTable<Tdata, Tvalue>({
   columns,
   data,
 }: DataTableProps<Tdata, Tvalue>) {
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [globalFilter, setGlobalFilter] = useState("");
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    onColumnFiltersChange: setColumnFilters,
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     getFilteredRowModel: getFilteredRowModel(),
-    state: {
-      columnFilters,
+    globalFilterFn: (row, columnId, filterValue) => {
+      const searchColumns = ["comprobanteNumber", "date", "amount"];
+      return searchColumns.some((col) => {
+        const value = row.getValue(col);
+        return rankItem(value?.toString() ?? "", filterValue).passed;
+      });
     },
+    state: {
+      globalFilter, 
+    },
+    onGlobalFilterChange: setGlobalFilter, 
   });
   const desiredColumns = ["Estado", "Tipo comprobante"];
   const filteredColumns = Array.from(table.getAllColumns()).filter((column) =>
@@ -47,7 +55,11 @@ export default function DataTable<Tdata, Tvalue>({
   );
   return (
     <div>
-    <TableToolbar table={table} searchColumn="Estado" columns={filteredColumns} containerClassName="py-2" />
+    <TableToolbar 
+    table={table} 
+    columns={filteredColumns} 
+    setGlobalFilter={setGlobalFilter} 
+    containerClassName="py-2" />
     <Table>
         <TableBody className="mt-0">
             {table.getRowModel().rows.map((row)=>(
