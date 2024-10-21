@@ -58,12 +58,6 @@ export default function DataTable<TData, TValue>({
 
   return (
     <div>
-      {/* <TableToolbar
-        table={table}
-        searchColumn="Fecha de proceso"
-        columns={filteredColumns}
-        containerClassName="py-2"
-      /> */}
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (

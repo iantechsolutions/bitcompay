@@ -12,7 +12,7 @@ import {
   getFacetedRowModel,
   getFacetedUniqueValues,
 } from "@tanstack/react-table";
-
+import { rankItem } from "@tanstack/match-sorter-utils";
 import { TableCell } from "~/components/ui/table";
 import {
   Table,
@@ -35,19 +35,26 @@ export function DataTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [globalFilter, setGlobalFilter] = useState("");
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    onColumnFiltersChange: setColumnFilters,
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     getFilteredRowModel: getFilteredRowModel(),
-    state: {
-      columnFilters,
+    globalFilterFn: (row, columnId, filterValue) => {
+      const searchColumns = ["nroGF", "cuil", "nombre"];
+      return searchColumns.some((col) => {
+        const value = row.getValue(col);
+        return rankItem(value?.toString() ?? "", filterValue).passed;
+      });
     },
+    state: {
+      globalFilter, 
+    },
+    onGlobalFilterChange: setGlobalFilter, 
     initialState: {
       columnVisibility: {
         id: false,
@@ -64,7 +71,6 @@ export function DataTable<TData, TValue>({
   const filteredColumns = Array.from(allColumns).filter((column) =>
     desiredColumns.includes(column.id!)
   );
-  console.log(filteredColumns);
   const handleRowClick = (row: Row<TData>) => {
     const linked = (link: string) => {
       window.location.href = link;
@@ -76,8 +82,8 @@ export function DataTable<TData, TValue>({
     <>
       <TableToolbar
         table={table}
-        searchColumn={"nombre"}
         columns={filteredColumns}
+        setGlobalFilter={setGlobalFilter} 
       />
 
       <div className="rounded-md border">
