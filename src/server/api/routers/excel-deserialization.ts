@@ -58,7 +58,7 @@ export const excelDeserializationRouter = createTRPCRouter({
       let contents;
 
       console.log("cande no esta", input.columns);
-      
+
       contents = await readExcelFileOS(
         db,
         input.id,
@@ -116,7 +116,7 @@ export const excelDeserializationRouter = createTRPCRouter({
       await db.transaction(async (db) => {
         for (const row of contents) {
           console.log("RowConfirm", row);
-          
+
           if (!row.contribution_date && !input.contribution_date) {
             throw new TRPCError({
               code: "BAD_REQUEST",
@@ -132,7 +132,10 @@ export const excelDeserializationRouter = createTRPCRouter({
           }
 
           const existingAffiliate = await db.query.integrants.findFirst({
-            where: eq(schema.integrants.fiscal_id_number, row.cuil),
+            where: and(
+              eq(schema.integrants.fiscal_id_number, row.cuil),
+              eq(schema.integrants.health_insuranceId, input.columns.id ?? "")
+            ),
           });
 
           if (!existingAffiliate) {
@@ -516,9 +519,9 @@ export const excelDeserializationRouter = createTRPCRouter({
               },
             });
             const product = companyProducts.find(
-              (x) => x.product && ((x.product.name ?? "") === row.product)
+              (x) => x.product && (x.product.name ?? "") === row.product
             )?.product;
-            console.log("productis",product);
+            console.log("productis", product);
             await db.insert(schema.pa).values({
               card_number: row.card_number?.toString() ?? null,
               CBU: row.cbu,
