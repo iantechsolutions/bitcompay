@@ -17,6 +17,7 @@ export type TotalsType = {
       puntoVenta: string;
       nroComprobante: string;
       importe: number;
+      id: string;
       iva: string;
     };
   };

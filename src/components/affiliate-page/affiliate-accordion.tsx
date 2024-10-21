@@ -77,10 +77,9 @@ const AccordionTrigger = React.forwardRef<
   CustomTriggerProps &
     React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>
 >(({ className, children, affiliate, ...props }, ref) => {
-  const isHolder = affiliate?.relationship === "Titular";
+  const isHolder = affiliate?.relationship === "Titular" ;
   const isBillResponsible = affiliate?.isBillResponsible;
   const isAffiliate = affiliate?.isAffiliate;
-
   console.log(isHolder, isBillResponsible, isAffiliate);
 
   const badgeClassName = `flex items-center text-lg font-medium justify-center rounded-full px-3 text-xs font-medium 
@@ -106,7 +105,7 @@ const AccordionTrigger = React.forwardRef<
           {isAffiliate ? (
             <div className={badgeClassName}>"Afiliado"</div>
           ) : null}
-          {!isHolder && !isBillResponsible && !isAffiliate ? (
+          {affiliate && !isHolder && !isBillResponsible && !isAffiliate ? (
             <div className={badgeClassName}>"Adherente"</div>
           ) : null}
           <CircleChevronDown

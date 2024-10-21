@@ -682,7 +682,8 @@ async function approbatecomprobante(liquidationId: string) {
               comprobante.family_group?.sale_condition ?? "",
               billResponsible?.fiscal_id_type ?? "",
               billResponsible?.fiscal_id_number ?? "",
-              billResponsible?.afip_status ?? ""
+              billResponsible?.afip_status ?? "",
+              billResponsible?.pa?.find((x) => x.CBU)?.CBU ?? "",
             );
           } catch (e) {
             console.log("Error en htmlBill");
@@ -1349,6 +1350,22 @@ export const comprobantesRouter = createTRPCRouter({
           invoice_number: number,
         })
         .where(eq(schema.payments.comprobante_id, id));
+      return updatedProvider;
+    }),
+  updateStatus: protectedProcedure
+    .input(
+      z.object({
+        comprobanteId: z.string(),
+        status: z.enum(["Generada","Pendiente","Pagada","Parcial","Anulada","Apertura","Error"]),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const updatedProvider = await db
+        .update(schema.comprobantes)
+        .set({
+          estado: input.status,
+        })
+        .where(eq(schema.comprobantes.id, input.comprobanteId));
       return updatedProvider;
     }),
   delete: protectedProcedure

@@ -248,8 +248,7 @@ export function htmlBill(
   company: any,
   producto: any,
   voucher: number,
-  brand: /* outerOutputs["brands"]["list"][number] */
-  InferSelectModel<typeof schema.brands> | undefined,
+  brand: /* outerOutputs["brands"]["list"][number] */InferSelectModel<typeof schema.brands> | undefined,
   name: string,
   domicilio: string,
   localidad: string,
@@ -258,8 +257,10 @@ export function htmlBill(
   sellCondition: string,
   id_type: string,
   id_number: string,
-  afip_status: string
+  afip_status: string,
+  cbu: string,
 ) {
+  console.log("cbu es", cbu);
   let subtotal = 0;
   let iva = 0;
   if (comprobante.items.filter((x: any) => x.concept !== "Saldo a favor" && x.concept !== "Total factura").length > 0) {
@@ -318,7 +319,7 @@ export function htmlBill(
   let saldoAfavor = comprobante?.items.find((x: any) => x.concept === "Saldo a favor");
 
 
-  // console.log(voucher);
+
 
   // moví funciones porque es lento redefinirlas constantemente
 
@@ -878,15 +879,12 @@ padding: 0;
 		<p style="font-size:12px; text-align:right; margin-right:0; padding-right:0;">Sub-total: ${formatNumberAsCurrency(
       subtotal ?? 0
     )}</p>
-    <p style="font-size:12px; text-align:right;  margin-right:0; padding-right:0; padding-top:5px;">IVA: ${formatNumberAsCurrency(
-      iva ?? 0
-    )}</p>
-		${totalTributes > 0
+  ${iva > 0 ? `<p style="font-size:12px; text-align:right;  margin-right:0; padding-right:0; padding-top:5px;">IVA: ${formatNumberAsCurrency(iva)}</p>` : ""}
+	${totalTributes > 0
         ? `<p style="font-size:12px; text-align:right;  margin-right:0; padding-right:0; padding-top:5px;">Otros Tributos: ${formatNumberAsCurrency(
             totalTributes ?? 0
           )}</p>`
-        : ""
-    }
+        : "" }
     ${saldoAfavor && saldoAfavor.total > 0 ?
       `<p style="font-size:12px; text-align:right; margin-right:0; padding-right:0; padding-top:5px;">Pagos a cuenta: ${formatNumberAsCurrency(
         saldoAfavor.total)} </p>`: ""}
@@ -906,9 +904,9 @@ padding: 0;
 		</div>
 	</div>
 
-  ${comprobante.tipoComprobante.includes("FACTURA") && `<div style="font-size:10px; padding-left: 30px; padding-top:10px; width:350px; white-space: nowrap; font-style: italic;">
-			Esta factura se debitará en fecha de vencimiento en CBU: XXXXXXXXXXXXXXXXXXXXXXXXX.
-		</div>`}
+  ${(comprobante.tipoComprobante.includes("FACTURA") && cbu) ? `<div style="font-size:10px; padding-left: 30px; padding-top:10px; width:350px; white-space: nowrap; font-style: italic;">
+			Esta factura se debitará en fecha de vencimiento en CBU: ${cbu}.
+		</div>` : " "}
 </section>
 
        ${getPaymentMethods(comprobante.tipoComprobante)}
@@ -957,7 +955,7 @@ padding: 0;
             alt="barcode"
           />
         </div>`
-  ) : ''}
+  ) : ""}
 </div>
       </section>
     </body>
@@ -1052,11 +1050,12 @@ function getPaymentMethods(tipoComprobante: string) {
          </div>
       </section>`;
   } else if (tipoComprobante.includes("NOTA DE")) {
-    return ""; 
+    return `<div style="height: 80px;"> </div>`; 
   } else {
-    return renderMediosDePago('cheque');
+    return `<div style="height: 80px;"> </div>`;
   }
 }
+
     function renderMediosDePago(medioDePago: keyof typeof mediosDePagoDetalles): string {
       let output = '';
       const detalles = mediosDePagoDetalles[medioDePago];
@@ -1136,7 +1135,6 @@ function getPaymentMethods(tipoComprobante: string) {
   }
   const medioDePagoSeleccionado = 'cheque';
 const paymentDetailsSection = renderMediosDePago(medioDePagoSeleccionado as keyof typeof mediosDePagoDetalles);
-console.log(paymentDetailsSection);
 
   return output;
 }
@@ -1165,8 +1163,7 @@ export async function ingresarAfip() {
   // });
 
   // const res = await afipCuit.CreateCert(_username, _password, alias);
-  // console.log("Certificado creado");
-  // console.log(res);
+
   const wsid = "wsfe";
 
   // // //ESTO CREA LA AUTORIZACION
@@ -1184,9 +1181,7 @@ export async function ingresarAfip() {
     // production: true,
   });
   // const serSer = await afip.CreateWSAuth(_username, _password, alias, wsid);
-  // console.log(serSer);
   // const salesPoints = await afip.ElectronicBilling.getSalesPoints();
-  // console.log(salesPoints);
   // const serSer = await afip.CreateWSAuth(username, password, alias, wsid);
 
   return afip;
@@ -1250,24 +1245,23 @@ function numeroALetras(numero: number | undefined): string {
     "veintinueve",
   ];
 
-  // Función para capitalizar la primera letra
+
   const capitalizarPrimeraLetra = (texto: string): string => {
     return texto.charAt(0).toUpperCase() + texto.slice(1);
   };
 
-  // Función para obtener los decimales de un número
-  const obtenerDecimales = (numero: number | undefined): string => {
-    if (!numero) return "00";
-    let numeroStr = numero.toString();
+  const obtenerDecimales = (numero: number | undefined): string | null => {
+    if (!numero) return null;
+    let numeroStr = numero.toFixed(2); 
     let partes = numeroStr.split(".");
     if (partes.length === 2) {
       let decimales = partes[1]!.substring(0, 2);
+      if (decimales === "00") return null;
       return decimales.padEnd(2, "0");
     }
-    return "00";
+    return null;
   };
 
-  // Función recursiva para convertir la parte entera en letras
   const convertirParteEntera = (numero: number): string => {
     if (numero === 0) return "cero";
     if (numero < 10) return unidades[numero]!;
@@ -1324,7 +1318,7 @@ function numeroALetras(numero: number | undefined): string {
     let resultadoParteEntera = convertirParteEntera(parteEntera);
 
     return (
-      capitalizarPrimeraLetra(resultadoParteEntera) + ` con ${parteDecimal}/100`
+      capitalizarPrimeraLetra(resultadoParteEntera) + `${parteDecimal ? ` con ${parteDecimal}/100`:""}`
     );
   }
 

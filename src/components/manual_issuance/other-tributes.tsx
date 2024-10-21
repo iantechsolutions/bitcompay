@@ -65,7 +65,7 @@ const OtherTributes = ({ otherTributes, Visualization, onAdd }: Props) => {
       {fields.map((fieldElement, index) => (
         <div
           key={fieldElement.id}
-          className="w-full grid grid-flow-col gap-5 justify-stretch items-center">
+          className="w-full flex gap-5 justify-stretch items-center">
           <ElementCard
             className="pb-0 border-[#bef0bb]"
             element={{

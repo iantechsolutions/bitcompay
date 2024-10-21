@@ -65,6 +65,7 @@ interface Props {
   obrasSociales?: any;
   marcas?: any;
   createdComprobante: Comprobante;
+  relatedComprobanteRecibo?: string;
   reloadPage: () => void;
 }
 
@@ -108,6 +109,7 @@ const confirmationPage = ({
   marcas,
   createdComprobante,
   reloadPage,
+  relatedComprobanteRecibo
 }: Props) => {
   // function generateComprobante(){
 
@@ -124,27 +126,29 @@ const confirmationPage = ({
     api.events.createByTypeOrg.useMutation();
   const { mutateAsync: updateComprobante } =
     api.comprobantes.approbate.useMutation();
+  const { mutateAsync: changeComprobanteState } =
+    api.comprobantes.updateStatus.useMutation();
   const router = useRouter();
   
   function handleApprove() {
     console.log("fcSeleccionada");
-    console.log(fcSeleccionada);
-    console.log("otherTributes");
-    console.log(otherTributes.getValues());
-    console.log("form");
-    console.log(form.getValues());
-    console.log("asociatedFCForm");
-    console.log(asociatedFCForm.getValues());
-    console.log("conceptsForm");
-    console.log(conceptsForm.getValues());
-    console.log("otherConcepts");
-    console.log(otherConcepts.getValues());
-    console.log("subTotal");
-    console.log(subTotal);
-    console.log("ivaTotal");
-    console.log(ivaTotal);
-    console.log("otherAttributes");
-    console.log(otherAttributes);
+    // console.log(fcSeleccionada);
+    // console.log("otherTributes");
+    // console.log(otherTributes.getValues());
+    // console.log("form");
+    // console.log(form.getValues());
+    // console.log("asociatedFCForm");
+    // console.log(asociatedFCForm.getValues());
+    // console.log("conceptsForm");
+    // console.log(conceptsForm.getValues());
+    // console.log("otherConcepts");
+    // console.log(otherConcepts.getValues());
+    // console.log("subTotal");
+    // console.log(subTotal);
+    // console.log("ivaTotal");
+    // console.log(ivaTotal);
+    // console.log("otherAttributes");
+    // console.log(otherAttributes);
   }
 
   async function handleDownload() {
@@ -177,7 +181,6 @@ const confirmationPage = ({
     const tributos = otherAttributes;
     let last_voucher = 0;
     let data = null;
-    console.log();
     let ivaFloat = (100 + parseFloat(ivaDictionary[Number(iva)] ?? "0")) / 100;
     const fecha = new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
       .toISOString()
@@ -356,6 +359,14 @@ const confirmationPage = ({
         });
       }
 
+
+
+      const updatedComprobanteEstado = await changeComprobanteState({
+        comprobanteId: relatedComprobanteRecibo ?? "",
+        status: "Pagada",
+      });
+
+
       // const eventOrg = createEventOrg({
       //   type: "REC",
       //   amount: createdComprobante.importe ?? 0,
@@ -385,10 +396,15 @@ const confirmationPage = ({
       ?.find((x: { id: string }) => x.id == fgId)
       ?.integrants.find((x: { isBillResponsible: any }) => x.isBillResponsible);
     const obraSocial = obrasSociales?.find((x: { id: string }) => x.id == osId);
+    
+    const pa = (billResponsible?.pa)
+    console.log("PA de Confirmation page es", pa);
+
+    const cbu = (billResponsible?.pa?.find((pa: { CBU: string }) => pa.CBU)?.CBU)
+    console.log("CBU de Confirmation page es", cbu);
 
     //reemplazar por comprobante creado
     if (createdComprobante) {
-      console.log(createdComprobante, "createdComprobante");
       const html = htmlBill(
         createdComprobante,
         company,
@@ -407,7 +423,7 @@ const confirmationPage = ({
         (billResponsible
           ? billResponsible?.postal_code?.cp
           : obraSocial?.cpData?.cp) ?? "",
-          sell_condition,
+        sell_condition,
         (billResponsible
           ? billResponsible?.fiscal_id_type
           : obraSocial?.fiscal_id_type) ?? "",
@@ -416,7 +432,10 @@ const confirmationPage = ({
           : obraSocial?.fiscal_id_number?.toString()) ?? "",
         (billResponsible
           ? billResponsible?.afip_status
-          : obraSocial?.afip_status) ?? ""
+          : obraSocial?.afip_status) ?? "",
+        (billResponsible
+            ? billResponsible?.pa?.find((pa: { CBU: string }) => pa.CBU)?.CBU ?? ""
+            : "" ) ?? "",
       );
       const options = {
         width: 8, // Ancho de pagina en pulgadas. Usar 3.1 para ticket

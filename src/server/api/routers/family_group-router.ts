@@ -131,6 +131,7 @@ export const family_groupsRouter = createTRPCRouter({
         integrants: {
           with: {
             postal_code: true,
+            pa: true,
           },
         },
         cc: true,

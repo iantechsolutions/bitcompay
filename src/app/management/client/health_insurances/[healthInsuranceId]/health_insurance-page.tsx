@@ -200,10 +200,10 @@ export default function HealthInsurancePage(props: {
         <div>
           <Accordion className="w-full" type="multiple">
             <AccordionItem value="item-1">
-              <AccordionTrigger className="font-semibold" name="">
+              <AccordionTrigger className="font-semibold bg-white px-0" name="">
                 Datos básicos
               </AccordionTrigger>
-              <AccordionContent className="pt-6 pl-5">
+              <AccordionContent className="pt-6 pl-7">
                 <h3 className="font-bold text-md mb-4">Datos Fiscales</h3>
                 <div className="grid grid-cols-4 gap-6 p-3 rounded-md">
                   {Object.entries(fiscalData).map(([key, value]) => (
