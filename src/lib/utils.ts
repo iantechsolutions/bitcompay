@@ -879,15 +879,12 @@ padding: 0;
 		<p style="font-size:12px; text-align:right; margin-right:0; padding-right:0;">Sub-total: ${formatNumberAsCurrency(
       subtotal ?? 0
     )}</p>
-    <p style="font-size:12px; text-align:right;  margin-right:0; padding-right:0; padding-top:5px;">IVA: ${formatNumberAsCurrency(
-      iva ?? 0
-    )}</p>
-		${totalTributes > 0
+  ${iva > 0 ? `<p style="font-size:12px; text-align:right;  margin-right:0; padding-right:0; padding-top:5px;">IVA: ${formatNumberAsCurrency(iva)}</p>` : ""}
+	${totalTributes > 0
         ? `<p style="font-size:12px; text-align:right;  margin-right:0; padding-right:0; padding-top:5px;">Otros Tributos: ${formatNumberAsCurrency(
             totalTributes ?? 0
           )}</p>`
-        : ""
-    }
+        : "" }
     ${saldoAfavor && saldoAfavor.total > 0 ?
       `<p style="font-size:12px; text-align:right; margin-right:0; padding-right:0; padding-top:5px;">Pagos a cuenta: ${formatNumberAsCurrency(
         saldoAfavor.total)} </p>`: ""}
