@@ -125,7 +125,7 @@ export default function AddDate({
               </div>
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex justify-self-start">
             <Button type="button" onClick={() => Save()}>
               Guardar fechas
             </Button>

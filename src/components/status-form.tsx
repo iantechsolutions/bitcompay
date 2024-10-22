@@ -91,7 +91,9 @@ export default function StatusForm({
                             </FormItem>
                         )}
                     />
-                    <Button type='submit'>{status ? 'Guardar cambios' : 'Añadir estado'}</Button>
+                    <Button type='submit'>
+                        {status ? 'Guardar cambios' : 'Añadir estado'}
+                        </Button>
                 </form>
             </Form>
         </>
