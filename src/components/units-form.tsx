@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { asTRPCError } from "~/lib/errors";
 import type { RouterOutputs } from "~/trpc/shared";
+import { PlusCircleIcon } from "lucide-react";
 type Inputs = {
   description: string;
 };
@@ -84,7 +85,9 @@ export default function UnitsForm({
                 </FormItem>
               )}
             />
-            <Button type="submit">
+            <Button type="submit" className="flex rounded-full w-fit justify-self-center bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#DEF5DD]"
+            >
+                  <PlusCircleIcon className="h-4 mr-1 stroke-1" />
               {unit ? unit.description : "Crear unidad de negocio"}
             </Button>
           </form>

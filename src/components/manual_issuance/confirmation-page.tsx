@@ -523,7 +523,7 @@ const confirmationPage = ({
 
           <>
             <Button
-              className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
+              className="h-7 bg-[#BEF0BB] hover:bg-[#DEF5DD] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
               onClick={() => {
                 // handleCreate();
                 handleAFIP();
@@ -548,7 +548,7 @@ const confirmationPage = ({
       {finishedAFIP && (
         <div className=" self-start flex gap-1">
           <Button
-            className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
+            className="h-7 bg-[#BEF0BB] hover:bg-[#DEF5DD] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 shadow-none"
             onClick={() => {
               // handleCreate();
               handleDownload();

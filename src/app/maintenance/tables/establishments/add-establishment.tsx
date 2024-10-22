@@ -104,9 +104,14 @@ export default function AddEstablishment(props: AddEstablishmentProps) {
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>
-        <PlusCircleIcon className="mr-2" />
-        Agregar Establecimiento
+      <Button onClick={() => setOpen(true)}
+        className="rounded-full gap-1 px-4 py-5 text-base text-[#3E3E3E] bg-[#BEF0BB] hover:bg-[#DEF5DD]">
+        {isLoading ? (
+                   <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
+                 ) : (
+                   <PlusCircleIcon className="h-5 mr-1 stroke-1" />
+                 )}    
+      Agregar Establecimiento
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[425px]">
@@ -151,9 +156,15 @@ export default function AddEstablishment(props: AddEstablishmentProps) {
             )}
           </div>
 
-          <DialogFooter>
-            <Button onClick={handleCreate} disabled={isLoading}>
-              {isLoading && <Loader2Icon />}
+          <DialogFooter className="sm:justify-center">
+            <Button className="flex rounded-full w-fit justify-self-center bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#DEF5DD]"
+                disabled={isLoading}
+                onClick={handleCreate}>
+                {isLoading ? (
+                  <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
+                ) : (
+                  <PlusCircleIcon className="h-4 mr-1 stroke-1" />
+                )}
               Crear
             </Button>
           </DialogFooter>

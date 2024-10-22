@@ -30,6 +30,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
+import CheckmarkCircle02Icon from "~/components/icons/checkmark-circle-02-stroke-rounded";
 
 export default function StatusPage({
   status,
@@ -60,12 +61,12 @@ export default function StatusPage({
       <section className="space-y-2">
         <div className="flex justify-between">
           <Title>{status.description}</Title>
-          <Button disabled={isLoading} onClick={handleChange}>
+          <Button disabled={isLoading} onClick={handleChange} className="h-7 bg-[#BEF0BB] hover:bg-[#DEF5DD] text-[#3e3e3e] font-medium text-base rounded-full py-5 px-6"
+          >
             {isLoading ? (
               <Loader2 className="mr-2 animate-spin" />
             ) : (
-              <CheckIcon className="mr-2" />
-            )}
+<CheckmarkCircle02Icon className="h-5 mr-2"/>            )}
             Aplicar
           </Button>
         </div>

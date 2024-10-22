@@ -1,5 +1,5 @@
 "use client";
-import { Loader2Icon, CheckIcon } from "lucide-react";
+import { Loader2Icon, CheckIcon, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { MouseEventHandler, useState } from "react";
 import { toast } from "sonner";
@@ -37,6 +37,7 @@ import {
 import { asTRPCError } from "~/lib/errors";
 import { Establishment } from "~/server/db/schema";
 import { api } from "~/trpc/react";
+import CheckmarkCircle02Icon from "~/components/icons/checkmark-circle-02-stroke-rounded";
 
 type EstablishmentPageProps = {
   establishment: Establishment;
@@ -85,8 +86,13 @@ export default function EstablishmentPage({
       <section className="space-y-2">
         <div className="flex justify-between">
           <Title>Editar Establecimiento</Title>
-          <Button disabled={isLoading} onClick={handleUpdate}>
-            <CheckIcon className="mr-2" />
+          <Button disabled={isLoading} onClick={handleUpdate} className="h-7 bg-[#BEF0BB] hover:bg-[#DEF5DD] text-[#3e3e3e] font-medium text-base rounded-full py-5 px-6"
+          >
+             {isLoading ? (
+              <Loader2 className="mr-2 animate-spin" />
+            ) : (
+              <CheckmarkCircle02Icon className="h-5 mr-2"/>
+            )}
             Aplicar
           </Button>
         </div>

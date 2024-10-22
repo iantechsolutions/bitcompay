@@ -785,7 +785,7 @@ export default function Page() {
               <p className=" text-lg font-semibold">Receptor</p>
               {/* <div className="pb-2">
                 <Button
-                  className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 mr-3 shadow-none"
+                  className="h-7 bg-[#BEF0BB] hover:bg-[#DEF5DD] text-[#3e3e3e] font-medium-medium text-sm rounded-2xl py-4 px-4 mr-3 shadow-none"
                   // onClick={() => setOpen(true)}
                   disabled={loading}
                   onClick={generateComprobante}>
@@ -900,7 +900,7 @@ export default function Page() {
             />
             <Button
               variant="outline"
-              className="flex justify-between px-4 py-4 rounded-full self-end bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e]"
+              className="flex justify-between px-4 py-4 rounded-full self-end bg-[#BEF0BB] hover:bg-[#DEF5DD] text-[#3e3e3e]"
               onClick={() => {
                 generateComprobante();
               }}

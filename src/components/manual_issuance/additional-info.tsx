@@ -34,6 +34,7 @@ import {
   otherConceptsForm,
 } from "~/lib/types/app";
 import { Label } from "../ui/label";
+import { PlusCircleIcon } from "lucide-react";
 
 type AdditionalInfoProps = {
   onValueChange?: () => void;
@@ -116,7 +117,10 @@ export default function AdditionalInfoCard({
                   iva: IVA_TASA, // Para mostrar como porcentaje
                   total: 0,
                 })
-              }>
+              }
+              className="flex rounded-full w-fit justify-self-center bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#DEF5DD]"
+            >
+              <PlusCircleIcon className="h-4 mr-1 stroke-1" />
               Agregar concepto
             </Button>
           </div>
@@ -269,8 +273,10 @@ export default function AdditionalInfoCard({
                   nroComprobante: "",
                   dateEmision: new Date(),
                   id: "",
-                })
-              }>
+                })}
+              className="flex rounded-full w-fit justify-self-center bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#DEF5DD]"
+            >
+              <PlusCircleIcon className="h-4 mr-1 stroke-1" />
               Agregar comprobante
             </Button>
           </div>
@@ -550,8 +556,10 @@ export default function AdditionalInfoCard({
               <Button
                 onClick={() =>
                   otherConceptsAppend({ description: "", importe: 0 })
-                }>
-                Agregar concepto
+                }className="flex rounded-full w-fit justify-self-center bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#DEF5DD]"
+                >
+                  <PlusCircleIcon className="h-4 mr-1 stroke-1" />
+                  Agregar concepto
               </Button>
             </div>
           )}

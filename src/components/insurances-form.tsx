@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { asTRPCError } from "~/lib/errors";
 import type { RouterOutputs } from "~/trpc/shared";
+import { PlusCircleIcon } from "lucide-react";
 type Inputs = {
   name: string;
 };
@@ -87,7 +88,9 @@ export default function InsurancesForm({
               </FormItem>
             )}
           />
-          <Button type="submit">
+          <Button type="submit" className="flex rounded-full w-fit justify-self-center bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#DEF5DD]"
+            >
+                  <PlusCircleIcon className="h-4 mr-1 stroke-1" />
             {insurance ? "Guardar cambios" : "Crear unidad de negocio"}
           </Button>
         </form>

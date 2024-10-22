@@ -98,7 +98,7 @@ export default function EditCompany() {
   return (
     <>
       <Button onClick={() => setOpen(true)}>
-        <PlusCircleIcon className="mr-2" /> Editar datos de la compañia
+        <PlusCircleIcon className="h-5 mr-1 stroke-1" /> Editar datos de la compañia
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[425px]">

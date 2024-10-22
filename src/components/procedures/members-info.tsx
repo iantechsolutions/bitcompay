@@ -9,7 +9,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon, PlusCircleIcon } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -144,7 +144,10 @@ export default function AddMembers(props: AddMembersProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="border-2">
+        <Button variant="outline" 
+        className="flex rounded-full w-fit justify-self-center bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#DEF5DD]"
+            >
+              <PlusCircleIcon className="h-4 mr-1 stroke-1" />
           Agregar miembro
         </Button>
       </DialogTrigger>
@@ -655,7 +658,9 @@ export default function AddMembers(props: AddMembersProps) {
                 )}
               />
             </div>
-            <Button type="submit" className="w-[150px] self-end">
+            <Button type="submit" className="flex rounded-full w-fit justify-self-center bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#DEF5DD]"
+            >
+             <PlusCircleIcon className="h-4 mr-1 stroke-1" />
               Agregar Miembro
             </Button>
           </form>

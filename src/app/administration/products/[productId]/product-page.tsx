@@ -3,6 +3,7 @@ import { CheckIcon, Loader2, Loader2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type MouseEventHandler, useState } from "react";
 import { toast } from "sonner";
+import CheckmarkCircle02Icon from "~/components/icons/checkmark-circle-02-stroke-rounded";
 import LayoutContainer from "~/components/layout-container";
 import { List, ListTile } from "~/components/list";
 import { Title } from "~/components/title";
@@ -133,11 +134,12 @@ export default function ProductPage({
       <section className="space-y-2">
         <div className="flex justify-between">
           <Title>{product.name}</Title>
-          <Button disabled={isLoading} onClick={handleChange}>
+          <Button disabled={isLoading} onClick={handleChange} className="h-7 bg-[#BEF0BB] hover:bg-[#DEF5DD] text-[#3e3e3e] font-medium text-base rounded-full py-5 px-6"
+          >
             {isLoading ? (
               <Loader2 className="mr-2 animate-spin" />
             ) : (
-              <CheckIcon className="mr-2" />
+              <CheckmarkCircle02Icon className="h-5 mr-2"/>
             )}
             Aplicar
           </Button>

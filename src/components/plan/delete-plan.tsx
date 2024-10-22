@@ -61,7 +61,7 @@ export default function DeleteButton(props: { id: string }) {
           <div className="w-full flex justify-center">
             <Button
               type="submit"
-              className="rounded-full bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#BEF0BB]"
+              className="rounded-full bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#DEF5DD]"
               disabled={isLoading || error}
               onClick={handleDelete}>
               {isLoading && (

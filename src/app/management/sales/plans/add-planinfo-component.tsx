@@ -144,11 +144,11 @@ export default function AddPlanInfoComponent({
           onChange={(e) => setDescripcion(e.target.value)}
         />
       </div>
-
+      <div className="flex justify-center">
       <Button
         onClick={handleSubmit}
         disabled={isCreating || isUpdating}
-        className="mt-7 font-medium mb-2 rounded-full w-fit justify-self-right bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3E3E3E]">
+        className="mt-7 font-medium mb-2 rounded-full w-fit justify-self-center bg-[#BEF0BB] hover:bg-[#DEF5DD] text-[#3E3E3E]">
         {isCreating || isUpdating ? (
           <Loader2Icon className="mr-2 animate-spin" size={20} />
         ) : (
@@ -156,12 +156,13 @@ export default function AddPlanInfoComponent({
             {planId ? (
               <Edit02Icon className="mr-2 h-4" />
             ) : (
-              <CirclePlus className="mr-2" />
+              <PlusCircleIcon className="h-4 mr-1 stroke-1" />
             )}
           </>
         )}
         {planId ? "Actualizar plan" : "Agregar plan"}
       </Button>
+      </div>
     </div>
   );
 }
