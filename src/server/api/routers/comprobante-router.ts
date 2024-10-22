@@ -170,7 +170,7 @@ async function createNextVoucher(
       e?.toString().startsWith("Error: (502) Error interno de base de datos") ||
       e?.toString().startsWith("Error: (10016)")
     ) {
-      ({res,result,error} = await createNextVoucher(data, afip));
+      ({ res, result, error } = await createNextVoucher(data, afip));
     } else {
       result = "Error";
       error = e?.toString() ?? "Desconocido";
@@ -469,45 +469,42 @@ async function approbatecomprobante(liquidationId: string) {
             comprobanteEstado = temp.result;
             afipError = temp.error ?? "";
             lastVoucher = temp.res?.voucherNumber ?? 0;
-            if(comprobanteEstado != "Error"){
-
-            
-            const ccs = await db.query.currentAccount.findMany({
-              with: {
-                events: true,
-              },
-            });
-            const cc = ccs.find(
-              (x) => x.id == comprobante.family_group?.cc?.id
-            );
-            if (cc?.events && cc?.events.length > 0) {
-              lastEventAmount = cc?.events.reduce((prev, current) => {
-                return new Date(prev.createdAt) > new Date(current.createdAt)
-                  ? prev
-                  : current;
-              }).current_amount;
-            }
-            await db.insert(schema.events).values({
-              current_amount: lastEventAmount + comprobante.importe,
-              description: "NC",
-              event_amount: comprobante.importe,
-              currentAccount_id: cc?.id,
-              type: "NC",
-              comprobante_id: comprobante.id,
-            });
-            await preparedUpdatePayment.execute({
-              comprobanteId: comprobante?.previous_facturaId,
-              statusId: statusCancelado?.id,
-            });
-            await db
-              .update(schema.comprobantes)
-              .set({
-                estado: comprobanteEstado,
-                nroComprobante: lastVoucher,
-              })
-              .where(eq(schema.comprobantes.id, comprobante.id));
-             }
-            else{
+            if (comprobanteEstado != "Error") {
+              const ccs = await db.query.currentAccount.findMany({
+                with: {
+                  events: true,
+                },
+              });
+              const cc = ccs.find(
+                (x) => x.id == comprobante.family_group?.cc?.id
+              );
+              if (cc?.events && cc?.events.length > 0) {
+                lastEventAmount = cc?.events.reduce((prev, current) => {
+                  return new Date(prev.createdAt) > new Date(current.createdAt)
+                    ? prev
+                    : current;
+                }).current_amount;
+              }
+              await db.insert(schema.events).values({
+                current_amount: lastEventAmount + comprobante.importe,
+                description: "NC",
+                event_amount: comprobante.importe,
+                currentAccount_id: cc?.id,
+                type: "NC",
+                comprobante_id: comprobante.id,
+              });
+              await preparedUpdatePayment.execute({
+                comprobanteId: comprobante?.previous_facturaId,
+                statusId: statusCancelado?.id,
+              });
+              await db
+                .update(schema.comprobantes)
+                .set({
+                  estado: comprobanteEstado,
+                  nroComprobante: lastVoucher,
+                })
+                .where(eq(schema.comprobantes.id, comprobante.id));
+            } else {
               await db
                 .update(schema.comprobantes)
                 .set({
@@ -521,7 +518,8 @@ async function approbatecomprobante(liquidationId: string) {
               .update(schema.comprobantes)
               .set({
                 estado: "Error",
-                afipError: "El comprobante anterior ya tenia un error de creacion",
+                afipError:
+                  "El comprobante anterior ya tenia un error de creacion",
               })
               .where(eq(schema.comprobantes.id, comprobante.id));
           }
@@ -683,7 +681,7 @@ async function approbatecomprobante(liquidationId: string) {
               billResponsible?.fiscal_id_type ?? "",
               billResponsible?.fiscal_id_number ?? "",
               billResponsible?.afip_status ?? "",
-              billResponsible?.pa?.find((x) => x.CBU)?.CBU ?? "",
+              billResponsible?.pa?.find((x) => x.CBU)?.CBU ?? ""
             );
           } catch (e) {
             console.log("Error en htmlBill");
@@ -1356,7 +1354,15 @@ export const comprobantesRouter = createTRPCRouter({
     .input(
       z.object({
         comprobanteId: z.string(),
-        status: z.enum(["Generada","Pendiente","Pagada","Parcial","Anulada","Apertura","Error"]),
+        status: z.enum([
+          "Generada",
+          "Pendiente",
+          "Pagada",
+          "Parcial",
+          "Anulada",
+          "Apertura",
+          "Error",
+        ]),
       })
     )
     .mutation(async ({ input }) => {
@@ -1499,25 +1505,31 @@ export async function preparateComprobante(
       const tipoComprobante = getBillingData(billResponsible, grupo);
 
       const tipoDocumento = idDictionary[billResponsible?.fiscal_id_type ?? ""];
-      console.log("aportes GF")
+      console.log("aportes GF");
       console.log(grupo.integrants.flatMap((part) => part.aportes_os));
-      
-      console.log("dateDesde",dateDesde);
-      console.log("dateHasta",dateHasta);
+
+      console.log("dateDesde", dateDesde);
+      console.log("dateHasta", dateHasta);
       const fechaDesde = new Date(dateHasta?.getTime() ?? 0);
-      const mesActual = dateHasta?.getMonth() ?? 0
-      fechaDesde?.setMonth((mesActual));
+      const mesActual = dateHasta?.getMonth() ?? 0;
+      fechaDesde?.setMonth(mesActual);
       console.log("comparisonMonth", fechaDesde?.getMonth());
       console.log("comparisonYear", fechaDesde?.getFullYear());
-      console.log("aportes", grupo.integrants.flatMap((part) => part.aportes_os))
+      console.log(
+        "aportes",
+        grupo.integrants.flatMap((part) => part.aportes_os)
+      );
       const totalAportes = grupo.integrants
         .flatMap((part) => part.aportes_os)
         .filter((a) => {
           if (!a.process_date || !fechaDesde) return false;
-          console.log("contributionMonth", ((a.process_date?.getMonth() ?? 0) + 1));
+          console.log(
+            "contributionMonth",
+            (a.process_date?.getMonth() ?? 0) + 1
+          );
           console.log("contributionYear", a.process_date?.getFullYear());
           return (
-            ((a.process_date?.getMonth() ?? 0) + 1) === fechaDesde?.getMonth() &&
+            (a.process_date?.getMonth() ?? 0) + 1 === fechaDesde?.getMonth() &&
             a.process_date?.getFullYear() === fechaDesde?.getFullYear()
           );
         })
@@ -1714,15 +1726,15 @@ async function calculateAmount(
   saldo: number,
   totalAportes: number
 ) {
-  console.log("interes", interest)
-  console.log("ivaFloat", ivaFloat)
-  console.log("iva", iva)
-  console.log("bonificacion", bonificacion)
-  console.log("abono", abono)
-  console.log("diferencial", diferencial)
-  console.log("previous_bill", previous_bill)
-  console.log("saldo", saldo)
-  console.log("totalAportes", totalAportes)
+  console.log("interes", interest);
+  console.log("ivaFloat", ivaFloat);
+  console.log("iva", iva);
+  console.log("bonificacion", bonificacion);
+  console.log("abono", abono);
+  console.log("diferencial", diferencial);
+  console.log("previous_bill", previous_bill);
+  console.log("saldo", saldo);
+  console.log("totalAportes", totalAportes);
   let amount = 0;
   let ivaCodigo = null;
   const { modo } = grupo;
@@ -1762,7 +1774,7 @@ async function calculateAmount(
   //
   // }
 
-  if (amount <= 0){
+  if (amount <= 0) {
     amount = 0;
   }
 

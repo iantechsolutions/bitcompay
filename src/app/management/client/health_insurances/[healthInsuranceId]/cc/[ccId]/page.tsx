@@ -26,11 +26,17 @@ export default function CCDetail(props: {
     api.healthInsurances.getWithComprobantes.useQuery({
       healthInsuranceId: props.params.healthInsuranceId,
     });
-  const lastEvent = events?.reduce((prev, current) => {
-    return new Date(prev.createdAt) > new Date(current.createdAt)
-      ? prev
-      : current;
-  });
+
+  let lastEvent;
+
+  if (events && events.length > 0) {
+    lastEvent = events.reduce((prev, current) => {
+      return new Date(prev.createdAt) > new Date(current.createdAt)
+        ? prev
+        : current;
+    });
+  }
+
   const comprobantes = healthInsurance?.comprobantes;
   let lastComprobante;
   if (comprobantes && comprobantes?.length! > 0) {
@@ -67,11 +73,11 @@ export default function CCDetail(props: {
     )?.amount;
   }
 
-  let saldo_a_pagar = (FCTotal ?? 0) - (saldo_a_favor ?? 0)
-  if(saldo_a_pagar < 0){
+  let saldo_a_pagar = (FCTotal ?? 0) - (saldo_a_favor ?? 0);
+  if (saldo_a_pagar < 0) {
     saldo_a_pagar = 0;
   }
-  
+
   const comprobantesTable: RouterOutputs["comprobantes"]["getByLiquidation"] =
     [];
   if (comprobanteFCReciente) {
@@ -163,7 +169,10 @@ export default function CCDetail(props: {
     const blob = new Blob([excelBuffer], {
       type: "application/octet-stream",
     });
-    saveAs(blob, `movimientos-cc-${healthInsurance?.identificationNumber}.xlsx`);
+    saveAs(
+      blob,
+      `movimientos-cc-${healthInsurance?.identificationNumber}.xlsx`
+    );
   }
   return (
     <LayoutContainer>
@@ -184,8 +193,7 @@ export default function CCDetail(props: {
                     : lastEvent.current_amount < 0
                     ? "text-[#EB2727]"
                     : "text-black"
-                }`}
-              >
+                }`}>
                 {new Intl.NumberFormat("es-AR", {
                   style: "currency",
                   currency: "ARS",
@@ -214,8 +222,7 @@ export default function CCDetail(props: {
           className=" text-base px-16 py-6 mt-5 gap-3 text-[#3e3e3e] rounded-full font-medium"
           onClick={async () => {
             await handleExport();
-          }}
-        >
+          }}>
           <Download02Icon />
           Exportar
         </Button>

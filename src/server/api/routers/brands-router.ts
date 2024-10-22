@@ -89,6 +89,7 @@ export const brandsRouter = createTRPCRouter({
         utility: z.string().optional(),
         concept: z.string().optional(),
         code: z.string().optional(),
+        pv: z.string().optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -117,6 +118,7 @@ export const brandsRouter = createTRPCRouter({
         utility: z.string().optional(),
         companiesId: z.set(z.string()),
         concept: z.string().optional(),
+        pv: z.string().optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -131,6 +133,7 @@ export const brandsRouter = createTRPCRouter({
           bill_type: input.billType,
           concept: input.concept,
           utility: input.utility,
+          pv: input.pv,
         })
         .where(eq(schema.brands.id, input.brandId));
 
@@ -154,6 +157,7 @@ export const brandsRouter = createTRPCRouter({
         iva: z.string().optional(),
         billType: z.string().optional(),
         concept: z.string().optional(),
+        pv: z.string().optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -166,6 +170,7 @@ export const brandsRouter = createTRPCRouter({
           iva: input.iva,
           bill_type: input.billType,
           concept: input.concept,
+          pv: input.pv,
         })
         .where(eq(schema.brands.id, input.brandId));
     }),

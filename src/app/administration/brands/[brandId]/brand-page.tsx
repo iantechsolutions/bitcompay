@@ -67,6 +67,7 @@ export default function BrandPage({
   const [reducedDescription, setReducedDescription] = useState(
     brand.redescription
   );
+  const [pv, setPv] = useState(brand.pv ?? "");
   const [relCompanies, setRelCompanies] = useState(new Set(relatedCompanies));
 
   const { mutateAsync: changeBrand, isLoading } =
@@ -98,6 +99,7 @@ export default function BrandPage({
     if (!reducedDescription) errors.push("Descripción Reducida");
     if (!concept) errors.push("Concepto");
     if (!iva) errors.push("IVA");
+    if (!pv) errors.push("PV");
     // if (!code) errors.push("Código");
     // if (!billType) errors.push("Tipo de Factura");
 
@@ -133,6 +135,7 @@ export default function BrandPage({
         utility,
         brandId: brand.id,
         concept,
+        pv,
       });
       toast.success("Se han guardado los cambios");
       router.refresh();
@@ -221,13 +224,13 @@ export default function BrandPage({
                       onChange={(e) => setReducedDescription(e.target.value)}
                     />
                   </div>
-                  <div className="col-span-2">
+
+                  <div className="col-span-1">
                     <Label htmlFor="concept">Concepto</Label>
                     <Select
                       onValueChange={(e) => setConcept(e)}
-                      value={concept ?? ""}
-                    >
-                      <SelectTrigger className="w-[180px] font-bold">
+                      value={concept ?? ""}>
+                      <SelectTrigger className="w-full font-bold">
                         <SelectValue placeholder="Seleccionar concepto..." />
                       </SelectTrigger>
                       <SelectContent>
@@ -236,6 +239,17 @@ export default function BrandPage({
                         <SelectItem value="3">Productos y Servicios</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+                  <div className="col-span-1">
+                    <Label htmlFor="pv">Punto de venta</Label>
+                    <Input
+                      id="pv"
+                      placeholder="0"
+                      value={pv}
+                      type="number"
+                      onChange={(e) => setPv(e.target.value)}
+                      required
+                    />
                   </div>
                   <div className="col-span-3">
                     <Label htmlFor="code">
@@ -388,8 +402,7 @@ function Deletebrand(props: { brandId: string }) {
           <AlertDialogAction
             className="bg-red-500 active:bg-red-700 hover:bg-red-600"
             onClick={handleDelete}
-            disabled={isLoading}
-          >
+            disabled={isLoading}>
             Eliminar
           </AlertDialogAction>
         </AlertDialogFooter>

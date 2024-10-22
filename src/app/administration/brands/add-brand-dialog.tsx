@@ -36,6 +36,7 @@ export function AddBrandDialog() {
 
   const [code, setCode] = useState("");
   const [concept, setConcepto] = useState("");
+  const [pv, setPv] = useState("");
 
   // const [billType, setBillType] = useState<string>("");
 
@@ -51,7 +52,7 @@ export function AddBrandDialog() {
 
   async function handleCreate() {
     try {
-      if (!name || !code || !iva || !reducedDescription) {
+      if (!name || !code || !iva || !reducedDescription || !pv) {
         setError("Todos los campos son obligatorios.");
         return;
       }
@@ -65,6 +66,7 @@ export function AddBrandDialog() {
         utility,
         redescription: reducedDescription,
         concept,
+        pv,
       });
 
       toast.success("Marca creada correctamente");
@@ -114,22 +116,35 @@ export function AddBrandDialog() {
                 required
               />
             </div> */}
-            <div>
-              <Label htmlFor="concept">Concepto</Label>
-              <Select
-                onValueChange={(e) => setConcepto(e)}
-                value={concept ?? ""}
-              >
-                <SelectTrigger className="w-[180px] font-bold">
-                  <SelectValue placeholder="Seleccionar concepto..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">Productos</SelectItem>
-                  <SelectItem value="2">Servicios</SelectItem>
-                  <SelectItem value="3">Productos y Servicios</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="flex">
+              <div className="w-[250px] font-bold">
+                <Label htmlFor="concept">Concepto</Label>
+                <Select
+                  onValueChange={(e) => setConcepto(e)}
+                  value={concept ?? ""}>
+                  <SelectTrigger className="w-[180px] font-bold">
+                    <SelectValue placeholder="Seleccionar concepto..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">Productos</SelectItem>
+                    <SelectItem value="2">Servicios</SelectItem>
+                    <SelectItem value="3">Productos y Servicios</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="w-[250px] font-bold">
+                <Label htmlFor="pv">Punto de venta</Label>
+                <Input
+                  id="pv"
+                  placeholder="0"
+                  type="number"
+                  value={pv}
+                  onChange={(e) => setPv(e.target.value)}
+                  required
+                />
+              </div>
             </div>
+
             {/* Código de marca */}
             <div className="flex">
               <div className="w-[250px] font-bold">

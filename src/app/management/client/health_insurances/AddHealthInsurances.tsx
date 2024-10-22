@@ -119,9 +119,9 @@ export function AddHealthInsurances(props: {
   const [excelEmployerDocument, setExcelEmployerDocument] = useState(
     OS?.excelDocument ?? ""
   );
-  const [excelSupportPeriod, setExcelSupportPeriod] = useState(
-    OS?.excelSupportPeriod ?? ""
-  );
+  // const [excelSupportPeriod, setExcelSupportPeriod] = useState(
+  //   OS?.excelSupportPeriod ?? ""
+  // );
 
   const [excelContributionperiod, setExcelContributionperiod] = useState(
     OS?.excelContributionperiod ?? undefined
@@ -212,7 +212,7 @@ export function AddHealthInsurances(props: {
         excelDocument: excelDocument,
         excelAmount: excelAmount,
         excelEmployerDocument: excelEmployerDocument,
-        excelSupportPeriod: excelSupportPeriod,
+        // excelSupportPeriod: excelSupportPeriod,
         excelContributionperiod: excelContributionperiod,
         // origen: origen,
 
@@ -285,7 +285,7 @@ export function AddHealthInsurances(props: {
         excelDocument: excelDocument,
         excelAmount: excelAmount,
         excelEmployerDocument: excelEmployerDocument,
-        excelSupportPeriod: excelSupportPeriod,
+        // excelSupportPeriod: excelSupportPeriod,
         excelContributionperiod: excelContributionperiod,
         // origen: origen,
         // initialValue: initialValue,
@@ -871,7 +871,7 @@ export function AddHealthInsurances(props: {
                 onChange={(e) => setExcelContributionperiod(e.target.value)}
               />
             </div>
-            <div>
+            {/* <div>
               <Label
                 htmlFor="excelSupportPeriod"
                 className="text-xs text-gray-500">
@@ -884,7 +884,7 @@ export function AddHealthInsurances(props: {
                 value={excelSupportPeriod}
                 onChange={(e) => setExcelSupportPeriod(e.target.value)}
               />
-            </div>
+            </div> */}
             {/* <div>
               <Label htmlFor="type" className="text-xs text-gray-500">
                 Tipo

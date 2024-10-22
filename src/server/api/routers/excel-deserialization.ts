@@ -48,7 +48,7 @@ export const excelDeserializationRouter = createTRPCRouter({
           contribution_date: z.string(),
           excelAmount: z.string(),
           employer_document_number: z.string(),
-          support_date: z.string(),
+          // support_date: z.string(),
         }),
         // fecha_soporte: z.date().optional(),
         // contribution_date: z.date().optional(),
@@ -96,7 +96,7 @@ export const excelDeserializationRouter = createTRPCRouter({
           contribution_date: z.string(),
           excelAmount: z.string(),
           employer_document_number: z.string(),
-          support_date: z.string(),
+          // support_date: z.string(),
         }),
         fecha_soporte: z.date().optional(),
         contribution_date: z.date().optional(),
@@ -124,13 +124,6 @@ export const excelDeserializationRouter = createTRPCRouter({
             });
           }
 
-          if (!row.support_date && !input.fecha_soporte) {
-            throw new TRPCError({
-              code: "BAD_REQUEST",
-              message: "La fecha de soporte es requerida",
-            });
-          }
-
           const existingAffiliate = await db.query.integrants.findFirst({
             where: and(
               eq(schema.integrants.fiscal_id_number, row.cuil),
@@ -150,7 +143,7 @@ export const excelDeserializationRouter = createTRPCRouter({
                 id_affiliate: existingAffiliate?.id ?? "",
                 employer_document_number: row.employer_document_number ?? "",
                 process_date: new Date(),
-                support_date: row.support_date ?? input.fecha_soporte ?? null,
+                // support_date: row.support_date ?? input.fecha_soporte ?? null,
                 contribution_date:
                   row.contribution_date ?? input.contribution_date ?? null,
               })

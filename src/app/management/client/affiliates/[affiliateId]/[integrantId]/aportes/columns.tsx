@@ -27,7 +27,7 @@ export type TableRecord = {
   cuil: string;
   "Fecha de proceso": Date | null;
   "Fecha de contribución": Date | null;
-  "Fecha de soporte": Date | null;
+  // "Fecha de soporte": Date | null;
 };
 
 export const columns: ColumnDef<TableRecord>[] = [
@@ -67,14 +67,14 @@ export const columns: ColumnDef<TableRecord>[] = [
         : "-";
     },
   },
-  {
-    accessorKey: "Fecha de soporte",
-    header: "Fecha de soporte",
-    cell: ({ row }) => {
-      const supportDate = row.getValue("Fecha de soporte") as Date | null;
-      return supportDate ? dayjs(supportDate).format("DD/MM/YYYY") : "-";
-    },
-  },
+  // {
+  //   accessorKey: "Fecha de soporte",
+  //   header: "Fecha de soporte",
+  //   cell: ({ row }) => {
+  //     const supportDate = row.getValue("Fecha de soporte") as Date | null;
+  //     return supportDate ? dayjs(supportDate).format("DD/MM/YYYY") : "-";
+  //   },
+  // },
   // {
   //   id: "actions",
   //   cell: ({ row }) => {

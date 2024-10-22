@@ -19,8 +19,8 @@ type propsContentTable = {
 };
 
 export default function AportesTable(props: propsContentTable) {
-  const {aportesOS} = props;
-  const healthinsurances = api.healthInsurances.list.useQuery().data
+  const { aportesOS } = props;
+  const healthinsurances = api.healthInsurances.list.useQuery().data;
 
   return (
     <Table>
@@ -31,28 +31,25 @@ export default function AportesTable(props: propsContentTable) {
         <TableHead className="pr-1 text-left">Monto</TableHead>
       </TableHeader>{" "}
       {aportesOS?.map((aporte) => {
-          const periodo = aporte.support_date ?? 0;
-          const cuit = aporte.employer_document_number ?? 0;
-          const os = healthinsurances?.find(x=>x.id == aporte.healthInsurances_id);
-          const amount = Number(aporte.amount) ?? 0;
-          return (
-            <TableRow key={aporte.id} className="border-b last:border-none">
-              <TableCell className="pl-4 text-left">
+        // const periodo = aporte.support_date ?? 0;
+        const cuit = aporte.employer_document_number ?? 0;
+        const os = healthinsurances?.find(
+          (x) => x.id == aporte.healthInsurances_id
+        );
+        const amount = Number(aporte.amount) ?? 0;
+        return (
+          <TableRow key={aporte.id} className="border-b last:border-none">
+            {/* <TableCell className="pl-4 text-left">
               {dayjs(periodo).format("DD/MM/YY")}
-              </TableCell>
-              <TableCell className="text-left">
-              {cuit}
-              </TableCell>
-              <TableCell className="text-left">
-              {os?.name ?? "-"}
-              </TableCell>
-              <TableCell className="pr-1 text-left">
+              </TableCell> */}
+            <TableCell className="text-left">{cuit}</TableCell>
+            <TableCell className="text-left">{os?.name ?? "-"}</TableCell>
+            <TableCell className="pr-1 text-left">
               {formatCurrency(amount)}
-              </TableCell>
-            </TableRow>
-          );
-        })}
+            </TableCell>
+          </TableRow>
+        );
+      })}
     </Table>
   );
 }
-

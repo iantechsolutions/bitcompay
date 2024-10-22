@@ -42,7 +42,7 @@ export default function AportesDetalles(props: {
         cuil: aporte.cuil,
         "Fecha de proceso": aporte.process_date ?? null,
         "Fecha de contribución": aporte.contribution_date ?? null,
-        "Fecha de soporte": aporte.support_date ?? null,
+        // "Fecha de soporte": aporte.support_date ?? null,
       });
     });
   }

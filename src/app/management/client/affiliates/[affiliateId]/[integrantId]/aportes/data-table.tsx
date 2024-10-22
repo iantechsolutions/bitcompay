@@ -49,7 +49,7 @@ export default function DataTable<TData, TValue>({
 
   const desiredColumns = [
     "Fecha de proceso",
-    "Fecha de soporte",
+    // "Fecha de soporte",
     "Fecha de contribución",
   ];
   const filteredColumns = Array.from(table.getAllColumns()).filter((column) =>

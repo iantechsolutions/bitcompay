@@ -50,7 +50,7 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
 
   const [confirmed, setConfirmed] = useState(upload!.confirmed);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [supportDate, setSupportDate] = useState<Date | null>(null);
+  // const [supportDate, setSupportDate] = useState<Date | null>(null);
   const [data, setData] = useState<
     RouterOutputs["excelDeserialization"]["deserializationOS"] | null
   >(null);
@@ -83,7 +83,7 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
       contribution_date: OS?.excelContributionperiod ?? "PERIODO",
       excelAmount: OS?.excelAmount ?? "TOTAL",
       employer_document_number: OS?.excelEmployerDocument ?? "CUIT",
-      support_date: OS?.excelSupportPeriod ?? "PERIODO DE SOPORTE",
+      // support_date: OS?.excelSupportPeriod ?? "PERIODO DE SOPORTE",
     };
 
     const result = await readData({
@@ -101,15 +101,15 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
       contribution_date: OS?.excelContributionperiod ?? "PERIODO",
       excelAmount: OS?.excelAmount ?? "TOTAL",
       employer_document_number: OS?.excelEmployerDocument ?? "CUIT",
-      support_date: OS?.excelSupportPeriod ?? "PERIODO DE SOPORTE",
+      // support_date: OS?.excelSupportPeriod ?? "PERIODO DE SOPORTE",
     };
 
-    console.log("Calambrees", supportDate);
+    // console.log("Calambrees", supportDate);
     await confirmData({
       type: "OS",
       uploadId: upload!.id,
       columns: columnNames,
-      fecha_soporte: supportDate ?? undefined,
+      // fecha_soporte: supportDate ?? undefined,
       contribution_date: selectedDate ?? undefined,
     });
     toast.success("Datos subidos correctamente");
@@ -123,9 +123,9 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
     } catch (_error) {}
   }
 
-  function handleDateSelected(date: Date, support_date: Date) {
+  function handleDateSelected(date: Date) {
     setSelectedDate(date);
-    setSupportDate(support_date);
+    // setSupportDate(support_date);
   }
 
   return (

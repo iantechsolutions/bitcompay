@@ -254,7 +254,7 @@ export const recRowsTransformerOS = (
   let finishedArrayOS: {
     cuil: string;
     contribution_date: Date | null;
-    support_date: Date | null | undefined;
+    // support_date: Date | null | undefined;
     excelAmount: string;
     employer_document_number: string | null;
   }[] = [];
@@ -263,7 +263,7 @@ export const recRowsTransformerOS = (
     {
       cuil: string | null;
       contribution_date: Date | null;
-      support_date: Date | null | undefined;
+      // support_date: Date | null | undefined;
       excelAmount: string;
       employer_document_number: string | null | undefined;
     }[]
@@ -283,7 +283,7 @@ export const recRowsTransformerOS = (
           item as {
             cuil: string;
             contribution_date: Date | null;
-            support_date: Date | null;
+            // support_date: Date | null;
             excelAmount: string;
             employer_document_number: string | null;
           }
@@ -454,7 +454,7 @@ export const recDocumentValidatorOS = (columns: { [key: string]: string }) =>
     .object({
       [columns.cuil as string]: allToString.nullable(),
       [columns.contribution_date as string]: AllToDate.nullable(),
-      [columns.support_date as string]: AllToDate.nullable().optional(),
+      // [columns.support_date as string]: AllToDate.nullable().optional(),
       [columns.excelAmount as string]: allToString.nullable().optional(),
       [columns.employer_document_number as string]: allToString
         .nullable()
@@ -465,7 +465,7 @@ export const recDocumentValidatorOS = (columns: { [key: string]: string }) =>
         cuil: value[columns.cuil ?? "CUIL"] ?? null,
         contribution_date:
           value[columns.contribution_date ?? "PERIODO"] ?? null,
-        support_date: value[columns.support_date ?? "PERIODO SOPORTE"] ?? null,
+        // support_date: value[columns.support_date ?? "PERIODO SOPORTE"] ?? null,
         excelAmount: value[columns.excelAmount ?? "MONTO"] ?? null,
         employer_document_number:
           value[columns.employer_document_number ?? "CUIT"] ?? null,
@@ -760,7 +760,7 @@ export const requiredColumns = [
 export const recHeadersOS: TableHeaders = [
   { key: "cuil", label: "CUIL", width: 140 },
   { key: "contribution_date", label: "PERIODO", width: 140 },
-  { key: "support_date", label: "PERIODO SOPORTE", width: 140 },
+  // { key: "support_date", label: "PERIODO SOPORTE", width: 140 },
   { key: "excelAmount", label: "MONTO", width: 140 },
   { key: "employer_document_number", label: "CUIT", width: 140 },
 ];
