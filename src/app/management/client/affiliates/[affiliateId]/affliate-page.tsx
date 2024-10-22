@@ -235,8 +235,9 @@ export default function AffiliatePage(props: {
     ),
   };
 
-  const prodId = billResponsible?.pa[0]?.product_id;
+  const prodId = billResponsible?.pa?.[0]?.product_id;
   const prod = productos?.find((x) => x.id === prodId);
+  const paymentMethodName = prod?.name?.toUpperCase();
 
   const paymentMethod = new Map<string, React.ReactNode>([
     [
@@ -346,7 +347,7 @@ export default function AffiliatePage(props: {
             element={{
               key: "FECHA DE VENC.",
               value:
-                dayjs(billResponsible?.pa[0]?.expire_date).format(
+                dayjs(billResponsible?.pa?.[0]?.expire_date).format(
                   "DD/MM/YYYY"
                 ) ?? "01/12/2024",
             }}
@@ -355,6 +356,20 @@ export default function AffiliatePage(props: {
       </div>,
     ],
   ]);
+
+  return (
+    <div>
+      {paymentMethodName && paymentMethod.has(paymentMethodName) ? (
+        <div className="flex gap-4 items-start">
+          {paymentMethod.get(paymentMethodName)}
+        </div>
+      ) : (
+        <div className="flex gap-4 items-start">
+          {paymentMethod.get("PAGO VOLUNTARIO")}
+        </div>
+      )}
+    </div>
+  );
 
   const goToCCDetail = (id: string | undefined) => {
     if (!id) return;
