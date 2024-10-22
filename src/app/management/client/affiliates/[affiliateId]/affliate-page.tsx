@@ -357,19 +357,21 @@ export default function AffiliatePage(props: {
     ],
   ]);
 
-  return (
-    <div>
-      {paymentMethodName && paymentMethod.has(paymentMethodName) ? (
-        <div className="flex gap-4 items-start">
-          {paymentMethod.get(paymentMethodName)}
-        </div>
-      ) : (
-        <div className="flex gap-4 items-start">
-          {paymentMethod.get("PAGO VOLUNTARIO")}
-        </div>
-      )}
-    </div>
-  );
+  function getPaymentMethod() {
+    return (
+      <div>
+        {paymentMethodName && paymentMethod.has(paymentMethodName) ? (
+          <div className="flex gap-4 items-start">
+            {paymentMethod.get(paymentMethodName)}
+          </div>
+        ) : (
+          <div className="flex gap-4 items-start">
+            {paymentMethod.get("PAGO VOLUNTARIO")}
+          </div>
+        )}
+      </div>
+    );
+  }
 
   const goToCCDetail = (id: string | undefined) => {
     if (!id) return;
@@ -404,7 +406,8 @@ export default function AffiliatePage(props: {
                       : (lastEvent?.current_amount ?? 0) == 0
                       ? "text-blacl"
                       : "text-[#EB2727]"
-                  )}>
+                  )}
+                >
                   {formatNumberAsCurrency(lastEvent?.current_amount ?? 0)}
                 </span>
               </div>
@@ -427,12 +430,14 @@ export default function AffiliatePage(props: {
           <Accordion
             className="w-full"
             defaultValue={["item-1", "item-2", "item-3"]}
-            type="multiple">
+            type="multiple"
+          >
             <AccordionItem value="item-1">
               <AccordionTriggerFG
                 className="font-semibold"
                 name="editIcon"
-                FamilyGroup={grupo}>
+                FamilyGroup={grupo}
+              >
                 Datos del grupo familiar
               </AccordionTriggerFG>
               <AccordionContent className="pt-6 pl-5">
@@ -452,7 +457,8 @@ export default function AffiliatePage(props: {
               <AccordionContent className="pt-6 pl-5">
                 <AccordionIntegrant
                   type="multiple"
-                  className="rounded-md overflow-hidden">
+                  className="rounded-md overflow-hidden"
+                >
                   {integrant ? (
                     integrant?.map((int) => (
                       <AccordionItemIntegrant value={int.id} key={int.id}>
@@ -554,7 +560,8 @@ export default function AffiliatePage(props: {
                             <Button className="px-5 bg-[#F7F7F7] hover:bg-[#F7F7F7] text-[#3E3E3E] font-medium text-xs rounded-full border-none flex items-center gap-x-2">
                               <Link
                                 href={`/management/client/affiliates/${int.family_group_id}/${int.id}/aportes`}
-                                className="flex items-center">
+                                className="flex items-center"
+                              >
                                 <Eye className="mr-0 md:mr-2 w-4 h-4" />{" "}
                                 <span className="hidden md:inline">
                                   Ver aportes{" "}
@@ -617,15 +624,7 @@ export default function AffiliatePage(props: {
                     <h2 className="mb-3 text-lg font-normal">
                       Detalles del pago
                     </h2>
-                    {paymentMethod && paymentMethod?.has(prod?.name ?? "") ? (
-                      <div className="flex gap-4 items-start">
-                        {paymentMethod.get(prod?.name ?? "")}
-                      </div>
-                    ) : (
-                      <div className="flex gap-4 items-start">
-                        {paymentMethod.get("Pago Voluntario")}
-                      </div>
-                    )}
+                    {getPaymentMethod()}
                   </div>
                 </div>
 
