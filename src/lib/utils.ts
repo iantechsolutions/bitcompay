@@ -164,7 +164,11 @@ function getIimageForBarcode() {
 }
 
 function generateConcepts(
-  items: Array<{ concept: string | null; total: number | null;amount:number | null }>
+  items: Array<{
+    concept: string | null;
+    total: number | null;
+    amount: number | null;
+  }>
 ): string {
   // let bonoTotal = 0;
 
@@ -183,34 +187,55 @@ function generateConcepts(
   items = items.sort((a, b) => (a.total ?? 0) - (b.total ?? 0));
   return items
     .map((item) => {
-      if (item.concept === "Diferencial" || item.concept === "Saldo a favor" || item.concept === "Total factura" || item.amount===0) return "";
+      if (
+        item.concept === "Diferencial" ||
+        item.concept === "Saldo a favor" ||
+        item.concept === "Total factura" ||
+        item.amount === 0
+      )
+        return "";
       return `<p>${item.concept}</p>`;
-    }).join("");
+    })
+    .join("");
 }
 
 function generateAmounts(
-  items: Array<{ concept: string | null; total: number | null; amount: number | null }>
+  items: Array<{
+    concept: string | null;
+    total: number | null;
+    amount: number | null;
+  }>
 ): string {
-  const diferencial =
-    items.find((x) => x.concept === "Diferencial");
-  
+  const diferencial = items.find((x) => x.concept === "Diferencial");
+
   const abonoTotal = items
-  .filter((x) => x.concept === "Abono")
-  .reduce((acc, item) => acc + (item.total ?? 0), 0);
+    .filter((x) => x.concept === "Abono")
+    .reduce((acc, item) => acc + (item.total ?? 0), 0);
 
   const abonoAmount = items
-  .filter((x) => x.concept === "Abono")
-  .reduce((acc, item) => acc + (item.amount ?? 0), 0);
+    .filter((x) => x.concept === "Abono")
+    .reduce((acc, item) => acc + (item.amount ?? 0), 0);
 
   items = items.filter((x) => x.concept !== "Abono");
-  items.push({ concept: "Abono", total: abonoTotal + (diferencial?.total ?? 0), amount: abonoAmount + (diferencial?.amount ?? 0)});
+  items.push({
+    concept: "Abono",
+    total: abonoTotal + (diferencial?.total ?? 0),
+    amount: abonoAmount + (diferencial?.amount ?? 0),
+  });
   items = items.sort((a, b) => (a.total ?? 0) - (b.total ?? 0));
-  return items.map((item) => {
-    if (item.concept === "Saldo a favor" || item.concept=="Diferencial" ||  item.concept === "Total factura" || item.amount === 0) return "";
-    return ((`<p>${formatNumberAsCurrency(item.amount ?? 0)}</p>`))
-  }).join("");
+  return items
+    .map((item) => {
+      if (
+        item.concept === "Saldo a favor" ||
+        item.concept == "Diferencial" ||
+        item.concept === "Total factura" ||
+        item.amount === 0
+      )
+        return "";
+      return `<p>${formatNumberAsCurrency(item.amount ?? 0)}</p>`;
+    })
+    .join("");
 }
-
 
 function getTextoForTipoComprobante(tipoComprobante: string) {
   switch (tipoComprobante) {
@@ -248,7 +273,8 @@ export function htmlBill(
   company: any,
   producto: any,
   voucher: number,
-  brand: /* outerOutputs["brands"]["list"][number] */InferSelectModel<typeof schema.brands> | undefined,
+  brand: /* outerOutputs["brands"]["list"][number] */
+  InferSelectModel<typeof schema.brands> | undefined,
   name: string,
   domicilio: string,
   localidad: string,
@@ -258,20 +284,34 @@ export function htmlBill(
   id_type: string,
   id_number: string,
   afip_status: string,
-  cbu: string,
+  cbu: string
 ) {
   console.log("cbu es", cbu);
   let subtotal = 0;
   let iva = 0;
-  if (comprobante.items.filter((x: any) => x.concept !== "Saldo a favor" && x.concept !== "Total factura").length > 0) {
-    subtotal = comprobante.items.filter((x: any) => x.concept !== "Saldo a favor" && x.concept !== "Total factura").reduce(
-      (acc: number, item: { amount: number }) => acc + (item?.amount ?? 0),
-      0
-    );
-    iva = comprobante?.items.filter((x: any) => x.concept !== "Saldo a favor" && x.concept !== "Total factura").reduce(
-      (acc: number, item: { iva: number }) => acc + (item?.iva ?? 0),
-      0
-    );
+  if (
+    comprobante.items.filter(
+      (x: any) => x.concept !== "Saldo a favor" && x.concept !== "Total factura"
+    ).length > 0
+  ) {
+    subtotal = comprobante.items
+      .filter(
+        (x: any) =>
+          x.concept !== "Saldo a favor" && x.concept !== "Total factura"
+      )
+      .reduce(
+        (acc: number, item: { amount: number }) => acc + (item?.amount ?? 0),
+        0
+      );
+    iva = comprobante?.items
+      .filter(
+        (x: any) =>
+          x.concept !== "Saldo a favor" && x.concept !== "Total factura"
+      )
+      .reduce(
+        (acc: number, item: { iva: number }) => acc + (item?.iva ?? 0),
+        0
+      );
   }
 
   let totalTributes = 0;
@@ -316,10 +356,9 @@ export function htmlBill(
     const payment = comprobante.payments;
   }
 
-  let saldoAfavor = comprobante?.items.find((x: any) => x.concept === "Saldo a favor");
-
-
-
+  let saldoAfavor = comprobante?.items.find(
+    (x: any) => x.concept === "Saldo a favor"
+  );
 
   // moví funciones porque es lento redefinirlas constantemente
 
@@ -879,15 +918,27 @@ padding: 0;
 		<p style="font-size:12px; text-align:right; margin-right:0; padding-right:0;">Sub-total: ${formatNumberAsCurrency(
       subtotal ?? 0
     )}</p>
-  ${iva > 0 ? `<p style="font-size:12px; text-align:right;  margin-right:0; padding-right:0; padding-top:5px;">IVA: ${formatNumberAsCurrency(iva)}</p>` : ""}
-	${totalTributes > 0
-        ? `<p style="font-size:12px; text-align:right;  margin-right:0; padding-right:0; padding-top:5px;">Otros Tributos: ${formatNumberAsCurrency(
-            totalTributes ?? 0
-          )}</p>`
-        : "" }
-    ${saldoAfavor && saldoAfavor.total > 0 ?
-      `<p style="font-size:12px; text-align:right; margin-right:0; padding-right:0; padding-top:5px;">Pagos a cuenta: ${formatNumberAsCurrency(
-        saldoAfavor.total)} </p>`: ""}
+  ${
+    iva > 0
+      ? `<p style="font-size:12px; text-align:right;  margin-right:0; padding-right:0; padding-top:5px;">IVA: ${formatNumberAsCurrency(
+          iva
+        )}</p>`
+      : ""
+  }
+	${
+    totalTributes > 0
+      ? `<p style="font-size:12px; text-align:right;  margin-right:0; padding-right:0; padding-top:5px;">Otros Tributos: ${formatNumberAsCurrency(
+          totalTributes ?? 0
+        )}</p>`
+      : ""
+  }
+    ${
+      saldoAfavor && saldoAfavor.total > 0
+        ? `<p style="font-size:12px; text-align:right; margin-right:0; padding-right:0; padding-top:5px;">Pagos a cuenta: ${formatNumberAsCurrency(
+            saldoAfavor.total
+          )} </p>`
+        : ""
+    }
     
 	</div>
 </div>
@@ -904,9 +955,13 @@ padding: 0;
 		</div>
 	</div>
 
-  ${(comprobante.tipoComprobante.includes("FACTURA") && cbu) ? `<div style="font-size:10px; padding-left: 30px; padding-top:10px; width:350px; white-space: nowrap; font-style: italic;">
+  ${
+    comprobante.tipoComprobante.includes("FACTURA") && cbu
+      ? `<div style="font-size:10px; padding-left: 30px; padding-top:10px; width:350px; white-space: nowrap; font-style: italic;">
 			Esta factura se debitará en fecha de vencimiento en CBU: ${cbu}.
-		</div>` : " "}
+		</div>`
+      : " "
+  }
 </section>
 
        ${getPaymentMethods(comprobante.tipoComprobante)}
@@ -944,8 +999,9 @@ padding: 0;
           </div>
           </div>
 
-         ${comprobante?.tipoComprobante.includes("FACTURA") ? (
-    `<div class="cae-section" style="text-align: left; ">
+         ${
+           comprobante?.tipoComprobante.includes("FACTURA")
+             ? `<div class="cae-section" style="text-align: left; ">
         <p>Fecha tope para el pago en redes: XX/XX/XXXX</p>
            <p>Código de pago electrónico PMC: XXXX-XXXXXXXX</p>
           <p>Canales con lectura de código de barras: </p>
@@ -955,7 +1011,8 @@ padding: 0;
             alt="barcode"
           />
         </div>`
-  ) : ""}
+             : ""
+         }
 </div>
       </section>
     </body>
@@ -973,28 +1030,30 @@ type MedioDePagoDetalles = {
   tipoTarjeta?: string;
 };
 
-const mediosDePagoDetalles: Record<typeof medioDePago[number], MedioDePagoDetalles> = {
+const mediosDePagoDetalles: Record<
+  (typeof medioDePago)[number],
+  MedioDePagoDetalles
+> = {
   cheque: {
-    numeroCheque: '12345678',
-    banco: 'Banco Nacional',
-    fechaPago: '20/10/2024',
+    numeroCheque: "12345678",
+    banco: "Banco Nacional",
+    fechaPago: "20/10/2024",
   },
   chequeDiferido: {
-    numeroCheque: '87654321',
-    banco: 'Banco Provincial',
-    fechaEmision: '01/10/2024',
-    fechaPago: '25/12/2024',
+    numeroCheque: "87654321",
+    banco: "Banco Provincial",
+    fechaEmision: "01/10/2024",
+    fechaPago: "25/12/2024",
   },
   tarjeta: {
-    bandera: 'Visa',
-    tipoTarjeta: 'Crédito',
+    bandera: "Visa",
+    tipoTarjeta: "Crédito",
   },
-  canalesDePago: {},
+  canalesDePago: {},
 };
 
-const medioDePago = ['cheque', 'chequeDiferido', 'tarjeta', 'canalesDePago'];
+const medioDePago = ["cheque", "chequeDiferido", "tarjeta", "canalesDePago"];
 function getPaymentMethods(tipoComprobante: string) {
-  
   if (tipoComprobante.includes("FACTURA")) {
     return `<section style="padding-left: 30px;  padding-right:30px; padding-top: 15px; padding-bottom: 5px;">
         <h2 style="color: #3E3E3E; font-weight: 500; font-size:16px;">Canales de pago habilitados </h2>
@@ -1050,18 +1109,20 @@ function getPaymentMethods(tipoComprobante: string) {
          </div>
       </section>`;
   } else if (tipoComprobante.includes("NOTA DE")) {
-    return `<div style="height: 80px;"> </div>`; 
+    return `<div style="height: 80px;"> </div>`;
   } else {
     return `<div style="height: 80px;"> </div>`;
   }
 }
 
-    function renderMediosDePago(medioDePago: keyof typeof mediosDePagoDetalles): string {
-      let output = '';
-      const detalles = mediosDePagoDetalles[medioDePago];
-    
-      if (medioDePago === 'cheque' && detalles) {
-        output = `
+function renderMediosDePago(
+  medioDePago: keyof typeof mediosDePagoDetalles
+): string {
+  let output = "";
+  const detalles = mediosDePagoDetalles[medioDePago];
+
+  if (medioDePago === "cheque" && detalles) {
+    output = `
       <section style="padding-left:40px; padding-right:40px; padding-top: 15px; padding-bottom: 5px;">
         <div style="margin-bottom: 8px;">
           <h2 style="color: #3E3E3E; font-weight: bold; font-size:16px; display: inline;">
@@ -1084,7 +1145,7 @@ function getPaymentMethods(tipoComprobante: string) {
         </div>
       </section>
     `;
-  } else if (medioDePago === 'chequeDiferido' && detalles) {
+  } else if (medioDePago === "chequeDiferido" && detalles) {
     output = `
       <section style="padding-left:40px; padding-right:40px; padding-top: 15px; padding-bottom: 5px;">
         <div style="margin-bottom: 8px;">
@@ -1111,7 +1172,7 @@ function getPaymentMethods(tipoComprobante: string) {
         </div>
       </section>
     `;
-  } else if (medioDePago === 'tarjeta' && detalles) {
+  } else if (medioDePago === "tarjeta" && detalles) {
     output = `
       <section style="padding-left:40px; padding-right:40px; padding-top: 15px; padding-bottom: 5px;">
         <div style="margin-bottom: 8px;">
@@ -1133,8 +1194,10 @@ function getPaymentMethods(tipoComprobante: string) {
       </section>
     `;
   }
-  const medioDePagoSeleccionado = 'cheque';
-const paymentDetailsSection = renderMediosDePago(medioDePagoSeleccionado as keyof typeof mediosDePagoDetalles);
+  const medioDePagoSeleccionado = "cheque";
+  const paymentDetailsSection = renderMediosDePago(
+    medioDePagoSeleccionado as keyof typeof mediosDePagoDetalles
+  );
 
   return output;
 }
@@ -1245,14 +1308,13 @@ function numeroALetras(numero: number | undefined): string {
     "veintinueve",
   ];
 
-
   const capitalizarPrimeraLetra = (texto: string): string => {
     return texto.charAt(0).toUpperCase() + texto.slice(1);
   };
 
   const obtenerDecimales = (numero: number | undefined): string | null => {
     if (!numero) return null;
-    let numeroStr = numero.toFixed(2); 
+    let numeroStr = numero.toFixed(2);
     let partes = numeroStr.split(".");
     if (partes.length === 2) {
       let decimales = partes[1]!.substring(0, 2);
@@ -1318,7 +1380,8 @@ function numeroALetras(numero: number | undefined): string {
     let resultadoParteEntera = convertirParteEntera(parteEntera);
 
     return (
-      capitalizarPrimeraLetra(resultadoParteEntera) + `${parteDecimal ? ` con ${parteDecimal}/100`:""}`
+      capitalizarPrimeraLetra(resultadoParteEntera) +
+      `${parteDecimal ? ` con ${parteDecimal}/100` : ""}`
     );
   }
 
@@ -1331,6 +1394,8 @@ export const valueToNameComprobanteMap: Record<string, string> = {
   "3": "Nota de crédito",
   "6": "Factura",
   "8": "Nota de crédito",
+  "2": "Nota de debito",
+  "7": "Nota de debito",
 };
 export const comprobanteDictionary: { [key: string]: number } = {
   "FACTURA A": 1,

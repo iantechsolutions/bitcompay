@@ -42,6 +42,40 @@ export const brandsRouter = createTRPCRouter({
 
     return brands;
   }),
+  getByBussinesUnit: protectedProcedure
+    .input(
+      z.object({
+        bussinesUnitId: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      const un = await db.query.bussinessUnits.findFirst({
+        where: eq(schema.bussinessUnits.id, input.bussinesUnitId),
+      });
+      if (!un) return null;
+      const brand = await db.query.brands.findFirst({
+        where: eq(schema.brands.id, un?.brandId),
+        // with: {
+        //   establishments: true,
+        //   company: {
+        //     columns: {
+        //       companyId: false,
+        //       brandId: false,
+        //     },
+        //     with: {
+        //       company: {
+        //         columns: {
+        //           name: true,
+        //           id: true,
+        //         },
+        //       },
+        //     },
+        //   },
+        // },
+      });
+
+      return brand?.pv;
+    }),
 
   list: protectedProcedure.query(async ({ ctx }) => {
     const brands = await db.query.brands.findMany({
