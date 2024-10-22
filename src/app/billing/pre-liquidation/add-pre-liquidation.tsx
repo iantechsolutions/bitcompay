@@ -55,7 +55,9 @@ export default function AddPreLiquidation() {
   const [fechaVencimiento2, setFechaVencimiento2] = useState<Date>();
   // const [fechaDesde, setFechaDesde] = useState<Date>();
   // const [fechaHasta, setFechaHasta] = useState<Date>();
-  const [mes, setMes] = useState<number | null>(null);
+  const [mes, setMes] = useState<number>(new Date().getMonth() + 1);
+  const [dia, setDia] = useState<number>(new Date().getDay() + 1);
+
   const [anio, setAnio] = useState<number>(new Date().getFullYear());
   // const [puntoVenta, setPuntoVenta] = useState("");
   const [logo_url, setLogo_url] = useState("");
@@ -77,12 +79,17 @@ export default function AddPreLiquidation() {
     if (!brandId) errors.push("Marca");
     if (!fechaVencimiento2 || !fechaVencimiento1) errors.push("Vencimientos");
     if (!mes) errors.push("Mes de vigencia");
-    if (!marcas?.find((x) => x.id === brandId)?.pv)
-      errors.push("Punto de Venta");
+    if (!marcas?.find((x) => x.id === brandId)?.pv) errors.push("PV en marca");
+    if (fechaVencimiento1 && fechaVencimiento1 < new Date(anio, mes - 1, 1))
+      errors.push("Vencimiento 1 menor al mes de vigencia");
+    if (fechaVencimiento2 && fechaVencimiento2 < new Date(anio, mes - 1, 1))
+      errors.push("Vencimiento 2 menor al mes de vigencia");
+
     return errors;
   }
 
   async function handleCreate() {
+    console.log("Peste", new Date(anio, mes - 1, 1));
     const validationErrors = validateFields();
     if (validationErrors.length > 0) {
       if (validationErrors.length > 0) {
@@ -186,145 +193,7 @@ export default function AddPreLiquidation() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="w-full flex flex-row gap-2 py-4 text-gray-500 justify-start">
-              <div className="w-1/2 pr-2">
-                <Label className="text-xs">1° FECHA DE VENCIMIENTO</Label>
-                <br />
-                <Popover open={popover1Open} onOpenChange={setPopover1Open}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={"form"}
-                      className={cn(
-                        "w-full border-b border-[#BEF0BB] pl-3 text-left font-normal hover:bg-none hover:bg-transparent shadow-none overflow-hidden text-ellipsis whitespace-nowrap",
-                        !fechaVencimiento1 && "text-muted-foreground"
-                      )}>
-                      <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[#3E3E3E]">
-                        {fechaVencimiento1 ? (
-                          dayjs(fechaVencimiento1).format(
-                            "D [de] MMMM [de] YYYY"
-                          )
-                        ) : (
-                          <span>Seleccione una fecha</span>
-                        )}
-                      </p>
-                      <CalendarIcon className="ml-2 h-4 w-4 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={
-                        fechaVencimiento1
-                          ? new Date(fechaVencimiento1)
-                          : undefined
-                      }
-                      onSelect={(e) => FechasCreate(e)}
-                      disabled={(date: Date) => date < new Date()}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div className="w-1/2 pl-2">
-                <Label className="text-xs">2° FECHA DE VENCIMIENTO</Label>
-                <br />
-                <Popover open={popover2Open} onOpenChange={setPopover2Open}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={"form"}
-                      className={cn(
-                        "w-full border-b border-[#BEF0BB] pl-3 text-left font-normal hover:bg-none hover:bg-transparent shadow-none overflow-hidden text-ellipsis whitespace-nowrap",
-                        !fechaVencimiento2 && "text-muted-foreground"
-                      )}>
-                      <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[#3E3E3E]">
-                        {fechaVencimiento2 ? (
-                          dayjs(fechaVencimiento2).format(
-                            "D [de] MMMM [de] YYYY"
-                          )
-                        ) : (
-                          <span>Seleccione una fecha</span>
-                        )}
-                      </p>
-                      <CalendarIcon className="ml-2 h-4 w-4 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={
-                        fechaVencimiento2 ? fechaVencimiento2 : undefined
-                      }
-                      onSelect={(e) => FechasCreate2(e)}
-                      disabled={(date: Date) => date < new Date()}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
-            {/* <div>
-            <Label>Fecha inicio de servicio</Label>
-            <br />
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={"form"}
-                  className={cn(
-                    "w-[240px]  border-[#BEF0BB] pl-3 text-left font-normal focus-visible:ring-green-400",
-                    !fechaDesde && "text-muted-foreground"
-                  )}
-                >
-                  <p>
-                    {fechaDesde ? (
-                      dayjs(fechaDesde).format("D [de] MMMM [de] YYYY")
-                    ) : (
-                      <span>Seleccione una fecha</span>
-                    )}
-                  </p>
-                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={fechaDesde ? fechaDesde : undefined}
-                  onSelect={(e) => setFechaDesde(e)}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-          <div>
-            <Label>Fecha fin de servicio</Label>
-            <br />
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={"form"}
-                  className={cn(
-                    "w-[240px]  border-[#BEF0BB] pl-3 text-left font-normal focus-visible:ring-green-400",
-                    !fechaHasta && "text-muted-foreground"
-                  )}
-                >
-                  <p>
-                    {fechaHasta ? (
-                      dayjs(fechaHasta).format("D [de] MMMM [de] YYYY")
-                    ) : (
-                      <span>Seleccione una fecha</span>
-                    )}
-                  </p>
-                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={fechaHasta ? fechaHasta : undefined}
-                  onSelect={(e) => setFechaHasta(e)}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div> */}
+
             <div className="w-full flex flex-row gap-2 py-4 text-gray-500">
               <div className="w-1/2 pr-2">
                 <Label htmlFor="validy_date" className="text-xs">
@@ -411,6 +280,152 @@ export default function AddPreLiquidation() {
                 />
               </div>
             </div>
+            <div className="w-full flex flex-row gap-2 py-4 text-gray-500 justify-start">
+              <div className="w-1/2 pr-2">
+                <Label className="text-xs">1° FECHA DE VENCIMIENTO</Label>
+                <br />
+                <Popover open={popover1Open} onOpenChange={setPopover1Open}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"form"}
+                      className={cn(
+                        "w-full border-b border-[#BEF0BB] pl-3 text-left font-normal hover:bg-none hover:bg-transparent shadow-none overflow-hidden text-ellipsis whitespace-nowrap",
+                        !fechaVencimiento1 && "text-muted-foreground"
+                      )}>
+                      <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[#3E3E3E]">
+                        {fechaVencimiento1 ? (
+                          dayjs(fechaVencimiento1).format(
+                            "D [de] MMMM [de] YYYY"
+                          )
+                        ) : (
+                          <span>Seleccione una fecha</span>
+                        )}
+                      </p>
+                      <CalendarIcon className="ml-2 h-4 w-4 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={
+                        fechaVencimiento1
+                          ? new Date(fechaVencimiento1)
+                          : undefined
+                      }
+                      onSelect={(e) => FechasCreate(e)}
+                      disabled={(date: Date) =>
+                        date < new Date() ||
+                        date < (mes ? new Date(anio, mes - 1, 1) : new Date())
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="w-1/2 pl-2">
+                <Label className="text-xs">2° FECHA DE VENCIMIENTO</Label>
+                <br />
+                <Popover open={popover2Open} onOpenChange={setPopover2Open}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"form"}
+                      className={cn(
+                        "w-full border-b border-[#BEF0BB] pl-3 text-left font-normal hover:bg-none hover:bg-transparent shadow-none overflow-hidden text-ellipsis whitespace-nowrap",
+                        !fechaVencimiento2 && "text-muted-foreground"
+                      )}>
+                      <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[#3E3E3E]">
+                        {fechaVencimiento2 ? (
+                          dayjs(fechaVencimiento2).format(
+                            "D [de] MMMM [de] YYYY"
+                          )
+                        ) : (
+                          <span>Seleccione una fecha</span>
+                        )}
+                      </p>
+                      <CalendarIcon className="ml-2 h-4 w-4 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={
+                        fechaVencimiento2 ? fechaVencimiento2 : undefined
+                      }
+                      onSelect={(e) => FechasCreate2(e)}
+                      disabled={(date: Date) =>
+                        date < new Date() ||
+                        date < (mes ? new Date(anio, mes - 1, 1) : new Date())
+                      }
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+            {/* <div>
+            <Label>Fecha inicio de servicio</Label>
+            <br />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"form"}
+                  className={cn(
+                    "w-[240px]  border-[#BEF0BB] pl-3 text-left font-normal focus-visible:ring-green-400",
+                    !fechaDesde && "text-muted-foreground"
+                  )}
+                >
+                  <p>
+                    {fechaDesde ? (
+                      dayjs(fechaDesde).format("D [de] MMMM [de] YYYY")
+                    ) : (
+                      <span>Seleccione una fecha</span>
+                    )}
+                  </p>
+                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={fechaDesde ? fechaDesde : undefined}
+                  onSelect={(e) => setFechaDesde(e)}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div>
+            <Label>Fecha fin de servicio</Label>
+            <br />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"form"}
+                  className={cn(
+                    "w-[240px]  border-[#BEF0BB] pl-3 text-left font-normal focus-visible:ring-green-400",
+                    !fechaHasta && "text-muted-foreground"
+                  )}
+                >
+                  <p>
+                    {fechaHasta ? (
+                      dayjs(fechaHasta).format("D [de] MMMM [de] YYYY")
+                    ) : (
+                      <span>Seleccione una fecha</span>
+                    )}
+                  </p>
+                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={fechaHasta ? fechaHasta : undefined}
+                  onSelect={(e) => setFechaHasta(e)}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div> */}
+
             <div className="flex flex-row py-4 gap-2  text-gray-500">
               {/*  <div className="w-1/2 text-nowrap pr-2">
                 <Label htmlFor="name" className="text-xs">
