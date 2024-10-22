@@ -32,6 +32,7 @@ import { RouterOutputs } from "~/trpc/shared";
 import { TableRecord } from "./columns";
 import DataTableSummary from "~/components/tanstack/summary";
 import { useRouter } from "next/navigation";
+import { rankItem } from "@tanstack/match-sorter-utils";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
@@ -43,19 +44,26 @@ export function DataTable<TData, TValue>({
   data,
   setLoading,
 }: DataTableProps<TData, TValue>) {
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [globalFilter, setGlobalFilter] = useState("");
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
-    state: {
-      columnFilters,
+    globalFilterFn: (row, columnId, filterValue) => {
+      const searchColumns = ["number", "Marca", "UN"];
+      return searchColumns.some((col) => {
+        const value = row.getValue(col);
+        return rankItem(value?.toString() ?? "", filterValue).passed;
+      });
     },
+    state: {
+      globalFilter, 
+    },
+    onGlobalFilterChange: setGlobalFilter, 
   });
   const router = useRouter();
 
@@ -79,7 +87,7 @@ export function DataTable<TData, TValue>({
       <TableToolbar
         table={table}
         columns={filteredColumns}
-        searchColumn="number"
+        setGlobalFilter={setGlobalFilter} 
       />
       <Table>
         <TableHeader>

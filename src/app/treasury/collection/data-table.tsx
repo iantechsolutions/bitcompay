@@ -13,7 +13,7 @@ import {
   getFacetedUniqueValues,
   getFacetedRowModel,
 } from "@tanstack/react-table";
-
+import { rankItem } from "@tanstack/match-sorter-utils";
 import { TableCell } from "~/components/ui/table";
 import {
   Table,
@@ -66,32 +66,31 @@ export function DataTable<TData, TValue>({
   data,
   setLoading,
 }: DataTableProps<TData, TValue>) {
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [globalFilter, setGlobalFilter] = useState("");
 
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
-    state: {
-      columnFilters,
+    globalFilterFn: (row, columnId, filterValue) => {
+      const searchColumns = ["name", "Marca", "Producto"];
+      return searchColumns.some((col) => {
+        const value = row.getValue(col);
+        return rankItem(value?.toString() ?? "", filterValue).passed;
+      });
     },
+    state: {
+      globalFilter, 
+    },
+    onGlobalFilterChange: setGlobalFilter,
   });
 
   const router = useRouter();
 
-  // const handleRowClick = (row: Row<TableRecord>) => {
-  //   // Asegúrate de que el tipo coincida
-  //   setLoading(true);
-  //   setTimeout(() => {
-  //     const originalData = row.original as { id: string };
-  //     router.push(`/billing/pre-liquidation/${originalData.id}`);
-  //   }, 100);
-  // };
   const desiredColumns = ["Marca", "Producto", "Estado"];
   const filteredColumns = Array.from(table.getAllColumns()).filter((column) =>
     desiredColumns.includes(column.id!)
@@ -101,7 +100,7 @@ export function DataTable<TData, TValue>({
       <TableToolbar
         table={table as any}
         columns={filteredColumns as any}
-        searchColumn="invoice_number"
+        setGlobalFilter={setGlobalFilter} 
       />
       <ScrollArea>
         <Table>
