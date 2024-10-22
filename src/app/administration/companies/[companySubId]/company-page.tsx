@@ -1,11 +1,13 @@
 "use client";
 
 import { af } from "date-fns/locale";
-import { CheckIcon, Loader2, Loader2Icon, UserCircleIcon } from "lucide-react";
+import { CheckIcon, CircleX, Loader2, Loader2Icon, UserCircleIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type MouseEventHandler, useState } from "react";
 import { toast } from "sonner";
 import { GoBackButton } from "~/components/goback-button";
+import CheckmarkCircle02Icon from "~/components/icons/checkmark-circle-02-stroke-rounded";
+import Delete02Icon from "~/components/icons/delete-02-stroke-rounded";
 import LayoutContainer from "~/components/layout-container";
 import { List, ListTile } from "~/components/list";
 import { Title } from "~/components/title";
@@ -78,6 +80,10 @@ export default function CompanyPage({
     api.companies.change.useMutation();
 
   async function handleChange() {
+    if (!name || !afipCondition || !cuit || !razonSocial || !address) {
+      toast.error("Por favor, complete todos los campos obligatorios");
+      return;
+    }
     try {
       await changeCompany({
         companyId: company.id,
@@ -93,17 +99,19 @@ export default function CompanyPage({
       toast.success("Se han guardado los cambios");
     } catch (e) {
       const error = asTRPCError(e)!;
+      console.error("Error guardando la entidad:", error);
       toast.error(error.message);
     }
   }
 
   function changeCompanyChannel(channelId: string, enabled: boolean) {
+    const updatedProducts = new Set(companyProducts);
     if (enabled) {
-      companyProducts.add(channelId);
+      updatedProducts.add(channelId);
     } else {
-      companyProducts.delete(channelId);
+      updatedProducts.delete(channelId);
     }
-    setCompanyProducts(new Set(companyProducts));
+    setCompanyProducts(updatedProducts);
   }
 
   return (
@@ -112,11 +120,14 @@ export default function CompanyPage({
       <section className="space-y-2">
         <div className="flex justify-between">
           <Title>{company.name}</Title>
-          <Button disabled={isLoading} onClick={handleChange}>
+          <Button disabled={isLoading} onClick={handleChange}
+          type="submit"
+          className="flex rounded-full w-fit justify-self-center bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#DEF5DD]">
+          
             {isLoading ? (
-              <Loader2 className="mr-2 animate-spin" />
-            ) : (
-              <CheckIcon className="mr-2" />
+              <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
+                        ) : (
+              <CheckmarkCircle02Icon className="h-5 mr-2"/>
             )}
             Aplicar
           </Button>
@@ -124,8 +135,8 @@ export default function CompanyPage({
 
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="item-1">
-            <AccordionTrigger className="border-b">
-              <h2 className="text-md">Productos habilitados</h2>
+          <AccordionTrigger className="border-b border-b-gray-100 opacity-80 rounded-none">
+          <h2 className="text-md text-black">Productos habilitados</h2>
             </AccordionTrigger>
             <AccordionContent>
               <List>
@@ -162,6 +173,8 @@ export default function CompanyPage({
                       id="name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
+                      maxLength={50} 
+                      className="truncate"
                     />
                   </div>
                   <div className="col-span-2">
@@ -194,21 +207,30 @@ export default function CompanyPage({
           </AccordionItem>
           <AccordionItem value="item-3">
             <AccordionTrigger>
-              <Label htmlFor="Info de facturacion">Info. de facturación</Label>
+              <h2 className="text-md">Info. de facturación</h2>
             </AccordionTrigger>
             <AccordionContent>
               <Card className="p-5">
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <div className="col-span-2">
-                    <Label htmlFor="afipCondition">Condición ante AFIP</Label>
-                    <Input
-                      id="afipCondition"
-                      value={afipCondition}
-                      onChange={(e) => setAfipCondition(e.target.value)}
-                    />
-                  </div>
+                <div className="m-2">
+            <Label htmlFor="afipCondition" className="m-2">Condición ante AFIP</Label>
+            <select
+           id="afipCondition"
+             value={afipCondition}
+              onChange={(e) => setAfipCondition(e.target.value)}
+             className="border-b border-gray-100 opacity-80 rounded-md m-2 w-full
+               hover:bg-inherit focus:outline-none focus:border-gray-100 hover:border-gray-100"
+            required
+                 >
+             <option value="">Seleccione una opción</option>
+             <option value="Monotributista">Monotributista</option>
+             <option value="Responsable Inscripto">Responsable Inscripto</option>
+             <option value="Exento">Exento</option>
+             <option value="Consumidor Final">Consumidor Final</option>
+           </select>
+           </div>
                   <div>
-                    <Label htmlFor="CUIT">CUIT</Label>
+                    <Label htmlFor="CUIT">CUIL/CUIT</Label>
                     <Input
                       id="CUIT"
                       value={cuit}
@@ -301,34 +323,39 @@ function DeleteChannel(props: { companySubId: string }) {
   };
   return (
     <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button variant="destructive" className="w-[160px]">
-          Eliminar entidad
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>
-            ¿Está seguro que quiere eliminar la entidad?
-          </AlertDialogTitle>
-          <AlertDialogDescription>
-            Eliminar entidad permanentemente.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            className="bg-red-500 hover:bg-red-600 active:bg-red-700"
-            onClick={handleDelete}
-            disabled={isLoading}
-          >
-            {isLoading && (
-              <Loader2Icon className="mr-2 animate-spin" size={20} />
-            )}
-            Eliminar
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+  <AlertDialogTrigger asChild>
+    <Button className="bg-[#f9c3c3] hover:bg-[#eba2a2] text-[#4B4B4B] text-sm rounded-full py-4 px-4 shadow-none">
+        <Delete02Icon className="h-4 w-auto mr-2" />
+      Eliminar entidad
+    </Button>
+  </AlertDialogTrigger>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>
+        ¿Está seguro que quiere eliminar la entidad?
+      </AlertDialogTitle>
+      <AlertDialogDescription>
+        Eliminar entidad permanentemente.
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogAction
+className="bg-[#f9c3c3] hover:bg-[#eba2a2] text-[#4B4B4B] text-sm rounded-full py-4 px-4 shadow-none"
+        onClick={handleDelete}
+        disabled={isLoading}
+      >
+        {isLoading ? (
+          <Loader2Icon className="mr-1 h-4 animate-spin" size={20} />
+        ) : (
+        <Delete02Icon className="h-4 mr-1" />
+      )} Eliminar
+      </AlertDialogAction>
+      <AlertDialogCancel className=" bg-[#D9D7D8] hover:bg-[#D9D7D8]/80 text-[#4B4B4B] border-0">
+          <CircleX className="flex h-4 mr-1" />
+            Cancelar</AlertDialogCancel>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
+
   );
 }
