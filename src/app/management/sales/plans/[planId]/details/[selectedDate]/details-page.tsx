@@ -295,10 +295,11 @@ export default function DetailsPage(props: {
                   onClick={() => handleUpdatePrice("edit")}
                   disabled={isLoading}
                   className="bg-[#BEF0BB] hover:bg-[#DEF5DD] ml-3 rounded-full mr-4 px-6 text-black font-normal hover:text-[#3E3E3E]">
-                  {isLoading && (
-                    <Loader2Icon className="mr-2 animate-spin" size={20} />
-                  )}
+                  {isLoading ? (
+                  <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
+                ) : (
                   <CreditCardPosIcon className="mr-2 h-5 font-medium-medium w-full" />
+                )}
                   Editar precio
                 </Button>
               </div>

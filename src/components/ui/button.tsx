@@ -12,7 +12,7 @@ const buttonVariants = cva(
         default:
           "bg-primary shadow:none text-primary-foreground shadow hover:bg-primary/90",
         destructive:
-          "bg-destructive shadow:none text-destructive-foreground shadow-sm hover:bg-destructive/90",
+          "bg-[#f9c3c3] hover:bg-[#f9c3c3]/80 text-[#4B4B4B] text-sm rounded-full py-4 px-4 shadow-none",
         outline:
           "border shadow:none border-input text-[#3E3E3E] rounded-full bg-background shadow-sm hover:bg-accent hover:accent-current",
         form: "border-0 shadow:none border-b text-[#3E3E3E] bg-background rounded-none hover:bg-accent hover:accent-current",

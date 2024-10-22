@@ -1,5 +1,5 @@
 "use client";
-import { Loader2Icon, CheckIcon, Loader2 } from "lucide-react";
+import { Loader2Icon, CheckIcon, Loader2, CircleX } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { MouseEventHandler, useState } from "react";
 import { toast } from "sonner";
@@ -38,6 +38,7 @@ import { asTRPCError } from "~/lib/errors";
 import { Establishment } from "~/server/db/schema";
 import { api } from "~/trpc/react";
 import CheckmarkCircle02Icon from "~/components/icons/checkmark-circle-02-stroke-rounded";
+import Delete02Icon from "~/components/icons/delete-02-stroke-rounded";
 
 type EstablishmentPageProps = {
   establishment: Establishment;
@@ -174,7 +175,9 @@ function DeleteEstablishment(props: { establishmentId: string }) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild={true}>
-        <Button variant="destructive">Eliminar Establecimiento</Button>
+        <Button variant="destructive">
+        <Delete02Icon className="h-4 mr-1 font-medium place-content-center" />
+          Eliminar Establecimiento</Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
@@ -186,13 +189,20 @@ function DeleteEstablishment(props: { establishmentId: string }) {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <Button
-            className="bg-red-500 active:bg-red-700 hover:bg-red-600"
+          <AlertDialogAction
+            className="bg-[#f9c3c3] hover:bg-[#f9c3c3]/80 text-[#4B4B4B] text-sm rounded-full py-4 px-4 shadow-none"
             onClick={handleDelete}
             disabled={isLoading}>
+            {isLoading ? (
+                  <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
+                ) : (
+                  <Delete02Icon className="h-4 mr-1" />
+                )}            
             Eliminar
-          </Button>
+          </AlertDialogAction>
+          <AlertDialogCancel className=" bg-[#D9D7D8] hover:bg-[#D9D7D8]/80 text-[#4B4B4B] border-0">
+          <CircleX className="flex h-4 mr-1" />
+            Cancelar</AlertDialogCancel>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

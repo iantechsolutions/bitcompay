@@ -1,5 +1,5 @@
 "use client";
-import { CheckIcon, Loader2 } from "lucide-react";
+import { CheckIcon, CircleX, Loader2, Loader2Icon } from "lucide-react";
 import { type MouseEventHandler, useState, useEffect } from "react";
 import { toast } from "sonner";
 import {
@@ -43,6 +43,7 @@ import { OurFileRouter } from "~/app/api/uploadthing/core";
 import Image from "next/image";
 import { ComboboxDemo } from "~/components/ui/combobox";
 import CheckmarkCircle02Icon from "~/components/icons/checkmark-circle-02-stroke-rounded";
+import Delete02Icon from "~/components/icons/delete-02-stroke-rounded";
 export default function BrandPage({
   brand,
   companies,
@@ -386,7 +387,8 @@ function Deletebrand(props: { brandId: string }) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild={true}>
-        <Button variant="destructive" className="w-[160px]">
+        <Button variant="destructive">
+        <Delete02Icon className="h-4 mr-1 font-medium place-content-center" />
           Eliminar marca
         </Button>
       </AlertDialogTrigger>
@@ -400,13 +402,20 @@ function Deletebrand(props: { brandId: string }) {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
-            className="bg-red-500 active:bg-red-700 hover:bg-red-600"
+            className="bg-[#f9c3c3] hover:bg-[#f9c3c3]/80 text-[#4B4B4B] text-sm rounded-full py-4 px-4 shadow-none"
             onClick={handleDelete}
             disabled={isLoading}>
-            Eliminar
+            {isLoading ? (
+                  <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
+                ) : (
+                  <Delete02Icon className="h-4 mr-1" />
+                )}            
+          Eliminar
           </AlertDialogAction>
+          <AlertDialogCancel className=" bg-[#D9D7D8] hover:bg-[#D9D7D8]/80 text-[#4B4B4B] border-0">
+          <CircleX className="flex h-4 mr-1" />
+            Cancelar</AlertDialogCancel>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
