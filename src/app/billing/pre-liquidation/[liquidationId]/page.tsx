@@ -162,8 +162,9 @@ export default async function Home(props: {
             <span className="">FECHA DE PROCESO</span>
             <br />
             <p className="font-medium text-sm">
-              {dayjs.utc(preliquidation?.createdAt).format("DD/MM/YYYY hh:mm") ??
-                "-"}
+              {dayjs
+                .utc(preliquidation?.createdAt)
+                .format("DD/MM/YYYY hh:mm") ?? "-"}
             </p>
           </li>
           <li className="">
@@ -190,9 +191,7 @@ export default async function Home(props: {
             <br />
             <p className="font-medium text-sm">
               {dayjs
-                .utc(
-                  preliquidation?.comprobantes[0]?.payments[0]?.first_due_date
-                )
+                .utc(preliquidation?.comprobantes[0]?.due_date)
                 .format("DD/MM/YYYY") ?? "-"}
             </p>
           </li>
@@ -201,9 +200,7 @@ export default async function Home(props: {
             <br />
             <p className="font-medium text-sm">
               {dayjs
-                .utc(
-                  preliquidation?.comprobantes[0]?.payments[0]?.second_due_date
-                )
+                .utc(preliquidation?.comprobantes[0]?.second_due_date)
                 .format("DD/MM/YYYY") ?? "-"}
             </p>
           </li>

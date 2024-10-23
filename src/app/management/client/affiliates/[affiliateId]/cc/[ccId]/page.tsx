@@ -46,9 +46,12 @@ export default function CCDetail(props: {
         : current;
     });
   }
-  const nextExpirationDate = lastComprobante?.due_date
-    ? dayjs(lastComprobante?.due_date).format("DD-MM-YYYY")
-    : "-";
+
+  let nextExpirationDate = "-";
+  if (lastComprobante?.due_date && lastComprobante?.due_date > new Date()) {
+    nextExpirationDate = dayjs(lastComprobante?.due_date).format("DD-MM-YYYY");
+    console.log(nextExpirationDate, lastComprobante?.id);
+  }
 
   let comprobanteNCReciente = comprobantes?.find(
     (comprobante) => comprobante.origin === "Nota de credito"
@@ -74,9 +77,8 @@ export default function CCDetail(props: {
     )?.amount;
   }
 
-  
-  let saldo_a_pagar = (FCTotal ?? 0) - (saldo_a_favor ?? 0)
-  if(saldo_a_pagar < 0){
+  let saldo_a_pagar = (FCTotal ?? 0) - (saldo_a_favor ?? 0);
+  if (saldo_a_pagar < 0) {
     saldo_a_pagar = 0;
   }
 
@@ -100,7 +102,7 @@ export default function CCDetail(props: {
         "Tipo comprobante": event.comprobantes?.tipoComprobante ?? "FACTURA A",
         comprobanteNumber: event.comprobantes?.nroComprobante ?? 0,
         ptoVenta: event.comprobantes?.ptoVenta ?? 0,
-        Estado: ((event.comprobantes?.estado ?? event.description) ?? "Apertura"),
+        Estado: event.comprobantes?.estado ?? event.description ?? "Apertura",
         iva: Number(event.comprobantes?.iva ?? 0),
         comprobantes: event.comprobantes,
         currentAccountAmount: lastEvent?.current_amount ?? 0,

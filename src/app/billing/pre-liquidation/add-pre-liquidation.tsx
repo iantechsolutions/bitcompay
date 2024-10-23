@@ -111,6 +111,7 @@ export default function AddPreLiquidation() {
           dateDesde: new Date(anio, mes - 1, 1),
           dateHasta: new Date(anio, mes, 0),
           dateDue: fechaVencimiento1,
+          second_due_date: fechaVencimiento2,
           interest: interest ?? 0,
           logo_url: logo_url ?? undefined,
         });
