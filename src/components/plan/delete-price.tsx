@@ -1,5 +1,5 @@
 "use client";
-import { Loader2Icon } from "lucide-react";
+import { CircleX, Loader2Icon } from "lucide-react";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -54,17 +54,20 @@ export default function DeletePrice(props: {
           <DialogTitle>¿Está seguro de borrar esta vigencia?</DialogTitle>
         </DialogHeader>
         <DialogFooter>
-          <Button disabled={isDeleting} onClick={() => setIsOpen(false)}>
-            {isDeleting && (
-              <Loader2Icon className="mr-2 animate-spin" size={20} />
-            )}
-            Cancelar
-          </Button>
           <Button disabled={isDeleting} onClick={handleDelete}>
-            {isDeleting && (
-              <Loader2Icon className="mr-2 animate-spin" size={20} />
-            )}
+          {isDeleting ? (
+                  <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
+                ) : (
+                  <Delete02Icon className="h-4 mr-1" />
+                )}  
             Eliminar vigencia
+          </Button>
+          <Button disabled={isDeleting} onClick={() => setIsOpen(false)}className=" bg-[#D9D7D8] hover:bg-[#D9D7D8]/80 text-[#4B4B4B] border-0">
+          {isDeleting ? (
+                  <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
+                ) : (
+            <CircleX className="flex h-4 mr-1" />                )}  
+            Cancelar
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -316,7 +316,7 @@ export default function RegisterForm({ setShowRegister }: RegisterFormProps) {
             <div className=" w-full mb-4 flex flex-col items-center justify-center ">
               <Button
                 type="submit"
-                className="w-full h-8 py-5  rounded-full flex justify-between text-[#477b43] font-bold bg-[#BEF0BB] hover:bg-[#BEF0BB]"
+                className="w-full h-8 py-5  rounded-full flex justify-between text-[#477b43] font-bold bg-[#BEF0BB] hover:bg-[#DEF5DD]"
               >
                 Continuar <ChevronRight className=" h-4" />
               </Button>

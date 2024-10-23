@@ -231,18 +231,17 @@ export default function DialogCC({ open, setOpen, data }: DialogCCProps) {
           </div> */}
         </div>
 
-        <div className="flex items-center justify-between p-2">
+        <div className="flex gap-3 justify-end p-2">
+          <Button
+            onClick={UpdateComprobante}
+            className="h-7 bg-[#BEF0BB] hover:bg-[#DEF5DD] text-[#3e3e3e] font-medium text-base rounded-full py-5 px-6">
+            Actualizar
+          </Button>
           <Button
             variant="outline"
             onClick={() => setOpen(false)}
-            className="w-full border-green-300 border-0 border-b text-[#3E3E3E] bg-background rounded-none">
+            className="h-7 bg-[#D9D7D8] hover:bg-[#d9d7d8dc] border-0 text-[#3e3e3e] font-medium text-base rounded-full py-5 px-6">
             Cancelar
-          </Button>
-
-          <Button
-            onClick={UpdateComprobante}
-            className="ml-2 border-green-300 border-0 border-b bg-background text-[#3E3E3E] rounded-none">
-            Actualizar
           </Button>
         </div>
       </DialogContent>

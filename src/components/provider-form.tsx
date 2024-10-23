@@ -41,7 +41,7 @@ import {
   fiscalIdType,
 } from "~/server/forms/providers-schema";
 import { toast } from "sonner";
-import { Calendar as CalendarIcon, Loader2Icon } from "lucide-react";
+import { Calendar as CalendarIcon, Loader2Icon, PlusCircleIcon } from "lucide-react";
 import { type RouterOutputs } from "~/trpc/shared";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -549,16 +549,19 @@ export default function ProviderForm({
               />
             </>
           )}
-          <Button disabled={isLoading} type="submit">
-            {isLoading && (
-              <Loader2Icon className="mr-2 animate-spin" size={20} />
-            )}
-            {isPending && (
-              <Loader2Icon className="mr-2 animate-spin" size={20} />
-            )}
+          <div className="flex justify-center">
+          <Button disabled={isLoading} type="submit" 
+           className="flex rounded-full w-fit justify-self-center bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#DEF5DD]"
+           >
+            {isLoading || isPending ? (
+                  <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
+                ) : (
+                  <PlusCircleIcon className="h-4 mr-1 stroke-1" />
+                )}
+
             {provider ? "Actualizar Información" : "Agregar Proveedor"}
           </Button>
-          ;
+          </div>
         </form>
       </Form>
     </>

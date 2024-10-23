@@ -279,7 +279,8 @@ export default function ProcedurePage(props: ProcedurePageProps) {
       <section className="space-y-2">
         <div className="flex justify-between">
           <Title> {props.procedure.type}</Title>
-          <Button disabled={isLoadingProcedure} onClick={handleChange}>
+          <Button disabled={isLoadingProcedure} onClick={handleChange} className="h-7 bg-[#BEF0BB] hover:bg-[#DEF5DD] text-[#3e3e3e] font-medium text-base rounded-full py-5 px-6"
+          >
             {isLoadingProcedure ? (
               <Loader2 className="mr-2 animate-spin" />
             ) : (

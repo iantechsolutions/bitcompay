@@ -44,7 +44,7 @@ function UpdateLiquidationEstadoDialog({
   return (
     <>
       <Button
-        className="h-7 bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] font-medium text-base rounded-full py-5 px-6"
+        className="h-7 bg-[#BEF0BB] hover:bg-[#DEF5DD] text-[#3e3e3e] font-medium text-base rounded-full py-5 px-6"
         onClick={() => setOpen(true)}>
         <CheckmarkCircle02Icon className="h-5 mr-2"/>
         Aprobar

@@ -13,6 +13,7 @@ import ElementCard from "../affiliate-page/element-card";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { FormField } from "../ui/form";
 import { ivaDictionary, visualizationSwitcher } from "~/lib/utils";
+import { PlusCircleIcon } from "lucide-react";
 type OtherTributesForm = {
   tributes: {
     tribute: string;
@@ -56,8 +57,10 @@ const OtherTributes = ({ otherTributes, Visualization, onAdd }: Props) => {
                   aliquot: IVA_TASA,
                   amount: 0,
                 });
-              }}>
-              Agregar concepto
+              }}className="flex rounded-full w-fit justify-self-center bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#DEF5DD]"
+              >
+                <PlusCircleIcon className="h-4 mr-1 stroke-1" />
+                Agregar concepto
             </Button>
           )}
         </div>

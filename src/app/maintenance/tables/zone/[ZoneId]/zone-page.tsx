@@ -11,7 +11,7 @@ import {
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
 import { Title } from "~/components/title";
-import { Loader2, CheckIcon } from "lucide-react";
+import { Loader2, CheckIcon, CircleX, Loader2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -29,6 +29,8 @@ import { api } from "~/trpc/react";
 import { RouterOutputs } from "~/trpc/shared";
 import LayoutContainer from "~/components/layout-container";
 import { List, ListTile } from "~/components/list";
+import CheckmarkCircle02Icon from "~/components/icons/checkmark-circle-02-stroke-rounded";
+import Delete02Icon from "~/components/icons/delete-02-stroke-rounded";
 
 export default function ZonePage(props: {
   zone: RouterOutputs["zone"]["get"];
@@ -98,11 +100,12 @@ export default function ZonePage(props: {
     <LayoutContainer>
       <div className="flex justify-between">
         <Title>Editar zona</Title>
-        <Button disabled={isLoading} onClick={handleUpdate}>
+        <Button disabled={isLoading} onClick={handleUpdate} className="h-7 bg-[#BEF0BB] hover:bg-[#DEF5DD] text-[#3e3e3e] font-medium text-base rounded-full py-5 px-6"
+        >
           {isLoading ? (
             <Loader2 className="mr-2 animate-spin" />
           ) : (
-            <CheckIcon className="mr-2" />
+            <CheckmarkCircle02Icon className="h-5 mr-2"/>
           )}
           Aplicar
         </Button>
@@ -168,7 +171,8 @@ export default function ZonePage(props: {
               <div className="flex">
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="destructive" className="w-[160px]">
+                    <Button variant="destructive">
+                    <Delete02Icon className="h-4 mr-1 font-medium place-content-center" />
                       Eliminar entidad
                     </Button>
                   </AlertDialogTrigger>
@@ -182,16 +186,20 @@ export default function ZonePage(props: {
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction
-                        className="bg-red-500 hover:bg-red-600 active:bg-red-700"
-                        onClick={handleDelete}
+            className="bg-[#f9c3c3] hover:bg-[#f9c3c3]/80 text-[#4B4B4B] text-sm rounded-full py-4 px-4 shadow-none"
+            onClick={handleDelete}
                         disabled={isLoadingDelete}>
-                        {isLoadingDelete && (
-                          <Loader2 className="mr-2 animate-spin" size={20} />
-                        )}
+                        {isLoadingDelete ? (
+                          <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
+                        ) : (
+                          <Delete02Icon className="h-4 mr-1" />
+                        )}  
                         Eliminar
                       </AlertDialogAction>
+                      <AlertDialogCancel className=" bg-[#D9D7D8] hover:bg-[#D9D7D8]/80 text-[#4B4B4B] border-0">
+          <CircleX className="flex h-4 mr-1" />
+            Cancelar</AlertDialogCancel>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>

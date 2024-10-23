@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { CalendarIcon, PlusCircleIcon } from "lucide-react";
+import { CalendarIcon, Loader2Icon, PlusCircleIcon } from "lucide-react";
 import { useState } from "react";
 import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
@@ -82,8 +82,12 @@ export default function AddBonusDialog() {
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>
-        <PlusCircleIcon className="mr-2" size={20} />
+      <Button onClick={() => setOpen(true)}className="rounded-full gap-1 px-4 py-5 text-base text-[#3E3E3E] bg-[#BEF0BB] hover:bg-[#DEF5DD]">
+       {isLoading ? (
+                  <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
+                ) : (
+                  <PlusCircleIcon className="h-5 mr-1 stroke-1" />
+                )}  
         Crear bonificación
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
@@ -199,7 +203,13 @@ export default function AddBonusDialog() {
                     </FormItem>
                   )}
                 />
-                <Button className="mt-2" type="submit" disabled={isLoading}>
+                <Button type="submit"  className="flex rounded-full w-fit justify-self-center bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#DEF5DD]"
+                disabled={isLoading}>
+                {isLoading ? (
+                  <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
+                ) : (
+                  <PlusCircleIcon className="h-4 mr-1 stroke-1" />
+                )}
                   Crear bonificación
                 </Button>
               </form>

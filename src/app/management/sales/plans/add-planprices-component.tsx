@@ -286,7 +286,7 @@ export default function AddPlanPricesComponent({
             {fields.length === 0 && (
               <Button
                 type="button"
-                className="float-right bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3e3e3e] rounded-full"
+                className="float-right bg-[#BEF0BB] hover:bg-[#DEF5DD] text-[#3e3e3e] rounded-full"
                 onClick={() =>
                   append({
                     id: "",
@@ -629,7 +629,7 @@ export default function AddPlanPricesComponent({
             type="submit"
             disabled={working || isButtonDisabled}
             className="mr-7 mt-15 px-14 py-3 font-medium rounded-full w-fit justify-self-right
-          text-lg bg-[#BEF0BB] hover:bg-[#BEF0BB] text-[#3E3E3E]">
+          text-lg bg-[#BEF0BB] hover:bg-[#DEF5DD] text-[#3E3E3E]">
             {" "}
             {working && <Loader2Icon className="mr-2 animate-spin" size={16} />}
             {edit ? (
