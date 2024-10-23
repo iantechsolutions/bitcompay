@@ -123,7 +123,6 @@ export default function CompanyPage({
           <Button disabled={isLoading} onClick={handleChange}
           type="submit"
           className="flex rounded-full w-fit justify-self-center bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#DEF5DD]">
-          
             {isLoading ? (
               <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
                         ) : (
@@ -255,7 +254,7 @@ export default function CompanyPage({
             </AccordionTrigger>
             <AccordionContent>
               <List>
-                {brands?.map((brand) => {
+                {brands?.filter((brand)=> brand)?.map((brand) => {
                   return (
                     <ListTile
                       href={`/administration/brands/${brand?.id}`}
