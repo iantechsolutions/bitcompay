@@ -100,7 +100,7 @@ export function AddCompanyDialog() {
         router.refresh();
         setOpen(false);
       } catch (e) {
-        setError("ocurrio un error al crear entidad");
+        setError("Ocurrió un error al crear entidad");
         const errorResult = asTRPCError(e);
         if (errorResult) {
           toast.error(errorResult.message);
@@ -136,7 +136,7 @@ export function AddCompanyDialog() {
                   setName(e.target.value);
                   setOrganizationName(e.target.value);
                 }}
-                maxLength={50} 
+                maxLength={25} 
                 required
                 className="truncate"
               />

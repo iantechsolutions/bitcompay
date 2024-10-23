@@ -2,7 +2,7 @@
 
 import { af } from "date-fns/locale";
 import { CheckIcon, CircleX, Loader2, Loader2Icon, UserCircleIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { type MouseEventHandler, useState } from "react";
 import { toast } from "sonner";
 import { GoBackButton } from "~/components/goback-button";
@@ -73,15 +73,24 @@ export default function CompanyPage({
   const [description, setDescription] = useState(company.description ?? "");
 
   const [companyProducts, setCompanyProducts] = useState<Set<string>>(
-    new Set(company.products.map((c) => c.productId))
+    new Set(company.products?.map((c) => c.productId) || [])
   );
 
+  const router = useRouter();
   const { mutateAsync: changeCompany, isLoading } =
     api.companies.change.useMutation();
+
+    function isValidCuit(cuit: string) {
+      return /^[0-9]{11}$/.test(cuit);
+    }
 
   async function handleChange() {
     if (!name || !afipCondition || !cuit || !razonSocial || !address) {
       toast.error("Por favor, complete todos los campos obligatorios");
+      return;
+    }
+    if (!isValidCuit(cuit)) {
+      toast.error("CUIL/CUIT inválido, debe tener 11 dígitos.");
       return;
     }
     try {
@@ -105,13 +114,15 @@ export default function CompanyPage({
   }
 
   function changeCompanyChannel(channelId: string, enabled: boolean) {
-    const updatedProducts = new Set(companyProducts);
-    if (enabled) {
-      updatedProducts.add(channelId);
-    } else {
-      updatedProducts.delete(channelId);
-    }
-    setCompanyProducts(updatedProducts);
+    setCompanyProducts((prevProducts) => {
+      const updatedProducts = new Set(prevProducts);
+      if (enabled) {
+        updatedProducts.add(channelId);
+      } else {
+        updatedProducts.delete(channelId);
+      }
+      return updatedProducts; 
+    });
   }
 
   return (
@@ -291,7 +302,7 @@ export default function CompanyPage({
             </AccordionTrigger>
             <AccordionContent>
               <div className="flex justify-end">
-                <DeleteChannel companySubId={company.id} />
+                <DeleteChannel companySubId={company.id} company={undefined}/>
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -301,60 +312,146 @@ export default function CompanyPage({
   );
 }
 
-function DeleteChannel(props: { companySubId: string }) {
-  const { mutateAsync: deleteChannel, isLoading } =
-    api.companies.delete.useMutation();
-
+function DeleteChannel(props: { companySubId: string; company: any }) {
+  const { mutateAsync: deleteChannel, isLoading } = api.companies.delete.useMutation();
   const router = useRouter();
-
-  const handleDelete: MouseEventHandler<HTMLButtonElement> = (e) => {
+  const params = useParams();
+  const currentCompanyId = params.companySubId as string;
+  const [showActiveWarning, setShowActiveWarning] = useState(false); 
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const handleDelete: MouseEventHandler<HTMLButtonElement> = async (e) => {
     e.preventDefault();
-    deleteChannel({ companyId: props.companySubId })
-      .then(() => {
-        toast.success("Se ha eliminado la entidad correctamente");
-        router.push("./");
-        router.refresh();
-      })
-      .catch((e) => {
-        const error = asTRPCError(e)!;
-        toast.error(error.message);
-      });
-  };
-  return (
-    <AlertDialog>
-  <AlertDialogTrigger asChild>
-    <Button className="bg-[#f9c3c3] hover:bg-[#eba2a2] text-[#4B4B4B] text-sm rounded-full py-4 px-4 shadow-none">
-        <Delete02Icon className="h-4 w-auto mr-2" />
-      Eliminar entidad
-    </Button>
-  </AlertDialogTrigger>
-  <AlertDialogContent>
-    <AlertDialogHeader>
-      <AlertDialogTitle>
-        ¿Está seguro que quiere eliminar la entidad?
-      </AlertDialogTitle>
-      <AlertDialogDescription>
-        Eliminar entidad permanentemente.
-      </AlertDialogDescription>
-    </AlertDialogHeader>
-    <AlertDialogFooter>
-      <AlertDialogAction
-className="bg-[#f9c3c3] hover:bg-[#eba2a2] text-[#4B4B4B] text-sm rounded-full py-4 px-4 shadow-none"
-        onClick={handleDelete}
-        disabled={isLoading}
-      >
-        {isLoading ? (
-          <Loader2Icon className="mr-1 h-4 animate-spin" size={20} />
-        ) : (
-        <Delete02Icon className="h-4 mr-1" />
-      )} Eliminar
-      </AlertDialogAction>
-      <AlertDialogCancel className=" bg-[#D9D7D8] hover:bg-[#D9D7D8]/80 text-[#4B4B4B] border-0">
-          <CircleX className="flex h-4 mr-1" />
-            Cancelar</AlertDialogCancel>
-    </AlertDialogFooter>
-  </AlertDialogContent>
-</AlertDialog>
 
+    if (props.company?.products?.length > 0) {
+      toast.error(
+        "No se puede eliminar la entidad porque tiene productos habilitados.",
+        {
+          duration: 5000, 
+        }
+      );
+      return;
+    }
+
+    try {
+      await deleteChannel({ companyId: props.companySubId });
+      toast.success("Se ha eliminado la entidad correctamente", {
+        duration: 2000,
+      });
+      router.push("/administration/companies");
+    } catch (e) {
+      const error = asTRPCError(e)!;
+
+      if (
+        error.message.includes("violates foreign key constraint") ||
+        error.message.includes("productos asociados")
+      ) {
+        toast.error(
+          "No se puede eliminar la entidad porque tiene productos asociados. Elimine o reasigne los productos antes de eliminar la entidad.",
+          {
+            duration: 5000,
+          }
+        );
+      } else {
+        toast.error(error.message, {
+          duration: 5000,
+        });
+      }
+    }
+  };
+
+  const handleTriggerClick = () => {
+    if (props.company?.isActive) {
+      setShowActiveWarning(true);
+    } else if (props.company?.products?.length > 0) {
+      toast.error(
+        "No se puede eliminar la entidad porque tiene productos habilitados.",
+        {
+          duration: 5000,
+        }
+      );
+      return;
+    } else {
+      setConfirmDelete(true);
+    }
+  };
+
+  const handleConfirmActiveWarning = () => {
+    setShowActiveWarning(false);
+    setConfirmDelete(true);
+  };
+
+  return (
+    <>
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button
+            className="bg-[#f9c3c3] hover:bg-[#eba2a2] text-[#4B4B4B] text-sm rounded-full py-4 px-4 shadow-none"
+            onClick={handleTriggerClick}>
+            <Delete02Icon className="h-4 w-auto mr-2" />
+            Eliminar entidad
+          </Button>
+        </AlertDialogTrigger>
+        {confirmDelete && (
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                ¿Está seguro que quiere eliminar la entidad?
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta acción eliminará la entidad de forma permanente.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction
+                className="bg-[#f9c3c3] hover:bg-[#eba2a2] text-[#4B4B4B] text-sm rounded-full py-4 px-4 shadow-none"
+                onClick={handleDelete}
+                disabled={isLoading}>
+                {isLoading ? (
+                  <Loader2Icon className="mr-1 h-4 animate-spin" size={20} />
+                ) : (
+                  <Delete02Icon className="h-4 mr-1" />
+                )}{" "}
+                Eliminar
+              </AlertDialogAction>
+              <AlertDialogCancel className="bg-[#D9D7D8] hover:bg-[#D9D7D8]/80 text-[#4B4B4B] border-0">
+                <CircleX className="flex h-4 mr-1" />
+                Cancelar
+              </AlertDialogCancel>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        )}
+        {showActiveWarning && (
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>La entidad está activa</AlertDialogTitle>
+              <AlertDialogDescription>
+                La entidad que desea eliminar está activa. ¿Está seguro que
+                quiere eliminarla de todos modos?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction
+                className="bg-[#f9c3c3] hover:bg-[#eba2a2] text-[#4B4B4B] text-sm rounded-full py-4 px-4 shadow-none"
+                onClick={handleConfirmActiveWarning}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <Loader2Icon className="mr-1 h-4 animate-spin" size={20} />
+                ) : (
+                  <Delete02Icon className="h-4 mr-1" />
+                )}{" "}
+                Continuar y eliminar
+              </AlertDialogAction>
+              <AlertDialogCancel
+                className="bg-[#D9D7D8] hover:bg-[#D9D7D8]/80 text-[#4B4B4B] border-0"
+                onClick={() => setShowActiveWarning(false)}>
+                <CircleX className="flex h-4 mr-1" />
+                Cancelar
+              </AlertDialogCancel>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        )}
+      </AlertDialog>
+    </>
   );
 }
