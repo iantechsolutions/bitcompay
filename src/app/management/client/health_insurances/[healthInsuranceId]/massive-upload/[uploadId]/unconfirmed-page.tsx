@@ -50,7 +50,7 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
 
   const [confirmed, setConfirmed] = useState(upload!.confirmed);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  // const [supportDate, setSupportDate] = useState<Date | null>(null);
+  const [supportDate, setSupportDate] = useState<Date | null>(null);
   const [data, setData] = useState<
     RouterOutputs["excelDeserialization"]["deserializationOS"] | null
   >(null);
@@ -83,7 +83,7 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
       contribution_date: OS?.excelContributionperiod ?? "PERIODO",
       excelAmount: OS?.excelAmount ?? "TOTAL",
       employer_document_number: OS?.excelEmployerDocument ?? "CUIT",
-      // support_date: OS?.excelSupportPeriod ?? "PERIODO DE SOPORTE",
+      support_date: OS?.excelSupportPeriod ?? "PERIODO DE SOPORTE",
     };
 
     const result = await readData({
@@ -101,7 +101,7 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
       contribution_date: OS?.excelContributionperiod ?? "PERIODO",
       excelAmount: OS?.excelAmount ?? "TOTAL",
       employer_document_number: OS?.excelEmployerDocument ?? "CUIT",
-      // support_date: OS?.excelSupportPeriod ?? "PERIODO DE SOPORTE",
+      support_date: OS?.excelSupportPeriod ?? "PERIODO DE SOPORTE",
     };
 
     // console.log("Calambrees", supportDate);
@@ -125,7 +125,7 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
 
   function handleDateSelected(date: Date) {
     setSelectedDate(date);
-    // setSupportDate(support_date);
+    setSupportDate(supportDate);
   }
 
   return (

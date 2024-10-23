@@ -157,7 +157,7 @@ export const healthInsurancesRouter = createTRPCRouter({
         excelDocument: z.string().optional(),
         excelAmount: z.string().optional(),
         excelEmployerDocument: z.string().optional(),
-        // excelSupportPeriod: z.string().optional(),
+        excelSupportPeriod: z.string().optional(),
         excelContributionperiod: z.string().optional(),
       })
     )
@@ -203,7 +203,7 @@ export const healthInsurancesRouter = createTRPCRouter({
           excelDocument: input.excelDocument,
           excelAmount: input.excelAmount,
           excelEmployerDocument: input.excelEmployerDocument,
-          // excelSupportPeriod: input.excelSupportPeriod,
+          excelSupportPeriod: input.excelSupportPeriod,
           excelContributionperiod: input.excelContributionperiod,
         })
         .returning();
@@ -267,7 +267,7 @@ export const healthInsurancesRouter = createTRPCRouter({
         excelDocument: z.string().optional(),
         excelAmount: z.string().optional(),
         excelEmployerDocument: z.string().optional(),
-        // excelSupportPeriod: z.string().optional(),
+        excelSupportPeriod: z.string().optional(),
         excelContributionperiod: z.string().optional(),
       })
     )
@@ -310,7 +310,7 @@ export const healthInsurancesRouter = createTRPCRouter({
           excelDocument: input.excelDocument,
           excelAmount: input.excelAmount,
           excelEmployerDocument: input.excelEmployerDocument,
-          // excelSupportPeriod: input.excelSupportPeriod,
+          excelSupportPeriod: input.excelSupportPeriod,
           excelContributionperiod: input.excelContributionperiod,
         })
         .where(eq(schema.healthInsurances.id, input.id));
