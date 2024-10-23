@@ -83,7 +83,7 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
       contribution_date: OS?.excelContributionperiod ?? "PERIODO",
       excelAmount: OS?.excelAmount ?? "TOTAL",
       employer_document_number: OS?.excelEmployerDocument ?? "CUIT",
-      // support_date: OS?.excelSupportPeriod ?? "PERIODO DE SOPORTE",
+      support_date: OS?.excelSupportPeriod ?? "PERIODO DE SOPORTE",
     };
 
     const result = await readData({
@@ -101,7 +101,7 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
       contribution_date: OS?.excelContributionperiod ?? "PERIODO",
       excelAmount: OS?.excelAmount ?? "TOTAL",
       employer_document_number: OS?.excelEmployerDocument ?? "CUIT",
-      // support_date: OS?.excelSupportPeriod ?? "PERIODO DE SOPORTE",
+      support_date: OS?.excelSupportPeriod ?? "PERIODO DE SOPORTE",
     };
 
     // console.log("Calambrees", supportDate);

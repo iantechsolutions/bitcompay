@@ -157,7 +157,7 @@ export const columns: ColumnDef<TableRecord>[] = [
     cell: ({ row }) => {
       const Estado = row.getValue("Estado");
       const style =
-        (Estado === "Pagada" || Estado === "Recaudacion")
+        Estado === "Pagada" || Estado === "Recaudacion"
           ? "bg-[#DDF9CC] text-[#4E9F1D]"
           : Estado === "Error"
           ? "bg-[#F9CCCC] text-[#F91D1D]"
@@ -215,7 +215,7 @@ export const columns: ColumnDef<TableRecord>[] = [
       const handleMenuClick = () => {
         let detailData = row.original as TableRecord;
 
-        console.log("detailData", detailData);
+        // console.log("detailData", detailData);
         setDetailData(detailData);
         setSheetOpen(!sheetOpen);
       };
@@ -230,7 +230,7 @@ export const columns: ColumnDef<TableRecord>[] = [
         let detailData = row.original as TableRecord;
         setDetailData(detailData);
         const comprobantes = detailData?.comprobantes;
-        console.log("Comprobante descargar:", comprobantes?.billLink);
+        // console.log("Comprobante descargar:", comprobantes?.billLink);
         if (!detailData) {
           return toast.error("Error al descargar");
         } else if (!comprobantes || !comprobantes?.billLink) {

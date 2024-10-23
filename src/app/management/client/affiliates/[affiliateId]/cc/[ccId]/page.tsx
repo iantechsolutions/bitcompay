@@ -50,7 +50,7 @@ export default function CCDetail(props: {
   let nextExpirationDate = "-";
   if (lastComprobante?.due_date && lastComprobante?.due_date > new Date()) {
     nextExpirationDate = dayjs(lastComprobante?.due_date).format("DD-MM-YYYY");
-    console.log(nextExpirationDate, lastComprobante?.id);
+    // console.log(nextExpirationDate, lastComprobante?.id);
   }
 
   let comprobanteNCReciente = comprobantes?.find(
@@ -94,7 +94,7 @@ export default function CCDetail(props: {
   const tableRows: TableRecord[] = [];
   if (events) {
     for (const event of events) {
-      console.log("event amount", event.event_amount);
+      // console.log("event amount", event.event_amount);
       tableRows.push({
         date: event.createdAt,
         description: event.description,

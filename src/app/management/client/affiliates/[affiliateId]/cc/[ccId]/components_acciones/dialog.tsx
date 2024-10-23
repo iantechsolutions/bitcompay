@@ -88,7 +88,7 @@ export default function DialogCC({ open, setOpen, data }: DialogCCProps) {
   }
 
   async function UpdateComprobante() {
-    console.log(events?.id);
+    // console.log(events?.id);
     const validationErrors = validateFields();
     if (validationErrors.length > 0) {
       return toast.error(
