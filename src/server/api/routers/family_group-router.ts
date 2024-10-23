@@ -301,7 +301,9 @@ export const family_groupsRouter = createTRPCRouter({
         where: eq(schema.family_groups.id, input.family_groupsId),
         with: {
           businessUnitData: true,
-          plan: true,
+          plan: {
+            with: { pricesPerCondition: true },
+          },
           modo: true,
           bonus: true,
           comprobantes: {

@@ -19,7 +19,8 @@ import { api } from "~/trpc/react";
 import { toast } from "sonner";
 import { RouterOutputs } from "~/trpc/shared";
 import { asTRPCError } from "~/lib/errors";
-import { set } from "date-fns";
+// import { CalculateDiferentialAmount } from "~/lib/utils";
+import { Label } from "../ui/label";
 
 interface EditAffiliateProps {
   Affiliate?: RouterOutputs["integrants"]["getByGroup"][number];
@@ -32,6 +33,9 @@ export default function AddDifferentials({ Affiliate }: EditAffiliateProps) {
   const { mutateAsync: editarDiferenciales, isLoading: isPending } =
     api.differentialsValues.change.useMutation();
 
+  const { data: fg } = api.family_groups.get.useQuery({
+    family_groupsId: Affiliate?.family_group_id ?? "",
+  });
   const { data: diferenciales } = api.differentials.list.useQuery();
   const { data: dif } = api.differentialsValues.getByIntegranteId.useQuery({
     integrantId: Affiliate?.id ?? "",
@@ -39,6 +43,7 @@ export default function AddDifferentials({ Affiliate }: EditAffiliateProps) {
   const [open, setOpen] = useState(false);
   const [tipo, setTipo] = useState(dif?.differentialId ?? "");
   const [monto, setMonto] = useState(dif?.amount ?? 0);
+  const [porcent, setPorcent] = useState(0);
 
   useEffect(() => {
     if (dif) {
@@ -50,7 +55,7 @@ export default function AddDifferentials({ Affiliate }: EditAffiliateProps) {
   function validateFields() {
     const errors: string[] = [];
     if (!tipo) errors.push("tipo");
-    if (!monto) errors.push("monto");
+    if (!porcent) errors.push("porcentaje del monto");
     return errors;
   }
 
@@ -62,11 +67,14 @@ export default function AddDifferentials({ Affiliate }: EditAffiliateProps) {
       );
     }
 
+    const amount = porcent / 100;
+
+    console.log("uopa pauoa", amount);
     if (!dif) {
       try {
         await crearDiferenciales({
           differentialId: tipo,
-          amount: monto,
+          amount: amount,
           integrant_id: Affiliate?.id ?? "",
         });
         toast.success("Diferencial agregado");
@@ -80,7 +88,7 @@ export default function AddDifferentials({ Affiliate }: EditAffiliateProps) {
         await editarDiferenciales({
           differentialValueId: dif?.id ?? "",
           differentialId: tipo,
-          amount: monto,
+          amount: amount,
           integrant_id: Affiliate?.id ?? "",
         });
         toast.success("Diferencial editado");
@@ -108,14 +116,18 @@ export default function AddDifferentials({ Affiliate }: EditAffiliateProps) {
             Diferencial para {Affiliate?.name ?? "-"}
           </h2>
           <div>
-            <label htmlFor="monto">Monto del diferencial</label>
+            <label htmlFor="porcent">Porcentaje del diferencial</label>
             <Input
-              id="monto"
-              value={monto}
-              onChange={(e) => setMonto(Number(e.target.value))}
+              id="porcent"
+              value={porcent}
+              onChange={(e) => setPorcent(Number(e.target.value))}
               placeholder="..."
-              type="number"
+              type="porcent"
             />
+          </div>
+          <div>
+            <label htmlFor="monto">Monto del diferencial</label>
+            <Label>{monto}</Label>
           </div>
           <div>
             <label htmlFor="tipo">Tipo de diferencial</label>

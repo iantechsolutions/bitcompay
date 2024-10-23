@@ -1475,6 +1475,46 @@ export const reversedIdDictionary: { [key: number]: string } = {
   99: "Consumidor Final",
 };
 
+// export function CalculateDiferentialAmount(
+//   grupo: any,
+//   integrant: string,
+//   porcentaje: number
+// ) {
+//   let importe = 0;
+
+//   const integranteEncontrado = grupo.integrants?.find(
+//     (i: any) => i.id === integrant
+//   );
+
+//   if (!integranteEncontrado || integranteEncontrado.birth_date == null) {
+//     return 0;
+//   }
+
+//   const age = calcularEdad(integranteEncontrado.birth_date);
+
+//   let precioIntegrante = grupo.plan?.pricesPerCondition
+//     ?.sort(
+//       (a: any, b: any) => b.validy_date.getTime() - a.validy_date.getTime()
+//     )
+//     .find(
+//       (x: any) =>
+//         integranteEncontrado.relationship &&
+//         x.condition === integranteEncontrado.relationship &&
+//         x.validy_date.getTime() <= new Date().getTime()
+//     )?.amount;
+
+//   if (precioIntegrante === undefined) {
+//     precioIntegrante =
+//       grupo.plan?.pricesPerCondition?.find(
+//         (x: any) => (x.from_age ?? 1000) <= age && (x.to_age ?? 0) >= age
+//       )?.amount ?? 0;
+//   }
+
+//   const montoDiferencial = (porcentaje / 100) * (precioIntegrante ?? 0);
+
+//   return montoDiferencial;
+// }
+
 export function getDifferentialAmount(grupo: any, fechaPreliq: Date) {
   let importe = 0;
   grupo.integrants?.forEach((integrant: any) => {
