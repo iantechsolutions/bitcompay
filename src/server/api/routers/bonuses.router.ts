@@ -4,6 +4,7 @@ import { db, schema } from "~/server/db";
 import { eq } from "drizzle-orm";
 
 import { bonusesSchemaDB } from "~/server/db/schema";
+import { currentUser } from "@clerk/nextjs/server";
 
 export const bonusesRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({ ctx }) => {
@@ -32,7 +33,19 @@ export const bonusesRouter = createTRPCRouter({
   create: protectedProcedure
     .input(bonusesSchemaDB)
     .mutation(async ({ input }) => {
-      const newbonuses = await db.insert(schema.bonuses).values({ ...input });
+      const user = await currentUser();
+
+      const newbonuses = await db.insert(schema.bonuses).values({
+        appliedUser: user?.id ?? "",
+        approverUser: user?.id ?? "",
+        validationDate: input.validationDate,
+        duration: input.duration,
+        amount: input.amount,
+        reason: input.reason,
+        from: input.from,
+        to: input.to,
+        family_group_id: input.family_group_id,
+      });
 
       return newbonuses;
     }),
@@ -45,9 +58,21 @@ export const bonusesRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input: { id, ...input } }) => {
+      const user = await currentUser();
+
       const updatedbonuses = await db
         .update(schema.bonuses)
-        .set(input)
+        .set({
+          appliedUser: user?.id ?? "",
+          approverUser: user?.id ?? "",
+          validationDate: input.validationDate,
+          duration: input.duration,
+          amount: input.amount,
+          reason: input.reason,
+          from: input.from,
+          to: input.to,
+          family_group_id: input.family_group_id,
+        })
         .where(eq(schema.bonuses.id, id));
       console.log(updatedbonuses);
       return updatedbonuses;
