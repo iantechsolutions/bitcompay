@@ -19,6 +19,7 @@ import { asTRPCError } from "~/lib/errors";
 import { api } from "~/trpc/react";
 import { useOrganizationList } from "@clerk/nextjs";
 export function AddCompanyDialog() {
+  const [afipCondition, setAfipCondition] = useState("");
   const { createOrganization } = useOrganizationList();
   const { mutateAsync: createCompany, isLoading } =
     api.companies.create.useMutation();
@@ -33,7 +34,7 @@ export function AddCompanyDialog() {
   const [concept, setConcept] = useState("");
   const [cuit, setCuit] = useState("");
   const [afipKey, setAfipKey] = useState("");
-
+  const [address, setAddress] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
 
@@ -49,6 +50,7 @@ export function AddCompanyDialog() {
     if (!concept) errors.push("Concepto");
     if (!cuit) errors.push("CUIT/CUIL");
     if (!afipKey) errors.push("Clave fiscal");
+    if (!address) errors.push("Dirección");
 
     return errors;
   }
@@ -78,6 +80,7 @@ export function AddCompanyDialog() {
             cuit,
             afipKey,
             razon_social,
+            address,
           });
           const cc = await createCC({
             company_id: organization.id,
@@ -97,7 +100,7 @@ export function AddCompanyDialog() {
         router.refresh();
         setOpen(false);
       } catch (e) {
-        setError("ocurrio un error al crear entidad");
+        setError("Ocurrió un error al crear entidad");
         const errorResult = asTRPCError(e);
         if (errorResult) {
           toast.error(errorResult.message);
@@ -107,11 +110,11 @@ export function AddCompanyDialog() {
       }
     }
   };
-
+ 
   return (
     <>
-      <Button onClick={() => setOpen(true)} variant="bitcompay" className="text-current text-sm">
-        <PlusCircleIcon className="mr-2" size={20} />
+      <Button onClick={() => setOpen(true)} variant="bitcompay" className="text-current text-sm hover:bg-[#BEF0BB]">
+        <PlusCircleIcon className="mr-1 h-4" size={20} />
         Crear entidad
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
@@ -127,14 +130,34 @@ export function AddCompanyDialog() {
               <Label htmlFor="name" className="m-2">Nombre de la entidad</Label>
               <Input
                 id="name"
-                placeholder="ej: bitcompay"
+                placeholder="Ej: Bitcompay"
                 value={name}
                 onChange={(e) => {
                   setName(e.target.value);
                   setOrganizationName(e.target.value);
                 }}
+                maxLength={25} 
+                required
+                className="truncate"
               />
             </div>
+            <div className="m-2">
+            <Label htmlFor="afipCondition" className="m-2">Condición ante AFIP</Label>
+            <select
+           id="afipCondition"
+             value={afipCondition}
+              onChange={(e) => setAfipCondition(e.target.value)}
+              className="border-b border-gray-100 opacity-80 rounded-md m-2 w-full
+              hover:bg-inherit focus:outline-none focus:border-gray-100 hover:border-gray-100"
+              required
+                 >
+             <option value="">Seleccione una opción</option>
+             <option value="Monotributista">Monotributista</option>
+             <option value="Responsable Inscripto">Responsable Inscripto</option>
+             <option value="Exento">Exento</option>
+             <option value="Consumidor Final">Consumidor Final</option>
+           </select>
+           </div>
             <div className="m-2">
                 <Label htmlFor="razon_social" className="m-2">Razón social</Label>
               <Input
@@ -143,7 +166,7 @@ export function AddCompanyDialog() {
                 value={razon_social}
                 onChange={(e) => {
                   setRazon(e.target.value);
-                }}
+                }} required
               />
             </div>
             <div className="m-2">
@@ -153,6 +176,7 @@ export function AddCompanyDialog() {
                 placeholder="..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
+                required
               />
             </div>
             <div className="m-2">
@@ -169,21 +193,42 @@ export function AddCompanyDialog() {
                     setError(
                       "el campo concepto no puede superar los 40 caracteres"
                     );
-                  }
-                }}
+                  } 
+                }} required
               />
               <span className="text-red-600 text-xs">{error}</span>
             </div>
+  
             <div className="m-2">
               <Label htmlFor="cuit" className="m-2">CUIL/CUIT</Label>
               <Input
                 id="cuit"
-                placeholder="0"
+                placeholder="00000000000"
                 value={cuit}
-                onChange={(e) => setCuit(e.target.value)}
+                onChange={(e) => {
+                  const inputValue = e.target.value;
+                  const numericValue = inputValue.replace(/\D/g, "");
+                  setCuit(numericValue);}}
+                maxLength={11}
+                required
+                type="text"
+                inputMode="numeric"
+                pattern="\d{11}"
               />
               <span className="text-red-600 text-xs">{error}</span>
             </div>
+            <div className="m-2">
+              <Label htmlFor="address" className="m-2">Dirección</Label>
+              <Input
+              id="address"
+              placeholder="Ej: Mitre 123, CABA"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              required
+               />
+          <span className="text-red-600 text-xs">{error}</span>
+            </div>
+
             <div className="m-2" >
               <Label htmlFor="afipKey" className="m-2">Clave fiscal</Label>
               <Input
@@ -191,16 +236,20 @@ export function AddCompanyDialog() {
                 placeholder="0"
                 value={afipKey}
                 onChange={(e) => setAfipKey(e.target.value)}
+                required
               />
               <span className="text-red-600 text-xs">{error}</span>
             </div>
             <br />
             <DialogFooter>
-              <Button disabled={isLoadingCC || isLoading} variant="bitcompay" className="text-current">
-                {isLoading ? (
-                  <Loader2Icon className="mr-2 animate-spin" size={20} />
+              <Button disabled={isLoadingCC || isLoading || !name || !razon_social || !description || !concept || !cuit || !afipKey || !address || !!error} 
+              variant="bitcompay"
+              className="flex rounded-full w-fit justify-self-center bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#c0f8bd]"
+              >
+                  {isLoading ? (
+                  <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
                 ) : (
-                  <CirclePlus className="mr-2" />
+                  <PlusCircleIcon className="h-4 mr-1 stroke-1" />
                 )}
                 Crear entidad
               </Button>
