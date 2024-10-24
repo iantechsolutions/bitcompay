@@ -126,10 +126,6 @@ export default function AddDifferentials({ Affiliate }: EditAffiliateProps) {
             />
           </div>
           <div>
-            <label htmlFor="monto">Monto del diferencial</label>
-            <Label>{monto}</Label>
-          </div>
-          <div>
             <label htmlFor="tipo">Tipo de diferencial</label>
             <Select
               value={tipo}
