@@ -18,12 +18,11 @@ import { asTRPCError } from "~/lib/errors";
 import { api } from "~/trpc/react";
 
 export function AddProductDialog() {
-  const { mutateAsync: createProduct, isLoading } =
-    api.products.create.useMutation();
+  const { mutateAsync: createProduct, isLoading } = api.products.create.useMutation();
+  const { data: allProducts } = api.products.list.useQuery();
 
   const [description, setDescription] = useState("");
   const [name, setName] = useState("");
-
   const [open, setOpen] = useState(false);
 
   const router = useRouter();
@@ -32,8 +31,20 @@ export function AddProductDialog() {
     const errors: string[] = [];
     if (!description) errors.push("Descripción");
     if (!name) errors.push("Nombre del producto");
-
     return errors;
+  }
+
+  function validateDuplicateProduct() {
+    if (allProducts) {
+      const duplicate = allProducts.find((product: { name: string; description: string }) =>
+        product.name.toLowerCase() === name.trim().toLowerCase() &&
+        product.description.toLowerCase() === description.trim().toLowerCase()
+      );
+      if (duplicate) {
+        return true;
+      }
+    }
+    return false;
   }
 
   async function handleCreate() {
@@ -43,6 +54,12 @@ export function AddProductDialog() {
         `Los siguientes campos están vacíos: ${validationErrors.join(", ")}`
       );
     }
+
+    const isDuplicate = validateDuplicateProduct();
+    if (isDuplicate) {
+      return toast.error("El producto ya existe.");
+    }
+
     try {
       await createProduct({
         description,
@@ -50,37 +67,47 @@ export function AddProductDialog() {
       });
 
       toast.success("Producto creado correctamente");
-      router.refresh();
       setOpen(false);
+      setName("");
+      setDescription(""); 
+      router.refresh();
     } catch (e) {
       const error = asTRPCError(e)!;
       toast.error(error.message);
     }
   }
 
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (isOpen) {
+      setName(""); 
+      setDescription(""); 
+    }
+  };
+
   return (
     <>
-      <Button onClick={() => setOpen(true)}className="rounded-full gap-1 px-4 py-5 text-base text-[#3E3E3E] bg-[#BEF0BB] hover:bg-[#DEF5DD]">
-       {isLoading ? (
-                  <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
-                ) : (
-                  <PlusCircleIcon className="h-5 mr-1 stroke-1" />
-                )}   
+      <Button
+        onClick={() => handleOpenChange(true)}
+        className="rounded-full gap-1 px-4 py-5 text-base text-[#3E3E3E] bg-[#BEF0BB] hover:bg-[#DEF5DD]"
+      >
+        {isLoading ? (
+          <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
+        ) : (
+          <PlusCircleIcon className="h-5 mr-1 stroke-1" />
+        )}
         Crear producto
       </Button>
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Crear nuevo producto</DialogTitle>
-            {/* <DialogDescription>
-                    
-                </DialogDescription> */}
           </DialogHeader>
           <div>
             <Label htmlFor="name">Nombre del producto</Label>
             <Input
               id="name"
-              placeholder="ej: premiun pack xz"
+              placeholder="ej: premium pack xz"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -96,14 +123,16 @@ export function AddProductDialog() {
             />
           </div>
           <DialogFooter className="sm:justify-center">
-                <Button className="flex rounded-full w-fit justify-self-center bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#DEF5DD]"
-                disabled={isLoading}
-                onClick={handleCreate}>
-                {isLoading ? (
-                  <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
-                ) : (
-                  <PlusCircleIcon className="h-4 mr-1 stroke-1" />
-                )}
+            <Button
+              className="flex rounded-full w-fit justify-self-center bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#DEF5DD]"
+              disabled={isLoading}
+              onClick={handleCreate}
+            >
+              {isLoading ? (
+                <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
+              ) : (
+                <PlusCircleIcon className="h-4 mr-1 stroke-1" />
+              )}
               Crear producto
             </Button>
           </DialogFooter>

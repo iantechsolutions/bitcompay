@@ -32,6 +32,7 @@ import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { Separator } from "~/components/ui/separator";
 import { Switch } from "~/components/ui/switch";
 import { asTRPCError } from "~/lib/errors";
 import { UserList } from "~/lib/types/clerk";
@@ -106,7 +107,15 @@ export default function CompanyPage({
         address: address ?? "",
       });
       toast.success("Se han guardado los cambios");
-    } catch (e) {
+      setName(name);
+      setAfipKey(afipKey);
+      setCuit(cuit);
+      setAfipCondition(afipCondition);
+      setRazonSocial(razonSocial);
+      setAddress(address);
+      setDescription(description);
+      setCompanyProducts(companyProducts);
+        } catch (e) {
       const error = asTRPCError(e)!;
       console.error("Error guardando la entidad:", error);
       toast.error(error.message);
@@ -183,7 +192,7 @@ export default function CompanyPage({
                       id="name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      maxLength={50} 
+                      maxLength={30} 
                       className="truncate"
                     />
                   </div>
@@ -242,10 +251,19 @@ export default function CompanyPage({
                   <div>
                     <Label htmlFor="CUIT">CUIL/CUIT</Label>
                     <Input
-                      id="CUIT"
-                      value={cuit}
-                      onChange={(e) => setCuit(e.target.value)}
-                    />
+                id="cuit"
+                placeholder="00000000000"
+                value={cuit}
+                onChange={(e) => {
+                  const inputValue = e.target.value;
+                  const numericValue = inputValue.replace(/\D/g, "");
+                  setCuit(numericValue);}}
+                maxLength={11}
+                required
+                type="text"
+                inputMode="numeric"
+                pattern="\d{11}"
+              />
                   </div>
                   <div>
                     <Label htmlFor="afipKey">Clave fiscal</Label>
@@ -395,10 +413,13 @@ function DeleteChannel(props: { companySubId: string; company: any }) {
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>
-                ¿Está seguro que quiere eliminar la entidad?
+              <h1 className="mr-4 pr-2 text-center"> La entidad está actualmente activa</h1>
+              <AlertDialogTitle>
+              <h2 className="mr-4 pr-2 text-center">¿Está seguro que quiere eliminarla?</h2>
+              </AlertDialogTitle>              
               </AlertDialogTitle>
-              <AlertDialogDescription>
-                Esta acción eliminará la entidad de forma permanente.
+              <AlertDialogDescription className="text-center">
+              Esta acción eliminará la entidad de forma permanente
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

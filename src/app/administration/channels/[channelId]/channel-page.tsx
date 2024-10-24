@@ -40,37 +40,64 @@ export default function ChannelPage({
   channel,
 }: {
   channel: NonNullable<RouterOutputs["channels"]["get"]>;
-  // user: NavUserData;
 }) {
   const [requiredColumns, setRequiredColumns] = useState<Set<string>>(
     new Set(channel.requiredColumns)
   );
   const [name, setName] = useState(channel.name);
   const [description, setDescription] = useState(channel.description);
+  const [hasChanges, setHasChanges] = useState(false);
+
+  const { refetch } = api.channels.get.useQuery({ channelId: channel.id }, {
+    onSuccess(data: any) {
+      setName(data.name); 
+      setDescription(data.description);
+      setRequiredColumns(new Set(data.requiredColumns));
+      setHasChanges(false);  
+    }
+  });
+
+  const { mutateAsync: changeChannel, isLoading } = api.channels.change.useMutation({
+    onSuccess: async () => {
+      await refetch();  
+      toast.success("Se han guardado los cambios");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    }
+  });
 
   function changeRequiredColumn(key: string, required: boolean) {
+    const updatedColumns = new Set(requiredColumns);
     if (required) {
-      requiredColumns.add(key);
+      updatedColumns.add(key);
     } else {
-      requiredColumns.delete(key);
+      updatedColumns.delete(key);
     }
-    setRequiredColumns(new Set(requiredColumns));
+    setRequiredColumns(updatedColumns);
+    setHasChanges(true);  
   }
 
-  const { mutateAsync: changeChannel, isLoading } =
-    api.channels.change.useMutation();
-
+  function handleInputChange(setter: (value: string) => void, value: string) {
+    setter(value);
+    setHasChanges(true); 
+  }
   async function handleChange() {
+    if (!name || !description) {
+      toast.error("Por favor, complete todos los campos obligatorios");
+      return;
+    }
+  
     try {
       await changeChannel({
         channelId: channel.id,
-        requiredColumns: Array.from(requiredColumns),
+        requiredColumns: Array.from(requiredColumns), 
         name,
         description,
       });
-      toast.success("Se han guardado los cambios");
     } catch (e) {
       const error = asTRPCError(e)!;
+      console.error("Error guardando el canal:", error);
       toast.error(error.message);
     }
   }
@@ -80,14 +107,17 @@ export default function ChannelPage({
       <section className="space-y-2">
         <div className="flex justify-between">
           <Title>
-            {channel.number} - {channel.name}
+            {channel.number} - {name}
           </Title>
-          <Button disabled={isLoading} onClick={handleChange} className="h-7 bg-[#BEF0BB] hover:bg-[#DEF5DD] text-[#3e3e3e] font-medium text-base rounded-full py-5 px-6"
+          <Button
+            disabled={isLoading || !hasChanges} 
+            onClick={handleChange}
+            className="h-7 bg-[#BEF0BB] hover:bg-[#DEF5DD] text-[#3e3e3e] font-medium text-base rounded-full py-5 px-6"
           >
             {isLoading ? (
               <Loader2 className="mr-2 animate-spin" />
             ) : (
-              <CheckmarkCircle02Icon className="h-5 mr-2"/>
+              <CheckmarkCircle02Icon className="h-5 mr-2" />
             )}
             Aplicar
           </Button>
@@ -99,28 +129,21 @@ export default function ChannelPage({
               <h2 className="text-md">Columnas obligatorias</h2>
             </AccordionTrigger>
             <AccordionContent>
-              <List>
-                {recHeaders.map((header) => {
-                  return (
-                    <ListTile
-                      key={header.key}
-                      title={header.label}
-                      subtitle={header.key}
-                      trailing={
-                        <Switch
-                          disabled={header.alwaysRequired}
-                          checked={
-                            header.alwaysRequired ??
-                            requiredColumns.has(header.key)
-                          }
-                          onCheckedChange={(required) =>
-                            changeRequiredColumn(header.key, required)
-                          }
-                        />
-                      }
-                    />
-                  );
-                })}
+            <List>
+                {recHeaders.map((header) => (
+                  <ListTile
+                    key={header.key}
+                    title={header.label}
+                    subtitle={header.key}
+                    trailing={
+                      <Switch
+                        disabled={header.alwaysRequired}
+                        checked={header.alwaysRequired || requiredColumns.has(header.key)}
+                        onCheckedChange={(required) => changeRequiredColumn(header.key, required)}
+                      />
+                    }
+                  />
+                ))}
               </List>
             </AccordionContent>
           </AccordionItem>
@@ -136,7 +159,9 @@ export default function ChannelPage({
                     <Input
                       id="name"
                       value={name}
-                      onChange={(e) => setName(e.target.value)}
+                      onChange={(e) => handleInputChange(setName, e.target.value)}
+                      maxLength={20}
+                      className="truncate"
                     />
                   </div>
 
@@ -145,7 +170,9 @@ export default function ChannelPage({
                     <Input
                       id="description"
                       value={description}
-                      onChange={(e) => setDescription(e.target.value)}
+                      onChange={(e) => handleInputChange(setDescription, e.target.value)}
+                      maxLength={50}
+                      className="truncate"
                     />
                   </div>
                 </div>
@@ -208,7 +235,7 @@ function DeleteChannel(props: { channelId: string }) {
     <AlertDialog>
       <AlertDialogTrigger asChild={true}>
         <Button variant="destructive">
-        <Delete02Icon className="h-4 mr-1 font-medium place-content-center" />
+          <Delete02Icon className="h-4 mr-1 font-medium place-content-center" />
           Eliminar canal
         </Button>
       </AlertDialogTrigger>
@@ -222,19 +249,22 @@ function DeleteChannel(props: { channelId: string }) {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-        <AlertDialogAction
+          <AlertDialogAction
             className="bg-[#f9c3c3] hover:bg-[#f9c3c3]/80 text-[#4B4B4B] text-sm rounded-full py-4 px-4 shadow-none"
             onClick={handleDelete}
-            disabled={isLoading}>
-{isLoading ? (
-                  <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
-                ) : (
-                  <Delete02Icon className="h-4 mr-1" />
-                )}            Eliminar
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
+            ) : (
+              <Delete02Icon className="h-4 mr-1" />
+            )}{" "}
+            Eliminar
           </AlertDialogAction>
           <AlertDialogCancel className=" bg-[#D9D7D8] hover:bg-[#D9D7D8]/80 text-[#4B4B4B] border-0">
-          <CircleX className="flex h-4 mr-1" />
-            Cancelar</AlertDialogCancel>
+            <CircleX className="flex h-4 mr-1" />
+            Cancelar
+          </AlertDialogCancel>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

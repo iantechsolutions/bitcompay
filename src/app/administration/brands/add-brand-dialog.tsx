@@ -102,12 +102,12 @@ export function AddBrandDialog() {
             <div>
               <Label htmlFor="name">Nombre de la marca</Label>
               <Input
-                id="name"
-                placeholder="..."
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
+                      id="name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      maxLength={20}
+                      className="truncate"
+                    />
             </div>
 
             {/* <div>

@@ -27,6 +27,7 @@ export function AddChannelDialog() {
   const [open, setOpen] = useState(false);
 
   const router = useRouter();
+
   function validateFields() {
     const errors: string[] = [];
     if (!description) errors.push("Descripción");
@@ -34,6 +35,7 @@ export function AddChannelDialog() {
 
     return errors;
   }
+  
   async function handleCreate() {
     const validationErrors = validateFields();
     if (validationErrors.length > 0) {
@@ -46,16 +48,16 @@ export function AddChannelDialog() {
         description,
         name: name.toUpperCase(),
       });
-
       toast.success("Canal creado correctamente");
-      router.refresh();
       setOpen(false);
+      setTimeout(() => {
+        router.refresh(); 
+      }, 500); 
     } catch (e) {
       const error = asTRPCError(e)!;
       toast.error(error.message);
     }
   }
-
   return (
     <>
       <Button onClick={() => setOpen(true)}
@@ -78,11 +80,12 @@ export function AddChannelDialog() {
           <div>
             <Label htmlFor="name">Nombre del canal</Label>
             <Input
-              id="name"
-              placeholder="ej: efectivo"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
+             id="name"
+            value={name}
+          onChange={(e) => setName(e.target.value)}
+          maxLength={20} 
+          className="truncate"
+                    />
           </div>
           <div>
             <Label htmlFor="description">Descripción</Label>
@@ -91,6 +94,8 @@ export function AddChannelDialog() {
               placeholder="..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+               maxLength={50} 
+          className="truncate"
             />
           </div>
           <DialogFooter className="sm:justify-center">
