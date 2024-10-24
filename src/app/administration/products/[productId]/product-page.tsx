@@ -174,7 +174,7 @@ export default function ProductPage({
 
           <AccordionItem value="item-2">
             <AccordionTrigger>
-              <h2 className="text-md">Info. de la producto</h2>
+              <h2 className="text-md">Info. del producto</h2>
             </AccordionTrigger>
             <AccordionContent>
               <Card className="p-5">
@@ -185,6 +185,8 @@ export default function ProductPage({
                       id="name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
+                      maxLength={20}
+                      className="truncate"
                     />
                   </div>
                   <div className="col-span-2">
