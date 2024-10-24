@@ -66,6 +66,7 @@ interface Props {
   marcas?: any;
   createdComprobante: Comprobante;
   relatedComprobanteRecibo?: string;
+  ptoVenta? : Number;
   reloadPage: () => void;
 }
 
@@ -109,7 +110,8 @@ const confirmationPage = ({
   marcas,
   createdComprobante,
   reloadPage,
-  relatedComprobanteRecibo
+  relatedComprobanteRecibo,
+  ptoVenta,
 }: Props) => {
   // function generateComprobante(){
 
@@ -189,7 +191,7 @@ const confirmationPage = ({
     if (tipoComprobante == "1" || tipoComprobante == "6") {
       try {
         last_voucher = await afipObject?.ElectronicBilling.getLastVoucher(
-          form.getValues().puntoVenta,
+          ptoVenta,
           tipoComprobante
         );
       } catch {
@@ -197,7 +199,7 @@ const confirmationPage = ({
       }
       data = {
         CantReg: 1, // Cantidad de comprobantes a registrar
-        PtoVta: Number(form.getValues().puntoVenta),
+        PtoVta: Number(ptoVenta),
         CbteTipo: Number(tipoComprobante),
         Concepto: Number(concepto),
         DocTipo: idDictionary[document_type ?? ""],
@@ -248,7 +250,7 @@ const confirmationPage = ({
       let ivaFloat = (100 + parseFloat(fcSeleccionada[0]?.iva ?? "0")) / 100;
       try {
         last_voucher = await afipObject?.ElectronicBilling.getLastVoucher(
-          form.getValues().puntoVenta,
+          ptoVenta,
           tipoComprobante
         );
       } catch {

@@ -642,6 +642,9 @@ export default function Page() {
         marcas?.find((x) => x.id === grupo?.businessUnitData?.brandId)?.pv
       ) ?? 0
     );
+    console.log("pv",(      Number(
+      marcas?.find((x) => x.id === grupo?.businessUnitData?.brandId)?.pv
+    ) ?? 0));
     setIvaCondition(billResponsible?.afip_status ?? "");
     setSellCondition(grupo?.sale_condition ?? "");
   }
@@ -655,6 +658,15 @@ export default function Page() {
     setNroDocumento(obra?.fiscal_id_number?.toString() ?? "0");
     setNroDocumentoDNI("0");
     setNombre(obra?.responsibleName ?? "");
+
+    console.log("pv",(      Number(
+      marcas?.find(
+        (x) =>
+          x.id ===
+          unidadNegocio?.find((e) => e.id === obra?.businessUnit)?.brandId
+      )?.pv ?? "0"
+    )));
+
     setPv(
       Number(
         marcas?.find(
@@ -970,6 +982,7 @@ export default function Page() {
             marcas={marcas}
             createdComprobante={createdComprobante}
             relatedComprobanteRecibo={previousComprobanteReciboId}
+            ptoVenta={pv}
             // setGeneratedUrlPopup={setGeneratedUrlPopup}
           />
         )}
