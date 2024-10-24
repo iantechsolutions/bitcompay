@@ -22,10 +22,11 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { ChangeEvent, useState } from "react";
-import DetailSheet from "./detail-sheet";
+import DetailSheet from "./componentes_acciones/detail-sheet";
 import { RouterOutputs } from "~/trpc/shared";
 import { toast } from "sonner";
-dayjs.locale('es')
+import DialogCCOS from "./componentes_acciones/dialog";
+dayjs.locale("es");
 export type TableRecord = {
   date: Date;
   description: string;
@@ -124,8 +125,7 @@ export const columns: ColumnDef<TableRecord>[] = [
       return (
         <div>
           <div
-            className={`rounded-full inline-block font-bold ${style} px-7 py-1`}
-          >
+            className={`rounded-full inline-block font-bold ${style} px-7 py-1`}>
             {" "}
             {row.getValue("Estado")}
           </div>
@@ -156,8 +156,7 @@ export const columns: ColumnDef<TableRecord>[] = [
             <span
               className={`"absolute top-1/2 transform -translate-y-1/2 font-bold ${
                 amount > 0 ? "text-[#6952EB]" : "text-[#EB2727]"
-              }`}
-            >
+              }`}>
               {amount}
             </span>
           )}
@@ -266,6 +265,12 @@ export const columns: ColumnDef<TableRecord>[] = [
                 // liquidationId={detailData.id}
                 open={sheetOpen}
                 setOpen={setSheetOpen}
+                data={detailData}
+              />
+
+              <DialogCCOS
+                open={dialogOpen}
+                setOpen={setDialOpen}
                 data={detailData}
               />
             </div>
