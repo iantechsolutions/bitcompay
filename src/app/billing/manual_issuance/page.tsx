@@ -80,6 +80,7 @@ export default function Page() {
   const { data: marcas } = api.brands.list.useQuery();
   const { data: gruposFamiliar } = api.family_groups.list.useQuery();
   const { data: obrasSociales } = api.healthInsurances.listClient.useQuery();
+  const { data: unidadNegocio } = api.bussinessUnits.list.useQuery();
   // const { data: comprobantesEntidad } = api.comprobantes.getByEntity.useQuery();
   const [subTotal, setSubTotal] = useState<number>(0);
   const [ivaTotal, setIvaTotal] = useState<number>(0);
@@ -103,7 +104,9 @@ export default function Page() {
 
   //   loginAfip();
   // }, []);
+  const [pv, setPv] = useState(0);
 
+  const [brandId, setBrandId] = useState("");
   function computeTotals() {
     let subTotal = 0;
     let ivaTotal = 0;
@@ -132,9 +135,10 @@ export default function Page() {
           ivaTotal += Number(comprobante.iva) * Number(comprobante.iva);
         }
     }
-    console.log("subtotal", subTotal);
+    console.log("subtotal", subTotal, "+", otherAttributes);
     setSubTotal(subTotal);
     setIvaTotal(ivaTotal);
+    setTributos(otherAttributes.toString());
     setOtherAttributes(otherAttributes);
   }
 
@@ -150,38 +154,37 @@ export default function Page() {
       setLogo(marcas[0]?.logo_url ?? "");
     }
 
-
-    if(!form.getValues().dateEmision){
+    if (!form.getValues().dateEmision) {
       toast.error("Ingrese la fecha de emisión");
       return null;
     }
 
-    if(!tipoComprobante){
+    if (!tipoComprobante) {
       toast.error("Ingrese el tipo de comprobante");
       return null;
     }
 
-    if(!form.getValues().dateVencimiento){
+    if (!form.getValues().dateVencimiento) {
       toast.error("Ingrese la fecha de vencimiento");
       return null;
     }
 
-    if(!subTotal){
+    if (!subTotal) {
       toast.error("Ingrese el importe");
       return null;
     }
 
-    if(!tributos){
+    if (!tributos) {
       toast.error("Ingrese los tributos");
       return null;
     }
 
-    if(tipoComprobante != "0" && !iva){
+    if (tipoComprobante != "0" && !iva) {
       toast.error("Ingrese el IVA");
       return null;
     }
-
-    if(tipoComprobante != "0" && !form.getValues().puntoVenta){
+    console.log("kakaroto", pv);
+    if (tipoComprobante != "0" && !pv) {
       toast.error("Ingrese el punto de venta");
       return null;
     }
@@ -204,6 +207,7 @@ export default function Page() {
           let ivaFloat =
             (100 + parseFloat(ivaDictionary[Number(iva)] ?? "0")) / 100;
 
+          console.log("acaaaaa", pv);
           comprobante = await createComprobante({
             billLink: "",
             estado: "Generada",
@@ -211,7 +215,7 @@ export default function Page() {
             importe: Number(subTotal) + Number(ivaTotal) + Number(tributos),
             iva: iva ?? "0",
             nroDocumento: Number(nroDocumento) ?? 0,
-            ptoVenta: Number(form.getValues().puntoVenta) ?? 0,
+            ptoVenta: pv,
             tipoDocumento: idDictionary[tipoDocumento ?? ""] ?? 0,
             tipoComprobante: reverseComprobanteDictionary[tipoComprobante],
             fromPeriod: form.getValues().dateDesde,
@@ -320,7 +324,7 @@ export default function Page() {
             importe: Number(subTotal) + Number(ivaTotal) + Number(tributos),
             iva: "0",
             nroDocumento: Number(nroDocumento) ?? 0,
-            ptoVenta: Number(form.getValues().puntoVenta) ?? 0,
+            ptoVenta: pv,
             tipoDocumento: idDictionary[tipoDocumento ?? ""] ?? 0,
             tipoComprobante: reverseComprobanteDictionary[tipoComprobante],
             fromPeriod: form.getValues().dateDesde,
@@ -393,6 +397,8 @@ export default function Page() {
           const facSeleccionada = comprobantes?.find(
             (x) => x.id == fcSeleccionada[0]?.id
           );
+
+          console.log("bottas", facSeleccionada?.ptoVenta);
 
           let ivaFloat = (100 + parseFloat(facSeleccionada?.iva ?? "0")) / 100;
           const importeBase = (facSeleccionada?.importe ?? 0) / ivaFloat;
@@ -545,7 +551,8 @@ export default function Page() {
   const [sellCondition, setSellCondition] = useState("");
   const [nroDocumento, setNroDocumento] = useState("");
   const [nroDocumentoDNI, setNroDocumentoDNI] = useState("");
-  const [previousComprobanteReciboId, setPreviousComprobanteReciboId] = useState("");
+  const [previousComprobanteReciboId, setPreviousComprobanteReciboId] =
+    useState("");
   const [nombre, setNombre] = useState("");
   const [tributos, setTributos] = useState("0");
   const [servicioprod, setservicioprod] = useState("Servicio");
@@ -553,6 +560,7 @@ export default function Page() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [grupoFamiliarId, setGrupoFamiliarId] = useState("");
+
   const form = useForm<ManualGenInputs>({
     defaultValues: {
       puntoVenta: "",
@@ -591,6 +599,7 @@ export default function Page() {
     },
   });
   console.log("comprobante tipoo", valueToNameComprobanteMap[tipoComprobante]);
+  console.log("acaaa", pv);
   const asociatedFCForm = useForm<AsociatedFCForm>({
     defaultValues: {
       comprobantes: [
@@ -609,7 +618,6 @@ export default function Page() {
     defaultValues: { otherConcepts: [{ description: "", importe: 0 }] },
   });
 
-  const [brandId, setBrandId] = useState("");
   const [page, setPage] = useState<"formPage" | "confirmationPage">("formPage");
 
   function handlePageChange(page: "formPage" | "confirmationPage") {
@@ -629,6 +637,14 @@ export default function Page() {
     setNombre(billResponsible?.name ?? "");
     setTipoDocumento(billResponsible?.fiscal_id_type ?? "");
     setBrandId(grupo?.businessUnitData?.brandId ?? "");
+    setPv(
+      Number(
+        marcas?.find((x) => x.id === grupo?.businessUnitData?.brandId)?.pv
+      ) ?? 0
+    );
+    console.log("pv",(      Number(
+      marcas?.find((x) => x.id === grupo?.businessUnitData?.brandId)?.pv
+    ) ?? 0));
     setIvaCondition(billResponsible?.afip_status ?? "");
     setSellCondition(grupo?.sale_condition ?? "");
   }
@@ -642,6 +658,24 @@ export default function Page() {
     setNroDocumento(obra?.fiscal_id_number?.toString() ?? "0");
     setNroDocumentoDNI("0");
     setNombre(obra?.responsibleName ?? "");
+
+    console.log("pv",(      Number(
+      marcas?.find(
+        (x) =>
+          x.id ===
+          unidadNegocio?.find((e) => e.id === obra?.businessUnit)?.brandId
+      )?.pv ?? "0"
+    )));
+
+    setPv(
+      Number(
+        marcas?.find(
+          (x) =>
+            x.id ===
+            unidadNegocio?.find((e) => e.id === obra?.businessUnit)?.brandId
+        )?.pv ?? "0"
+      )
+    );
     setTipoDocumento(obra?.fiscal_id_type ?? "");
     setIvaCondition(obra?.afip_status ?? "");
     setSellCondition("No Aplica");
@@ -657,6 +691,7 @@ export default function Page() {
   const handleBrandChange = (value: string) => {
     selectedBrand = marcas?.find((marca: { id: string }) => marca.id === value);
     setBrandId(value);
+    setPv(Number(selectedBrand?.pv) ?? 0);
   };
 
   const reloadPage = () => {
@@ -689,6 +724,7 @@ export default function Page() {
     otherConceptsForm.reset();
     setPage("formPage");
     setBrandId("");
+    setPv(0);
     router.refresh();
   };
 
@@ -891,6 +927,7 @@ export default function Page() {
               Visualization={false}
               otherTributes={otherTributesForm}
               onAdd={computeTotals}
+              onValueChange={computeTotals}
             />
 
             <Totals
@@ -945,6 +982,7 @@ export default function Page() {
             marcas={marcas}
             createdComprobante={createdComprobante}
             relatedComprobanteRecibo={previousComprobanteReciboId}
+            ptoVenta={pv}
             // setGeneratedUrlPopup={setGeneratedUrlPopup}
           />
         )}

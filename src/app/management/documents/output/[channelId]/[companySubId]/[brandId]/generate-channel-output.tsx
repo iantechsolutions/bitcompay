@@ -77,7 +77,7 @@ export default function GenerateChannelOutputPage(props: {
 
   const [open, setOpen] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
-
+  const utils = api.useUtils();
   const [fileName, setFileName] = useState<string | null>(null);
   const [cardType, setCardType] = useState<string | null>(null);
   const [cardBrand, setCardBrand] = useState<string | null>(null);
@@ -131,6 +131,7 @@ export default function GenerateChannelOutputPage(props: {
       setError(null);
       setDisabled(true);
       setOpenDialog(false);
+      utils.invalidate();
     } catch {
       toast.error("Error");
     }

@@ -566,7 +566,7 @@ export const healthInsurances = pgTable("health_insurances", {
   excelDocument: varchar("excelDocument", { length: 255 }),
   excelAmount: varchar("excelAmount"),
   excelEmployerDocument: varchar("excelEmployerDocument", { length: 255 }),
-  // excelSupportPeriod: varchar("excelSupportPeriod", { length: 255 }),
+  excelSupportPeriod: varchar("excelSupportPeriod", { length: 255 }),
   excelContributionperiod: varchar("excelContributionperiod", { length: 255 }),
 });
 
@@ -776,7 +776,7 @@ export const comprobantes = pgTable("comprobantes", {
   fromPeriod: timestamp("fromperiod", { mode: "date" }),
   toPeriod: timestamp("toperiod", { mode: "date" }),
   due_date: timestamp("due_date", { mode: "date" }),
-  // second_due_date: timestamp("second_due_date", { mode: "date" }),
+  second_due_date: timestamp("second_due_date", { mode: "date" }),
   payedDate: timestamp("payedDate", { mode: "date" }),
   prodName: varchar("prodName", { length: 255 }).notNull(),
   iva: varchar("iva", { length: 255 }).notNull(),
@@ -1378,7 +1378,7 @@ export const aportes_os = pgTable("aportes_os", {
   // origen: varchar("origen", { length: 255 }).notNull(),
   process_date: timestamp("process_date", { mode: "date" }),
   contribution_date: timestamp("contribution_date", { mode: "date" }),
-  // support_date: timestamp("support_date", { mode: "date" }),
+  support_date: timestamp("support_date", { mode: "date" }),
   amount: varchar("amount").notNull(),
   employer_document_number: varchar("employer_document_number", {
     length: 255,

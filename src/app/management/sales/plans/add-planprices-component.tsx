@@ -119,7 +119,6 @@ export default function AddPlanPricesComponent({
     }
   );
 
-
   const { mutateAsync: createPricePerCondition } =
     api.pricePerCondition.create.useMutation();
   const { mutateAsync: updatePricePerCondition } =
@@ -146,8 +145,7 @@ export default function AddPlanPricesComponent({
         setAnio(initialPrices[0]?.validy_date.getFullYear() ?? null);
       }
     }
-  }, [edit, initialPrices, 
-  ]);
+  }, [edit, initialPrices]);
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     try {
@@ -160,7 +158,9 @@ export default function AddPlanPricesComponent({
         setWorking(false);
       } else {
         let allowed = true;
-        data.prices.filter(x=>x.isAmountByAge).sort((a, b) => (a.from_age ?? 0) - (b.from_age ?? 0));
+        data.prices
+          .filter((x) => x.isAmountByAge)
+          .sort((a, b) => (a.from_age ?? 0) - (b.from_age ?? 0));
 
         const validity_date = new Date(anio ?? 0, (mes ?? 1) - 1, 1);
         for (let i = 0; i < data.prices.length; i++) {
@@ -188,15 +188,15 @@ export default function AddPlanPricesComponent({
           for (const item of data.prices) {
             const amount =
               typeof item.amount === "string"
-                ? parseFloat(item.amount.replace(",", "."))
-                : item.amount;
+                ? parseFloat(item.amount.replace(",", ".")).toFixed(2)
+                : item.amount.toFixed(2);
             if (edit && item.id !== "") {
               if (item.isAmountByAge) {
                 await updatePricePerCondition({
                   id: item.id,
                   from_age: Number(item.from_age),
                   to_age: Number(item.to_age),
-                  amount: amount,
+                  amount: Number(amount),
                   plan_id: planId ?? "",
                   isAmountByAge: true,
                   validy_date: dayjs.utc(validity_date).toDate(),
@@ -205,7 +205,7 @@ export default function AddPlanPricesComponent({
                 await updatePricePerCondition({
                   id: item.id,
                   condition: item.condition ?? "",
-                  amount: amount,
+                  amount: Number(amount),
                   plan_id: planId ?? "",
                   isAmountByAge: false,
                   validy_date: dayjs.utc(validity_date).toDate(),
@@ -216,7 +216,7 @@ export default function AddPlanPricesComponent({
                 await createPricePerCondition({
                   from_age: Number(item.from_age),
                   to_age: Number(item.to_age),
-                  amount: amount,
+                  amount: Number(amount),
                   plan_id: planId ?? "",
                   isAmountByAge: true,
                   validy_date: dayjs.utc(validity_date).toDate(),
@@ -224,7 +224,7 @@ export default function AddPlanPricesComponent({
               } else {
                 await createPricePerCondition({
                   condition: item.condition ?? "",
-                  amount: amount,
+                  amount: Number(amount),
                   plan_id: planId ?? "",
                   isAmountByAge: false,
                   validy_date: dayjs.utc(validity_date).toDate(),
@@ -253,16 +253,15 @@ export default function AddPlanPricesComponent({
     }
     setIsButtonDisabled(true);
     try {
-      if(initialPrices){
+      if (initialPrices) {
         const price = initialPrices?.[index];
-        initialPrices.splice(index,1);
+        initialPrices.splice(index, 1);
 
         if (price?.id) {
           await deletePricePerCondition({ id: price?.id ?? "" });
           remove(index);
         }
-      }
-       else {
+      } else {
         remove(index);
       }
     } catch {

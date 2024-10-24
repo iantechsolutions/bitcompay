@@ -41,6 +41,7 @@ import EditAffiliate from "~/components/affiliate-page/edit-affiliate";
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "~/components/ui/button";
+import AddDifferentials from "~/components/affiliate-page/add-differentials";
 
 export default function AffiliatePage(props: {
   isAdmin: boolean;
@@ -51,7 +52,7 @@ export default function AffiliatePage(props: {
   const grupos = props.params.affiliateId;
   const isAdmin = props.isAdmin;
   const { data: grupo } = api.family_groups.get.useQuery({
-    family_groupsId: grupos!,
+    family_groupsId: grupos ?? "",
   });
   const { data: productos } = api.products.list.useQuery();
 
@@ -381,6 +382,7 @@ export default function AffiliatePage(props: {
   };
 
   const [openAffiliate, setOpenAffiliate] = useState(false);
+  // const [openDifferencials, setOpenDifferencials] = useState(false);
 
   return (
     <LayoutContainer>
@@ -390,7 +392,7 @@ export default function AffiliatePage(props: {
         </h2>
 
         <div className="absolute top-0 right-0">
-          <BonusDialog />
+          {grupo ? <BonusDialog grupo={grupo} /> : null}
         </div>
 
         <div className="flex gap-3 mt-5 mb-10">
@@ -406,8 +408,7 @@ export default function AffiliatePage(props: {
                       : (lastEvent?.current_amount ?? 0) == 0
                       ? "text-blacl"
                       : "text-[#EB2727]"
-                  )}
-                >
+                  )}>
                   {formatNumberAsCurrency(lastEvent?.current_amount ?? 0)}
                 </span>
               </div>
@@ -430,14 +431,12 @@ export default function AffiliatePage(props: {
           <Accordion
             className="w-full"
             defaultValue={["item-1", "item-2", "item-3"]}
-            type="multiple"
-          >
+            type="multiple">
             <AccordionItem value="item-1">
               <AccordionTriggerFG
                 className="font-semibold"
                 name="editIcon"
-                FamilyGroup={grupo}
-              >
+                FamilyGroup={grupo}>
                 Datos del grupo familiar
               </AccordionTriggerFG>
               <AccordionContent className="pt-6 pl-5">
@@ -457,8 +456,7 @@ export default function AffiliatePage(props: {
               <AccordionContent className="pt-6 pl-5">
                 <AccordionIntegrant
                   type="multiple"
-                  className="rounded-md overflow-hidden"
-                >
+                  className="rounded-md overflow-hidden">
                   {integrant ? (
                     integrant?.map((int) => (
                       <AccordionItemIntegrant value={int.id} key={int.id}>
@@ -470,11 +468,18 @@ export default function AffiliatePage(props: {
                             <p className="text-sm font-semibold">
                               Información Personal
                             </p>
-                            <EditAffiliate
-                              Affiliate={int}
-                              open={openAffiliate}
-                              setOpen={setOpenAffiliate}
-                            />
+                            <div className="flex gap-x-4">
+                              <EditAffiliate
+                                Affiliate={int}
+                                open={openAffiliate}
+                                setOpen={setOpenAffiliate}
+                              />
+                              <AddDifferentials
+                                Affiliate={int}
+                                // open={openDifferencials}
+                                // setOpen={setOpenDifferencials}
+                              />
+                            </div>
                           </div>
                           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-stretch pt-4  mt-2">
                             {Object.entries(
@@ -560,8 +565,7 @@ export default function AffiliatePage(props: {
                             <Button className="px-5 bg-[#F7F7F7] hover:bg-[#F7F7F7] text-[#3E3E3E] font-medium text-xs rounded-full border-none flex items-center gap-x-2">
                               <Link
                                 href={`/management/client/affiliates/${int.family_group_id}/${int.id}/aportes`}
-                                className="flex items-center"
-                              >
+                                className="flex items-center">
                                 <Eye className="mr-0 md:mr-2 w-4 h-4" />{" "}
                                 <span className="hidden md:inline">
                                   Ver aportes{" "}
@@ -630,7 +634,7 @@ export default function AffiliatePage(props: {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-stretch p-3 pt-6">
                   {Object.entries(additionalData).map(([key, value]) => {
-                    console.log("iteracion: ", key === "DIFERENCIAL", !isAdmin);
+                    // console.log("iteracion: ", key === "DIFERENCIAL", !isAdmin);
                     const notRender = key === "DIFERENCIAL" && !isAdmin;
                     const isEmpty = value === "-" || !value;
                     const isPeriod =
