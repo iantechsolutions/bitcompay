@@ -1,6 +1,6 @@
 "use client";
 import { Dialog, DialogContent, DialogTrigger } from "@radix-ui/react-dialog";
-import { PlusCircleIcon } from "lucide-react";
+import { CirclePlus, PlusCircleIcon } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { Button } from "~/components/ui/button";
 import { toast } from "sonner";
@@ -116,8 +116,8 @@ export default function BonusDialog({ grupo }: BonusDialogProps) {
       <DialogTrigger asChild>
         <Button
           className="text-current text-sm shadow-md place-items-center"
-          variant={"bitcompay"}>
-          <CirclePlus className="p-0 h-4 stroke-1" />
+          variant="bitcompay">
+          <PlusCircleIcon className="h-4 mr-1 stroke-1" />
           Bonus
         </Button>
       </DialogTrigger>
@@ -126,50 +126,97 @@ export default function BonusDialog({ grupo }: BonusDialogProps) {
           <h2 className="text-lg font-semibold whitespace-nowrap p-2">
             Agregar bonus
           </h2>
-
           <div className="flex flex-col gap-4 bg-white z-10 p-2">
             <div>
-              <label htmlFor="group">Grupo Familiar</label>
+              <Label htmlFor="percentage">Porcentaje %</Label>
               <Input
-                id="group"
-                value={group}
-                onChange={(e) => setGroup(e.target.value)}
+                id="percentage"
+                value={percentage}
+                onChange={(e) => setPercentage(Number(e.target.value))}
+                placeholder="..."
+                type="number"
+              />
+            </div>
+            <div>
+              <Label htmlFor="razon">Razón</Label>
+              <Input
+                id="razon"
+                value={razon}
+                onChange={(e) => setRazon(e.target.value)}
                 placeholder="..."
               />
             </div>
-            <div>
-              <label htmlFor="percentage">Porcentaje %</label>
-              <div className="z-10">
-                <Input
-                  id="percentage"
-                  value={percentage}
-                  onChange={(e) => setPercentage(e.target.value)}
-                  placeholder="..."
-                  type="number"
-                />
+            <div className="w-full flex flex-row gap-2 py-4 text-gray-500 justify-start">
+              <div className="w-1/2 pr-2">
+                <Label className="text-xs">Fecha desde</Label>
+                <Popover open={isFromDateOpen} onOpenChange={setIsFromDateOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "text-left flex justify-between font-medium w-full border-b text-[#3E3E3E] bg-background rounded-none pr-0 pl-0",
+                        !fromDate && "text-muted-foreground"
+                      )}>
+                      {fromDate ? (
+                        format(fromDate, "PPP")
+                      ) : (
+                        <span>Seleccionar fecha</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="p-0">
+                    <Calendar
+                      mode="single"
+                      selected={fromDate}
+                      onSelect={(date) => {
+                        setFromDate(date);
+                        setIsFromDateOpen(false); // Cerrar el calendario al seleccionar la fecha
+                      }}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="w-1/2 pl-2">
+                <Label className="text-xs">Fecha hasta</Label>
+                <Popover open={isToDateOpen} onOpenChange={setIsToDateOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "text-left flex justify-between font-medium w-full border-b text-[#3E3E3E] bg-background rounded-none pr-0 pl-0",
+                        !toDate && "text-muted-foreground"
+                      )}>
+                      {toDate ? (
+                        format(toDate, "PPP")
+                      ) : (
+                        <span>Seleccionar fecha</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="p-0">
+                    <Calendar
+                      mode="single"
+                      selected={toDate}
+                      onSelect={(date) => {
+                        setToDate(date);
+                        setIsToDateOpen(false); // Cerrar el calendario al seleccionar la fecha
+                      }}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
-
-            <div>
-              <label htmlFor="fromDate">Fecha Desde</label>
-              <Input
-                id="fromDate"
-                value={fromDate}
-                onChange={(e) => setFromDate(e.target.value)}
-                type="date"
-              />
-            </div>
-            <div className="bg-white z-10 pb-2">
-              <label htmlFor="toDate">Fecha Hasta</label>
-              <Input
-                id="toDate"
-                value={toDate}
-                onChange={(e) => setToDate(e.target.value)}
-                type="date"
-              />
-            </div>
-            <div className="flex justify-end">
-              <Button className="text-current text-sm" variant={"bitcompay"}>
+            <div className="flex justify-end gap-2">
+              <Button
+                onClick={() => setOpen(false)}
+                className="bg-[#F7F7F7] hover:bg-[#DEF5DD] text-[#3e3e3e] font-medium text-xs rounded-full py-1 px-5">
+                Cancelar
+              </Button>
+              <Button
+                className="text-current text-sm"
+                variant="bitcompay"
+                onClick={addBonus}
+                disabled={isLoading}>
                 Guardar
               </Button>
             </div>
