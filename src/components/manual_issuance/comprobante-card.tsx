@@ -12,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import Calendar01Icon from "../icons/calendar-01-stroke-rounded";
 import { Calendar } from "../ui/calendar";
 import { Button } from "../ui/button";
-import { cn, reverseComprobanteDictionary } from "~/lib/utils";
+import { cn, ivaDictionary, reverseComprobanteDictionary } from "~/lib/utils";
 import { format, setDefaultOptions } from "date-fns";
 import { es } from "date-fns/locale";
 import { Form, FormControl, FormField } from "../ui/form";
@@ -127,7 +127,7 @@ export default function ComprobanteCard({
                   </Select>
                 )}
               />,
-              form.getValues("alicuota")
+              ivaDictionary[Number(form.getValues("alicuota") as string)]
             ),
           }}
         />
