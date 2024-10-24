@@ -25,7 +25,8 @@ import { ChangeEvent, useState } from "react";
 import DetailSheet from "./detail-sheet";
 import { RouterOutputs } from "~/trpc/shared";
 import { toast } from "sonner";
-dayjs.locale('es')
+import DialogCC from "./dialog";
+dayjs.locale("es");
 export type TableRecord = {
   date: Date;
   description: string;
@@ -124,8 +125,7 @@ export const columns: ColumnDef<TableRecord>[] = [
       return (
         <div>
           <div
-            className={`rounded-full inline-block font-bold ${style} px-7 py-1`}
-          >
+            className={`rounded-full inline-block font-bold ${style} px-7 py-1`}>
             {" "}
             {row.getValue("Estado")}
           </div>
@@ -156,8 +156,7 @@ export const columns: ColumnDef<TableRecord>[] = [
             <span
               className={`"absolute top-1/2 transform -translate-y-1/2 font-bold ${
                 amount > 0 ? "text-[#6952EB]" : "text-[#EB2727]"
-              }`}
-            >
+              }`}>
               {amount}
             </span>
           )}
@@ -262,6 +261,11 @@ export const columns: ColumnDef<TableRecord>[] = [
 
           {detailData && (
             <div>
+              <DialogCC
+                data={detailData}
+                open={dialogOpen}
+                setOpen={setDialOpen}
+              />
               <DetailSheet
                 // liquidationId={detailData.id}
                 open={sheetOpen}

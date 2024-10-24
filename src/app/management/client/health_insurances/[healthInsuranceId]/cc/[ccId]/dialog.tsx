@@ -43,7 +43,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { asTRPCError } from "~/lib/errors";
-import { TableRecord } from "../columns";
+import { TableRecord } from "./columns";
 
 type DialogCCProps = {
   open: boolean;
@@ -88,7 +88,7 @@ export default function DialogCC({ open, setOpen, data }: DialogCCProps) {
   }
 
   async function UpdateComprobante() {
-    // console.log(events?.id);
+    console.log(events?.id);
     const validationErrors = validateFields();
     if (validationErrors.length > 0) {
       return toast.error(
@@ -96,23 +96,22 @@ export default function DialogCC({ open, setOpen, data }: DialogCCProps) {
       );
     }
 
-    try {
-      if (events) {
-        await updateEvents({
-          id: events.id ?? "",
-          current_amount: importe,
-          description: concept,
-          event_amount: importe,
-        });
+    // try {
+    //   if (events) {
+    //     await updateEvents({
+    //       id: events.id ?? "",
+    //       current_amount: importe,
+    //       description: concept,
+    //       event_amount: importe,
+    //     });
 
-        toast.success("comprobante actualizado correctamente");
-        router.refresh();
-        setOpen(false);
-      }
-    } catch (e) {
-      const error = asTRPCError(e)!;
-      toast.error(error.message);
-    }
+    //     toast.success("comprobante actualizado correctamente");
+    //     router.refresh();
+    //     setOpen(false);
+    //   }
+    // } catch (e) {
+    toast.error("Funcionalidad no implementada");
+    // }
   }
 
   return (

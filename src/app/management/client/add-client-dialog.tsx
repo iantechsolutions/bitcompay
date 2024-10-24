@@ -26,8 +26,9 @@ export function AddClientDialog() {
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>
-        <PlusCircleIcon className="mr-2" size={20} />
+      <Button onClick={() => setOpen(true)}
+      className="rounded-full gap-1 px-4 py-5 text-base text-[#3E3E3E] bg-[#BEF0BB] hover:bg-[#DEF5DD]">
+                  <PlusCircleIcon className="h-5 mr-1 stroke-1" />
         Agregar Cliente
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>

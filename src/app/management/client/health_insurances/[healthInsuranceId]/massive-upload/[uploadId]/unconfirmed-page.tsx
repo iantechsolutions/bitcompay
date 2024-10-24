@@ -50,7 +50,7 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
 
   const [confirmed, setConfirmed] = useState(upload!.confirmed);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  // const [supportDate, setSupportDate] = useState<Date | null>(null);
+  const [supportDate, setSupportDate] = useState<Date | null>(null);
   const [data, setData] = useState<
     RouterOutputs["excelDeserialization"]["deserializationOS"] | null
   >(null);
@@ -125,7 +125,7 @@ export default function UnconfirmedPage(props: unconfirmedPageProps) {
 
   function handleDateSelected(date: Date) {
     setSelectedDate(date);
-    // setSupportDate(support_date);
+    setSupportDate(supportDate);
   }
 
   return (

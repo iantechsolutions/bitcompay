@@ -39,6 +39,7 @@ import { asTRPCError } from "~/lib/errors";
 import { api } from "~/trpc/react";
 import type { RouterOutputs } from "~/trpc/shared";
 import { useRouter } from "next/navigation";
+import CheckmarkCircle02Icon from "~/components/icons/checkmark-circle-02-stroke-rounded";
 
 export default function UserPage(props: { params: { userId: string } }) {
   const router = useRouter();
@@ -133,8 +134,13 @@ export default function UserPage(props: { params: { userId: string } }) {
               {" "}
               {user?.firstName} {user?.lastName}{" "}
             </Title>
-            <Button onClick={handleChange} disabled={isLoading}>
-              <CheckIcon className="mr-2" />
+            <Button onClick={handleChange} disabled={isLoading} className="h-7 bg-[#BEF0BB] hover:bg-[#DEF5DD] text-[#3e3e3e] font-medium text-base rounded-full py-5 px-6"
+            >
+               {isLoading ? (
+              <Loader2 className="mr-2 animate-spin" />
+            ) : (
+              <CheckmarkCircle02Icon className="h-5 mr-2"/>
+            )}
               Aplicar
             </Button>
           </div>

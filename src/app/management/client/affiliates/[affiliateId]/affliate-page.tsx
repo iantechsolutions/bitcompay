@@ -52,7 +52,7 @@ export default function AffiliatePage(props: {
   const grupos = props.params.affiliateId;
   const isAdmin = props.isAdmin;
   const { data: grupo } = api.family_groups.get.useQuery({
-    family_groupsId: grupos!,
+    family_groupsId: grupos ?? "",
   });
   const { data: productos } = api.products.list.useQuery();
 
@@ -236,8 +236,9 @@ export default function AffiliatePage(props: {
     ),
   };
 
-  const prodId = billResponsible?.pa[0]?.product_id;
+  const prodId = billResponsible?.pa?.[0]?.product_id;
   const prod = productos?.find((x) => x.id === prodId);
+  const paymentMethodName = prod?.name?.toUpperCase();
 
   const paymentMethod = new Map<string, React.ReactNode>([
     [
@@ -347,7 +348,7 @@ export default function AffiliatePage(props: {
             element={{
               key: "FECHA DE VENC.",
               value:
-                dayjs(billResponsible?.pa[0]?.expire_date).format(
+                dayjs(billResponsible?.pa?.[0]?.expire_date).format(
                   "DD/MM/YYYY"
                 ) ?? "01/12/2024",
             }}
@@ -356,6 +357,22 @@ export default function AffiliatePage(props: {
       </div>,
     ],
   ]);
+
+  function getPaymentMethod() {
+    return (
+      <div>
+        {paymentMethodName && paymentMethod.has(paymentMethodName) ? (
+          <div className="flex gap-4 items-start">
+            {paymentMethod.get(paymentMethodName)}
+          </div>
+        ) : (
+          <div className="flex gap-4 items-start">
+            {paymentMethod.get("PAGO VOLUNTARIO")}
+          </div>
+        )}
+      </div>
+    );
+  }
 
   const goToCCDetail = (id: string | undefined) => {
     if (!id) return;
@@ -375,7 +392,7 @@ export default function AffiliatePage(props: {
         </h2>
 
         <div className="absolute top-0 right-0">
-          <BonusDialog />
+          {grupo ? <BonusDialog grupo={grupo} /> : null}
         </div>
 
         <div className="flex gap-3 mt-5 mb-10">
@@ -611,15 +628,7 @@ export default function AffiliatePage(props: {
                     <h2 className="mb-3 text-lg font-normal">
                       Detalles del pago
                     </h2>
-                    {paymentMethod && paymentMethod?.has(prod?.name ?? "") ? (
-                      <div className="flex gap-4 items-start">
-                        {paymentMethod.get(prod?.name ?? "")}
-                      </div>
-                    ) : (
-                      <div className="flex gap-4 items-start">
-                        {paymentMethod.get("Pago Voluntario")}
-                      </div>
-                    )}
+                    {getPaymentMethod()}
                   </div>
                 </div>
 

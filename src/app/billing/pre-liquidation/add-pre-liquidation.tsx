@@ -150,13 +150,11 @@ export default function AddPreLiquidation() {
   }
   return (
     <>
-      {/* <Button onClick={() => setOpen(true)}>
-        <PlusCircleIcon className="mr-2" /> Crear Pre liquidación
-      </Button> */}
+      
       <AddElementButton
         onClick={() => setOpen(true)}
-        className="rounded-full gap-1 p-4 text-base text-[#3E3E3E] bg-[#BEF0BB] ">
-        <PlusCircleIcon className="h-4" />
+        className="rounded-full gap-1 px-4 py-5 text-base text-[#3E3E3E] bg-[#BEF0BB] ">
+        <PlusCircleIcon className="h-5 stroke-1" />
         Agregar preliquidación
       </AddElementButton>
 
@@ -479,9 +477,9 @@ export default function AddPreLiquidation() {
                 {isLoading ? (
                   <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
                 ) : (
-                  <CirclePlus className="h-4 mr-1 stroke-1" />
+                  <PlusCircleIcon className="h-4 mr-1 stroke-1" />
                 )}
-                Crear Preliquidación
+                Crear preliquidación
               </Button>
             </div>
           </DialogHeader>

@@ -31,6 +31,7 @@ import { Input } from "../ui/input";
 import { RouterOutputs } from "~/trpc/shared";
 import { Calendar } from "../ui/calendar";
 import Calendar01Icon from "../icons/calendar-01-stroke-rounded";
+import { es } from "date-fns/locale";
 
 interface EditAffiliateProps {
   open: boolean;
@@ -243,40 +244,41 @@ export default function EditAffiliate({
             </div>
 
             <div>
-              <Label htmlFor="birthDate" className="text-xs text-gray-500">
-                Fecha de Nacimiento
-              </Label>
-              <Popover open={openCalendar} onOpenChange={setOpenCalendar}>
-                <PopoverTrigger asChild={true} autoFocus={false}>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "text-left flex justify-between font-medium w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none pr-0 pl-0",
-                      !birthDate && "text-muted-foreground"
-                    )}
-                    onClick={() => setOpenCalendar(!openCalendar)} // Controla la apertura
-                  >
-                    {birthDate ? (
-                      format(birthDate, "PPP")
-                    ) : (
-                      <span>Seleccionar fecha</span>
-                    )}
-                    <Calendar01Icon className="h-4 w-4" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent align="end" className="p-0">
-                  <Calendar
-                    mode="single"
-                    selected={birthDate}
-                    onSelect={(date) => {
-                      setBirthDate(date);
-                      setOpenCalendar(false);
-                    }}
-                    initialFocus={true}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
+  <Label htmlFor="birthDate" className="text-xs text-gray-500">
+    Fecha de Nacimiento
+  </Label>
+  <Popover open={openCalendar} onOpenChange={setOpenCalendar}>
+    <PopoverTrigger asChild={true} autoFocus={false}>
+      <Button
+        variant={"outline"}
+        className={cn(
+          "text-left flex justify-between font-medium w-full border-[#bef0bb] border-0 border-b text-[#3E3E3E] bg-background rounded-none pr-0 pl-0",
+          !birthDate && "text-muted-foreground"
+        )}
+        onClick={() => setOpenCalendar(!openCalendar)}
+      >
+        {birthDate ? (
+          format(birthDate, "dd/MM/yyyy", { locale: es })
+        ) : (
+          <span>Seleccionar fecha</span>
+        )}
+        <Calendar01Icon className="h-4 w-4" />
+        </Button>
+       </PopoverTrigger>
+      <PopoverContent align="end" className="p-0">
+      <Calendar
+        mode="single"
+        selected={birthDate}
+        onSelect={(date) => {
+          setBirthDate(date);
+          setOpenCalendar(false);
+        }}
+        initialFocus={true}
+            />
+          </PopoverContent>
+          </Popover>
+          </div>
+
             <div>
               <Label htmlFor="civilStatus" className="text-xs mb-2 block">
                 Estado Civil
@@ -322,11 +324,11 @@ export default function EditAffiliate({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ACTIVO">Activo</SelectItem>
-                  <SelectItem value="INACTIO">Inactivo</SelectItem>
+                  <SelectItem value="INACTIVO">Inactivo</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            {estado === "INACTIO" && (
+            {estado === "INACTIVO" && (
               <div>
                 <Label htmlFor="motivoBaja" className="text-xs mb-2 block">
                   Motivo Baja
