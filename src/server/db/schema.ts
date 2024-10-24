@@ -776,7 +776,7 @@ export const comprobantes = pgTable("comprobantes", {
   fromPeriod: timestamp("fromperiod", { mode: "date" }),
   toPeriod: timestamp("toperiod", { mode: "date" }),
   due_date: timestamp("due_date", { mode: "date" }),
-  // second_due_date: timestamp("second_due_date", { mode: "date" }),
+  second_due_date: timestamp("second_due_date", { mode: "date" }),
   payedDate: timestamp("payedDate", { mode: "date" }),
   prodName: varchar("prodName", { length: 255 }).notNull(),
   iva: varchar("iva", { length: 255 }).notNull(),

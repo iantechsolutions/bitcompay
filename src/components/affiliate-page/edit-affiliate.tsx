@@ -213,7 +213,7 @@ export default function EditAffiliate({
       <Button
         onClick={() => setOpen(true)}
         variant="bitcompay"
-        className="absolute right-10 text-sm px-4 h-5 justify-center text-[#3e3e3e] rounded-full font-medium z-0">
+        className="text-sm px-4 h-5 justify-center text-[#3e3e3e] rounded-full font-medium z-0">
         <Edit02Icon className="h-3" /> Editar
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>

@@ -408,6 +408,7 @@ export const uploadsRouter = createTRPCRouter({
               period: row.period,
               first_due_amount: row.first_due_amount,
               first_due_date: row.first_due_date,
+
               second_due_amount: null,
               second_due_date: null,
               additional_info: row.additional_info ?? null,

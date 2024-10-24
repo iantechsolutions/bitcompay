@@ -27,9 +27,15 @@ interface Props {
   Visualization: boolean;
   otherTributes: UseFormReturn<OtherTributesForm>;
   onAdd?: () => void;
+  onValueChange?: () => void;
 }
 
-const OtherTributes = ({ otherTributes, Visualization, onAdd }: Props) => {
+const OtherTributes = ({
+  otherTributes,
+  Visualization,
+  onAdd,
+  onValueChange,
+}: Props) => {
   const { fields, remove, append } = useFieldArray({
     control: otherTributes.control,
     name: "tributes",
@@ -145,6 +151,21 @@ const OtherTributes = ({ otherTributes, Visualization, onAdd }: Props) => {
                       type="number"
                       className="pr-1 pb-0 border-[#bef0bb]"
                       {...field}
+                      onChange={(e) => {
+                        const importe = parseFloat(e.target.value) || 0; // Manejo de valores no numéricos
+                        field.onChange(importe);
+
+                        const ivaCalcular = isNaN(IVA_TASA) ? 0 : IVA_TASA;
+
+                        const iva = (importe * (ivaCalcular ?? 1)) / 100;
+                        const total = importe + iva;
+                        otherTributes.setValue(
+                          `tributes.${index}.amount`,
+                          total
+                        );
+                        if (onValueChange) onValueChange();
+                      }}
+                      value={field.value ?? 0}
                     />
                   )}
                 />,
@@ -163,7 +184,28 @@ const OtherTributes = ({ otherTributes, Visualization, onAdd }: Props) => {
                   name={`tributes.${index}.aliquot`}
                   control={otherTributes.control}
                   render={({ field }) => (
-                    <Input type="number" className="w-full" {...field} />
+                    <Select onValueChange={field.onChange} defaultValue={"3"}>
+                      <SelectTrigger className="border-none focus:ring-transparent px-0 py-0 h-8 ">
+                        <SelectValue placeholder="Seleccionar alicuota" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[
+                          { value: "3", label: "0%" },
+                          { value: "4", label: "10.5%" },
+                          { value: "5", label: "21%" },
+                          { value: "6", label: "27%" },
+                          { value: "8", label: "5%" },
+                          { value: "9", label: "2.5%" },
+                        ].map((option) => (
+                          <SelectItem
+                            key={option.value}
+                            value={option.value}
+                            className="rounded-none ">
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   )}
                 />,
                 fieldElement.aliquot
@@ -181,17 +223,9 @@ const OtherTributes = ({ otherTributes, Visualization, onAdd }: Props) => {
                   name={`tributes.${index}.amount`}
                   control={otherTributes.control}
                   render={({ field }) => (
-                    <Input
-                      type="number"
-                      className="w-full"
-                      {...field}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        if (onAdd) {
-                          onAdd();
-                        }
-                      }}
-                    />
+                    <p className="px-[12px] py-[8px]">
+                      {field.value.toFixed(2)}
+                    </p>
                   )}
                 />,
                 fieldElement.amount
