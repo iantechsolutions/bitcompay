@@ -1,6 +1,6 @@
 "use client";
 import { Dialog, DialogContent, DialogTrigger } from "@radix-ui/react-dialog";
-import { PlusCircleIcon } from "lucide-react";
+import { CirclePlus, PlusCircleIcon } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { Button } from "~/components/ui/button";
 import { toast } from "sonner";
@@ -37,7 +37,6 @@ export default function BonusDialog({ grupo }: BonusDialogProps) {
   );
   const [razon, setRazon] = useState(bonus?.reason || "");
 
-  // Estado para controlar la apertura de los calendarios
   const [isFromDateOpen, setIsFromDateOpen] = useState(false);
   const [isToDateOpen, setIsToDateOpen] = useState(false);
 
