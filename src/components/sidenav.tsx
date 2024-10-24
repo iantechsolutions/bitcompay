@@ -35,15 +35,14 @@ export function SidenavItem(props: {
   const pathname = usePathname();
 
   const isActive =
-    props.href === "/dashboard"
-      ? pathname === "/dashboard"
-      : props.href
-      ? pathname.includes(props.href)
-      : false;
+  props.href === "/"
+  ? pathname === "/"
+  : props.href
+  ? pathname.includes(props.href)
+  : false;
 
   const activeColor = props.IsChild ? "bg-[#DEF5DD]" : "bg-[#BEF0BB]";
-  const className = `flex gap-1 px-2 py-1 items-center rounded-full
-  text-xs xl:text-sm ${
+  const className = `flex gap-1 px-2 py-1 xl:py-2 items-center rounded-full text-xs xl:text-sm ${
     isActive ? activeColor : ""
   } ${props.className}`;
 

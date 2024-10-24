@@ -67,13 +67,13 @@ import Inicio from "../../public/sidebar/Frame-1.svg";
 import path from "path";
 export default function CompanySidenav() {
   const menu: Record<string, string> = {
-    Administracion: "administration/",
-    Gestion: "management/",
-    Mantenimimento: "maintenance/",
     General: "general/",
+    Administracion: "administration/",
+    Mantenimimento: "maintenance/",
+    Gestion: "management/",
     Auditoria: "audit/",
-    Tesoreria: "treasury/",
     Facturacion: "billing/",
+    Tesoreria: "treasury/",
     Ventas: "management/sales/",
     Proveedores: "management/suppliers/",
     Documentos: "management/documents/",
@@ -212,7 +212,7 @@ export default function CompanySidenav() {
       </div>
       <Sidenav className="bg-white pr-5 pl-4 xl:pr-6 xl:pl-5">
         <SidenavItem
-          className=" bg-white text-sideNav"
+          className="text-sideNav mt-3"
           href={`/`}
           icon={
             <img
@@ -242,7 +242,7 @@ export default function CompanySidenav() {
               icon={
                 <LayoutDashboardIcon
                   strokeWidth={1}
-                  className="w-4 xl:w-5 ml-2 ml-2 h-auto"
+                  className="w-4 xl:w-5 ml-2 h-auto"
                 />
               }
               activeIcon={
@@ -425,7 +425,7 @@ export default function CompanySidenav() {
               <Accordion type="single" collapsible>
                 <AccordionItem value="item-1" className="border-none max-w-40">
                   <AccordionTrigger
-                    className={`py-[1vh] my-[0.5vh] hover:no-underline ${ isActive("Ventas")
+                    className={`py-1 my-2 xl:py-2 hover:no-underline ${ isActive("Ventas")
                       ? `bg-[#BEF0BB]`
                       : ``
                   }`}
@@ -582,7 +582,7 @@ export default function CompanySidenav() {
               <Accordion type="single" collapsible className="">
                 <AccordionItem value="item-1" className="border-none max-w-40">
                   <AccordionTrigger
-                    className={`py-[1vh] my-[0.5vh] hover:no-underline ${ isActive("Clientes")
+                    className={`py-1 my-2 xl:py-2 hover:no-underline ${ isActive("Clientes")
                       ? `bg-[#BEF0BB]`
                       : ``
                   }`}>
@@ -655,7 +655,7 @@ export default function CompanySidenav() {
               <Accordion type="single" collapsible className="">
                 <AccordionItem value="item-1" className="border-none max-w-40">
                   <AccordionTrigger
-                    className={`py-[1vh] my-[0.5vh] hover:no-underline ${ isActive("Proveedores")
+                    className={`py-1 my-2 xl:py-2 hover:no-underline ${ isActive("Proveedores")
                       ? `bg-[#BEF0BB]`
                       : ``
                   }`}>
@@ -712,7 +712,7 @@ export default function CompanySidenav() {
               <Accordion type="single" collapsible className="">
                 <AccordionItem value="item-1" className="border-none max-w-40">
                   <AccordionTrigger
-                    className={`py-[1vh] my-[0.5vh] hover:no-underline ${ isActive("Documentos")
+                    className={`py-1 my-2 xl:py-2 hover:no-underline ${ isActive("Documentos")
                       ? `bg-[#BEF0BB]`
                       : ``
                   }`}>
@@ -950,7 +950,7 @@ export default function CompanySidenav() {
                 icon={
                   <img
                     src="/public/sidebar/Frame-10.png"
-                    className="w-4 xl:w-5 ml-2 h-6"
+                    className="w-4 xl:w-5 ml-2 h-auto"
                   />
                 }
                 activeIcon={
