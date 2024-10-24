@@ -1,8 +1,10 @@
 "use client";
-import { CheckIcon, Loader2, Loader2Icon } from "lucide-react";
+import { CheckIcon, CircleX, Loader2, Loader2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type MouseEventHandler, useState } from "react";
 import { toast } from "sonner";
+import CheckmarkCircle02Icon from "~/components/icons/checkmark-circle-02-stroke-rounded";
+import Delete02Icon from "~/components/icons/delete-02-stroke-rounded";
 import LayoutContainer from "~/components/layout-container";
 import { List, ListTile } from "~/components/list";
 import { Title } from "~/components/title";
@@ -133,11 +135,12 @@ export default function ProductPage({
       <section className="space-y-2">
         <div className="flex justify-between">
           <Title>{product.name}</Title>
-          <Button disabled={isLoading} onClick={handleChange}>
+          <Button disabled={isLoading} onClick={handleChange} className="h-7 bg-[#BEF0BB] hover:bg-[#DEF5DD] text-[#3e3e3e] font-medium text-base rounded-full py-5 px-6"
+          >
             {isLoading ? (
               <Loader2 className="mr-2 animate-spin" />
             ) : (
-              <CheckIcon className="mr-2" />
+              <CheckmarkCircle02Icon className="h-5 mr-2"/>
             )}
             Aplicar
           </Button>
@@ -232,8 +235,8 @@ export default function ProductPage({
               <div className="flex justify-end">
                 <Button
                   variant={"destructive"}
-                  className="ml-10"
                   onClick={() => setOpenDelete(true)}>
+                  <Delete02Icon className="h-4 mr-1 font-medium place-content-center" />
                   Eliminar
                 </Button>
               </div>
@@ -253,13 +256,20 @@ export default function ProductPage({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-red-500 active:bg-red-700 hover:bg-red-600"
-              onClick={handleDelete}
-              disabled={isLoading}>
+          <AlertDialogAction
+            className="bg-[#f9c3c3] hover:bg-[#f9c3c3]/80 text-[#4B4B4B] text-sm rounded-full py-4 px-4 shadow-none"
+            onClick={handleDelete}
+            disabled={isLoading}>
+{isLoading ? (
+                  <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
+                ) : (
+                  <Delete02Icon className="h-4 mr-1" />
+                )}
               Eliminar
-            </AlertDialogAction>
+          </AlertDialogAction>
+          <AlertDialogCancel className=" bg-[#D9D7D8] hover:bg-[#D9D7D8]/80 text-[#4B4B4B] border-0">
+          <CircleX className="flex h-4 mr-1" />
+            Cancelar</AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

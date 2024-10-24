@@ -221,7 +221,7 @@ export default function LoginForm({ setShowRegister }: LoginFormProps) {
               Recuperar contraseña
             </p>
             <Button
-              className="w-full h-8 py-5  rounded-full flex justify-between text-[#477b43] font-bold bg-[#BEF0BB] hover:bg-[#BEF0BB] "
+              className="w-full h-8 py-5  rounded-full flex justify-between text-[#477b43] font-bold bg-[#BEF0BB] hover:bg-[#DEF5DD] "
               disabled={loading}
             >
               {loading && (

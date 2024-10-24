@@ -23,20 +23,20 @@ import dayjs from "dayjs";
 export default function AddDate({
   onDateSelected,
 }: {
-  onDateSelected: (date: Date, support_date: Date) => void;
+  onDateSelected: (date: Date) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [openDate, setOpenDate] = useState(false);
   const [openSupportDate, setOpenSupportDate] = useState(false);
 
   const [fecha, setFecha] = useState<Date>(new Date());
-  const [fechaSoporte, setFechaSoporte] = useState<Date>(new Date());
+  // const [fechaSoporte, setFechaSoporte] = useState<Date>(new Date());
 
   async function Save() {
     console.log("Fecha de presentación:", fecha);
-    console.log("Fecha de soporte:", fechaSoporte);
+    // console.log("Fecha de soporte:", fechaSoporte);
 
-    onDateSelected(fecha, fechaSoporte);
+    onDateSelected(fecha);
 
     setOpen(false);
   }
@@ -86,7 +86,7 @@ export default function AddDate({
                 </Popover>
 
                 {/* Nueva Fecha de Soporte */}
-                <Label htmlFor="support_date">Fecha de soporte</Label>
+                {/* <Label htmlFor="support_date">Fecha de soporte</Label>
                 <Popover
                   open={openSupportDate}
                   onOpenChange={setOpenSupportDate}>
@@ -121,11 +121,11 @@ export default function AddDate({
                       initialFocus
                     />
                   </PopoverContent>
-                </Popover>
+                </Popover> */}
               </div>
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex justify-self-start">
             <Button type="button" onClick={() => Save()}>
               Guardar fechas
             </Button>

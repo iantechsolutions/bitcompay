@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Loader2Icon, PlusCircleIcon } from "lucide-react";
+import { CircleX, Loader2Icon, PlusCircleIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
@@ -54,6 +54,7 @@ import LayoutContainer from "~/components/layout-container";
 import { modos } from "~/server/db/schema";
 import { Title } from "~/components/title";
 import { Label } from "~/components/ui/label";
+import Delete02Icon from "~/components/icons/delete-02-stroke-rounded";
 dayjs.extend(utc);
 dayjs.locale("es");
 
@@ -143,8 +144,8 @@ export default function ModoPage(props: {
 
       <Button
         variant={"destructive"}
-        className="ml-10"
         onClick={() => setOpenDelete(true)}>
+        <Delete02Icon className="h-4 mr-1 font-medium place-content-center" />
         Eliminar
       </Button>
 
@@ -155,13 +156,18 @@ export default function ModoPage(props: {
           </DialogHeader>
 
           <DialogFooter>
-            <Button onClick={() => setOpenDelete(false)}>Cancelar</Button>
             <Button disabled={isDeleting} onClick={handleDelete}>
-              {isDeleting && (
-                <Loader2Icon className="mr-2 animate-spin" size={20} />
-              )}
+            {isDeleting ? (
+                  <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
+                ) : (
+                  <Delete02Icon className="h-4 mr-1" />
+                )} 
               Eliminar modo
             </Button>
+            <Button onClick={() => setOpenDelete(false)}
+              className=" bg-[#D9D7D8] hover:bg-[#D9D7D8]/80 text-[#4B4B4B] border-0">
+              <CircleX className="flex h-4 mr-1" />
+                Cancelar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

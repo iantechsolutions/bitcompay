@@ -502,6 +502,13 @@ export const family_groupsRouter = createTRPCRouter({
           })),
       }));
 
+      console.log(
+        "patan",
+        aportesPorGrupo,
+        input.period,
+        "and",
+        fgFiltered[0]?.integrants[0]?.aportes_os
+      );
       return {
         summary: makeSummary(aportesPorGrupo, fgFiltered as any),
         totalRows: fgFiltered.length,

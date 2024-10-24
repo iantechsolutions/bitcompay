@@ -61,14 +61,15 @@ export default function DeleteButton(props: { id: string }) {
           <div className="w-full flex justify-center">
             <Button
               type="submit"
-              className="rounded-full bg-[#BEF0BB] text-[#3E3E3E] hover:bg-[#BEF0BB]"
+              variant="destructive"
               disabled={isLoading || error}
               onClick={handleDelete}>
-              {isLoading && (
-                <Loader2Icon className="mr-2 animate-spin" size={20} />
-              )}
-              <Delete02Icon className="m-2 font-medium place-content-center" />
-              <h1 className="font-medium-medium p-1">Eliminar</h1>
+              {isLoading ? (
+                  <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
+                ) : (
+                  <Delete02Icon className="h-4 mr-1" />
+                )}
+            Eliminar
             </Button>
           </div>
         </DialogContent>

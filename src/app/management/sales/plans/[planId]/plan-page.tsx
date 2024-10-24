@@ -161,7 +161,7 @@ export default function PlanPage(props: {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button className=" bg-[#BEF0BB] hover:bg-[#BEF0BB]  rounded-full text-[#3E3E3E] hover:text-[#3E3E3E]">
+                <Button className=" bg-[#BEF0BB] hover:bg-[#DEF5DD]  rounded-full text-[#3E3E3E] hover:text-[#3E3E3E]">
                   <Settings02Icon className="mr-2 h-5" strokeWidth={1} />
                   Opciones
                 </Button>

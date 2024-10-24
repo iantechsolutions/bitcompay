@@ -20,6 +20,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { api } from "~/trpc/react";
 import { ComboboxDemo } from "~/components/ui/combobox";
+import CheckmarkCircle02Icon from "~/components/icons/checkmark-circle-02-stroke-rounded";
 
 export default function EditCompany() {
   const {
@@ -98,7 +99,7 @@ export default function EditCompany() {
   return (
     <>
       <Button onClick={() => setOpen(true)}>
-        <PlusCircleIcon className="mr-2" /> Editar datos de la compañia
+        <PlusCircleIcon className="h-5 mr-1 stroke-1" /> Editar datos de la compañia
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[425px]">
@@ -219,11 +220,14 @@ export default function EditCompany() {
               </div>
             </>
           )}
-          <DialogFooter>
-            <Button disabled={isMutating} onClick={handleSubmit}>
-              {isMutating && (
-                <Loader2Icon className="mr-2 animate-spin" size={20} />
-              )}
+          <DialogFooter className="flex justify-self-start">
+            <Button disabled={isMutating} onClick={handleSubmit}
+            className="h-7 bg-[#BEF0BB] hover:bg-[#DEF5DD] text-[#3e3e3e] font-medium text-base rounded-full py-5 px-6">
+            {isMutating ? (
+                  <Loader2Icon className="h-4 mr-1 animate-spin" size={20} />
+                ) : (
+                  <CheckmarkCircle02Icon className="h-5 mr-2"/>
+                )}
               Confirmar
             </Button>
           </DialogFooter>
